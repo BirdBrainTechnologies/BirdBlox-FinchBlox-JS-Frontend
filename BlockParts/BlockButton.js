@@ -147,6 +147,19 @@ BlockButton.prototype.updateValue = function(newValue, index) {//, displayString
     } else {
       text[i] = this.values[i].toString() + this.displaySuffixes[i];
     }
+
+    if (this.widgets[i].type == "time") {
+      if (this.timeIcon != null) { this.timeIcon.remove(); }
+      const textM = text[i] + "...."
+      text[i] = text[i] + "    ";
+      const textW = GuiElements.measure.stringWidth(textM, this.font);
+      const tiH = 11;
+      const tiPath = VectorPaths.faClock;
+      const tiW = VectorIcon.computeWidth(tiPath, tiH);
+      const tiX = this.button.width/2 + textW/2 - tiW;
+      const tiY = (i+1) * this.button.height/(this.widgets.length + 1) - tiH/2 + 0.75;
+      this.timeIcon = new VectorIcon(tiX, tiY, tiPath, Colors.bbtDarkGray, tiH, this.button.group);
+    }
   }
   this.button.addMultiText(text, this.font, this.textColor);
   this.parent.updateValues();

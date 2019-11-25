@@ -66,9 +66,9 @@ function B_Wait(x, y) {
 		const blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 35);
 		blockIcon.isEndOfLine = true;
 		this.addPart(blockIcon);
-		this.timeSelection = 3;
+		this.timeSelection = 30;
 		this.timeBN = new BlockButton(this);
-		this.timeBN.addSlider("time", this.timeSelection, [1, 2, 3, 4, 5]);
+		this.timeBN.addSlider("time", this.timeSelection, [1, 10, 20, 30, 40, 50]);
 		this.addPart(this.timeBN);
 	} else {
 		// Derived from CommandBlock
@@ -87,7 +87,7 @@ B_Wait.prototype.startAction = function() {
 	const mem = this.runMem;
 	mem.startTime = new Date().getTime();
 	if (FinchBlox) {
-		mem.delayTime = this.timeSelection * 1000;
+		mem.delayTime = this.timeSelection * 100;
 	} else {
 		// Extract a positive value from first slot
 		mem.delayTime = this.slots[0].getData().getValueWithC(true) * 1000;

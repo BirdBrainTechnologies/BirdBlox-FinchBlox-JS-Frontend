@@ -30606,6 +30606,19 @@ BlockButton.prototype.updateValue = function(newValue, index) {//, displayString
     } else {
       text[i] = this.values[i].toString() + this.displaySuffixes[i];
     }
+
+    if (this.widgets[i].type == "time") {
+      if (this.timeIcon != null) { this.timeIcon.remove(); }
+      const textM = text[i] + "...."
+      text[i] = text[i] + "    ";
+      const textW = GuiElements.measure.stringWidth(textM, this.font);
+      const tiH = 11;
+      const tiPath = VectorPaths.faClock;
+      const tiW = VectorIcon.computeWidth(tiPath, tiH);
+      const tiX = this.button.width/2 + textW/2 - tiW;
+      const tiY = (i+1) * this.button.height/(this.widgets.length + 1) - tiH/2 + 0.75;
+      this.timeIcon = new VectorIcon(tiX, tiY, tiPath, Colors.bbtDarkGray, tiH, this.button.group);
+    }
   }
   this.button.addMultiText(text, this.font, this.textColor);
   this.parent.updateValues();
@@ -33199,7 +33212,7 @@ function B_FBSound(x, y, level) {
   this.addPart(this.blockIcon);
 
   this.midiNote = 60;
-  this.beats = 1;
+  this.beats = 5;
 }
 B_FBSound.prototype = Object.create(CommandBlock.prototype);
 B_FBSound.prototype.constructor = B_FBSound;
@@ -33399,9 +33412,9 @@ function B_Wait(x, y) {
 		const blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 35);
 		blockIcon.isEndOfLine = true;
 		this.addPart(blockIcon);
-		this.timeSelection = 3;
+		this.timeSelection = 30;
 		this.timeBN = new BlockButton(this);
-		this.timeBN.addSlider("time", this.timeSelection, [1, 2, 3, 4, 5]);
+		this.timeBN.addSlider("time", this.timeSelection, [1, 10, 20, 30, 40, 50]);
 		this.addPart(this.timeBN);
 	} else {
 		// Derived from CommandBlock
@@ -33420,7 +33433,7 @@ B_Wait.prototype.startAction = function() {
 	const mem = this.runMem;
 	mem.startTime = new Date().getTime();
 	if (FinchBlox) {
-		mem.delayTime = this.timeSelection * 1000;
+		mem.delayTime = this.timeSelection * 100;
 	} else {
 		// Extract a positive value from first slot
 		mem.delayTime = this.slots[0].getData().getValueWithC(true) * 1000;

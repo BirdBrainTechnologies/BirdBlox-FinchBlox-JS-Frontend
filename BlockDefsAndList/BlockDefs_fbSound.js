@@ -14,7 +14,7 @@ function B_FBSound(x, y, level) {
   this.addPart(this.blockIcon);
 
   this.midiNote = 60;
-  this.beats = 1;
+  this.beats = 5;
 }
 B_FBSound.prototype = Object.create(CommandBlock.prototype);
 B_FBSound.prototype.constructor = B_FBSound;
