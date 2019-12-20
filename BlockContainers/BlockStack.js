@@ -382,6 +382,7 @@ BlockStack.prototype.snap = function(block) {
 	oldG.remove();
 
 	this.updateDim();
+  this.startRunIfAutoExec();
 };
 
 /**

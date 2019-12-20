@@ -283,6 +283,7 @@ function B_FinchSensorBase(x, y) {
 	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
 	this.scalingFactor = 1
 	this.displayDecimalPlaces = 0
+	this.invert = false
 }
 B_FinchSensorBase.prototype = Object.create(ReporterBlock.prototype);
 B_FinchSensorBase.prototype.constructor = B_FinchSensorBase;
@@ -311,6 +312,7 @@ B_FinchSensorBase.prototype.updateAction = function(){
 			const num = (result.asNum().getValue()) * this.scalingFactor;
 			const fact = Math.pow(10, this.displayDecimalPlaces)
 			var rounded = Math.round(num * fact) / fact;
+			if (this.invert) { rounded = 100 - rounded; }
 			return new ExecutionStatusResult(new NumData(rounded));
 		}
 	}
@@ -391,6 +393,7 @@ B_FinchLight.prototype.startAction = function() {
 
 function B_FinchLine(x, y) {
 	B_FinchSensorBase.call(this, x, y);
+	this.invert = true;
 
 	const ds = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Right"), "right"));
 	ds.addOption(new SelectionData(Language.getStr("Right"), "right"));
