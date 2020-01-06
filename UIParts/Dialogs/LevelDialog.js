@@ -179,10 +179,11 @@ LevelDialog.loadLevelSavePoint = function() {
     console.log("file '" + levelFileName + "' not found. Must create...");
     const request = new HttpRequestBuilder("data/new");
     request.addParam("filename", levelFileName);
+    SaveManager.loadBlank();
     HtmlServer.sendRequestWithCallback(request.toString(), function() {
       LevelDialog.filesSavedLocally.push(levelFileName);
       console.log("file " + levelFileName + " added to list");
-      SaveManager.userOpenFile(levelFileName);
+      //SaveManager.userOpenFile(levelFileName);
     }, null, true, SaveManager.emptyProgData);
   } else {
     SaveManager.userOpenFile(levelFileName);

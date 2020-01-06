@@ -1,5 +1,5 @@
 "use strict";
-var FinchBlox = true;
+var FinchBlox = false;
 const FrontendVersion = 393;
 
 
@@ -2449,7 +2449,11 @@ Language.en = {
 "Backward":"Backward",
 "Right":"Right",
 "Left":"Left",
-"Battery":"Battery"
+"Battery":"Battery",
+"Beak_Up":"Beak Up",
+"Beak_Down":"Beak Down",
+"Finch_Is_Level":"Level",
+"Upside_Down":"Upside Down"
 }
 
 //Spanish Translation
@@ -22705,10 +22709,11 @@ LevelDialog.loadLevelSavePoint = function() {
     console.log("file '" + levelFileName + "' not found. Must create...");
     const request = new HttpRequestBuilder("data/new");
     request.addParam("filename", levelFileName);
+    SaveManager.loadBlank();
     HtmlServer.sendRequestWithCallback(request.toString(), function() {
       LevelDialog.filesSavedLocally.push(levelFileName);
       console.log("file " + levelFileName + " added to list");
-      SaveManager.userOpenFile(levelFileName);
+      //SaveManager.userOpenFile(levelFileName);
     }, null, true, SaveManager.emptyProgData);
   } else {
     SaveManager.userOpenFile(levelFileName);
@@ -31291,14 +31296,31 @@ function B_MicroBitOrientation(x, y, deviceClass){
   this.deviceClass = deviceClass;
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
 
-  const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
-  orientation.addOption(new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
-  orientation.addOption(new SelectionData(Language.getStr("Screen_Down"), "screenDown"));
-  orientation.addOption(new SelectionData(Language.getStr("Tilt_Left"), "tiltLeft"));
-  orientation.addOption(new SelectionData(Language.getStr("Tilt_Right"), "tiltRight"));
-  orientation.addOption(new SelectionData(Language.getStr("Logo_Up"), "logoUp"));
-  orientation.addOption(new SelectionData(Language.getStr("Logo_Down"), "logoDown"));
-  orientation.addOption(new SelectionData(Language.getStr("Shake"), "shake"));
+  var displayStrings = {
+    "tiltLeft":Language.getStr("Tilt_Left"),
+    "tiltRight":Language.getStr("Tilt_Right"),
+    "shake":Language.getStr("Shake")
+  };
+  if (deviceClass == DeviceFinch) {
+    displayStrings["screenUp"] = Language.getStr("Finch_Is_Level");
+    displayStrings["screenDown"] = Language.getStr("Upside_Down");
+    displayStrings["logoUp"] = Language.getStr("Beak_Down");
+    displayStrings["logoDown"] = Language.getStr("Beak_Up");
+  } else {
+    displayStrings["screenUp"] = Language.getStr("Screen_Up");
+    displayStrings["screenDown"] = Language.getStr("Screen_Down");
+    displayStrings["logoUp"] = Language.getStr("Logo_Up");
+    displayStrings["logoDown"] = Language.getStr("Logo_Down");
+  }
+
+  const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(displayStrings["screenUp"], "screenUp"));
+  orientation.addOption(new SelectionData(displayStrings["screenUp"], "screenUp"));
+  orientation.addOption(new SelectionData(displayStrings["screenDown"], "screenDown"));
+  orientation.addOption(new SelectionData(displayStrings["tiltLeft"], "tiltLeft"));
+  orientation.addOption(new SelectionData(displayStrings["tiltRight"], "tiltRight"));
+  orientation.addOption(new SelectionData(displayStrings["logoUp"], "logoUp"));
+  orientation.addOption(new SelectionData(displayStrings["logoDown"], "logoDown"));
+  orientation.addOption(new SelectionData(displayStrings["shake"], "shake"));
   this.addPart(orientation);
 };
 B_MicroBitOrientation.prototype = Object.create(PredicateBlock.prototype);

@@ -214,14 +214,31 @@ function B_MicroBitOrientation(x, y, deviceClass){
   this.deviceClass = deviceClass;
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
 
-  const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
-  orientation.addOption(new SelectionData(Language.getStr("Screen_Up"), "screenUp"));
-  orientation.addOption(new SelectionData(Language.getStr("Screen_Down"), "screenDown"));
-  orientation.addOption(new SelectionData(Language.getStr("Tilt_Left"), "tiltLeft"));
-  orientation.addOption(new SelectionData(Language.getStr("Tilt_Right"), "tiltRight"));
-  orientation.addOption(new SelectionData(Language.getStr("Logo_Up"), "logoUp"));
-  orientation.addOption(new SelectionData(Language.getStr("Logo_Down"), "logoDown"));
-  orientation.addOption(new SelectionData(Language.getStr("Shake"), "shake"));
+  var displayStrings = {
+    "tiltLeft":Language.getStr("Tilt_Left"),
+    "tiltRight":Language.getStr("Tilt_Right"),
+    "shake":Language.getStr("Shake")
+  };
+  if (deviceClass == DeviceFinch) {
+    displayStrings["screenUp"] = Language.getStr("Finch_Is_Level");
+    displayStrings["screenDown"] = Language.getStr("Upside_Down");
+    displayStrings["logoUp"] = Language.getStr("Beak_Down");
+    displayStrings["logoDown"] = Language.getStr("Beak_Up");
+  } else {
+    displayStrings["screenUp"] = Language.getStr("Screen_Up");
+    displayStrings["screenDown"] = Language.getStr("Screen_Down");
+    displayStrings["logoUp"] = Language.getStr("Logo_Up");
+    displayStrings["logoDown"] = Language.getStr("Logo_Down");
+  }
+
+  const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(displayStrings["screenUp"], "screenUp"));
+  orientation.addOption(new SelectionData(displayStrings["screenUp"], "screenUp"));
+  orientation.addOption(new SelectionData(displayStrings["screenDown"], "screenDown"));
+  orientation.addOption(new SelectionData(displayStrings["tiltLeft"], "tiltLeft"));
+  orientation.addOption(new SelectionData(displayStrings["tiltRight"], "tiltRight"));
+  orientation.addOption(new SelectionData(displayStrings["logoUp"], "logoUp"));
+  orientation.addOption(new SelectionData(displayStrings["logoDown"], "logoDown"));
+  orientation.addOption(new SelectionData(displayStrings["shake"], "shake"));
   this.addPart(orientation);
 };
 B_MicroBitOrientation.prototype = Object.create(PredicateBlock.prototype);

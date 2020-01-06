@@ -220,5 +220,9 @@ Language.en = {
 "Backward":"Backward",
 "Right":"Right",
 "Left":"Left",
-"Battery":"Battery"
+"Battery":"Battery",
+"Beak_Up":"Beak Up",
+"Beak_Down":"Beak Down",
+"Finch_Is_Level":"Level",
+"Upside_Down":"Upside Down"
 }
