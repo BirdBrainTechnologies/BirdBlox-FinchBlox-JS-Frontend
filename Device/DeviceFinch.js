@@ -11,9 +11,9 @@ DeviceFinch.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");
 DeviceFinch.prototype.constructor = DeviceFinch;
 
-DeviceFinch.ticksPerCM = 51;
+DeviceFinch.ticksPerCM = 49.7; //51;
 DeviceFinch.cmPerDegree = 0.087; //How many cm must the wheels move to turn the finch 1 degree?
-DeviceFinch.cmPerDistance = 0.0919; //Convert raw distance to cm.
+DeviceFinch.cmPerDistance = 0.0919; //Convert raw distance sensor value to cm.
 
 /**
  * Issues a request to set the beak led.
@@ -62,8 +62,8 @@ DeviceFinch.prototype.setTail = function(status, port, red, green, blue) {
 DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR) {
 
 	// Convert from distance in cm to encoder ticks.
-	const ticksPerCM = DeviceFinch.ticksPerCM;//100;
-	const speedScaling = 45/100;//127/100;
+	const ticksPerCM = DeviceFinch.ticksPerCM;
+	const speedScaling = 36/100;//45/100;//127/100;
 
 	//Make sure speeds do not exceed 100%
 	if (speedL > 100) { speedL = 100; }

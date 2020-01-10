@@ -1,4 +1,4 @@
-var FinchBlox = false;
+var FinchBlox = true;
 var FrontendVersion = 393;
 
 
@@ -5876,9 +5876,9 @@ DeviceFinch.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");
 DeviceFinch.prototype.constructor = DeviceFinch;
 
-DeviceFinch.ticksPerCM = 51;
+DeviceFinch.ticksPerCM = 49.7; //51;
 DeviceFinch.cmPerDegree = 0.087; //How many cm must the wheels move to turn the finch 1 degree?
-DeviceFinch.cmPerDistance = 0.0919; //Convert raw distance to cm.
+DeviceFinch.cmPerDistance = 0.0919; //Convert raw distance sensor value to cm.
 
 /**
  * Issues a request to set the beak led.
@@ -5927,8 +5927,8 @@ DeviceFinch.prototype.setTail = function(status, port, red, green, blue) {
 DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR) {
 
 	// Convert from distance in cm to encoder ticks.
-	var ticksPerCM = DeviceFinch.ticksPerCM;//100;
-	var speedScaling = 45/100;//127/100;
+	var ticksPerCM = DeviceFinch.ticksPerCM;
+	var speedScaling = 36/100;//45/100;//127/100;
 
 	//Make sure speeds do not exceed 100%
 	if (speedL > 100) { speedL = 100; }
@@ -22708,11 +22708,11 @@ LevelDialog.loadLevelSavePoint = function() {
     console.log("file '" + levelFileName + "' not found. Must create...");
     var request = new HttpRequestBuilder("data/new");
     request.addParam("filename", levelFileName);
-    SaveManager.loadBlank();
+    if (GuiElements.isIos) { SaveManager.loadBlank(); }
     HtmlServer.sendRequestWithCallback(request.toString(), function() {
       LevelDialog.filesSavedLocally.push(levelFileName);
       console.log("file " + levelFileName + " added to list");
-      //SaveManager.userOpenFile(levelFileName);
+      if (!GuiElements.isIos) { SaveManager.userOpenFile(levelFileName); }
     }, null, true, SaveManager.emptyProgData);
   } else {
     SaveManager.userOpenFile(levelFileName);
