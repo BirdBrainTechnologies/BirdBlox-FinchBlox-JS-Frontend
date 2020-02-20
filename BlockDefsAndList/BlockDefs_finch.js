@@ -36,11 +36,61 @@ B_FinchCommand.prototype.updateAction = function() {
 	}
 };
 
+
+function B_FinchSetMotorsAndWait(x, y) {
+	B_FinchCommand.call(this, x, y);
+}
+B_FinchSetMotorsAndWait.prototype = Object.create(B_FinchCommand.prototype);
+B_FinchSetMotorsAndWait.prototype.constructor = B_FinchSetMotorsAndWait;
+B_FinchSetMotorsAndWait.prototype.sendCheckMoving = function() {
+	let device = this.setupAction();
+	if (device == null) {
+		return new ExecutionStatusError(); // Device was invalid, exit early
+	}
+
+	device.readSensor(this.runMem.requestStatus, "isMoving");
+	return new ExecutionStatusRunning();
+};
+B_FinchSetMotorsAndWait.prototype.checkMoving = function() {
+	const isMoving = (this.runMem.requestStatus.result === "1");
+	if (this.wasMoving && !isMoving) {
+		return new ExecutionStatusDone();
+	}
+	this.wasMoving = isMoving;
+
+	return this.sendCheckMoving();
+}
+B_FinchSetMotorsAndWait.prototype.updateAction = function() {
+	let status = this.runMem.requestStatus;
+	if(status.finished){
+		if(status.error){
+			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+			return new ExecutionStatusError();
+		} else if (!this.moveSent) {
+			this.wasMoving = (status.result === "1");
+			let device = this.setupAction();
+			if (device == null) {
+				return new ExecutionStatusError(); // Device was invalid, exit early
+			}
+			device.setMotors(this.runMem.requestStatus, this.moveSpeedL, this.moveDistance, this.moveSpeedR, this.moveDistance);
+			this.moveSent = true;
+			return new ExecutionStatusRunning();
+		} else if (!this.moveSendFinished) {
+			this.moveSendFinished = true;
+			return this.sendCheckMoving();
+		} else {
+			return this.checkMoving();
+		}
+	} else {
+		return new ExecutionStatusRunning();
+	}
+};
+
 /**
  * Finch Move block
  */
 function B_FinchMove(x, y) {
-	B_FinchCommand.call(this, x, y);
+	B_FinchSetMotorsAndWait.call(this, x, y);
 
 	const ds = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Forward"), "forward"));
 	ds.addOption(new SelectionData(Language.getStr("Forward"), "forward"));
@@ -57,29 +107,30 @@ function B_FinchMove(x, y) {
 
 	this.parseTranslation(Language.getStr("block_finch_move"));
 }
-B_FinchMove.prototype = Object.create(B_FinchCommand.prototype);
+B_FinchMove.prototype = Object.create(B_FinchSetMotorsAndWait.prototype);
 B_FinchMove.prototype.constructor = B_FinchMove;
 B_FinchMove.prototype.startAction = function() {
-	let device = this.setupAction();
-	if (device == null) {
-		return new ExecutionStatusError(); // Device was invalid, exit early
-	}
 
-	let direction = this.slots[1].getData().getValue();
-	let distance = this.slots[2].getData().getValue();
+	const direction = this.slots[1].getData().getValue();
+	this.moveDistance = this.slots[2].getData().getValue();
 	let speed = this.slots[3].getData().getValue();
 
 	if (direction == "backward") { speed = -speed; }
+	this.moveSpeedL = speed;
+	this.moveSpeedR = speed;
 
-	device.setMotors(this.runMem.requestStatus, speed, distance, speed, distance);
-	return new ExecutionStatusRunning();
+	this.moveSent = false;
+	this.moveSendFinished = false;
+	this.wasMoving = false;
+	return this.sendCheckMoving();
 };
+
 
 /**
  * Finch Turn Block
  */
 function B_FinchTurn(x, y) {
-	B_FinchCommand.call(this, x, y);
+	B_FinchSetMotorsAndWait.call(this, x, y);
 
 	const ds = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Right"), "right"));
 	ds.addOption(new SelectionData(Language.getStr("Right"), "right"));
@@ -96,32 +147,27 @@ function B_FinchTurn(x, y) {
 
 	this.parseTranslation(Language.getStr("block_finch_turn"));
 }
-B_FinchTurn.prototype = Object.create(B_FinchCommand.prototype);
+B_FinchTurn.prototype = Object.create(B_FinchSetMotorsAndWait.prototype);
 B_FinchTurn.prototype.constructor = B_FinchTurn;
 B_FinchTurn.prototype.startAction = function() {
-	let device = this.setupAction();
-	if (device == null) {
-		return new ExecutionStatusError(); // Device was invalid, exit early
-	}
 
-	let direction = this.slots[1].getData().getValue();
-	let angle = this.slots[2].getData().getValue();
-	let speed = this.slots[3].getData().getValue();
-
-
-	//TODO: change to convert from angle to distance
-	let distance = angle * DeviceFinch.cmPerDegree;
+	const direction = this.slots[1].getData().getValue();
+	const angle = this.slots[2].getData().getValue();
+	const speed = this.slots[3].getData().getValue();
+	this.moveDistance = angle * DeviceFinch.cmPerDegree;
 
 	if (direction == "right") {
-		device.setMotors(this.runMem.requestStatus, speed, distance, -speed, distance);
-		return new ExecutionStatusRunning();
-	} else if (direction == "left") {
-		device.setMotors(this.runMem.requestStatus, -speed, distance, speed, distance);
-		return new ExecutionStatusRunning();
-	} else {
-		return new ExecutionStatusError();
+		this.moveSpeedL = speed;
+		this.moveSpeedR = -speed;
+	} else { // direction == "left"
+		this.moveSpeedL = -speed;
+		this.moveSpeedR = speed;
 	}
 
+	this.moveSent = false;
+	this.moveSendFinished = false;
+	this.wasMoving = false;
+	return this.sendCheckMoving();
 };
 
 function B_FinchMotors(x, y) {

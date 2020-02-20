@@ -22,27 +22,62 @@ function B_FBMotion(x, y, direction, level) {
 B_FBMotion.prototype = Object.create(CommandBlock.prototype);
 B_FBMotion.prototype.constructor = B_FBMotion;
 
-B_FBMotion.prototype.startAction = function () {
-  const mem = this.runMem;
-  mem.requestStatus = {};
-  mem.requestStatus.finished = false;
-  mem.requestStatus.error = false;
-  mem.requestStatus.result = null;
+B_FBMotion.prototype.setupAction = function() {
+	let mem = this.runMem;
+	mem.requestStatus = {};
+	mem.requestStatus.finished = false;
+	mem.requestStatus.error = false;
+	mem.requestStatus.result = null;
 
-  let device = DeviceFinch.getManager().getDevice(0);
-  if (device != null) {
-    device.setMotors(this.runMem.requestStatus, this.leftSpeed, this.leftDist, this.rightSpeed, this.rightDist);
-  } else {
+	let device = DeviceFinch.getManager().getDevice(0);
+	if (device == null) {
     mem.requestStatus.finished = true;
     mem.duration = 0;
     TitleBar.flashFinchButton();
-  }
+	}
+	return device;
+};
+B_FBMotion.prototype.sendCheckMoving = function() {
+	let device = this.setupAction();
+	if (device == null) {
+		return new ExecutionStatusDone(); // Device was invalid, exit early
+	}
 
-  return new ExecutionStatusRunning();
+	device.readSensor(this.runMem.requestStatus, "isMoving");
+	return new ExecutionStatusRunning();
+};
+B_FBMotion.prototype.checkMoving = function() {
+	const isMoving = (this.runMem.requestStatus.result === "1");
+	if (this.wasMoving && !isMoving) {
+		return new ExecutionStatusDone();
+	}
+	this.wasMoving = isMoving;
+
+	return this.sendCheckMoving();
+}
+B_FBMotion.prototype.startAction = function () {
+  this.moveSent = false;
+	this.moveSendFinished = false;
+	this.wasMoving = false;
+  return this.sendCheckMoving();
 }
 B_FBMotion.prototype.updateAction = function () {
   if(this.runMem.requestStatus.finished) {
-		return new ExecutionStatusDone();
+		if (!this.moveSent) {
+      this.wasMoving = (status.result === "1");
+      let device = this.setupAction();
+			if (device == null) {
+        return new ExecutionStatusDone();
+      }
+      device.setMotors(this.runMem.requestStatus, this.leftSpeed, this.leftDist, this.rightSpeed, this.rightDist);
+      this.moveSent = true;
+			return new ExecutionStatusRunning();
+    } else if (!this.moveSendFinished) {
+			this.moveSendFinished = true;
+			return this.sendCheckMoving();
+		} else {
+			return this.checkMoving();
+		}
 	} else {
 		return new ExecutionStatusRunning();
 	}
