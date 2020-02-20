@@ -18,6 +18,11 @@ OverflowArrows.setConstants = function() {
 	OA.triangleH = 15;
 	OA.margin = 15;
 	OA.opacity = 0.5;
+	if (FinchBlox) {
+		OA.color = Colors.lightLightGray;
+	} else {
+		OA.color = Colors.white;
+	}
 };
 
 /**
@@ -27,7 +32,7 @@ OverflowArrows.setConstants = function() {
 OverflowArrows.prototype.makeTriangle = function() {
 	const OA = OverflowArrows;
 	const tri = GuiElements.create.path();
-	GuiElements.update.color(tri, Colors.white);
+	GuiElements.update.color(tri, OA.color);
 	GuiElements.update.opacity(tri, OA.opacity);
 	GuiElements.update.makeClickThrough(tri);
 	return tri;
@@ -106,12 +111,15 @@ OverflowArrows.prototype.updateZoom = function() {
 OverflowArrows.prototype.setArrowPos = function() {
 	const OA = OverflowArrows;
 	this.left = BlockPalette.width;
-	if (!GuiElements.paletteLayersVisible) {
+	if (!GuiElements.paletteLayersVisible || FinchBlox) {
 		this.left = 0;
 	}
 	this.top = TitleBar.height;
 	this.right = GuiElements.width;
 	this.bottom = GuiElements.height;
+	if (FinchBlox) {
+		this.bottom = GuiElements.height - BlockPalette.height - CategoryBN.height;
+	}
 
 	const midX = (this.left + this.right) / 2;
 	const midY = (this.top + this.bottom) / 2;

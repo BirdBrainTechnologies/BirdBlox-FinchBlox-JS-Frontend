@@ -8216,7 +8216,8 @@ Font.uiFont = function(fontSize){
  *     point in the Inkscape file
  *
  * Another option is to get svg icons from Font Awesome. Icons from this source
- * should have names starting with fa.
+ * should have names starting with fa and are available under the following
+ * license: https://fontawesome.com/license
  *
  * Icons with names starting with mv come from Michael Verner
  * Icons with names starting with mj come from Molly Johnson
@@ -8299,6 +8300,14 @@ function VectorPaths(){
   VP.mvArrow.width=83;
   VP.mvArrow.height=83;
   VP.mvArrow.transform="matrix(8.76256e-17,-1.43103,1.43103,8.76256e-17,-721.241,439.328)";
+  VP.faSave={};
+  VP.faSave.path="M433.941 129.941l-83.882-83.882A48 48 0 0 0 316.118 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V163.882a48 48 0 0 0-14.059-33.941zM224 416c-35.346 0-64-28.654-64-64 0-35.346 28.654-64 64-64s64 28.654 64 64c0 35.346-28.654 64-64 64zm96-304.52V212c0 6.627-5.373 12-12 12H76c-6.627 0-12-5.373-12-12V108c0-6.627 5.373-12 12-12h228.52c3.183 0 6.235 1.264 8.485 3.515l3.48 3.48A11.996 11.996 0 0 1 320 111.48z";
+  VP.faSave.width=448;
+  VP.faSave.height=512;
+  VP.faFile={};
+  VP.faFile.path="M224 136V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm160-14.1v6.1H256V0h6.1c6.4 0 12.5 2.5 17 7l97.9 98c4.5 4.5 7 10.6 7 16.9z";
+  VP.faFile.width=384;
+  VP.faFile.height=512;
   VP.faSyncAlt={};
   VP.faSyncAlt.path="M370.72 133.28C339.458 104.008 298.888 87.962 255.848 88c-77.458.068-144.328 53.178-162.791 126.85-1.344 5.363-6.122 9.15-11.651 9.15H24.103c-7.498 0-13.194-6.807-11.807-14.176C33.933 94.924 134.813 8 256 8c66.448 0 126.791 26.136 171.315 68.685L463.03 40.97C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.749zM32 296h134.059c21.382 0 32.09 25.851 16.971 40.971l-41.75 41.75c31.262 29.273 71.835 45.319 114.876 45.28 77.418-.07 144.315-53.144 162.787-126.849 1.344-5.363 6.122-9.15 11.651-9.15h57.304c7.498 0 13.194 6.807 11.807 14.176C478.067 417.076 377.187 504 256 504c-66.448 0-126.791-26.136-171.315-68.685L48.97 471.03C33.851 486.149 8 475.441 8 454.059V320c0-13.255 10.745-24 24-24z";
   VP.faSyncAlt.width=512;
@@ -8311,6 +8320,14 @@ function VectorPaths(){
   VP.faClockSolid.path="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm57.1 350.1L224.9 294c-3.1-2.3-4.9-5.9-4.9-9.7V116c0-6.6 5.4-12 12-12h48c6.6 0 12 5.4 12 12v137.7l63.5 46.2c5.4 3.9 6.5 11.4 2.6 16.8l-28.2 38.8c-3.9 5.3-11.4 6.5-16.8 2.6z";
   VP.faClockSolid.width=512;
   VP.faClockSolid.height=512;
+  VP.faCheck={};
+  VP.faCheck.path="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z";
+  VP.faCheck.width=512;
+  VP.faCheck.height=512;
+  VP.faTimes={};
+  VP.faTimes.path="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z";
+  VP.faTimes.width=352;
+  VP.faTimes.height=512;
   VP.faTimesCircle={};
   VP.faTimesCircle.path="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z";
   VP.faTimesCircle.width=512;
@@ -16116,7 +16133,7 @@ BubbleOverlay.prototype.relToAbsY = function(y) {
  * Special BubbleOverlay for FinchBlox
  */
 function FBBubbleOverlay(overlayType, margin, innerGroup, parent, outlineColor, block) {
-  this.width = GuiElements.width * 19/20;
+  if (block != null) { this.width = GuiElements.width * 19/20; }
   this.outlineColor = outlineColor;
   this.block = block;
   BubbleOverlay.call(this, overlayType, Colors.white, margin, innerGroup, parent, GuiElements.layers.overlay);
@@ -16129,7 +16146,7 @@ FBBubbleOverlay.prototype.constructor = FBBubbleOverlay;
  * Override the makeBg function to give FinchBlox look.
  */
 FBBubbleOverlay.prototype.makeBg = function() {
-  this.bgRect = GuiElements.draw.rect(0, 0, this.width, 0, this.bgColor, 10, 10);
+  this.bgRect = GuiElements.draw.rect(0, 0, 0, 0, this.bgColor, 10, 10);
   this.bgGroup.appendChild(this.bgRect);
   GuiElements.update.stroke(this.bgRect, this.outlineColor, 4);
  	this.triangle = GuiElements.create.path(this.bgGroup);
@@ -16138,26 +16155,33 @@ FBBubbleOverlay.prototype.makeBg = function() {
 
 FBBubbleOverlay.prototype.show = function () {
   if (!this.visible) {
-    const zf = TabManager.activeTab.zoomFactor;
-
     BubbleOverlay.prototype.show.call(this);
 
-    GuiElements.update.zoom(this.blockG, zf);
-    this.blockG.appendChild(this.block.group);
-    //this.layerG.appendChild(this.block.group);
+    if (this.block != null) {
+      const zf = TabManager.activeTab.zoomFactor;
+      GuiElements.update.zoom(this.blockG, zf);
+      this.blockG.appendChild(this.block.group);
+      //this.layerG.appendChild(this.block.group);
 
-    let absX = this.block.stack.relToAbsX(this.block.x);
-    let absY = this.block.stack.relToAbsY(this.block.y);
-    GuiElements.move.group(this.block.group, absX/zf, absY/zf);
+      let absX = this.block.stack.relToAbsX(this.block.x);
+      let absY = this.block.stack.relToAbsY(this.block.y);
+      GuiElements.move.group(this.block.group, absX/zf, absY/zf);
+    } else if (this.parent.parentGroup != null) {
+      this.blockG.appendChild(this.parent.parentGroup);
+    }
     GuiElements.blockInteraction();
   }
 }
 
 FBBubbleOverlay.prototype.hide = function () {
   BubbleOverlay.prototype.hide.call(this);
-  this.block.group.remove();
-  this.block.stack.group.appendChild(this.block.group);
-  GuiElements.move.group(this.block.group, this.block.x, this.block.y);
+  if (this.block != null) {
+    this.block.group.remove();
+    this.block.stack.group.appendChild(this.block.group);
+    GuiElements.move.group(this.block.group, this.block.x, this.block.y);
+  } else if (this.parent.parentGroup != null) {
+    this.parent.parentLayer.appendChild(this.parent.parentGroup);
+  }
   GuiElements.unblockInteraction();
 }
 
@@ -16166,6 +16190,7 @@ FBBubbleOverlay.prototype.display = function (x1, x2, y1, y2, innerWidth, innerH
 	const BO = BubbleOverlay;
 
   const height = innerHeight + 2 * this.margin;
+  const width = this.width || innerWidth + 2 * this.margin;
   const overlap = 2; //how much should the triangle overlap the button?
 
   /* Center the content in the bubble */
@@ -16188,14 +16213,18 @@ FBBubbleOverlay.prototype.display = function (x1, x2, y1, y2, innerWidth, innerH
   }
   // Convert the triangle's coords from abs to rel coords
   this.x = (GuiElements.width - this.width)/2;
-	const triX = triangleX - this.x;
+  var triX = triangleX - this.x;
+  if (this.block == null) {
+    this.x = GuiElements.width - width - this.margin;
+    triX = triangleX;
+  }
 	const triY = triangleY - this.y;
 	const triH = (BO.triangleH + BO.overlap) * triangleDir;
 
 	// Move the elements using the results
   GuiElements.move.group(this.group, this.x, this.y);
 	GuiElements.update.triangleFromPoint(this.triangle, triX, triY, BO.triangleW, triH, true);
-	GuiElements.update.rect(this.bgRect, 0, 0, this.width, height);
+	GuiElements.update.rect(this.bgRect, 0, 0, width, height);
 	this.show();
 }
 
@@ -22746,6 +22775,11 @@ OverflowArrows.setConstants = function() {
 	OA.triangleH = 15;
 	OA.margin = 15;
 	OA.opacity = 0.5;
+	if (FinchBlox) {
+		OA.color = Colors.lightLightGray;
+	} else {
+		OA.color = Colors.white;
+	}
 };
 
 /**
@@ -22755,7 +22789,7 @@ OverflowArrows.setConstants = function() {
 OverflowArrows.prototype.makeTriangle = function() {
 	const OA = OverflowArrows;
 	const tri = GuiElements.create.path();
-	GuiElements.update.color(tri, Colors.white);
+	GuiElements.update.color(tri, OA.color);
 	GuiElements.update.opacity(tri, OA.opacity);
 	GuiElements.update.makeClickThrough(tri);
 	return tri;
@@ -22834,12 +22868,15 @@ OverflowArrows.prototype.updateZoom = function() {
 OverflowArrows.prototype.setArrowPos = function() {
 	const OA = OverflowArrows;
 	this.left = BlockPalette.width;
-	if (!GuiElements.paletteLayersVisible) {
+	if (!GuiElements.paletteLayersVisible || FinchBlox) {
 		this.left = 0;
 	}
 	this.top = TitleBar.height;
 	this.right = GuiElements.width;
 	this.bottom = GuiElements.height;
+	if (FinchBlox) {
+		this.bottom = GuiElements.height - BlockPalette.height - CategoryBN.height;
+	}
 
 	const midX = (this.left + this.right) / 2;
 	const midY = (this.top + this.bottom) / 2;
@@ -22853,6 +22890,7 @@ OverflowArrows.prototype.setArrowPos = function() {
 	GuiElements.update.triangleFromPoint(this.triRight, rightX, midY, OA.triangleW, -OA.triangleH, false);
 	GuiElements.update.triangleFromPoint(this.triBottom, midX, bottomY, OA.triangleW, -OA.triangleH, true);
 };
+
 /**
  * BlockStack is a class that holds a stack of Blocks.
  * BlockStacks move, execute, and snap the Blocks within them.

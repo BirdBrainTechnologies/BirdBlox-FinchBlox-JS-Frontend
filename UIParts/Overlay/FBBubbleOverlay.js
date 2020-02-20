@@ -2,7 +2,7 @@
  * Special BubbleOverlay for FinchBlox
  */
 function FBBubbleOverlay(overlayType, margin, innerGroup, parent, outlineColor, block) {
-  this.width = GuiElements.width * 19/20;
+  if (block != null) { this.width = GuiElements.width * 19/20; }
   this.outlineColor = outlineColor;
   this.block = block;
   BubbleOverlay.call(this, overlayType, Colors.white, margin, innerGroup, parent, GuiElements.layers.overlay);
@@ -15,7 +15,7 @@ FBBubbleOverlay.prototype.constructor = FBBubbleOverlay;
  * Override the makeBg function to give FinchBlox look.
  */
 FBBubbleOverlay.prototype.makeBg = function() {
-  this.bgRect = GuiElements.draw.rect(0, 0, this.width, 0, this.bgColor, 10, 10);
+  this.bgRect = GuiElements.draw.rect(0, 0, 0, 0, this.bgColor, 10, 10);
   this.bgGroup.appendChild(this.bgRect);
   GuiElements.update.stroke(this.bgRect, this.outlineColor, 4);
  	this.triangle = GuiElements.create.path(this.bgGroup);
@@ -24,26 +24,33 @@ FBBubbleOverlay.prototype.makeBg = function() {
 
 FBBubbleOverlay.prototype.show = function () {
   if (!this.visible) {
-    const zf = TabManager.activeTab.zoomFactor;
-
     BubbleOverlay.prototype.show.call(this);
 
-    GuiElements.update.zoom(this.blockG, zf);
-    this.blockG.appendChild(this.block.group);
-    //this.layerG.appendChild(this.block.group);
+    if (this.block != null) {
+      const zf = TabManager.activeTab.zoomFactor;
+      GuiElements.update.zoom(this.blockG, zf);
+      this.blockG.appendChild(this.block.group);
+      //this.layerG.appendChild(this.block.group);
 
-    let absX = this.block.stack.relToAbsX(this.block.x);
-    let absY = this.block.stack.relToAbsY(this.block.y);
-    GuiElements.move.group(this.block.group, absX/zf, absY/zf);
+      let absX = this.block.stack.relToAbsX(this.block.x);
+      let absY = this.block.stack.relToAbsY(this.block.y);
+      GuiElements.move.group(this.block.group, absX/zf, absY/zf);
+    } else if (this.parent.parentGroup != null) {
+      this.blockG.appendChild(this.parent.parentGroup);
+    }
     GuiElements.blockInteraction();
   }
 }
 
 FBBubbleOverlay.prototype.hide = function () {
   BubbleOverlay.prototype.hide.call(this);
-  this.block.group.remove();
-  this.block.stack.group.appendChild(this.block.group);
-  GuiElements.move.group(this.block.group, this.block.x, this.block.y);
+  if (this.block != null) {
+    this.block.group.remove();
+    this.block.stack.group.appendChild(this.block.group);
+    GuiElements.move.group(this.block.group, this.block.x, this.block.y);
+  } else if (this.parent.parentGroup != null) {
+    this.parent.parentLayer.appendChild(this.parent.parentGroup);
+  }
   GuiElements.unblockInteraction();
 }
 
@@ -52,6 +59,7 @@ FBBubbleOverlay.prototype.display = function (x1, x2, y1, y2, innerWidth, innerH
 	const BO = BubbleOverlay;
 
   const height = innerHeight + 2 * this.margin;
+  const width = this.width || innerWidth + 2 * this.margin;
   const overlap = 2; //how much should the triangle overlap the button?
 
   /* Center the content in the bubble */
@@ -74,13 +82,17 @@ FBBubbleOverlay.prototype.display = function (x1, x2, y1, y2, innerWidth, innerH
   }
   // Convert the triangle's coords from abs to rel coords
   this.x = (GuiElements.width - this.width)/2;
-	const triX = triangleX - this.x;
+  var triX = triangleX - this.x;
+  if (this.block == null) {
+    this.x = GuiElements.width - width - this.margin;
+    triX = triangleX;
+  }
 	const triY = triangleY - this.y;
 	const triH = (BO.triangleH + BO.overlap) * triangleDir;
 
 	// Move the elements using the results
   GuiElements.move.group(this.group, this.x, this.y);
 	GuiElements.update.triangleFromPoint(this.triangle, triX, triY, BO.triangleW, triH, true);
-	GuiElements.update.rect(this.bgRect, 0, 0, this.width, height);
+	GuiElements.update.rect(this.bgRect, 0, 0, width, height);
 	this.show();
 }
