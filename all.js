@@ -5878,8 +5878,10 @@ Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");
 DeviceFinch.prototype.constructor = DeviceFinch;
 
 DeviceFinch.ticksPerCM = 49.7; //51;
-DeviceFinch.cmPerDegree = 0.087; //How many cm must the wheels move to turn the finch 1 degree?
+DeviceFinch.ticksPerDegree = 4.335;
+//DeviceFinch.cmPerDegree = 0.087; //How many cm must the wheels move to turn the finch 1 degree?
 DeviceFinch.cmPerDistance = 0.0919; //Convert raw distance sensor value to cm.
+
 
 /**
  * Issues a request to set the beak led.
@@ -5921,14 +5923,14 @@ DeviceFinch.prototype.setTail = function(status, port, red, green, blue) {
  * Issues a request to set the motors.
  * @param {object} status - An object provided by the caller to track the progress of the request
  * @param {number} speedL - speed of the left motor (%)
- * @param {number} distL - distance for left motor to travel (set to 0 for continuous motion)
+ * @param {number} ticksL - distance for left motor to travel (set to 0 for continuous motion)
  * @param {number} speedR - speed of the right motor (%)
- * @param {number} distR - distance for rigth motor to travel (set to 0 for continuous motion)
+ * @param {number} ticksR - distance for rigth motor to travel (set to 0 for continuous motion)
  */
-DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR) {
+DeviceFinch.prototype.setMotors = function(status, speedL, ticksL, speedR, ticksR) {
 
 	// Convert from distance in cm to encoder ticks.
-	const ticksPerCM = DeviceFinch.ticksPerCM;
+	//const ticksPerCM = DeviceFinch.ticksPerCM;
 	const speedScaling = 36/100;//45/100;//127/100;
 
 	//Make sure speeds do not exceed 100%
@@ -5937,8 +5939,8 @@ DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR)
 	if (speedR > 100) { speedR = 100; }
 	if (speedR < -100) { speedR = -100; }
 
-	let ticksL = Math.round(distL * ticksPerCM);
-	let ticksR = Math.round(distR * ticksPerCM);
+	//let ticksL = Math.round(distL * ticksPerCM);
+	//let ticksR = Math.round(distR * ticksPerCM);
 
 	const request = new HttpRequestBuilder("robot/out/motors");
 	request.addParam("type", this.getDeviceTypeId());
@@ -31335,18 +31337,20 @@ function B_MicroBitOrientation(x, y, deviceClass){
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
 
   var displayStrings = {
-    "tiltLeft":Language.getStr("Tilt_Left"),
-    "tiltRight":Language.getStr("Tilt_Right"),
     "shake":Language.getStr("Shake")
   };
   if (deviceClass == DeviceFinch) {
     displayStrings["screenUp"] = Language.getStr("Finch_Is_Level");
     displayStrings["screenDown"] = Language.getStr("Upside_Down");
+    displayStrings["tiltLeft"] = Language.getStr("Tilt_Right")
+    displayStrings["tiltRight"] = Language.getStr("Tilt_Left");
     displayStrings["logoUp"] = Language.getStr("Beak_Down");
     displayStrings["logoDown"] = Language.getStr("Beak_Up");
   } else {
     displayStrings["screenUp"] = Language.getStr("Screen_Up");
     displayStrings["screenDown"] = Language.getStr("Screen_Down");
+    displayStrings["tiltLeft"] = Language.getStr("Tilt_Left");
+    displayStrings["tiltRight"] = Language.getStr("Tilt_Right")
     displayStrings["logoUp"] = Language.getStr("Logo_Up");
     displayStrings["logoDown"] = Language.getStr("Logo_Down");
   }
@@ -32231,7 +32235,7 @@ B_FinchSetMotorsAndWait.prototype.updateAction = function() {
 			if (device == null) {
 				return new ExecutionStatusError(); // Device was invalid, exit early
 			}
-			device.setMotors(this.runMem.requestStatus, this.moveSpeedL, this.moveDistance, this.moveSpeedR, this.moveDistance);
+			device.setMotors(this.runMem.requestStatus, this.moveSpeedL, this.moveTicks, this.moveSpeedR, this.moveTicks);
 			this.moveSent = true;
 			return new ExecutionStatusRunning();
 		} else if (!this.moveSendFinished) {
@@ -32271,7 +32275,7 @@ B_FinchMove.prototype.constructor = B_FinchMove;
 B_FinchMove.prototype.startAction = function() {
 
 	const direction = this.slots[1].getData().getValue();
-	this.moveDistance = this.slots[2].getData().getValue();
+	this.moveTicks = Math.round(this.slots[2].getData().getValue() * DeviceFinch.ticksPerCM);
 	let speed = this.slots[3].getData().getValue();
 
 	if (direction == "backward") { speed = -speed; }
@@ -32313,7 +32317,7 @@ B_FinchTurn.prototype.startAction = function() {
 	const direction = this.slots[1].getData().getValue();
 	const angle = this.slots[2].getData().getValue();
 	const speed = this.slots[3].getData().getValue();
-	this.moveDistance = angle * DeviceFinch.cmPerDegree;
+	this.moveTicks = Math.round(angle * DeviceFinch.ticksPerDegree);
 
 	if (direction == "right") {
 		this.moveSpeedL = speed;
@@ -32486,9 +32490,10 @@ function B_FinchSensorBase(x, y) {
 	this.deviceClass = DeviceFinch;
 	ReporterBlock.call(this,x,y,this.deviceClass.getDeviceTypeId());
 	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-	this.scalingFactor = 1
-	this.displayDecimalPlaces = 0
-	this.invert = false
+	this.offset = 0 //subtract this much from the raw value before scaling
+	this.scalingFactor = 1 //multiply result by this value
+	this.displayDecimalPlaces = 0 //display this many digits after the decimal
+	this.invert = false //invert the final value (return 100 - value)
 }
 B_FinchSensorBase.prototype = Object.create(ReporterBlock.prototype);
 B_FinchSensorBase.prototype.constructor = B_FinchSensorBase;
@@ -32514,7 +32519,7 @@ B_FinchSensorBase.prototype.updateAction = function(){
 			return new ExecutionStatusError();
 		} else {
 			const result = new StringData(status.result);
-			const num = (result.asNum().getValue()) * this.scalingFactor;
+			const num = ((result.asNum().getValue()) - this.offset) * this.scalingFactor;
 			const fact = Math.pow(10, this.displayDecimalPlaces)
 			var rounded = Math.round(num * fact) / fact;
 			if (this.invert) { rounded = 100 - rounded; }
@@ -32528,8 +32533,8 @@ function B_FinchEncoder(x, y) {
 	B_FinchSensorBase.call(this, x, y);
 
 	this.displayDecimalPlaces = 2;
-	//800 ticks per rotation
-	this.scalingFactor = 1/800;
+	//792 ticks per rotation
+	this.scalingFactor = 1/792;
 
 	const ds = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Right"), "right"));
 	ds.addOption(new SelectionData(Language.getStr("Right"), "right"));
@@ -32598,6 +32603,8 @@ B_FinchLight.prototype.startAction = function() {
 
 function B_FinchLine(x, y) {
 	B_FinchSensorBase.call(this, x, y);
+	this.offset = 6;
+	this.scalingFactor = 100/121;
 	this.invert = true;
 
 	const ds = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Right"), "right"));
@@ -33038,7 +33045,7 @@ B_FBMotion.prototype.updateAction = function () {
 			if (device == null) {
         return new ExecutionStatusDone();
       }
-      device.setMotors(this.runMem.requestStatus, this.leftSpeed, this.leftDist, this.rightSpeed, this.rightDist);
+      device.setMotors(this.runMem.requestStatus, this.leftSpeed, this.leftTicks, this.rightSpeed, this.rightTicks);
       this.moveSent = true;
 			return new ExecutionStatusRunning();
     } else if (!this.moveSendFinished) {
@@ -33075,13 +33082,13 @@ B_FBMotion.prototype.setDefaults = function() {
   switch (this.direction) {
     case "forward":
     case "backward":
-      this.leftDist = this.defaultDistance;
-      this.rightDist = this.defaultDistance;
+      this.leftTicks = Math.round(this.defaultDistance * DeviceFinch.ticksPerCM);
+      this.rightTicks = Math.round(this.defaultDistance * DeviceFinch.ticksPerCM);
       break;
     case "right":
     case "left":
-      this.leftDist = this.defaultAngle * DeviceFinch.cmPerDegree;
-      this.rightDist = this.defaultAngle * DeviceFinch.cmPerDegree;
+      this.leftTicks = Math.round(this.defaultAngle * DeviceFinch.ticksPerDegree);
+      this.rightTicks = Math.round(this.defaultAngle * DeviceFinch.ticksPerDegree);
       break;
     default:
         GuiElements.alert("unknown direction in motion block set defaults");
@@ -33108,13 +33115,13 @@ B_FBMotion.prototype.addL2Button = function() {
 B_FBMotion.prototype.updateValues = function () {
   let speed;
   if (this.distanceBN != null) {
-    this.leftDist = this.distanceBN.values[0];
-    this.rightDist = this.distanceBN.values[0];
+    this.leftTicks = Math.round(this.distanceBN.values[0] * DeviceFinch.ticksPerCM);
+    this.rightTicks = Math.round(this.distanceBN.values[0] * DeviceFinch.ticksPerCM);
     speed = this.distanceBN.values[1];
   }
   if (this.angleBN != null) {
-    this.leftDist = this.angleBN.values[0] * DeviceFinch.cmPerDegree;
-    this.rightDist = this.angleBN.values[0] * DeviceFinch.cmPerDegree;
+    this.leftTicks = Math.round(this.angleBN.values[0] * DeviceFinch.ticksPerDegree);
+    this.rightTicks = Math.round(this.angleBN.values[0] * DeviceFinch.ticksPerDegree);
     speed = this.angleBN.values[1];
   }
   if (speed != null) {

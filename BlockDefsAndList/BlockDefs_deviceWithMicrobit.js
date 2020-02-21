@@ -215,18 +215,20 @@ function B_MicroBitOrientation(x, y, deviceClass){
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
 
   var displayStrings = {
-    "tiltLeft":Language.getStr("Tilt_Left"),
-    "tiltRight":Language.getStr("Tilt_Right"),
     "shake":Language.getStr("Shake")
   };
   if (deviceClass == DeviceFinch) {
     displayStrings["screenUp"] = Language.getStr("Finch_Is_Level");
     displayStrings["screenDown"] = Language.getStr("Upside_Down");
+    displayStrings["tiltLeft"] = Language.getStr("Tilt_Right")
+    displayStrings["tiltRight"] = Language.getStr("Tilt_Left");
     displayStrings["logoUp"] = Language.getStr("Beak_Down");
     displayStrings["logoDown"] = Language.getStr("Beak_Up");
   } else {
     displayStrings["screenUp"] = Language.getStr("Screen_Up");
     displayStrings["screenDown"] = Language.getStr("Screen_Down");
+    displayStrings["tiltLeft"] = Language.getStr("Tilt_Left");
+    displayStrings["tiltRight"] = Language.getStr("Tilt_Right")
     displayStrings["logoUp"] = Language.getStr("Logo_Up");
     displayStrings["logoDown"] = Language.getStr("Logo_Down");
   }

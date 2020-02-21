@@ -69,7 +69,7 @@ B_FBMotion.prototype.updateAction = function () {
 			if (device == null) {
         return new ExecutionStatusDone();
       }
-      device.setMotors(this.runMem.requestStatus, this.leftSpeed, this.leftDist, this.rightSpeed, this.rightDist);
+      device.setMotors(this.runMem.requestStatus, this.leftSpeed, this.leftTicks, this.rightSpeed, this.rightTicks);
       this.moveSent = true;
 			return new ExecutionStatusRunning();
     } else if (!this.moveSendFinished) {
@@ -106,13 +106,13 @@ B_FBMotion.prototype.setDefaults = function() {
   switch (this.direction) {
     case "forward":
     case "backward":
-      this.leftDist = this.defaultDistance;
-      this.rightDist = this.defaultDistance;
+      this.leftTicks = Math.round(this.defaultDistance * DeviceFinch.ticksPerCM);
+      this.rightTicks = Math.round(this.defaultDistance * DeviceFinch.ticksPerCM);
       break;
     case "right":
     case "left":
-      this.leftDist = this.defaultAngle * DeviceFinch.cmPerDegree;
-      this.rightDist = this.defaultAngle * DeviceFinch.cmPerDegree;
+      this.leftTicks = Math.round(this.defaultAngle * DeviceFinch.ticksPerDegree);
+      this.rightTicks = Math.round(this.defaultAngle * DeviceFinch.ticksPerDegree);
       break;
     default:
         GuiElements.alert("unknown direction in motion block set defaults");
@@ -139,13 +139,13 @@ B_FBMotion.prototype.addL2Button = function() {
 B_FBMotion.prototype.updateValues = function () {
   let speed;
   if (this.distanceBN != null) {
-    this.leftDist = this.distanceBN.values[0];
-    this.rightDist = this.distanceBN.values[0];
+    this.leftTicks = Math.round(this.distanceBN.values[0] * DeviceFinch.ticksPerCM);
+    this.rightTicks = Math.round(this.distanceBN.values[0] * DeviceFinch.ticksPerCM);
     speed = this.distanceBN.values[1];
   }
   if (this.angleBN != null) {
-    this.leftDist = this.angleBN.values[0] * DeviceFinch.cmPerDegree;
-    this.rightDist = this.angleBN.values[0] * DeviceFinch.cmPerDegree;
+    this.leftTicks = Math.round(this.angleBN.values[0] * DeviceFinch.ticksPerDegree);
+    this.rightTicks = Math.round(this.angleBN.values[0] * DeviceFinch.ticksPerDegree);
     speed = this.angleBN.values[1];
   }
   if (speed != null) {

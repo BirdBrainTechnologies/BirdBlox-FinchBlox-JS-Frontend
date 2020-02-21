@@ -12,8 +12,10 @@ Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");
 DeviceFinch.prototype.constructor = DeviceFinch;
 
 DeviceFinch.ticksPerCM = 49.7; //51;
-DeviceFinch.cmPerDegree = 0.087; //How many cm must the wheels move to turn the finch 1 degree?
+DeviceFinch.ticksPerDegree = 4.335;
+//DeviceFinch.cmPerDegree = 0.087; //How many cm must the wheels move to turn the finch 1 degree?
 DeviceFinch.cmPerDistance = 0.0919; //Convert raw distance sensor value to cm.
+
 
 /**
  * Issues a request to set the beak led.
@@ -55,14 +57,14 @@ DeviceFinch.prototype.setTail = function(status, port, red, green, blue) {
  * Issues a request to set the motors.
  * @param {object} status - An object provided by the caller to track the progress of the request
  * @param {number} speedL - speed of the left motor (%)
- * @param {number} distL - distance for left motor to travel (set to 0 for continuous motion)
+ * @param {number} ticksL - distance for left motor to travel (set to 0 for continuous motion)
  * @param {number} speedR - speed of the right motor (%)
- * @param {number} distR - distance for rigth motor to travel (set to 0 for continuous motion)
+ * @param {number} ticksR - distance for rigth motor to travel (set to 0 for continuous motion)
  */
-DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR) {
+DeviceFinch.prototype.setMotors = function(status, speedL, ticksL, speedR, ticksR) {
 
 	// Convert from distance in cm to encoder ticks.
-	const ticksPerCM = DeviceFinch.ticksPerCM;
+	//const ticksPerCM = DeviceFinch.ticksPerCM;
 	const speedScaling = 36/100;//45/100;//127/100;
 
 	//Make sure speeds do not exceed 100%
@@ -71,8 +73,8 @@ DeviceFinch.prototype.setMotors = function(status, speedL, distL, speedR, distR)
 	if (speedR > 100) { speedR = 100; }
 	if (speedR < -100) { speedR = -100; }
 
-	let ticksL = Math.round(distL * ticksPerCM);
-	let ticksR = Math.round(distR * ticksPerCM);
+	//let ticksL = Math.round(distL * ticksPerCM);
+	//let ticksR = Math.round(distR * ticksPerCM);
 
 	const request = new HttpRequestBuilder("robot/out/motors");
 	request.addParam("type", this.getDeviceTypeId());

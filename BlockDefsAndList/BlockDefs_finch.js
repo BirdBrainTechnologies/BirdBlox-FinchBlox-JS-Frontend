@@ -72,7 +72,7 @@ B_FinchSetMotorsAndWait.prototype.updateAction = function() {
 			if (device == null) {
 				return new ExecutionStatusError(); // Device was invalid, exit early
 			}
-			device.setMotors(this.runMem.requestStatus, this.moveSpeedL, this.moveDistance, this.moveSpeedR, this.moveDistance);
+			device.setMotors(this.runMem.requestStatus, this.moveSpeedL, this.moveTicks, this.moveSpeedR, this.moveTicks);
 			this.moveSent = true;
 			return new ExecutionStatusRunning();
 		} else if (!this.moveSendFinished) {
@@ -112,7 +112,7 @@ B_FinchMove.prototype.constructor = B_FinchMove;
 B_FinchMove.prototype.startAction = function() {
 
 	const direction = this.slots[1].getData().getValue();
-	this.moveDistance = this.slots[2].getData().getValue();
+	this.moveTicks = Math.round(this.slots[2].getData().getValue() * DeviceFinch.ticksPerCM);
 	let speed = this.slots[3].getData().getValue();
 
 	if (direction == "backward") { speed = -speed; }
@@ -154,7 +154,7 @@ B_FinchTurn.prototype.startAction = function() {
 	const direction = this.slots[1].getData().getValue();
 	const angle = this.slots[2].getData().getValue();
 	const speed = this.slots[3].getData().getValue();
-	this.moveDistance = angle * DeviceFinch.cmPerDegree;
+	this.moveTicks = Math.round(angle * DeviceFinch.ticksPerDegree);
 
 	if (direction == "right") {
 		this.moveSpeedL = speed;
@@ -327,9 +327,10 @@ function B_FinchSensorBase(x, y) {
 	this.deviceClass = DeviceFinch;
 	ReporterBlock.call(this,x,y,this.deviceClass.getDeviceTypeId());
 	this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-	this.scalingFactor = 1
-	this.displayDecimalPlaces = 0
-	this.invert = false
+	this.offset = 0 //subtract this much from the raw value before scaling
+	this.scalingFactor = 1 //multiply result by this value
+	this.displayDecimalPlaces = 0 //display this many digits after the decimal
+	this.invert = false //invert the final value (return 100 - value)
 }
 B_FinchSensorBase.prototype = Object.create(ReporterBlock.prototype);
 B_FinchSensorBase.prototype.constructor = B_FinchSensorBase;
@@ -355,7 +356,7 @@ B_FinchSensorBase.prototype.updateAction = function(){
 			return new ExecutionStatusError();
 		} else {
 			const result = new StringData(status.result);
-			const num = (result.asNum().getValue()) * this.scalingFactor;
+			const num = ((result.asNum().getValue()) - this.offset) * this.scalingFactor;
 			const fact = Math.pow(10, this.displayDecimalPlaces)
 			var rounded = Math.round(num * fact) / fact;
 			if (this.invert) { rounded = 100 - rounded; }
@@ -369,8 +370,8 @@ function B_FinchEncoder(x, y) {
 	B_FinchSensorBase.call(this, x, y);
 
 	this.displayDecimalPlaces = 2;
-	//800 ticks per rotation
-	this.scalingFactor = 1/800;
+	//792 ticks per rotation
+	this.scalingFactor = 1/792;
 
 	const ds = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Right"), "right"));
 	ds.addOption(new SelectionData(Language.getStr("Right"), "right"));
@@ -439,6 +440,8 @@ B_FinchLight.prototype.startAction = function() {
 
 function B_FinchLine(x, y) {
 	B_FinchSensorBase.call(this, x, y);
+	this.offset = 6;
+	this.scalingFactor = 100/121;
 	this.invert = true;
 
 	const ds = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Right"), "right"));
