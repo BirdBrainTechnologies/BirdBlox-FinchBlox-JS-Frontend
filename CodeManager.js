@@ -260,6 +260,7 @@ CodeManager.stop = function() {
 	CodeManager.stopUpdateTimer();   // Stop the update timer.
 	DisplayBoxManager.hide();   // Hide any messages being displayed.
 	Sound.stopAllSounds() // Stops all sounds and tones
+  BlockPalette.passRecursively("passRecursively", "stop"); //Stop any block running in the block palette
 	// Note: Tones are not allowed to be async, so they
 	// must be stopped manually
 

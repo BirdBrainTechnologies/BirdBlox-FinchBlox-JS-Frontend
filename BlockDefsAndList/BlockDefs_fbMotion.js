@@ -63,7 +63,9 @@ B_FBMotion.prototype.startAction = function () {
 }
 B_FBMotion.prototype.updateAction = function () {
   if(this.runMem.requestStatus.finished) {
-		if (!this.moveSent) {
+    if(this.runMem.requestStatus.error){
+      return new ExecutionStatusError();
+		} else if (!this.moveSent) {
       this.wasMoving = (status.result === "1");
       let device = this.setupAction();
 			if (device == null) {
@@ -279,7 +281,7 @@ B_FBLeftL3.prototype.constructor = B_FBLeftL3;
 function B_FBSensorBlock(x, y, sensor) {
   this.sensor = sensor;
   this.speed = 50;
-  this.threshold = 30/DeviceFinch.cmPerDistance; //obstical threshold of 20cm
+  this.threshold = 30/DeviceFinch.cmPerDistance; //obstical threshold of 30cm
   if (sensor == "dark") { this.threshold = 5; }
   CommandBlock.call(this,x,y,"motion_3");
 }
