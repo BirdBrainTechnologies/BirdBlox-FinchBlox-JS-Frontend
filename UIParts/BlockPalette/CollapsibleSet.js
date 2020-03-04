@@ -107,6 +107,13 @@ CollapsibleSet.prototype.remove = function() {
 };
 
 /**
+ * Stop all executing blocks in the set
+ */
+CollapsibleSet.prototype.stop = function() {
+	this.passRecursively("passRecursively", "stop");
+}
+
+/**
  * Passes a suggested expand/collapse message to all CollapsibleItems
  * @param {string} id
  * @param {boolean} collapsed
