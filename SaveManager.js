@@ -184,6 +184,7 @@ SaveManager.autoSave = function(nextAction) {
 		if (nextAction != null) nextAction();
 		return;
 	}
+	if (FinchBlox) { TitleBar.fileBn.update(); }
 	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
 	const request = new HttpRequestBuilder("data/autoSave");
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction, null, true, xmlDocText);
@@ -199,7 +200,10 @@ SaveManager.userOpenFile = function(fileName) {
 	request.addParam("filename", fileName);
 	CodeManager.markLoading(Language.getStr("Loading"));
 	HtmlServer.sendRequestWithCallback(request.toString(), function() {
-		if (FinchBlox) { GuiElements.unblockInteraction(); }
+		if (FinchBlox) {
+			TitleBar.fileBn.update();
+			GuiElements.unblockInteraction();
+		}
 	}, function() {
 		CodeManager.cancelLoading();
 	});

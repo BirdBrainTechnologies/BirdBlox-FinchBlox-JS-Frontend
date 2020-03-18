@@ -1,5 +1,5 @@
 "use strict";
-var FinchBlox = false;
+var FinchBlox = true;
 const FrontendVersion = 393;
 
 
@@ -6231,7 +6231,10 @@ GuiElements.setConstants = function() {
 	OpenDialog.setConstants();
 	FileContextMenu.setGraphics();
 	//LevelMenu.setConstants();
-	LevelDialog.setGlobals();
+	LevelDialog.setConstants();
+	LevelManager.setConstants();
+	FBPopup.setConstants();
+	FBFileSelect.setConstants();
 
 	InputPad.setConstants();
 	SoundInputPad.setConstants();
@@ -6257,6 +6260,7 @@ GuiElements.buildUI = function() {
 	Colors.createGradients(); //Adds gradient definitions to the SVG for each block category
 	Overlay.setStatics(); //Creates a list of open overlays
 	TouchReceiver(); //Adds touch event handlers to the SVG
+	if (FinchBlox) { LevelManager(); } //sets the current level in finchblox
 	BlockPalette(); //Creates the sidebar on the left with the categories and blocks
 	TitleBar(); //Creates the title bar and the buttons contained within it.
 	TabManager(); //Creates the tab-switching interface below the title bar
@@ -6265,11 +6269,10 @@ GuiElements.buildUI = function() {
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
 	SaveManager();
+	GuiElements.blockInteraction();
 	if (FinchBlox){
-		GuiElements.blockInteraction();
-		LevelDialog.loadLevelSavePoint();
+		LevelManager.loadLevelSavePoint();
 	} else {
-		GuiElements.blockInteraction();
 		OpenDialog.showDialog();
 	}
 	DebugOptions.applyActions();
@@ -8338,6 +8341,10 @@ function VectorPaths(){
 	VP.faPlusCircle.path="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm144 276c0 6.6-5.4 12-12 12h-92v92c0 6.6-5.4 12-12 12h-56c-6.6 0-12-5.4-12-12v-92h-92c-6.6 0-12-5.4-12-12v-56c0-6.6 5.4-12 12-12h92v-92c0-6.6 5.4-12 12-12h56c6.6 0 12 5.4 12 12v92h92c6.6 0 12 5.4 12 12v56z";
 	VP.faPlusCircle.width=512;
 	VP.faPlusCircle.height=512;
+  VP.faPlus={};
+  VP.faPlus.path="M416 208H272V64c0-17.67-14.33-32-32-32h-32c-17.67 0-32 14.33-32 32v144H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h144v144c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32V304h144c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z";
+  VP.faPlus.width=448;
+  VP.faPlus.height=512;
   VP.faUndoAlt={};
   VP.faUndoAlt.path="M255.545 8c-66.269.119-126.438 26.233-170.86 68.685L48.971 40.971C33.851 25.851 8 36.559 8 57.941V192c0 13.255 10.745 24 24 24h134.059c21.382 0 32.09-25.851 16.971-40.971l-41.75-41.75c30.864-28.899 70.801-44.907 113.23-45.273 92.398-.798 170.283 73.977 169.484 169.442C423.236 348.009 349.816 424 256 424c-41.127 0-79.997-14.678-110.63-41.556-4.743-4.161-11.906-3.908-16.368.553L89.34 422.659c-4.872 4.872-4.631 12.815.482 17.433C133.798 479.813 192.074 504 256 504c136.966 0 247.999-111.033 248-247.998C504.001 119.193 392.354 7.755 255.545 8z";
   VP.faUndoAlt.width=512;
@@ -10140,6 +10147,22 @@ TouchReceiver.touchStartSlider = function(target, e) {
 		e.stopPropagation();
 	}
 };
+TouchReceiver.touchStartEditText = function(target, e, element) {
+  const TR = TouchReceiver;
+  console.log("touch start edit text");
+  console.log(target);
+  console.log(e);
+  console.log(element);
+  //element.focus();
+  target.editText();
+	/*if (TR.touchstart(e, false)) {
+		TR.targetType = "editText";
+		TR.target = target;
+
+    //target.focus();
+		//e.stopPropagation();
+	}*/
+}
 /**
  * @param {event} e
  */
@@ -10581,6 +10604,13 @@ TouchReceiver.addListenersSlider = function(element, parent) {
 		TouchReceiver.touchStartSlider(parent, e);
 	}, false);
 };
+TouchReceiver.addListenersEditText = function(element, parent) {
+  const TR = TouchReceiver;
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+		// When it is touched, the SVG element will tell the TouchReceiver.
+		TouchReceiver.touchStartEditText(parent, e, element);
+	}, false);
+}
 /**
  * Adds handlerDown listeners to the background space in the Tab where blocks go. Used for scrolling.
  * @param {Element} element
@@ -10767,8 +10797,8 @@ TitleBar.setGraphicsPart1 = function() {
   if (FinchBlox) {
     TB.buttonH = TB.height/2;
     TB.tallButtonH = TB.buttonH * 1.25;
-    //TB.buttonW = TB.tallButtonH * (5/4);
-    TB.buttonW = TB.tallButtonH * (3/4);
+    TB.buttonW = TB.tallButtonH * (5/4);
+    //TB.buttonW = TB.tallButtonH * (3/4);
     const maxBnWidth = (TB.width - 6 * TB.buttonMargin) / 8;
     TB.buttonW = Math.min(maxBnWidth, TB.buttonW);
     //TB.longButtonW = 2.5 * TB.buttonW;
@@ -10935,11 +10965,11 @@ TitleBar.makeButtons = function() {
     const r = TB.defaultCornerRounding;
     const y = (TB.height/2) - (TB.tallButtonH/2);
     const h = TB.tallButtonH;
-    //TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonMargin/2;
-    //TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonMargin/2 - TB.buttonW;
-    TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonW/2 + TB.buttonMargin;
-    TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonW/2;
-    TB.trashBnX = TB.width - TB.sideWidth/2 - TB.buttonW/2 - TB.buttonMargin - TB.buttonW;
+    TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonMargin/2;
+    TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonMargin/2 - TB.buttonW;
+    //TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonW/2 + TB.buttonMargin;
+    //TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonW/2;
+    //TB.trashBnX = TB.width - TB.sideWidth/2 - TB.buttonW/2 - TB.buttonMargin - TB.buttonW;
 
   	TB.flagBn = new Button(TB.flagBnX, y, TB.longButtonW, h, TBLayer, Colors.flagGreen, r, r);
     TB.flagBn.addIcon(VectorPaths.faFlag, TB.bnIconH);
@@ -10955,15 +10985,15 @@ TitleBar.makeButtons = function() {
   	UndoManager.setUndoButton(TB.undoButton);
 
     //TB.trashButton = new Button(TB.trashBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.seance, r, r);
-    TB.trashButton = new Button(TB.trashBnX, y, TB.buttonW, h, TBLayer, Colors.neonCarrot, r, r);
-    TB.trashButton.addIcon(VectorPaths.faTrash, TB.bnIconH * 0.8);
+    //TB.trashButton = new Button(TB.trashBnX, y, TB.buttonW, h, TBLayer, Colors.neonCarrot, r, r);
+    //TB.trashButton.addIcon(VectorPaths.faTrash, TB.bnIconH * 0.8);
     //TB.trashButton.setCallbackFunction(function(){TabManager.activeTab.clear();}, false);
-    TB.trashButton.setCallbackFunction(function(){ UndoManager.deleteTab(); }, false);
+    //TB.trashButton.setCallbackFunction(function(){ UndoManager.deleteTab(); }, false);
 
     //TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.levelBN, r, r);
 		TB.levelButton = new Button(TB.levelBnX, y, TB.buttonW, h, TBLayer, Colors.seance, r, r);
     //TB.levelButton.addText("1", Font.uiFont(24).bold(), Colors.bbtDarkGray);
-		TB.levelButton.addText(LevelDialog.currentLevel, Font.uiFont(35), Colors.white);
+		TB.levelButton.addText(LevelManager.currentLevel, Font.uiFont(35), Colors.white);
     //TB.levelButton.setCallbackFunction(function(){
     //  new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
     //},false);
@@ -11017,6 +11047,27 @@ TitleBar.makeButtons = function() {
 			}
 		}, true);
 
+    /*const fdMarg = TB.buttonMargin*2/3;
+    const fdX = TB.width - TB.buttonW;
+    const fdY = TB.height + fdMarg;
+    const fdW = TB.longButtonW;
+    const fdH = h - 2*fdMarg;
+    TB.fileDisplay = GuiElements.create.group(fdX, fdY, TBLayer);
+    const fileDisplayBG = GuiElements.draw.rect(0, 0, fdW, fdH, Colors.fbGray, r, r);
+	  TB.fileDisplay.appendChild(fileDisplayBG);
+
+    const fileBnW = h - 3*fdMarg;
+    const fileBnX = (TB.buttonW - fileBnW)/2;
+    const fileBnH = h - 4*fdMarg;
+    TB.fileBn = new Button(fileBnX, fdMarg, fileBnW, fileBnH, TB.fileDisplay, Colors.easternBlue, r/2, r/2);
+  	TB.fileBn.addIcon(VectorPaths.faSave, TB.bnIconH * 0.5);
+  	//TB.fileBn.setCallbackFunction(function() {(new FBFileSelect(TB.fileBn, TB.fileDisplay)).show();}, true);
+    TB.fileBn.setCallbackFunction(function() {(new FBSaveFile(fdX, fdY, fdW, fdH, TB.fileDisplay, TBLayer)).show();}, true);
+
+    TB.updateFileBn = function() {
+
+    }*/
+    TB.fileBn = new FBFileNameDisplay();
 
   } else {
     TB.flagBn = new Button(TB.flagBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
@@ -11571,7 +11622,7 @@ BlockPalette.setLevel = function() {
 		category.button.setHidden();
 	})
 //  switch (LevelMenu.currentLevel){
-	switch(LevelDialog.currentLevel){
+	switch(LevelManager.currentLevel){
     case 1:
       BlockPalette.getCategory("motion_1").select();
       break;
@@ -11993,10 +12044,10 @@ CategoryBN.prototype.addListeners = function() {
  CategoryBN.prototype.setHidden = function() {
 	 const level = this.category.level;
 	 //if (level != LevelMenu.currentLevel && this.group.parentNode != null) {
-	 if (level != LevelDialog.currentLevel && this.group.parentNode != null) {
+	 if (level != LevelManager.currentLevel && this.group.parentNode != null) {
 		 this.group.parentNode.removeChild(this.group);
 	 //} else if (level == LevelMenu.currentLevel && this.group.parentNode == null) {
-	 } else if (level == LevelDialog.currentLevel && this.group.parentNode == null) {
+	 } else if (level == LevelManager.currentLevel && this.group.parentNode == null) {
 		 GuiElements.layers.categories.appendChild(this.group);
 	 }
  };
@@ -14131,6 +14182,102 @@ CloseButton.prototype.setColor = function(isPressed) {
 	}
 };
 /**
+ * Display the name of the current file and a button to bring up the file
+ * chooser or save the current file if there is no current file name. Used in
+ * finchblox only.
+ */
+
+function FBFileNameDisplay() {
+  const TB = TitleBar;
+  const TBLayer = GuiElements.layers.titlebar;
+  const h = TB.tallButtonH;
+  this.margin = TB.buttonMargin * 2 / 3;
+  this.W = 2*TB.longButtonW;
+  this.H = h - 2 * this.margin;
+  this.bnW = this.H - this.margin;
+  this.X = TB.width - this.bnW - 4*this.margin;//- TB.buttonW;
+  this.Y = TB.height + this.margin;
+  this.r = TB.defaultCornerRounding;
+  this.font = Button.defaultFont;
+  this.textW = 0;
+
+
+  this.group = GuiElements.create.group(this.X, this.Y, TBLayer);
+  const fileDisplayBG = GuiElements.draw.rect(0, 0, this.W, this.H, Colors.fbGray, this.r, this.r);
+  this.group.appendChild(fileDisplayBG);
+
+  //this.isInNoSaveState = false; //true when there are files to load and nothing to save.
+  this.addButton(false);
+
+
+}
+
+FBFileNameDisplay.prototype.update = function() {
+  const TB = TitleBar;
+  if (this.textE != null) {
+    this.textE.remove();
+    this.textW = 0;
+  }
+
+  if (SaveManager.fileName == LevelManager.savePointFileNames[LevelManager.currentLevel]) {
+    this.X = TB.width - this.bnW - 4*this.margin;//- TB.buttonW;
+    GuiElements.move.group(this.group, this.X, this.Y);
+    const stackList = TabManager.activeTab.stackList;
+    //If there is anything to save, make the button a save button
+    if (stackList.length > 1 || !(stackList.length != 0 &&
+      stackList[0].firstBlock.isStartBlock && stackList[0].firstBlock.nextBlock == null)) {
+      this.addButton(true);
+      //this.isInNoSaveState = false;
+    //Otherwise, let the user skip to the file menu
+    } else {
+      this.addButton(false);
+      //this.isInNoSaveState = true;
+    }
+  } else {
+    console.log("will display " + SaveManager.fileName)
+    const displayName = SaveManager.fileName.slice(0,-2);
+    const textX = 2*this.margin;
+    const textY = (this.H + this.font.charHeight)/2
+    this.textW = GuiElements.measure.stringWidth(displayName, this.font);
+    this.textE = GuiElements.draw.text(textX, textY, displayName, this.font, Colors.bbtDarkGray);
+    this.group.appendChild(this.textE);
+    this.X = TB.width - this.bnW - this.textW - 6*this.margin;
+    GuiElements.move.group(this.group, this.X, this.Y);
+    this.addButton(false);
+    //this.isInNoSaveState = false;
+  }
+}
+
+FBFileNameDisplay.prototype.addButton = function(isSaveBn) {
+  console.log("Called add button with " + isSaveBn);
+  const TB = TitleBar;
+  const bnX = TB.width - this.X - this.bnW - 2*this.margin;//(TB.buttonW - this.bnW) / 2;
+  const bnH = this.H - 2 * this.margin;
+  const bnR = this.r/2;
+  const icon = isSaveBn ? VectorPaths.faSave : VectorPaths.faFile
+
+  if (this.button != null) { this.button.remove(); }
+
+  this.button = new Button(bnX, this.margin, this.bnW, bnH, this.group, Colors.easternBlue, bnR, bnR);
+  this.button.addIcon(icon, TB.bnIconH * 0.5);
+  //TB.fileBn.setCallbackFunction(function() {(new FBFileSelect(TB.fileBn, TB.fileDisplay)).show();}, true);
+  if (isSaveBn) {
+    this.button.setCallbackFunction(function() {
+      (new FBSaveFile(this.X, this.Y, this.W, this.H, this.group)).show();
+    }.bind(this), true);
+  } else {
+    this.button.setCallbackFunction(function() {
+      (new FBFileSelect(this.X, this.Y, this.W, this.H, this.group)).show();
+    }.bind(this), true);
+  }
+}
+
+
+FBFileNameDisplay.prototype.remove = function() {
+  this.group.remove();
+}
+
+/**
  * An abstract class representing a way of inputting data into an EditableSlot.  Each EditableSlot can make an
  * InputSystem when it is told to edit(), which it provides with its slotShape, initial data, and functions to
  * call when editing is complete.
@@ -16236,6 +16383,402 @@ FBBubbleOverlay.prototype.display = function (x1, x2, y1, y2, innerWidth, innerH
 	GuiElements.update.triangleFromPoint(this.triangle, triX, triY, BO.triangleW, triH, true);
 	GuiElements.update.rect(this.bgRect, 0, 0, width, height);
 	this.show();
+}
+
+/**
+ * Abstract class for popups for FinchBlox. Is the superclass of all popups
+ * other than block inputs.
+ */
+
+function FBPopup(x, y, w, h, parentGroup) {
+  this.parentX = x;
+  this.parentY = y;
+  this.parentW = w;
+  this.parentH = h;
+  this.parentGroup = parentGroup;
+  this.parentLayer = GuiElements.layers.titlebar;
+}
+
+FBPopup.setConstants = function() {
+	FBPopup.bnMargin = Button.defaultMargin;
+  FBPopup.color = Colors.easternBlue;
+  FBPopup.bubbleMargin = 20;
+  FBPopup.font = Button.defaultFont;
+  FBPopup.fontColor = Colors.bbtDarkGray;
+  FBPopup.trashIcon = VectorPaths.faTrash;
+  FBPopup.trashColor = Colors.stopRed;
+}
+
+FBPopup.prototype.show = function(heightToWidthRatio) {
+  const overlayType = Overlay.types.inputPad;
+  this.innerWidth = GuiElements.width/2;
+  this.innerHeight = this.innerWidth * heightToWidthRatio;
+
+  this.innerGroup = GuiElements.create.group(0, 0);
+
+  this.bubbleOverlay = new FBBubbleOverlay(overlayType, FBPopup.bubbleMargin, this.innerGroup, this, FBPopup.color);
+  this.bubbleOverlay.display(this.parentX, this.parentY, this.parentX + this.parentW, this.parentY + this.parentH, this.innerWidth, this.innerHeight);
+  this.x = this.bubbleOverlay.x;
+  this.y = this.bubbleOverlay.y;
+}
+
+FBPopup.prototype.close = function() {
+  console.log("called close")
+	this.bubbleOverlay.hide();
+}
+
+FBPopup.prototype.addConfirmCancelBns = function() {
+  console.log("adding buttons")
+  const r = TitleBar.defaultCornerRounding;
+  const buttonW = this.innerWidth/3;
+  const buttonH = buttonW * 2/5;
+  const iconH = buttonH*2/3;
+  const buttonMargin = this.innerWidth / 20;
+  const confirmX = this.innerWidth/2 - buttonW - buttonMargin/2;
+  const cancelX = this.innerWidth/2 + buttonMargin/2;
+  const buttonY = this.innerHeight - buttonH - FBPopup.bubbleMargin;
+
+  this.confirmBn = new Button(confirmX, buttonY, buttonW, buttonH, this.innerGroup, Colors.flagGreen, r, r);
+  this.confirmBn.addIcon(VectorPaths.faCheck, iconH);
+  this.confirmBn.setCallbackFunction(function () {
+    this.confirm();
+  }.bind(this), false);
+
+  this.cancelBn = new Button(cancelX, buttonY, buttonW, buttonH, this.innerGroup, Colors.stopRed, r, r)
+  this.cancelBn.addIcon(VectorPaths.faTimes, iconH);
+}
+
+FBPopup.prototype.confirm = function() {
+  DebugOptions.markAbstract();
+}
+
+/**
+ * Menu for selecting files in FinchBlox. Since this menu appears as
+ * a BubbleOverlay, it is not a direct subclass of Menu.
+ */
+
+
+function FBFileSelect(x, y, w, h, parentGroup){
+  this.parentX = x;
+  this.parentY = y;
+  this.parentW = w;
+  this.parentH = h;
+  this.parentGroup = parentGroup;
+  this.parentLayer = GuiElements.layers.titlebar;
+};
+
+FBFileSelect.setConstants = function() {
+	const FS = FBFileSelect;
+	FS.bnMargin = Button.defaultMargin;
+  FS.color = Colors.easternBlue;
+  FS.bubbleMargin = 20;
+  FS.font = Button.defaultFont;
+  FS.fontColor = Colors.bbtDarkGray;
+  FS.trashIcon = VectorPaths.faTrash;
+  FS.trashColor = Colors.stopRed;
+};
+
+FBFileSelect.prototype.show = function() {
+  const FS = FBFileSelect;
+  const layer = GuiElements.layers.inputPad;
+  const overlayType = Overlay.types.inputPad;//overlayType, margin, innerGroup, parent, outlineColor, block
+  const r = TitleBar.defaultCornerRounding;
+  this.innerWidth = GuiElements.width/2;
+  this.innerHeight = this.innerWidth/2;// * 3/10;
+  this.bnW = TitleBar.longButtonW;
+  this.bnH = TitleBar.tallButtonH;
+  const buttonX = (this.innerWidth - this.bnW)/2;
+  const buttonY = this.bnH/4;
+  const iconH = this.bnH*2/3;
+
+  this.innerGroup = GuiElements.create.group(0, 0);
+
+
+	this.bubbleOverlay = new FBBubbleOverlay(overlayType, FS.bubbleMargin, this.innerGroup, this, FS.color);//, null, this.button);
+	//this.menuBnList = new SmoothMenuBnList(this.bubbleOverlay, this.group, 0, 0);
+	//this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
+
+	//const height = this.menuBnList.previewHeight();
+	//const width = this.menuBnList.previewWidth();
+	//this.bubbleOverlay.display(this.x, this.x, this.y, this.y, this.menuBnList.width, height);
+  //this.bubbleOverlay.display(GuiElements.width/3, GuiElements.width*2/3, GuiElements.height/4, GuiElements.height/2, 100, 100);
+  this.bubbleOverlay.display(this.parentX, this.parentY, this.parentX + this.parentW, this.parentY + this.parentH, this.innerWidth, this.innerHeight);
+  this.x = this.bubbleOverlay.x;
+  this.y = this.bubbleOverlay.y;
+
+  this.newFileBn = new Button(buttonX, buttonY, this.bnW, this.bnH, this.innerGroup, FS.color, r, r);
+  this.newFileBn.addIcon(VectorPaths.faPlus, iconH);
+  this.newFileBn.setCallbackFunction(function() {
+    this.close();
+    (new LevelDialog()).show();
+  }.bind(this), true);
+  this.newFileBn.partOfOverlay = this.bubbleOverlay;
+
+	//this.menuBnList.show();
+
+  //this.menuBnList.addOption("1", function(){ f(1, this); }.bind(this));
+
+  this.fileList = []
+  this.suffixList = []
+  for (let i = 0; i < LevelManager.filesSavedLocally.length; i++) {
+    const file = LevelManager.filesSavedLocally[i];
+    const suffix = file.slice(-2);
+    switch (suffix) {
+      case LevelManager.fileLevelSuffixes[1]:
+      case LevelManager.fileLevelSuffixes[2]:
+      case LevelManager.fileLevelSuffixes[3]:
+        this.fileList.push(file);
+        //this.suffixList.push(suffix);
+    }
+  }
+  this.rowCount = this.fileList.length;
+  this.contentWidth = this.innerWidth + 2*FS.bubbleMargin - 4;
+  this.hintText = "";
+
+  const RD = RowDialog;
+  const scrollHeight = this.rowCount * (RD.bnMargin + RD.bnHeight) - RD.bnMargin;
+  const availableHeight = this.innerHeight - 1.5*this.bnH + FS.bubbleMargin/2;
+  this.scrollBoxX = 2; //do not overlap the bubble outline
+  this.scrollBoxY = 1.5*this.bnH + FS.bubbleMargin;
+  this.scrollBoxWidth = this.contentWidth;
+  this.scrollBoxHeight = Math.min(availableHeight, scrollHeight);
+
+  this.rowGroup = RD.prototype.createContent.call(this);
+  this.scrollBox = RD.prototype.createScrollBox.call(this); // could be null
+  if (this.scrollBox != null) {
+    this.scrollBox.partOfOverlay = this.bubbleOverlay;
+    this.scrollBox.show();
+  }
+};
+
+FBFileSelect.prototype.createRow = function(index, y, width, contentGroup) {
+  const FS = FBFileSelect;
+  const fileName = this.fileList[index];
+  const displayName = fileName.slice(0,-2);
+  const fileLevel = fileName.slice(-1);
+
+	var color;
+	if (index % 2 == 0) {
+		color = Colors.white;
+	} else {
+		color = Colors.fbGray;
+	}
+
+
+	// TODO: use RowDialog.createMainBnWithText instead
+	const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup, color);
+
+  //Add the filename
+	//button.addText(fileName + " (" + fileLevel + ")", FS.font, FS.fontColor);
+  const textX = FS.bubbleMargin;
+  const textY = (button.height + FS.font.charHeight) / 2;
+  const textE = GuiElements.draw.text(textX, textY, "", FS.font, FS.fontColor);
+	GuiElements.update.textLimitWidth(textE, displayName, button.width);
+  button.group.appendChild(textE);
+  TouchReceiver.addListenersBN(textE, button);
+
+
+  //Add the trash button
+  const trashH = 20;
+  const trashW = VectorIcon.computeWidth(FS.trashIcon, trashH);
+  const trashX = button.width - FS.bubbleMargin - trashW;
+  const trashY = (button.height - trashH)/2;
+  //const trash = new VectorIcon(trashX, trashY, FS.trashIcon, FS.trashColor, trashH, button.group);
+  const trashBn = new Button(trashX, trashY, trashW, trashH, button.group, color);
+  trashBn.addColorIcon(FS.trashIcon, trashH, FS.trashColor);
+  trashBn.setCallbackFunction(function () {
+    console.log("pressed the trash button")
+    this.close();
+    const cd = new FBConfirmDelete(this.parentX, this.parentY, this.parentW, this.parentH, this.parentGroup, fileName)
+    console.log(cd)
+    cd.show();
+  }.bind(this), true);
+  //trashBn.partOfOverlay = this.bubbleOverlay;
+
+  //Add level number
+  const levelE = GuiElements.draw.text(0, 0, fileLevel, FS.font, Colors.seance);
+  const levelW = GuiElements.measure.textWidth(levelE);
+  const levelX = trashX - FS.bubbleMargin - levelW;
+  const levelY = textY;
+  GuiElements.move.text(levelE, levelX, levelY);
+  button.group.appendChild(levelE);
+  TouchReceiver.addListenersBN(levelE, button);
+
+
+	button.setCallbackFunction(function() {
+		this.selectFile(index);
+	}.bind(this), true);
+	button.makeScrollable();
+  button.partOfOverlay = this.bubbleOverlay;
+};
+
+FBFileSelect.prototype.selectFile = function(index) {
+  LevelManager.openFile(this.fileList[index]);
+  this.close();
+}
+
+FBFileSelect.prototype.close = function() {
+  this.scrollBox.hide();
+	this.bubbleOverlay.hide();
+	//this.menuBnList.hide();
+};
+
+function FBSaveFile (x, y, w, h, parentGroup) {
+  this.parentX = x;
+  this.parentY = y;
+  this.parentW = w;
+  this.parentH = h;
+  this.parentGroup = parentGroup;
+  this.parentLayer = GuiElements.layers.titlebar;
+}
+
+FBSaveFile.prototype.show = function() {
+  const r = TitleBar.defaultCornerRounding;
+  this.innerWidth = GuiElements.width/2;
+  const innerHeight = this.innerWidth * 3/10;
+  const buttonW = this.innerWidth/3;
+  const buttonH = buttonW * 2/5;
+  const iconH = buttonH*2/3;
+  const buttonMargin = this.innerWidth / 20;
+  const confirmX = this.innerWidth/2 - buttonW - buttonMargin/2;
+  const cancelX = this.innerWidth/2 + buttonMargin/2;
+  this.font = Button.defaultFont;
+  this.textColor = Colors.bbtDarkGray;
+  this.textBoxHeight = innerHeight/3;
+  this.textY = this.font.charHeight/2;//(innerHeight/3 + font.charHeight) / 2;
+
+  this.innerGroup = GuiElements.create.group(0, 0);
+
+  //The grey rectangle around the text box
+  this.textRect = GuiElements.draw.rect(0, 0, this.innerWidth, this.textBoxHeight, Colors.white, r, r);
+  GuiElements.update.stroke(this.textRect, Colors.fbGray, 2);
+  this.innerGroup.appendChild(this.textRect);
+  TouchReceiver.addListenersEditText(this.textRect, this);
+
+  this.confirmBn = new Button(confirmX, innerHeight/2, buttonW, buttonH, this.innerGroup, Colors.flagGreen, r, r);
+  this.confirmBn.addIcon(VectorPaths.faCheck, iconH);
+  this.confirmBn.setCallbackFunction(function () {
+    this.confirm();
+  }.bind(this), false);
+
+  this.cancelBn = new Button(cancelX, innerHeight/2, buttonW, buttonH, this.innerGroup, Colors.stopRed, r, r)
+  this.cancelBn.addIcon(VectorPaths.faTimes, iconH);
+
+  this.bubbleOverlay = new FBBubbleOverlay(Overlay.types.inputPad, 20, this.innerGroup, this, Colors.easternBlue);
+  this.bubbleOverlay.display(this.parentX, this.parentY, this.parentX + this.parentW, this.parentY + this.parentH, this.innerWidth, innerHeight);
+
+  this.editText();
+}
+
+FBSaveFile.prototype.close = function() {
+	this.bubbleOverlay.hide();
+};
+
+FBSaveFile.prototype.editText = function() {
+
+  if (this.editableText == null) {
+
+    const fo = document.createElementNS('http://www.w3.org/2000/svg',"foreignObject");
+    fo.setAttribute('width', this.innerWidth);
+    fo.setAttribute('height', this.textBoxHeight);
+    fo.setAttribute("style", "text-align: center;");
+    fo.setAttribute("x", 0);
+    fo.setAttribute("y", this.textY);
+
+    this.editableText = document.createElement('div');
+    //this.editableText = document.createElement('input');
+    //this.editableText.setAttribute("type", "text");
+    //const textNode = document.createTextNode("click to edit");
+    //foDiv.appendChild(textNode);
+    this.editableText.setAttribute("contentEditable", "true");
+    this.editableText.setAttribute("width", this.innerWidth);
+    //this.editableText.setAttribute("style", "display: inline-block; pointer-events: auto; -webkit-user-select: auto; color: " + this.textColor + "; font-family: " + this.font.fontFamily + "; font-size: " + this.font.fontSize + ";");
+    this.editableText.setAttribute("style", "pointer-events: auto; -webkit-user-select: auto;");
+    this.editableText.style.display = "block";
+    this.editableText.style.color = this.textColor;
+    this.editableText.style.fontFamily = this.font.fontFamily;
+    this.editableText.style.fontSize = this.font.fontSize;
+    this.editableText.style.outline = "none";
+
+
+    fo.appendChild(this.editableText);
+    this.innerGroup.appendChild(fo);
+    TouchReceiver.addListenersEditText(this.editableText, this);
+
+    //Also, add a listner for when the user presses the enter key
+    this.editableText.addEventListener("keydown", function(event) {
+      //event.preventDefault();
+      if (event.keyCode === 13) {
+          //this.confirm();
+          //this.close();
+          this.editableText.blur();
+      }
+    }.bind(this));
+    //TODO: maybe also look at keypress event to limit to reasonable characters
+    // https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
+  }
+  this.editableText.focus();
+}
+
+FBSaveFile.prototype.confirm = function () {
+  if (this.editableText == null ||
+    this.editableText.textContent == null ||
+    this.editableText.textContent == "") {
+      console.log("confirm button pressed without a name");
+      return;
+    }
+
+  let fileName = this.editableText.textContent
+  console.log("Name file " + fileName);
+  LevelManager.saveAs(fileName);
+}
+
+/**
+ * Popup for FinchBlox. Used when the user chooses to delete a file.
+ */
+
+function FBConfirmDelete(x, y, w, h, parentGroup, fileName) {
+  console.log("making a new popup")
+  FBPopup.call(this, x, y, w, h, parentGroup);
+  console.log("popup made")
+  this.fileName = fileName;
+}
+FBConfirmDelete.prototype = Object.create(FBPopup.prototype);
+FBConfirmDelete.prototype.constructor = FBConfirmDelete;
+
+FBConfirmDelete.prototype.show = function() {
+  console.log("called show")
+  FBPopup.prototype.show.call(this, 9/16);
+
+  const titleFont = Font.uiFont(82);
+  const titleK = 5; //Space between trash and question mark
+  const qmE = GuiElements.draw.text(0, 0, "?", titleFont, FBPopup.trashColor)
+  const qmW = GuiElements.measure.textWidth(qmE)
+  const trashH = 60;
+  const trashW = VectorIcon.computeWidth(FBPopup.trashIcon, trashH);
+  const qmX = (this.innerWidth - trashW - qmW - titleK) / 2 + trashW + titleK;
+  const qmY = FBPopup.bubbleMargin + 1 + (trashH + titleFont.charHeight) / 2;
+  const trashX = (this.innerWidth - trashW - qmW - titleK) / 2;
+  const trashY = FBPopup.bubbleMargin;
+  const trash = new VectorIcon(trashX, trashY, FBPopup.trashIcon, FBPopup.trashColor, trashH, this.innerGroup);
+  GuiElements.move.text(qmE, qmX, qmY);
+  this.innerGroup.appendChild(qmE);
+
+  const displayName = this.fileName.slice(0, -2);
+  const font = Font.uiFont(20);
+  const fileE = GuiElements.draw.text(0, 0, displayName, font, FBPopup.fontColor)
+  const fileW = GuiElements.measure.textWidth(fileE);
+  const fileX = (this.innerWidth - fileW) / 2;
+  const fileY = trashY + trashH + FBPopup.bubbleMargin + font.charHeight / 2;
+  GuiElements.move.text(fileE, fileX, fileY);
+  this.innerGroup.appendChild(fileE);
+
+  this.addConfirmCancelBns();
+
+}
+
+FBConfirmDelete.prototype.confirm = function() {
+  LevelManager.userDeleteFile(this.fileName)
 }
 
 /**
@@ -22561,8 +23104,16 @@ CalibrateCompassDialog.prototype.closeDialog = function() {
 CalibrateCompassDialog.showVideo = function(robot) {
   var fileName = "Videos/MicroBit_Calibration.mp4";
 
-  if (robot.getDeviceTypeId() == "hummingbirdbit") {
+/*  if (robot.getDeviceTypeId() == "hummingbirdbit") {
     fileName = "Videos/HummBit_Calibration.mp4";
+  }*/
+  switch(robot.getDeviceTypeId()) {
+    case "hummingbirdbit":
+      fileName = "Videos/HummBit_Calibration.mp4";
+      break;
+    case "finch":
+      fileName = "Videos/Finch_Calibration.mp4";
+      break;
   }
 
   const video = GuiElements.draw.video(fileName, robot.id);
@@ -22579,24 +23130,11 @@ function LevelDialog() {
 //LevelDialog.prototype = Object.create(RowDialog.prototype);
 //LevelDialog.prototype.constructor = LevelDialog;
 
-LevelDialog.setGlobals = function() {
+LevelDialog.setConstants = function() {
   const LD = LevelDialog;
   LD.color = Colors.seance;
   LD.strokeW = 1.5;
   LD.bnR = 10;
-
-  LD.totalLevels = 3;
-  LD.currentLevel = 1;
-
-  LD.savePointFileNames = {
-    1 : "FinchBloxSavePoint_Level_1",
-    2 : "FinchBloxSavePoint_Level_2",
-    3 : "FinchBloxSavePoint_Level_3"
-  }
-  //LD.filesMissing = 0;
-  LD.fileListRetreived = false;
-  LD.filesSavedLocally = [];
-  LD.checkSavedFiles();
 }
 
 LevelDialog.prototype.show = function() {
@@ -22637,25 +23175,26 @@ LevelDialog.prototype.drawBackground = function() {
 
 LevelDialog.prototype.createContent = function() {
   const LD = LevelDialog;
+  const LM = LevelManager;
   const rowGroup = GuiElements.create.group(0, 0);
 
   //const margin = this.width/16;
   const bnMargin = this.width * 0.1//0.08; //Margin between buttons
   const hMargin = bnMargin * 0.5;//4/3; //Margin on outer edges
   //const bnDim = (this.width - margin*(2+(LD.totalLevels-1)*1.5))/LD.totalLevels; //buttons are square
-  const bnDim = (this.width - 2*hMargin - bnMargin*(LD.totalLevels-1))/LD.totalLevels
+  const bnDim = (this.width - 2*hMargin - bnMargin*(LM.totalLevels-1))/LM.totalLevels
 
   //const y = margin;
   const y = (this.height - bnDim)/2;
   //var x = margin;
   var x = hMargin
 
-  for (let i = 1; i <= LD.totalLevels; i++) {
+  for (let i = 1; i <= LM.totalLevels; i++) {
     const button = new Button(x, y, bnDim, bnDim, rowGroup, Colors.white, LD.bnR, LD.bnR);
     GuiElements.update.stroke(button.bgRect, LD.color, LD.strokeW);
     button.addText(i, this.font, LD.color);
-    button.setCallbackFunction(function(){LevelDialog.setLevel(i);}, false);
-    button.setCallbackFunction(function(){RowDialog.currentDialog.closeDialog();}, true);
+    button.setCallbackFunction(function(){this.setLevel(i);}.bind(this), false);
+    button.setCallbackFunction(function(){this.closeDialog();}.bind(this), true);
 
     this.buttons.push(button);
     //x+= bnDim + 1.5*margin;
@@ -22668,30 +23207,22 @@ LevelDialog.prototype.createContent = function() {
   return rowGroup;
 }
 
-LevelDialog.setLevel = function(level) {
-  const LD = LevelDialog;
-  if (LD.currentLevel != level) {
-    LD.currentLevel = level;
-    GuiElements.blockInteraction();
-    SaveManager.userClose(); //necessary? maybe add callback?
-    BlockPalette.setLevel();
-    //TabManager.activeTab.clear();
-    TitleBar.levelButton.addText(level, Font.uiFont(30), Colors.white);
-    LD.loadLevelSavePoint();
-  }
-  RowDialog.currentDialog.highlightSelected();
+LevelDialog.prototype.setLevel = function(level) {
+  LevelManager.setLevel(level);
+  LevelManager.loadLevelSavePoint();
+  this.highlightSelected();
 }
 
 LevelDialog.prototype.highlightSelected = function() {
-  const LD = LevelDialog;
-  for (let i = 0; i < LD.totalLevels; i++){
+  const LM = LevelManager;
+  for (let i = 0; i < LM.totalLevels; i++){
     const bn = this.buttons[i];
-    if (LD.currentLevel == i + 1){
-      GuiElements.update.color(bn.bgRect, LD.color);
+    if (LM.currentLevel == i + 1){
+      GuiElements.update.color(bn.bgRect, LevelDialog.color);
       GuiElements.update.color(bn.textE, Colors.white);
     } else {
       GuiElements.update.color(bn.bgRect, Colors.white);
-      GuiElements.update.color(bn.textE, LD.color);
+      GuiElements.update.color(bn.textE, LevelDialog.color);
     }
   }
 }
@@ -22708,62 +23239,6 @@ LevelDialog.prototype.closeDialog = function() {
 		}
 		GuiElements.unblockInteraction();
 	}
-}
-
-/**
- * Checks what files are available in the backend
- */
-LevelDialog.checkSavedFiles = function() {
-  HtmlServer.sendRequestWithCallback("data/files", function(response) {
-    console.log("getSavedFiles response: " + response);
-		const fileList = new FileList(response);
-    LevelDialog.filesSavedLocally = fileList.localFiles;
-    LevelDialog.fileListRetreived = true;
-		//LevelDialog.savedFiles = fileList.localFiles;
-    //console.log("got saved files from backend... " + LevelDialog.savedFiles);
-    /*for (var i = 1; i <= LevelDialog.totalLevels; i++) {
-      const levelFileName = LevelDialog.savePointFileNames[i];
-      console.log("checking for level " + i + " file " + levelFileName);
-      if (!fileList.localFiles.includes(levelFileName)) {
-        console.log("file '" + levelFileName + "' not found. Must create...");
-        LevelDialog.filesMissing++;
-        const request = new HttpRequestBuilder("data/new");
-      	request.addParam("filename", levelFileName);
-        HtmlServer.sendRequestWithCallback(request.toString(), function() { LevelDialog.filesMissing--; }, null, true, SaveManager.emptyProgData);
-      }
-    }*/
-	}, function() {
-    GuiElements.alert("Error retrieving saved files");
-  });
-}
-
-LevelDialog.loadLevelSavePoint = function() {
-  const LD = LevelDialog;
-  console.log("loadLevelSavePoint for level " + LD.currentLevel);
-  const levelFileName = LD.savePointFileNames[LD.currentLevel];
-  if (!LD.fileListRetreived) {
-    setTimeout(function(){ LevelDialog.loadLevelSavePoint(); }, 200);
-    return;
-  }
-  if (!LD.filesSavedLocally.includes(levelFileName)) {
-    console.log("file '" + levelFileName + "' not found. Must create...");
-    const request = new HttpRequestBuilder("data/new");
-    request.addParam("filename", levelFileName);
-    if (GuiElements.isIos) { SaveManager.loadBlank(); }
-    HtmlServer.sendRequestWithCallback(request.toString(), function() {
-      LevelDialog.filesSavedLocally.push(levelFileName);
-      console.log("file " + levelFileName + " added to list");
-      if (!GuiElements.isIos) { SaveManager.userOpenFile(levelFileName); }
-    }, null, true, SaveManager.emptyProgData);
-  } else {
-    SaveManager.userOpenFile(levelFileName);
-  }
-  /*if (LD.filesMissing == 0) {
-    SaveManager.userOpenFile(LD.savePointFileNames[LD.currentLevel]);
-  } else {
-    console.log("files missing = " + LD.filesMissing);
-  }*/
-
 }
 
 /**
@@ -23855,7 +24330,8 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 				// Or with fake data
 				if (callbackFn != null) {
 					//callbackFn('Started');
-					callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
+					//callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
+					callbackFn('{"files":["project1_1","project2_1","project1_2","project2_2","bananna_1","elephant_3", "FinchBloxSavePoint_Level1"],"signedIn":true,"account":"101010tw42@gmail.com"}');
 					//callbackFn('[{"name":"hi","id":"there"}]');
 					//callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true,"files":["project1","project2"]}');
 				}
@@ -25028,6 +25504,7 @@ SaveManager.autoSave = function(nextAction) {
 		if (nextAction != null) nextAction();
 		return;
 	}
+	if (FinchBlox) { TitleBar.fileBn.update(); }
 	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
 	const request = new HttpRequestBuilder("data/autoSave");
 	HtmlServer.sendRequestWithCallback(request.toString(), nextAction, null, true, xmlDocText);
@@ -25043,7 +25520,10 @@ SaveManager.userOpenFile = function(fileName) {
 	request.addParam("filename", fileName);
 	CodeManager.markLoading(Language.getStr("Loading"));
 	HtmlServer.sendRequestWithCallback(request.toString(), function() {
-		if (FinchBlox) { GuiElements.unblockInteraction(); }
+		if (FinchBlox) {
+			TitleBar.fileBn.update();
+			GuiElements.unblockInteraction();
+		}
 	}, function() {
 		CodeManager.cancelLoading();
 	});
@@ -25435,7 +25915,7 @@ UndoManager.deleteStack = function(stack) {
 	const UM = UndoManager;
   const doc = XmlWriter.newDoc("undoData");
   var stackData;
-  if(FinchBlox && (LevelDialog.currentLevel != 3) && stack.firstBlock.isStartBlock){
+  if(FinchBlox && (LevelManager.currentLevel != 3) && stack.firstBlock.isStartBlock){
 		TabManager.activeTab.addStartBlock();
     if (stack.firstBlock.nextBlock != null) {
       stackData = stack.createXml(doc, true);
@@ -25463,7 +25943,7 @@ UndoManager.deleteTab = function() {
   const tab = TabManager.activeTab;
   const doc = XmlWriter.newDoc("undoData");
   var tabData;
-  if(FinchBlox && (LevelDialog.currentLevel != 3)){
+  if(FinchBlox && (LevelManager.currentLevel != 3)){
     tabData = tab.createXml(doc, true);
     tab.clear();
     TabManager.activeTab.addStartBlock();
@@ -25514,6 +25994,164 @@ UndoManager.clearUndos = function() {
 	UM.undoStack = [];
 	UM.updateButtonEnabled();
 };
+
+/**
+ * Static class for the management of levels in FinchBlox
+ */
+function LevelManager() {
+  const LM = LevelManager;
+  LM.currentLevel = 1;
+  LM.fileListRetreived = false;
+  LM.filesSavedLocally = [];
+  LM.levelFileList = {
+    1: [],
+    2: [],
+    3: []
+  }
+  LM.checkSavedFiles();
+}
+
+LevelManager.setConstants = function() {
+  const LM = LevelManager;
+  LM.totalLevels = 3;
+
+  LM.savePointFileNames = {
+    1: "FinchBloxSavePoint_Level1",
+    2: "FinchBloxSavePoint_Level2",
+    3: "FinchBloxSavePoint_Level3"
+  }
+  //Suffixes must be 2 characters to show correctly in FBFileSelect
+  LM.fileLevelSuffixes = {
+    1: "_1",
+    2: "_2",
+    3: "_3"
+  }
+}
+
+LevelManager.setLevel = function(level) {
+  const LM = LevelManager;
+  level = parseInt(level);
+  console.log("Setting level to " + level);
+  if (LM.currentLevel != level) {
+    LM.currentLevel = level;
+    GuiElements.blockInteraction();
+    //SaveManager.userClose(); //necessary? maybe add callback?
+    BlockPalette.setLevel();
+    //TabManager.activeTab.clear();
+    TitleBar.levelButton.addText(level, Font.uiFont(30), Colors.white);
+    //LM.loadLevelSavePoint();
+  }
+}
+
+/**
+ * Checks what files are available in the backend
+ */
+LevelManager.checkSavedFiles = function() {
+  HtmlServer.sendRequestWithCallback("data/files", function(response) {
+    console.log("getSavedFiles response: " + response);
+    const fileList = new FileList(response);
+    LevelManager.filesSavedLocally = fileList.localFiles;
+    LevelManager.fileListRetreived = true;
+
+    fileList.localFiles.forEach(function(file) {
+      console.log(file);
+      const suffix = file.split("_").pop();
+      if (LevelManager.levelFileList[suffix]) {
+        LevelManager.levelFileList[suffix].push(file);
+      }
+    })
+    console.log(LevelManager.levelFileList);
+  }, function() {
+    GuiElements.alert("Error retrieving saved files");
+  });
+}
+
+
+LevelManager.loadLevelSavePoint = function() {
+  const LM = LevelManager;
+  console.log("loadLevelSavePoint for level " + LM.currentLevel);
+  const levelFileName = LM.savePointFileNames[LM.currentLevel];
+  if (!LM.fileListRetreived) {
+    setTimeout(function() {
+      LevelManager.loadLevelSavePoint();
+    }, 200);
+    return;
+  }
+  if (!LM.filesSavedLocally.includes(levelFileName)) {
+    console.log("file '" + levelFileName + "' not found. Must create...");
+    const request = new HttpRequestBuilder("data/new");
+    request.addParam("filename", levelFileName);
+    if (GuiElements.isIos) {
+      SaveManager.loadBlank();
+    }
+    HtmlServer.sendRequestWithCallback(request.toString(), function() {
+      LevelManager.filesSavedLocally.push(levelFileName);
+      console.log("file " + levelFileName + " added to list");
+      if (!GuiElements.isIos) {
+        SaveManager.userOpenFile(levelFileName);
+      }
+    }, null, true, SaveManager.emptyProgData);
+  } else {
+    SaveManager.userOpenFile(levelFileName);
+  }
+  /*if (LD.filesMissing == 0) {
+    SaveManager.userOpenFile(LD.savePointFileNames[LD.currentLevel]);
+  } else {
+    console.log("files missing = " + LD.filesMissing);
+  }*/
+
+}
+
+
+/**
+ * LevelManager.saveAs - Saves the currently open level save point file as a
+ * named file that will appear in the file list.
+ *
+ * @param  {string} name name to give this file
+ */
+LevelManager.saveAs = function(name) {
+  const LM = LevelManager
+  const currentLevelFile = LM.savePointFileNames[LM.currentLevel];
+  const fileName = name.trim() + LM.fileLevelSuffixes[LM.currentLevel];
+  //Check to be sure the current level save point is the file that is open
+  if (SaveManager.fileName != currentLevelFile) {
+    console.log("Tried to rename file with " + SaveManager.fileName + " open instead of " + currentLevelFile);
+    return;
+  }
+  console.log("Rename " + currentLevelFile + " to " + fileName);
+  SaveManager.sanitizeRename(false, currentLevelFile, "", fileName, function () {
+    const index = LM.filesSavedLocally.indexOf(currentLevelFile);
+    if (index > -1) { LM.filesSavedLocally.splice(index, 1); }
+    LM.filesSavedLocally.push(fileName);
+    console.log("Renamed " + currentLevelFile + " to " + fileName);
+    console.log(LM.filesSavedLocally);
+    TitleBar.fileBn.update();
+  });
+}
+
+LevelManager.openFile = function(fileName) {
+  const fileLevel = fileName.slice(-1);
+  console.log("User selected to open " + fileName + " on level " + fileLevel);
+  if (!(fileLevel > 0 && fileLevel <= LevelManager.totalLevels)) {
+    console.log("Unsupported level  " + fileLevel);
+    return;
+  }
+
+  LevelManager.setLevel(fileLevel);
+  SaveManager.userOpenFile(fileName);
+}
+
+LevelManager.userDeleteFile = function(fileName) {
+  if (fileName == SaveManager.fileName) {
+    LevelManager.loadLevelSavePoint();
+  }
+  for (let i = 0; i < LevelManager.filesSavedLocally.length; i++) {
+    if (LevelManager.filesSavedLocally[i] == fileName) {
+      LevelManager.filesSavedLocally.splice(i, 1);
+    }
+  }
+  SaveManager.delete(false, fileName);
+}
 
 
 /**

@@ -31,7 +31,7 @@ UndoManager.deleteStack = function(stack) {
 	const UM = UndoManager;
   const doc = XmlWriter.newDoc("undoData");
   var stackData;
-  if(FinchBlox && (LevelDialog.currentLevel != 3) && stack.firstBlock.isStartBlock){
+  if(FinchBlox && (LevelManager.currentLevel != 3) && stack.firstBlock.isStartBlock){
 		TabManager.activeTab.addStartBlock();
     if (stack.firstBlock.nextBlock != null) {
       stackData = stack.createXml(doc, true);
@@ -59,7 +59,7 @@ UndoManager.deleteTab = function() {
   const tab = TabManager.activeTab;
   const doc = XmlWriter.newDoc("undoData");
   var tabData;
-  if(FinchBlox && (LevelDialog.currentLevel != 3)){
+  if(FinchBlox && (LevelManager.currentLevel != 3)){
     tabData = tab.createXml(doc, true);
     tab.clear();
     TabManager.activeTab.addStartBlock();

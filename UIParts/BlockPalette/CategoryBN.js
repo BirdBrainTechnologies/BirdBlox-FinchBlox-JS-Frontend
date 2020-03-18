@@ -146,10 +146,10 @@ CategoryBN.prototype.addListeners = function() {
  CategoryBN.prototype.setHidden = function() {
 	 const level = this.category.level;
 	 //if (level != LevelMenu.currentLevel && this.group.parentNode != null) {
-	 if (level != LevelDialog.currentLevel && this.group.parentNode != null) {
+	 if (level != LevelManager.currentLevel && this.group.parentNode != null) {
 		 this.group.parentNode.removeChild(this.group);
 	 //} else if (level == LevelMenu.currentLevel && this.group.parentNode == null) {
-	 } else if (level == LevelDialog.currentLevel && this.group.parentNode == null) {
+	 } else if (level == LevelManager.currentLevel && this.group.parentNode == null) {
 		 GuiElements.layers.categories.appendChild(this.group);
 	 }
  };

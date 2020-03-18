@@ -345,6 +345,22 @@ TouchReceiver.touchStartSlider = function(target, e) {
 		e.stopPropagation();
 	}
 };
+TouchReceiver.touchStartEditText = function(target, e, element) {
+  const TR = TouchReceiver;
+  console.log("touch start edit text");
+  console.log(target);
+  console.log(e);
+  console.log(element);
+  //element.focus();
+  target.editText();
+	/*if (TR.touchstart(e, false)) {
+		TR.targetType = "editText";
+		TR.target = target;
+
+    //target.focus();
+		//e.stopPropagation();
+	}*/
+}
 /**
  * @param {event} e
  */
@@ -786,6 +802,13 @@ TouchReceiver.addListenersSlider = function(element, parent) {
 		TouchReceiver.touchStartSlider(parent, e);
 	}, false);
 };
+TouchReceiver.addListenersEditText = function(element, parent) {
+  const TR = TouchReceiver;
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+		// When it is touched, the SVG element will tell the TouchReceiver.
+		TouchReceiver.touchStartEditText(parent, e, element);
+	}, false);
+}
 /**
  * Adds handlerDown listeners to the background space in the Tab where blocks go. Used for scrolling.
  * @param {Element} element

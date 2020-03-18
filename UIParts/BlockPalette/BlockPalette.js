@@ -352,7 +352,7 @@ BlockPalette.setLevel = function() {
 		category.button.setHidden();
 	})
 //  switch (LevelMenu.currentLevel){
-	switch(LevelDialog.currentLevel){
+	switch(LevelManager.currentLevel){
     case 1:
       BlockPalette.getCategory("motion_1").select();
       break;

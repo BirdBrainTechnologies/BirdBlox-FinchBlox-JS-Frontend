@@ -102,7 +102,8 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 				// Or with fake data
 				if (callbackFn != null) {
 					//callbackFn('Started');
-					callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
+					//callbackFn('{"files":["project1","project2"],"signedIn":true,"account":"101010tw42@gmail.com"}');
+					callbackFn('{"files":["project1_1","project2_1","project1_2","project2_2","bananna_1","elephant_3", "FinchBloxSavePoint_Level1"],"signedIn":true,"account":"101010tw42@gmail.com"}');
 					//callbackFn('[{"name":"hi","id":"there"}]');
 					//callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true,"files":["project1","project2"]}');
 				}

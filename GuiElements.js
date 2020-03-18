@@ -169,7 +169,10 @@ GuiElements.setConstants = function() {
 	OpenDialog.setConstants();
 	FileContextMenu.setGraphics();
 	//LevelMenu.setConstants();
-	LevelDialog.setGlobals();
+	LevelDialog.setConstants();
+	LevelManager.setConstants();
+	FBPopup.setConstants();
+	FBFileSelect.setConstants();
 
 	InputPad.setConstants();
 	SoundInputPad.setConstants();
@@ -195,6 +198,7 @@ GuiElements.buildUI = function() {
 	Colors.createGradients(); //Adds gradient definitions to the SVG for each block category
 	Overlay.setStatics(); //Creates a list of open overlays
 	TouchReceiver(); //Adds touch event handlers to the SVG
+	if (FinchBlox) { LevelManager(); } //sets the current level in finchblox
 	BlockPalette(); //Creates the sidebar on the left with the categories and blocks
 	TitleBar(); //Creates the title bar and the buttons contained within it.
 	TabManager(); //Creates the tab-switching interface below the title bar
@@ -203,11 +207,10 @@ GuiElements.buildUI = function() {
 	the white ring which shows which slot a Block will connect to. */
 	Highlighter();
 	SaveManager();
+	GuiElements.blockInteraction();
 	if (FinchBlox){
-		GuiElements.blockInteraction();
-		LevelDialog.loadLevelSavePoint();
+		LevelManager.loadLevelSavePoint();
 	} else {
-		GuiElements.blockInteraction();
 		OpenDialog.showDialog();
 	}
 	DebugOptions.applyActions();
