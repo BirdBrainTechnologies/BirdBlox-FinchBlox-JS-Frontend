@@ -172,7 +172,6 @@ GuiElements.setConstants = function() {
 	LevelDialog.setConstants();
 	LevelManager.setConstants();
 	FBPopup.setConstants();
-	FBFileSelect.setConstants();
 
 	InputPad.setConstants();
 	SoundInputPad.setConstants();

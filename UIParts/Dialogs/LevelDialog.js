@@ -116,6 +116,6 @@ LevelDialog.prototype.closeDialog = function() {
     if (RowDialog.currentDialog === this) {
 			RowDialog.currentDialog = null;
 		}
-		GuiElements.unblockInteraction();
+		//GuiElements.unblockInteraction();
 	}
 }

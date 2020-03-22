@@ -454,7 +454,10 @@ TouchReceiver.touchEndDialogBlock = function(e) {
       RowDialog.currentDialog.closeDialog();
     }
 	}
-  if (FinchBlox) { Overlay.closeOverlays(); }
+  if (FinchBlox) {
+    Overlay.closeOverlays();
+    GuiElements.unblockInteraction();
+  }
 }
 
 /**

@@ -289,6 +289,7 @@ Button.prototype.addDeviceInfo = function(device) {
 	const color = Colors.flagGreen;
   const color2 = Colors.bbtDarkGray;
   const font = Button.defaultFont;
+  const font2 = Font.secondaryUiFont(16);
 	const pathId = VectorPaths.faPlusCircle;
 	const iconH = this.height*0.6;
 	const iconW = VectorIcon.computeWidth(pathId, iconH);
@@ -304,7 +305,7 @@ Button.prototype.addDeviceInfo = function(device) {
 	//let shortW = GuiElements.measure.textWidth(this.textE);
 
 	const text2X = 3*this.height;
-	this.textE2 = GuiElements.draw.text(text2X, textY, device.name, font, color2);
+	this.textE2 = GuiElements.draw.text(text2X, textY, device.name, font2, color2);
 	this.group.appendChild(this.textE2);
 
 	this.icon = new VectorIcon(iconX, iconY, pathId, color, iconH, this.group);

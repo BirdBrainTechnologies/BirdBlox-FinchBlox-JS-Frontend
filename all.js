@@ -6234,7 +6234,6 @@ GuiElements.setConstants = function() {
 	LevelDialog.setConstants();
 	LevelManager.setConstants();
 	FBPopup.setConstants();
-	FBFileSelect.setConstants();
 
 	InputPad.setConstants();
 	SoundInputPad.setConstants();
@@ -8200,9 +8199,21 @@ Font.prototype.unBold = function(){
  * @return {Font}
  */
 Font.uiFont = function(fontSize){
-	if (FinchBlox) { return new Font('AvenirHeavy', fontSize, "normal"); }
+	//if (FinchBlox) { return new Font('AvenirHeavy', fontSize, "normal"); }
+  if (FinchBlox) { return new Font('FredericBlack', fontSize, "normal"); }
 	return new Font("Arial", fontSize, "normal");
 };
+
+
+/**
+ *  Returns the secondary font of a given size.
+ * @param  {number} fontSize
+ * @return {Font}
+ */
+Font.secondaryUiFont = function(fontSize) {
+  if (FinchBlox) { return new Font('FredericRegular', fontSize, "normal"); }
+	return new Font("Arial", fontSize, "normal");
+}
 
 /**
  * This static class hold objects which encode path information for icons.  Each entry contains information about
@@ -10256,7 +10267,10 @@ TouchReceiver.touchEndDialogBlock = function(e) {
       RowDialog.currentDialog.closeDialog();
     }
 	}
-  if (FinchBlox) { Overlay.closeOverlays(); }
+  if (FinchBlox) {
+    Overlay.closeOverlays();
+    GuiElements.unblockInteraction();
+  }
 }
 
 /**
@@ -13279,6 +13293,7 @@ Button.prototype.addDeviceInfo = function(device) {
 	const color = Colors.flagGreen;
   const color2 = Colors.bbtDarkGray;
   const font = Button.defaultFont;
+  const font2 = Font.secondaryUiFont(16);
 	const pathId = VectorPaths.faPlusCircle;
 	const iconH = this.height*0.6;
 	const iconW = VectorIcon.computeWidth(pathId, iconH);
@@ -13294,7 +13309,7 @@ Button.prototype.addDeviceInfo = function(device) {
 	//let shortW = GuiElements.measure.textWidth(this.textE);
 
 	const text2X = 3*this.height;
-	this.textE2 = GuiElements.draw.text(text2X, textY, device.name, font, color2);
+	this.textE2 = GuiElements.draw.text(text2X, textY, device.name, font2, color2);
 	this.group.appendChild(this.textE2);
 
 	this.icon = new VectorIcon(iconX, iconY, pathId, color, iconH, this.group);
@@ -14198,7 +14213,7 @@ function FBFileNameDisplay() {
   this.X = TB.width - this.bnW - 4*this.margin;//- TB.buttonW;
   this.Y = TB.height + this.margin;
   this.r = TB.defaultCornerRounding;
-  this.font = Button.defaultFont;
+  this.font = Font.secondaryUiFont(16);//Button.defaultFont;
   this.textW = 0;
 
 
@@ -16336,10 +16351,11 @@ FBBubbleOverlay.prototype.hide = function () {
     this.block.group.remove();
     this.block.stack.group.appendChild(this.block.group);
     GuiElements.move.group(this.block.group, this.block.x, this.block.y);
+    GuiElements.unblockInteraction();
   } else if (this.parent.parentGroup != null) {
     this.parent.parentLayer.appendChild(this.parent.parentGroup);
   }
-  GuiElements.unblockInteraction();
+
 }
 
 FBBubbleOverlay.prototype.display = function (x1, x2, y1, y2, innerWidth, innerHeight) {
@@ -16403,15 +16419,17 @@ FBPopup.setConstants = function() {
 	FBPopup.bnMargin = Button.defaultMargin;
   FBPopup.color = Colors.easternBlue;
   FBPopup.bubbleMargin = 20;
-  FBPopup.font = Button.defaultFont;
+  FBPopup.font = Font.secondaryUiFont(16);
   FBPopup.fontColor = Colors.bbtDarkGray;
   FBPopup.trashIcon = VectorPaths.faTrash;
   FBPopup.trashColor = Colors.stopRed;
+  FBPopup.innerWidth = GuiElements.width/2;
 }
 
 FBPopup.prototype.show = function(heightToWidthRatio) {
+  console.log("Showing fb popup with parent y=" + this.parentY)
   const overlayType = Overlay.types.inputPad;
-  this.innerWidth = GuiElements.width/2;
+  this.innerWidth = FBPopup.innerWidth;
   this.innerHeight = this.innerWidth * heightToWidthRatio;
 
   this.innerGroup = GuiElements.create.group(0, 0);
@@ -16436,7 +16454,7 @@ FBPopup.prototype.addConfirmCancelBns = function() {
   const buttonMargin = this.innerWidth / 20;
   const confirmX = this.innerWidth/2 - buttonW - buttonMargin/2;
   const cancelX = this.innerWidth/2 + buttonMargin/2;
-  const buttonY = this.innerHeight - buttonH - FBPopup.bubbleMargin;
+  const buttonY = this.innerHeight - buttonH; //- FBPopup.bubbleMargin;
 
   this.confirmBn = new Button(confirmX, buttonY, buttonW, buttonH, this.innerGroup, Colors.flagGreen, r, r);
   this.confirmBn.addIcon(VectorPaths.faCheck, iconH);
@@ -16446,10 +16464,17 @@ FBPopup.prototype.addConfirmCancelBns = function() {
 
   this.cancelBn = new Button(cancelX, buttonY, buttonW, buttonH, this.innerGroup, Colors.stopRed, r, r)
   this.cancelBn.addIcon(VectorPaths.faTimes, iconH);
+  this.cancelBn.setCallbackFunction(function () {
+    this.cancel();
+  }.bind(this), true);
 }
 
 FBPopup.prototype.confirm = function() {
   DebugOptions.markAbstract();
+}
+
+FBPopup.prototype.cancel = function() {
+  GuiElements.unblockInteraction();
 }
 
 /**
@@ -16459,67 +16484,23 @@ FBPopup.prototype.confirm = function() {
 
 
 function FBFileSelect(x, y, w, h, parentGroup){
-  this.parentX = x;
-  this.parentY = y;
-  this.parentW = w;
-  this.parentH = h;
-  this.parentGroup = parentGroup;
-  this.parentLayer = GuiElements.layers.titlebar;
+  FBPopup.call(this, x, y, w, h, parentGroup);
 };
-
-FBFileSelect.setConstants = function() {
-	const FS = FBFileSelect;
-	FS.bnMargin = Button.defaultMargin;
-  FS.color = Colors.easternBlue;
-  FS.bubbleMargin = 20;
-  FS.font = Button.defaultFont;
-  FS.fontColor = Colors.bbtDarkGray;
-  FS.trashIcon = VectorPaths.faTrash;
-  FS.trashColor = Colors.stopRed;
-};
+FBFileSelect.prototype = Object.create(FBPopup.prototype);
+FBFileSelect.prototype.constructor = FBFileSelect;
 
 FBFileSelect.prototype.show = function() {
-  const FS = FBFileSelect;
-  const layer = GuiElements.layers.inputPad;
-  const overlayType = Overlay.types.inputPad;//overlayType, margin, innerGroup, parent, outlineColor, block
+  const RD = RowDialog;
   const r = TitleBar.defaultCornerRounding;
-  this.innerWidth = GuiElements.width/2;
-  this.innerHeight = this.innerWidth/2;// * 3/10;
-  this.bnW = TitleBar.longButtonW;
-  this.bnH = TitleBar.tallButtonH;
-  const buttonX = (this.innerWidth - this.bnW)/2;
-  const buttonY = this.bnH/4;
-  const iconH = this.bnH*2/3;
+  const buttonW = TitleBar.longButtonW;
+  const buttonH = TitleBar.tallButtonH;
+  const buttonX = (FBPopup.innerWidth - buttonW)/2;
+  const buttonY = buttonH/4;
+  const iconH = buttonH*2/3;
+  const bnSectionH = 2*buttonY + buttonH + FBPopup.bubbleMargin; //1.5*buttonH + FBPopup.bubbleMargin;
 
-  this.innerGroup = GuiElements.create.group(0, 0);
-
-
-	this.bubbleOverlay = new FBBubbleOverlay(overlayType, FS.bubbleMargin, this.innerGroup, this, FS.color);//, null, this.button);
-	//this.menuBnList = new SmoothMenuBnList(this.bubbleOverlay, this.group, 0, 0);
-	//this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
-
-	//const height = this.menuBnList.previewHeight();
-	//const width = this.menuBnList.previewWidth();
-	//this.bubbleOverlay.display(this.x, this.x, this.y, this.y, this.menuBnList.width, height);
-  //this.bubbleOverlay.display(GuiElements.width/3, GuiElements.width*2/3, GuiElements.height/4, GuiElements.height/2, 100, 100);
-  this.bubbleOverlay.display(this.parentX, this.parentY, this.parentX + this.parentW, this.parentY + this.parentH, this.innerWidth, this.innerHeight);
-  this.x = this.bubbleOverlay.x;
-  this.y = this.bubbleOverlay.y;
-
-  this.newFileBn = new Button(buttonX, buttonY, this.bnW, this.bnH, this.innerGroup, FS.color, r, r);
-  this.newFileBn.addIcon(VectorPaths.faPlus, iconH);
-  this.newFileBn.setCallbackFunction(function() {
-    this.close();
-    (new LevelDialog()).show();
-  }.bind(this), true);
-  this.newFileBn.partOfOverlay = this.bubbleOverlay;
-
-	//this.menuBnList.show();
-
-  //this.menuBnList.addOption("1", function(){ f(1, this); }.bind(this));
-
-  this.fileList = []
-  this.suffixList = []
+  //Get the list of files to display and determine how much space that will take
+  const list = []
   for (let i = 0; i < LevelManager.filesSavedLocally.length; i++) {
     const file = LevelManager.filesSavedLocally[i];
     const suffix = file.slice(-2);
@@ -16527,32 +16508,49 @@ FBFileSelect.prototype.show = function() {
       case LevelManager.fileLevelSuffixes[1]:
       case LevelManager.fileLevelSuffixes[2]:
       case LevelManager.fileLevelSuffixes[3]:
-        this.fileList.push(file);
-        //this.suffixList.push(suffix);
+        list.push(file);
     }
   }
+  this.fileList = FileList.getSortedList(list);
   this.rowCount = this.fileList.length;
-  this.contentWidth = this.innerWidth + 2*FS.bubbleMargin - 4;
-  this.hintText = "";
-
-  const RD = RowDialog;
   const scrollHeight = this.rowCount * (RD.bnMargin + RD.bnHeight) - RD.bnMargin;
-  const availableHeight = this.innerHeight - 1.5*this.bnH + FS.bubbleMargin/2;
-  this.scrollBoxX = 2; //do not overlap the bubble outline
-  this.scrollBoxY = 1.5*this.bnH + FS.bubbleMargin;
-  this.scrollBoxWidth = this.contentWidth;
-  this.scrollBoxHeight = Math.min(availableHeight, scrollHeight);
 
-  this.rowGroup = RD.prototype.createContent.call(this);
-  this.scrollBox = RD.prototype.createScrollBox.call(this); // could be null
-  if (this.scrollBox != null) {
+  const maxBubbleH = GuiElements.height - 2.5 * TitleBar.height;
+  const heightToWidthRatio = (Math.min(bnSectionH + scrollHeight, maxBubbleH))/(FBPopup.innerWidth);
+  FBPopup.prototype.show.call(this, heightToWidthRatio);// 1/2);
+
+  this.newFileBn = new Button(buttonX, buttonY, buttonW, buttonH, this.innerGroup, FBPopup.color, r, r);
+  this.newFileBn.addIcon(VectorPaths.faPlus, iconH);
+  this.newFileBn.setCallbackFunction(function() {
+    this.close();
+    (new LevelDialog()).show();
+  }.bind(this), true);
+  this.newFileBn.partOfOverlay = this.bubbleOverlay;
+
+  //Calculations for the scrollbox
+  const availableHeight = this.innerHeight - bnSectionH;
+  this.contentWidth = this.innerWidth + 2*FBPopup.bubbleMargin - 4;
+  this.hintText = "";
+  //this.scrollBoxX = 2; //do not overlap the bubble outline
+  //this.scrollBoxY = bnSectionH;//1.5*buttonH + FBPopup.bubbleMargin;
+  const scrollBoxX = 2 + this.x;
+  const scrollBoxY = bnSectionH + FBPopup.bubbleMargin + this.y;
+  const scrollBoxWidth = this.contentWidth;
+  const scrollBoxHeight = Math.min(availableHeight, scrollHeight);
+  //console.log("making content. sx=" + scrollBoxX + " sy=" + scrollBoxY + " this.y=" + this.y + " sh=" + scrollHeight + " ah=" + availableHeight + " sbh=" + scrollBoxHeight + " rc=" + this.rowCount + " bnh=" + RD.bnHeight);
+  //Create the rows to display and the scrollbox to contain them
+  if(this.rowCount != 0) {
+    this.rowGroup = RD.prototype.createContent.call(this);
+  //this.scrollBox = RD.prototype.createScrollBox.call(this); // could be null
+  //if (this.scrollBox != null) {
+    this.scrollBox = new SmoothScrollBox(this.rowGroup, GuiElements.layers.frontScroll,
+      scrollBoxX, scrollBoxY, scrollBoxWidth, scrollBoxHeight, scrollBoxWidth, scrollHeight);
     this.scrollBox.partOfOverlay = this.bubbleOverlay;
     this.scrollBox.show();
   }
 };
 
 FBFileSelect.prototype.createRow = function(index, y, width, contentGroup) {
-  const FS = FBFileSelect;
   const fileName = this.fileList[index];
   const displayName = fileName.slice(0,-2);
   const fileLevel = fileName.slice(-1);
@@ -16564,28 +16562,24 @@ FBFileSelect.prototype.createRow = function(index, y, width, contentGroup) {
 		color = Colors.fbGray;
 	}
 
-
 	// TODO: use RowDialog.createMainBnWithText instead
 	const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup, color);
 
   //Add the filename
-	//button.addText(fileName + " (" + fileLevel + ")", FS.font, FS.fontColor);
-  const textX = FS.bubbleMargin;
-  const textY = (button.height + FS.font.charHeight) / 2;
-  const textE = GuiElements.draw.text(textX, textY, "", FS.font, FS.fontColor);
+  const textX = FBPopup.bubbleMargin;
+  const textY = (button.height + FBPopup.font.charHeight) / 2;
+  const textE = GuiElements.draw.text(textX, textY, "", FBPopup.font, FBPopup.fontColor);
 	GuiElements.update.textLimitWidth(textE, displayName, button.width);
   button.group.appendChild(textE);
   TouchReceiver.addListenersBN(textE, button);
 
-
   //Add the trash button
-  const trashH = 20;
-  const trashW = VectorIcon.computeWidth(FS.trashIcon, trashH);
-  const trashX = button.width - FS.bubbleMargin - trashW;
+  const trashH = 18;
+  const trashW = VectorIcon.computeWidth(FBPopup.trashIcon, trashH);
+  const trashX = button.width - FBPopup.bubbleMargin - trashW;
   const trashY = (button.height - trashH)/2;
-  //const trash = new VectorIcon(trashX, trashY, FS.trashIcon, FS.trashColor, trashH, button.group);
   const trashBn = new Button(trashX, trashY, trashW, trashH, button.group, color);
-  trashBn.addColorIcon(FS.trashIcon, trashH, FS.trashColor);
+  trashBn.addColorIcon(FBPopup.trashIcon, trashH, FBPopup.trashColor);
   trashBn.setCallbackFunction(function () {
     console.log("pressed the trash button")
     this.close();
@@ -16596,9 +16590,18 @@ FBFileSelect.prototype.createRow = function(index, y, width, contentGroup) {
   //trashBn.partOfOverlay = this.bubbleOverlay;
 
   //Add level number
-  const levelE = GuiElements.draw.text(0, 0, fileLevel, FS.font, Colors.seance);
+  const levelFont = Font.uiFont(18)
+  const levelRectH = levelFont.charHeight * 3/2;
+  const levelRectW = levelRectH * 8/7;
+  const levelRectY = (button.height - levelRectH)/2;
+  const levelRectX = trashX - 2*FBPopup.bubbleMargin - levelRectW;
+  const lr = 4; //corner rounding of level label
+  const levelRect = GuiElements.draw.rect(levelRectX, levelRectY, levelRectW, levelRectH, Colors.seance, lr, lr);
+  button.group.appendChild(levelRect);
+  TouchReceiver.addListenersBN(levelRect, button);
+  const levelE = GuiElements.draw.text(0, 0, fileLevel, levelFont, Colors.white);
   const levelW = GuiElements.measure.textWidth(levelE);
-  const levelX = trashX - FS.bubbleMargin - levelW;
+  const levelX = levelRectX + (levelRectW - levelW)/2; //trashX - FBPopup.bubbleMargin - levelW;
   const levelY = textY;
   GuiElements.move.text(levelE, levelX, levelY);
   button.group.appendChild(levelE);
@@ -16618,88 +16621,66 @@ FBFileSelect.prototype.selectFile = function(index) {
 }
 
 FBFileSelect.prototype.close = function() {
-  this.scrollBox.hide();
-	this.bubbleOverlay.hide();
-	//this.menuBnList.hide();
+  if (this.scrollBox != null) { this.scrollBox.hide(); }
+  FBPopup.prototype.close.call(this);
 };
 
+/**
+ * FBSaveFile - FinchBlox popup for naming the currently open file
+ *
+ * @param  {type} x           parent x
+ * @param  {type} y           parent y
+ * @param  {type} w           parent w
+ * @param  {type} h           parent h
+ * @param  {type} parentGroup parent group
+ */
 function FBSaveFile (x, y, w, h, parentGroup) {
-  this.parentX = x;
-  this.parentY = y;
-  this.parentW = w;
-  this.parentH = h;
-  this.parentGroup = parentGroup;
-  this.parentLayer = GuiElements.layers.titlebar;
+  FBPopup.call(this, x, y, w, h, parentGroup);
 }
+FBSaveFile.prototype = Object.create(FBPopup.prototype);
+FBSaveFile.prototype.constructor = FBSaveFile;
 
 FBSaveFile.prototype.show = function() {
-  const r = TitleBar.defaultCornerRounding;
-  this.innerWidth = GuiElements.width/2;
-  const innerHeight = this.innerWidth * 3/10;
-  const buttonW = this.innerWidth/3;
-  const buttonH = buttonW * 2/5;
-  const iconH = buttonH*2/3;
-  const buttonMargin = this.innerWidth / 20;
-  const confirmX = this.innerWidth/2 - buttonW - buttonMargin/2;
-  const cancelX = this.innerWidth/2 + buttonMargin/2;
-  this.font = Button.defaultFont;
-  this.textColor = Colors.bbtDarkGray;
-  this.textBoxHeight = innerHeight/3;
-  this.textY = this.font.charHeight/2;//(innerHeight/3 + font.charHeight) / 2;
+  FBPopup.prototype.show.call(this, 3/10);
 
-  this.innerGroup = GuiElements.create.group(0, 0);
+  const r = TitleBar.defaultCornerRounding;
 
   //The grey rectangle around the text box
+  this.textBoxHeight = this.innerHeight/3;
   this.textRect = GuiElements.draw.rect(0, 0, this.innerWidth, this.textBoxHeight, Colors.white, r, r);
   GuiElements.update.stroke(this.textRect, Colors.fbGray, 2);
   this.innerGroup.appendChild(this.textRect);
   TouchReceiver.addListenersEditText(this.textRect, this);
 
-  this.confirmBn = new Button(confirmX, innerHeight/2, buttonW, buttonH, this.innerGroup, Colors.flagGreen, r, r);
-  this.confirmBn.addIcon(VectorPaths.faCheck, iconH);
-  this.confirmBn.setCallbackFunction(function () {
-    this.confirm();
-  }.bind(this), false);
-
-  this.cancelBn = new Button(cancelX, innerHeight/2, buttonW, buttonH, this.innerGroup, Colors.stopRed, r, r)
-  this.cancelBn.addIcon(VectorPaths.faTimes, iconH);
-
-  this.bubbleOverlay = new FBBubbleOverlay(Overlay.types.inputPad, 20, this.innerGroup, this, Colors.easternBlue);
-  this.bubbleOverlay.display(this.parentX, this.parentY, this.parentX + this.parentW, this.parentY + this.parentH, this.innerWidth, innerHeight);
+  this.addConfirmCancelBns();
 
   this.editText();
 }
 
-FBSaveFile.prototype.close = function() {
-	this.bubbleOverlay.hide();
-};
-
 FBSaveFile.prototype.editText = function() {
 
   if (this.editableText == null) {
+    const font = FBPopup.font;
+    const textColor = FBPopup.fontColor;
+    const textY = font.charHeight/2;//(innerHeight/3 + font.charHeight) / 2;
+    this.charCount = 0;
 
     const fo = document.createElementNS('http://www.w3.org/2000/svg',"foreignObject");
     fo.setAttribute('width', this.innerWidth);
     fo.setAttribute('height', this.textBoxHeight);
     fo.setAttribute("style", "text-align: center;");
     fo.setAttribute("x", 0);
-    fo.setAttribute("y", this.textY);
+    fo.setAttribute("y", textY);
 
     this.editableText = document.createElement('div');
-    //this.editableText = document.createElement('input');
-    //this.editableText.setAttribute("type", "text");
-    //const textNode = document.createTextNode("click to edit");
-    //foDiv.appendChild(textNode);
     this.editableText.setAttribute("contentEditable", "true");
     this.editableText.setAttribute("width", this.innerWidth);
-    //this.editableText.setAttribute("style", "display: inline-block; pointer-events: auto; -webkit-user-select: auto; color: " + this.textColor + "; font-family: " + this.font.fontFamily + "; font-size: " + this.font.fontSize + ";");
     this.editableText.setAttribute("style", "pointer-events: auto; -webkit-user-select: auto;");
     this.editableText.style.display = "block";
-    this.editableText.style.color = this.textColor;
-    this.editableText.style.fontFamily = this.font.fontFamily;
-    this.editableText.style.fontSize = this.font.fontSize;
+    this.editableText.style.color = textColor;
+    this.editableText.style.fontFamily = font.fontFamily;
+    this.editableText.style.fontSize = font.fontSize;
     this.editableText.style.outline = "none";
-
 
     fo.appendChild(this.editableText);
     this.innerGroup.appendChild(fo);
@@ -16708,15 +16689,39 @@ FBSaveFile.prototype.editText = function() {
     //Also, add a listner for when the user presses the enter key
     this.editableText.addEventListener("keydown", function(event) {
       //event.preventDefault();
-      if (event.keyCode === 13) {
-          //this.confirm();
-          //this.close();
-          this.editableText.blur();
+      /* Deprecated
+      if (event.keyCode === 13) { //enter
+        //this.confirm();
+        //this.close();
+        this.editableText.blur();
       }
+      if (event.keyCode === 46 || event.keyCode === 8) { //delete or backspace
+        this.charCount--;
+      }
+      */
+      switch (event.code) {
+        case 'Enter':
+          this.editableText.blur();
+          break;
+        case 'Backspace':
+        case 'Delete':
+          this.charCount--;
+          break;
+      }
+
     }.bind(this));
     //TODO: maybe also look at keypress event to limit to reasonable characters
     // https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
+    this.editableText.addEventListener('keypress', function(event) {
+      console.log("pressed a key count=" + this.charCount);
+      if (this.charCount >= 24) {
+        event.preventDefault();
+      } else {
+        this.charCount++;
+      }
+    }.bind(this));
   }
+
   this.editableText.focus();
 }
 
@@ -16738,43 +16743,39 @@ FBSaveFile.prototype.confirm = function () {
  */
 
 function FBConfirmDelete(x, y, w, h, parentGroup, fileName) {
-  console.log("making a new popup")
   FBPopup.call(this, x, y, w, h, parentGroup);
-  console.log("popup made")
   this.fileName = fileName;
 }
 FBConfirmDelete.prototype = Object.create(FBPopup.prototype);
 FBConfirmDelete.prototype.constructor = FBConfirmDelete;
 
 FBConfirmDelete.prototype.show = function() {
-  console.log("called show")
-  FBPopup.prototype.show.call(this, 9/16);
+  FBPopup.prototype.show.call(this, 1/2);
 
-  const titleFont = Font.uiFont(82);
+  const titleFont = Font.secondaryUiFont(82);//Font.uiFont(82);
   const titleK = 5; //Space between trash and question mark
   const qmE = GuiElements.draw.text(0, 0, "?", titleFont, FBPopup.trashColor)
   const qmW = GuiElements.measure.textWidth(qmE)
   const trashH = 60;
   const trashW = VectorIcon.computeWidth(FBPopup.trashIcon, trashH);
   const qmX = (this.innerWidth - trashW - qmW - titleK) / 2 + trashW + titleK;
-  const qmY = FBPopup.bubbleMargin + 1 + (trashH + titleFont.charHeight) / 2;
+  const qmY = 1 + (trashH + titleFont.charHeight) / 2;//FBPopup.bubbleMargin + 1 + (trashH + titleFont.charHeight) / 2;
   const trashX = (this.innerWidth - trashW - qmW - titleK) / 2;
-  const trashY = FBPopup.bubbleMargin;
+  const trashY = 0; //FBPopup.bubbleMargin;
   const trash = new VectorIcon(trashX, trashY, FBPopup.trashIcon, FBPopup.trashColor, trashH, this.innerGroup);
   GuiElements.move.text(qmE, qmX, qmY);
   this.innerGroup.appendChild(qmE);
 
   const displayName = this.fileName.slice(0, -2);
-  const font = Font.uiFont(20);
+  const font = Font.secondaryUiFont(25);
   const fileE = GuiElements.draw.text(0, 0, displayName, font, FBPopup.fontColor)
   const fileW = GuiElements.measure.textWidth(fileE);
   const fileX = (this.innerWidth - fileW) / 2;
-  const fileY = trashY + trashH + FBPopup.bubbleMargin + font.charHeight / 2;
+  const fileY = trashY + trashH + FBPopup.bubbleMargin + font.charHeight;
   GuiElements.move.text(fileE, fileX, fileY);
   this.innerGroup.appendChild(fileE);
 
   this.addConfirmCancelBns();
-
 }
 
 FBConfirmDelete.prototype.confirm = function() {
@@ -23237,7 +23238,7 @@ LevelDialog.prototype.closeDialog = function() {
     if (RowDialog.currentDialog === this) {
 			RowDialog.currentDialog = null;
 		}
-		GuiElements.unblockInteraction();
+		//GuiElements.unblockInteraction();
 	}
 }
 
@@ -25349,6 +25350,7 @@ SaveManager.backendOpen = function(fileName, data) {
 	SaveManager.loadData(data);
 	OpenDialog.closeDialog();
 	GuiElements.unblockInteraction();
+	if (FinchBlox) { TitleBar.fileBn.update(); }
 };
 
 /**
@@ -25520,8 +25522,8 @@ SaveManager.userOpenFile = function(fileName) {
 	request.addParam("filename", fileName);
 	CodeManager.markLoading(Language.getStr("Loading"));
 	HtmlServer.sendRequestWithCallback(request.toString(), function() {
-		if (FinchBlox) {
-			TitleBar.fileBn.update();
+		if (FinchBlox && DebugOptions.enabled) {
+			//TitleBar.fileBn.update();
 			GuiElements.unblockInteraction();
 		}
 	}, function() {

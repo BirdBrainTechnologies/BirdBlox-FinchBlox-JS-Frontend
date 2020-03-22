@@ -47,6 +47,18 @@ Font.prototype.unBold = function(){
  * @return {Font}
  */
 Font.uiFont = function(fontSize){
-	if (FinchBlox) { return new Font('AvenirHeavy', fontSize, "normal"); }
+	//if (FinchBlox) { return new Font('AvenirHeavy', fontSize, "normal"); }
+  if (FinchBlox) { return new Font('FredericBlack', fontSize, "normal"); }
 	return new Font("Arial", fontSize, "normal");
 };
+
+
+/**
+ *  Returns the secondary font of a given size.
+ * @param  {number} fontSize
+ * @return {Font}
+ */
+Font.secondaryUiFont = function(fontSize) {
+  if (FinchBlox) { return new Font('FredericRegular', fontSize, "normal"); }
+	return new Font("Arial", fontSize, "normal");
+}

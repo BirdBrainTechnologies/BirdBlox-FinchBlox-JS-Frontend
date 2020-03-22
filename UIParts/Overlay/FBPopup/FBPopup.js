@@ -16,15 +16,17 @@ FBPopup.setConstants = function() {
 	FBPopup.bnMargin = Button.defaultMargin;
   FBPopup.color = Colors.easternBlue;
   FBPopup.bubbleMargin = 20;
-  FBPopup.font = Button.defaultFont;
+  FBPopup.font = Font.secondaryUiFont(16);
   FBPopup.fontColor = Colors.bbtDarkGray;
   FBPopup.trashIcon = VectorPaths.faTrash;
   FBPopup.trashColor = Colors.stopRed;
+  FBPopup.innerWidth = GuiElements.width/2;
 }
 
 FBPopup.prototype.show = function(heightToWidthRatio) {
+  console.log("Showing fb popup with parent y=" + this.parentY)
   const overlayType = Overlay.types.inputPad;
-  this.innerWidth = GuiElements.width/2;
+  this.innerWidth = FBPopup.innerWidth;
   this.innerHeight = this.innerWidth * heightToWidthRatio;
 
   this.innerGroup = GuiElements.create.group(0, 0);
@@ -49,7 +51,7 @@ FBPopup.prototype.addConfirmCancelBns = function() {
   const buttonMargin = this.innerWidth / 20;
   const confirmX = this.innerWidth/2 - buttonW - buttonMargin/2;
   const cancelX = this.innerWidth/2 + buttonMargin/2;
-  const buttonY = this.innerHeight - buttonH - FBPopup.bubbleMargin;
+  const buttonY = this.innerHeight - buttonH; //- FBPopup.bubbleMargin;
 
   this.confirmBn = new Button(confirmX, buttonY, buttonW, buttonH, this.innerGroup, Colors.flagGreen, r, r);
   this.confirmBn.addIcon(VectorPaths.faCheck, iconH);
@@ -59,8 +61,15 @@ FBPopup.prototype.addConfirmCancelBns = function() {
 
   this.cancelBn = new Button(cancelX, buttonY, buttonW, buttonH, this.innerGroup, Colors.stopRed, r, r)
   this.cancelBn.addIcon(VectorPaths.faTimes, iconH);
+  this.cancelBn.setCallbackFunction(function () {
+    this.cancel();
+  }.bind(this), true);
 }
 
 FBPopup.prototype.confirm = function() {
   DebugOptions.markAbstract();
+}
+
+FBPopup.prototype.cancel = function() {
+  GuiElements.unblockInteraction();
 }

@@ -91,3 +91,13 @@ path{
   font-family: AvenirHeavy;
   src: url(Fonts/AEH.ttf);
 }
+
+@font-face {
+  font-family: FredericBlack;
+  src: url(Fonts/FredericBlack.ttf);
+}
+
+@font-face {
+  font-family: FredericRegular;
+  src: url(Fonts/FredericRegular.ttf);
+}

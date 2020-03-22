@@ -15,7 +15,7 @@ function FBFileNameDisplay() {
   this.X = TB.width - this.bnW - 4*this.margin;//- TB.buttonW;
   this.Y = TB.height + this.margin;
   this.r = TB.defaultCornerRounding;
-  this.font = Button.defaultFont;
+  this.font = Font.secondaryUiFont(16);//Button.defaultFont;
   this.textW = 0;
 
 

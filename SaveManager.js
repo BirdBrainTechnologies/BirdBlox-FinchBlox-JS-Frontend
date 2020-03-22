@@ -29,6 +29,7 @@ SaveManager.backendOpen = function(fileName, data) {
 	SaveManager.loadData(data);
 	OpenDialog.closeDialog();
 	GuiElements.unblockInteraction();
+	if (FinchBlox) { TitleBar.fileBn.update(); }
 };
 
 /**
@@ -200,8 +201,8 @@ SaveManager.userOpenFile = function(fileName) {
 	request.addParam("filename", fileName);
 	CodeManager.markLoading(Language.getStr("Loading"));
 	HtmlServer.sendRequestWithCallback(request.toString(), function() {
-		if (FinchBlox) {
-			TitleBar.fileBn.update();
+		if (FinchBlox && DebugOptions.enabled) {
+			//TitleBar.fileBn.update();
 			GuiElements.unblockInteraction();
 		}
 	}, function() {
