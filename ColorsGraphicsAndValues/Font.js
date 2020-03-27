@@ -48,7 +48,9 @@ Font.prototype.unBold = function(){
  */
 Font.uiFont = function(fontSize){
 	//if (FinchBlox) { return new Font('AvenirHeavy', fontSize, "normal"); }
-  if (FinchBlox) { return new Font('FredericBlack', fontSize, "normal"); }
+  //if (FinchBlox) { return new Font('FredericBlack', fontSize, "normal"); }
+  //if (FinchBlox) { return new Font("NunitoSans-ExtraBold", fontSize, "normal"); }
+  if (FinchBlox) { return new Font("Nunito-ExtraBold", fontSize, "normal"); }
 	return new Font("Arial", fontSize, "normal");
 };
 
@@ -59,6 +61,8 @@ Font.uiFont = function(fontSize){
  * @return {Font}
  */
 Font.secondaryUiFont = function(fontSize) {
-  if (FinchBlox) { return new Font('FredericRegular', fontSize, "normal"); }
+  //if (FinchBlox) { return new Font('FredericRegular', fontSize, "normal"); }
+  //if (FinchBlox) { return new Font("NunitoSans-Regular", fontSize, "normal"); }
+  if (FinchBlox) { return new Font("Nunito-Regular", fontSize, "normal"); }
 	return new Font("Arial", fontSize, "normal");
 }

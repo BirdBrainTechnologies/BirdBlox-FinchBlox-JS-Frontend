@@ -21,6 +21,9 @@ FBPopup.setConstants = function() {
   FBPopup.trashIcon = VectorPaths.faTrash;
   FBPopup.trashColor = Colors.stopRed;
   FBPopup.innerWidth = GuiElements.width/2;
+
+  //Keep iOS 9 from resizing the window when the keyboard comes up
+  FBPopup.isEditingText = false;
 }
 
 FBPopup.prototype.show = function(heightToWidthRatio) {

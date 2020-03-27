@@ -101,3 +101,23 @@ path{
   font-family: FredericRegular;
   src: url(Fonts/FredericRegular.ttf);
 }
+
+@font-face {
+  font-family: NunitoSans-Regular;
+  src: url(Fonts/NunitoSans-Regular.ttf);
+}
+
+@font-face {
+  font-family: NunitoSans-ExtraBold;
+  src: url(Fonts/NunitoSans-ExtraBold.ttf);
+}
+
+@font-face {
+  font-family: Nunito-Regular;
+  src: url(Fonts/Nunito-Regular.ttf);
+}
+
+@font-face {
+  font-family: Nunito-ExtraBold;
+  src: url(Fonts/Nunito-ExtraBold.ttf);
+}

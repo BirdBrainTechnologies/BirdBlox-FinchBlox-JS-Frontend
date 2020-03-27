@@ -355,19 +355,16 @@ TitleBar.makeButtons = function() {
  */
 TitleBar.removeButtons = function() {
 	let TB = TitleBar;
+  TB.flagBn.remove();
+  TB.stopBn.remove();
+  TB.fileBn.remove();
+  TB.undoButton.remove();
   if (FinchBlox) {
-    TB.flagBn.remove();
-  	TB.stopBn.remove();
-    TB.undoButton.remove();
     TB.finchButton.remove();
     TB.levelButton.remove();
   //  TB.trashButton.remove();
   } else {
-    TB.flagBn.remove();
-  	TB.stopBn.remove();
-    TB.fileBn.remove();
   	TB.viewBn.remove();
-    TB.undoButton.remove();
     TB.hummingbirdBn.remove();
   	TB.batteryBn.remove();
     TB.deviceStatusLight.remove();

@@ -50,9 +50,11 @@ window.onresize = function() {
 
 		let f = function() {
 			if(FinchBlox){
-				//The screen FinchBlox is designed for is about 800 wide by 600 tall.
-				GuiElements.zoomMultiple = window.innerWidth/800;//window.innerHeight/600;
-				GuiElements.updateZoom();
+				if (!FBPopup.isEditingText) { //prevent iOS9 from resizing while editing text
+					//The screen FinchBlox is designed for is about 800 wide by 600 tall.
+					GuiElements.zoomMultiple = window.innerWidth/800;//window.innerHeight/600;
+					GuiElements.updateZoom();
+				}
 			} else {
 				GuiElements.updateDims();
 			}

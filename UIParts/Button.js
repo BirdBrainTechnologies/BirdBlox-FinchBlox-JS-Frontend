@@ -405,7 +405,7 @@ Button.prototype.addFinchBnIcons = function() {
   TouchReceiver.addListenersBN(this.xIcon.pathE, this);
 	TouchReceiver.addListenersBN(this.textE, this);
 
-  TitleBar.updateStatus();
+  TitleBar.updateStatus(DeviceManager.getStatus());
 }
 
 /**

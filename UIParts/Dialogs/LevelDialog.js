@@ -72,7 +72,19 @@ LevelDialog.prototype.createContent = function() {
     const button = new Button(x, y, bnDim, bnDim, rowGroup, Colors.white, LD.bnR, LD.bnR);
     GuiElements.update.stroke(button.bgRect, LD.color, LD.strokeW);
     button.addText(i, this.font, LD.color);
-    button.setCallbackFunction(function(){this.setLevel(i);}.bind(this), false);
+    //for iOS 9, using i directly in the callback causes variable scoping problems
+    switch (i) {
+      case 1:
+        button.setCallbackFunction(function(){this.setLevel(1);}.bind(this), false);
+        break;
+      case 2:
+        button.setCallbackFunction(function(){this.setLevel(2);}.bind(this), false);
+        break;
+      case 3:
+        button.setCallbackFunction(function(){this.setLevel(3);}.bind(this), false);
+        break;
+    }
+    //button.setCallbackFunction(function(){this.setLevel(i);}.bind(this), false);
     button.setCallbackFunction(function(){this.closeDialog();}.bind(this), true);
 
     this.buttons.push(button);

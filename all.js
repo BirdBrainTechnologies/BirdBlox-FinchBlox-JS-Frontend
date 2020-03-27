@@ -6112,9 +6112,11 @@ window.onresize = function() {
 
 		let f = function() {
 			if(FinchBlox){
-				//The screen FinchBlox is designed for is about 800 wide by 600 tall.
-				GuiElements.zoomMultiple = window.innerWidth/800;//window.innerHeight/600;
-				GuiElements.updateZoom();
+				if (!FBPopup.isEditingText) { //prevent iOS9 from resizing while editing text
+					//The screen FinchBlox is designed for is about 800 wide by 600 tall.
+					GuiElements.zoomMultiple = window.innerWidth/800;//window.innerHeight/600;
+					GuiElements.updateZoom();
+				}
 			} else {
 				GuiElements.updateDims();
 			}
@@ -8200,7 +8202,9 @@ Font.prototype.unBold = function(){
  */
 Font.uiFont = function(fontSize){
 	//if (FinchBlox) { return new Font('AvenirHeavy', fontSize, "normal"); }
-  if (FinchBlox) { return new Font('FredericBlack', fontSize, "normal"); }
+  //if (FinchBlox) { return new Font('FredericBlack', fontSize, "normal"); }
+  //if (FinchBlox) { return new Font("NunitoSans-ExtraBold", fontSize, "normal"); }
+  if (FinchBlox) { return new Font("Nunito-ExtraBold", fontSize, "normal"); }
 	return new Font("Arial", fontSize, "normal");
 };
 
@@ -8211,7 +8215,9 @@ Font.uiFont = function(fontSize){
  * @return {Font}
  */
 Font.secondaryUiFont = function(fontSize) {
-  if (FinchBlox) { return new Font('FredericRegular', fontSize, "normal"); }
+  //if (FinchBlox) { return new Font('FredericRegular', fontSize, "normal"); }
+  //if (FinchBlox) { return new Font("NunitoSans-Regular", fontSize, "normal"); }
+  if (FinchBlox) { return new Font("Nunito-Regular", fontSize, "normal"); }
 	return new Font("Arial", fontSize, "normal");
 }
 
@@ -10160,10 +10166,10 @@ TouchReceiver.touchStartSlider = function(target, e) {
 };
 TouchReceiver.touchStartEditText = function(target, e, element) {
   const TR = TouchReceiver;
-  console.log("touch start edit text");
-  console.log(target);
-  console.log(e);
-  console.log(element);
+  //console.log("touch start edit text");
+  //console.log(target);
+  //console.log(e);
+  //console.log(element);
   //element.focus();
   target.editText();
 	/*if (TR.touchstart(e, false)) {
@@ -11129,19 +11135,16 @@ TitleBar.makeButtons = function() {
  */
 TitleBar.removeButtons = function() {
 	let TB = TitleBar;
+  TB.flagBn.remove();
+  TB.stopBn.remove();
+  TB.fileBn.remove();
+  TB.undoButton.remove();
   if (FinchBlox) {
-    TB.flagBn.remove();
-  	TB.stopBn.remove();
-    TB.undoButton.remove();
     TB.finchButton.remove();
     TB.levelButton.remove();
   //  TB.trashButton.remove();
   } else {
-    TB.flagBn.remove();
-  	TB.stopBn.remove();
-    TB.fileBn.remove();
   	TB.viewBn.remove();
-    TB.undoButton.remove();
     TB.hummingbirdBn.remove();
   	TB.batteryBn.remove();
     TB.deviceStatusLight.remove();
@@ -13409,7 +13412,7 @@ Button.prototype.addFinchBnIcons = function() {
   TouchReceiver.addListenersBN(this.xIcon.pathE, this);
 	TouchReceiver.addListenersBN(this.textE, this);
 
-  TitleBar.updateStatus();
+  TitleBar.updateStatus(DeviceManager.getStatus());
 }
 
 /**
@@ -14222,8 +14225,8 @@ function FBFileNameDisplay() {
   this.group.appendChild(fileDisplayBG);
 
   //this.isInNoSaveState = false; //true when there are files to load and nothing to save.
-  this.addButton(false);
-
+  //this.addButton(false);
+  this.update();
 
 }
 
@@ -14234,7 +14237,9 @@ FBFileNameDisplay.prototype.update = function() {
     this.textW = 0;
   }
 
-  if (SaveManager.fileName == LevelManager.savePointFileNames[LevelManager.currentLevel]) {
+  if (SaveManager.fileName == undefined) {//When the app is first loaded
+    this.addButton(false);
+  } else if (SaveManager.fileName == LevelManager.savePointFileNames[LevelManager.currentLevel]) {
     this.X = TB.width - this.bnW - 4*this.margin;//- TB.buttonW;
     GuiElements.move.group(this.group, this.X, this.Y);
     const stackList = TabManager.activeTab.stackList;
@@ -14264,7 +14269,7 @@ FBFileNameDisplay.prototype.update = function() {
 }
 
 FBFileNameDisplay.prototype.addButton = function(isSaveBn) {
-  console.log("Called add button with " + isSaveBn);
+  //console.log("Called add button with " + isSaveBn);
   const TB = TitleBar;
   const bnX = TB.width - this.X - this.bnW - 2*this.margin;//(TB.buttonW - this.bnW) / 2;
   const bnH = this.H - 2 * this.margin;
@@ -16424,6 +16429,9 @@ FBPopup.setConstants = function() {
   FBPopup.trashIcon = VectorPaths.faTrash;
   FBPopup.trashColor = Colors.stopRed;
   FBPopup.innerWidth = GuiElements.width/2;
+
+  //Keep iOS 9 from resizing the window when the keyboard comes up
+  FBPopup.isEditingText = false;
 }
 
 FBPopup.prototype.show = function(heightToWidthRatio) {
@@ -16654,74 +16662,89 @@ FBSaveFile.prototype.show = function() {
 
   this.addConfirmCancelBns();
 
+  const font = FBPopup.font;
+  const textColor = FBPopup.fontColor;
+  const textY = font.charHeight/2;//(innerHeight/3 + font.charHeight) / 2;
+  this.charCount = 0;
+
+  const fo = document.createElementNS('http://www.w3.org/2000/svg',"foreignObject");
+  fo.setAttribute('width', this.innerWidth);
+  fo.setAttribute('height', this.textBoxHeight);
+  fo.setAttribute("style", "text-align: center;");
+  fo.setAttribute("x", 0);
+  fo.setAttribute("y", textY);
+
+  this.editableText = document.createElement('div');
+  this.editableText.setAttribute("contentEditable", "true");
+  this.editableText.setAttribute("width", this.innerWidth);
+  this.editableText.setAttribute("style", "pointer-events: auto; -webkit-user-select: auto;");
+  this.editableText.style.display = "block";
+  this.editableText.style.color = textColor;
+  this.editableText.style.fontFamily = font.fontFamily;
+  this.editableText.style.fontSize = font.fontSize;
+  this.editableText.style.outline = "none";
+
+  fo.appendChild(this.editableText);
+  this.innerGroup.appendChild(fo);
+  TouchReceiver.addListenersEditText(this.editableText, this);
+
+  //Also, add a listner for when the user presses the enter key
+  this.editableText.addEventListener("keydown", function(event) {
+    //event.preventDefault();
+    /* Deprecated
+    if (event.keyCode === 13) { //enter
+      //this.confirm();
+      //this.close();
+      this.editableText.blur();
+    }
+    if (event.keyCode === 46 || event.keyCode === 8) { //delete or backspace
+      this.charCount--;
+    }
+    */
+    /*switch (event.code) {
+      case 'Enter':
+        this.editableText.blur();
+        break;
+      case 'Backspace':
+      case 'Delete':
+        this.charCount--;
+        break;
+    }*/
+    //Use of keyCode is depricated, but necessary for old iPads at least
+    if (event.code == 'Enter' || event.keyCode === 13) { //enter
+      //this.confirm();
+      //this.close();
+      this.editableText.blur();
+    }
+    if (event.code == 'Delete' || event.code == 'Backspace' ||
+      event.keyCode === 46 || event.keyCode === 8) { //delete or backspace
+      this.charCount--;
+    }
+
+  }.bind(this));
+  //TODO: maybe also look at keypress event to limit to reasonable characters
+  // https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
+  this.editableText.addEventListener('keypress', function(event) {
+    console.log("pressed a key count=" + this.charCount);
+    if (this.charCount >= 24) {
+      event.preventDefault();
+    } else {
+      this.charCount++;
+    }
+  }.bind(this));
+
+  /*this.editableText.onfocus = function() {
+    console.log("onfocus!")
+    console.log(this);
+    //this.value = this.value;
+    this.setSelectionRange(1000,1001);
+  }*/
+
   this.editText();
 }
 
 FBSaveFile.prototype.editText = function() {
-
-  if (this.editableText == null) {
-    const font = FBPopup.font;
-    const textColor = FBPopup.fontColor;
-    const textY = font.charHeight/2;//(innerHeight/3 + font.charHeight) / 2;
-    this.charCount = 0;
-
-    const fo = document.createElementNS('http://www.w3.org/2000/svg',"foreignObject");
-    fo.setAttribute('width', this.innerWidth);
-    fo.setAttribute('height', this.textBoxHeight);
-    fo.setAttribute("style", "text-align: center;");
-    fo.setAttribute("x", 0);
-    fo.setAttribute("y", textY);
-
-    this.editableText = document.createElement('div');
-    this.editableText.setAttribute("contentEditable", "true");
-    this.editableText.setAttribute("width", this.innerWidth);
-    this.editableText.setAttribute("style", "pointer-events: auto; -webkit-user-select: auto;");
-    this.editableText.style.display = "block";
-    this.editableText.style.color = textColor;
-    this.editableText.style.fontFamily = font.fontFamily;
-    this.editableText.style.fontSize = font.fontSize;
-    this.editableText.style.outline = "none";
-
-    fo.appendChild(this.editableText);
-    this.innerGroup.appendChild(fo);
-    TouchReceiver.addListenersEditText(this.editableText, this);
-
-    //Also, add a listner for when the user presses the enter key
-    this.editableText.addEventListener("keydown", function(event) {
-      //event.preventDefault();
-      /* Deprecated
-      if (event.keyCode === 13) { //enter
-        //this.confirm();
-        //this.close();
-        this.editableText.blur();
-      }
-      if (event.keyCode === 46 || event.keyCode === 8) { //delete or backspace
-        this.charCount--;
-      }
-      */
-      switch (event.code) {
-        case 'Enter':
-          this.editableText.blur();
-          break;
-        case 'Backspace':
-        case 'Delete':
-          this.charCount--;
-          break;
-      }
-
-    }.bind(this));
-    //TODO: maybe also look at keypress event to limit to reasonable characters
-    // https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
-    this.editableText.addEventListener('keypress', function(event) {
-      console.log("pressed a key count=" + this.charCount);
-      if (this.charCount >= 24) {
-        event.preventDefault();
-      } else {
-        this.charCount++;
-      }
-    }.bind(this));
-  }
-
+  FBPopup.isEditingText = true;
   this.editableText.focus();
 }
 
@@ -16737,6 +16760,11 @@ FBSaveFile.prototype.confirm = function () {
   console.log("Name file " + fileName);
   LevelManager.saveAs(fileName);
 }
+
+FBSaveFile.prototype.close = function() {
+  FBPopup.isEditingText = false;
+  FBPopup.prototype.close.call(this);
+};
 
 /**
  * Popup for FinchBlox. Used when the user chooses to delete a file.
@@ -23194,7 +23222,19 @@ LevelDialog.prototype.createContent = function() {
     const button = new Button(x, y, bnDim, bnDim, rowGroup, Colors.white, LD.bnR, LD.bnR);
     GuiElements.update.stroke(button.bgRect, LD.color, LD.strokeW);
     button.addText(i, this.font, LD.color);
-    button.setCallbackFunction(function(){this.setLevel(i);}.bind(this), false);
+    //for iOS 9, using i directly in the callback causes variable scoping problems
+    switch (i) {
+      case 1:
+        button.setCallbackFunction(function(){this.setLevel(1);}.bind(this), false);
+        break;
+      case 2:
+        button.setCallbackFunction(function(){this.setLevel(2);}.bind(this), false);
+        break;
+      case 3:
+        button.setCallbackFunction(function(){this.setLevel(3);}.bind(this), false);
+        break;
+    }
+    //button.setCallbackFunction(function(){this.setLevel(i);}.bind(this), false);
     button.setCallbackFunction(function(){this.closeDialog();}.bind(this), true);
 
     this.buttons.push(button);

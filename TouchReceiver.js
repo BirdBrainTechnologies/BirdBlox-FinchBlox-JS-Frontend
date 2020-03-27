@@ -347,10 +347,10 @@ TouchReceiver.touchStartSlider = function(target, e) {
 };
 TouchReceiver.touchStartEditText = function(target, e, element) {
   const TR = TouchReceiver;
-  console.log("touch start edit text");
-  console.log(target);
-  console.log(e);
-  console.log(element);
+  //console.log("touch start edit text");
+  //console.log(target);
+  //console.log(e);
+  //console.log(element);
   //element.focus();
   target.editText();
 	/*if (TR.touchstart(e, false)) {

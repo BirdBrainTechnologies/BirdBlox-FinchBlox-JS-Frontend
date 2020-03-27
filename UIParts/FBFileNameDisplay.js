@@ -24,8 +24,8 @@ function FBFileNameDisplay() {
   this.group.appendChild(fileDisplayBG);
 
   //this.isInNoSaveState = false; //true when there are files to load and nothing to save.
-  this.addButton(false);
-
+  //this.addButton(false);
+  this.update();
 
 }
 
@@ -36,7 +36,9 @@ FBFileNameDisplay.prototype.update = function() {
     this.textW = 0;
   }
 
-  if (SaveManager.fileName == LevelManager.savePointFileNames[LevelManager.currentLevel]) {
+  if (SaveManager.fileName == undefined) {//When the app is first loaded
+    this.addButton(false);
+  } else if (SaveManager.fileName == LevelManager.savePointFileNames[LevelManager.currentLevel]) {
     this.X = TB.width - this.bnW - 4*this.margin;//- TB.buttonW;
     GuiElements.move.group(this.group, this.X, this.Y);
     const stackList = TabManager.activeTab.stackList;
@@ -66,7 +68,7 @@ FBFileNameDisplay.prototype.update = function() {
 }
 
 FBFileNameDisplay.prototype.addButton = function(isSaveBn) {
-  console.log("Called add button with " + isSaveBn);
+  //console.log("Called add button with " + isSaveBn);
   const TB = TitleBar;
   const bnX = TB.width - this.X - this.bnW - 2*this.margin;//(TB.buttonW - this.bnW) / 2;
   const bnH = this.H - 2 * this.margin;
