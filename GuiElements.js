@@ -431,6 +431,89 @@ GuiElements.create.rect = function(group) {
 	}
 	return rect; //Return the rect.
 };
+/**
+ * GuiElements.create.editableText - Create an editable text box. Pressing enter
+ * leaves the text box. There is a maximum number of characters that can be
+ * entered. To make the box editable, it is surrounded in a foreign object
+ * before being added to the given group.
+ *
+ * @param  {Font} font      font
+ * @param  {string} textColor color to display text
+ * @param  {number} x         x position within group
+ * @param  {number} y         y position within group
+ * @param  {number} w         text box width
+ * @param  {number} h         text box height
+ * @param  {Element} group     svg group to add the box to
+ * @return {Element}         editable text box element created
+ */
+GuiElements.create.editableText = function(font, textColor, x, y, w, h, group) {
+	const fo = document.createElementNS('http://www.w3.org/2000/svg',"foreignObject");
+  fo.setAttribute('width', w);
+  fo.setAttribute('height', h);
+  fo.setAttribute("style", "text-align: center;");
+  fo.setAttribute("x", 0);
+  fo.setAttribute("y", y);
+
+  const editableText = document.createElement('div');
+  editableText.setAttribute("contentEditable", "true");
+  editableText.setAttribute("width", w);
+  editableText.setAttribute("style", "pointer-events: auto; -webkit-user-select: auto;");
+  editableText.style.display = "block";
+  editableText.style.color = textColor;
+  editableText.style.fontFamily = font.fontFamily;
+  editableText.style.fontSize = font.fontSize;
+  editableText.style.outline = "none";
+
+  fo.appendChild(editableText);
+  group.appendChild(fo);
+
+	editableText.charCount = 0;
+
+	//When user presses enter, leave the text box and close soft keyboard.
+	// When pressing delete or backspace, decrease the char count.
+  editableText.addEventListener("keydown", function(event) {
+		//Use of keyCode is depricated, but necessary for old iPads at least
+    if (event.code == 'Enter' || event.keyCode === 13) { //enter
+      this.blur();
+    }
+    if (event.code == 'Delete' || event.code == 'Backspace' ||
+      event.keyCode === 46 || event.keyCode === 8) { //delete or backspace
+      this.charCount--;
+    }
+	});
+
+	//Keep track of the characters typed and limit total to 24.
+	// https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
+	editableText.addEventListener('keypress', function(event) {
+		console.log("pressed a key count=" + this.charCount);
+		if (this.charCount > 24) {
+			event.preventDefault();
+		} else {
+			this.charCount++;
+		}
+	});
+
+	//When focused, move cursor to the end of the content
+	// https://stackoverflow.com/questions/1125292/how-to-move-cursor-to-end-of-contenteditable-entity
+	editableText.onfocus = function() {
+    var range,selection;
+    if(document.createRange) { //Firefox, Chrome, Opera, Safari, IE 9+
+        range = document.createRange();//Create a range (a range is a like the selection but invisible)
+        range.selectNodeContents(this);//Select the entire contents of the element with the range
+        range.collapse(false);//collapse the range to the end point. false means collapse to end rather than the start
+        selection = window.getSelection();//get the selection object (allows you to change selection)
+        selection.removeAllRanges();//remove any selections already made
+        selection.addRange(range);//make the range you have just created the visible selection
+    } else if(document.selection) { //IE 8 and lower
+        range = document.body.createTextRange();//Create a range (a range is a like the selection but invisible)
+        range.moveToElementText(this);//Select the entire contents of the element with the range
+        range.collapse(false);//collapse the range to the end point. false means collapse to end rather than the start
+        range.select();//Select the range (make it the visible selection
+    }
+  }
+
+	return editableText
+}
 
 /* GuiElements.draw contains functions that create SVG elements and assign their attributes
  * so they are ready to be drawn on the screen. The element is then returned.
@@ -737,12 +820,12 @@ GuiElements.update.text = function(textE, newText) {
  * Adds "..." if characters are removed.
  * @param {Element} textE - The text element to be modified.
  * @param {string} text - The element's new text.
- * @param {number} maxWidth - When finished, the width of the text element will be less that this number.
+ * @param {number} maxWidth - When finished, the width of the text element will be less than or equal to this number.
  */
 GuiElements.update.textLimitWidth = function(textE, text, maxWidth) {
 	GuiElements.update.text(textE, text);
 	let currentWidth = GuiElements.measure.textWidth(textE);
-	if (currentWidth < maxWidth || text == "") {
+	if (currentWidth <= maxWidth || text == "") {
 		return;
 	}
 	let chars = 1;

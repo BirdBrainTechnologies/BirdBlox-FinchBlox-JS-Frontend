@@ -68,11 +68,16 @@ SaveManager.backendSetName = function(fileName) {
 };
 
 /**
- * Clears the canvas and shows an Open Dialog
+ * Clears the canvas and shows an Open Dialog in BirdBlox. In FinchBlox, load
+ * the current level's save point.
  */
 SaveManager.backendClose = function() {
-	SaveManager.loadBlank();
-	OpenDialog.showDialog();
+	if (FinchBlox) {
+		LevelManager.loadLevelSavePoint();
+	} else {
+		SaveManager.loadBlank();
+		OpenDialog.showDialog();
+	}
 };
 
 /**

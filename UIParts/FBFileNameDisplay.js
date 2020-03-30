@@ -17,10 +17,10 @@ function FBFileNameDisplay() {
   this.r = TB.defaultCornerRounding;
   this.font = Font.secondaryUiFont(16);//Button.defaultFont;
   this.textW = 0;
-
+  this.bgColor = Colors.fbGray;
 
   this.group = GuiElements.create.group(this.X, this.Y, TBLayer);
-  const fileDisplayBG = GuiElements.draw.rect(0, 0, this.W, this.H, Colors.fbGray, this.r, this.r);
+  const fileDisplayBG = GuiElements.draw.rect(0, 0, this.W, this.H, this.bgColor, this.r, this.r);
   this.group.appendChild(fileDisplayBG);
 
   //this.isInNoSaveState = false; //true when there are files to load and nothing to save.
@@ -31,8 +31,10 @@ function FBFileNameDisplay() {
 
 FBFileNameDisplay.prototype.update = function() {
   const TB = TitleBar;
-  if (this.textE != null) {
-    this.textE.remove();
+  if (this.textBn != null) {
+    this.textBn.remove();
+    //this.textE.parentElement.remove();
+    //console.log(this.textE.parentElement);
     this.textW = 0;
   }
 
@@ -53,17 +55,25 @@ FBFileNameDisplay.prototype.update = function() {
       //this.isInNoSaveState = true;
     }
   } else {
-    console.log("will display " + SaveManager.fileName)
+    //console.log("will display " + SaveManager.fileName)
     const displayName = SaveManager.fileName.slice(0,-2);
     const textX = 2*this.margin;
     const textY = (this.H + this.font.charHeight)/2
+    //const textY = 0//(this.H - this.font.charHeight)/2
     this.textW = GuiElements.measure.stringWidth(displayName, this.font);
-    this.textE = GuiElements.draw.text(textX, textY, displayName, this.font, Colors.bbtDarkGray);
-    this.group.appendChild(this.textE);
+    //this.textE = GuiElements.draw.text(textX, textY, displayName, this.font, Colors.bbtDarkGray);
+    //this.group.appendChild(this.textE);
+    this.textBn = new Button(textX, 0, this.textW, this.H, this.group, this.bgColor);
+    this.textBn.addText(displayName, this.font, Colors.bbtDarkGray);
     this.X = TB.width - this.bnW - this.textW - 6*this.margin;
     GuiElements.move.group(this.group, this.X, this.Y);
+    this.textBn.setCallbackFunction(function() {
+      (new FBSaveFile(this.X, this.Y, this.W, this.H, this.group, displayName)).show();
+    }.bind(this), true);
+
     this.addButton(false);
     //this.isInNoSaveState = false;
+    //TouchReceiver.addListenersEditText(this.textE, this);
   }
 }
 

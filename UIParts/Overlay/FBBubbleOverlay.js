@@ -48,11 +48,10 @@ FBBubbleOverlay.prototype.hide = function () {
     this.block.group.remove();
     this.block.stack.group.appendChild(this.block.group);
     GuiElements.move.group(this.block.group, this.block.x, this.block.y);
-    GuiElements.unblockInteraction();
   } else if (this.parent.parentGroup != null) {
     this.parent.parentLayer.appendChild(this.parent.parentGroup);
   }
-
+  GuiElements.unblockInteraction();
 }
 
 FBBubbleOverlay.prototype.display = function (x1, x2, y1, y2, innerWidth, innerHeight) {

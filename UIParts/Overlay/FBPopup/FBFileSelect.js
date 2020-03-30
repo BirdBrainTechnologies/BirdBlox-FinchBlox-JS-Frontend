@@ -105,7 +105,7 @@ FBFileSelect.prototype.createRow = function(index, y, width, contentGroup) {
     console.log("pressed the trash button")
     this.close();
     const cd = new FBConfirmDelete(this.parentX, this.parentY, this.parentW, this.parentH, this.parentGroup, fileName)
-    console.log(cd)
+    //console.log(cd)
     cd.show();
   }.bind(this), true);
   //trashBn.partOfOverlay = this.bubbleOverlay;
@@ -137,8 +137,8 @@ FBFileSelect.prototype.createRow = function(index, y, width, contentGroup) {
 };
 
 FBFileSelect.prototype.selectFile = function(index) {
-  LevelManager.openFile(this.fileList[index]);
   this.close();
+  LevelManager.openFile(this.fileList[index]);
 }
 
 FBFileSelect.prototype.close = function() {

@@ -6493,6 +6493,89 @@ GuiElements.create.rect = function(group) {
 	}
 	return rect; //Return the rect.
 };
+/**
+ * GuiElements.create.editableText - Create an editable text box. Pressing enter
+ * leaves the text box. There is a maximum number of characters that can be
+ * entered. To make the box editable, it is surrounded in a foreign object
+ * before being added to the given group.
+ *
+ * @param  {Font} font      font
+ * @param  {string} textColor color to display text
+ * @param  {number} x         x position within group
+ * @param  {number} y         y position within group
+ * @param  {number} w         text box width
+ * @param  {number} h         text box height
+ * @param  {Element} group     svg group to add the box to
+ * @return {Element}         editable text box element created
+ */
+GuiElements.create.editableText = function(font, textColor, x, y, w, h, group) {
+	const fo = document.createElementNS('http://www.w3.org/2000/svg',"foreignObject");
+  fo.setAttribute('width', w);
+  fo.setAttribute('height', h);
+  fo.setAttribute("style", "text-align: center;");
+  fo.setAttribute("x", 0);
+  fo.setAttribute("y", y);
+
+  const editableText = document.createElement('div');
+  editableText.setAttribute("contentEditable", "true");
+  editableText.setAttribute("width", w);
+  editableText.setAttribute("style", "pointer-events: auto; -webkit-user-select: auto;");
+  editableText.style.display = "block";
+  editableText.style.color = textColor;
+  editableText.style.fontFamily = font.fontFamily;
+  editableText.style.fontSize = font.fontSize;
+  editableText.style.outline = "none";
+
+  fo.appendChild(editableText);
+  group.appendChild(fo);
+
+	editableText.charCount = 0;
+
+	//When user presses enter, leave the text box and close soft keyboard.
+	// When pressing delete or backspace, decrease the char count.
+  editableText.addEventListener("keydown", function(event) {
+		//Use of keyCode is depricated, but necessary for old iPads at least
+    if (event.code == 'Enter' || event.keyCode === 13) { //enter
+      this.blur();
+    }
+    if (event.code == 'Delete' || event.code == 'Backspace' ||
+      event.keyCode === 46 || event.keyCode === 8) { //delete or backspace
+      this.charCount--;
+    }
+	});
+
+	//Keep track of the characters typed and limit total to 24.
+	// https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
+	editableText.addEventListener('keypress', function(event) {
+		console.log("pressed a key count=" + this.charCount);
+		if (this.charCount > 24) {
+			event.preventDefault();
+		} else {
+			this.charCount++;
+		}
+	});
+
+	//When focused, move cursor to the end of the content
+	// https://stackoverflow.com/questions/1125292/how-to-move-cursor-to-end-of-contenteditable-entity
+	editableText.onfocus = function() {
+    var range,selection;
+    if(document.createRange) { //Firefox, Chrome, Opera, Safari, IE 9+
+        range = document.createRange();//Create a range (a range is a like the selection but invisible)
+        range.selectNodeContents(this);//Select the entire contents of the element with the range
+        range.collapse(false);//collapse the range to the end point. false means collapse to end rather than the start
+        selection = window.getSelection();//get the selection object (allows you to change selection)
+        selection.removeAllRanges();//remove any selections already made
+        selection.addRange(range);//make the range you have just created the visible selection
+    } else if(document.selection) { //IE 8 and lower
+        range = document.body.createTextRange();//Create a range (a range is a like the selection but invisible)
+        range.moveToElementText(this);//Select the entire contents of the element with the range
+        range.collapse(false);//collapse the range to the end point. false means collapse to end rather than the start
+        range.select();//Select the range (make it the visible selection
+    }
+  }
+
+	return editableText
+}
 
 /* GuiElements.draw contains functions that create SVG elements and assign their attributes
  * so they are ready to be drawn on the screen. The element is then returned.
@@ -6799,12 +6882,12 @@ GuiElements.update.text = function(textE, newText) {
  * Adds "..." if characters are removed.
  * @param {Element} textE - The text element to be modified.
  * @param {string} text - The element's new text.
- * @param {number} maxWidth - When finished, the width of the text element will be less that this number.
+ * @param {number} maxWidth - When finished, the width of the text element will be less than or equal to this number.
  */
 GuiElements.update.textLimitWidth = function(textE, text, maxWidth) {
 	GuiElements.update.text(textE, text);
 	let currentWidth = GuiElements.measure.textWidth(textE);
-	if (currentWidth < maxWidth || text == "") {
+	if (currentWidth <= maxWidth || text == "") {
 		return;
 	}
 	let chars = 1;
@@ -10164,21 +10247,8 @@ TouchReceiver.touchStartSlider = function(target, e) {
 		e.stopPropagation();
 	}
 };
-TouchReceiver.touchStartEditText = function(target, e, element) {
-  const TR = TouchReceiver;
-  //console.log("touch start edit text");
-  //console.log(target);
-  //console.log(e);
-  //console.log(element);
-  //element.focus();
+TouchReceiver.touchStartEditText = function(target, e) {
   target.editText();
-	/*if (TR.touchstart(e, false)) {
-		TR.targetType = "editText";
-		TR.target = target;
-
-    //target.focus();
-		//e.stopPropagation();
-	}*/
 }
 /**
  * @param {event} e
@@ -10275,7 +10345,8 @@ TouchReceiver.touchEndDialogBlock = function(e) {
 	}
   if (FinchBlox) {
     Overlay.closeOverlays();
-    GuiElements.unblockInteraction();
+    //GuiElements.unblockInteraction();
+
   }
 }
 
@@ -10628,7 +10699,7 @@ TouchReceiver.addListenersEditText = function(element, parent) {
   const TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		// When it is touched, the SVG element will tell the TouchReceiver.
-		TouchReceiver.touchStartEditText(parent, e, element);
+		TouchReceiver.touchStartEditText(parent, e);
 	}, false);
 }
 /**
@@ -14218,10 +14289,10 @@ function FBFileNameDisplay() {
   this.r = TB.defaultCornerRounding;
   this.font = Font.secondaryUiFont(16);//Button.defaultFont;
   this.textW = 0;
-
+  this.bgColor = Colors.fbGray;
 
   this.group = GuiElements.create.group(this.X, this.Y, TBLayer);
-  const fileDisplayBG = GuiElements.draw.rect(0, 0, this.W, this.H, Colors.fbGray, this.r, this.r);
+  const fileDisplayBG = GuiElements.draw.rect(0, 0, this.W, this.H, this.bgColor, this.r, this.r);
   this.group.appendChild(fileDisplayBG);
 
   //this.isInNoSaveState = false; //true when there are files to load and nothing to save.
@@ -14232,8 +14303,10 @@ function FBFileNameDisplay() {
 
 FBFileNameDisplay.prototype.update = function() {
   const TB = TitleBar;
-  if (this.textE != null) {
-    this.textE.remove();
+  if (this.textBn != null) {
+    this.textBn.remove();
+    //this.textE.parentElement.remove();
+    //console.log(this.textE.parentElement);
     this.textW = 0;
   }
 
@@ -14254,17 +14327,25 @@ FBFileNameDisplay.prototype.update = function() {
       //this.isInNoSaveState = true;
     }
   } else {
-    console.log("will display " + SaveManager.fileName)
+    //console.log("will display " + SaveManager.fileName)
     const displayName = SaveManager.fileName.slice(0,-2);
     const textX = 2*this.margin;
     const textY = (this.H + this.font.charHeight)/2
+    //const textY = 0//(this.H - this.font.charHeight)/2
     this.textW = GuiElements.measure.stringWidth(displayName, this.font);
-    this.textE = GuiElements.draw.text(textX, textY, displayName, this.font, Colors.bbtDarkGray);
-    this.group.appendChild(this.textE);
+    //this.textE = GuiElements.draw.text(textX, textY, displayName, this.font, Colors.bbtDarkGray);
+    //this.group.appendChild(this.textE);
+    this.textBn = new Button(textX, 0, this.textW, this.H, this.group, this.bgColor);
+    this.textBn.addText(displayName, this.font, Colors.bbtDarkGray);
     this.X = TB.width - this.bnW - this.textW - 6*this.margin;
     GuiElements.move.group(this.group, this.X, this.Y);
+    this.textBn.setCallbackFunction(function() {
+      (new FBSaveFile(this.X, this.Y, this.W, this.H, this.group, displayName)).show();
+    }.bind(this), true);
+
     this.addButton(false);
     //this.isInNoSaveState = false;
+    //TouchReceiver.addListenersEditText(this.textE, this);
   }
 }
 
@@ -16356,11 +16437,10 @@ FBBubbleOverlay.prototype.hide = function () {
     this.block.group.remove();
     this.block.stack.group.appendChild(this.block.group);
     GuiElements.move.group(this.block.group, this.block.x, this.block.y);
-    GuiElements.unblockInteraction();
   } else if (this.parent.parentGroup != null) {
     this.parent.parentLayer.appendChild(this.parent.parentGroup);
   }
-
+  GuiElements.unblockInteraction();
 }
 
 FBBubbleOverlay.prototype.display = function (x1, x2, y1, y2, innerWidth, innerHeight) {
@@ -16435,7 +16515,7 @@ FBPopup.setConstants = function() {
 }
 
 FBPopup.prototype.show = function(heightToWidthRatio) {
-  console.log("Showing fb popup with parent y=" + this.parentY)
+  //console.log("Showing fb popup with parent y=" + this.parentY)
   const overlayType = Overlay.types.inputPad;
   this.innerWidth = FBPopup.innerWidth;
   this.innerHeight = this.innerWidth * heightToWidthRatio;
@@ -16450,11 +16530,12 @@ FBPopup.prototype.show = function(heightToWidthRatio) {
 
 FBPopup.prototype.close = function() {
   console.log("called close")
+  FBPopup.isEditingText = false;
 	this.bubbleOverlay.hide();
 }
 
 FBPopup.prototype.addConfirmCancelBns = function() {
-  console.log("adding buttons")
+  //console.log("adding buttons")
   const r = TitleBar.defaultCornerRounding;
   const buttonW = this.innerWidth/3;
   const buttonH = buttonW * 2/5;
@@ -16592,7 +16673,7 @@ FBFileSelect.prototype.createRow = function(index, y, width, contentGroup) {
     console.log("pressed the trash button")
     this.close();
     const cd = new FBConfirmDelete(this.parentX, this.parentY, this.parentW, this.parentH, this.parentGroup, fileName)
-    console.log(cd)
+    //console.log(cd)
     cd.show();
   }.bind(this), true);
   //trashBn.partOfOverlay = this.bubbleOverlay;
@@ -16624,8 +16705,8 @@ FBFileSelect.prototype.createRow = function(index, y, width, contentGroup) {
 };
 
 FBFileSelect.prototype.selectFile = function(index) {
-  LevelManager.openFile(this.fileList[index]);
   this.close();
+  LevelManager.openFile(this.fileList[index]);
 }
 
 FBFileSelect.prototype.close = function() {
@@ -16642,8 +16723,9 @@ FBFileSelect.prototype.close = function() {
  * @param  {type} h           parent h
  * @param  {type} parentGroup parent group
  */
-function FBSaveFile (x, y, w, h, parentGroup) {
+function FBSaveFile (x, y, w, h, parentGroup, currentName) {
   FBPopup.call(this, x, y, w, h, parentGroup);
+  this.currentName = currentName;
 }
 FBSaveFile.prototype = Object.create(FBPopup.prototype);
 FBSaveFile.prototype.constructor = FBSaveFile;
@@ -16667,78 +16749,10 @@ FBSaveFile.prototype.show = function() {
   const textY = font.charHeight/2;//(innerHeight/3 + font.charHeight) / 2;
   this.charCount = 0;
 
-  const fo = document.createElementNS('http://www.w3.org/2000/svg',"foreignObject");
-  fo.setAttribute('width', this.innerWidth);
-  fo.setAttribute('height', this.textBoxHeight);
-  fo.setAttribute("style", "text-align: center;");
-  fo.setAttribute("x", 0);
-  fo.setAttribute("y", textY);
+  this.editableText = GuiElements.create.editableText(font, textColor, 0, textY, this.innerWidth, this.textBoxHeight, this.innerGroup, this)
+  if (this.currentName != null) { this.editableText.textContent = this.currentName; }
 
-  this.editableText = document.createElement('div');
-  this.editableText.setAttribute("contentEditable", "true");
-  this.editableText.setAttribute("width", this.innerWidth);
-  this.editableText.setAttribute("style", "pointer-events: auto; -webkit-user-select: auto;");
-  this.editableText.style.display = "block";
-  this.editableText.style.color = textColor;
-  this.editableText.style.fontFamily = font.fontFamily;
-  this.editableText.style.fontSize = font.fontSize;
-  this.editableText.style.outline = "none";
-
-  fo.appendChild(this.editableText);
-  this.innerGroup.appendChild(fo);
   TouchReceiver.addListenersEditText(this.editableText, this);
-
-  //Also, add a listner for when the user presses the enter key
-  this.editableText.addEventListener("keydown", function(event) {
-    //event.preventDefault();
-    /* Deprecated
-    if (event.keyCode === 13) { //enter
-      //this.confirm();
-      //this.close();
-      this.editableText.blur();
-    }
-    if (event.keyCode === 46 || event.keyCode === 8) { //delete or backspace
-      this.charCount--;
-    }
-    */
-    /*switch (event.code) {
-      case 'Enter':
-        this.editableText.blur();
-        break;
-      case 'Backspace':
-      case 'Delete':
-        this.charCount--;
-        break;
-    }*/
-    //Use of keyCode is depricated, but necessary for old iPads at least
-    if (event.code == 'Enter' || event.keyCode === 13) { //enter
-      //this.confirm();
-      //this.close();
-      this.editableText.blur();
-    }
-    if (event.code == 'Delete' || event.code == 'Backspace' ||
-      event.keyCode === 46 || event.keyCode === 8) { //delete or backspace
-      this.charCount--;
-    }
-
-  }.bind(this));
-  //TODO: maybe also look at keypress event to limit to reasonable characters
-  // https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
-  this.editableText.addEventListener('keypress', function(event) {
-    console.log("pressed a key count=" + this.charCount);
-    if (this.charCount >= 24) {
-      event.preventDefault();
-    } else {
-      this.charCount++;
-    }
-  }.bind(this));
-
-  /*this.editableText.onfocus = function() {
-    console.log("onfocus!")
-    console.log(this);
-    //this.value = this.value;
-    this.setSelectionRange(1000,1001);
-  }*/
 
   this.editText();
 }
@@ -16757,14 +16771,15 @@ FBSaveFile.prototype.confirm = function () {
     }
 
   let fileName = this.editableText.textContent
-  console.log("Name file " + fileName);
-  LevelManager.saveAs(fileName);
-}
 
-FBSaveFile.prototype.close = function() {
-  FBPopup.isEditingText = false;
-  FBPopup.prototype.close.call(this);
-};
+  if (fileName == this.currentName) {
+    console.log("confirm button pressed without changing the name.")
+    return;
+  }
+
+  console.log("Name file " + fileName);
+  LevelManager.saveAs(fileName, (this.currentName != null));
+}
 
 /**
  * Popup for FinchBlox. Used when the user chooses to delete a file.
@@ -23235,7 +23250,7 @@ LevelDialog.prototype.createContent = function() {
         break;
     }
     //button.setCallbackFunction(function(){this.setLevel(i);}.bind(this), false);
-    button.setCallbackFunction(function(){this.closeDialog();}.bind(this), true);
+    button.setCallbackFunction(function(){this.close();}.bind(this), true);
 
     this.buttons.push(button);
     //x+= bnDim + 1.5*margin;
@@ -23268,18 +23283,23 @@ LevelDialog.prototype.highlightSelected = function() {
   }
 }
 
-  /**
-   * Removes the dialog from view and unblocks the ui behind it.
-   */
-LevelDialog.prototype.closeDialog = function() {
-	if (this.visible) {
+LevelDialog.prototype.close = function() {
+  if (this.visible) {
     this.visible = false;
 		this.group.remove();
     if (RowDialog.currentDialog === this) {
 			RowDialog.currentDialog = null;
 		}
-		//GuiElements.unblockInteraction();
 	}
+}
+
+/**
+ * Removes the dialog from view and unblocks the ui behind it.
+ */
+LevelDialog.prototype.closeDialog = function() {
+  console.log("LevelDialog.prototype.closeDialog")
+	this.close();
+  GuiElements.unblockInteraction();
 }
 
 /**
@@ -25429,11 +25449,16 @@ SaveManager.backendSetName = function(fileName) {
 };
 
 /**
- * Clears the canvas and shows an Open Dialog
+ * Clears the canvas and shows an Open Dialog in BirdBlox. In FinchBlox, load
+ * the current level's save point.
  */
 SaveManager.backendClose = function() {
-	SaveManager.loadBlank();
-	OpenDialog.showDialog();
+	if (FinchBlox) {
+		LevelManager.loadLevelSavePoint();
+	} else {
+		SaveManager.loadBlank();
+		OpenDialog.showDialog();
+	}
 };
 
 /**
@@ -26111,6 +26136,7 @@ LevelManager.checkSavedFiles = function() {
 
 LevelManager.loadLevelSavePoint = function() {
   const LM = LevelManager;
+  GuiElements.blockInteraction();
   console.log("loadLevelSavePoint for level " + LM.currentLevel);
   const levelFileName = LM.savePointFileNames[LM.currentLevel];
   if (!LM.fileListRetreived) {
@@ -26150,22 +26176,29 @@ LevelManager.loadLevelSavePoint = function() {
  * named file that will appear in the file list.
  *
  * @param  {string} name name to give this file
+ * @param {boolean} rename rename a currently saved file if true
  */
-LevelManager.saveAs = function(name) {
+LevelManager.saveAs = function(name, rename) {
   const LM = LevelManager
+  const currentFile = SaveManager.fileName;
   const currentLevelFile = LM.savePointFileNames[LM.currentLevel];
   const fileName = name.trim() + LM.fileLevelSuffixes[LM.currentLevel];
   //Check to be sure the current level save point is the file that is open
-  if (SaveManager.fileName != currentLevelFile) {
+  if (currentFile != currentLevelFile && !rename) {
     console.log("Tried to rename file with " + SaveManager.fileName + " open instead of " + currentLevelFile);
     return;
   }
-  console.log("Rename " + currentLevelFile + " to " + fileName);
-  SaveManager.sanitizeRename(false, currentLevelFile, "", fileName, function () {
-    const index = LM.filesSavedLocally.indexOf(currentLevelFile);
+  //console.log("Rename " + currentLevelFile + " to " + fileName);
+  GuiElements.blockInteraction();
+  console.log("Rename " + currentFile + " to " + fileName);
+  //SaveManager.sanitizeRename(false, currentLevelFile, "", fileName, function () {
+  SaveManager.sanitizeRename(false, currentFile, "", fileName, function () {
+    //const index = LM.filesSavedLocally.indexOf(currentLevelFile);
+    const index = LM.filesSavedLocally.indexOf(currentFile);
     if (index > -1) { LM.filesSavedLocally.splice(index, 1); }
     LM.filesSavedLocally.push(fileName);
-    console.log("Renamed " + currentLevelFile + " to " + fileName);
+    //console.log("Renamed " + currentLevelFile + " to " + fileName);
+    console.log("Renamed " + currentFile + " to " + fileName);
     console.log(LM.filesSavedLocally);
     TitleBar.fileBn.update();
   });
@@ -26178,15 +26211,16 @@ LevelManager.openFile = function(fileName) {
     console.log("Unsupported level  " + fileLevel);
     return;
   }
-
+  GuiElements.blockInteraction();
   LevelManager.setLevel(fileLevel);
   SaveManager.userOpenFile(fileName);
 }
 
 LevelManager.userDeleteFile = function(fileName) {
-  if (fileName == SaveManager.fileName) {
+  /*if (fileName == SaveManager.fileName) {
     LevelManager.loadLevelSavePoint();
-  }
+  }*/
+  GuiElements.blockInteraction();
   for (let i = 0; i < LevelManager.filesSavedLocally.length; i++) {
     if (LevelManager.filesSavedLocally[i] == fileName) {
       LevelManager.filesSavedLocally.splice(i, 1);

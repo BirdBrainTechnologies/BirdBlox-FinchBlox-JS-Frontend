@@ -27,7 +27,7 @@ FBPopup.setConstants = function() {
 }
 
 FBPopup.prototype.show = function(heightToWidthRatio) {
-  console.log("Showing fb popup with parent y=" + this.parentY)
+  //console.log("Showing fb popup with parent y=" + this.parentY)
   const overlayType = Overlay.types.inputPad;
   this.innerWidth = FBPopup.innerWidth;
   this.innerHeight = this.innerWidth * heightToWidthRatio;
@@ -42,11 +42,12 @@ FBPopup.prototype.show = function(heightToWidthRatio) {
 
 FBPopup.prototype.close = function() {
   console.log("called close")
+  FBPopup.isEditingText = false;
 	this.bubbleOverlay.hide();
 }
 
 FBPopup.prototype.addConfirmCancelBns = function() {
-  console.log("adding buttons")
+  //console.log("adding buttons")
   const r = TitleBar.defaultCornerRounding;
   const buttonW = this.innerWidth/3;
   const buttonH = buttonW * 2/5;

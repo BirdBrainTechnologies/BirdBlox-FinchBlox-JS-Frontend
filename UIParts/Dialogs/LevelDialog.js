@@ -85,7 +85,7 @@ LevelDialog.prototype.createContent = function() {
         break;
     }
     //button.setCallbackFunction(function(){this.setLevel(i);}.bind(this), false);
-    button.setCallbackFunction(function(){this.closeDialog();}.bind(this), true);
+    button.setCallbackFunction(function(){this.close();}.bind(this), true);
 
     this.buttons.push(button);
     //x+= bnDim + 1.5*margin;
@@ -118,16 +118,21 @@ LevelDialog.prototype.highlightSelected = function() {
   }
 }
 
-  /**
-   * Removes the dialog from view and unblocks the ui behind it.
-   */
-LevelDialog.prototype.closeDialog = function() {
-	if (this.visible) {
+LevelDialog.prototype.close = function() {
+  if (this.visible) {
     this.visible = false;
 		this.group.remove();
     if (RowDialog.currentDialog === this) {
 			RowDialog.currentDialog = null;
 		}
-		//GuiElements.unblockInteraction();
 	}
+}
+
+/**
+ * Removes the dialog from view and unblocks the ui behind it.
+ */
+LevelDialog.prototype.closeDialog = function() {
+  console.log("LevelDialog.prototype.closeDialog")
+	this.close();
+  GuiElements.unblockInteraction();
 }

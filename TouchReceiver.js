@@ -345,21 +345,8 @@ TouchReceiver.touchStartSlider = function(target, e) {
 		e.stopPropagation();
 	}
 };
-TouchReceiver.touchStartEditText = function(target, e, element) {
-  const TR = TouchReceiver;
-  //console.log("touch start edit text");
-  //console.log(target);
-  //console.log(e);
-  //console.log(element);
-  //element.focus();
+TouchReceiver.touchStartEditText = function(target, e) {
   target.editText();
-	/*if (TR.touchstart(e, false)) {
-		TR.targetType = "editText";
-		TR.target = target;
-
-    //target.focus();
-		//e.stopPropagation();
-	}*/
 }
 /**
  * @param {event} e
@@ -456,7 +443,8 @@ TouchReceiver.touchEndDialogBlock = function(e) {
 	}
   if (FinchBlox) {
     Overlay.closeOverlays();
-    GuiElements.unblockInteraction();
+    //GuiElements.unblockInteraction();
+
   }
 }
 
@@ -809,7 +797,7 @@ TouchReceiver.addListenersEditText = function(element, parent) {
   const TR = TouchReceiver;
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		// When it is touched, the SVG element will tell the TouchReceiver.
-		TouchReceiver.touchStartEditText(parent, e, element);
+		TouchReceiver.touchStartEditText(parent, e);
 	}, false);
 }
 /**

@@ -72,6 +72,7 @@ LevelManager.checkSavedFiles = function() {
 
 LevelManager.loadLevelSavePoint = function() {
   const LM = LevelManager;
+  GuiElements.blockInteraction();
   console.log("loadLevelSavePoint for level " + LM.currentLevel);
   const levelFileName = LM.savePointFileNames[LM.currentLevel];
   if (!LM.fileListRetreived) {
@@ -111,22 +112,29 @@ LevelManager.loadLevelSavePoint = function() {
  * named file that will appear in the file list.
  *
  * @param  {string} name name to give this file
+ * @param {boolean} rename rename a currently saved file if true
  */
-LevelManager.saveAs = function(name) {
+LevelManager.saveAs = function(name, rename) {
   const LM = LevelManager
+  const currentFile = SaveManager.fileName;
   const currentLevelFile = LM.savePointFileNames[LM.currentLevel];
   const fileName = name.trim() + LM.fileLevelSuffixes[LM.currentLevel];
   //Check to be sure the current level save point is the file that is open
-  if (SaveManager.fileName != currentLevelFile) {
+  if (currentFile != currentLevelFile && !rename) {
     console.log("Tried to rename file with " + SaveManager.fileName + " open instead of " + currentLevelFile);
     return;
   }
-  console.log("Rename " + currentLevelFile + " to " + fileName);
-  SaveManager.sanitizeRename(false, currentLevelFile, "", fileName, function () {
-    const index = LM.filesSavedLocally.indexOf(currentLevelFile);
+  //console.log("Rename " + currentLevelFile + " to " + fileName);
+  GuiElements.blockInteraction();
+  console.log("Rename " + currentFile + " to " + fileName);
+  //SaveManager.sanitizeRename(false, currentLevelFile, "", fileName, function () {
+  SaveManager.sanitizeRename(false, currentFile, "", fileName, function () {
+    //const index = LM.filesSavedLocally.indexOf(currentLevelFile);
+    const index = LM.filesSavedLocally.indexOf(currentFile);
     if (index > -1) { LM.filesSavedLocally.splice(index, 1); }
     LM.filesSavedLocally.push(fileName);
-    console.log("Renamed " + currentLevelFile + " to " + fileName);
+    //console.log("Renamed " + currentLevelFile + " to " + fileName);
+    console.log("Renamed " + currentFile + " to " + fileName);
     console.log(LM.filesSavedLocally);
     TitleBar.fileBn.update();
   });
@@ -139,15 +147,16 @@ LevelManager.openFile = function(fileName) {
     console.log("Unsupported level  " + fileLevel);
     return;
   }
-
+  GuiElements.blockInteraction();
   LevelManager.setLevel(fileLevel);
   SaveManager.userOpenFile(fileName);
 }
 
 LevelManager.userDeleteFile = function(fileName) {
-  if (fileName == SaveManager.fileName) {
+  /*if (fileName == SaveManager.fileName) {
     LevelManager.loadLevelSavePoint();
-  }
+  }*/
+  GuiElements.blockInteraction();
   for (let i = 0; i < LevelManager.filesSavedLocally.length; i++) {
     if (LevelManager.filesSavedLocally[i] == fileName) {
       LevelManager.filesSavedLocally.splice(i, 1);
