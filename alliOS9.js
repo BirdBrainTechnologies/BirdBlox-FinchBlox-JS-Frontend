@@ -2273,7 +2273,7 @@ Language.en = {
 "facedown":"Facedown",
 "portrait_bottom":"Portrait: Camera on bottom",
 "portrait_top":"Portrait: Camera on top",
-"landscape_left":"Lanscape: Camera on left",
+"landscape_left":"Landscape: Camera on left",
 "landscape_right":"Landscape: Camera on right",
 "block_Display":"Display (Slot 1 = Hello) at (Slot 2)",
 "position":"Position",
@@ -5871,6 +5871,7 @@ DeviceFlutter.getConnectionInstructions = function() {
  */
 function DeviceFinch(name, id, RSSI, device) {
 	DeviceWithPorts.call(this, name, id, RSSI, device);
+	this.isMoving = false; //FinchBlox
 }
 DeviceFinch.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");
@@ -32938,7 +32939,8 @@ B_FinchSetMotorsAndWait.prototype.sendCheckMoving = function() {
 };
 B_FinchSetMotorsAndWait.prototype.checkMoving = function() {
 	var isMoving = (this.runMem.requestStatus.result === "1");
-	if (this.wasMoving && !isMoving) {
+	var moveStartTimedOut = (new Date().getTime() > this.moveSentTime + 500);
+	if ((this.wasMoving || moveStartTimedOut) && !isMoving) {
 		return new ExecutionStatusDone();
 	}
 	this.wasMoving = isMoving;
@@ -32953,6 +32955,7 @@ B_FinchSetMotorsAndWait.prototype.updateAction = function() {
 			return new ExecutionStatusError();
 		} else if (!this.moveSent) {
 			this.wasMoving = (status.result === "1");
+			this.moveSentTime = new Date().getTime();
 			var device = this.setupAction();
 			if (device == null) {
 				return new ExecutionStatusError(); // Device was invalid, exit early
@@ -33736,20 +33739,21 @@ B_FBMotion.prototype.setupAction = function() {
 	return device;
 };
 B_FBMotion.prototype.sendCheckMoving = function() {
-	var device = this.setupAction();
-	if (device == null) {
+	this.device = this.setupAction();
+	if (this.device == null) {
 		return new ExecutionStatusDone(); // Device was invalid, exit early
 	}
 
-	device.readSensor(this.runMem.requestStatus, "isMoving");
+	this.device.readSensor(this.runMem.requestStatus, "isMoving");
 	return new ExecutionStatusRunning();
 };
 B_FBMotion.prototype.checkMoving = function() {
-	var isMoving = (this.runMem.requestStatus.result === "1");
-	if (this.wasMoving && !isMoving) {
+	this.device.isMoving = (this.runMem.requestStatus.result === "1");
+  var moveStartTimedOut = (new Date().getTime() > this.moveSentTime + 500);
+	if ((this.wasMoving || moveStartTimedOut) && !this.device.isMoving) {
 		return new ExecutionStatusDone();
 	}
-	this.wasMoving = isMoving;
+	this.wasMoving = this.device.isMoving;
 
 	return this.sendCheckMoving();
 }
@@ -33765,11 +33769,12 @@ B_FBMotion.prototype.updateAction = function () {
       return new ExecutionStatusError();
 		} else if (!this.moveSent) {
       this.wasMoving = (status.result === "1");
-      var device = this.setupAction();
-			if (device == null) {
+      this.moveSentTime = new Date().getTime();
+      this.device = this.setupAction();
+			if (this.device == null) {
         return new ExecutionStatusDone();
       }
-      device.setMotors(this.runMem.requestStatus, this.leftSpeed, this.leftTicks, this.rightSpeed, this.rightTicks);
+      this.device.setMotors(this.runMem.requestStatus, this.leftSpeed, this.leftTicks, this.rightSpeed, this.rightTicks);
       this.moveSent = true;
 			return new ExecutionStatusRunning();
     } else if (!this.moveSendFinished) {
@@ -33999,6 +34004,7 @@ B_FBSensorBlock.prototype.startAction = function () {
   var device = DeviceFinch.getManager().getDevice(0);
   if (device != null) {
     device.setMotors(this.runMem.requestStatus, this.speed, 0, this.speed, 0);
+    device.isMoving = true;
   } else {
     TitleBar.flashFinchButton();
     return new ExecutionStatusDone();
@@ -34018,10 +34024,12 @@ B_FBSensorBlock.prototype.updateAction = function () {
       }
 			var result = new StringData(status.result);
 			var num = (result.asNum().getValue());
-			if (num < this.threshold) {
-        var device = DeviceFinch.getManager().getDevice(0);
-        if (device != null) {
+      var pastThreshold = (num < this.threshold);
+      var device = DeviceFinch.getManager().getDevice(0);
+      if (pastThreshold || (device != null && !device.isMoving) || device == null) {
+			  if (pastThreshold && device != null) {
           device.setMotors(this.runMem.requestStatus, 0, 0, 0, 0);
+          device.isMoving = false;
         }
 				return new ExecutionStatusDone();
 			} else {

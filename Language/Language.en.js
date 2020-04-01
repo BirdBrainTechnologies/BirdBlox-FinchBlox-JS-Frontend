@@ -45,7 +45,7 @@ Language.en = {
 "facedown":"Facedown",
 "portrait_bottom":"Portrait: Camera on bottom",
 "portrait_top":"Portrait: Camera on top",
-"landscape_left":"Lanscape: Camera on left",
+"landscape_left":"Landscape: Camera on left",
 "landscape_right":"Landscape: Camera on right",
 "block_Display":"Display (Slot 1 = Hello) at (Slot 2)",
 "position":"Position",

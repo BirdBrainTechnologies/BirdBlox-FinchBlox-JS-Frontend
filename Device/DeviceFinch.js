@@ -6,6 +6,7 @@
  */
 function DeviceFinch(name, id, RSSI, device) {
 	DeviceWithPorts.call(this, name, id, RSSI, device);
+	this.isMoving = false; //FinchBlox
 }
 DeviceFinch.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");

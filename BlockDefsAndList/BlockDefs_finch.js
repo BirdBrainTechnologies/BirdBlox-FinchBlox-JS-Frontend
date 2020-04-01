@@ -53,7 +53,8 @@ B_FinchSetMotorsAndWait.prototype.sendCheckMoving = function() {
 };
 B_FinchSetMotorsAndWait.prototype.checkMoving = function() {
 	const isMoving = (this.runMem.requestStatus.result === "1");
-	if (this.wasMoving && !isMoving) {
+	const moveStartTimedOut = (new Date().getTime() > this.moveSentTime + 500);
+	if ((this.wasMoving || moveStartTimedOut) && !isMoving) {
 		return new ExecutionStatusDone();
 	}
 	this.wasMoving = isMoving;
@@ -68,6 +69,7 @@ B_FinchSetMotorsAndWait.prototype.updateAction = function() {
 			return new ExecutionStatusError();
 		} else if (!this.moveSent) {
 			this.wasMoving = (status.result === "1");
+			this.moveSentTime = new Date().getTime();
 			let device = this.setupAction();
 			if (device == null) {
 				return new ExecutionStatusError(); // Device was invalid, exit early

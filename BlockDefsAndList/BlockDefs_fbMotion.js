@@ -38,20 +38,21 @@ B_FBMotion.prototype.setupAction = function() {
 	return device;
 };
 B_FBMotion.prototype.sendCheckMoving = function() {
-	let device = this.setupAction();
-	if (device == null) {
+	this.device = this.setupAction();
+	if (this.device == null) {
 		return new ExecutionStatusDone(); // Device was invalid, exit early
 	}
 
-	device.readSensor(this.runMem.requestStatus, "isMoving");
+	this.device.readSensor(this.runMem.requestStatus, "isMoving");
 	return new ExecutionStatusRunning();
 };
 B_FBMotion.prototype.checkMoving = function() {
-	const isMoving = (this.runMem.requestStatus.result === "1");
-	if (this.wasMoving && !isMoving) {
+	this.device.isMoving = (this.runMem.requestStatus.result === "1");
+  const moveStartTimedOut = (new Date().getTime() > this.moveSentTime + 500);
+	if ((this.wasMoving || moveStartTimedOut) && !this.device.isMoving) {
 		return new ExecutionStatusDone();
 	}
-	this.wasMoving = isMoving;
+	this.wasMoving = this.device.isMoving;
 
 	return this.sendCheckMoving();
 }
@@ -67,11 +68,12 @@ B_FBMotion.prototype.updateAction = function () {
       return new ExecutionStatusError();
 		} else if (!this.moveSent) {
       this.wasMoving = (status.result === "1");
-      let device = this.setupAction();
-			if (device == null) {
+      this.moveSentTime = new Date().getTime();
+      this.device = this.setupAction();
+			if (this.device == null) {
         return new ExecutionStatusDone();
       }
-      device.setMotors(this.runMem.requestStatus, this.leftSpeed, this.leftTicks, this.rightSpeed, this.rightTicks);
+      this.device.setMotors(this.runMem.requestStatus, this.leftSpeed, this.leftTicks, this.rightSpeed, this.rightTicks);
       this.moveSent = true;
 			return new ExecutionStatusRunning();
     } else if (!this.moveSendFinished) {
@@ -301,6 +303,7 @@ B_FBSensorBlock.prototype.startAction = function () {
   let device = DeviceFinch.getManager().getDevice(0);
   if (device != null) {
     device.setMotors(this.runMem.requestStatus, this.speed, 0, this.speed, 0);
+    device.isMoving = true;
   } else {
     TitleBar.flashFinchButton();
     return new ExecutionStatusDone();
@@ -320,10 +323,12 @@ B_FBSensorBlock.prototype.updateAction = function () {
       }
 			const result = new StringData(status.result);
 			const num = (result.asNum().getValue());
-			if (num < this.threshold) {
-        let device = DeviceFinch.getManager().getDevice(0);
-        if (device != null) {
+      const pastThreshold = (num < this.threshold);
+      let device = DeviceFinch.getManager().getDevice(0);
+      if (pastThreshold || (device != null && !device.isMoving) || device == null) {
+			  if (pastThreshold && device != null) {
           device.setMotors(this.runMem.requestStatus, 0, 0, 0, 0);
+          device.isMoving = false;
         }
 				return new ExecutionStatusDone();
 			} else {
