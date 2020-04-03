@@ -42,8 +42,12 @@ FBPopup.prototype.show = function(heightToWidthRatio) {
 
 FBPopup.prototype.close = function() {
   console.log("called close")
+  this.bubbleOverlay.hide();
+  if (FBPopup.isEditingText && GuiElements.isAndroid) {
+    HtmlServer.sendRequestWithCallback("ui/hideNavigationBar");
+  }
   FBPopup.isEditingText = false;
-	this.bubbleOverlay.hide();
+
 }
 
 FBPopup.prototype.addConfirmCancelBns = function() {

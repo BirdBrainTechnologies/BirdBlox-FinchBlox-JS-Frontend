@@ -16530,8 +16530,12 @@ FBPopup.prototype.show = function(heightToWidthRatio) {
 
 FBPopup.prototype.close = function() {
   console.log("called close")
+  this.bubbleOverlay.hide();
+  if (FBPopup.isEditingText && GuiElements.isAndroid) {
+    HtmlServer.sendRequestWithCallback("ui/hideNavigationBar");
+  }
   FBPopup.isEditingText = false;
-	this.bubbleOverlay.hide();
+
 }
 
 FBPopup.prototype.addConfirmCancelBns = function() {
@@ -16669,8 +16673,8 @@ FBFileSelect.prototype.createRow = function(index, y, width, contentGroup) {
   var trashY = (button.height - trashH)/2;
   var trashBn = new Button(trashX, trashY, trashW, trashH, button.group, color);
   trashBn.addColorIcon(FBPopup.trashIcon, trashH, FBPopup.trashColor);
+  trashBn.partOfOverlay = this.bubbleOverlay;
   trashBn.setCallbackFunction(function () {
-    console.log("pressed the trash button")
     this.close();
     var cd = new FBConfirmDelete(this.parentX, this.parentY, this.parentW, this.parentH, this.parentGroup, fileName)
     //console.log(cd)
@@ -26201,6 +26205,7 @@ LevelManager.saveAs = function(name, rename) {
     console.log("Renamed " + currentFile + " to " + fileName);
     console.log(LM.filesSavedLocally);
     TitleBar.fileBn.update();
+    if (GuiElements.isAndroid) { GuiElements.unblockInteraction(); }
   });
 }
 

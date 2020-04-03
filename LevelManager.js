@@ -137,6 +137,7 @@ LevelManager.saveAs = function(name, rename) {
     console.log("Renamed " + currentFile + " to " + fileName);
     console.log(LM.filesSavedLocally);
     TitleBar.fileBn.update();
+    if (GuiElements.isAndroid) { GuiElements.unblockInteraction(); }
   });
 }
 

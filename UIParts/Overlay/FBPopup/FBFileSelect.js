@@ -101,8 +101,8 @@ FBFileSelect.prototype.createRow = function(index, y, width, contentGroup) {
   const trashY = (button.height - trashH)/2;
   const trashBn = new Button(trashX, trashY, trashW, trashH, button.group, color);
   trashBn.addColorIcon(FBPopup.trashIcon, trashH, FBPopup.trashColor);
+  trashBn.partOfOverlay = this.bubbleOverlay;
   trashBn.setCallbackFunction(function () {
-    console.log("pressed the trash button")
     this.close();
     const cd = new FBConfirmDelete(this.parentX, this.parentY, this.parentW, this.parentH, this.parentGroup, fileName)
     //console.log(cd)
