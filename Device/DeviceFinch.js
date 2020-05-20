@@ -74,15 +74,20 @@ DeviceFinch.prototype.setMotors = function(status, speedL, ticksL, speedR, ticks
 	if (speedR > 100) { speedR = 100; }
 	if (speedR < -100) { speedR = -100; }
 
-	//let ticksL = Math.round(distL * ticksPerCM);
-	//let ticksR = Math.round(distR * ticksPerCM);
+	//scale speeds
+	speedL = Math.round(speedL * speedScaling);
+	speedR = Math.round(speedR * speedScaling);
+
+	//to make sure finch still moves at low numbers, give min value of 3
+	if (speedL > 0 && speedL < 3) { speedL = 3; }
+	if (speedR > 0 && speedR < 3) { speedR = 3; }
 
 	const request = new HttpRequestBuilder("robot/out/motors");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
-	request.addParam("speedL", Math.round(speedL * speedScaling));
+	request.addParam("speedL", speedL);
 	request.addParam("ticksL", ticksL);
-	request.addParam("speedR", Math.round(speedR * speedScaling));
+	request.addParam("speedR", speedR);
 	request.addParam("ticksR", ticksR);
 	//Since these requests may wait for a response from the finch, the second
 	// true here keeps the request from timing out

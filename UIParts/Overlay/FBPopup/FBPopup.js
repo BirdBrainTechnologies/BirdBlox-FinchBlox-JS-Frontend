@@ -57,8 +57,8 @@ FBPopup.prototype.addConfirmCancelBns = function() {
   const buttonH = buttonW * 2/5;
   const iconH = buttonH*2/3;
   const buttonMargin = this.innerWidth / 20;
-  const confirmX = this.innerWidth/2 - buttonW - buttonMargin/2;
-  const cancelX = this.innerWidth/2 + buttonMargin/2;
+  const cancelX = this.innerWidth/2 - buttonW - buttonMargin/2;
+  const confirmX = this.innerWidth/2 + buttonMargin/2;
   const buttonY = this.innerHeight - buttonH; //- FBPopup.bubbleMargin;
 
   this.confirmBn = new Button(confirmX, buttonY, buttonW, buttonH, this.innerGroup, Colors.flagGreen, r, r);

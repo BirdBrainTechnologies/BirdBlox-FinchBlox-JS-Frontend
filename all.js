@@ -5940,15 +5940,20 @@ DeviceFinch.prototype.setMotors = function(status, speedL, ticksL, speedR, ticks
 	if (speedR > 100) { speedR = 100; }
 	if (speedR < -100) { speedR = -100; }
 
-	//let ticksL = Math.round(distL * ticksPerCM);
-	//let ticksR = Math.round(distR * ticksPerCM);
+	//scale speeds
+	speedL = Math.round(speedL * speedScaling);
+	speedR = Math.round(speedR * speedScaling);
+
+	//to make sure finch still moves at low numbers, give min value of 3
+	if (speedL > 0 && speedL < 3) { speedL = 3; }
+	if (speedR > 0 && speedR < 3) { speedR = 3; }
 
 	const request = new HttpRequestBuilder("robot/out/motors");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
-	request.addParam("speedL", Math.round(speedL * speedScaling));
+	request.addParam("speedL", speedL);
 	request.addParam("ticksL", ticksL);
-	request.addParam("speedR", Math.round(speedR * speedScaling));
+	request.addParam("speedR", speedR);
 	request.addParam("ticksR", ticksR);
 	//Since these requests may wait for a response from the finch, the second
 	// true here keeps the request from timing out
@@ -16546,8 +16551,8 @@ FBPopup.prototype.addConfirmCancelBns = function() {
   const buttonH = buttonW * 2/5;
   const iconH = buttonH*2/3;
   const buttonMargin = this.innerWidth / 20;
-  const confirmX = this.innerWidth/2 - buttonW - buttonMargin/2;
-  const cancelX = this.innerWidth/2 + buttonMargin/2;
+  const cancelX = this.innerWidth/2 - buttonW - buttonMargin/2;
+  const confirmX = this.innerWidth/2 + buttonMargin/2;
   const buttonY = this.innerHeight - buttonH; //- FBPopup.bubbleMargin;
 
   this.confirmBn = new Button(confirmX, buttonY, buttonW, buttonH, this.innerGroup, Colors.flagGreen, r, r);
@@ -32960,6 +32965,9 @@ B_FinchSetMotorsAndWait.prototype.updateAction = function() {
 			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		} else if (!this.moveSent) {
+			if (this.moveTicks == 0) { //ticks=0 is command for continuous motion.
+				return new ExecutionStatusDone();
+			}
 			this.wasMoving = (status.result === "1");
 			this.moveSentTime = new Date().getTime();
 			let device = this.setupAction();
@@ -32992,7 +33000,7 @@ function B_FinchMove(x, y) {
 	this.addPart(ds);
 
 	const distSlot = new NumSlot(this, "Num_dist", 10, true, true);
-	distSlot.addLimits(0, 500);
+	distSlot.addLimits(0, 10000);
 	this.addPart(distSlot);
 
 	const speedSlot = new NumSlot(this, "Num_speed", 50, true, true);
@@ -33032,7 +33040,7 @@ function B_FinchTurn(x, y) {
 	this.addPart(ds);
 
 	const angleSlot = new NumSlot(this, "Num_dist", 90, true, true);
-	angleSlot.addLimits(0, 180);
+	angleSlot.addLimits(0, 360000);
 	this.addPart(angleSlot);
 
 	const speedSlot = new NumSlot(this, "Num_speed", 50, true, true);
@@ -33210,8 +33218,27 @@ B_FinchResetEncoders.prototype.startAction = function() {
 		return new ExecutionStatusError(); // Device was invalid, exit early
 	}
 
+	this.runMem.timerStarted = false;
 	device.resetEncoders(this.runMem.requestStatus);
 	return new ExecutionStatusRunning();
+}
+B_FinchResetEncoders.prototype.updateAction = function() {
+	const mem = this.runMem;
+  if (!mem.timerStarted) {
+      const status = mem.requestStatus;
+      if (status.finished === true) {
+          mem.startTime = new Date().getTime();
+          mem.timerStarted = true;
+      } else {
+          return new ExecutionStatusRunning(); // Still running
+      }
+  }
+	//This block runs for a short time to allow the finch to have a chance to reset.
+  if (new Date().getTime() >= mem.startTime + 100) {
+      return new ExecutionStatusDone(); // Done running
+  } else {
+      return new ExecutionStatusRunning(); // Still running
+  }
 }
 
 /**

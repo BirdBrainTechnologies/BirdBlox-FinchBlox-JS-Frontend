@@ -68,6 +68,9 @@ B_FinchSetMotorsAndWait.prototype.updateAction = function() {
 			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		} else if (!this.moveSent) {
+			if (this.moveTicks == 0) { //ticks=0 is command for continuous motion.
+				return new ExecutionStatusDone();
+			}
 			this.wasMoving = (status.result === "1");
 			this.moveSentTime = new Date().getTime();
 			let device = this.setupAction();
@@ -100,7 +103,7 @@ function B_FinchMove(x, y) {
 	this.addPart(ds);
 
 	const distSlot = new NumSlot(this, "Num_dist", 10, true, true);
-	distSlot.addLimits(0, 500);
+	distSlot.addLimits(0, 10000);
 	this.addPart(distSlot);
 
 	const speedSlot = new NumSlot(this, "Num_speed", 50, true, true);
@@ -140,7 +143,7 @@ function B_FinchTurn(x, y) {
 	this.addPart(ds);
 
 	const angleSlot = new NumSlot(this, "Num_dist", 90, true, true);
-	angleSlot.addLimits(0, 180);
+	angleSlot.addLimits(0, 360000);
 	this.addPart(angleSlot);
 
 	const speedSlot = new NumSlot(this, "Num_speed", 50, true, true);
@@ -318,8 +321,27 @@ B_FinchResetEncoders.prototype.startAction = function() {
 		return new ExecutionStatusError(); // Device was invalid, exit early
 	}
 
+	this.runMem.timerStarted = false;
 	device.resetEncoders(this.runMem.requestStatus);
 	return new ExecutionStatusRunning();
+}
+B_FinchResetEncoders.prototype.updateAction = function() {
+	const mem = this.runMem;
+  if (!mem.timerStarted) {
+      const status = mem.requestStatus;
+      if (status.finished === true) {
+          mem.startTime = new Date().getTime();
+          mem.timerStarted = true;
+      } else {
+          return new ExecutionStatusRunning(); // Still running
+      }
+  }
+	//This block runs for a short time to allow the finch to have a chance to reset.
+  if (new Date().getTime() >= mem.startTime + 100) {
+      return new ExecutionStatusDone(); // Done running
+  } else {
+      return new ExecutionStatusRunning(); // Still running
+  }
 }
 
 /**
