@@ -80,7 +80,9 @@ DeviceFinch.prototype.setMotors = function(status, speedL, ticksL, speedR, ticks
 
 	//to make sure finch still moves at low numbers, give min value of 3
 	if (speedL > 0 && speedL < 3) { speedL = 3; }
+	if (speedL < 0 && speedL > -3) { speedL = -3; }
 	if (speedR > 0 && speedR < 3) { speedR = 3; }
+	if (speedR < 0 && speedR > -3) { speedR = -3; }
 
 	const request = new HttpRequestBuilder("robot/out/motors");
 	request.addParam("type", this.getDeviceTypeId());

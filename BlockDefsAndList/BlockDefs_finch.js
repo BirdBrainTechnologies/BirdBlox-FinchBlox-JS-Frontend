@@ -355,6 +355,7 @@ function B_FinchSensorBase(x, y) {
 	this.scalingFactor = 1 //multiply result by this value
 	this.displayDecimalPlaces = 0 //display this many digits after the decimal
 	this.invert = false //invert the final value (return 100 - value)
+	this.capResult = false //Keep result in range of 0 to 100
 }
 B_FinchSensorBase.prototype = Object.create(ReporterBlock.prototype);
 B_FinchSensorBase.prototype.constructor = B_FinchSensorBase;
@@ -384,6 +385,7 @@ B_FinchSensorBase.prototype.updateAction = function(){
 			const fact = Math.pow(10, this.displayDecimalPlaces)
 			var rounded = Math.round(num * fact) / fact;
 			if (this.invert) { rounded = 100 - rounded; }
+			if (this.capResult) { rounded = Math.min(100, Math.max(0, rounded)) }
 			return new ExecutionStatusResult(new NumData(rounded));
 		}
 	}
@@ -467,6 +469,7 @@ function B_FinchLine(x, y) {
 	this.offset = 6;
 	this.scalingFactor = 100/121;
 	this.invert = true;
+	this.capResult = true;
 
 	const ds = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Right"), "right"));
 	ds.addOption(new SelectionData(Language.getStr("Right"), "right"));
