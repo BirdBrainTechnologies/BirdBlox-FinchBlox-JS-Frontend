@@ -442,6 +442,7 @@ Block.setDisplaySuffix(B_FinchDistance, "cm");
 
 function B_FinchLight(x, y) {
 	B_FinchSensorBase.call(this, x, y);
+	this.capResult = true;
 
 	const ds = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Right"), "right"));
 	ds.addOption(new SelectionData(Language.getStr("Right"), "right"));

@@ -65,6 +65,9 @@ Language.setLanguage = function(lang) {
  */
 Language.getStr = function(str) {
     let translatedStr = eval("Language." + Language.lang + "." + str);
+    if (translatedStr == null && !DebugOptions.enabled) {
+      translatedStr = eval("Language.en." + str);
+    }
     if (translatedStr != null) {
         return translatedStr;
     } else {

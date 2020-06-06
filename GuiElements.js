@@ -456,6 +456,8 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group) {
 
   const editableText = document.createElement('div');
   editableText.setAttribute("contentEditable", "true");
+	editableText.setAttribute("spellcheck", "false");
+	editableText.setAttribute("autocomplete", "off");
   editableText.setAttribute("width", w);
   editableText.setAttribute("style", "pointer-events: auto; -webkit-user-select: auto;");
   editableText.style.display = "block";

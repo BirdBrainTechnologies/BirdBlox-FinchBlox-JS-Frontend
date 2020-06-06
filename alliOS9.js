@@ -1364,6 +1364,9 @@ Language.setLanguage = function(lang) {
  */
 Language.getStr = function(str) {
     var translatedStr = eval("Language." + Language.lang + "." + str);
+    if (translatedStr == null && !DebugOptions.enabled) {
+      translatedStr = eval("Language.en." + str);
+    }
     if (translatedStr != null) {
         return translatedStr;
     } else {
@@ -6525,6 +6528,8 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group) {
 
   var editableText = document.createElement('div');
   editableText.setAttribute("contentEditable", "true");
+	editableText.setAttribute("spellcheck", "false");
+	editableText.setAttribute("autocomplete", "off");
   editableText.setAttribute("width", w);
   editableText.setAttribute("style", "pointer-events: auto; -webkit-user-select: auto;");
   editableText.style.display = "block";
@@ -33340,6 +33345,7 @@ Block.setDisplaySuffix(B_FinchDistance, "cm");
 
 function B_FinchLight(x, y) {
 	B_FinchSensorBase.call(this, x, y);
+	this.capResult = true;
 
 	var ds = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Right"), "right"));
 	ds.addOption(new SelectionData(Language.getStr("Right"), "right"));
