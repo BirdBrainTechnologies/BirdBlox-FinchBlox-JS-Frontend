@@ -207,5 +207,21 @@ Language.he = {
   "CM":"סיימ",
   "Inch":"אינץ",
   "block_subtract":"(Slot 1) – (Slot 2)",
-  "block_divide":"(Slot 1) / (Slot 2)"
+  "block_divide":"(Slot 1) / (Slot 2)",
+  "block_finch_move":"זוז (Slot 1) (Slot 2) ס''מ ב (Slot 3) %",
+"block_finch_turn":"הסתובב (Slot 1) (Slot 2) מעלות ב (Slot 3) %",
+"block_finch_motors":"גלגלים שמאל (Slot 1) % ימין (Slot 2) %",
+"block_finch_beak":"מקור אדום (Slot 1) % ירוק (Slot 2) % כחול (Slot 3) %",
+"block_finch_tail":"זנב (Slot 1) אדום (Slot 2) % ירוק (Slot 3) % כחול (Slot 4) %",
+"block_finch_reset_encoders":"לאפס קודאי",
+"block_encoder":"(Slot 1) קודאי",
+"Line":"קו",
+"Forward":"קדימה",
+"Backward":"אחורה",
+"Right":"ימינה",
+"Left":"שמאלה",
+"Beak_Up":"לעלות את המקור",
+"Beak_Down":"להוריד את המקור",
+"Finch_Is_Level":"רמה",
+"Upside_Down":"הפוך"
 }

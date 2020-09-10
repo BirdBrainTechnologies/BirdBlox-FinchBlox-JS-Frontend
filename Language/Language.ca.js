@@ -209,5 +209,21 @@ Language.ca = {
 "CM":"cm",
 "Inch":"polzades",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"Mou-te (Slot 2) cm cap (Slot 1) a velocitat (Slot 3) %",
+"block_finch_turn":"Gira (Slot 2) ° cap a la (Slot 1) a velocitat (Slot 3) %",
+"block_finch_motors":"Posa les rodes a velocitat E (Slot 1) % D (Slot 2) %",
+"block_finch_beak":"Encén el bec de color R (Slot 1) % G (Slot 2) % B (Slot 3) %",
+"block_finch_tail":"Encén la cua de color (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
+"block_finch_reset_encoders":"Reinicialitza els comptadors de voltes",
+"block_encoder":"Recompte de voltes (Slot 1)",
+"Line":"Línia",
+"Forward":"Endavant",
+"Backward":"Enrere",
+"Right":"Dreta",
+"Left":"Esquerra",
+"Beak_Up":"Bec cap amunt",
+"Beak_Down":"Bec cap avall",
+"Finch_Is_Level":"Horitzontal",
+"Upside_Down":"Cap per avall"
 }

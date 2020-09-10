@@ -209,5 +209,21 @@ Language.es = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"Mover (Slot 2) cm hacia (Slot 1) a velocidad (Slot 3) %",
+"block_finch_turn":"Girar (Slot 2) ° hacia la (Slot 1) a velocidad (Slot 3) %",
+"block_finch_motors":"Poner las ruedas a velocidad I (Slot 1) % D (Slot 2) %",
+"block_finch_beak":"Encender el pico de color R (Slot 1) % V (Slot 2) % A (Slot 3) %",
+"block_finch_tail":"Encender la cola de color (Slot 1) R (Slot 2) % V (Slot 3) % A (Slot 4) %",
+"block_finch_reset_encoders":"Reinicializar los contadores de vueltas",
+"block_encoder":"Recuento de vueltas (Slot 1)",
+"Line":"Línea",
+"Forward":"Adelante",
+"Backward":"Atrás",
+"Right":"Derecha",
+"Left":"Izquierda",
+"Beak_Up":"Pico hacia arriba",
+"Beak_Down":"Pico hacia abajo",
+"Finch_Is_Level":"Horizontal",
+"Upside_Down":"Boca abajo"
 }

@@ -209,5 +209,21 @@ Language.zht = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"移動  (Slot 1) (Slot 2) 厘米在 (Slot 3) %",
+"block_finch_turn":"轉動 (Slot 1) (Slot 2) °在 (Slot 3) %",
+"block_finch_motors":"車輪  左 (Slot 1) % 右 (Slot 2) %",
+"block_finch_beak":"鳥嘴 紅 (Slot 1) % 綠 (Slot 2) % 藍 (Slot 3)%",
+"block_finch_tail":"尾巴 (Slot 1) 紅 (Slot 2) % 綠 (Slot 3) % 藍 (Slot 4)%",
+"block_finch_reset_encoders":"重置編碼器",
+"block_encoder":"(Slot 1) 編碼器",
+"Line":"線",
+"Forward":"向前",
+"Backward":"向後",
+"Right":"右傾",
+"Left":"左傾",
+"Beak_Up":"向上",
+"Beak_Down":"向下",
+"Finch_Is_Level":"水平",
+"Upside_Down":"翻轉"
 }

@@ -207,5 +207,21 @@ Language.ko = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"(Slot 1) (Slot 2) cm 로 움직이기 빠르기 (Slot 3) %",
+"block_finch_turn":"(Slot 1) (Slot 2) ° 로 회전하기 빠르기 (Slot 3) %",
+"block_finch_motors":"바퀴 왼쪽 (Slot 1) % 오른쪽 (Slot 2) %",
+"block_finch_beak":"부리 빨강 (Slot 1) % 초록 (Slot 2) % 파랑 (Slot 3) %",
+"block_finch_tail":"꼬리 (Slot 1) 빨강 (Slot 2) % 초록 (Slot 3) % 파랑 (Slot 4) %",
+"block_finch_reset_encoders":"인코더 리셋하기",
+"block_encoder":"(Slot 1) 인코더",
+"Line":"선",
+"Forward":"앞으로",
+"Backward":"뒤로",
+"Right":"오른쪽",
+"Left":"왼쪽",
+"Beak_Up":"부리 위로",
+"Beak_Down":"부리 아래로",
+"Finch_Is_Level":"수평",
+"Upside_Down":"뒤짚힘"
 }

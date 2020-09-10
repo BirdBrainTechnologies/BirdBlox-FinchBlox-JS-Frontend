@@ -209,5 +209,21 @@ Language.nl = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"Beweeg (Slot 1) (Slot 2) cm op (Slot 3) %",
+"block_finch_turn":"Draai (Slot 1) (Slot 2) ° op (Slot 3) %",
+"block_finch_motors":"Wielen L (Slot 1) % R (Slot 2) %",
+"block_finch_beak":"Bek R (Slot 1) % G (Slot 2) % B (Slot 3)%",
+"block_finch_tail":"Staart (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4)%",
+"block_finch_reset_encoders":"Encoders Resetten",
+"block_encoder":"(Slot 1) Encoder",
+"Line":"Lijn",
+"Forward":"Vooruit",
+"Backward":"Achteruit",
+"Right":"Rechts",
+"Left":"Links",
+"Beak_Up":"Bek Omhoog",
+"Beak_Down":"Bek Omlaag",
+"Finch_Is_Level":"Horizontaal",
+"Upside_Down":"Ondersteboven"
 }

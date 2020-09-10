@@ -209,5 +209,21 @@ Language.de = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"Gehe (Slot 1) (Slot 2) cm mit (Slot 3) %",
+"block_finch_turn":"Drehe (Slot 1) (Slot 2) ° mit (Slot 3)%",
+"block_finch_motors":"Räder L (Slot 1)% R (Slot 2)%",
+"block_finch_beak":"Schnabel R (Slot 1) % G (Slot 2) % B (Slot 3) %",
+"block_finch_tail":"Schwanz (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4)%",
+"block_finch_reset_encoders":"Kodierer Zurücksetzen",
+"block_encoder":"(Slot 1) Kodierer",
+"Line":"Linie",
+"Forward":"Vorwärts",
+"Backward":"Rückwärts",
+"Right":"Rechts",
+"Left":"Links",
+"Beak_Up":"Schnabel Oben",
+"Beak_Down":"Schnabel Unten",
+"Finch_Is_Level":"Eben (Rücken oben)",
+"Upside_Down":"Umgedreht (Rücken unten)"
 }

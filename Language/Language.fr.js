@@ -209,5 +209,21 @@ Language.fr = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"Déplacer (Slot 1) (Slot 2) cm sur (Slot 3)%",
+"block_finch_turn":"Tournez (Slot 1) (Slot 2) ° à (Slot 3)%",
+"block_finch_motors":"Roues L (Slot 1)% R (Slot 2)%",
+"block_finch_beak":"Bec R (Slot 1) % G (Slot 2) % B (Slot 3)%",
+"block_finch_tail":"Queue (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4)%",
+"block_finch_reset_encoders":"Réinitialiser les encodeurs",
+"block_encoder":"(Slot 1) Encodeur",
+"Line":"Ligne",
+"Forward":"En avant",
+"Backward":"En arrière",
+"Right":"Droit",
+"Left":"Gauche",
+"Beak_Up":"Bec en haut",
+"Beak_Down":"Bec en bas",
+"Finch_Is_Level":"Horizontale",
+"Upside_Down":"À l'envers"
 }
