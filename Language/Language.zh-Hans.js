@@ -208,5 +208,21 @@ Language.zhs = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"以(Slot 3) % 移动 (Slot 1) (Slot 2) cm",
+"block_finch_turn":"以(Slot 3) % 转动 (Slot 1) (Slot 2) °",
+"block_finch_motors":"左轮(Slot 1) % 右轮(Slot 2) %",
+"block_finch_beak":"鸟喙 R (Slot 1) % G (Slot 2) % B (Slot 3)%",
+"block_finch_tail":"鸟尾(Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4)%",
+"block_finch_reset_encoders":"重置编码器",
+"block_encoder":"(Slot 1)编码器",
+"Line":"线",
+"Forward":"前进",
+"Backward":"后退",
+"Right":"右",
+"Left":"左",
+"Beak_Up":"喙部向上",
+"Beak_Down":"喙部向下",
+"Finch_Is_Level":"水平",
+"Upside_Down":"翻转"
 }
