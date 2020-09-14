@@ -38,7 +38,7 @@ Language.ar = {
   "block_Device_SSID":"قرص معرف مجموعه الخدمة",
   "block_Device_Pressure":"قرص الضغط",
   "block_Device_Relative_Altitude":"ارتفاع نسبي للجهاز اللوحي",
-  "block_Acceleration":"التسارع (Slot 1) الجهاز اللوحي",
+  "block_Acceleration":"(Slot 1) التسارع  الجهاز اللوحي",
   "Total":"المجموع",
   "block_Device_Orientation":"معاينة الجهاز",
   "faceup":"الوجه للأسفل",

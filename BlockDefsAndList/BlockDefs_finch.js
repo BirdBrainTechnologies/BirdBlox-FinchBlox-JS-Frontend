@@ -68,8 +68,12 @@ B_FinchSetMotorsAndWait.prototype.updateAction = function() {
 			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		} else if (!this.moveSent) {
-			if (this.moveTicks == 0) { //ticks=0 is command for continuous motion.
-				return new ExecutionStatusDone();
+			if (this.moveTicks <= 0) { //ticks=0 is command for continuous motion.
+				//return new ExecutionStatusDone();
+				// Make this a stop command in case the finch was already moving.
+				this.moveTicks = 0;
+				this.moveSpeedL = 0;
+				this.moveSpeedR = 0;
 			}
 			this.wasMoving = (status.result === "1");
 			this.moveSentTime = new Date().getTime();
@@ -81,6 +85,9 @@ B_FinchSetMotorsAndWait.prototype.updateAction = function() {
 			this.moveSent = true;
 			return new ExecutionStatusRunning();
 		} else if (!this.moveSendFinished) {
+			if (this.moveTicks == 0) {
+				return new ExecutionStatusDone();
+			}
 			this.moveSendFinished = true;
 			return this.sendCheckMoving();
 		} else {

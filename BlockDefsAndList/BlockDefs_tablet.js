@@ -175,14 +175,28 @@ Block.setDisplaySuffix(B_DeviceRelativeAltitude, "m");
 
 
 function B_DeviceOrientation(x, y) {
-	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
-	this.addPart(new LabelText(this, Language.getStr("block_Device_Orientation")));
+	//ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
+	//this.addPart(new LabelText(this, Language.getStr("block_Device_Orientation")));
+	PredicateBlock.call(this, x, y, "tablet");
+
+	const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("faceup"), "faceup"));
+  orientation.addOption(new SelectionData(Language.getStr("faceup"), "faceup"));
+  orientation.addOption(new SelectionData(Language.getStr("facedown"), "facedown"));
+  orientation.addOption(new SelectionData(Language.getStr("portrait_bottom"), "portrait_bottom"));
+  orientation.addOption(new SelectionData(Language.getStr("portrait_top"), "portrait_top"));
+  orientation.addOption(new SelectionData(Language.getStr("landscape_left"), "landscape_left"));
+  orientation.addOption(new SelectionData(Language.getStr("landscape_right"), "landscape_right"));
+  orientation.addOption(new SelectionData(Language.getStr("in_between"), "Other"));
+  this.addPart(orientation);
+
+	this.parseTranslation(Language.getStr("block_Device_Orientation"));
 }
 B_DeviceOrientation.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceOrientation.prototype.constructor = B_DeviceOrientation;
 /* Make the request. */
 B_DeviceOrientation.prototype.startAction = function() {
 	const mem = this.runMem;
+	mem.selection = this.slots[0].getData().getValue();
 	mem.request = "tablet/orientation";
 	mem.requestStatus = function() {};
 	HtmlServer.sendRequest(mem.request, mem.requestStatus);
@@ -194,7 +208,12 @@ B_DeviceOrientation.prototype.updateAction = function() {
 	const status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
-			const res = new StringData(Language.getStr(status.result), true);
+			const currentOrientation = status.result
+			let res = new BoolData(false);
+			if (currentOrientation == mem.selection) {
+				res = new BoolData(true);
+			}
+			//const res = new StringData(Language.getStr(status.result), true);
 			return new ExecutionStatusResult(res);
 		} else {
 			if (status.result.length > 0) {

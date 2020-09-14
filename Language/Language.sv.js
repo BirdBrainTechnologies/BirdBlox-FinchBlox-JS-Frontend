@@ -38,7 +38,7 @@ Language.sv = {
   "block_Device_SSID":"Tabettens SSID",
   "block_Device_Pressure":"Tablettens tryck",
   "block_Device_Relative_Altitude":"Tabelettens relativa höjd",
-  "block_Acceleration":"Tablettens (Slot 1) Acceleration",
+  "block_Acceleration":"Tablettens Accelerometer (Slot 1)",
   "Total":"Total",
   "block_Device_Orientation":"Tablettens orientering",
   "faceup":"Skärm upp",

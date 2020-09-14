@@ -1,5 +1,5 @@
 "use strict";
-var FinchBlox = true;
+var FinchBlox = false;
 const FrontendVersion = 393;
 
 
@@ -1416,7 +1416,7 @@ Language.ar = {
   "block_Device_SSID":"قرص معرف مجموعه الخدمة",
   "block_Device_Pressure":"قرص الضغط",
   "block_Device_Relative_Altitude":"ارتفاع نسبي للجهاز اللوحي",
-  "block_Acceleration":"التسارع (Slot 1) الجهاز اللوحي",
+  "block_Acceleration":"(Slot 1) التسارع  الجهاز اللوحي",
   "Total":"المجموع",
   "block_Device_Orientation":"معاينة الجهاز",
   "faceup":"الوجه للأسفل",
@@ -1630,15 +1630,16 @@ Language.ca = {
   "block_Device_SSID":"SSID de la tauleta",
   "block_Device_Pressure":"Pressió de la tauleta",
   "block_Device_Relative_Altitude":"Altitud relativa de la tauleta",
-  "block_Acceleration":"Acceleració (Slot 1) de la tauleta",
+  "block_Acceleration":"Tauleta Acceleròmetre (Slot 1)",
   "Total":"Total",
-  "block_Device_Orientation":"Orientació de la tauleta",
-  "faceup":"De cara amunt",
-  "facedown":"De cara avall",
-  "portrait_bottom":"Vertical: Càmera a dalt",
-  "portrait_top":"Vertical: Càmera a baix",
-  "landscape_left":"Apaïsat: Càmera a l'esquerra",
-  "landscape_right":"Apaïsat: Càmera a la dreta",
+  "block_Device_Orientation":"Tauleta (Slot 1)",
+  "faceup":"Pantalla cap per amunt",
+  "facedown":"Pantalla cap per avall",
+  "portrait_bottom":"Càmera a baix",
+  "portrait_top":"Càmera a dalt",
+  "landscape_left":"Càmera a l'esquerra",
+  "landscape_right":"Càmera a la dreta",
+  "in_between":"Altres",
   "block_Display":"Escriu (Slot 1 = Hola) a (Slot 2)",
   "position":"Posició",
   "block_ask":"pregunta (Slot 1 = Com et dius?) i espera",
@@ -1801,7 +1802,23 @@ Language.ca = {
 "CM":"cm",
 "Inch":"polzades",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"Mou-te (Slot 2) cm cap (Slot 1) a velocitat (Slot 3) %",
+"block_finch_turn":"Gira (Slot 2) ° cap a la (Slot 1) a velocitat (Slot 3) %",
+"block_finch_motors":"Posa les rodes a velocitat E (Slot 1) % D (Slot 2) %",
+"block_finch_beak":"Encén el bec de color R (Slot 1) % G (Slot 2) % B (Slot 3) %",
+"block_finch_tail":"Encén la cua de color (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
+"block_finch_reset_encoders":"Reinicialitza els comptadors de voltes",
+"block_encoder":"Recompte de voltes (Slot 1)",
+"Line":"Línia",
+"Forward":"Endavant",
+"Backward":"Enrere",
+"Right":"Dreta",
+"Left":"Esquerra",
+"Beak_Up":"Bec cap amunt",
+"Beak_Down":"Bec cap avall",
+"Finch_Is_Level":"Horitzontal",
+"Upside_Down":"Cap per avall"
 }
 
 //Danish Translation
@@ -1844,7 +1861,7 @@ Language.da = {
   "block_Device_SSID":"Enhed SSID",
   "block_Device_Pressure":"Enhed lufttryk",
   "block_Device_Relative_Altitude":"Enhed relativ højde",
-  "block_Acceleration":"Enhed (Slot 1) acceleration",
+  "block_Acceleration":"Enhed Accelerometer (Slot 1)",
   "Total":"Total",
   "block_Device_Orientation":"Enhed orientering",
   "faceup":"Skærm opad",
@@ -2056,15 +2073,16 @@ Language.de = {
   "block_Device_SSID":"Gerät SSID",
   "block_Device_Pressure":"Gerät Luftdruck",
   "block_Device_Relative_Altitude":"Gerät Relative Höhe",
-  "block_Acceleration":"Gerät (Slot 1) Beschleunigung",
+  "block_Acceleration":"Gerät Beschleunigungssensor (Slot 1)",
   "Total":"Gesamt",
-  "block_Device_Orientation":"Gerät-Ausrichtung",
-  "faceup":"Nach Oben",
-  "facedown":"Nach Unten",
-  "portrait_bottom":"Hochformat: Kamera oben",
-  "portrait_top":"Hochformat: Kamera unten",
-  "landscape_left":"Querformat: Kamera links",
-  "landscape_right":"Querformat: Kamera rechts",
+  "block_Device_Orientation":"Tablet (Slot 1)",
+  "faceup":"Anzeige Oben",
+  "facedown":"Anzeige Unten",
+  "portrait_bottom":"Kamera Oben",
+  "portrait_top":"Kamera Unten",
+  "landscape_left":"Kamera Links",
+  "landscape_right":"Kamera Rechts",
+  "in_between":"Andere",
   "block_Display":"zeige (Slot 1 = Hallo) an (Slot 2) an",
   "position":"Position",
   "block_ask":"frage (Slot 1 = Wie heißt du?) und warte",
@@ -2227,7 +2245,23 @@ Language.de = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"Gehe (Slot 1) (Slot 2) cm mit (Slot 3) %",
+"block_finch_turn":"Drehe (Slot 1) (Slot 2) ° mit (Slot 3)%",
+"block_finch_motors":"Räder L (Slot 1)% R (Slot 2)%",
+"block_finch_beak":"Schnabel R (Slot 1) % G (Slot 2) % B (Slot 3) %",
+"block_finch_tail":"Schwanz (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4)%",
+"block_finch_reset_encoders":"Kodierer Zurücksetzen",
+"block_encoder":"(Slot 1) Kodierer",
+"Line":"Linie",
+"Forward":"Vorwärts",
+"Backward":"Rückwärts",
+"Right":"Rechts",
+"Left":"Links",
+"Beak_Up":"Schnabel Oben",
+"Beak_Down":"Schnabel Unten",
+"Finch_Is_Level":"Eben (Rücken oben)",
+"Upside_Down":"Umgedreht (Rücken unten)"
 }
 
 //English Translation
@@ -2270,15 +2304,16 @@ Language.en = {
 "block_Device_SSID":"Tablet SSID",
 "block_Device_Pressure":"Tablet Pressure",
 "block_Device_Relative_Altitude":"Tablet Relative Altitude",
-"block_Acceleration":"Tablet (Slot 1) Acceleration",
+"block_Acceleration":"Tablet Accelerometer (Slot 1)",
 "Total":"Total",
-"block_Device_Orientation":"Tablet Orientation",
-"faceup":"Faceup",
-"facedown":"Facedown",
-"portrait_bottom":"Portrait: Camera on bottom",
-"portrait_top":"Portrait: Camera on top",
-"landscape_left":"Landscape: Camera on left",
-"landscape_right":"Landscape: Camera on right",
+"block_Device_Orientation":"Tablet (Slot 1)",
+"faceup":"Screen Up",
+"facedown":"Screen Down",
+"portrait_bottom":"Camera Bottom",
+"portrait_top":"Camera Top",
+"landscape_left":"Camera Left",
+"landscape_right":"Camera Right",
+"in_between":"Other",
 "block_Display":"Display (Slot 1 = Hello) at (Slot 2)",
 "position":"Position",
 "block_ask":"ask (Slot 1 = What's your name?) and wait",
@@ -2499,15 +2534,16 @@ Language.es = {
   "block_Device_SSID":"SSID de la tableta",
   "block_Device_Pressure":"Presion de la tableta",
   "block_Device_Relative_Altitude":"Altitud relativa de la tableta",
-  "block_Acceleration":"Tableta (Slot 1) aceleracion",
+  "block_Acceleration":"Tableta Acelerometro (Slot 1)",
   "Total":"Total",
-  "block_Device_Orientation":"Orientacion de la tableta",
-  "faceup":"Cara arriba",
-  "facedown":"Cara abajo",
-  "portrait_bottom":"Portaretrato: Camara inferior",
-  "portrait_top":"Portaretrato: Camara superior",
-  "landscape_left":"Paisaje: Camara en la izquierda",
-  "landscape_right":"Paisaje: Camara en la derecha",
+  "block_Device_Orientation":"Tableta (Slot 1)",
+  "faceup":"Pantalla hacia arriba",
+  "facedown":"Pantalla hacia abajo",
+  "portrait_bottom":"Cámara abajo",
+  "portrait_top":"Cámara arriba",
+  "landscape_left":"Cámara a la izquierda",
+  "landscape_right":"Cámara a la derecha",
+  "in_between":"Otro",
   "block_Display":"Monitor (Slot 1 = Hola) en (Slot 2)",
   "position":"Posicion",
   "block_ask":"Preguntar (Slot 1 = Cual es tu nombre?) Y esperar",
@@ -2670,7 +2706,23 @@ Language.es = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"Mover (Slot 2) cm hacia (Slot 1) a velocidad (Slot 3) %",
+"block_finch_turn":"Girar (Slot 2) ° hacia la (Slot 1) a velocidad (Slot 3) %",
+"block_finch_motors":"Poner las ruedas a velocidad I (Slot 1) % D (Slot 2) %",
+"block_finch_beak":"Encender el pico de color R (Slot 1) % V (Slot 2) % A (Slot 3) %",
+"block_finch_tail":"Encender la cola de color (Slot 1) R (Slot 2) % V (Slot 3) % A (Slot 4) %",
+"block_finch_reset_encoders":"Reinicializar los contadores de vueltas",
+"block_encoder":"Recuento de vueltas (Slot 1)",
+"Line":"Línea",
+"Forward":"Adelante",
+"Backward":"Atrás",
+"Right":"Derecha",
+"Left":"Izquierda",
+"Beak_Up":"Pico hacia arriba",
+"Beak_Down":"Pico hacia abajo",
+"Finch_Is_Level":"Horizontal",
+"Upside_Down":"Boca abajo"
 }
 
 //Finnish Translation
@@ -2713,7 +2765,7 @@ Language.fi = {
   "block_Device_SSID":"Tabletti SSID",
   "block_Device_Pressure":"Tabletti ilmanpaine",
   "block_Device_Relative_Altitude":"Tabletti suhteellinen korkeus",
-  "block_Acceleration":"Tabletti (Slot 1) Kiihtyvyys",
+  "block_Acceleration":"Tabletti Kiihtyvyysanturi (Slot 1)",
   "Total":"Kokonais-",
   "block_Device_Orientation":"Tabletti asento",
   "faceup":"Näyttö ylös",
@@ -2927,15 +2979,16 @@ Language.fr = {
 "block_Device_SSID":"Tablette SSID",
 "block_Device_Pressure":"Tablette Pression",
 "block_Device_Relative_Altitude":"Tablette Altitude Relative",
-"block_Acceleration":"Tablette (Slot 1) Accélération",
+"block_Acceleration":"Tablette Accéléromètre (Slot 1)",
 "Total":"Total",
-"block_Device_Orientation":"Orientation de la tablette",
-"faceup":"Face vers le haut",
-"facedown":"Face vers le bas",
-"portrait_bottom":"Vertical: Caméra en bas",
-"portrait_top":"Vertical: Caméra en haut",
-"landscape_left":"Horizontal: Caméra à gauche",
-"landscape_right":"Horizontal: Caméra à droite",
+"block_Device_Orientation":"Tablette (Slot 1)",
+"faceup":"Écran vers le haut",
+"facedown":"Écran vers le bas",
+"portrait_bottom":"Caméra vers le bas",
+"portrait_top":"Caméra vers le haut",
+"landscape_left":"Caméra à gauche",
+"landscape_right":"Caméra à droite",
+"in_between":"Autre",
 "block_Display":"Display (Slot 1 = Bonjour) à (Slot 2)",
 "position":"Position",
 "block_ask":"demande (Slot 1 = Quel est ton nom?) et attendez",
@@ -3098,7 +3151,23 @@ Language.fr = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"Déplacer (Slot 1) (Slot 2) cm sur (Slot 3)%",
+"block_finch_turn":"Tournez (Slot 1) (Slot 2) ° à (Slot 3)%",
+"block_finch_motors":"Roues L (Slot 1)% R (Slot 2)%",
+"block_finch_beak":"Bec R (Slot 1) % G (Slot 2) % B (Slot 3)%",
+"block_finch_tail":"Queue (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4)%",
+"block_finch_reset_encoders":"Réinitialiser les encodeurs",
+"block_encoder":"(Slot 1) Encodeur",
+"Line":"Ligne",
+"Forward":"En avant",
+"Backward":"En arrière",
+"Right":"Droit",
+"Left":"Gauche",
+"Beak_Up":"Bec en haut",
+"Beak_Down":"Bec en bas",
+"Finch_Is_Level":"Horizontale",
+"Upside_Down":"À l'envers"
 }
 
 //Hebrew Translation
@@ -3141,15 +3210,16 @@ Language.he = {
   "block_Device_SSID":"SSID טאבלט",
   "block_Device_Pressure":"לחץ על הטאבלט",
   "block_Device_Relative_Altitude":"גובה יחסי של הטאבלט",
-  "block_Acceleration":"(Slot 1) תאוצה של הטאבלט",
+  "block_Acceleration":"(Slot 1) טאבלט חיישן תאוצ",
   "Total":"סה''כ",
-  "block_Device_Orientation":"כיוון הטאבלט",
-  "faceup":"פנים כלפי מעלה",
-  "facedown":"פנים כלפי מטה",
-  "portrait_bottom":"פורטרט: מצלמה בתחתית",
-  "portrait_top":"פורטרט: מצלמה עליונית",
-  "landscape_left":"נוף: מצלמה בשמאל",
-  "landscape_right":"נוף: מצלמה בימין",
+  "block_Device_Orientation":"(Slot 1) טאבלט",
+  "faceup":"לעלות מסך",
+  "facedown":"להוריד מסך",
+  "portrait_bottom":"להוריד מצלמה",
+  "portrait_top":"לעלות מצלמה",
+  "landscape_left":"מצלמה לשמאל",
+  "landscape_right":"מצלמה לימין",
+  "in_between":"אחר",
   "block_Display":"(Slot 2) ב (Slot 1 = שלום) להציג ",
   "position":"כיוון",
   "block_ask":"ולחכות (Slot 1 = מה שמך?) לשאול",
@@ -3310,7 +3380,23 @@ Language.he = {
   "CM":"סיימ",
   "Inch":"אינץ",
   "block_subtract":"(Slot 1) – (Slot 2)",
-  "block_divide":"(Slot 1) / (Slot 2)"
+  "block_divide":"(Slot 1) / (Slot 2)",
+  "block_finch_move":"זוז (Slot 1) (Slot 2) ס''מ ב (Slot 3) %",
+"block_finch_turn":"הסתובב (Slot 1) (Slot 2) מעלות ב (Slot 3) %",
+"block_finch_motors":"גלגלים שמאל (Slot 1) % ימין (Slot 2) %",
+"block_finch_beak":"מקור אדום (Slot 1) % ירוק (Slot 2) % כחול (Slot 3) %",
+"block_finch_tail":"זנב (Slot 1) אדום (Slot 2) % ירוק (Slot 3) % כחול (Slot 4) %",
+"block_finch_reset_encoders":"לאפס קודאי",
+"block_encoder":"(Slot 1) קודאי",
+"Line":"קו",
+"Forward":"קדימה",
+"Backward":"אחורה",
+"Right":"ימינה",
+"Left":"שמאלה",
+"Beak_Up":"לעלות את המקור",
+"Beak_Down":"להוריד את המקור",
+"Finch_Is_Level":"רמה",
+"Upside_Down":"הפוך"
 }
 
 //Korean Translation
@@ -3353,15 +3439,16 @@ Language.ko = {
   "block_Device_SSID":"태블릿 SSID(네트워크 이름)",
   "block_Device_Pressure":"태블릿 기압",
   "block_Device_Relative_Altitude":"태블릿 고도",
-  "block_Acceleration":"태블릿 (Slot 1) 가속도",
+  "block_Acceleration":"태블릿 가속도 센서 (Slot 1)",
   "Total":"전체",
-  "block_Device_Orientation":"태블릿 방위",
+  "block_Device_Orientation":"테블릿 (Slot 1)",
   "faceup":"화면 하늘 방향",
   "facedown":"화면 땅 방향",
-  "portrait_bottom":"세로모드: 카메라 아래쪽 보기",
-  "portrait_top":"세로모드: 카메라 위쪽 보기",
-  "landscape_left":"가로모드: 카메라 왼쪽 보기",
-  "landscape_right":"가로모드: 카메라 오른쪽 보기",
+  "portrait_bottom":"카메라 아래로",
+  "portrait_top":"카메라 위로",
+  "landscape_left":"카메라 왼쪽으로",
+  "landscape_right":"카메라 오른쪽으로",
+  "in_between":"그 외",
   "block_Display":"(Slot 1 = 안녕) 보이기 위치: (Slot 2)",
   "position":"위치",
   "block_ask":"(Slot 1 = 이름이 무엇이니?) 묻고 기다리기",
@@ -3522,7 +3609,23 @@ Language.ko = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"(Slot 1) (Slot 2) cm 로 움직이기 빠르기 (Slot 3) %",
+"block_finch_turn":"(Slot 1) (Slot 2) ° 로 회전하기 빠르기 (Slot 3) %",
+"block_finch_motors":"바퀴 왼쪽 (Slot 1) % 오른쪽 (Slot 2) %",
+"block_finch_beak":"부리 빨강 (Slot 1) % 초록 (Slot 2) % 파랑 (Slot 3) %",
+"block_finch_tail":"꼬리 (Slot 1) 빨강 (Slot 2) % 초록 (Slot 3) % 파랑 (Slot 4) %",
+"block_finch_reset_encoders":"인코더 리셋하기",
+"block_encoder":"(Slot 1) 인코더",
+"Line":"선",
+"Forward":"앞으로",
+"Backward":"뒤로",
+"Right":"오른쪽",
+"Left":"왼쪽",
+"Beak_Up":"부리 위로",
+"Beak_Down":"부리 아래로",
+"Finch_Is_Level":"수평",
+"Upside_Down":"뒤짚힘"
 }
 
 //Dutch Translation
@@ -3565,15 +3668,16 @@ Language.nl = {
   "block_Device_SSID":"Tablet SSID",
   "block_Device_Pressure":"Tablet Druk",
   "block_Device_Relative_Altitude":"Tablet Relatieve Hoogte",
-  "block_Acceleration":"Tablet (Slot 1) Acceleratie",
+  "block_Acceleration":"Tablet Accelerometer (Slot 1)",
   "Total":"Totaal",
-  "block_Device_Orientation":"Tablet Orientatie",
-  "faceup":"Omhoog",
-  "facedown":"Omlaag",
-  "portrait_bottom":"Staand: Camera onderaan",
-  "portrait_top":"Staand: Camera bovenaan",
-  "landscape_left":"Liggend: Camera links",
-  "landscape_right":"Liggend: Camera rechts",
+  "block_Device_Orientation":"Tablet (Slot 1)",
+  "faceup":"Scherm Omhoog",
+  "facedown":"Scherm Omlaag",
+  "portrait_bottom":"Camera Omlaag",
+  "portrait_top":"Camera Omhoog",
+  "landscape_left":"Camera Links",
+  "landscape_right":"Camera Rechts",
+  "in_between":"Ander",
   "block_Display":"Schrijf (Slot 1 = Hello) in (Slot 2)",
   "position":"Positie",
   "block_ask":"Vraag (Slot 1 = Wat is uw naam?) en wacht",
@@ -3736,7 +3840,23 @@ Language.nl = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"Beweeg (Slot 1) (Slot 2) cm op (Slot 3) %",
+"block_finch_turn":"Draai (Slot 1) (Slot 2) ° op (Slot 3) %",
+"block_finch_motors":"Wielen L (Slot 1) % R (Slot 2) %",
+"block_finch_beak":"Bek R (Slot 1) % G (Slot 2) % B (Slot 3)%",
+"block_finch_tail":"Staart (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4)%",
+"block_finch_reset_encoders":"Encoders Resetten",
+"block_encoder":"(Slot 1) Encoder",
+"Line":"Lijn",
+"Forward":"Vooruit",
+"Backward":"Achteruit",
+"Right":"Rechts",
+"Left":"Links",
+"Beak_Up":"Bek Omhoog",
+"Beak_Down":"Bek Omlaag",
+"Finch_Is_Level":"Horizontaal",
+"Upside_Down":"Ondersteboven"
 }
 
 //Portuguese Translation
@@ -3779,15 +3899,16 @@ Language.pt = {
   "block_Device_SSID":"Tablet SSID",
   "block_Device_Pressure":"Tablet Pressão",
   "block_Device_Relative_Altitude":"Tablet Altitude Relativa",
-  "block_Acceleration":"Tablet (Slot 1) Aceleração",
+  "block_Acceleration":"Tablet Acelerômetro (Slot 1)",
   "Total":"Total",
-  "block_Device_Orientation":"Tablet Orientação ",
-  "faceup":"Virado para cima",
-  "facedown":"Virado para baixo",
-  "portrait_bottom":"Retrato: Câmera na parte inferior",
-  "portrait_top":"Retrato: Câmera na parte superior",
-  "landscape_left":"Paisagem: Câmera à esquerda",
-  "landscape_right":"Paisagem: Câmera à direita",
+  "block_Device_Orientation":"Tablet (Slot 1)",
+  "faceup":"Tela Para Cima",
+  "facedown":"Tela Para Baixo",
+  "portrait_bottom":"Parte Inferior da Câmera",
+  "portrait_top":"Parte Superior da Câmerra",
+  "landscape_left":"Câmera Esquerda",
+  "landscape_right":"Câmera Direita",
+  "in_between":"Outros",
   "block_Display":"Visor (Slot 1 = Olá) a (Slot 2)",
   "position":"Posiçao",
   "block_ask":"Perguntar (Slot 1 = Qual o seu nome?) e esperar",
@@ -3950,7 +4071,23 @@ Language.pt = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"Mova (Slot 1) (Slot 2) cm  a (Slot 3) %",
+"block_finch_turn":"Gire (Slot 1) (Slot 2) ° a (Slot 3) %",
+"block_finch_motors":"Rodas E (Slot 1) % D (Slot 2) %",
+"block_finch_beak":"Bico R (Slot 1) % G (Slot 2) % B (Slot 3)%",
+"block_finch_tail":"Cauda (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4)%",
+"block_finch_reset_encoders":"Redefinir Código",
+"block_encoder":"(Slot 1) Código",
+"Line":"Linha",
+"Forward":"Frente",
+"Backward":"Trás",
+"Right":"Direita",
+"Left":"Esquerda",
+"Beak_Up":"Bico Para Cima",
+"Beak_Down":"Bico Para Baixo ",
+"Finch_Is_Level":"Nível",
+"Upside_Down":"Invertido"
 }
 
 //Swedish Translation
@@ -3993,7 +4130,7 @@ Language.sv = {
   "block_Device_SSID":"Tabettens SSID",
   "block_Device_Pressure":"Tablettens tryck",
   "block_Device_Relative_Altitude":"Tabelettens relativa höjd",
-  "block_Acceleration":"Tablettens (Slot 1) Acceleration",
+  "block_Acceleration":"Tablettens Accelerometer (Slot 1)",
   "Total":"Total",
   "block_Device_Orientation":"Tablettens orientering",
   "faceup":"Skärm upp",
@@ -4207,15 +4344,16 @@ Language.zhs = {
 "block_Device_SSID":"平板电脑的服务设定识别码",
 "block_Device_Pressure":"平板电脑的大气压力",
 "block_Device_Relative_Altitude":"平板电脑的相对高度",
-"block_Acceleration":"平板电脑 (Slot 1) 加速度",
+"block_Acceleration":"平板电脑 加速计(Slot 1)",
 "Total":"总和",
-"block_Device_Orientation":"平板电脑的方向",
+"block_Device_Orientation":"板块(Slot 1)",
 "faceup":"屏幕向上",
 "facedown":"屏幕向下",
-"portrait_bottom":"人像: 下边的镜头",
-"portrait_top":"人像: 上边的镜头",
-"landscape_left":"风景：左边的镜头",
-"landscape_right":"风景：右边的镜头",
+"portrait_bottom":"摄像头底部",
+"portrait_top":"摄像头顶部",
+"landscape_left":"摄像头左边",
+"landscape_right":"摄像头右边",
+"in_between":"其他",
 "block_Display":"(Slot 2) 显示 (Slot 1 = 你好)",
 "position":"位置",
 "block_ask":"问 (Slot 1 = 你的名字是什么？) 并等待",
@@ -4377,7 +4515,23 @@ Language.zhs = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"以(Slot 3) % 移动 (Slot 1) (Slot 2) cm",
+"block_finch_turn":"以(Slot 3) % 转动 (Slot 1) (Slot 2) °",
+"block_finch_motors":"左轮(Slot 1) % 右轮(Slot 2) %",
+"block_finch_beak":"鸟喙 R (Slot 1) % G (Slot 2) % B (Slot 3)%",
+"block_finch_tail":"鸟尾(Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4)%",
+"block_finch_reset_encoders":"重置编码器",
+"block_encoder":"(Slot 1)编码器",
+"Line":"线",
+"Forward":"前进",
+"Backward":"后退",
+"Right":"右",
+"Left":"左",
+"Beak_Up":"喙部向上",
+"Beak_Down":"喙部向下",
+"Finch_Is_Level":"水平",
+"Upside_Down":"翻转"
 }
 
 //Traditional Chinese Translation (zh-Hant)
@@ -4420,15 +4574,16 @@ Language.zht = {
   "block_Device_SSID":"平板電腦的服務設定識別碼",
   "block_Device_Pressure":"平板電腦的大氣壓力",
   "block_Device_Relative_Altitude":"平板電腦的相對高度",
-  "block_Acceleration":"平板電腦 (Slot 1) 加速度",
+  "block_Acceleration":"平板電腦 加速計 (Slot 1)",
   "Total":"總和",
-  "block_Device_Orientation":"平板電腦的方向",
+  "block_Device_Orientation":"平板電腦 (Slot 1)",
   "faceup":"屏幕向上",
   "facedown":"屏幕向下",
-  "portrait_bottom":"人像: 下邊的鏡頭",
-  "portrait_top":"人像: 上邊的鏡頭",
-  "landscape_left":"風景：左邊的鏡頭",
-  "landscape_right":"風景：右邊的鏡頭",
+  "portrait_bottom":"鏡頭向下",
+  "portrait_top":"鏡頭向上",
+  "landscape_left":"鏡頭向左",
+  "landscape_right":"鏡頭向右",
+  "in_between":"其他",
   "block_Display":"(Slot 2) 顯示 (Slot 1 = 你好)",
   "position":"位置",
   "block_ask":"問 (Slot 1 = 你的名字是什麼？) 並等待",
@@ -4591,7 +4746,23 @@ Language.zht = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"block_finch_move":"移動  (Slot 1) (Slot 2) 厘米在 (Slot 3) %",
+"block_finch_turn":"轉動 (Slot 1) (Slot 2) °在 (Slot 3) %",
+"block_finch_motors":"車輪  左 (Slot 1) % 右 (Slot 2) %",
+"block_finch_beak":"鳥嘴 紅 (Slot 1) % 綠 (Slot 2) % 藍 (Slot 3)%",
+"block_finch_tail":"尾巴 (Slot 1) 紅 (Slot 2) % 綠 (Slot 3) % 藍 (Slot 4)%",
+"block_finch_reset_encoders":"重置編碼器",
+"block_encoder":"(Slot 1) 編碼器",
+"Line":"線",
+"Forward":"向前",
+"Backward":"向後",
+"Right":"右傾",
+"Left":"左傾",
+"Beak_Up":"向上",
+"Beak_Down":"向下",
+"Finch_Is_Level":"水平",
+"Upside_Down":"翻轉"
 }
 
 /**
@@ -32972,8 +33143,12 @@ B_FinchSetMotorsAndWait.prototype.updateAction = function() {
 			this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
 			return new ExecutionStatusError();
 		} else if (!this.moveSent) {
-			if (this.moveTicks == 0) { //ticks=0 is command for continuous motion.
-				return new ExecutionStatusDone();
+			if (this.moveTicks <= 0) { //ticks=0 is command for continuous motion.
+				//return new ExecutionStatusDone();
+				// Make this a stop command in case the finch was already moving.
+				this.moveTicks = 0;
+				this.moveSpeedL = 0;
+				this.moveSpeedR = 0;
 			}
 			this.wasMoving = (status.result === "1");
 			this.moveSentTime = new Date().getTime();
@@ -32985,6 +33160,9 @@ B_FinchSetMotorsAndWait.prototype.updateAction = function() {
 			this.moveSent = true;
 			return new ExecutionStatusRunning();
 		} else if (!this.moveSendFinished) {
+			if (this.moveTicks == 0) {
+				return new ExecutionStatusDone();
+			}
 			this.moveSendFinished = true;
 			return this.sendCheckMoving();
 		} else {
@@ -35638,14 +35816,28 @@ Block.setDisplaySuffix(B_DeviceRelativeAltitude, "m");
 
 
 function B_DeviceOrientation(x, y) {
-	ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
-	this.addPart(new LabelText(this, Language.getStr("block_Device_Orientation")));
+	//ReporterBlock.call(this, x, y, "tablet", Block.returnTypes.string);
+	//this.addPart(new LabelText(this, Language.getStr("block_Device_Orientation")));
+	PredicateBlock.call(this, x, y, "tablet");
+
+	const orientation = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("faceup"), "faceup"));
+  orientation.addOption(new SelectionData(Language.getStr("faceup"), "faceup"));
+  orientation.addOption(new SelectionData(Language.getStr("facedown"), "facedown"));
+  orientation.addOption(new SelectionData(Language.getStr("portrait_bottom"), "portrait_bottom"));
+  orientation.addOption(new SelectionData(Language.getStr("portrait_top"), "portrait_top"));
+  orientation.addOption(new SelectionData(Language.getStr("landscape_left"), "landscape_left"));
+  orientation.addOption(new SelectionData(Language.getStr("landscape_right"), "landscape_right"));
+  orientation.addOption(new SelectionData(Language.getStr("in_between"), "Other"));
+  this.addPart(orientation);
+
+	this.parseTranslation(Language.getStr("block_Device_Orientation"));
 }
 B_DeviceOrientation.prototype = Object.create(ReporterBlock.prototype);
 B_DeviceOrientation.prototype.constructor = B_DeviceOrientation;
 /* Make the request. */
 B_DeviceOrientation.prototype.startAction = function() {
 	const mem = this.runMem;
+	mem.selection = this.slots[0].getData().getValue();
 	mem.request = "tablet/orientation";
 	mem.requestStatus = function() {};
 	HtmlServer.sendRequest(mem.request, mem.requestStatus);
@@ -35657,7 +35849,12 @@ B_DeviceOrientation.prototype.updateAction = function() {
 	const status = mem.requestStatus;
 	if (status.finished === true) {
 		if (status.error === false) {
-			const res = new StringData(Language.getStr(status.result), true);
+			const currentOrientation = status.result
+			let res = new BoolData(false);
+			if (currentOrientation == mem.selection) {
+				res = new BoolData(true);
+			}
+			//const res = new StringData(Language.getStr(status.result), true);
 			return new ExecutionStatusResult(res);
 		} else {
 			if (status.result.length > 0) {

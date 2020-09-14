@@ -38,7 +38,7 @@ Language.fi = {
   "block_Device_SSID":"Tabletti SSID",
   "block_Device_Pressure":"Tabletti ilmanpaine",
   "block_Device_Relative_Altitude":"Tabletti suhteellinen korkeus",
-  "block_Acceleration":"Tabletti (Slot 1) Kiihtyvyys",
+  "block_Acceleration":"Tabletti Kiihtyvyysanturi (Slot 1)",
   "Total":"Kokonais-",
   "block_Device_Orientation":"Tabletti asento",
   "faceup":"Näyttö ylös",

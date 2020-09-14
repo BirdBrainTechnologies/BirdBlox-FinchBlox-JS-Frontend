@@ -38,7 +38,7 @@ Language.da = {
   "block_Device_SSID":"Enhed SSID",
   "block_Device_Pressure":"Enhed lufttryk",
   "block_Device_Relative_Altitude":"Enhed relativ højde",
-  "block_Acceleration":"Enhed (Slot 1) acceleration",
+  "block_Acceleration":"Enhed Accelerometer (Slot 1)",
   "Total":"Total",
   "block_Device_Orientation":"Enhed orientering",
   "faceup":"Skærm opad",
