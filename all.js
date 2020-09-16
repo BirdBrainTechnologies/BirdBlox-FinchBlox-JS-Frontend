@@ -21410,12 +21410,12 @@ function OpenDialog(fileList) {
 
 	this.fileList = fileList;
 	this.files = fileList.localFiles;
-	if (GuiElements.isAndroid) {
-		// On Android, space is needed for the row of tabs
-		RD.call(this, false, Language.getStr("Open"), this.files.length, OD.tabRowHeight, OD.extraBottomSpace, OD.tabRowHeight - 1);
-	} else {
+	//if (GuiElements.isAndroid) {
+		// On Android, space was needed for the row of tabs when dropbox integration was supported. Support discontinued September 2020.
+	//	RD.call(this, false, Language.getStr("Open"), this.files.length, OD.tabRowHeight, OD.extraBottomSpace, OD.tabRowHeight - 1);
+	//} else {
 		RD.call(this, false, Language.getStr("Open"), this.files.length, 0, OpenDialog.extraBottomSpace);
-	}
+	//}
 	// this.addCenteredButton("Cancel", this.closeDialog.bind(this));
 	this.addHintText(Language.getStr("No_saved_programs"));
 }
@@ -21442,9 +21442,10 @@ OpenDialog.prototype.show = function() {
         if (GuiElements.isIos) {
             this.createCloudBn();
         }
-        if (GuiElements.isAndroid) {
+        //This added a tab to support dropbox use. Dropbox use discontinued September 2020.
+        /*if (GuiElements.isAndroid) {
             this.createTabRow();
-        }
+        }*/
     } else {
         SaveManager.userOpenFile(OpenDialog.defaultFile);
         OpenDialog.defaultFile = "";
