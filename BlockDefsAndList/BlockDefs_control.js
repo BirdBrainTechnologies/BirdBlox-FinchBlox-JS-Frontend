@@ -444,6 +444,88 @@ B_When.prototype.startAction = function() {
 	}
 };
 
+function B_WhenKeyPressed(x, y) {
+	HatBlock.call(this, x, y, "control", true);
+	const dS = new DropSlot(this, "DS_key", null, null, new SelectionData(Language.getStr("space"), "Space,32"));
+	dS.addOption(new SelectionData("0", "Digit0,48"));
+	dS.addOption(new SelectionData("1", "Digit1,49"));
+	dS.addOption(new SelectionData("2", "Digit2,50"));
+	dS.addOption(new SelectionData("3", "Digit3,51"));
+	dS.addOption(new SelectionData("4", "Digit4,52"));
+	dS.addOption(new SelectionData("5", "Digit5,53"));
+	dS.addOption(new SelectionData("6", "Digit6,54"));
+	dS.addOption(new SelectionData("7", "Digit7,55"));
+	dS.addOption(new SelectionData("8", "Digit8,56"));
+	dS.addOption(new SelectionData("9", "Digit9,57"));
+	dS.addOption(new SelectionData(Language.getStr("any_key"), "any_key"));
+	dS.addOption(new SelectionData("↑", "ArrowUp,38"));
+	dS.addOption(new SelectionData("↓", "ArrowDown,40"));
+	dS.addOption(new SelectionData("→", " ArrowRight,39"));
+	dS.addOption(new SelectionData("←", "ArrowLeft,37"));
+	dS.addOption(new SelectionData(Language.getStr("space"), "Space,32"));
+	dS.addOption(new SelectionData("+", "Equal,187"));
+	dS.addOption(new SelectionData("-", "Minus,189"));
+	dS.addOption(new SelectionData("a", "KeyA,65"));
+	dS.addOption(new SelectionData("b", "KeyB,66"));
+	dS.addOption(new SelectionData("c", "KeyC,67"));
+	dS.addOption(new SelectionData("d", "KeyD,68"));
+	dS.addOption(new SelectionData("e", "KeyE,69"));
+	dS.addOption(new SelectionData("f", "KeyF,70"));
+	dS.addOption(new SelectionData("g", "KeyG,71"));
+	dS.addOption(new SelectionData("h", "KeyH,72"));
+	dS.addOption(new SelectionData("i", "KeyI,73"));
+	dS.addOption(new SelectionData("j", "KeyJ,74"));
+	dS.addOption(new SelectionData("k", "KeyK,75"));
+	dS.addOption(new SelectionData("l", "KeyL,76"));
+	dS.addOption(new SelectionData("m", "KeyM,77"));
+	dS.addOption(new SelectionData("n", "KeyN,78"));
+	dS.addOption(new SelectionData("o", "KeyO,79"));
+	dS.addOption(new SelectionData("p", "KeyP,80"));
+	dS.addOption(new SelectionData("q", "KeyQ,81"));
+	dS.addOption(new SelectionData("r", "KeyR,82"));
+	dS.addOption(new SelectionData("s", "KeyS,83"));
+	dS.addOption(new SelectionData("t", "KeyT,84"));
+	dS.addOption(new SelectionData("u", "KeyU,85"));
+	dS.addOption(new SelectionData("v", "KeyV,86"));
+	dS.addOption(new SelectionData("w", "KeyW,87"));
+	dS.addOption(new SelectionData("x", "KeyX,88"));
+	dS.addOption(new SelectionData("y", "KeyY,89"));
+	dS.addOption(new SelectionData("z", "KeyZ,90"));
+
+	this.addPart(dS);
+	this.parseTranslation(Language.getStr("block_when_key_pressed"));
+
+	this.selectedKeyPressed = false;
+	const me = this;
+	document.addEventListener("keydown", function(event) {
+		if (!me.running) { return; }
+		console.log("keydown " + event.code + "," + event.keyCode);
+		const currentSelection = me.slots[0].getData().getValue().split(",");
+		console.log("current selection = " + currentSelection[0] + ", " + currentSelection[1]);
+		//Use of keyCode is depricated, but necessary for old iPads at least
+    if (event.code == currentSelection[0] || event.keyCode == currentSelection[1] || currentSelection[0] == "any_key") {
+			me.selectedKeyPressed = true;
+    }
+	})
+}
+B_WhenKeyPressed.prototype = Object.create(HatBlock.prototype);
+B_WhenKeyPressed.prototype.constructor = B_WhenKeyPressed;
+// The flag should trigger this block as well
+B_WhenKeyPressed.prototype.eventFlagClicked = function() {
+	this.stack.startRun();
+}
+B_WhenKeyPressed.prototype.startAction = function() {
+	this.selectedKeyPressed = false;
+	return new ExecutionStatusRunning();
+};
+B_WhenKeyPressed.prototype.updateAction = function() {
+	if (this.selectedKeyPressed) {
+		return new ExecutionStatusDone();
+	} else {
+		return new ExecutionStatusRunning();
+	}
+}
+
 //FinchBlox only
 function B_StartWhenDark(x, y) {
 	HatBlock.call(this, x, y, "control_3", true);

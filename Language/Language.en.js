@@ -225,5 +225,8 @@ Language.en = {
 "Beak_Up":"Beak Up",
 "Beak_Down":"Beak Down",
 "Finch_Is_Level":"Level",
-"Upside_Down":"Upside Down"
+"Upside_Down":"Upside Down",
+"block_when_key_pressed":"when (Slot 1) key pressed",
+"space":"space",
+"any_key":"any key"
 }

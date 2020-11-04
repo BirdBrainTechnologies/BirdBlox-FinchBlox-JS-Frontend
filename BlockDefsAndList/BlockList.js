@@ -215,6 +215,7 @@ BlockList.populateCat_control = function(category) {
 	category.addBlockByName("B_WhenIReceive");
 	category.addSpace();
 	category.addBlockByName("B_When");
+	category.addBlockByName("B_WhenKeyPressed");
 	category.addSpace();
 	category.addBlockByName("B_Broadcast");
 	category.addBlockByName("B_BroadcastAndWait");
