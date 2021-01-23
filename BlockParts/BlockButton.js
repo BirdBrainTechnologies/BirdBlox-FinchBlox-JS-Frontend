@@ -19,6 +19,7 @@ function BlockButton(parent){
  this.widgets = [];
  this.displaySuffixes = [];
  this.values = [];
+ this.popupIsDisplayed = false;
 
  this.outlineColor = Colors.blockOutline[parent.category];
  if (this.outlineColor == null) { this.outlineColor = Colors.categoryColors[parent.category]; }
@@ -30,7 +31,9 @@ function BlockButton(parent){
      const inputSys = me.createInputSystem();
      inputSys.show(null, me.updateValue.bind(me), function(){
        SaveManager.markEdited();
+       me.popupIsDisplayed = false;
      }, me.values, me.outlineColor, parent);
+     me.popupIsDisplayed = true;
    }
  }
 

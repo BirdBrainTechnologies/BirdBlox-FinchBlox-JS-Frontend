@@ -140,10 +140,11 @@ B_RestForBeats.prototype.updateAction = function() {
 
 function B_PlayNoteForBeats(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	const noteSlot = new NumSlot(this, "NumS_note", 60, true, true); // Positive integer
+	//const noteSlot = new NumSlot(this, "NumS_note", 60, true, true); // Positive integer
+	const noteSlot = new NoteSlot(this, "NumS_note", 60, true, true); // Positive integer
 	noteSlot.addLimits(32, 135, Language.getStr("Note"));
 	this.addPart(noteSlot);
-	const beatsSlot = new NumSlot(this, "NumS_dur", 1, true); // Positive 
+	const beatsSlot = new NumSlot(this, "NumS_dur", 1, true); // Positive
 	beatsSlot.addLimits(0, 16, Language.getStr("Beats"))
 	this.addPart(beatsSlot);
 	this.parseTranslation(Language.getStr("block_Play_Note"));
@@ -156,10 +157,11 @@ B_PlayNoteForBeats.prototype.startAction = function() {
 	const note = this.slots[0].getData().getValueWithC(true, true);
 	const beats = this.slots[1].getData().getValueWithC(true); // Positive
 	mem.soundDuration = CodeManager.beatsToMs(beats);
-	mem.request = "sound/note?note=" + note + "&duration=" + mem.soundDuration;
+	//mem.request = "sound/note?note=" + note + "&duration=" + mem.soundDuration;
 	mem.timerStarted = false;
-	mem.requestStatus = function() {};
-	HtmlServer.sendRequest(mem.request, mem.requestStatus);
+	//mem.requestStatus = function() {};
+	//HtmlServer.sendRequest(mem.request, mem.requestStatus);
+	mem.requestStatus = HtmlServer.sendTabletSoundRequest(note, mem.soundDuration);
 	return new ExecutionStatusRunning(); // Still running
 };
 /* When the request is sent, start a timer then wait for the timer to expire */

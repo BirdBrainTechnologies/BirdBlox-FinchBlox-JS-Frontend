@@ -136,16 +136,20 @@ BlockSlot.prototype.removeChild = function() {
 /**
  * Checks if the moving Block could fit in this BlockStack and then passes the findBestFit message recursively
  */
-BlockSlot.prototype.findBestFit = function() {
-	const move = CodeManager.move;
-	const fit = CodeManager.fit;
+BlockSlot.prototype.findBestFit = function(moveManager) {
+	let move = CodeManager.move;
+  let fit = CodeManager.fit;
+  if (moveManager != null) {
+    move = moveManager.move
+    fit = moveManager.fit
+  }
 	const x = this.getAbsX();
 	const y = this.getAbsY();
 
 	// Check if the Block fits in this BlockSlot (above the top Block in it, if any)
 	if (move.topOpen) {
 		const snap = BlockGraphics.command.snap;
-		if (move.pInRange(move.topX, move.topY, x - snap.left, y - snap.top, snap.left + snap.right, snap.top + snap.bottom)) {
+		if (CodeManager.move.pInRange(move.topX, move.topY, x - snap.left, y - snap.top, snap.left + snap.right, snap.top + snap.bottom)) {
 			const xDist = move.topX - x;
 			const yDist = move.topY - y;
 			const dist = xDist * xDist + yDist * yDist;
@@ -158,7 +162,7 @@ BlockSlot.prototype.findBestFit = function() {
 	}
 	// Check if it fits in this BlockSlot's children
 	if (this.hasChild) {
-		this.child.findBestFit();
+		this.child.findBestFit(moveManager);
 	}
 };
 

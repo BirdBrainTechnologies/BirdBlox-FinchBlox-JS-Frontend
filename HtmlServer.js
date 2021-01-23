@@ -115,7 +115,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 	if (isPost == null) {
 		isPost = false;
 	}
-	if (HtmlServer.iosHandler != null || window.AndroidInterface) {
+	if (HtmlServer.iosHandler != null || window.AndroidInterface || GuiElements.isPWA) {
 		HtmlServer.sendNativeCall(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock, noTimeout);
 		return;
 	}
@@ -210,6 +210,22 @@ HtmlServer.sendFinishedLoadingRequest = function() {
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
 
+
+/**
+ * HtmlServer.sendTabletSoundRequest - Asks the backend to play a simple tone
+ * on the tablet.
+ *
+ * @param  {number} note          Midi note number to play
+ * @param  {number} duration      Duration of note in ms
+ * @return  {Object}  Request status object
+ */
+HtmlServer.sendTabletSoundRequest = function(note, duration) {
+	const request = "sound/note?note=" + note + "&duration=" + duration;
+	var requestStatus = function() {};
+	HtmlServer.sendRequest(request, requestStatus);
+	return requestStatus;
+}
+
 /**
  * Sends a command through the system iOS provides for allowing JS to call swift functions,
  * or to the Android javascriptInterface
@@ -255,6 +271,8 @@ HtmlServer.sendNativeCall = function(request, callbackFn, callbackErr, isPost, p
 		const jsonObjString = JSON.stringify(requestObject);
 		AndroidInterface.sendAndroidRequest(jsonObjString);
 		GuiElements.alert("Made request: " + request + " using Android native, inBackground=" + requestObject.inBackground);
+	} else if (GuiElements.isPWA) {
+    parseFinchBloxRequest(requestObject);
 	} else {
 		GuiElements.alert("ERROR: Failure to send native call: '" + request + "'. No native handler found.");
 	}

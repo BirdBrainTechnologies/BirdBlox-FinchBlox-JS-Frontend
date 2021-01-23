@@ -77,6 +77,7 @@ InputPad.prototype.show = function(slotShape, updateFn, finishFn, data, color, b
  */
 InputPad.prototype.updateDim = function() {
 	const IP = InputPad;
+  let width = IP.width;
 	let height = 0;
 	this.widgets.forEach(function(widget) {
 		// Some widgets have adjustable heights (like SelectPads)
@@ -86,6 +87,10 @@ InputPad.prototype.updateDim = function() {
 			height += widget.height;
 		}
 		height += IP.margin;
+
+    if (widget.constructor == InputWidget.Piano && !FinchBlox) {
+      width = InputWidget.Piano.inputPadWidth;
+    }
 	});
 	height -= IP.margin;
 	height = Math.max(height, 0);
@@ -104,7 +109,7 @@ InputPad.prototype.updateDim = function() {
 	});
 	// Store the final results
 	this.height = height;
-	this.width = IP.width;
+  this.width = width;
 };
 
 /**

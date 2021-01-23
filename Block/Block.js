@@ -685,9 +685,13 @@ Block.prototype.resize = function(width, height) {
  * A command block attempts to find a connection between its bottom and the moving stack's top.
  * Connections to the top of the stack's findBestFit.
  */
-Block.prototype.findBestFit = function() {
+Block.prototype.findBestFit = function(moveManager) {
 	let move = CodeManager.move;
 	let fit = CodeManager.fit;
+  if (moveManager != null) {
+    move = moveManager.move
+    fit = moveManager.fit
+  }
 	let x = this.getAbsX(); //Get coords to compare.
 	let y = this.getAbsY();
 	let height = this.relToAbsY(this.height) - y;
@@ -696,7 +700,7 @@ Block.prototype.findBestFit = function() {
 
 	if (move.returnsValue) { //If a connection between the stack and block are possible...
 		for (let i = 0; i < this.slots.length; i++) {
-			let slotHasMatch = this.slots[i].findBestFit();
+			let slotHasMatch = this.slots[i].findBestFit(moveManager);
 			hasMatch = slotHasMatch || hasMatch;
 		}
 	} else if (move.topOpen && this.bottomOpen) { //If a connection between the stack and block are possible...
@@ -712,9 +716,9 @@ Block.prototype.findBestFit = function() {
 		//Check if point falls in a rectangular range.
     let success = false;
     if (FinchBlox) {
-      success = move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapFWidth, snapFHeight);
+      success = CodeManager.move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapFWidth, snapFHeight);
     } else {
-      success = move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapBWidth, snapBHeight);
+      success = CodeManager.move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapBWidth, snapBHeight);
     }
 		if (success) {
 			let xDist = move.topX - x; //If it does, compute the distance with the distance formula.
@@ -732,13 +736,13 @@ Block.prototype.findBestFit = function() {
 		}
 	}
 	if (this.hasBlockSlot1) { //Pass the message on recursively.
-		this.blockSlot1.findBestFit();
+		this.blockSlot1.findBestFit(moveManager);
 	}
 	if (this.hasBlockSlot2) {
-		this.blockSlot2.findBestFit();
+		this.blockSlot2.findBestFit(moveManager);
 	}
 	if (this.nextBlock != null) {
-		this.nextBlock.findBestFit();
+		this.nextBlock.findBestFit(moveManager);
 	}
 	return hasMatch;
 };

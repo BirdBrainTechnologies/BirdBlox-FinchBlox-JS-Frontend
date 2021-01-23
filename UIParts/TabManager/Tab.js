@@ -136,8 +136,8 @@ Tab.prototype.getAbsY = function() {
 };
 
 /* Recursively passed messages.  Each of these function simply calls the function on the Tab's stacks */
-Tab.prototype.findBestFit = function() {
-	this.passRecursively("findBestFit");
+Tab.prototype.findBestFit = function(moveManager) {
+	this.passRecursively("findBestFit", moveManager);
 };
 Tab.prototype.eventFlagClicked = function() {
 	this.passRecursively("eventFlagClicked");

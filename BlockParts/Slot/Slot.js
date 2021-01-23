@@ -228,12 +228,12 @@ Slot.prototype.removeChild = function(){
  * Returns nothing. Results stored in CodeManager.fit.
  * @return {boolean} - true iff this Slot or one of its descendants can accept the moving blocks
  */
-Slot.prototype.findBestFit = function(){
+Slot.prototype.findBestFit = function(moveManager){
 	// Only the highest eligible slot on the connection tree is allowed to accept the blocks.
 	let childHasMatch = false;
 	// The slot is a leaf unless one of its decedents is a leaf.
 	if(this.hasChild){
-		childHasMatch = this.child.findBestFit(); // Pass on the message.
+		childHasMatch = this.child.findBestFit(moveManager); // Pass on the message.
 	}
 	if(childHasMatch){
 		// Don't bother checking this slot if it already has a matching decedents.
@@ -241,8 +241,12 @@ Slot.prototype.findBestFit = function(){
 	}
 
 	// shorthand
-	const move = CodeManager.move;
-	const fit = CodeManager.fit;
+	let move = CodeManager.move;
+	let fit = CodeManager.fit;
+  if (moveManager != null) {
+    move = moveManager.move
+    fit = moveManager.fit
+  }
 
 	// Use coords relative to screen.
 	const x = this.getAbsX();
@@ -256,7 +260,7 @@ Slot.prototype.findBestFit = function(){
 	// Does the bounding box of the BlockStack overlap with the bounding box of the Slot?
 	const width = move.bottomX - move.topX;
 	const height = move.bottomY - move.topY;
-	const locationMatches = move.rInRange(move.topX, move.topY, width, height, x,y, myWidth, myHeight);
+	const locationMatches = CodeManager.move.rInRange(move.topX, move.topY, width, height, x,y, myWidth, myHeight);
 
 	// If so, use distance to find the best fit
 	if(typeMatches && locationMatches){

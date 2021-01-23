@@ -14,6 +14,7 @@ function TouchReceiver() {
 	TR.touchDown = false;   // Is a finger currently on the screen?
 	TR.longTouch = false;   // Has the event already been handled by a long touch event?
 	TR.target = null;   // The object being interacted with.
+  TR.multiTouches = [];
 	TR.startX = 0;   // The x coord of the initial touch.
 	TR.startY = 0;   // The y coord of the initial touch.
 	TR.startX2 = 0;   // The x coord of the second touch.
@@ -152,6 +153,15 @@ TouchReceiver.getTouchX = function(e, i) {
 	return x;
 };
 
+TouchReceiver.getMultiX = function(touch) {
+  var x = touch.pageX / GuiElements.zoomFactor;
+  if (Language.isRTL) { x = GuiElements.width - x; }
+  return x;
+}
+TouchReceiver.getMultiY = function(touch) {
+  return touch.pageY / GuiElements.zoomFactor;
+}
+
 /**
  * Returns the touch y coord at the specified index
  * @param {event} e
@@ -247,25 +257,167 @@ TouchReceiver.targetIsInTabSpace = function() {
  * Handles new touch events for Blocks.  Stores the target Block.
  * @param {Block} target - The Block that was touched.
  * @param {event} e - passed event arguments.
- * @fix rename to touchStartBlock.
  */
 TouchReceiver.touchStartBlock = function(target, e) {
 	const TR = TouchReceiver;
-	if (!target.stack.isDisplayStack) {
-		TR.checkStartZoom(e);
-	}
-	if (TR.touchstart(e)) {
-		Overlay.closeOverlays();   // Close any visible overlays.
-		if (target.stack.isDisplayStack) {   // Determine what type of stack the Block is a member of.
-			TR.targetType = "displayStack";
-			TR.setLongTouchTimer();
-		} else {
-			TR.targetType = "block";
-			TR.setLongTouchTimer();
-		}
-		TouchReceiver.target = target;   // Store target Block.
-	}
+  if (e.type.startsWith("mouse")) {
+  	if (!target.stack.isDisplayStack) {
+  		TR.checkStartZoom(e);
+  	}
+  	if (TR.touchstart(e)) {
+  		Overlay.closeOverlays();   // Close any visible overlays.
+  		if (target.stack.isDisplayStack) {   // Determine what type of stack the Block is a member of.
+  			TR.targetType = "displayStack";
+  			TR.setLongTouchTimer();
+  		} else {
+  			TR.targetType = "block";
+  			TR.setLongTouchTimer();
+  		}
+  		TouchReceiver.target = target;   // Store target Block.
+  	}
+  } else {
+    let targetType = (target.stack.isDisplayStack ? "displayStack" : "block");
+    TR.multiTouchStart(e, target, targetType)
+  }
 };
+
+TouchReceiver.multiTouchStart = function(e, target, targetType) {
+  const TR = TouchReceiver;
+  e.preventDefault();
+  if (!TR.interactionEnabeled) { return; }
+
+  Overlay.closeOverlays();
+  for (var i = 0; i < e.changedTouches.length; i++) {
+    let touchObject = {
+      id: e.changedTouches[i].identifier,
+      target: target,
+      targetType: targetType,
+      longTouch: false,
+      dragging: false,
+      touchDown: true,
+      startX: TR.getMultiX(e.changedTouches[i]),
+      startY: TR.getMultiY(e.changedTouches[i])
+    }
+    self.setTimeout(function() {
+      TR.multiTouchLong(touchObject)
+    }, TR.longTouchInterval);
+    TR.multiTouches.push(touchObject);
+  }
+
+  TR.addEventListenerSafe(e.target, TR.handlerMove, TR.multiTouchMove);
+  TR.addEventListenerSafe(e.target, TR.handlerUp, TR.multiTouchEnd);
+}
+
+TouchReceiver.multiTouchMove = function(e) {
+  const TR = TouchReceiver;
+  e.preventDefault();
+  if (!TR.interactionEnabeled) {
+		return;
+	}
+
+  for (let i = 0; i < TR.multiTouches.length; i++) {
+    for (let j = 0; j < e.changedTouches.length; j++) {
+      let touch = e.changedTouches[j]
+      let mto = TR.multiTouches[i]
+      if (mto.id == touch.identifier) {
+        // We start dragging when the touch moves outside the threshold
+      	if (mto.touchDown && (TR.multiTouchHasMovedOutsideThreshold(mto, touch) || mto.dragging)) {
+          mto.dragging = true;
+          mto.longTouch = false;
+
+          // If the user drags a Slot, the block they are dragging should become the target.
+          if (mto.targetType === "slot") {
+            mto.target = mto.target.parent
+            mto.targetType = (mto.target.stack.isDisplayStack ? "displayStack" : "block")
+          }
+        }
+        /* If the user drags a Block that is in a DisplayStack,
+  			 the DisplayStack copies to a new BlockStack, which can be dragged. */
+  			if (mto.targetType === "displayStack") {
+  	        const x = mto.target.stack.getAbsX();
+            const y = mto.target.stack.getAbsY();
+            // The first block of the duplicated BlockStack is the new target.
+            mto.target = mto.target.stack.duplicate(x, y).firstBlock;
+            mto.targetType = "block";
+  			}
+  			/* If the user drags a Block that is a member of a BlockStack,
+  			 then the BlockStack should move. */
+  			if (mto.targetType === "block") {
+  				// If the CodeManager has not started the movement, this must be done first.
+  				let x = TR.getMultiX(touch);
+  				let y = TR.getMultiY(touch);
+  				if (mto.blockMoveManager) {
+  					// The CodeManager handles moving BlockStacks.
+  					mto.blockMoveManager.update(x, y);
+  				} else {
+            mto.blockMoveManager = new BlockMoveManager(mto.target, x, y);
+  				}
+  			}
+
+      }
+    }
+  }
+}
+
+TouchReceiver.multiTouchEnd = function(e) {
+  const TR = TouchReceiver;
+  for (let i = 0; i < TR.multiTouches.length; i++) {
+    for (let j = 0; j < e.changedTouches.length; j++) {
+      let touch = e.changedTouches[j]
+      let mto = TR.multiTouches[i]
+      if (mto.id == touch.identifier) {
+        if (mto.touchDown && !mto.longTouch) {
+          mto.touchDown = false;
+          mto.dragging = false;
+          if (mto.targetType === "block") {
+      			if (mto.blockMoveManager != null) {   // If a stack is moving, tell the CodeManager to end the movement.
+      				mto.blockMoveManager.end();
+      				mto.blockMoveManager = null;
+      			} else {   // The stack was tapped, so it should run.
+      				mto.target.stack.startRun();
+      			}
+      		} else if (mto.targetType === "slot") {
+      			// If a Slot is pressed and released without dragging, it is time to edit its value.
+      			mto.target.onTap();
+      		} else if (mto.targetType == "displayStack") {
+            mto.target.stack.startRun();
+      		}
+      	} else {
+      		mto.touchDown = false;
+      	}
+      	//if (shouldPreventDefault) {
+      		// GuiElements.alert("Prevented 3");
+      		e.preventDefault();
+      	//}
+
+        //Remove the touch from the active touch list.
+        TR.multiTouches.splice(i, 1);
+      }
+    }
+  }
+}
+
+TouchReceiver.multiTouchLong = function(t) {
+  const TR = TouchReceiver;
+
+  if (t.dragging || !t.touchDown) { return; }
+
+  if (t.targetType === "slot") {
+    t.target = t.target.parent
+    t.targetType = (t.target.stack.isDisplayStack ? "displayStack" : "block")
+  }
+  if (t.targetType == "displayStack") {
+    // Show the menu for variables
+		if (t.target.blockTypeName === "B_Variable" || t.target.blockTypeName === "B_List") {
+			t.longTouch = true;
+			new BlockContextMenu(t.target, t.startX, t.startY);
+		}
+  } else if (t.targetType === "block" && !FinchBlox) {
+		t.longTouch = true;
+		new BlockContextMenu(t.target, t.startX, t.startY);
+	}
+}
+
 /**
  * Handles new touch events for Slots.  Stores the target Slot.
  * @param {Slot} slot - The Slot that was touched.
@@ -273,17 +425,21 @@ TouchReceiver.touchStartBlock = function(target, e) {
  */
 TouchReceiver.touchStartSlot = function(slot, e) {
 	const TR = TouchReceiver;
-	if (!slot.parent.stack.isDisplayStack) {
-		TR.checkStartZoom(e);
-	}
-	if (TR.touchstart(e)) {
-		if (!slot.isEditable() || slot.isEditing() !== true) {
-			Overlay.closeOverlays();   // Close any visible overlays.
-		}
-		TR.targetType = "slot";
-		TouchReceiver.target = slot;   // Store target Slot.
-		TR.setLongTouchTimer();
-	}
+  if (e.type.startsWith("mouse")) {
+  	if (!slot.parent.stack.isDisplayStack) {
+  		TR.checkStartZoom(e);
+  	}
+  	if (TR.touchstart(e)) {
+  		if (!slot.isEditable() || slot.isEditing() !== true) {
+  			Overlay.closeOverlays();   // Close any visible overlays.
+  		}
+  		TR.targetType = "slot";
+  		TouchReceiver.target = slot;   // Store target Slot.
+  		TR.setLongTouchTimer();
+  	}
+  } else {
+    TR.multiTouchStart(e, slot, "slot");
+  }
 };
 /**
  * Handles new touch events for CategoryBNs.  Stores the target CategoryBN.
@@ -323,6 +479,9 @@ TouchReceiver.touchStartBN = function(target, e) {
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchStartScrollBox = function(target, e) {
+  console.log("touchstartscrollbox")
+  console.log(target)
+  console.log(e)
 	const TR = TouchReceiver;
 	if (TR.touchstart(e, false)) {
 		Overlay.closeOverlaysExcept(target.partOfOverlay);
@@ -570,6 +729,14 @@ TouchReceiver.hasMovedOutsideThreshold = function(e) {
 	const distY = TR.startY - TR.getY(e);
 	return (distX * distX + distY * distY >= TR.moveThreshold * TR.moveThreshold);
 };
+
+TouchReceiver.multiTouchHasMovedOutsideThreshold = function(t, touch) {
+  const TR = TouchReceiver;
+  if (!t.touchDown) return false;
+  const distX = t.startX - TR.getMultiX(touch);
+	const distY = t.startY - TR.getMultiY(touch);
+	return (distX * distX + distY * distY >= TR.moveThreshold * TR.moveThreshold);
+}
 
 /**
  * Handles touch end events.  Tells stacks, Blocks, Buttons, etc. how to respond.

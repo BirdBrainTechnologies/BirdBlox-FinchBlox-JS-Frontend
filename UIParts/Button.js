@@ -511,7 +511,7 @@ Button.prototype.release = function() {
 			}
 			return;
 		}
-		if (!this.toggles || (this.toggled && !FinchBlox)) {
+		if (!this.toggles || (this.toggled && this.iconColor == null)) {
 			this.setColor(false);
 		}
 		if (this.toggles && this.toggled) {
@@ -543,7 +543,7 @@ Button.prototype.interrupt = function() {
  * Tells the button to exit the toggled state
  */
 Button.prototype.unToggle = function() {
-	if (this.enabled && (this.toggled || FinchBlox)) {
+	if (this.enabled && (this.toggled || this.iconColor != null)) {
 		this.setColor(false);
 	}
 	this.toggled = false;
@@ -601,7 +601,6 @@ Button.prototype.move = function(x, y) {
 Button.prototype.setColor = function(isPressed) {
   if (isPressed && FinchBlox) {
     if (this.toggles && this.hasIcon) {
-      console.log("toggles and hasIcon");
     	this.icon.setColor(Colors.blockPaletteSound);
     } else {
       let darkColor = Colors.darkenColor(this.bg, 0.8);
@@ -636,7 +635,11 @@ Button.prototype.setColor = function(isPressed) {
 			this.textE.setAttributeNS(null, "fill", Button.foreground);
 		}
 		if (this.hasIcon && this.iconInverts) {
-			this.icon.setColor(Button.foreground);
+      let color = Button.foreground;
+      if (this.iconColor != null) {
+        color = this.iconColor;
+      }
+			this.icon.setColor(color);
 		}
 		if (this.hasImage) {
 			GuiElements.update.image(this.imageE, this.imageData.lightName);

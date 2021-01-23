@@ -1,4 +1,4 @@
-var FinchBlox = false;
+var FinchBlox = true;
 var FrontendVersion = 393;
 
 
@@ -2490,7 +2490,10 @@ Language.en = {
 "Beak_Up":"Beak Up",
 "Beak_Down":"Beak Down",
 "Finch_Is_Level":"Level",
-"Upside_Down":"Upside Down"
+"Upside_Down":"Upside Down",
+"block_when_key_pressed":"when (Slot 1) key pressed",
+"space":"space",
+"any_key":"any key"
 }
 
 //Spanish Translation
@@ -7978,6 +7981,7 @@ BlockList.populateCat_control = function(category) {
 	category.addBlockByName("B_WhenIReceive");
 	category.addSpace();
 	category.addBlockByName("B_When");
+	category.addBlockByName("B_WhenKeyPressed");
 	category.addSpace();
 	category.addBlockByName("B_Broadcast");
 	category.addBlockByName("B_BroadcastAndWait");
@@ -10099,6 +10103,7 @@ function TouchReceiver() {
 	TR.touchDown = false;   // Is a finger currently on the screen?
 	TR.longTouch = false;   // Has the event already been handled by a long touch event?
 	TR.target = null;   // The object being interacted with.
+  TR.multiTouches = [];
 	TR.startX = 0;   // The x coord of the initial touch.
 	TR.startY = 0;   // The y coord of the initial touch.
 	TR.startX2 = 0;   // The x coord of the second touch.
@@ -10237,6 +10242,15 @@ TouchReceiver.getTouchX = function(e, i) {
 	return x;
 };
 
+TouchReceiver.getMultiX = function(touch) {
+  var x = touch.pageX / GuiElements.zoomFactor;
+  if (Language.isRTL) { x = GuiElements.width - x; }
+  return x;
+}
+TouchReceiver.getMultiY = function(touch) {
+  return touch.pageY / GuiElements.zoomFactor;
+}
+
 /**
  * Returns the touch y coord at the specified index
  * @param {event} e
@@ -10332,25 +10346,167 @@ TouchReceiver.targetIsInTabSpace = function() {
  * Handles new touch events for Blocks.  Stores the target Block.
  * @param {Block} target - The Block that was touched.
  * @param {event} e - passed event arguments.
- * @fix rename to touchStartBlock.
  */
 TouchReceiver.touchStartBlock = function(target, e) {
 	var TR = TouchReceiver;
-	if (!target.stack.isDisplayStack) {
-		TR.checkStartZoom(e);
-	}
-	if (TR.touchstart(e)) {
-		Overlay.closeOverlays();   // Close any visible overlays.
-		if (target.stack.isDisplayStack) {   // Determine what type of stack the Block is a member of.
-			TR.targetType = "displayStack";
-			TR.setLongTouchTimer();
-		} else {
-			TR.targetType = "block";
-			TR.setLongTouchTimer();
-		}
-		TouchReceiver.target = target;   // Store target Block.
-	}
+  if (e.type.startsWith("mouse")) {
+  	if (!target.stack.isDisplayStack) {
+  		TR.checkStartZoom(e);
+  	}
+  	if (TR.touchstart(e)) {
+  		Overlay.closeOverlays();   // Close any visible overlays.
+  		if (target.stack.isDisplayStack) {   // Determine what type of stack the Block is a member of.
+  			TR.targetType = "displayStack";
+  			TR.setLongTouchTimer();
+  		} else {
+  			TR.targetType = "block";
+  			TR.setLongTouchTimer();
+  		}
+  		TouchReceiver.target = target;   // Store target Block.
+  	}
+  } else {
+    var targetType = (target.stack.isDisplayStack ? "displayStack" : "block");
+    TR.multiTouchStart(e, target, targetType)
+  }
 };
+
+TouchReceiver.multiTouchStart = function(e, target, targetType) {
+  var TR = TouchReceiver;
+  e.preventDefault();
+  if (!TR.interactionEnabeled) { return; }
+
+  Overlay.closeOverlays();
+  for (var i = 0; i < e.changedTouches.length; i++) {
+    var touchObject = {
+      id: e.changedTouches[i].identifier,
+      target: target,
+      targetType: targetType,
+      longTouch: false,
+      dragging: false,
+      touchDown: true,
+      startX: TR.getMultiX(e.changedTouches[i]),
+      startY: TR.getMultiY(e.changedTouches[i])
+    }
+    self.setTimeout(function() {
+      TR.multiTouchLong(touchObject)
+    }, TR.longTouchInterval);
+    TR.multiTouches.push(touchObject);
+  }
+
+  TR.addEventListenerSafe(e.target, TR.handlerMove, TR.multiTouchMove);
+  TR.addEventListenerSafe(e.target, TR.handlerUp, TR.multiTouchEnd);
+}
+
+TouchReceiver.multiTouchMove = function(e) {
+  var TR = TouchReceiver;
+  e.preventDefault();
+  if (!TR.interactionEnabeled) {
+		return;
+	}
+
+  for (var i = 0; i < TR.multiTouches.length; i++) {
+    for (var j = 0; j < e.changedTouches.length; j++) {
+      var touch = e.changedTouches[j]
+      var mto = TR.multiTouches[i]
+      if (mto.id == touch.identifier) {
+        // We start dragging when the touch moves outside the threshold
+      	if (mto.touchDown && (TR.multiTouchHasMovedOutsideThreshold(mto, touch) || mto.dragging)) {
+          mto.dragging = true;
+          mto.longTouch = false;
+
+          // If the user drags a Slot, the block they are dragging should become the target.
+          if (mto.targetType === "slot") {
+            mto.target = mto.target.parent
+            mto.targetType = (mto.target.stack.isDisplayStack ? "displayStack" : "block")
+          }
+        }
+        /* If the user drags a Block that is in a DisplayStack,
+  			 the DisplayStack copies to a new BlockStack, which can be dragged. */
+  			if (mto.targetType === "displayStack") {
+  	        var x = mto.target.stack.getAbsX();
+            var y = mto.target.stack.getAbsY();
+            // The first block of the duplicated BlockStack is the new target.
+            mto.target = mto.target.stack.duplicate(x, y).firstBlock;
+            mto.targetType = "block";
+  			}
+  			/* If the user drags a Block that is a member of a BlockStack,
+  			 then the BlockStack should move. */
+  			if (mto.targetType === "block") {
+  				// If the CodeManager has not started the movement, this must be done first.
+  				var x = TR.getMultiX(touch);
+  				var y = TR.getMultiY(touch);
+  				if (mto.blockMoveManager) {
+  					// The CodeManager handles moving BlockStacks.
+  					mto.blockMoveManager.update(x, y);
+  				} else {
+            mto.blockMoveManager = new BlockMoveManager(mto.target, x, y);
+  				}
+  			}
+
+      }
+    }
+  }
+}
+
+TouchReceiver.multiTouchEnd = function(e) {
+  var TR = TouchReceiver;
+  for (var i = 0; i < TR.multiTouches.length; i++) {
+    for (var j = 0; j < e.changedTouches.length; j++) {
+      var touch = e.changedTouches[j]
+      var mto = TR.multiTouches[i]
+      if (mto.id == touch.identifier) {
+        if (mto.touchDown && !mto.longTouch) {
+          mto.touchDown = false;
+          mto.dragging = false;
+          if (mto.targetType === "block") {
+      			if (mto.blockMoveManager != null) {   // If a stack is moving, tell the CodeManager to end the movement.
+      				mto.blockMoveManager.end();
+      				mto.blockMoveManager = null;
+      			} else {   // The stack was tapped, so it should run.
+      				mto.target.stack.startRun();
+      			}
+      		} else if (mto.targetType === "slot") {
+      			// If a Slot is pressed and released without dragging, it is time to edit its value.
+      			mto.target.onTap();
+      		} else if (mto.targetType == "displayStack") {
+            mto.target.stack.startRun();
+      		}
+      	} else {
+      		mto.touchDown = false;
+      	}
+      	//if (shouldPreventDefault) {
+      		// GuiElements.alert("Prevented 3");
+      		e.preventDefault();
+      	//}
+
+        //Remove the touch from the active touch list.
+        TR.multiTouches.splice(i, 1);
+      }
+    }
+  }
+}
+
+TouchReceiver.multiTouchLong = function(t) {
+  var TR = TouchReceiver;
+
+  if (t.dragging || !t.touchDown) { return; }
+
+  if (t.targetType === "slot") {
+    t.target = t.target.parent
+    t.targetType = (t.target.stack.isDisplayStack ? "displayStack" : "block")
+  }
+  if (t.targetType == "displayStack") {
+    // Show the menu for variables
+		if (t.target.blockTypeName === "B_Variable" || t.target.blockTypeName === "B_List") {
+			t.longTouch = true;
+			new BlockContextMenu(t.target, t.startX, t.startY);
+		}
+  } else if (t.targetType === "block" && !FinchBlox) {
+		t.longTouch = true;
+		new BlockContextMenu(t.target, t.startX, t.startY);
+	}
+}
+
 /**
  * Handles new touch events for Slots.  Stores the target Slot.
  * @param {Slot} slot - The Slot that was touched.
@@ -10358,17 +10514,21 @@ TouchReceiver.touchStartBlock = function(target, e) {
  */
 TouchReceiver.touchStartSlot = function(slot, e) {
 	var TR = TouchReceiver;
-	if (!slot.parent.stack.isDisplayStack) {
-		TR.checkStartZoom(e);
-	}
-	if (TR.touchstart(e)) {
-		if (!slot.isEditable() || slot.isEditing() !== true) {
-			Overlay.closeOverlays();   // Close any visible overlays.
-		}
-		TR.targetType = "slot";
-		TouchReceiver.target = slot;   // Store target Slot.
-		TR.setLongTouchTimer();
-	}
+  if (e.type.startsWith("mouse")) {
+  	if (!slot.parent.stack.isDisplayStack) {
+  		TR.checkStartZoom(e);
+  	}
+  	if (TR.touchstart(e)) {
+  		if (!slot.isEditable() || slot.isEditing() !== true) {
+  			Overlay.closeOverlays();   // Close any visible overlays.
+  		}
+  		TR.targetType = "slot";
+  		TouchReceiver.target = slot;   // Store target Slot.
+  		TR.setLongTouchTimer();
+  	}
+  } else {
+    TR.multiTouchStart(e, slot, "slot");
+  }
 };
 /**
  * Handles new touch events for CategoryBNs.  Stores the target CategoryBN.
@@ -10408,6 +10568,9 @@ TouchReceiver.touchStartBN = function(target, e) {
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchStartScrollBox = function(target, e) {
+  console.log("touchstartscrollbox")
+  console.log(target)
+  console.log(e)
 	var TR = TouchReceiver;
 	if (TR.touchstart(e, false)) {
 		Overlay.closeOverlaysExcept(target.partOfOverlay);
@@ -10655,6 +10818,14 @@ TouchReceiver.hasMovedOutsideThreshold = function(e) {
 	var distY = TR.startY - TR.getY(e);
 	return (distX * distX + distY * distY >= TR.moveThreshold * TR.moveThreshold);
 };
+
+TouchReceiver.multiTouchHasMovedOutsideThreshold = function(t, touch) {
+  var TR = TouchReceiver;
+  if (!t.touchDown) return false;
+  var distX = t.startX - TR.getMultiX(touch);
+	var distY = t.startY - TR.getMultiY(touch);
+	return (distX * distX + distY * distY >= TR.moveThreshold * TR.moveThreshold);
+}
 
 /**
  * Handles touch end events.  Tells stacks, Blocks, Buttons, etc. how to respond.
@@ -13772,7 +13943,7 @@ Button.prototype.release = function() {
 			}
 			return;
 		}
-		if (!this.toggles || (this.toggled && !FinchBlox)) {
+		if (!this.toggles || (this.toggled && this.iconColor == null)) {
 			this.setColor(false);
 		}
 		if (this.toggles && this.toggled) {
@@ -13804,7 +13975,7 @@ Button.prototype.interrupt = function() {
  * Tells the button to exit the toggled state
  */
 Button.prototype.unToggle = function() {
-	if (this.enabled && (this.toggled || FinchBlox)) {
+	if (this.enabled && (this.toggled || this.iconColor != null)) {
 		this.setColor(false);
 	}
 	this.toggled = false;
@@ -13862,7 +14033,6 @@ Button.prototype.move = function(x, y) {
 Button.prototype.setColor = function(isPressed) {
   if (isPressed && FinchBlox) {
     if (this.toggles && this.hasIcon) {
-      console.log("toggles and hasIcon");
     	this.icon.setColor(Colors.blockPaletteSound);
     } else {
       var darkColor = Colors.darkenColor(this.bg, 0.8);
@@ -13897,7 +14067,11 @@ Button.prototype.setColor = function(isPressed) {
 			this.textE.setAttributeNS(null, "fill", Button.foreground);
 		}
 		if (this.hasIcon && this.iconInverts) {
-			this.icon.setColor(Button.foreground);
+      var color = Button.foreground;
+      if (this.iconColor != null) {
+        color = this.iconColor;
+      }
+			this.icon.setColor(color);
 		}
 		if (this.hasImage) {
 			GuiElements.update.image(this.imageE, this.imageData.lightName);
@@ -14718,6 +14892,7 @@ InputPad.prototype.show = function(slotShape, updateFn, finishFn, data, color, b
  */
 InputPad.prototype.updateDim = function() {
 	var IP = InputPad;
+  var width = IP.width;
 	var height = 0;
 	this.widgets.forEach(function(widget) {
 		// Some widgets have adjustable heights (like SelectPads)
@@ -14727,6 +14902,10 @@ InputPad.prototype.updateDim = function() {
 			height += widget.height;
 		}
 		height += IP.margin;
+
+    if (widget.constructor == InputWidget.Piano && !FinchBlox) {
+      width = InputWidget.Piano.inputPadWidth;
+    }
 	});
 	height -= IP.margin;
 	height = Math.max(height, 0);
@@ -14745,7 +14924,7 @@ InputPad.prototype.updateDim = function() {
 	});
 	// Store the final results
 	this.height = height;
-	this.width = IP.width;
+  this.width = width;
 };
 
 /**
@@ -14886,6 +15065,7 @@ InputWidget.Label.prototype.show = function(x, y, parentGroup) {
 	var textY = y + L.font.charHeight + L.margin;
 	GuiElements.move.text(this.textE, textX, textY);
 	parentGroup.appendChild(this.textE);
+	this.textY = textY;
 };
 
 /**
@@ -15952,7 +16132,8 @@ InputWidget.Piano.setConstants = function() {
 	P.bnMargin = 2;
 	P.firstNote = 60;
 	P.numWhiteKeys = 14;
-	P.whiteKeyW = (InputPad.width - P.bnMargin * (P.numWhiteKeys-1)) / P.numWhiteKeys;
+	P.inputPadWidth = FinchBlox ? InputPad.width : InputPad.width*3
+	P.whiteKeyW = (P.inputPadWidth - P.bnMargin * (P.numWhiteKeys-1)) / P.numWhiteKeys;
 	P.blackKeyW = P.whiteKeyW*0.65;
 
 	P.wkIcon = VectorPaths.mvPianoWhiteKey;
@@ -16009,8 +16190,14 @@ InputWidget.Piano.prototype.show = function(x, y, parentGroup, overlay, slotShap
 	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
 	this.group = GuiElements.create.group(x, y, parentGroup);
 	//this.displayNum = new DisplayNum(data);
-	console.log("show piano " + data);
-	this.makeBns(data[this.index]);
+	//console.log("show piano " + this.index + " " + data[this.index] + " " + data.getValue());
+
+	if (FinchBlox) {
+		this.makeBns(data[this.index]);
+	} else {
+		this.makeBns(data.getValue());
+	}
+
 	/* The data in the Slot starts out gray to indicate that it will be deleted on modification. THe number 0 is not
 	 * grayed since there's nothing to delete. */
 	//this.grayOutUnlessZero();
@@ -16077,6 +16264,7 @@ InputWidget.Piano.prototype.makeWhiteKey = function(x, y, num) {
 	var P = InputWidget.Piano;
 	var button = this.makeKey(x, y, num, P.whiteKeyW, P.whiteKeyH);
 	button.addColorIcon(VectorPaths.mvPianoWhiteKey, P.whiteKeyH, Colors.white);
+	button.iconInverts = true;
 	GuiElements.update.stroke(button.icon.pathE, Colors.iron, 1);
 }
 
@@ -16085,6 +16273,7 @@ InputWidget.Piano.prototype.makeBlackKey = function(x, y, num) {
 	x += P.whiteKeyW + P.bnMargin/2 - P.blackKeyW/2;
 	var button = this.makeKey(x, y, num, P.blackKeyW, P.blackKeyH);
 	button.addColorIcon(VectorPaths.mvPianoBlackKey, P.blackKeyH, Colors.black);
+	button.iconInverts = true;
 }
 
 InputWidget.Piano.prototype.makeKey = function(x, y, num, w, h) {
@@ -16092,10 +16281,10 @@ InputWidget.Piano.prototype.makeKey = function(x, y, num, w, h) {
 	var P = InputWidget.Piano;
 	var button = new Button(x, y, w, h, this.group, Colors.white);
 	button.setCallbackFunction(function(){
-		var soundDuration = CodeManager.beatsToMs(0.5);
+		/*var soundDuration = CodeManager.beatsToMs(0.5);
 		var request = "sound/note?note=" + num + "&duration=" + soundDuration;
 		var requestStatus = function() {};
-		HtmlServer.sendRequest(request, requestStatus);
+		HtmlServer.sendRequest(request, requestStatus);*/
 
 		this.keyPressed(num)
 	}.bind(this));
@@ -16118,8 +16307,13 @@ InputWidget.Piano.prototype.keyPressed = function(num) {
 	//this.displayNum = new DisplayNum(new NumData(num));
 	//this.updateFn(this.displayNum.getData(), this.displayNum.getString());
 	//this.updateFn(num, InputWidget.Piano.noteStrings[num]);
-	this.updateFn(num, this.index);
-	console.log("pressed key " + num);
+	if (FinchBlox) {
+		this.updateFn(num, this.index);
+	} else {
+		this.updateFn(new NumData(num));
+	}
+
+	//console.log("pressed key " + num);
 	//this.finishFn(this.displayNum.getData());
 	this.updatePressed(num);
 };
@@ -19691,6 +19885,158 @@ CodeManager.dragRelToAbsY = function(y) {
 	return y * TabManager.getActiveZoom();
 };
 
+
+
+/**
+ * BlockMoveManager is a class that moves the BlockStack that the user is dragging
+ * BlockMoveManager contains function to start, stop, and update the movement of a BlockStack.
+ * These functions are called by the TouchReceiver class when the user drags a BlockStack.
+ * Initializer - Picks up a Block so that it can be moved.  Stores necessary information in BlockMoveManager.move.
+ * Transfers the BlockStack into the drag layer above other blocks.
+ * @param {Block} block - The block the user dragged.
+ * @param {number} x - The x coord of the user's finger.
+ * @param {number} y - The y coord of the user's finger.
+ */
+function BlockMoveManager(block, x, y) {
+  var move = {}
+
+  Overlay.closeOverlays();   // Close any visible overlays.
+	/* Disconnect the Block from its current BlockStack to form a new BlockStack
+	containing only the Block and the Blocks below it. */
+	var stack = block.unsnap();
+	stack.fly();   // Make the new BlockStack fly (moves it into the drag layer).
+	move.bottomX = stack.relToAbsX(stack.dim.rw);   // Store the BlockStack's dimensions.
+	move.bottomY = stack.relToAbsY(stack.dim.rh);
+	move.returnType = stack.returnType;   // Store the BlockStack's return type.
+	move.startedFromPalette = BlockPalette.isStackOverPalette(x, y);
+
+	// Store other information about how the BlockStack can connect to other Blocks.
+	move.bottomOpen = stack.getLastBlock().bottomOpen;
+	move.topOpen = stack.firstBlock.topOpen;
+	move.returnsValue = stack.firstBlock.returnsValue;
+
+	move.touchX = x;   // Store coords
+	move.touchY = y;
+	move.offsetX = stack.getAbsX() - x;   // Store offset.
+	move.offsetY = stack.getAbsY() - y;
+	move.stack = stack;   // Store stack.
+
+  move.topX = 0;   // The top-left corner's x coord of the BlockStack being moved.
+	move.topY = 0;   // The top-left corner's y-coord of the BlockStack being moved.
+  this.move = move;
+  // Stores information used when determine which slot is closest to the moving stack.
+	this.fit = {};
+}
+
+/**
+ * Updates the position of the currently moving BlockStack.
+ * Also highlights the slot that fits it best (if any).
+ * @param {number} x - The x coord of the user's finger.
+ * @param {number} y - The y coord of the user's finger.
+ */
+BlockMoveManager.prototype.update = function(x, y) {
+	var move = this.move;   // shorthand
+
+	move.touchX = x;
+	move.touchY = y;
+	move.topX = move.offsetX + x;
+	move.topY = move.offsetY + y;
+	move.bottomX = move.stack.relToAbsX(move.stack.dim.rw);
+	move.bottomY = move.stack.relToAbsY(move.stack.dim.rh);
+	// Move the BlockStack to the correct location.
+	move.stack.move(CodeManager.dragAbsToRelX(move.topX), CodeManager.dragAbsToRelY(move.topY));
+	// If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
+  var wouldDelete = BlockPalette.isStackOverPalette(move.touchX, move.touchY);
+  if (FinchBlox) { wouldDelete |= TitleBar.isStackOverTitleBar(move.touchX, move.touchY); }
+	if (wouldDelete) {
+		Highlighter.hide();   // Hide any existing highlight.
+		if (!move.startedFromPalette) {
+			BlockPalette.showTrash();
+		}
+	} else {
+		BlockPalette.hideTrash();
+		// The slot which fits it best (if any) will be stored in BlockMoveManager.fit.bestFit.
+		this.findBestFit();
+		if (this.fit.found) {
+			if (FinchBlox) {
+				var fit = this.fit.bestFit;
+				Highlighter.showShadow(fit, move.stack);
+			} else {
+				this.fit.bestFit.highlight();   // If such a slot exists, highlight it.
+			}
+		} else {
+			Highlighter.hide();   // If not, hide any existing highlight.
+		}
+	}
+
+};
+
+/**
+ * Drops the BlockStack that is currently moving and connects it to the Slot/Block that fits it.
+ */
+BlockMoveManager.prototype.end = function() {
+	var move = this.move;   // shorthand
+	var fit = this.fit;   // shorthand
+
+	move.topX = move.offsetX + move.touchX;
+	move.topY = move.offsetY + move.touchY;
+	move.bottomX = move.stack.relToAbsX(move.stack.dim.rw);
+	move.bottomY = move.stack.relToAbsY(move.stack.dim.rh);
+	// If the BlockStack overlaps with the BlockPalette, delete it.
+  var shouldDelete = BlockPalette.isStackOverPalette(move.touchX, move.touchY);
+  if (FinchBlox) { shouldDelete |= TitleBar.isStackOverTitleBar(move.touchX, move.touchY); }
+	if (shouldDelete) {
+		if (move.startedFromPalette) {
+			move.stack.remove();
+		} else {
+			UndoManager.deleteStack(move.stack);
+			SaveManager.markEdited();
+		}
+	} else {
+		// The Block/Slot which fits it best (if any) will be stored in BlockMoveManager.fit.bestFit.
+		this.findBestFit();
+		if (fit.found) {
+			// Snap is onto the Block/Slot that fits it best.
+			fit.bestFit.snap(move.stack.firstBlock);
+			Sound.playSnap();
+		} else {
+			// If it is not going to be snapped or deleted, simply drop it onto the current tab.
+			move.stack.land();
+			move.stack.updateDim();   // Fix! this line of code might not be needed.
+		}
+		SaveManager.markEdited();
+	}
+	Highlighter.hide();   // Hide any existing highlight.
+	BlockPalette.hideTrash();
+
+};
+
+/**
+ * Drops the BlockStack where it is without attaching it to anything or deleting it.
+ */
+BlockMoveManager.prototype.interrupt = function() {
+	var move = this.move;   // shorthand
+
+	move.topX = move.offsetX + move.touchX;
+	move.topY = move.offsetY + move.touchY;
+	move.stack.land();
+	move.stack.updateDim();   // Fix! this line of code might not be needed.
+	Highlighter.hide();   // Hide any existing highlight.
+
+};
+
+/**
+ * Recursively searches for the Block/Slot that best fits the moving BlockStack.
+ * All results are stored in BlockMoveManager.fit.  Nothing is returned.
+ */
+BlockMoveManager.prototype.findBestFit = function() {
+	var fit = this.fit;   // shorthand
+	fit.found = false;   // Have any matching slot/block been found?
+	fit.bestFit = null;   // Slot/Block that is closest to the item?
+	fit.dist = 0;   // How far is the best candidate from the ideal location?
+	TabManager.activeTab.findBestFit(this);   // Begins the recursive calls.
+};
+
 /**
  * When BirdBlox was created, we initially were going to have tabs on the main canvas for different sprites.
  * All messages to blocks are passed from TabManager > Tab > BlockStack > Block > Slot > etc.
@@ -20225,8 +20571,8 @@ Tab.prototype.getAbsY = function() {
 };
 
 /* Recursively passed messages.  Each of these function simply calls the function on the Tab's stacks */
-Tab.prototype.findBestFit = function() {
-	this.passRecursively("findBestFit");
+Tab.prototype.findBestFit = function(moveManager) {
+	this.passRecursively("findBestFit", moveManager);
 };
 Tab.prototype.eventFlagClicked = function() {
 	this.passRecursively("eventFlagClicked");
@@ -23775,15 +24121,18 @@ BlockStack.prototype.getAbsY = function() {
  * Searches the Blocks within this BlockStack to find one which fits the moving BlockStack.
  * Returns no values but stores results on CodeManager.fit.
  */
-BlockStack.prototype.findBestFit = function() {
+BlockStack.prototype.findBestFit = function(moveManager) {
 	var move = CodeManager.move;
+  if (moveManager != null) {
+    move = moveManager.move
+  }
 	// If this BlockStack is the one being moved, it can't attach to itself.
 	if (move.stack === this) {
 		return;
 	}
 	// Check if the moving BlockStack can attach to the top of this BlockStack.
 	if (move.bottomOpen && this.firstBlock.topOpen) {
-		this.findBestFitTop();
+		this.findBestFitTop(moveManager);
 	}
 	// Recursively check if the moving BlockStack can attach to the bottom of any Blocks in this BlockStack.
 	if (move.topOpen) {
@@ -23792,8 +24141,8 @@ BlockStack.prototype.findBestFit = function() {
 		var absCy = this.relToAbsY(this.dim.cy1);
 		var absW = this.relToAbsX(this.dim.cw) - absCx;
 		var absH = this.relToAbsY(this.dim.ch) - absCy;
-		if (move.pInRange(move.topX, move.topY, absCx, absCy, absW, absH)) {
-			this.firstBlock.findBestFit();
+		if (CodeManager.move.pInRange(move.topX, move.topY, absCx, absCy, absW, absH)) {
+			this.firstBlock.findBestFit(moveManager);
 		}
 	}
 	// Recursively check recursively if the moving BlockStack can attach one of this BlockStack's Slots.
@@ -23805,8 +24154,8 @@ BlockStack.prototype.findBestFit = function() {
 		var absH = this.relToAbsY(this.dim.rh) - absRy;
 		var width = move.bottomX - move.topX;
 		var height = move.bottomY - move.topY;
-		if (move.rInRange(move.topX, move.topY, width, height, absRx, absRy, absW, absH)) {
-			this.firstBlock.findBestFit();
+		if (CodeManager.move.rInRange(move.topX, move.topY, width, height, absRx, absRy, absW, absH)) {
+			this.firstBlock.findBestFit(moveManager);
 		}
 	}
 };
@@ -23927,10 +24276,15 @@ BlockStack.prototype.endRun = function() {
  * Results are stored in CodeManager.fit.
  * Only called if moving BlockStack returns no value.
  */
-BlockStack.prototype.findBestFitTop = function() {
+BlockStack.prototype.findBestFitTop = function(moveManager) {
 	var snap = BlockGraphics.command.snap; // Get snap bounding box for command Blocks.
 	var move = CodeManager.move;
-	var fit = CodeManager.fit;
+  var fit = CodeManager.fit;
+  if (moveManager != null) {
+    move = moveManager.move
+    fit = moveManager.fit
+  }
+
 	var x = this.firstBlock.getAbsX(); // Uses screen coordinates.
 	var y = this.firstBlock.getAbsY();
 	var height = this.relToAbsY(this.firstBlock.height) - y;
@@ -23953,9 +24307,9 @@ BlockStack.prototype.findBestFitTop = function() {
 	// Checks if the point falls in the box.
   var success = false;
   if (FinchBlox) { //because these blocks connect horizontally, check the top right corner
-    success = move.pInRange(moveTopRightX, moveTopRightY, snapBLeft, snapBTop, snapFWidth, snapFHeight);
+    success = CodeManager.move.pInRange(moveTopRightX, moveTopRightY, snapBLeft, snapBTop, snapFWidth, snapFHeight);
   } else {
-    success = move.pInRange(moveBottomLeftX, moveBottomLeftY, snapBLeft, snapBTop, snapBWidth, snapBHeight);
+    success = CodeManager.move.pInRange(moveBottomLeftX, moveBottomLeftY, snapBLeft, snapBTop, snapBWidth, snapBHeight);
   }
 	if (success) {
 		var xDist = move.topX - x;
@@ -24592,7 +24946,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
 	if (isPost == null) {
 		isPost = false;
 	}
-	if (HtmlServer.iosHandler != null || window.AndroidInterface) {
+	if (HtmlServer.iosHandler != null || window.AndroidInterface || GuiElements.isPWA) {
 		HtmlServer.sendNativeCall(request, callbackFn, callbackErr, isPost, postData, isBluetoothBlock, noTimeout);
 		return;
 	}
@@ -24687,6 +25041,22 @@ HtmlServer.sendFinishedLoadingRequest = function() {
 	HtmlServer.sendRequestWithCallback(request.toString());
 };
 
+
+/**
+ * HtmlServer.sendTabletSoundRequest - Asks the backend to play a simple tone
+ * on the tablet.
+ *
+ * @param  {number} note          Midi note number to play
+ * @param  {number} duration      Duration of note in ms
+ * @return  {Object}  Request status object
+ */
+HtmlServer.sendTabletSoundRequest = function(note, duration) {
+	var request = "sound/note?note=" + note + "&duration=" + duration;
+	var requestStatus = function() {};
+	HtmlServer.sendRequest(request, requestStatus);
+	return requestStatus;
+}
+
 /**
  * Sends a command through the system iOS provides for allowing JS to call swift functions,
  * or to the Android javascriptInterface
@@ -24732,6 +25102,8 @@ HtmlServer.sendNativeCall = function(request, callbackFn, callbackErr, isPost, p
 		var jsonObjString = JSON.stringify(requestObject);
 		AndroidInterface.sendAndroidRequest(jsonObjString);
 		GuiElements.alert("Made request: " + request + " using Android native, inBackground=" + requestObject.inBackground);
+	} else if (GuiElements.isPWA) {
+    parseFinchBloxRequest(requestObject);
 	} else {
 		GuiElements.alert("ERROR: Failure to send native call: '" + request + "'. No native handler found.");
 	}
@@ -27105,9 +27477,13 @@ Block.prototype.resize = function(width, height) {
  * A command block attempts to find a connection between its bottom and the moving stack's top.
  * Connections to the top of the stack's findBestFit.
  */
-Block.prototype.findBestFit = function() {
+Block.prototype.findBestFit = function(moveManager) {
 	var move = CodeManager.move;
 	var fit = CodeManager.fit;
+  if (moveManager != null) {
+    move = moveManager.move
+    fit = moveManager.fit
+  }
 	var x = this.getAbsX(); //Get coords to compare.
 	var y = this.getAbsY();
 	var height = this.relToAbsY(this.height) - y;
@@ -27116,7 +27492,7 @@ Block.prototype.findBestFit = function() {
 
 	if (move.returnsValue) { //If a connection between the stack and block are possible...
 		for (var i = 0; i < this.slots.length; i++) {
-			var slotHasMatch = this.slots[i].findBestFit();
+			var slotHasMatch = this.slots[i].findBestFit(moveManager);
 			hasMatch = slotHasMatch || hasMatch;
 		}
 	} else if (move.topOpen && this.bottomOpen) { //If a connection between the stack and block are possible...
@@ -27132,9 +27508,9 @@ Block.prototype.findBestFit = function() {
 		//Check if point falls in a rectangular range.
     var success = false;
     if (FinchBlox) {
-      success = move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapFWidth, snapFHeight);
+      success = CodeManager.move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapFWidth, snapFHeight);
     } else {
-      success = move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapBWidth, snapBHeight);
+      success = CodeManager.move.pInRange(move.topX, move.topY, snapBLeft, snapBTop, snapBWidth, snapBHeight);
     }
 		if (success) {
 			var xDist = move.topX - x; //If it does, compute the distance with the distance formula.
@@ -27152,13 +27528,13 @@ Block.prototype.findBestFit = function() {
 		}
 	}
 	if (this.hasBlockSlot1) { //Pass the message on recursively.
-		this.blockSlot1.findBestFit();
+		this.blockSlot1.findBestFit(moveManager);
 	}
 	if (this.hasBlockSlot2) {
-		this.blockSlot2.findBestFit();
+		this.blockSlot2.findBestFit(moveManager);
 	}
 	if (this.nextBlock != null) {
-		this.nextBlock.findBestFit();
+		this.nextBlock.findBestFit(moveManager);
 	}
 	return hasMatch;
 };
@@ -28853,12 +29229,12 @@ Slot.prototype.removeChild = function(){
  * Returns nothing. Results stored in CodeManager.fit.
  * @return {boolean} - true iff this Slot or one of its descendants can accept the moving blocks
  */
-Slot.prototype.findBestFit = function(){
+Slot.prototype.findBestFit = function(moveManager){
 	// Only the highest eligible slot on the connection tree is allowed to accept the blocks.
 	var childHasMatch = false;
 	// The slot is a leaf unless one of its decedents is a leaf.
 	if(this.hasChild){
-		childHasMatch = this.child.findBestFit(); // Pass on the message.
+		childHasMatch = this.child.findBestFit(moveManager); // Pass on the message.
 	}
 	if(childHasMatch){
 		// Don't bother checking this slot if it already has a matching decedents.
@@ -28868,6 +29244,10 @@ Slot.prototype.findBestFit = function(){
 	// shorthand
 	var move = CodeManager.move;
 	var fit = CodeManager.fit;
+  if (moveManager != null) {
+    move = moveManager.move
+    fit = moveManager.fit
+  }
 
 	// Use coords relative to screen.
 	var x = this.getAbsX();
@@ -28881,7 +29261,7 @@ Slot.prototype.findBestFit = function(){
 	// Does the bounding box of the BlockStack overlap with the bounding box of the Slot?
 	var width = move.bottomX - move.topX;
 	var height = move.bottomY - move.topY;
-	var locationMatches = move.rInRange(move.topX, move.topY, width, height, x,y, myWidth, myHeight);
+	var locationMatches = CodeManager.move.rInRange(move.topX, move.topY, width, height, x,y, myWidth, myHeight);
 
 	// If so, use distance to find the best fit
 	if(typeMatches && locationMatches){
@@ -30540,6 +30920,63 @@ NumSlot.prototype.sanitizeData = function(data) {
 	return new NumData(value, data.isValid);
 };
 /**
+ * NoteSlot is a subclass of NumSlot which is a subclass of RoundSlot.
+ * It creates a RoundSlot optimized for use with musical notes.
+ * It automatically converts any results into NumData and has a snapType of numStrBool.
+ * @constructor
+ * @param {Block} parent
+ * @param {string} key
+ * @param {number} value
+ * @param {boolean} [positive] - Determines if the NumPad will have the plus/minus Button disabled.
+ * @param {boolean} [integer] - Determines if the NumPad will have the decimal point Button disabled.
+ */
+function NoteSlot(parent, key, value, positive, integer) {
+  NumSlot.call(this, parent, key, value, positive, integer);
+}
+NoteSlot.prototype = Object.create(NumSlot.prototype);
+NoteSlot.prototype.constructor = NoteSlot;
+
+/**
+  * @inheritDoc
+  * @return {InputPad}
+  */
+NoteSlot.prototype.createInputSystem = function() {
+	var x1 = this.getAbsX();
+	var y1 = this.getAbsY();
+	var x2 = this.relToAbsX(this.width);
+	var y2 = this.relToAbsY(this.height);
+
+  var labelText = InputWidget.Piano.noteStrings[this.enteredData.getValue()]
+  this.label = new InputWidget.Label(labelText)
+
+	var inputPad = new InputPad(x1, x2, y1, y2);
+  inputPad.addWidget(this.label);
+	inputPad.addWidget(new InputWidget.Piano(0));
+
+	return inputPad;
+};
+
+
+NoteSlot.prototype.updateEdit = function(data) {
+  //Call the updateEdit function of the superclass
+  Object.getPrototypeOf(Object.getPrototypeOf(this)).updateEdit.call(this, data);
+
+  var midiNote = this.enteredData.getValue()
+
+  //Update the label with the note name
+  var labelText = InputWidget.Piano.noteStrings[midiNote]
+  var ipW = InputWidget.Piano.inputPadWidth;
+  GuiElements.update.textLimitWidth(this.label.textE, labelText, ipW);
+	var textW = GuiElements.measure.textWidth(this.label.textE);
+	var textX = ipW / 2 - textW / 2;
+	var textY = this.label.textY;
+	GuiElements.move.text(this.label.textE, textX, textY);
+
+  //Play the proposed note
+  HtmlServer.sendTabletSoundRequest(midiNote, CodeManager.beatsToMs(0.5));
+}
+
+/**
  * StringSlot is a subclass of RectSlot.
  * It creates a RectSlot optimized for use with strings.
  * It automatically converts any results into StringData and has a snapType of numStrBool.
@@ -30862,16 +31299,20 @@ BlockSlot.prototype.removeChild = function() {
 /**
  * Checks if the moving Block could fit in this BlockStack and then passes the findBestFit message recursively
  */
-BlockSlot.prototype.findBestFit = function() {
+BlockSlot.prototype.findBestFit = function(moveManager) {
 	var move = CodeManager.move;
-	var fit = CodeManager.fit;
+  var fit = CodeManager.fit;
+  if (moveManager != null) {
+    move = moveManager.move
+    fit = moveManager.fit
+  }
 	var x = this.getAbsX();
 	var y = this.getAbsY();
 
 	// Check if the Block fits in this BlockSlot (above the top Block in it, if any)
 	if (move.topOpen) {
 		var snap = BlockGraphics.command.snap;
-		if (move.pInRange(move.topX, move.topY, x - snap.left, y - snap.top, snap.left + snap.right, snap.top + snap.bottom)) {
+		if (CodeManager.move.pInRange(move.topX, move.topY, x - snap.left, y - snap.top, snap.left + snap.right, snap.top + snap.bottom)) {
 			var xDist = move.topX - x;
 			var yDist = move.topY - y;
 			var dist = xDist * xDist + yDist * yDist;
@@ -30884,7 +31325,7 @@ BlockSlot.prototype.findBestFit = function() {
 	}
 	// Check if it fits in this BlockSlot's children
 	if (this.hasChild) {
-		this.child.findBestFit();
+		this.child.findBestFit(moveManager);
 	}
 };
 
@@ -31436,6 +31877,7 @@ function BlockButton(parent){
  this.widgets = [];
  this.displaySuffixes = [];
  this.values = [];
+ this.popupIsDisplayed = false;
 
  this.outlineColor = Colors.blockOutline[parent.category];
  if (this.outlineColor == null) { this.outlineColor = Colors.categoryColors[parent.category]; }
@@ -31447,7 +31889,9 @@ function BlockButton(parent){
      var inputSys = me.createInputSystem();
      inputSys.show(null, me.updateValue.bind(me), function(){
        SaveManager.markEdited();
+       me.popupIsDisplayed = false;
      }, me.values, me.outlineColor, parent);
+     me.popupIsDisplayed = true;
    }
  }
 
@@ -31975,7 +32419,8 @@ function B_DeviceWithPortsBuzzer(x, y, deviceClass){
   this.minBeat = 0
   this.maxBeat = 16
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  var noteSlot = new NumSlot(this,"Note_out", 60, true, true);
+  //var noteSlot = new NumSlot(this,"Note_out", 60, true, true);
+	var noteSlot = new NoteSlot(this,"Note_out", 60, true, true);
   noteSlot.addLimits(this.minNote, this.maxNote, Language.getStr("Note"));
   this.addPart(noteSlot);
   var beatsSlot = new NumSlot(this,"Beats_out", 1, true, false);
@@ -34373,6 +34818,10 @@ B_FBSound.prototype.updateValues = function () {
     if (this.noteButton.widgets.length == 2) {
       this.beats = this.noteButton.values[1];
     }
+
+    if (this.blockButton.popupIsDisplayed) {
+      HtmlServer.sendTabletSoundRequest(this.midiNote, 100 * this.beats);
+    }
   }
 }
 
@@ -34895,6 +35344,88 @@ B_When.prototype.startAction = function() {
 		return new ExecutionStatusRunning(); //Still running
 	}
 };
+
+function B_WhenKeyPressed(x, y) {
+	HatBlock.call(this, x, y, "control", true);
+	var dS = new DropSlot(this, "DS_key", null, null, new SelectionData(Language.getStr("space"), "Space,32"));
+	dS.addOption(new SelectionData("0", "Digit0,48"));
+	dS.addOption(new SelectionData("1", "Digit1,49"));
+	dS.addOption(new SelectionData("2", "Digit2,50"));
+	dS.addOption(new SelectionData("3", "Digit3,51"));
+	dS.addOption(new SelectionData("4", "Digit4,52"));
+	dS.addOption(new SelectionData("5", "Digit5,53"));
+	dS.addOption(new SelectionData("6", "Digit6,54"));
+	dS.addOption(new SelectionData("7", "Digit7,55"));
+	dS.addOption(new SelectionData("8", "Digit8,56"));
+	dS.addOption(new SelectionData("9", "Digit9,57"));
+	dS.addOption(new SelectionData(Language.getStr("any_key"), "any_key"));
+	dS.addOption(new SelectionData("↑", "ArrowUp,38"));
+	dS.addOption(new SelectionData("↓", "ArrowDown,40"));
+	dS.addOption(new SelectionData("→", " ArrowRight,39"));
+	dS.addOption(new SelectionData("←", "ArrowLeft,37"));
+	dS.addOption(new SelectionData(Language.getStr("space"), "Space,32"));
+	dS.addOption(new SelectionData("+", "Equal,187"));
+	dS.addOption(new SelectionData("-", "Minus,189"));
+	dS.addOption(new SelectionData("a", "KeyA,65"));
+	dS.addOption(new SelectionData("b", "KeyB,66"));
+	dS.addOption(new SelectionData("c", "KeyC,67"));
+	dS.addOption(new SelectionData("d", "KeyD,68"));
+	dS.addOption(new SelectionData("e", "KeyE,69"));
+	dS.addOption(new SelectionData("f", "KeyF,70"));
+	dS.addOption(new SelectionData("g", "KeyG,71"));
+	dS.addOption(new SelectionData("h", "KeyH,72"));
+	dS.addOption(new SelectionData("i", "KeyI,73"));
+	dS.addOption(new SelectionData("j", "KeyJ,74"));
+	dS.addOption(new SelectionData("k", "KeyK,75"));
+	dS.addOption(new SelectionData("l", "KeyL,76"));
+	dS.addOption(new SelectionData("m", "KeyM,77"));
+	dS.addOption(new SelectionData("n", "KeyN,78"));
+	dS.addOption(new SelectionData("o", "KeyO,79"));
+	dS.addOption(new SelectionData("p", "KeyP,80"));
+	dS.addOption(new SelectionData("q", "KeyQ,81"));
+	dS.addOption(new SelectionData("r", "KeyR,82"));
+	dS.addOption(new SelectionData("s", "KeyS,83"));
+	dS.addOption(new SelectionData("t", "KeyT,84"));
+	dS.addOption(new SelectionData("u", "KeyU,85"));
+	dS.addOption(new SelectionData("v", "KeyV,86"));
+	dS.addOption(new SelectionData("w", "KeyW,87"));
+	dS.addOption(new SelectionData("x", "KeyX,88"));
+	dS.addOption(new SelectionData("y", "KeyY,89"));
+	dS.addOption(new SelectionData("z", "KeyZ,90"));
+
+	this.addPart(dS);
+	this.parseTranslation(Language.getStr("block_when_key_pressed"));
+
+	this.selectedKeyPressed = false;
+	var me = this;
+	document.body.addEventListener("keydown", function(event) {
+		if (!me.running) { return; }
+		console.log("keydown " + event.code + "," + event.keyCode);
+		var currentSelection = me.slots[0].getData().getValue().split(",");
+		console.log("current selection = " + currentSelection[0] + ", " + currentSelection[1]);
+		//Use of keyCode is depricated, but necessary for old iPads at least
+    if (event.code == currentSelection[0] || event.keyCode == currentSelection[1] || currentSelection[0] == "any_key") {
+			me.selectedKeyPressed = true;
+    }
+	})
+}
+B_WhenKeyPressed.prototype = Object.create(HatBlock.prototype);
+B_WhenKeyPressed.prototype.constructor = B_WhenKeyPressed;
+// The flag should trigger this block as well
+B_WhenKeyPressed.prototype.eventFlagClicked = function() {
+	this.stack.startRun();
+}
+B_WhenKeyPressed.prototype.startAction = function() {
+	this.selectedKeyPressed = false;
+	return new ExecutionStatusRunning();
+};
+B_WhenKeyPressed.prototype.updateAction = function() {
+	if (this.selectedKeyPressed) {
+		return new ExecutionStatusDone();
+	} else {
+		return new ExecutionStatusRunning();
+	}
+}
 
 //FinchBlox only
 function B_StartWhenDark(x, y) {
@@ -36117,10 +36648,11 @@ B_RestForBeats.prototype.updateAction = function() {
 
 function B_PlayNoteForBeats(x, y) {
 	CommandBlock.call(this, x, y, "sound");
-	var noteSlot = new NumSlot(this, "NumS_note", 60, true, true); // Positive integer
+	//var noteSlot = new NumSlot(this, "NumS_note", 60, true, true); // Positive integer
+	var noteSlot = new NoteSlot(this, "NumS_note", 60, true, true); // Positive integer
 	noteSlot.addLimits(32, 135, Language.getStr("Note"));
 	this.addPart(noteSlot);
-	var beatsSlot = new NumSlot(this, "NumS_dur", 1, true); // Positive 
+	var beatsSlot = new NumSlot(this, "NumS_dur", 1, true); // Positive
 	beatsSlot.addLimits(0, 16, Language.getStr("Beats"))
 	this.addPart(beatsSlot);
 	this.parseTranslation(Language.getStr("block_Play_Note"));
@@ -36133,10 +36665,11 @@ B_PlayNoteForBeats.prototype.startAction = function() {
 	var note = this.slots[0].getData().getValueWithC(true, true);
 	var beats = this.slots[1].getData().getValueWithC(true); // Positive
 	mem.soundDuration = CodeManager.beatsToMs(beats);
-	mem.request = "sound/note?note=" + note + "&duration=" + mem.soundDuration;
+	//mem.request = "sound/note?note=" + note + "&duration=" + mem.soundDuration;
 	mem.timerStarted = false;
-	mem.requestStatus = function() {};
-	HtmlServer.sendRequest(mem.request, mem.requestStatus);
+	//mem.requestStatus = function() {};
+	//HtmlServer.sendRequest(mem.request, mem.requestStatus);
+	mem.requestStatus = HtmlServer.sendTabletSoundRequest(note, mem.soundDuration);
 	return new ExecutionStatusRunning(); // Still running
 };
 /* When the request is sent, start a timer then wait for the timer to expire */

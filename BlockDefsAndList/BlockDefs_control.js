@@ -497,7 +497,7 @@ function B_WhenKeyPressed(x, y) {
 
 	this.selectedKeyPressed = false;
 	const me = this;
-	document.addEventListener("keydown", function(event) {
+	document.body.addEventListener("keydown", function(event) {
 		if (!me.running) { return; }
 		console.log("keydown " + event.code + "," + event.keyCode);
 		const currentSelection = me.slots[0].getData().getValue().split(",");

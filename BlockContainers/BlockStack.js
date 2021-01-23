@@ -147,15 +147,18 @@ BlockStack.prototype.getAbsY = function() {
  * Searches the Blocks within this BlockStack to find one which fits the moving BlockStack.
  * Returns no values but stores results on CodeManager.fit.
  */
-BlockStack.prototype.findBestFit = function() {
-	const move = CodeManager.move;
+BlockStack.prototype.findBestFit = function(moveManager) {
+	let move = CodeManager.move;
+  if (moveManager != null) {
+    move = moveManager.move
+  }
 	// If this BlockStack is the one being moved, it can't attach to itself.
 	if (move.stack === this) {
 		return;
 	}
 	// Check if the moving BlockStack can attach to the top of this BlockStack.
 	if (move.bottomOpen && this.firstBlock.topOpen) {
-		this.findBestFitTop();
+		this.findBestFitTop(moveManager);
 	}
 	// Recursively check if the moving BlockStack can attach to the bottom of any Blocks in this BlockStack.
 	if (move.topOpen) {
@@ -164,8 +167,8 @@ BlockStack.prototype.findBestFit = function() {
 		let absCy = this.relToAbsY(this.dim.cy1);
 		let absW = this.relToAbsX(this.dim.cw) - absCx;
 		let absH = this.relToAbsY(this.dim.ch) - absCy;
-		if (move.pInRange(move.topX, move.topY, absCx, absCy, absW, absH)) {
-			this.firstBlock.findBestFit();
+		if (CodeManager.move.pInRange(move.topX, move.topY, absCx, absCy, absW, absH)) {
+			this.firstBlock.findBestFit(moveManager);
 		}
 	}
 	// Recursively check recursively if the moving BlockStack can attach one of this BlockStack's Slots.
@@ -177,8 +180,8 @@ BlockStack.prototype.findBestFit = function() {
 		let absH = this.relToAbsY(this.dim.rh) - absRy;
 		let width = move.bottomX - move.topX;
 		let height = move.bottomY - move.topY;
-		if (move.rInRange(move.topX, move.topY, width, height, absRx, absRy, absW, absH)) {
-			this.firstBlock.findBestFit();
+		if (CodeManager.move.rInRange(move.topX, move.topY, width, height, absRx, absRy, absW, absH)) {
+			this.firstBlock.findBestFit(moveManager);
 		}
 	}
 };
@@ -299,10 +302,15 @@ BlockStack.prototype.endRun = function() {
  * Results are stored in CodeManager.fit.
  * Only called if moving BlockStack returns no value.
  */
-BlockStack.prototype.findBestFitTop = function() {
+BlockStack.prototype.findBestFitTop = function(moveManager) {
 	const snap = BlockGraphics.command.snap; // Get snap bounding box for command Blocks.
-	const move = CodeManager.move;
-	const fit = CodeManager.fit;
+	let move = CodeManager.move;
+  let fit = CodeManager.fit;
+  if (moveManager != null) {
+    move = moveManager.move
+    fit = moveManager.fit
+  }
+
 	const x = this.firstBlock.getAbsX(); // Uses screen coordinates.
 	const y = this.firstBlock.getAbsY();
 	const height = this.relToAbsY(this.firstBlock.height) - y;
@@ -325,9 +333,9 @@ BlockStack.prototype.findBestFitTop = function() {
 	// Checks if the point falls in the box.
   let success = false;
   if (FinchBlox) { //because these blocks connect horizontally, check the top right corner
-    success = move.pInRange(moveTopRightX, moveTopRightY, snapBLeft, snapBTop, snapFWidth, snapFHeight);
+    success = CodeManager.move.pInRange(moveTopRightX, moveTopRightY, snapBLeft, snapBTop, snapFWidth, snapFHeight);
   } else {
-    success = move.pInRange(moveBottomLeftX, moveBottomLeftY, snapBLeft, snapBTop, snapBWidth, snapBHeight);
+    success = CodeManager.move.pInRange(moveBottomLeftX, moveBottomLeftY, snapBLeft, snapBTop, snapBWidth, snapBHeight);
   }
 	if (success) {
 		let xDist = move.topX - x;

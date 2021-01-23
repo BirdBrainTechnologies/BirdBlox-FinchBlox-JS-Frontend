@@ -16,7 +16,8 @@ InputWidget.Piano.setConstants = function() {
 	P.bnMargin = 2;
 	P.firstNote = 60;
 	P.numWhiteKeys = 14;
-	P.whiteKeyW = (InputPad.width - P.bnMargin * (P.numWhiteKeys-1)) / P.numWhiteKeys;
+	P.inputPadWidth = FinchBlox ? InputPad.width : InputPad.width*3
+	P.whiteKeyW = (P.inputPadWidth - P.bnMargin * (P.numWhiteKeys-1)) / P.numWhiteKeys;
 	P.blackKeyW = P.whiteKeyW*0.65;
 
 	P.wkIcon = VectorPaths.mvPianoWhiteKey;
@@ -73,8 +74,14 @@ InputWidget.Piano.prototype.show = function(x, y, parentGroup, overlay, slotShap
 	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
 	this.group = GuiElements.create.group(x, y, parentGroup);
 	//this.displayNum = new DisplayNum(data);
-	console.log("show piano " + data);
-	this.makeBns(data[this.index]);
+	//console.log("show piano " + this.index + " " + data[this.index] + " " + data.getValue());
+
+	if (FinchBlox) {
+		this.makeBns(data[this.index]);
+	} else {
+		this.makeBns(data.getValue());
+	}
+
 	/* The data in the Slot starts out gray to indicate that it will be deleted on modification. THe number 0 is not
 	 * grayed since there's nothing to delete. */
 	//this.grayOutUnlessZero();
@@ -141,6 +148,7 @@ InputWidget.Piano.prototype.makeWhiteKey = function(x, y, num) {
 	const P = InputWidget.Piano;
 	let button = this.makeKey(x, y, num, P.whiteKeyW, P.whiteKeyH);
 	button.addColorIcon(VectorPaths.mvPianoWhiteKey, P.whiteKeyH, Colors.white);
+	button.iconInverts = true;
 	GuiElements.update.stroke(button.icon.pathE, Colors.iron, 1);
 }
 
@@ -149,6 +157,7 @@ InputWidget.Piano.prototype.makeBlackKey = function(x, y, num) {
 	x += P.whiteKeyW + P.bnMargin/2 - P.blackKeyW/2;
 	let button = this.makeKey(x, y, num, P.blackKeyW, P.blackKeyH);
 	button.addColorIcon(VectorPaths.mvPianoBlackKey, P.blackKeyH, Colors.black);
+	button.iconInverts = true;
 }
 
 InputWidget.Piano.prototype.makeKey = function(x, y, num, w, h) {
@@ -156,10 +165,10 @@ InputWidget.Piano.prototype.makeKey = function(x, y, num, w, h) {
 	const P = InputWidget.Piano;
 	let button = new Button(x, y, w, h, this.group, Colors.white);
 	button.setCallbackFunction(function(){
-		const soundDuration = CodeManager.beatsToMs(0.5);
+		/*const soundDuration = CodeManager.beatsToMs(0.5);
 		const request = "sound/note?note=" + num + "&duration=" + soundDuration;
 		var requestStatus = function() {};
-		HtmlServer.sendRequest(request, requestStatus);
+		HtmlServer.sendRequest(request, requestStatus);*/
 
 		this.keyPressed(num)
 	}.bind(this));
@@ -182,8 +191,13 @@ InputWidget.Piano.prototype.keyPressed = function(num) {
 	//this.displayNum = new DisplayNum(new NumData(num));
 	//this.updateFn(this.displayNum.getData(), this.displayNum.getString());
 	//this.updateFn(num, InputWidget.Piano.noteStrings[num]);
-	this.updateFn(num, this.index);
-	console.log("pressed key " + num);
+	if (FinchBlox) {
+		this.updateFn(num, this.index);
+	} else {
+		this.updateFn(new NumData(num));
+	}
+
+	//console.log("pressed key " + num);
 	//this.finishFn(this.displayNum.getData());
 	this.updatePressed(num);
 };

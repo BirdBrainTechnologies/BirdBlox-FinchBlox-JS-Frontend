@@ -69,6 +69,10 @@ B_FBSound.prototype.updateValues = function () {
     if (this.noteButton.widgets.length == 2) {
       this.beats = this.noteButton.values[1];
     }
+
+    if (this.blockButton.popupIsDisplayed) {
+      HtmlServer.sendTabletSoundRequest(this.midiNote, 100 * this.beats);
+    }
   }
 }
 

@@ -221,7 +221,8 @@ function B_DeviceWithPortsBuzzer(x, y, deviceClass){
   this.minBeat = 0
   this.maxBeat = 16
   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-  const noteSlot = new NumSlot(this,"Note_out", 60, true, true);
+  //const noteSlot = new NumSlot(this,"Note_out", 60, true, true);
+	const noteSlot = new NoteSlot(this,"Note_out", 60, true, true);
   noteSlot.addLimits(this.minNote, this.maxNote, Language.getStr("Note"));
   this.addPart(noteSlot);
   const beatsSlot = new NumSlot(this,"Beats_out", 1, true, false);

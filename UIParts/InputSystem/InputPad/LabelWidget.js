@@ -31,6 +31,7 @@ InputWidget.Label.prototype.show = function(x, y, parentGroup) {
 	const textY = y + L.font.charHeight + L.margin;
 	GuiElements.move.text(this.textE, textX, textY);
 	parentGroup.appendChild(this.textE);
+	this.textY = textY;
 };
 
 /**
