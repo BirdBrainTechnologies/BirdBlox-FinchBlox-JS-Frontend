@@ -6,11 +6,7 @@ function LevelManager() {
   LM.currentLevel = 1;
   LM.fileListRetreived = false;
   LM.filesSavedLocally = [];
-  LM.levelFileList = {
-    1: [],
-    2: [],
-    3: []
-  }
+  LM.levelFileList = null;
   LM.checkSavedFiles();
 }
 
@@ -34,7 +30,7 @@ LevelManager.setConstants = function() {
 LevelManager.setLevel = function(level) {
   const LM = LevelManager;
   level = parseInt(level);
-  console.log("Setting level to " + level);
+  //console.log("Setting level to " + level);
   if (LM.currentLevel != level) {
     LM.currentLevel = level;
     GuiElements.blockInteraction();
@@ -51,19 +47,20 @@ LevelManager.setLevel = function(level) {
  */
 LevelManager.checkSavedFiles = function() {
   HtmlServer.sendRequestWithCallback("data/files", function(response) {
-    console.log("getSavedFiles response: " + response);
+    //console.log("getSavedFiles response: " + response);
     const fileList = new FileList(response);
     LevelManager.filesSavedLocally = fileList.localFiles;
     LevelManager.fileListRetreived = true;
+    LevelManager.levelFileList = { 1: [], 2: [], 3: [] }
 
     fileList.localFiles.forEach(function(file) {
-      console.log(file);
+      //console.log(file);
       const suffix = file.split("_").pop();
       if (LevelManager.levelFileList[suffix]) {
         LevelManager.levelFileList[suffix].push(file);
       }
     })
-    console.log(LevelManager.levelFileList);
+    //console.log(LevelManager.levelFileList);
   }, function() {
     GuiElements.alert("Error retrieving saved files");
   });
@@ -73,7 +70,7 @@ LevelManager.checkSavedFiles = function() {
 LevelManager.loadLevelSavePoint = function() {
   const LM = LevelManager;
   GuiElements.blockInteraction();
-  console.log("loadLevelSavePoint for level " + LM.currentLevel);
+  //console.log("loadLevelSavePoint for level " + LM.currentLevel);
   const levelFileName = LM.savePointFileNames[LM.currentLevel];
   if (!LM.fileListRetreived) {
     setTimeout(function() {
@@ -82,7 +79,7 @@ LevelManager.loadLevelSavePoint = function() {
     return;
   }
   if (!LM.filesSavedLocally.includes(levelFileName)) {
-    console.log("file '" + levelFileName + "' not found. Must create...");
+    //console.log("file '" + levelFileName + "' not found. Must create...");
     const request = new HttpRequestBuilder("data/new");
     request.addParam("filename", levelFileName);
     if (GuiElements.isIos) {
@@ -90,7 +87,7 @@ LevelManager.loadLevelSavePoint = function() {
     }
     HtmlServer.sendRequestWithCallback(request.toString(), function() {
       LevelManager.filesSavedLocally.push(levelFileName);
-      console.log("file " + levelFileName + " added to list");
+      //console.log("file " + levelFileName + " added to list");
       if (!GuiElements.isIos) {
         SaveManager.userOpenFile(levelFileName);
       }
@@ -121,21 +118,18 @@ LevelManager.saveAs = function(name, rename) {
   const fileName = name.trim() + LM.fileLevelSuffixes[LM.currentLevel];
   //Check to be sure the current level save point is the file that is open
   if (currentFile != currentLevelFile && !rename) {
-    console.log("Tried to rename file with " + SaveManager.fileName + " open instead of " + currentLevelFile);
+    console.error("Tried to rename file with " + SaveManager.fileName + " open instead of " + currentLevelFile);
     return;
   }
   //console.log("Rename " + currentLevelFile + " to " + fileName);
   GuiElements.blockInteraction();
-  console.log("Rename " + currentFile + " to " + fileName);
+  //console.log("Rename " + currentFile + " to " + fileName);
   //SaveManager.sanitizeRename(false, currentLevelFile, "", fileName, function () {
   SaveManager.sanitizeRename(false, currentFile, "", fileName, function () {
-    //const index = LM.filesSavedLocally.indexOf(currentLevelFile);
-    const index = LM.filesSavedLocally.indexOf(currentFile);
-    if (index > -1) { LM.filesSavedLocally.splice(index, 1); }
-    LM.filesSavedLocally.push(fileName);
+    LM.checkSavedFiles()
     //console.log("Renamed " + currentLevelFile + " to " + fileName);
-    console.log("Renamed " + currentFile + " to " + fileName);
-    console.log(LM.filesSavedLocally);
+    //console.log("Renamed " + currentFile + " to " + fileName);
+    //console.log(LM.filesSavedLocally);
     TitleBar.fileBn.update();
     if (GuiElements.isAndroid) { GuiElements.unblockInteraction(); }
   });
@@ -143,9 +137,9 @@ LevelManager.saveAs = function(name, rename) {
 
 LevelManager.openFile = function(fileName) {
   const fileLevel = fileName.slice(-1);
-  console.log("User selected to open " + fileName + " on level " + fileLevel);
+  //console.log("User selected to open " + fileName + " on level " + fileLevel);
   if (!(fileLevel > 0 && fileLevel <= LevelManager.totalLevels)) {
-    console.log("Unsupported level  " + fileLevel);
+    console.error("Unsupported level  " + fileLevel);
     return;
   }
   GuiElements.blockInteraction();

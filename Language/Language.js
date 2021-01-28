@@ -71,7 +71,7 @@ Language.getStr = function(str) {
     if (translatedStr != null) {
         return translatedStr;
     } else {
-        console.log("Translation? " + str);
+        //console.log("Translation? " + str);
         return "Translation required";
     }
 }

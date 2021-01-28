@@ -91,7 +91,7 @@ B_FBColor.prototype.updateAction = function () {
  }
  if (new Date().getTime() >= mem.startTime + mem.duration) {
     if (!mem.offSent){
-      console.log("sending led off");
+      //console.log("sending led off");
       mem.offSent = true;
       mem.timerStarted = false;
       mem.duration = 0;

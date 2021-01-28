@@ -1371,7 +1371,7 @@ Language.getStr = function(str) {
     if (translatedStr != null) {
         return translatedStr;
     } else {
-        console.log("Translation? " + str);
+        //console.log("Translation? " + str);
         return "Translation required";
     }
 }
@@ -6724,6 +6724,10 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group) {
 		//Use of keyCode is depricated, but necessary for old iPads at least
     if (event.code == 'Enter' || event.keyCode === 13) { //enter
       this.blur();
+			if (GuiElements.isPWA && FBPopup.currentPopup != null) {
+				FBPopup.currentPopup.confirm()
+				FBPopup.currentPopup.close()
+			}
     }
     if (event.code == 'Delete' || event.code == 'Backspace' ||
       event.keyCode === 46 || event.keyCode === 8) { //delete or backspace
@@ -6734,7 +6738,7 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group) {
 	//Keep track of the characters typed and limit total to 24.
 	// https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
 	editableText.addEventListener('keypress', function(event) {
-		console.log("pressed a key count=" + this.charCount);
+		//console.log("pressed a key count=" + this.charCount);
 		if (this.charCount > 24) {
 			event.preventDefault();
 		} else {
@@ -10569,9 +10573,9 @@ TouchReceiver.touchStartBN = function(target, e) {
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchStartScrollBox = function(target, e) {
-  console.log("touchstartscrollbox")
-  console.log(target)
-  console.log(e)
+  //console.log("touchstartscrollbox")
+  //console.log(target)
+  //console.log(e)
 	const TR = TouchReceiver;
 	if (TR.touchstart(e, false)) {
 		Overlay.closeOverlaysExcept(target.partOfOverlay);
@@ -15678,7 +15682,7 @@ InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotSha
 	TouchReceiver.addListenersSlider(this.bgRect, this);
 
   //this.value = data;
-  console.log("show slider at index " + this.index + " with data " + data);
+  //console.log("show slider at index " + this.index + " with data " + data);
   this.value = data[this.index];
   this.makeSlider();
 
@@ -16002,7 +16006,7 @@ InputWidget.Slider.prototype.drop = function() {
     let bestFit = 0;
 
     for (let i = 0; i < this.optionXs.length; i++) {
-      console.log("option at " + this.optionXs[i] + " relX " + relX);
+      //console.log("option at " + this.optionXs[i] + " relX " + relX);
       let optionDist = Math.abs(this.optionXs[i] - relX);
       if (optionDist < dist) {
         dist = optionDist;
@@ -16043,7 +16047,7 @@ InputWidget.Slider.prototype.moveToPosition = function(p) {
  */
 InputWidget.Slider.prototype.moveToValue = function() {
   if (typeof this.value == 'number') {
-    console.log("move to value " + this.value);
+    //console.log("move to value " + this.value);
     if (this.optionValues.length != 0) {
       let v = -1;
       for (let i = 0; i < this.optionValues.length; i++) {
@@ -16890,6 +16894,9 @@ FBPopup.setConstants = function() {
 
   //Keep iOS 9 from resizing the window when the keyboard comes up
   FBPopup.isEditingText = false;
+
+  //Keep a reference to the current popup
+  FBPopup.currentPopup = null;
 }
 
 FBPopup.prototype.show = function(heightToWidthRatio) {
@@ -16904,16 +16911,18 @@ FBPopup.prototype.show = function(heightToWidthRatio) {
   this.bubbleOverlay.display(this.parentX, this.parentY, this.parentX + this.parentW, this.parentY + this.parentH, this.innerWidth, this.innerHeight);
   this.x = this.bubbleOverlay.x;
   this.y = this.bubbleOverlay.y;
+
+  FBPopup.currentPopup = this;
 }
 
 FBPopup.prototype.close = function() {
-  console.log("called close")
+  //console.log("called close")
   this.bubbleOverlay.hide();
   if (FBPopup.isEditingText && GuiElements.isAndroid) {
     HtmlServer.sendRequestWithCallback("ui/hideNavigationBar");
   }
   FBPopup.isEditingText = false;
-
+  FBPopup.currentPopup = null;
 }
 
 FBPopup.prototype.addConfirmCancelBns = function() {
@@ -17055,7 +17064,6 @@ FBFileSelect.prototype.createRow = function(index, y, width, contentGroup) {
   trashBn.setCallbackFunction(function () {
     this.close();
     const cd = new FBConfirmDelete(this.parentX, this.parentY, this.parentW, this.parentH, this.parentGroup, fileName)
-    //console.log(cd)
     cd.show();
   }.bind(this), true);
   //trashBn.partOfOverlay = this.bubbleOverlay;
@@ -17148,18 +17156,18 @@ FBSaveFile.prototype.confirm = function () {
   if (this.editableText == null ||
     this.editableText.textContent == null ||
     this.editableText.textContent == "") {
-      console.log("confirm button pressed without a name");
+      //console.log("confirm button pressed without a name");
       return;
     }
 
   let fileName = this.editableText.textContent
 
   if (fileName == this.currentName) {
-    console.log("confirm button pressed without changing the name.")
+    //console.log("confirm button pressed without changing the name.")
     return;
   }
 
-  console.log("Name file " + fileName);
+  //console.log("Name file " + fileName);
   LevelManager.saveAs(fileName, (this.currentName != null));
 }
 
@@ -23832,7 +23840,7 @@ LevelDialog.prototype.close = function() {
  * Removes the dialog from view and unblocks the ui behind it.
  */
 LevelDialog.prototype.closeDialog = function() {
-  console.log("LevelDialog.prototype.closeDialog")
+  //console.log("LevelDialog.prototype.closeDialog")
 	this.close();
   GuiElements.unblockInteraction();
 }
@@ -26631,11 +26639,7 @@ function LevelManager() {
   LM.currentLevel = 1;
   LM.fileListRetreived = false;
   LM.filesSavedLocally = [];
-  LM.levelFileList = {
-    1: [],
-    2: [],
-    3: []
-  }
+  LM.levelFileList = null;
   LM.checkSavedFiles();
 }
 
@@ -26659,7 +26663,7 @@ LevelManager.setConstants = function() {
 LevelManager.setLevel = function(level) {
   const LM = LevelManager;
   level = parseInt(level);
-  console.log("Setting level to " + level);
+  //console.log("Setting level to " + level);
   if (LM.currentLevel != level) {
     LM.currentLevel = level;
     GuiElements.blockInteraction();
@@ -26676,19 +26680,20 @@ LevelManager.setLevel = function(level) {
  */
 LevelManager.checkSavedFiles = function() {
   HtmlServer.sendRequestWithCallback("data/files", function(response) {
-    console.log("getSavedFiles response: " + response);
+    //console.log("getSavedFiles response: " + response);
     const fileList = new FileList(response);
     LevelManager.filesSavedLocally = fileList.localFiles;
     LevelManager.fileListRetreived = true;
+    LevelManager.levelFileList = { 1: [], 2: [], 3: [] }
 
     fileList.localFiles.forEach(function(file) {
-      console.log(file);
+      //console.log(file);
       const suffix = file.split("_").pop();
       if (LevelManager.levelFileList[suffix]) {
         LevelManager.levelFileList[suffix].push(file);
       }
     })
-    console.log(LevelManager.levelFileList);
+    //console.log(LevelManager.levelFileList);
   }, function() {
     GuiElements.alert("Error retrieving saved files");
   });
@@ -26698,7 +26703,7 @@ LevelManager.checkSavedFiles = function() {
 LevelManager.loadLevelSavePoint = function() {
   const LM = LevelManager;
   GuiElements.blockInteraction();
-  console.log("loadLevelSavePoint for level " + LM.currentLevel);
+  //console.log("loadLevelSavePoint for level " + LM.currentLevel);
   const levelFileName = LM.savePointFileNames[LM.currentLevel];
   if (!LM.fileListRetreived) {
     setTimeout(function() {
@@ -26707,7 +26712,7 @@ LevelManager.loadLevelSavePoint = function() {
     return;
   }
   if (!LM.filesSavedLocally.includes(levelFileName)) {
-    console.log("file '" + levelFileName + "' not found. Must create...");
+    //console.log("file '" + levelFileName + "' not found. Must create...");
     const request = new HttpRequestBuilder("data/new");
     request.addParam("filename", levelFileName);
     if (GuiElements.isIos) {
@@ -26715,7 +26720,7 @@ LevelManager.loadLevelSavePoint = function() {
     }
     HtmlServer.sendRequestWithCallback(request.toString(), function() {
       LevelManager.filesSavedLocally.push(levelFileName);
-      console.log("file " + levelFileName + " added to list");
+      //console.log("file " + levelFileName + " added to list");
       if (!GuiElements.isIos) {
         SaveManager.userOpenFile(levelFileName);
       }
@@ -26746,21 +26751,18 @@ LevelManager.saveAs = function(name, rename) {
   const fileName = name.trim() + LM.fileLevelSuffixes[LM.currentLevel];
   //Check to be sure the current level save point is the file that is open
   if (currentFile != currentLevelFile && !rename) {
-    console.log("Tried to rename file with " + SaveManager.fileName + " open instead of " + currentLevelFile);
+    console.error("Tried to rename file with " + SaveManager.fileName + " open instead of " + currentLevelFile);
     return;
   }
   //console.log("Rename " + currentLevelFile + " to " + fileName);
   GuiElements.blockInteraction();
-  console.log("Rename " + currentFile + " to " + fileName);
+  //console.log("Rename " + currentFile + " to " + fileName);
   //SaveManager.sanitizeRename(false, currentLevelFile, "", fileName, function () {
   SaveManager.sanitizeRename(false, currentFile, "", fileName, function () {
-    //const index = LM.filesSavedLocally.indexOf(currentLevelFile);
-    const index = LM.filesSavedLocally.indexOf(currentFile);
-    if (index > -1) { LM.filesSavedLocally.splice(index, 1); }
-    LM.filesSavedLocally.push(fileName);
+    LM.checkSavedFiles()
     //console.log("Renamed " + currentLevelFile + " to " + fileName);
-    console.log("Renamed " + currentFile + " to " + fileName);
-    console.log(LM.filesSavedLocally);
+    //console.log("Renamed " + currentFile + " to " + fileName);
+    //console.log(LM.filesSavedLocally);
     TitleBar.fileBn.update();
     if (GuiElements.isAndroid) { GuiElements.unblockInteraction(); }
   });
@@ -26768,9 +26770,9 @@ LevelManager.saveAs = function(name, rename) {
 
 LevelManager.openFile = function(fileName) {
   const fileLevel = fileName.slice(-1);
-  console.log("User selected to open " + fileName + " on level " + fileLevel);
+  //console.log("User selected to open " + fileName + " on level " + fileLevel);
   if (!(fileLevel > 0 && fileLevel <= LevelManager.totalLevels)) {
-    console.log("Unsupported level  " + fileLevel);
+    console.error("Unsupported level  " + fileLevel);
     return;
   }
   GuiElements.blockInteraction();
@@ -34157,7 +34159,7 @@ B_FBColor.prototype.updateAction = function () {
  }
  if (new Date().getTime() >= mem.startTime + mem.duration) {
     if (!mem.offSent){
-      console.log("sending led off");
+      //console.log("sending led off");
       mem.offSent = true;
       mem.timerStarted = false;
       mem.duration = 0;

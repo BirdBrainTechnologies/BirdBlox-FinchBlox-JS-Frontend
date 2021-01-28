@@ -105,7 +105,6 @@ FBFileSelect.prototype.createRow = function(index, y, width, contentGroup) {
   trashBn.setCallbackFunction(function () {
     this.close();
     const cd = new FBConfirmDelete(this.parentX, this.parentY, this.parentW, this.parentH, this.parentGroup, fileName)
-    //console.log(cd)
     cd.show();
   }.bind(this), true);
   //trashBn.partOfOverlay = this.bubbleOverlay;

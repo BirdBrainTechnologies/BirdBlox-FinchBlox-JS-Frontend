@@ -24,6 +24,9 @@ FBPopup.setConstants = function() {
 
   //Keep iOS 9 from resizing the window when the keyboard comes up
   FBPopup.isEditingText = false;
+
+  //Keep a reference to the current popup
+  FBPopup.currentPopup = null;
 }
 
 FBPopup.prototype.show = function(heightToWidthRatio) {
@@ -38,16 +41,18 @@ FBPopup.prototype.show = function(heightToWidthRatio) {
   this.bubbleOverlay.display(this.parentX, this.parentY, this.parentX + this.parentW, this.parentY + this.parentH, this.innerWidth, this.innerHeight);
   this.x = this.bubbleOverlay.x;
   this.y = this.bubbleOverlay.y;
+
+  FBPopup.currentPopup = this;
 }
 
 FBPopup.prototype.close = function() {
-  console.log("called close")
+  //console.log("called close")
   this.bubbleOverlay.hide();
   if (FBPopup.isEditingText && GuiElements.isAndroid) {
     HtmlServer.sendRequestWithCallback("ui/hideNavigationBar");
   }
   FBPopup.isEditingText = false;
-
+  FBPopup.currentPopup = null;
 }
 
 FBPopup.prototype.addConfirmCancelBns = function() {

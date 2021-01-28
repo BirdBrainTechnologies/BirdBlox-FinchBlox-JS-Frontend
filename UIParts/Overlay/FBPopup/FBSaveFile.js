@@ -50,17 +50,17 @@ FBSaveFile.prototype.confirm = function () {
   if (this.editableText == null ||
     this.editableText.textContent == null ||
     this.editableText.textContent == "") {
-      console.log("confirm button pressed without a name");
+      //console.log("confirm button pressed without a name");
       return;
     }
 
   let fileName = this.editableText.textContent
 
   if (fileName == this.currentName) {
-    console.log("confirm button pressed without changing the name.")
+    //console.log("confirm button pressed without changing the name.")
     return;
   }
 
-  console.log("Name file " + fileName);
+  //console.log("Name file " + fileName);
   LevelManager.saveAs(fileName, (this.currentName != null));
 }

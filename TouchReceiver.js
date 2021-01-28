@@ -479,9 +479,9 @@ TouchReceiver.touchStartBN = function(target, e) {
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchStartScrollBox = function(target, e) {
-  console.log("touchstartscrollbox")
-  console.log(target)
-  console.log(e)
+  //console.log("touchstartscrollbox")
+  //console.log(target)
+  //console.log(e)
 	const TR = TouchReceiver;
 	if (TR.touchstart(e, false)) {
 		Overlay.closeOverlaysExcept(target.partOfOverlay);

@@ -56,7 +56,7 @@ InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotSha
 	TouchReceiver.addListenersSlider(this.bgRect, this);
 
   //this.value = data;
-  console.log("show slider at index " + this.index + " with data " + data);
+  //console.log("show slider at index " + this.index + " with data " + data);
   this.value = data[this.index];
   this.makeSlider();
 
@@ -380,7 +380,7 @@ InputWidget.Slider.prototype.drop = function() {
     let bestFit = 0;
 
     for (let i = 0; i < this.optionXs.length; i++) {
-      console.log("option at " + this.optionXs[i] + " relX " + relX);
+      //console.log("option at " + this.optionXs[i] + " relX " + relX);
       let optionDist = Math.abs(this.optionXs[i] - relX);
       if (optionDist < dist) {
         dist = optionDist;
@@ -421,7 +421,7 @@ InputWidget.Slider.prototype.moveToPosition = function(p) {
  */
 InputWidget.Slider.prototype.moveToValue = function() {
   if (typeof this.value == 'number') {
-    console.log("move to value " + this.value);
+    //console.log("move to value " + this.value);
     if (this.optionValues.length != 0) {
       let v = -1;
       for (let i = 0; i < this.optionValues.length; i++) {

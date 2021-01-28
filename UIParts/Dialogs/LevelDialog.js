@@ -132,7 +132,7 @@ LevelDialog.prototype.close = function() {
  * Removes the dialog from view and unblocks the ui behind it.
  */
 LevelDialog.prototype.closeDialog = function() {
-  console.log("LevelDialog.prototype.closeDialog")
+  //console.log("LevelDialog.prototype.closeDialog")
 	this.close();
   GuiElements.unblockInteraction();
 }

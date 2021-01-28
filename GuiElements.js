@@ -477,6 +477,10 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group) {
 		//Use of keyCode is depricated, but necessary for old iPads at least
     if (event.code == 'Enter' || event.keyCode === 13) { //enter
       this.blur();
+			if (GuiElements.isPWA && FBPopup.currentPopup != null) {
+				FBPopup.currentPopup.confirm()
+				FBPopup.currentPopup.close()
+			}
     }
     if (event.code == 'Delete' || event.code == 'Backspace' ||
       event.keyCode === 46 || event.keyCode === 8) { //delete or backspace
@@ -487,7 +491,7 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group) {
 	//Keep track of the characters typed and limit total to 24.
 	// https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
 	editableText.addEventListener('keypress', function(event) {
-		console.log("pressed a key count=" + this.charCount);
+		//console.log("pressed a key count=" + this.charCount);
 		if (this.charCount > 24) {
 			event.preventDefault();
 		} else {
