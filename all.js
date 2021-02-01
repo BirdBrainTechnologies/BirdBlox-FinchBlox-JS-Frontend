@@ -1,5 +1,5 @@
 "use strict";
-var FinchBlox = true;
+var FinchBlox = false;
 const FrontendVersion = 393;
 
 
@@ -25112,7 +25112,12 @@ HtmlServer.sendNativeCall = function(request, callbackFn, callbackErr, isPost, p
 		AndroidInterface.sendAndroidRequest(jsonObjString);
 		GuiElements.alert("Made request: " + request + " using Android native, inBackground=" + requestObject.inBackground);
 	} else if (GuiElements.isPWA) {
-    parseFinchBloxRequest(requestObject);
+		/*if (window.birdbrain === undefined) {
+    	window.birdbrain = {};
+			//console.log("setting up message channel")
+    	window.birdbrain.messageChannel = new MessageChannel();
+		}*/
+    window.parent.parseFinchBloxRequest(requestObject);
 	} else {
 		GuiElements.alert("ERROR: Failure to send native call: '" + request + "'. No native handler found.");
 	}
@@ -35400,17 +35405,17 @@ function B_WhenKeyPressed(x, y) {
 	this.parseTranslation(Language.getStr("block_when_key_pressed"));
 
 	this.selectedKeyPressed = false;
-	const me = this;
+
 	document.body.addEventListener("keydown", function(event) {
-		if (!me.running) { return; }
+		if (!this.running) { return; }
 		console.log("keydown " + event.code + "," + event.keyCode);
-		const currentSelection = me.slots[0].getData().getValue().split(",");
+		const currentSelection = this.slots[0].getData().getValue().split(",");
 		console.log("current selection = " + currentSelection[0] + ", " + currentSelection[1]);
 		//Use of keyCode is depricated, but necessary for old iPads at least
     if (event.code == currentSelection[0] || event.keyCode == currentSelection[1] || currentSelection[0] == "any_key") {
-			me.selectedKeyPressed = true;
+			this.selectedKeyPressed = true;
     }
-	})
+	}.bind(this))
 }
 B_WhenKeyPressed.prototype = Object.create(HatBlock.prototype);
 B_WhenKeyPressed.prototype.constructor = B_WhenKeyPressed;

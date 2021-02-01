@@ -272,7 +272,7 @@ HtmlServer.sendNativeCall = function(request, callbackFn, callbackErr, isPost, p
 		AndroidInterface.sendAndroidRequest(jsonObjString);
 		GuiElements.alert("Made request: " + request + " using Android native, inBackground=" + requestObject.inBackground);
 	} else if (GuiElements.isPWA) {
-    parseFinchBloxRequest(requestObject);
+    window.parent.parseFinchBloxRequest(requestObject);
 	} else {
 		GuiElements.alert("ERROR: Failure to send native call: '" + request + "'. No native handler found.");
 	}

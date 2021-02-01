@@ -496,17 +496,17 @@ function B_WhenKeyPressed(x, y) {
 	this.parseTranslation(Language.getStr("block_when_key_pressed"));
 
 	this.selectedKeyPressed = false;
-	const me = this;
+
 	document.body.addEventListener("keydown", function(event) {
-		if (!me.running) { return; }
+		if (!this.running) { return; }
 		console.log("keydown " + event.code + "," + event.keyCode);
-		const currentSelection = me.slots[0].getData().getValue().split(",");
+		const currentSelection = this.slots[0].getData().getValue().split(",");
 		console.log("current selection = " + currentSelection[0] + ", " + currentSelection[1]);
 		//Use of keyCode is depricated, but necessary for old iPads at least
     if (event.code == currentSelection[0] || event.keyCode == currentSelection[1] || currentSelection[0] == "any_key") {
-			me.selectedKeyPressed = true;
+			this.selectedKeyPressed = true;
     }
-	})
+	}.bind(this))
 }
 B_WhenKeyPressed.prototype = Object.create(HatBlock.prototype);
 B_WhenKeyPressed.prototype.constructor = B_WhenKeyPressed;
