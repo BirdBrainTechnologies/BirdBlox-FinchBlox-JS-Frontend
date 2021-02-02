@@ -233,7 +233,7 @@ TitleBar.makeButtons = function() {
     //TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.levelBN, r, r);
 		TB.levelButton = new Button(TB.levelBnX, y, TB.buttonW, h, TBLayer, Colors.seance, r, r);
     //TB.levelButton.addText("1", Font.uiFont(24).bold(), Colors.bbtDarkGray);
-		TB.levelButton.addText(LevelManager.currentLevel, Font.uiFont(35), Colors.white);
+		TB.levelButton.addText(LevelManager.currentLevel, LevelManager.levelButtonFont, Colors.white);
     //TB.levelButton.setCallbackFunction(function(){
     //  new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
     //},false);
@@ -256,6 +256,7 @@ TitleBar.makeButtons = function() {
         finchBn.battIcon.group.appendChild(finchBn.battIcon.pathE);
         finchBn.xIcon.pathE.remove();
         finchBn.icon.move(finchBn.finchConnectedX, finchBn.finchY);
+        DeviceManager.checkBattery();
       } else {
         finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
         finchBn.battIcon.pathE.remove();

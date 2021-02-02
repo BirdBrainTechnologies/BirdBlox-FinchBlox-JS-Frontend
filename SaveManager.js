@@ -27,9 +27,15 @@ SaveManager.setConstants = function() {
 SaveManager.backendOpen = function(fileName, data) {
 	SaveManager.fileName = fileName;
 	SaveManager.loadData(data);
+	if (FinchBlox) {
+	  const fileLevel = parseInt(fileName.slice(fileName.length - 1));
+	  if (fileLevel != LevelManager.currentLevel && fileLevel > 0 && fileLevel <= LevelManager.totalLevels) {
+	    LevelManager.setLevel(fileLevel)
+	  }
+	  TitleBar.fileBn.update();
+	}
 	OpenDialog.closeDialog();
 	GuiElements.unblockInteraction();
-	if (FinchBlox) { TitleBar.fileBn.update(); }
 };
 
 /**

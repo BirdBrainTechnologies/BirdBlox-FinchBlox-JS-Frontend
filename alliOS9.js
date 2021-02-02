@@ -1,4 +1,4 @@
-var FinchBlox = false;
+var FinchBlox = true;
 var FrontendVersion = 393;
 
 
@@ -11442,7 +11442,7 @@ TitleBar.makeButtons = function() {
     //TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.levelBN, r, r);
 		TB.levelButton = new Button(TB.levelBnX, y, TB.buttonW, h, TBLayer, Colors.seance, r, r);
     //TB.levelButton.addText("1", Font.uiFont(24).bold(), Colors.bbtDarkGray);
-		TB.levelButton.addText(LevelManager.currentLevel, Font.uiFont(35), Colors.white);
+		TB.levelButton.addText(LevelManager.currentLevel, LevelManager.levelButtonFont, Colors.white);
     //TB.levelButton.setCallbackFunction(function(){
     //  new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
     //},false);
@@ -11465,6 +11465,7 @@ TitleBar.makeButtons = function() {
         finchBn.battIcon.group.appendChild(finchBn.battIcon.pathE);
         finchBn.xIcon.pathE.remove();
         finchBn.icon.move(finchBn.finchConnectedX, finchBn.finchY);
+        DeviceManager.checkBattery();
       } else {
         finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
         finchBn.battIcon.pathE.remove();
@@ -25111,11 +25112,6 @@ HtmlServer.sendNativeCall = function(request, callbackFn, callbackErr, isPost, p
 		AndroidInterface.sendAndroidRequest(jsonObjString);
 		GuiElements.alert("Made request: " + request + " using Android native, inBackground=" + requestObject.inBackground);
 	} else if (GuiElements.isPWA) {
-		/*if (window.birdbrain === undefined) {
-    	window.birdbrain = {};
-			//console.log("setting up message channel")
-    	window.birdbrain.messageChannel = new MessageChannel();
-		}*/
     window.parent.parseFinchBloxRequest(requestObject);
 	} else {
 		GuiElements.alert("ERROR: Failure to send native call: '" + request + "'. No native handler found.");
@@ -25981,9 +25977,15 @@ SaveManager.setConstants = function() {
 SaveManager.backendOpen = function(fileName, data) {
 	SaveManager.fileName = fileName;
 	SaveManager.loadData(data);
+	if (FinchBlox) {
+	  var fileLevel = parseInt(fileName.slice(fileName.length - 1));
+	  if (fileLevel != LevelManager.currentLevel && fileLevel > 0 && fileLevel <= LevelManager.totalLevels) {
+	    LevelManager.setLevel(fileLevel)
+	  }
+	  TitleBar.fileBn.update();
+	}
 	OpenDialog.closeDialog();
 	GuiElements.unblockInteraction();
-	if (FinchBlox) { TitleBar.fileBn.update(); }
 };
 
 /**
@@ -26650,6 +26652,7 @@ function LevelManager() {
 LevelManager.setConstants = function() {
   var LM = LevelManager;
   LM.totalLevels = 3;
+  LM.levelButtonFont = Font.uiFont(35);
 
   LM.savePointFileNames = {
     1: "FinchBloxSavePoint_Level1",
@@ -26674,7 +26677,7 @@ LevelManager.setLevel = function(level) {
     //SaveManager.userClose(); //necessary? maybe add callback?
     BlockPalette.setLevel();
     //TabManager.activeTab.clear();
-    TitleBar.levelButton.addText(level, Font.uiFont(30), Colors.white);
+    TitleBar.levelButton.addText(level, LM.levelButtonFont, Colors.white);
     //LM.loadLevelSavePoint();
   }
 }
