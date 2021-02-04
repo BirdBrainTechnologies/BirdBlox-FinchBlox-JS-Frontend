@@ -41,6 +41,7 @@ B_FBSound.prototype.startAction = function () {
     mem.requestStatus.finished = true;
     mem.duration = 0;
     TitleBar.flashFinchButton();
+    return new ExecutionStatusError();
   }
 
   return new ExecutionStatusRunning();

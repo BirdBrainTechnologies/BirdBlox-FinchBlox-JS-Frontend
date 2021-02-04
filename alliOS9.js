@@ -34149,6 +34149,7 @@ B_FBColor.prototype.startAction = function () {
    mem.requestStatus.finished = true;
    mem.duration = 0;
    TitleBar.flashFinchButton();
+   return new ExecutionStatusError();
  }
 
  return new ExecutionStatusRunning();
@@ -34418,7 +34419,7 @@ B_FBMotion.prototype.setupAction = function() {
 B_FBMotion.prototype.sendCheckMoving = function() {
 	this.device = this.setupAction();
 	if (this.device == null) {
-		return new ExecutionStatusDone(); // Device was invalid, exit early
+		return new ExecutionStatusError(); // Device was invalid, exit early
 	}
 
 	this.device.readSensor(this.runMem.requestStatus, "isMoving");
@@ -34449,7 +34450,7 @@ B_FBMotion.prototype.updateAction = function () {
       this.moveSentTime = new Date().getTime();
       this.device = this.setupAction();
 			if (this.device == null) {
-        return new ExecutionStatusDone();
+        return new ExecutionStatusError();
       }
       this.device.setMotors(this.runMem.requestStatus, this.leftSpeed, this.leftTicks, this.rightSpeed, this.rightTicks);
       this.moveSent = true;
@@ -34684,7 +34685,7 @@ B_FBSensorBlock.prototype.startAction = function () {
     device.isMoving = true;
   } else {
     TitleBar.flashFinchButton();
-    return new ExecutionStatusDone();
+    return new ExecutionStatusError();
   }
 
   return new ExecutionStatusRunning();
@@ -34800,6 +34801,7 @@ B_FBSound.prototype.startAction = function () {
     mem.requestStatus.finished = true;
     mem.duration = 0;
     TitleBar.flashFinchButton();
+    return new ExecutionStatusError();
   }
 
   return new ExecutionStatusRunning();
@@ -35417,7 +35419,7 @@ function B_WhenKeyPressed(x, y) {
     if (event.code == currentSelection[0] || event.keyCode == currentSelection[1] || currentSelection[0] == "any_key") {
 			this.selectedKeyPressed = true;
     }
-	}.bind(this))
+	}.bind(this), true)
 }
 B_WhenKeyPressed.prototype = Object.create(HatBlock.prototype);
 B_WhenKeyPressed.prototype.constructor = B_WhenKeyPressed;

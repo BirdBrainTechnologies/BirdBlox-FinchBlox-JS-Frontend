@@ -40,7 +40,7 @@ B_FBMotion.prototype.setupAction = function() {
 B_FBMotion.prototype.sendCheckMoving = function() {
 	this.device = this.setupAction();
 	if (this.device == null) {
-		return new ExecutionStatusDone(); // Device was invalid, exit early
+		return new ExecutionStatusError(); // Device was invalid, exit early
 	}
 
 	this.device.readSensor(this.runMem.requestStatus, "isMoving");
@@ -71,7 +71,7 @@ B_FBMotion.prototype.updateAction = function () {
       this.moveSentTime = new Date().getTime();
       this.device = this.setupAction();
 			if (this.device == null) {
-        return new ExecutionStatusDone();
+        return new ExecutionStatusError();
       }
       this.device.setMotors(this.runMem.requestStatus, this.leftSpeed, this.leftTicks, this.rightSpeed, this.rightTicks);
       this.moveSent = true;
@@ -306,7 +306,7 @@ B_FBSensorBlock.prototype.startAction = function () {
     device.isMoving = true;
   } else {
     TitleBar.flashFinchButton();
-    return new ExecutionStatusDone();
+    return new ExecutionStatusError();
   }
 
   return new ExecutionStatusRunning();

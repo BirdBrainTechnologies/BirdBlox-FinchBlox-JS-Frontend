@@ -506,7 +506,7 @@ function B_WhenKeyPressed(x, y) {
     if (event.code == currentSelection[0] || event.keyCode == currentSelection[1] || currentSelection[0] == "any_key") {
 			this.selectedKeyPressed = true;
     }
-	}.bind(this))
+	}.bind(this), true)
 }
 B_WhenKeyPressed.prototype = Object.create(HatBlock.prototype);
 B_WhenKeyPressed.prototype.constructor = B_WhenKeyPressed;
