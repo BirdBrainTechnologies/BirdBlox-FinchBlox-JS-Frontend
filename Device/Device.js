@@ -37,6 +37,7 @@ function Device(name, id, RSSI, device) {
 	 * configure these fields so they can update when the status changes */
 	this.statusListener = null;
 	this.firmwareStatusListener = null;
+  this.hasV2Microbit = false;
 }
 
 
@@ -270,6 +271,10 @@ Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
 		}
 	}.bind(this));
 };
+
+Device.prototype.setHasV2Microbit = function(hasV2) {
+  this.hasV2Microbit = hasV2;
+}
 
 /**
  * Constructs a Device instance from a JSON object with fields for name and id

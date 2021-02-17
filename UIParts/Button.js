@@ -511,7 +511,7 @@ Button.prototype.release = function() {
 			}
 			return;
 		}
-		if (!this.toggles || (this.toggled && this.iconColor == null)) {
+		if (!this.toggles || (this.toggled && (this.iconColor == null || this.icon.pathId == VectorPaths.battery))) {
 			this.setColor(false);
 		}
 		if (this.toggles && this.toggled) {

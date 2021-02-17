@@ -1,4 +1,4 @@
-var FinchBlox = true;
+var FinchBlox = false;
 var FrontendVersion = 393;
 
 
@@ -2493,7 +2493,10 @@ Language.en = {
 "Upside_Down":"Upside Down",
 "block_when_key_pressed":"when (Slot 1) key pressed",
 "space":"space",
-"any_key":"any key"
+"any_key":"any key",
+"logo":"Logo",
+"V2_required":"V2 micro:bit required",
+"Temperature":"Temperature"
 }
 
 //Spanish Translation
@@ -4806,6 +4809,7 @@ function Device(name, id, RSSI, device) {
 	 * configure these fields so they can update when the status changes */
 	this.statusListener = null;
 	this.firmwareStatusListener = null;
+  this.hasV2Microbit = false;
 }
 
 
@@ -5040,6 +5044,10 @@ Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
 	}.bind(this));
 };
 
+Device.prototype.setHasV2Microbit = function(hasV2) {
+  this.hasV2Microbit = hasV2;
+}
+
 /**
  * Constructs a Device instance from a JSON object with fields for name and id
  * @param deviceClass - Subclass of device, the type of device to construct
@@ -5134,7 +5142,9 @@ DeviceWithPorts.prototype.readSensor = function(status, sensorType, port) {
 	var request = new HttpRequestBuilder("robot/in");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
-	request.addParam("port", port);
+	if (port != null) {
+		request.addParam("port", port);
+	}
 	request.addParam("sensor", sensorType);
 	HtmlServer.sendRequest(request.toString(), status, true);
 };
@@ -5337,7 +5347,7 @@ DeviceManager.setStatics();
  * Retrieves the number of devices in this.connectedDevices
  */
 DeviceManager.checkBattery = function() {
-    var worstBatteryStatus = "3";
+    var worstBatteryStatus = "4";
     var curBatteryStatus = "";
     var color = Colors.lightGray;
     DeviceManager.forEach(function(manager) {
@@ -5349,6 +5359,9 @@ DeviceManager.checkBattery = function() {
             }
         }
     });
+    if (worstBatteryStatus === "3") {
+      worstBatteryStatus = "2" //Status 3 is full charge for finch
+    }
     if (FinchBlox) {
 			if (worstBatteryStatus === "2") {
 	        color = Colors.flagGreen;
@@ -5570,6 +5583,14 @@ DeviceManager.prototype.updateSelectableDevices = function() {
 	BlockPalette.setSuggestedCollapse(this.deviceClass.getDeviceTypeId(), suggestedCollapse);
 };
 
+DeviceManager.prototype.hasV2Microbit = function() {
+  var hasV2 = false
+  this.connectedDevices.forEach(function(device) {
+    if (device.hasV2Microbit) { hasV2 = true }
+  })
+  return hasV2
+}
+
 /**
  * Retrieves the number of devices that should be listed in each DeviceDropSlot
  * @return {number}
@@ -5773,6 +5794,14 @@ DeviceManager.prototype.updateCompassCalibrationStatus = function (robotId, succ
 		robot.setCompassCalibrationStatus(success);
 	}
 };
+
+DeviceManager.prototype.setHasV2Microbit = function (robotId, hasV2) {
+	var index = this.lookupRobotIndexById(robotId);
+	if (index >= 0) {
+		var robot = this.connectedDevices[index];
+		robot.setHasV2Microbit(hasV2);
+	}
+};
 /**
  * Looks for the specified device and sets its firmware status (if found)
  * @param {string} deviceId
@@ -5867,6 +5896,22 @@ DeviceManager.updateCompassCalibrationStatus = function(robotId, success) {
 	DeviceManager.forEach(function(manager) {
 		manager.updateCompassCalibrationStatus(robotId, success);
 	});
+}
+
+DeviceManager.setHasV2Microbit = function(robotId, hasV2) {
+  DeviceManager.forEach(function(manager) {
+		manager.setHasV2Microbit(robotId, hasV2);
+	});
+}
+
+DeviceManager.hasV2MicrobitConnected = function(deviceClass) {
+  var hasV2 = false
+  DeviceManager.forEach(function(manager) {
+    if (manager.deviceClass == deviceClass && manager.hasV2Microbit()) {
+      hasV2 = true
+    }
+  });
+  return hasV2
 }
 /**
  * Finds the robot with the given deviceId and sets its firmware status, then updates the UI to reflect any changes
@@ -8137,6 +8182,7 @@ BlockList.populateItem_hummingbirdbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_BBButton");
 	collapsibleItem.addBlockByName("B_BBOrientation");
 	collapsibleItem.addBlockByName("B_BBCompass");
+	collapsibleItem.addBlockByName("B_BBV2Sensor");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
@@ -8156,6 +8202,7 @@ BlockList.populateItem_microbit = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_MBButton");
 	collapsibleItem.addBlockByName("B_MBOrientation");
 	collapsibleItem.addBlockByName("B_MBCompass");
+	collapsibleItem.addBlockByName("B_MBV2Sensor");
 	collapsibleItem.trimBottom();
 	collapsibleItem.finalize();
 };
@@ -8181,6 +8228,7 @@ BlockList.populateItem_finch = function(collapsibleItem) {
 //	collapsibleItem.addBlockByName("B_FinchBattery");
 	collapsibleItem.addBlockByName("B_FNMagnetometer");
 	collapsibleItem.addBlockByName("B_FNCompass");
+	collapsibleItem.addBlockByName("B_FNV2Sensor");
 	collapsibleItem.addBlockByName("B_FNButton");
 	collapsibleItem.addBlockByName("B_FNOrientation");
 	collapsibleItem.addSpace();
@@ -13948,7 +13996,7 @@ Button.prototype.release = function() {
 			}
 			return;
 		}
-		if (!this.toggles || (this.toggled && this.iconColor == null)) {
+		if (!this.toggles || (this.toggled && (this.iconColor == null || this.icon.pathId == VectorPaths.battery))) {
 			this.setColor(false);
 		}
 		if (this.toggles && this.toggled) {
@@ -25577,6 +25625,12 @@ CallbackManager.robot.updateFirmwareStatus = function(robotId, status) {
 	DeviceManager.updateFirmwareStatus(robotId, firmwareStatus);
 	return true;
 };
+
+CallbackManager.robot.updateHasV2Microbit = function(robotId, hasV2) {
+  robotId = HtmlServer.decodeHtml(robotId);
+  hasV2 = HtmlServer.decodeHtml(hasV2);
+  DeviceManager.setHasV2Microbit(robotId, hasV2)
+}
 /**
  * Tells the frontend that a device has just been discovered
  * @param {string} robotTypeId - The percent encoded type of robot being scanned for
@@ -32648,6 +32702,7 @@ function B_MicroBitButton(x, y, deviceClass){
   var choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
   choice.addOption(new SelectionData("A", "buttonA"));
   choice.addOption(new SelectionData("B", "buttonB"));
+  choice.addOption(new SelectionData(Language.getStr("logo"), "V2touch"))
   this.addPart(choice);
   this.parseTranslation(Language.getStr("block_Button"));
 };
@@ -32661,6 +32716,10 @@ B_MicroBitButton.prototype.startAction=function(){
   if (device == null) {
     this.displayError(this.deviceClass.getNotConnectedMessage());
     return new ExecutionStatusError(); // Device was invalid, exit early
+  }
+  if (sensorSelection == "V2touch" && !device.hasV2Microbit) {
+    this.displayError(Language.getStr("V2_required"))
+    return new ExecutionStatusError(); //touch sensor only available on V2 micro:bit
   }
   var mem = this.runMem;
   mem.requestStatus = {};
@@ -32887,6 +32946,69 @@ B_MicroBitCompass.prototype.updateAction = function(){
 };
 Block.setDisplaySuffix(B_MicroBitCompass, String.fromCharCode(176));
 
+/**
+ * B_MicroBitV2Sensor - Return values for the micro:bit V2 sound and temperature sensors.
+ *
+ * @param  {type} x
+ * @param  {type} y
+ * @param  {type} deviceClass
+ */
+function B_MicroBitV2Sensor(x, y, deviceClass){
+   ReporterBlock.call(this,x,y,deviceClass.getDeviceTypeId());
+   this.deviceClass = deviceClass;
+   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+
+   var pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Sound"), "V2sound"));
+   pickBlock.addOption(new SelectionData(Language.getStr("Sound"), "V2sound"));
+   pickBlock.addOption(new SelectionData(Language.getStr("Temperature"), "V2temperature"));
+   this.addPart(pickBlock);
+}
+B_MicroBitV2Sensor.prototype = Object.create(ReporterBlock.prototype);
+B_MicroBitV2Sensor.prototype.constructor = B_MicroBitV2Sensor;
+
+B_MicroBitV2Sensor.prototype.startAction=function(){
+  var deviceIndex = this.slots[0].getData().getValue();
+  var sensorSelection = this.slots[1].getData().getValue();
+  var device = this.deviceClass.getManager().getDevice(deviceIndex);
+  if (device == null) {
+     this.displayError(this.deviceClass.getNotConnectedMessage());
+     return new ExecutionStatusError(); // Flutter was invalid, exit early
+  }
+  if (!device.hasV2Microbit) {
+   this.displayError(Language.getStr("V2_required"))
+   return new ExecutionStatusError(); //touch sensor only available on V2 micro:bit
+  }
+  if (sensorSelection == "V2temperature") {
+     Block.setDisplaySuffix(B_MicroBitV2Sensor, String.fromCharCode(176) + "C");
+  }
+  var mem = this.runMem;
+  mem.requestStatus = {};
+  mem.requestStatus.finished = false;
+  mem.requestStatus.error = false;
+  mem.requestStatus.result = null;
+  device.readSensor(mem.requestStatus, sensorSelection);
+  return new ExecutionStatusRunning();
+}
+
+B_MicroBitV2Sensor.prototype.updateAction = function(){
+  var status = this.runMem.requestStatus;
+  if (status.finished) {
+      if(status.error){
+          this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+          return new ExecutionStatusError();
+      } else {
+          var result = new StringData(status.result);
+          var numResult = result.asNum();
+          var num = Math.round(numResult.getValue());
+          return new ExecutionStatusResult(new NumData(num, numResult.isValid));
+      }
+  }
+  return new ExecutionStatusRunning(); // Still running
+};
+B_MicroBitV2Sensor.prototype.checkActive = function() {
+	return DeviceManager.hasV2MicrobitConnected(this.deviceClass)
+};
+
 /* This file contains the implementations of hummingbird blocks
  */
 function B_HummingbirdOutputBase(x, y, outputType, blockTranslationKey, numberOfPorts, valueKey, minVal, maxVal, displayUnits) {
@@ -33085,6 +33207,12 @@ function B_MBCompass(x, y){
 };
 B_MBCompass.prototype = Object.create(B_MicroBitCompass.prototype);
 B_MBCompass.prototype.constructor = B_MBCompass;
+
+function B_MBV2Sensor(x, y){
+    B_MicroBitV2Sensor.call(this, x, y, DeviceMicroBit);
+};
+B_MBV2Sensor.prototype = Object.create(B_MicroBitV2Sensor.prototype);
+B_MBV2Sensor.prototype.constructor = B_MBV2Sensor;
 
 
 //MARK: Blocks specific to the stand alone micro:bit
@@ -33356,6 +33484,12 @@ function B_BBCompass(x, y){
 }
 B_BBCompass.prototype = Object.create(B_MicroBitCompass.prototype);
 B_BBCompass.prototype.constructor = B_BBCompass;
+
+function B_BBV2Sensor(x, y){
+  B_MicroBitV2Sensor.call(this, x, y, DeviceHummingbirdBit);
+}
+B_BBV2Sensor.prototype = Object.create(B_MicroBitV2Sensor.prototype);
+B_BBV2Sensor.prototype.constructor = B_BBV2Sensor;
 
 
 
@@ -34066,6 +34200,12 @@ function B_FNCompass(x, y){
 }
 B_FNCompass.prototype = Object.create(B_MicroBitCompass.prototype);
 B_FNCompass.prototype.constructor = B_FNCompass;
+
+function B_FNV2Sensor(x, y){
+  B_MicroBitV2Sensor.call(this, x, y, DeviceFinch);
+}
+B_FNV2Sensor.prototype = Object.create(B_MicroBitV2Sensor.prototype);
+B_FNV2Sensor.prototype.constructor = B_FNV2Sensor;
 
 function B_FNOrientation(x, y){
   B_MicroBitOrientation.call(this, x, y, DeviceFinch);

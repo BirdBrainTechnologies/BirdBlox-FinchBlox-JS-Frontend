@@ -235,6 +235,12 @@ CallbackManager.robot.updateFirmwareStatus = function(robotId, status) {
 	DeviceManager.updateFirmwareStatus(robotId, firmwareStatus);
 	return true;
 };
+
+CallbackManager.robot.updateHasV2Microbit = function(robotId, hasV2) {
+  robotId = HtmlServer.decodeHtml(robotId);
+  hasV2 = HtmlServer.decodeHtml(hasV2);
+  DeviceManager.setHasV2Microbit(robotId, hasV2)
+}
 /**
  * Tells the frontend that a device has just been discovered
  * @param {string} robotTypeId - The percent encoded type of robot being scanned for

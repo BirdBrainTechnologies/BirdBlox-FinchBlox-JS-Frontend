@@ -228,5 +228,8 @@ Language.en = {
 "Upside_Down":"Upside Down",
 "block_when_key_pressed":"when (Slot 1) key pressed",
 "space":"space",
-"any_key":"any key"
+"any_key":"any key",
+"logo":"Logo",
+"V2_required":"V2 micro:bit required",
+"Temperature":"Temperature"
 }

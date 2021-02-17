@@ -64,7 +64,7 @@ DeviceManager.setStatics();
  * Retrieves the number of devices in this.connectedDevices
  */
 DeviceManager.checkBattery = function() {
-    var worstBatteryStatus = "3";
+    var worstBatteryStatus = "4";
     var curBatteryStatus = "";
     var color = Colors.lightGray;
     DeviceManager.forEach(function(manager) {
@@ -76,6 +76,9 @@ DeviceManager.checkBattery = function() {
             }
         }
     });
+    if (worstBatteryStatus === "3") {
+      worstBatteryStatus = "2" //Status 3 is full charge for finch
+    }
     if (FinchBlox) {
 			if (worstBatteryStatus === "2") {
 	        color = Colors.flagGreen;
@@ -297,6 +300,14 @@ DeviceManager.prototype.updateSelectableDevices = function() {
 	BlockPalette.setSuggestedCollapse(this.deviceClass.getDeviceTypeId(), suggestedCollapse);
 };
 
+DeviceManager.prototype.hasV2Microbit = function() {
+  let hasV2 = false
+  this.connectedDevices.forEach(function(device) {
+    if (device.hasV2Microbit) { hasV2 = true }
+  })
+  return hasV2
+}
+
 /**
  * Retrieves the number of devices that should be listed in each DeviceDropSlot
  * @return {number}
@@ -500,6 +511,14 @@ DeviceManager.prototype.updateCompassCalibrationStatus = function (robotId, succ
 		robot.setCompassCalibrationStatus(success);
 	}
 };
+
+DeviceManager.prototype.setHasV2Microbit = function (robotId, hasV2) {
+	const index = this.lookupRobotIndexById(robotId);
+	if (index >= 0) {
+		let robot = this.connectedDevices[index];
+		robot.setHasV2Microbit(hasV2);
+	}
+};
 /**
  * Looks for the specified device and sets its firmware status (if found)
  * @param {string} deviceId
@@ -594,6 +613,22 @@ DeviceManager.updateCompassCalibrationStatus = function(robotId, success) {
 	DeviceManager.forEach(function(manager) {
 		manager.updateCompassCalibrationStatus(robotId, success);
 	});
+}
+
+DeviceManager.setHasV2Microbit = function(robotId, hasV2) {
+  DeviceManager.forEach(function(manager) {
+		manager.setHasV2Microbit(robotId, hasV2);
+	});
+}
+
+DeviceManager.hasV2MicrobitConnected = function(deviceClass) {
+  let hasV2 = false
+  DeviceManager.forEach(function(manager) {
+    if (manager.deviceClass == deviceClass && manager.hasV2Microbit()) {
+      hasV2 = true
+    }
+  });
+  return hasV2
 }
 /**
  * Finds the robot with the given deviceId and sets its firmware status, then updates the UI to reflect any changes

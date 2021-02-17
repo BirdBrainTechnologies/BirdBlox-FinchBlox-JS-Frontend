@@ -159,6 +159,7 @@ function B_MicroBitButton(x, y, deviceClass){
   const choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
   choice.addOption(new SelectionData("A", "buttonA"));
   choice.addOption(new SelectionData("B", "buttonB"));
+  choice.addOption(new SelectionData(Language.getStr("logo"), "V2touch"))
   this.addPart(choice);
   this.parseTranslation(Language.getStr("block_Button"));
 };
@@ -172,6 +173,10 @@ B_MicroBitButton.prototype.startAction=function(){
   if (device == null) {
     this.displayError(this.deviceClass.getNotConnectedMessage());
     return new ExecutionStatusError(); // Device was invalid, exit early
+  }
+  if (sensorSelection == "V2touch" && !device.hasV2Microbit) {
+    this.displayError(Language.getStr("V2_required"))
+    return new ExecutionStatusError(); //touch sensor only available on V2 micro:bit
   }
   let mem = this.runMem;
   mem.requestStatus = {};
@@ -397,3 +402,66 @@ B_MicroBitCompass.prototype.updateAction = function(){
        return new ExecutionStatusRunning(); // Still running
 };
 Block.setDisplaySuffix(B_MicroBitCompass, String.fromCharCode(176));
+
+/**
+ * B_MicroBitV2Sensor - Return values for the micro:bit V2 sound and temperature sensors.
+ *
+ * @param  {type} x
+ * @param  {type} y
+ * @param  {type} deviceClass
+ */
+function B_MicroBitV2Sensor(x, y, deviceClass){
+   ReporterBlock.call(this,x,y,deviceClass.getDeviceTypeId());
+   this.deviceClass = deviceClass;
+   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+
+   const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Sound"), "V2sound"));
+   pickBlock.addOption(new SelectionData(Language.getStr("Sound"), "V2sound"));
+   pickBlock.addOption(new SelectionData(Language.getStr("Temperature"), "V2temperature"));
+   this.addPart(pickBlock);
+}
+B_MicroBitV2Sensor.prototype = Object.create(ReporterBlock.prototype);
+B_MicroBitV2Sensor.prototype.constructor = B_MicroBitV2Sensor;
+
+B_MicroBitV2Sensor.prototype.startAction=function(){
+  let deviceIndex = this.slots[0].getData().getValue();
+  let sensorSelection = this.slots[1].getData().getValue();
+  let device = this.deviceClass.getManager().getDevice(deviceIndex);
+  if (device == null) {
+     this.displayError(this.deviceClass.getNotConnectedMessage());
+     return new ExecutionStatusError(); // Flutter was invalid, exit early
+  }
+  if (!device.hasV2Microbit) {
+   this.displayError(Language.getStr("V2_required"))
+   return new ExecutionStatusError(); //touch sensor only available on V2 micro:bit
+  }
+  if (sensorSelection == "V2temperature") {
+     Block.setDisplaySuffix(B_MicroBitV2Sensor, String.fromCharCode(176) + "C");
+  }
+  let mem = this.runMem;
+  mem.requestStatus = {};
+  mem.requestStatus.finished = false;
+  mem.requestStatus.error = false;
+  mem.requestStatus.result = null;
+  device.readSensor(mem.requestStatus, sensorSelection);
+  return new ExecutionStatusRunning();
+}
+
+B_MicroBitV2Sensor.prototype.updateAction = function(){
+  const status = this.runMem.requestStatus;
+  if (status.finished) {
+      if(status.error){
+          this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+          return new ExecutionStatusError();
+      } else {
+          const result = new StringData(status.result);
+          const numResult = result.asNum();
+          const num = Math.round(numResult.getValue());
+          return new ExecutionStatusResult(new NumData(num, numResult.isValid));
+      }
+  }
+  return new ExecutionStatusRunning(); // Still running
+};
+B_MicroBitV2Sensor.prototype.checkActive = function() {
+	return DeviceManager.hasV2MicrobitConnected(this.deviceClass)
+};

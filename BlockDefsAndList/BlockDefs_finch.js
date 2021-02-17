@@ -537,6 +537,12 @@ function B_FNCompass(x, y){
 B_FNCompass.prototype = Object.create(B_MicroBitCompass.prototype);
 B_FNCompass.prototype.constructor = B_FNCompass;
 
+function B_FNV2Sensor(x, y){
+  B_MicroBitV2Sensor.call(this, x, y, DeviceFinch);
+}
+B_FNV2Sensor.prototype = Object.create(B_MicroBitV2Sensor.prototype);
+B_FNV2Sensor.prototype.constructor = B_FNV2Sensor;
+
 function B_FNOrientation(x, y){
   B_MicroBitOrientation.call(this, x, y, DeviceFinch);
 };

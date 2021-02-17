@@ -21,7 +21,9 @@ DeviceWithPorts.prototype.readSensor = function(status, sensorType, port) {
 	const request = new HttpRequestBuilder("robot/in");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
-	request.addParam("port", port);
+	if (port != null) {
+		request.addParam("port", port);
+	}
 	request.addParam("sensor", sensorType);
 	HtmlServer.sendRequest(request.toString(), status, true);
 };

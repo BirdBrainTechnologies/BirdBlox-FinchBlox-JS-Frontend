@@ -47,6 +47,12 @@ function B_MBCompass(x, y){
 B_MBCompass.prototype = Object.create(B_MicroBitCompass.prototype);
 B_MBCompass.prototype.constructor = B_MBCompass;
 
+function B_MBV2Sensor(x, y){
+    B_MicroBitV2Sensor.call(this, x, y, DeviceMicroBit);
+};
+B_MBV2Sensor.prototype = Object.create(B_MicroBitV2Sensor.prototype);
+B_MBV2Sensor.prototype.constructor = B_MBV2Sensor;
+
 
 //MARK: Blocks specific to the stand alone micro:bit
 

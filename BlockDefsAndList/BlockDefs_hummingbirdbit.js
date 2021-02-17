@@ -159,3 +159,9 @@ function B_BBCompass(x, y){
 }
 B_BBCompass.prototype = Object.create(B_MicroBitCompass.prototype);
 B_BBCompass.prototype.constructor = B_BBCompass;
+
+function B_BBV2Sensor(x, y){
+  B_MicroBitV2Sensor.call(this, x, y, DeviceHummingbirdBit);
+}
+B_BBV2Sensor.prototype = Object.create(B_MicroBitV2Sensor.prototype);
+B_BBV2Sensor.prototype.constructor = B_BBV2Sensor;
