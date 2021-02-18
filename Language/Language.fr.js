@@ -226,5 +226,8 @@ Language.fr = {
 "Beak_Up":"Bec en haut",
 "Beak_Down":"Bec en bas",
 "Finch_Is_Level":"Horizontale",
-"Upside_Down":"À l'envers"
+"Upside_Down":"À l'envers",
+"logo":"Logo",
+"V2_required":"V2 micro:bit requise",
+"Temperature":"Température"
 }

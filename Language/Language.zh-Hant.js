@@ -226,5 +226,8 @@ Language.zht = {
 "Beak_Up":"向上",
 "Beak_Down":"向下",
 "Finch_Is_Level":"水平",
-"Upside_Down":"翻轉"
+"Upside_Down":"翻轉",
+"logo":"徽標",
+"V2_required":"V2 micro:bit 所需的",
+"Temperature":"溫度"
 }

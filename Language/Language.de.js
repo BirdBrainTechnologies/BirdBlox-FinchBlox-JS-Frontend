@@ -226,5 +226,8 @@ Language.de = {
 "Beak_Up":"Schnabel Oben",
 "Beak_Down":"Schnabel Unten",
 "Finch_Is_Level":"Eben (Rücken oben)",
-"Upside_Down":"Umgedreht (Rücken unten)"
+"Upside_Down":"Umgedreht (Rücken unten)",
+"logo":"Logo",
+"V2_required":"V2 micro:bit benötigte",
+"Temperature":"Temperatur"
 }

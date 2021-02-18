@@ -224,5 +224,8 @@ Language.he = {
 "Beak_Up":"לעלות את המקור",
 "Beak_Down":"להוריד את המקור",
 "Finch_Is_Level":"רמה",
-"Upside_Down":"הפוך"
+"Upside_Down":"הפוך",
+"logo":"לוגו",
+"V2_required":"V2 micro:bit נידרשת",
+"Temperature":"טמפרטורה"
 }

@@ -226,5 +226,8 @@ Language.nl = {
 "Beak_Up":"Bek Omhoog",
 "Beak_Down":"Bek Omlaag",
 "Finch_Is_Level":"Horizontaal",
-"Upside_Down":"Ondersteboven"
+"Upside_Down":"Ondersteboven",
+"logo":"Logo",
+"V2_required":"V2 micro:bit vereiste",
+"Temperature":"Temperatuur"
 }

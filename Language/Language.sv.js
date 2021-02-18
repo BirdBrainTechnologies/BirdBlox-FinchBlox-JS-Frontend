@@ -26,7 +26,7 @@ Language.sv = {
   "block_Servo":"Servo (Slot 1) (Slot 2)",
   "block_Vibration":"Vibration (Slot 1) (Slot 2)",
   "block_Motor":"Motor (Slot 1) (Slot 2)",
-  "block_Temperature_C":"Tempertur C (Slot 1)",
+  "block_Temperature_C":"Temperatur C (Slot 1)",
   "block_Temperature_F":"Temperatur  F (Slot 1)",
   "block_write":"Skriv  (Slot 1) (Slot 2) %",
   "pin":"Pin",
@@ -209,5 +209,8 @@ Language.sv = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"logo":"Logotyp",
+"V2_required":"V2 micro:bit som krävs",
+"Temperature":"Temperatur"
 };

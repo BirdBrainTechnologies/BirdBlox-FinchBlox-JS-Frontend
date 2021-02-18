@@ -226,5 +226,8 @@ Language.ca = {
 "Beak_Up":"Bec cap amunt",
 "Beak_Down":"Bec cap avall",
 "Finch_Is_Level":"Horitzontal",
-"Upside_Down":"Cap per avall"
+"Upside_Down":"Cap per avall",
+"logo":"Logo",
+"V2_required":"V2 micro:bit requerida",
+"Temperature":"Temperatura"
 }

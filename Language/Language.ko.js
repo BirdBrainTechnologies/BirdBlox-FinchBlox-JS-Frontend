@@ -224,5 +224,8 @@ Language.ko = {
 "Beak_Up":"부리 위로",
 "Beak_Down":"부리 아래로",
 "Finch_Is_Level":"수평",
-"Upside_Down":"뒤짚힘"
+"Upside_Down":"뒤짚힘",
+"logo":"로고",
+"V2_required":"V2 micro:bit 필요한",
+"Temperature":"온도"
 }

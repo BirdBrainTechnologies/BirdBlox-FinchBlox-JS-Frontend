@@ -209,5 +209,8 @@ Language.ar = {
   "CM":"CM",
   "Inch":"Inch",
   "block_subtract":"(Slot 1) – (Slot 2)",
-  "block_divide":"(Slot 1) / (Slot 2)"
+  "block_divide":"(Slot 1) / (Slot 2)",
+  "logo":"الشعار",
+  "V2_required":"V2 micro:bit مطلوب",
+  "Temperature":"مؤشر الحرارة"
 }

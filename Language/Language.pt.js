@@ -226,5 +226,8 @@ Language.pt = {
 "Beak_Up":"Bico Para Cima",
 "Beak_Down":"Bico Para Baixo ",
 "Finch_Is_Level":"Nível",
-"Upside_Down":"Invertido"
+"Upside_Down":"Invertido",
+"logo":"Logo",
+"V2_required":"V2 micro:bit necessária",
+"Temperature":"Temperatura"
 }

@@ -344,7 +344,7 @@ B_FinchResetEncoders.prototype.updateAction = function() {
       }
   }
 	//This block runs for a short time to allow the finch to have a chance to reset.
-  if (new Date().getTime() >= mem.startTime + 100) {
+  if (new Date().getTime() >= mem.startTime + 500) {
       return new ExecutionStatusDone(); // Done running
   } else {
       return new ExecutionStatusRunning(); // Still running
@@ -440,6 +440,10 @@ B_FinchDistance.prototype.startAction = function() {
 	let device = this.setupAction();
 	if (device == null) {
 		return new ExecutionStatusError(); // Device was invalid, exit early
+	}
+	if (device.hasV2Microbit) {
+		//V2 distance values are reported in cm.
+		this.scalingFactor = 1;
 	}
 
 	device.readSensor(this.runMem.requestStatus, "distance");

@@ -225,5 +225,8 @@ Language.zhs = {
 "Beak_Up":"喙部向上",
 "Beak_Down":"喙部向下",
 "Finch_Is_Level":"水平",
-"Upside_Down":"翻转"
+"Upside_Down":"翻转",
+"logo":"徽标",
+"V2_required":"V2 micro:bit 所需的",
+"Temperature":"温度"
 }

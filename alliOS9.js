@@ -1586,7 +1586,10 @@ Language.ar = {
   "CM":"CM",
   "Inch":"Inch",
   "block_subtract":"(Slot 1) – (Slot 2)",
-  "block_divide":"(Slot 1) / (Slot 2)"
+  "block_divide":"(Slot 1) / (Slot 2)",
+  "logo":"الشعار",
+  "V2_required":"V2 micro:bit مطلوب",
+  "Temperature":"مؤشر الحرارة"
 }
 
 //Catalan Translation
@@ -1817,7 +1820,10 @@ Language.ca = {
 "Beak_Up":"Bec cap amunt",
 "Beak_Down":"Bec cap avall",
 "Finch_Is_Level":"Horitzontal",
-"Upside_Down":"Cap per avall"
+"Upside_Down":"Cap per avall",
+"logo":"Logo",
+"V2_required":"V2 micro:bit requerida",
+"Temperature":"Temperatura"
 }
 
 //Danish Translation
@@ -2029,7 +2035,10 @@ Language.da = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"logo":"Logo",
+"V2_required":"V2 micro:bit påkrævet",
+"Temperature":"Temperatur"
 }
 
 //German Translation
@@ -2260,7 +2269,10 @@ Language.de = {
 "Beak_Up":"Schnabel Oben",
 "Beak_Down":"Schnabel Unten",
 "Finch_Is_Level":"Eben (Rücken oben)",
-"Upside_Down":"Umgedreht (Rücken unten)"
+"Upside_Down":"Umgedreht (Rücken unten)",
+"logo":"Logo",
+"V2_required":"V2 micro:bit benötigte",
+"Temperature":"Temperatur"
 }
 
 //English Translation
@@ -2727,7 +2739,10 @@ Language.es = {
 "Beak_Up":"Pico hacia arriba",
 "Beak_Down":"Pico hacia abajo",
 "Finch_Is_Level":"Horizontal",
-"Upside_Down":"Boca abajo"
+"Upside_Down":"Boca abajo",
+"logo":"Logo",
+"V2_required":"V2 micro:bit requerida",
+"Temperature":"Temperatura"
 }
 
 //Finnish Translation
@@ -2941,7 +2956,10 @@ Language.fi = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"logo":"Logo",
+"V2_required":"V2 micro:bit vaadittu",
+"Temperature":"Lämpötila"
 };
 
 // French translation
@@ -3172,7 +3190,10 @@ Language.fr = {
 "Beak_Up":"Bec en haut",
 "Beak_Down":"Bec en bas",
 "Finch_Is_Level":"Horizontale",
-"Upside_Down":"À l'envers"
+"Upside_Down":"À l'envers",
+"logo":"Logo",
+"V2_required":"V2 micro:bit requise",
+"Temperature":"Température"
 }
 
 //Hebrew Translation
@@ -3401,7 +3422,10 @@ Language.he = {
 "Beak_Up":"לעלות את המקור",
 "Beak_Down":"להוריד את המקור",
 "Finch_Is_Level":"רמה",
-"Upside_Down":"הפוך"
+"Upside_Down":"הפוך",
+"logo":"לוגו",
+"V2_required":"V2 micro:bit נידרשת",
+"Temperature":"טמפרטורה"
 }
 
 //Korean Translation
@@ -3630,7 +3654,10 @@ Language.ko = {
 "Beak_Up":"부리 위로",
 "Beak_Down":"부리 아래로",
 "Finch_Is_Level":"수평",
-"Upside_Down":"뒤짚힘"
+"Upside_Down":"뒤짚힘",
+"logo":"로고",
+"V2_required":"V2 micro:bit 필요한",
+"Temperature":"온도"
 }
 
 //Dutch Translation
@@ -3861,7 +3888,10 @@ Language.nl = {
 "Beak_Up":"Bek Omhoog",
 "Beak_Down":"Bek Omlaag",
 "Finch_Is_Level":"Horizontaal",
-"Upside_Down":"Ondersteboven"
+"Upside_Down":"Ondersteboven",
+"logo":"Logo",
+"V2_required":"V2 micro:bit vereiste",
+"Temperature":"Temperatuur"
 }
 
 //Portuguese Translation
@@ -4092,7 +4122,10 @@ Language.pt = {
 "Beak_Up":"Bico Para Cima",
 "Beak_Down":"Bico Para Baixo ",
 "Finch_Is_Level":"Nível",
-"Upside_Down":"Invertido"
+"Upside_Down":"Invertido",
+"logo":"Logo",
+"V2_required":"V2 micro:bit necessária",
+"Temperature":"Temperatura"
 }
 
 //Swedish Translation
@@ -4123,7 +4156,7 @@ Language.sv = {
   "block_Servo":"Servo (Slot 1) (Slot 2)",
   "block_Vibration":"Vibration (Slot 1) (Slot 2)",
   "block_Motor":"Motor (Slot 1) (Slot 2)",
-  "block_Temperature_C":"Tempertur C (Slot 1)",
+  "block_Temperature_C":"Temperatur C (Slot 1)",
   "block_Temperature_F":"Temperatur  F (Slot 1)",
   "block_write":"Skriv  (Slot 1) (Slot 2) %",
   "pin":"Pin",
@@ -4306,7 +4339,10 @@ Language.sv = {
 "CM":"CM",
 "Inch":"Inch",
 "block_subtract":"(Slot 1) – (Slot 2)",
-"block_divide":"(Slot 1) / (Slot 2)"
+"block_divide":"(Slot 1) / (Slot 2)",
+"logo":"Logotyp",
+"V2_required":"V2 micro:bit som krävs",
+"Temperature":"Temperatur"
 };
 
 //Simplified Chinese Translation (zh-Hans)
@@ -4536,7 +4572,10 @@ Language.zhs = {
 "Beak_Up":"喙部向上",
 "Beak_Down":"喙部向下",
 "Finch_Is_Level":"水平",
-"Upside_Down":"翻转"
+"Upside_Down":"翻转",
+"logo":"徽标",
+"V2_required":"V2 micro:bit 所需的",
+"Temperature":"温度"
 }
 
 //Traditional Chinese Translation (zh-Hant)
@@ -4767,7 +4806,10 @@ Language.zht = {
 "Beak_Up":"向上",
 "Beak_Down":"向下",
 "Finch_Is_Level":"水平",
-"Upside_Down":"翻轉"
+"Upside_Down":"翻轉",
+"logo":"徽標",
+"V2_required":"V2 micro:bit 所需的",
+"Temperature":"溫度"
 }
 
 /**
@@ -34008,7 +34050,7 @@ B_FinchResetEncoders.prototype.updateAction = function() {
       }
   }
 	//This block runs for a short time to allow the finch to have a chance to reset.
-  if (new Date().getTime() >= mem.startTime + 100) {
+  if (new Date().getTime() >= mem.startTime + 500) {
       return new ExecutionStatusDone(); // Done running
   } else {
       return new ExecutionStatusRunning(); // Still running
@@ -34104,6 +34146,10 @@ B_FinchDistance.prototype.startAction = function() {
 	var device = this.setupAction();
 	if (device == null) {
 		return new ExecutionStatusError(); // Device was invalid, exit early
+	}
+	if (device.hasV2Microbit) {
+		//V2 distance values are reported in cm.
+		this.scalingFactor = 1;
 	}
 
 	device.readSensor(this.runMem.requestStatus, "distance");
