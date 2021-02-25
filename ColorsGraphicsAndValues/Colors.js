@@ -63,6 +63,9 @@ Colors.setCommon = function() {
 	Colors.fbPurpleBorder = "#691675";
 	Colors.fbOrangeBorder = "#F78705";
 	Colors.darkTeal = "#114F53";
+	if (FinchBlox) {
+		Colors.inactiveGray = Colors.fbGray;
+	}
 };
 
 Colors.setCategory = function() {
@@ -118,7 +121,8 @@ Colors.setCategory = function() {
 		"color_3": Colors.fbOrangeBorder,
 		"sound_3": Colors.fbPurpleBorder,
 		"control_3": Colors.fbYellowBorder,
-		"sensor_3": Colors.finchGreen
+		"sensor_3": Colors.finchGreen,
+		"inactive": Colors.iron
 	}
 };
 

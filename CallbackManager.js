@@ -236,10 +236,11 @@ CallbackManager.robot.updateFirmwareStatus = function(robotId, status) {
 	return true;
 };
 
-CallbackManager.robot.updateHasV2Microbit = function(robotId, hasV2) {
+CallbackManager.robot.updateHasV2Microbit = function(robotId, hasV2String) {
   robotId = HtmlServer.decodeHtml(robotId);
-  hasV2 = HtmlServer.decodeHtml(hasV2);
+  const hasV2 = (HtmlServer.decodeHtml(hasV2String) == 'true');
   DeviceManager.setHasV2Microbit(robotId, hasV2)
+  CodeManager.updateAvailableSensors(); //activates or deactivates micro:bit V2 only blocks
 }
 /**
  * Tells the frontend that a device has just been discovered

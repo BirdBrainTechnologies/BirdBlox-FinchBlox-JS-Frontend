@@ -6,6 +6,7 @@ Language.pt = {
   "block_Position_Servo":"Posição do Servo (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Rotação do Servo (Slot 1) (Slot 2) %",
   "block_Play_Note":"Toque Notas (Slot 1) por (Slot 2) Batidas",
+  "block_play_note":"toque notas (Slot 1) por (Slot 2) batidas",
   "Light":"Luz",
   "Distance":"Distância",
   "Dial":"Discar",

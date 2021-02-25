@@ -527,26 +527,17 @@ B_WhenKeyPressed.prototype.updateAction = function() {
 }
 
 //FinchBlox only
-function B_StartWhenDark(x, y) {
+function B_FBStartWhen(x, y, sensor) {
+	this.sensor = sensor
 	HatBlock.call(this, x, y, "control_3", true);
-	const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.fbDarkGreen, "sun", 25);
-	blockIcon.icon.setRotation(-8);
-	//blockIcon.icon.negate(Colors.flagGreen);
-	blockIcon.negate(Colors.flagGreen);
-	blockIcon.isEndOfLine = true;
-	blockIcon.addSecondIcon(VectorPaths.faFlag, Colors.flagGreen, true);
-	this.addPart(blockIcon);
-	//const icon2 = new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 30)
 }
-B_StartWhenDark.prototype = Object.create(HatBlock.prototype);
-B_StartWhenDark.prototype.constructor = B_StartWhenDark;
-
+B_FBStartWhen.prototype = Object.create(HatBlock.prototype);
+B_FBStartWhen.prototype.constructor = B_FBStartWhen;
 /* Triggers stack to start running. */
-B_StartWhenDark.prototype.eventFlagClicked = function() {
+B_FBStartWhen.prototype.eventFlagClicked = function() {
 	this.stack.startRun();
 };
-
-B_StartWhenDark.prototype.startAction = function() {
+B_FBStartWhen.prototype.startAction = function() {
 
 	this.blankRequestStatus = {};
 	this.blankRequestStatus.finished = false;
@@ -558,16 +549,15 @@ B_StartWhenDark.prototype.startAction = function() {
 
 	return new ExecutionStatusRunning();
 };
-
-B_StartWhenDark.prototype.updateAction = function() {
+B_FBStartWhen.prototype.updateAction = function() {
 	const status = this.runMem.requestStatus;
 	if (status.requestSent) {
 		if (status.finished) {
 			if (status.error) { return new ExecutionStatusError(); }
 			const result = new StringData(status.result);
 			const num = (result.asNum().getValue());
-			const threshold = 5;
-			if (num < threshold) {
+			if ((this.sensor == "clap" && num > 50) ||
+				(this.sensor == "dark" && num < 5)) {
 				return new ExecutionStatusDone();
 			} else {
 				this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
@@ -576,9 +566,46 @@ B_StartWhenDark.prototype.updateAction = function() {
 	} else {
 		let device = DeviceFinch.getManager().getDevice(0);
 	  if (device != null) {
-			device.readSensor(status, "light", "left");
+			if (this.sensor == "clap") {
+				device.readSensor(status, "V2sound");
+			} else {
+				device.readSensor(status, "light", "left");
+			}
 			status.requestSent = true;
 		}
 	}
 	return new ExecutionStatusRunning();
 }
+
+function B_StartWhenDark(x, y) {
+	B_FBStartWhen.call(this, x, y, "dark")
+
+	const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.fbDarkGreen, "sun", 25);
+	blockIcon.icon.setRotation(-8);
+	//blockIcon.icon.negate(Colors.flagGreen);
+	blockIcon.negate(Colors.flagGreen);
+	blockIcon.isEndOfLine = true;
+	blockIcon.addSecondIcon(VectorPaths.faFlag, Colors.flagGreen, true);
+	this.addPart(blockIcon);
+	//const icon2 = new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 30)
+}
+B_StartWhenDark.prototype = Object.create(B_FBStartWhen.prototype);
+B_StartWhenDark.prototype.constructor = B_StartWhenDark;
+
+function B_StartWhenClap(x, y) {
+	B_FBStartWhen.call(this, x, y, "clap")
+
+	const blockIcon = new BlockIcon(this, VectorPaths.clap, Colors.fbDarkGreen, "clap", 30);
+	blockIcon.isEndOfLine = true;
+	blockIcon.addSecondIcon(VectorPaths.faFlag, Colors.flagGreen, true, 25, -5);
+	this.addPart(blockIcon);
+}
+B_StartWhenClap.prototype = Object.create(B_FBStartWhen.prototype);
+B_StartWhenClap.prototype.constructor = B_StartWhenClap;
+
+B_StartWhenClap.prototype.checkActive = function() {
+	let device = DeviceFinch.getManager().getDevice(0);
+	const active = (device == null || !(device.hasV2Microbit === false))
+	//console.log("when clap check active " + active + " with " + device)
+	return active
+};

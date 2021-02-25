@@ -6,6 +6,7 @@ Language.ca = {
   "block_Position_Servo":"Servo posicional (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Servo rotacional (Slot 1) (Slot 2) %",
   "block_Play_Note":"Toca nota (Slot 1) durant (Slot 2) temps",
+  "block_play_note":"toca nota (Slot 1) durant (Slot 2) temps",
   "Light":"Llum",
   "Distance":"Distància",
   "Dial":"Rodeta",

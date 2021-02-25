@@ -437,6 +437,8 @@ B_MicroBitV2Sensor.prototype.startAction=function(){
   }
   if (sensorSelection == "V2temperature") {
      Block.setDisplaySuffix(B_MicroBitV2Sensor, String.fromCharCode(176) + "C");
+  } else {
+    Block.removeDisplaySuffix(B_MicroBitV2Sensor);
   }
   let mem = this.runMem;
   mem.requestStatus = {};

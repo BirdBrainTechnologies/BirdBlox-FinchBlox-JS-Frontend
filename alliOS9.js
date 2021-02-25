@@ -1,4 +1,4 @@
-var FinchBlox = false;
+var FinchBlox = true;
 var FrontendVersion = 393;
 
 
@@ -1383,6 +1383,7 @@ Language.ar = {
   "block_Position_Servo":"(Slot 2) (Slot 1) موقف محرك سيرفو المؤازر",
   "block_Rotation_Servo":"(Slot 2) (Slot 1) فتحة دوران المحرك المؤازر ",
   "block_Play_Note":"(Slot 2) (Slot 1) تشغيل الموسيقى",
+  "block_play_note":"(Slot 2) (Slot 1) تشغيل الموسيقى",
   "Light":"ضوء",
   "Distance":"مسافه",
   "Dial":"دوار",
@@ -1600,6 +1601,7 @@ Language.ca = {
   "block_Position_Servo":"Servo posicional (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Servo rotacional (Slot 1) (Slot 2) %",
   "block_Play_Note":"Toca nota (Slot 1) durant (Slot 2) temps",
+  "block_play_note":"toca nota (Slot 1) durant (Slot 2) temps",
   "Light":"Llum",
   "Distance":"Distància",
   "Dial":"Rodeta",
@@ -1834,6 +1836,7 @@ Language.da = {
   "block_Position_Servo":"Positionsservo (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Rotationsservo (Slot 1) (Slot 2) %",
   "block_Play_Note":"Spil tone (Slot 1) i (Slot 2) slag",
+  "block_play_note":"spil tone (Slot 1) i (Slot 2) slag",
   "Light":"Lys",
   "Distance":"Afstand",
   "Dial":"Ring til",
@@ -2049,6 +2052,7 @@ Language.de = {
   "block_Position_Servo":"Position Servo (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Drehung Servo (Slot 1) (Slot 2) %",
   "block_Play_Note":"spiele Note (Slot 1) für (Slot 2) Schläge",
+  "block_play_note":"spiele note (Slot 1) für (Slot 2) schläge",
   "Light":"Licht",
   "Distance":"Entfernung",
   "Dial":"Drehknopf",
@@ -2283,6 +2287,7 @@ Language.en = {
 "block_Position_Servo":"Position Servo (Slot 1) (Slot 2) °",
 "block_Rotation_Servo":"Rotation Servo (Slot 1) (Slot 2) %",
 "block_Play_Note":"Play Note (Slot 1) for (Slot 2) Beats",
+"block_play_note":"play note (Slot 1) for (Slot 2) beats",
 "Light":"Light",
 "Distance":"Distance",
 "Dial":"Dial",
@@ -2519,6 +2524,7 @@ Language.es = {
   "block_Position_Servo":"Servo de posicion (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Servo de rotacion (Slot 1) (Slot 2) %",
   "block_Play_Note":"Emitir un sonido (Slot 1) por (Slot 2) pulsos",
+  "block_play_note":"emitir un sonido (Slot 1) por (Slot 2) pulsos",
   "Light":"Luz",
   "Distance":"Distancia",
   "Dial":"Dial",
@@ -2753,6 +2759,7 @@ Language.fi = {
   "block_Position_Servo":"Asentoservo (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Kiertoservo (Slot 1) (Slot 2) %",
   "block_Play_Note":"Soita sävel (Slot 1)  (Slot 2) iskun ajan",
+  "block_play_note":"soita sävel (Slot 1)  (Slot 2) iskun ajan",
   "Light":"Valo",
   "Distance":"Etäisyys",
   "Dial":"Säädin",
@@ -2970,6 +2977,7 @@ Language.fr = {
 "block_Position_Servo":"Position Servo (Slot 1) (Slot 2) °",
 "block_Rotation_Servo":"Rotation Servo (Slot 1) (Slot 2) %",
 "block_Play_Note":"Jouer la note (Slot 1) pour (Slot 2) battement(s)",
+"block_play_note":"jouer la note (Slot 1) pour (Slot 2) battement(s)",
 "Light":"Lumière",
 "Distance":"Distance",
 "Dial":"Cadran",
@@ -3204,6 +3212,7 @@ Language.he = {
   "block_Position_Servo":"(Slot 2) (Slot 1) סרוו כיוון",
   "block_Rotation_Servo":"% (Slot 2) (Slot 1) סרוו סיבובים",
   "block_Play_Note":"פעימות (Slot 2) במשך (Slot 1) נגן תו",
+  "block_play_note":"פעימות (Slot 2) במשך (Slot 1) נגן תו",
   "Light":"אור",
   "Distance":"מרחק",
   "Dial":"חיוג",
@@ -3436,6 +3445,7 @@ Language.ko = {
   "block_Position_Servo":"위치 제어 서보 (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"회전속도 제어 서보 (Slot 1) (Slot 2) %",
   "block_Play_Note":"(Slot 1) 번 음을 (Slot 2) 박자로 연주하기",
+  "block_play_note":"(Slot 1) 번 음을 (Slot 2) 박자로 연주하기",
   "Light":"빛 센서",
   "Distance":"거리 센서",
   "Dial":"가변 저항",
@@ -3668,6 +3678,7 @@ Language.nl = {
   "block_Position_Servo":"Positie-Servo (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Draai-Servo (Slot 1) (Slot 2) %",
   "block_Play_Note":"speel noot (Slot 1) voor (Slot 2) Beats",
+  "block_play_note":"speel noot (Slot 1) voor (Slot 2) beats",
   "Light":"Licht",
   "Distance":"Afstand",
   "Dial":"Draaiknop",
@@ -3902,6 +3913,7 @@ Language.pt = {
   "block_Position_Servo":"Posição do Servo (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Rotação do Servo (Slot 1) (Slot 2) %",
   "block_Play_Note":"Toque Notas (Slot 1) por (Slot 2) Batidas",
+  "block_play_note":"toque notas (Slot 1) por (Slot 2) batidas",
   "Light":"Luz",
   "Distance":"Distância",
   "Dial":"Discar",
@@ -4136,6 +4148,7 @@ Language.sv = {
   "block_Position_Servo":"Positionsservo (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Rotationsservo (Slot 1) (Slot 2) %",
   "block_Play_Note":"Spela not",
+  "block_play_note":"spela not",
   "Light":"Ljus",
   "Distance":"Avstånd",
   "Dial":"Rotation",
@@ -4353,6 +4366,7 @@ Language.zhs = {
 "block_Position_Servo":"位置伺服 (Slot 1) (Slot 2) °",
 "block_Rotation_Servo":"旋转伺服 (Slot 1) (Slot 2) %",
 "block_Play_Note":"演奏 音阶 (Slot 1)于(Slot 2) 拍",
+"block_play_note":"演奏 音阶 (Slot 1)于(Slot 2) 拍",
 "Light":"灯光",
 "Distance":"距离",
 "Dial":"拨号",
@@ -4586,6 +4600,7 @@ Language.zht = {
   "block_Position_Servo":"位置伺服 (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"旋轉伺服 (Slot 1) (Slot 2) %",
   "block_Play_Note":"演奏 音階 (Slot 1)於(Slot 2) 拍",
+  "block_play_note":"演奏 音階 (Slot 1)於(Slot 2) 拍",
   "Light":"燈光",
   "Distance":"距離",
   "Dial":"撥號",
@@ -4846,12 +4861,12 @@ function Device(name, id, RSSI, device) {
 	this.connected = false;
 	/** @type {Device.firmwareStatuses} */
 	this.firmwareStatus = Device.firmwareStatuses.upToDate;
-    this.batteryState = "3";
+    this.batteryState = "4";
 	/* Field hold functions that are called each time the device's status or firmwareStatus changes.  DeviceStatusLights
 	 * configure these fields so they can update when the status changes */
 	this.statusListener = null;
 	this.firmwareStatusListener = null;
-  this.hasV2Microbit = false;
+  this.hasV2Microbit;
 }
 
 
@@ -7946,9 +7961,9 @@ BlockList.populateCat_color_1 = function(category) {
 BlockList.populateCat_sound_1 = function(category) {
 	category.addBlockByName("B_FBC");
 	category.addBlockByName("B_FBD");
-	category.addBlockByName("B_FBE");
 	category.addBlockByName("B_FBF");
 	category.addBlockByName("B_FBG");
+	category.addBlockByName("B_FBA");
 	category.trimBottom();
 	category.centerBlocks();
 }
@@ -8000,6 +8015,7 @@ BlockList.populateCat_control_3 = function(category) {
 	category.addBlockByName("B_Forever");
 	category.addBlockByName("B_Repeat");
 	category.addBlockByName("B_StartWhenDark");
+	category.addBlockByName("B_StartWhenClap");
 	category.trimBottom();
 	category.centerBlocks();
 }
@@ -8367,6 +8383,9 @@ Colors.setCommon = function() {
 	Colors.fbPurpleBorder = "#691675";
 	Colors.fbOrangeBorder = "#F78705";
 	Colors.darkTeal = "#114F53";
+	if (FinchBlox) {
+		Colors.inactiveGray = Colors.fbGray;
+	}
 };
 
 Colors.setCategory = function() {
@@ -8422,7 +8441,8 @@ Colors.setCategory = function() {
 		"color_3": Colors.fbOrangeBorder,
 		"sound_3": Colors.fbPurpleBorder,
 		"control_3": Colors.fbYellowBorder,
-		"sensor_3": Colors.finchGreen
+		"sensor_3": Colors.finchGreen,
+		"inactive": Colors.iron
 	}
 };
 
@@ -8611,6 +8631,10 @@ Font.secondaryUiFont = function(fontSize) {
  */
 function VectorPaths(){
 	var VP=VectorPaths;
+  VP.clap={}; //clap by Berkah Icon from the Noun Project https://thenounproject.com/term/clap/2345410/
+  VP.clap.path="M53.569,27.147a4.2,4.2,0,0,0-5.839-1.73l-1.191.687a4.016,4.016,0,0,0-.882-1.653,4.167,4.167,0,0,0-2.149-1.281l.358-.358a4.294,4.294,0,0,0,.282-5.906,4.2,4.2,0,0,0-6.1-.163l-2,2.005a4.2,4.2,0,0,0-4.082-3.231h-.006A4.162,4.162,0,0,0,29,16.745l-6.861,6.86-.012.012-.766.766a5.221,5.221,0,0,0-1.631-3.233,3.123,3.123,0,0,0-4.309.12L8.2,28.5A17.213,17.213,0,0,0,7.31,52.268a17.051,17.051,0,0,0,4.278,3.388c.331.353.69.707,1.078,1.054A16.98,16.98,0,0,0,32.46,58.719l16.632-9.6a4.3,4.3,0,0,0,1.8-5.629,4.183,4.183,0,0,0-1.754-1.8l2.127-1.227a4.3,4.3,0,0,0,1.819-5.629l0,0a4.159,4.159,0,0,0-1.743-1.791l.433-.25A4.306,4.306,0,0,0,53.569,27.147ZM8.788,50.921a15.218,15.218,0,0,1,.821-21.012l7.225-7.224a1.1,1.1,0,0,1,1.526-.076,3.266,3.266,0,0,1,.083,4.691l-.005,0-6.79,6.79a1,1,0,0,0,1.415,1.414l6.778-6.779h0l0,0,0,0h0l0,0h0l0,0,10.56-10.56a2.176,2.176,0,0,1,1.549-.642h0a2.2,2.2,0,0,1,1.557,3.759L22.21,32.586A1,1,0,1,0,23.624,34L34.935,22.69l4.532-4.532a2.2,2.2,0,0,1,3.2.087,2.326,2.326,0,0,1-.21,3.153l-2.884,2.884,0,.006L26.736,37.113a1,1,0,1,0,1.414,1.414L40.977,25.7a2.06,2.06,0,0,1,1.614-.644,2.183,2.183,0,0,1,1.58.731,2.143,2.143,0,0,1,.473,1.832v0a2.365,2.365,0,0,1-.075.3c-.014.043-.028.085-.044.127-.028.074-.058.146-.092.217a2.243,2.243,0,0,1-.114.2c-.028.047-.054.094-.085.139a2.536,2.536,0,0,1-.272.327L39.7,33.207l-.006.006L31.264,41.64a1,1,0,1,0,1.414,1.414l8.412-8.413s.012-.006.017-.011a2.085,2.085,0,0,1,2.713-.306c.048.03.1.052.145.086s.095.088.144.131a2.4,2.4,0,0,1,.191.174.231.231,0,0,0,.014.019,2.314,2.314,0,0,1,.4.723,2.149,2.149,0,0,1,.091.571q0,.056,0,.111a2.492,2.492,0,0,1-.29,1.128c-.022.042-.045.084-.07.126a2.409,2.409,0,0,1-.331.436c-.011.012-.019.026-.031.038l-13.58,13.58c-.3.3-.6.575-.916.842A15.013,15.013,0,0,1,14.26,54.746q-.546-.222-1.081-.489A15.016,15.016,0,0,1,8.788,50.921Zm39.3-3.534-16.63,9.6a14.977,14.977,0,0,1-13.549.745,16.434,16.434,0,0,0,3.749.021c.1-.01.193-.031.291-.042.5-.061.988-.139,1.477-.243.173-.036.342-.085.514-.127.411-.1.818-.212,1.221-.344.192-.062.38-.132.57-.2.379-.139.752-.29,1.121-.456.191-.086.381-.173.57-.267.362-.179.716-.375,1.067-.581.179-.1.36-.206.536-.319.361-.23.709-.481,1.054-.741.151-.112.306-.216.454-.334q.649-.522,1.254-1.116c.045-.043.094-.078.138-.122l3.287-3.288.011,0a1,1,0,0,0,.5-.134l10.32-5.959.011-.009a2.207,2.207,0,0,1,3.055.927A2.325,2.325,0,0,1,48.09,47.387Zm2.18-8.66-5.23,3.02c-.006,0-.009.01-.015.013L40.3,44.49l5.21-5.21a4.409,4.409,0,0,0,.483-.586c.047-.066.088-.132.131-.2a4.451,4.451,0,0,0,.234-.421c.045-.091.093-.18.131-.273a4.72,4.72,0,0,0,.269-.982c.016-.1.032-.193.041-.29.013-.133.019-.265.019-.4,0-.1-.007-.2-.014-.3,0-.057,0-.113-.007-.169l1.436-.83h0a2.206,2.206,0,0,1,3.066.906A2.33,2.33,0,0,1,50.27,38.727Zm.5-7.67L47.233,33.1h0l-1.159.669a4.113,4.113,0,0,0-.286-.391,4.421,4.421,0,0,0-.42-.4c-.016-.013-.029-.03-.045-.043-.084-.069-.176-.124-.265-.186s-.164-.125-.252-.178a4.147,4.147,0,0,0-1.163-.47l1.744-1.743a4.66,4.66,0,0,0,.46-.562c.054-.075.1-.15.152-.227.073-.116.137-.235.2-.356a4.4,4.4,0,0,0,.283-.689c.01-.03.023-.058.032-.088l2.22-1.282a2.2,2.2,0,0,1,3.06.908A2.337,2.337,0,0,1,50.771,31.057Z    M52.793,14.207a1,1,0,0,0,1.414,0l6.5-6.5a1,1,0,1,0-1.414-1.414l-6.5,6.5A1,1,0,0,0,52.793,14.207Z   M59.485,14.143l-5,3a1,1,0,1,0,1.03,1.714l5-3a1,1,0,1,0-1.03-1.714Z    M48.553,13.9a1,1,0,0,0,1.342-.448l3-6a1,1,0,1,0-1.79-.894l-3,6A1,1,0,0,0,48.553,13.9Z    M25.081,11.394a1,1,0,0,0,1.838-.788l-3-7a1,1,0,0,0-1.838.788Z M30,12a1,1,0,0,0,1-1V5a1,1,0,0,0-2,0v6A1,1,0,0,0,30,12Z    M21.219,13.625a1,1,0,0,0,1.562-1.25l-4-5a1,1,0,0,0-1.562,1.25Z";
+  VP.clap.width=64;
+  VP.clap.height=80;
   VP.mjBack={};
   VP.mjBack.path="M47.588 0H22.176v33.778H5.801a5 5 0 0 0-3.592 8.478L31.301 72.3a5 5 0 0 0 7.174.01l29.259-30.045a5 5 0 0 0-3.582-8.488H47.588V0z";
   VP.mjBack.width=70;
@@ -9862,6 +9886,7 @@ BlockGraphics.update.hexSlotGradient = function(path, category, active) {
 BlockGraphics.update.blockActive = function(path, category, returnsValue, active, glowing) {
 	if (!active) category = "inactive";
 	var fill = Colors.getGradient(category);
+	if (FinchBlox) { fill = Colors.getColor(category) }
 	path.setAttributeNS(null, "fill", fill);
 	if (!glowing) {
 		BlockGraphics.update.stroke(path, category, returnsValue, active);
@@ -16225,7 +16250,7 @@ InputWidget.Piano.setConstants = function() {
 	var P = InputWidget.Piano;
 	//P.bnMargin = InputPad.margin;
 	P.bnMargin = 2;
-	P.firstNote = 60;
+	P.firstNote = 48;
 	P.numWhiteKeys = 14;
 	P.inputPadWidth = FinchBlox ? InputPad.width : InputPad.width*3
 	P.whiteKeyW = (P.inputPadWidth - P.bnMargin * (P.numWhiteKeys-1)) / P.numWhiteKeys;
@@ -16240,32 +16265,14 @@ InputWidget.Piano.setConstants = function() {
 	P.blackKeyH = P.blackKeyW * bKeyRatio;
 	P.font = Font.uiFont(34).bold();
 
-	P.blackKeys = [61, 63, 66, 68, 70, 73, 75, 78, 80, 82];
+	P.blackKeys = [49, 51, 54, 56, 58, 61, 63, 66, 68, 70, 73, 75, 78, 80, 82];
 	P.noteStrings = {
-		60:"C4",
-		61:"C#4",
-		62:"D4",
-		63:"D#4",
-		64:"E4",
-		65:"F4",
-		66:"F#4",
-		67:"G4",
-		68:"G#4",
-		69:"A4",
-		70:"A#4",
-		71:"B4",
-		72:"C5",
-		73:"C#5",
-		74:"D5",
-		75:"D#5",
-		76:"E5",
-		77:"F5",
-		78:"F#5",
-		79:"G5",
-		80:"G#5",
-		81:"A5",
-		82:"A#5",
-		83:"B5",
+		48:"C3", 49:"C#3", 50:"D3", 51:"D#3", 52:"E3", 53:"F3",
+		54:"F#3", 55:"G3", 56:"G#3", 57:"A3", 58:"A#3", 59:"B3",
+		60:"C4", 61:"C#4", 62:"D4", 63:"D#4", 64:"E4", 65:"F4",
+		66:"F#4", 67:"G4", 68:"G#4", 69:"A4", 70:"A#4", 71:"B4",
+		72:"C5", 73:"C#5", 74:"D5", 75:"D#5", 76:"E5", 77:"F5",
+		78:"F#5", 79:"G5", 80:"G#5", 81:"A5", 82:"A#5", 83:"B5",
 		84:"C6"
 	}
 };
@@ -25668,10 +25675,11 @@ CallbackManager.robot.updateFirmwareStatus = function(robotId, status) {
 	return true;
 };
 
-CallbackManager.robot.updateHasV2Microbit = function(robotId, hasV2) {
+CallbackManager.robot.updateHasV2Microbit = function(robotId, hasV2String) {
   robotId = HtmlServer.decodeHtml(robotId);
-  hasV2 = HtmlServer.decodeHtml(hasV2);
+  var hasV2 = (HtmlServer.decodeHtml(hasV2String) == 'true');
   DeviceManager.setHasV2Microbit(robotId, hasV2)
+  CodeManager.updateAvailableSensors(); //activates micro:bit V2 only blocks
 }
 /**
  * Tells the frontend that a device has just been discovered
@@ -33022,6 +33030,8 @@ B_MicroBitV2Sensor.prototype.startAction=function(){
   }
   if (sensorSelection == "V2temperature") {
      Block.setDisplaySuffix(B_MicroBitV2Sensor, String.fromCharCode(176) + "C");
+  } else {
+    Block.removeDisplaySuffix(B_MicroBitV2Sensor);
   }
   var mem = this.runMem;
   mem.requestStatus = {};
@@ -34150,6 +34160,8 @@ B_FinchDistance.prototype.startAction = function() {
 	if (device.hasV2Microbit) {
 		//V2 distance values are reported in cm.
 		this.scalingFactor = 1;
+	} else {
+		this.scalingFactor = DeviceFinch.cmPerDistance;
 	}
 
 	device.readSensor(this.runMem.requestStatus, "distance");
@@ -34848,8 +34860,10 @@ B_FBLeftL3.prototype.constructor = B_FBLeftL3;
 function B_FBSensorBlock(x, y, sensor) {
   this.sensor = sensor;
   this.speed = 50;
-  this.threshold = 30/DeviceFinch.cmPerDistance; //obstical threshold of 30cm
-  if (sensor == "dark") { this.threshold = 5; }
+  this.distanceThreshold = 30
+  this.lightThreshold = 5
+  this.threshold = this.distanceThreshold/DeviceFinch.cmPerDistance; //obstacle threshold of 30cm
+  if (sensor == "dark") { this.threshold = this.lightThreshold; }
   CommandBlock.call(this,x,y,"motion_3");
 }
 B_FBSensorBlock.prototype = Object.create(CommandBlock.prototype);
@@ -34867,6 +34881,14 @@ B_FBSensorBlock.prototype.startAction = function () {
 
   var device = DeviceFinch.getManager().getDevice(0);
   if (device != null) {
+    if (this.sensor == "obstacle") {
+      if (device.hasV2Microbit) {
+  		    //V2 distance values are reported in cm.
+  		    this.threshold = this.distanceThreshold
+      } else {
+          this.threshold = this.distanceThreshold/DeviceFinch.cmPerDistance
+      }
+  	}
     device.setMotors(this.runMem.requestStatus, this.speed, 0, this.speed, 0);
     device.isMoving = true;
   } else {
@@ -35065,6 +35087,13 @@ function B_FBG(x, y) {
 }
 B_FBG.prototype = Object.create(B_FBSoundL1.prototype);
 B_FBG.prototype.constructor = B_FBG;
+
+function B_FBA(x, y) {
+  B_FBSoundL1.call(this, x, y, "A", 69);
+}
+B_FBA.prototype = Object.create(B_FBSoundL1.prototype);
+B_FBA.prototype.constructor = B_FBA;
+
 
 //********* Level 2 blocks *********
 
@@ -35626,26 +35655,17 @@ B_WhenKeyPressed.prototype.updateAction = function() {
 }
 
 //FinchBlox only
-function B_StartWhenDark(x, y) {
+function B_FBStartWhen(x, y, sensor) {
+	this.sensor = sensor
 	HatBlock.call(this, x, y, "control_3", true);
-	var blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.fbDarkGreen, "sun", 25);
-	blockIcon.icon.setRotation(-8);
-	//blockIcon.icon.negate(Colors.flagGreen);
-	blockIcon.negate(Colors.flagGreen);
-	blockIcon.isEndOfLine = true;
-	blockIcon.addSecondIcon(VectorPaths.faFlag, Colors.flagGreen, true);
-	this.addPart(blockIcon);
-	//var icon2 = new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 30)
 }
-B_StartWhenDark.prototype = Object.create(HatBlock.prototype);
-B_StartWhenDark.prototype.constructor = B_StartWhenDark;
-
+B_FBStartWhen.prototype = Object.create(HatBlock.prototype);
+B_FBStartWhen.prototype.constructor = B_FBStartWhen;
 /* Triggers stack to start running. */
-B_StartWhenDark.prototype.eventFlagClicked = function() {
+B_FBStartWhen.prototype.eventFlagClicked = function() {
 	this.stack.startRun();
 };
-
-B_StartWhenDark.prototype.startAction = function() {
+B_FBStartWhen.prototype.startAction = function() {
 
 	this.blankRequestStatus = {};
 	this.blankRequestStatus.finished = false;
@@ -35657,16 +35677,15 @@ B_StartWhenDark.prototype.startAction = function() {
 
 	return new ExecutionStatusRunning();
 };
-
-B_StartWhenDark.prototype.updateAction = function() {
+B_FBStartWhen.prototype.updateAction = function() {
 	var status = this.runMem.requestStatus;
 	if (status.requestSent) {
 		if (status.finished) {
 			if (status.error) { return new ExecutionStatusError(); }
 			var result = new StringData(status.result);
 			var num = (result.asNum().getValue());
-			var threshold = 5;
-			if (num < threshold) {
+			if ((this.sensor == "clap" && num > 50) ||
+				(this.sensor == "dark" && num < 5)) {
 				return new ExecutionStatusDone();
 			} else {
 				this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
@@ -35675,12 +35694,49 @@ B_StartWhenDark.prototype.updateAction = function() {
 	} else {
 		var device = DeviceFinch.getManager().getDevice(0);
 	  if (device != null) {
-			device.readSensor(status, "light", "left");
+			if (this.sensor == "clap") {
+				device.readSensor(status, "V2sound");
+			} else {
+				device.readSensor(status, "light", "left");
+			}
 			status.requestSent = true;
 		}
 	}
 	return new ExecutionStatusRunning();
 }
+
+function B_StartWhenDark(x, y) {
+	B_FBStartWhen.call(this, x, y, "dark")
+
+	var blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.fbDarkGreen, "sun", 25);
+	blockIcon.icon.setRotation(-8);
+	//blockIcon.icon.negate(Colors.flagGreen);
+	blockIcon.negate(Colors.flagGreen);
+	blockIcon.isEndOfLine = true;
+	blockIcon.addSecondIcon(VectorPaths.faFlag, Colors.flagGreen, true);
+	this.addPart(blockIcon);
+	//var icon2 = new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 30)
+}
+B_StartWhenDark.prototype = Object.create(B_FBStartWhen.prototype);
+B_StartWhenDark.prototype.constructor = B_StartWhenDark;
+
+function B_StartWhenClap(x, y) {
+	B_FBStartWhen.call(this, x, y, "clap")
+
+	var blockIcon = new BlockIcon(this, VectorPaths.clap, Colors.fbDarkGreen, "clap", 30);
+	blockIcon.isEndOfLine = true;
+	blockIcon.addSecondIcon(VectorPaths.faFlag, Colors.flagGreen, true, 25, -5);
+	this.addPart(blockIcon);
+}
+B_StartWhenClap.prototype = Object.create(B_FBStartWhen.prototype);
+B_StartWhenClap.prototype.constructor = B_StartWhenClap;
+
+B_StartWhenClap.prototype.checkActive = function() {
+	var device = DeviceFinch.getManager().getDevice(0);
+	var active = (device == null || !(device.hasV2Microbit === false))
+	//console.log("when clap check active " + active + " with " + device)
+	return active
+};
 
 /* This file contains the implementations for sensing Blocks, which have been moved to the tablet category
  * TODO: merge with tablet
@@ -36853,7 +36909,7 @@ function B_PlayNoteForBeats(x, y) {
 	var beatsSlot = new NumSlot(this, "NumS_dur", 1, true); // Positive
 	beatsSlot.addLimits(0, 16, Language.getStr("Beats"))
 	this.addPart(beatsSlot);
-	this.parseTranslation(Language.getStr("block_Play_Note"));
+	this.parseTranslation(Language.getStr("block_play_note"));
 }
 B_PlayNoteForBeats.prototype = Object.create(CommandBlock.prototype);
 B_PlayNoteForBeats.prototype.constructor = B_PlayNoteForBeats;

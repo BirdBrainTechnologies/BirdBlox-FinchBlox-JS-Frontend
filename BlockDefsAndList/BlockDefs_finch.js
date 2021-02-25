@@ -444,6 +444,8 @@ B_FinchDistance.prototype.startAction = function() {
 	if (device.hasV2Microbit) {
 		//V2 distance values are reported in cm.
 		this.scalingFactor = 1;
+	} else {
+		this.scalingFactor = DeviceFinch.cmPerDistance;
 	}
 
 	device.readSensor(this.runMem.requestStatus, "distance");

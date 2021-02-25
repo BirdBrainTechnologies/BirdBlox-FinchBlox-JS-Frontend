@@ -6,6 +6,7 @@ Language.zhs = {
 "block_Position_Servo":"位置伺服 (Slot 1) (Slot 2) °",
 "block_Rotation_Servo":"旋转伺服 (Slot 1) (Slot 2) %",
 "block_Play_Note":"演奏 音阶 (Slot 1)于(Slot 2) 拍",
+"block_play_note":"演奏 音阶 (Slot 1)于(Slot 2) 拍",
 "Light":"灯光",
 "Distance":"距离",
 "Dial":"拨号",

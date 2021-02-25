@@ -6,6 +6,7 @@ Language.de = {
   "block_Position_Servo":"Position Servo (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Drehung Servo (Slot 1) (Slot 2) %",
   "block_Play_Note":"spiele Note (Slot 1) für (Slot 2) Schläge",
+  "block_play_note":"spiele note (Slot 1) für (Slot 2) schläge",
   "Light":"Licht",
   "Distance":"Entfernung",
   "Dial":"Drehknopf",

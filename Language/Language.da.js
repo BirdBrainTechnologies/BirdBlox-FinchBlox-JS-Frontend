@@ -6,6 +6,7 @@ Language.da = {
   "block_Position_Servo":"Positionsservo (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Rotationsservo (Slot 1) (Slot 2) %",
   "block_Play_Note":"Spil tone (Slot 1) i (Slot 2) slag",
+  "block_play_note":"spil tone (Slot 1) i (Slot 2) slag",
   "Light":"Lys",
   "Distance":"Afstand",
   "Dial":"Ring til",

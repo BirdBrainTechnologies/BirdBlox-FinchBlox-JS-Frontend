@@ -6,6 +6,7 @@ Language.ar = {
   "block_Position_Servo":"(Slot 2) (Slot 1) موقف محرك سيرفو المؤازر",
   "block_Rotation_Servo":"(Slot 2) (Slot 1) فتحة دوران المحرك المؤازر ",
   "block_Play_Note":"(Slot 2) (Slot 1) تشغيل الموسيقى",
+  "block_play_note":"(Slot 2) (Slot 1) تشغيل الموسيقى",
   "Light":"ضوء",
   "Distance":"مسافه",
   "Dial":"دوار",

@@ -120,6 +120,13 @@ function B_FBG(x, y) {
 B_FBG.prototype = Object.create(B_FBSoundL1.prototype);
 B_FBG.prototype.constructor = B_FBG;
 
+function B_FBA(x, y) {
+  B_FBSoundL1.call(this, x, y, "A", 69);
+}
+B_FBA.prototype = Object.create(B_FBSoundL1.prototype);
+B_FBA.prototype.constructor = B_FBA;
+
+
 //********* Level 2 blocks *********
 
 function B_FBSoundL2(x, y) {

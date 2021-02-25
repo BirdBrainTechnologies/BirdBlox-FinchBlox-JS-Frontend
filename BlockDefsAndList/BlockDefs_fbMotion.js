@@ -283,8 +283,10 @@ B_FBLeftL3.prototype.constructor = B_FBLeftL3;
 function B_FBSensorBlock(x, y, sensor) {
   this.sensor = sensor;
   this.speed = 50;
-  this.threshold = 30/DeviceFinch.cmPerDistance; //obstical threshold of 30cm
-  if (sensor == "dark") { this.threshold = 5; }
+  this.distanceThreshold = 30
+  this.lightThreshold = 5
+  this.threshold = this.distanceThreshold/DeviceFinch.cmPerDistance; //obstacle threshold of 30cm
+  if (sensor == "dark") { this.threshold = this.lightThreshold; }
   CommandBlock.call(this,x,y,"motion_3");
 }
 B_FBSensorBlock.prototype = Object.create(CommandBlock.prototype);
@@ -302,6 +304,14 @@ B_FBSensorBlock.prototype.startAction = function () {
 
   let device = DeviceFinch.getManager().getDevice(0);
   if (device != null) {
+    if (this.sensor == "obstacle") {
+      if (device.hasV2Microbit) {
+  		    //V2 distance values are reported in cm.
+  		    this.threshold = this.distanceThreshold
+      } else {
+          this.threshold = this.distanceThreshold/DeviceFinch.cmPerDistance
+      }
+  	}
     device.setMotors(this.runMem.requestStatus, this.speed, 0, this.speed, 0);
     device.isMoving = true;
   } else {

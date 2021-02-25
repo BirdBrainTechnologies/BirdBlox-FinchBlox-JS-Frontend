@@ -32,12 +32,12 @@ function Device(name, id, RSSI, device) {
 	this.connected = false;
 	/** @type {Device.firmwareStatuses} */
 	this.firmwareStatus = Device.firmwareStatuses.upToDate;
-    this.batteryState = "3";
+    this.batteryState = "4";
 	/* Field hold functions that are called each time the device's status or firmwareStatus changes.  DeviceStatusLights
 	 * configure these fields so they can update when the status changes */
 	this.statusListener = null;
 	this.firmwareStatusListener = null;
-  this.hasV2Microbit = false;
+  this.hasV2Microbit;
 }
 
 

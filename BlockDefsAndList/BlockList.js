@@ -89,9 +89,9 @@ BlockList.populateCat_color_1 = function(category) {
 BlockList.populateCat_sound_1 = function(category) {
 	category.addBlockByName("B_FBC");
 	category.addBlockByName("B_FBD");
-	category.addBlockByName("B_FBE");
 	category.addBlockByName("B_FBF");
 	category.addBlockByName("B_FBG");
+	category.addBlockByName("B_FBA");
 	category.trimBottom();
 	category.centerBlocks();
 }
@@ -143,6 +143,7 @@ BlockList.populateCat_control_3 = function(category) {
 	category.addBlockByName("B_Forever");
 	category.addBlockByName("B_Repeat");
 	category.addBlockByName("B_StartWhenDark");
+	category.addBlockByName("B_StartWhenClap");
 	category.trimBottom();
 	category.centerBlocks();
 }

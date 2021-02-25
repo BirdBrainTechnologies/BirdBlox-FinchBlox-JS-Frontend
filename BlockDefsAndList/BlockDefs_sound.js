@@ -147,7 +147,7 @@ function B_PlayNoteForBeats(x, y) {
 	const beatsSlot = new NumSlot(this, "NumS_dur", 1, true); // Positive
 	beatsSlot.addLimits(0, 16, Language.getStr("Beats"))
 	this.addPart(beatsSlot);
-	this.parseTranslation(Language.getStr("block_Play_Note"));
+	this.parseTranslation(Language.getStr("block_play_note"));
 }
 B_PlayNoteForBeats.prototype = Object.create(CommandBlock.prototype);
 B_PlayNoteForBeats.prototype.constructor = B_PlayNoteForBeats;

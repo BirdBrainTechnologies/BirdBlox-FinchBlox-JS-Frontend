@@ -6,6 +6,7 @@ Language.he = {
   "block_Position_Servo":"(Slot 2) (Slot 1) סרוו כיוון",
   "block_Rotation_Servo":"% (Slot 2) (Slot 1) סרוו סיבובים",
   "block_Play_Note":"פעימות (Slot 2) במשך (Slot 1) נגן תו",
+  "block_play_note":"פעימות (Slot 2) במשך (Slot 1) נגן תו",
   "Light":"אור",
   "Distance":"מרחק",
   "Dial":"חיוג",

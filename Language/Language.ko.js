@@ -6,6 +6,7 @@ Language.ko = {
   "block_Position_Servo":"위치 제어 서보 (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"회전속도 제어 서보 (Slot 1) (Slot 2) %",
   "block_Play_Note":"(Slot 1) 번 음을 (Slot 2) 박자로 연주하기",
+  "block_play_note":"(Slot 1) 번 음을 (Slot 2) 박자로 연주하기",
   "Light":"빛 센서",
   "Distance":"거리 센서",
   "Dial":"가변 저항",

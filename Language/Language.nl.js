@@ -6,6 +6,7 @@ Language.nl = {
   "block_Position_Servo":"Positie-Servo (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Draai-Servo (Slot 1) (Slot 2) %",
   "block_Play_Note":"speel noot (Slot 1) voor (Slot 2) Beats",
+  "block_play_note":"speel noot (Slot 1) voor (Slot 2) beats",
   "Light":"Licht",
   "Distance":"Afstand",
   "Dial":"Draaiknop",

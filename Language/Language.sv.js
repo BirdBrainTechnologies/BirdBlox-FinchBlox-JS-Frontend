@@ -6,6 +6,7 @@ Language.sv = {
   "block_Position_Servo":"Positionsservo (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Rotationsservo (Slot 1) (Slot 2) %",
   "block_Play_Note":"Spela not",
+  "block_play_note":"spela not",
   "Light":"Ljus",
   "Distance":"Avstånd",
   "Dial":"Rotation",

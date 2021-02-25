@@ -6,6 +6,7 @@ Language.fi = {
   "block_Position_Servo":"Asentoservo (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Kiertoservo (Slot 1) (Slot 2) %",
   "block_Play_Note":"Soita sävel (Slot 1)  (Slot 2) iskun ajan",
+  "block_play_note":"soita sävel (Slot 1)  (Slot 2) iskun ajan",
   "Light":"Valo",
   "Distance":"Etäisyys",
   "Dial":"Säädin",

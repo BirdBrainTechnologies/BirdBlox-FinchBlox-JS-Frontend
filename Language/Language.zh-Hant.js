@@ -6,6 +6,7 @@ Language.zht = {
   "block_Position_Servo":"位置伺服 (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"旋轉伺服 (Slot 1) (Slot 2) %",
   "block_Play_Note":"演奏 音階 (Slot 1)於(Slot 2) 拍",
+  "block_play_note":"演奏 音階 (Slot 1)於(Slot 2) 拍",
   "Light":"燈光",
   "Distance":"距離",
   "Dial":"撥號",

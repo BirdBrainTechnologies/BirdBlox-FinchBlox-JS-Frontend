@@ -14,7 +14,7 @@ InputWidget.Piano.setConstants = function() {
 	const P = InputWidget.Piano;
 	//P.bnMargin = InputPad.margin;
 	P.bnMargin = 2;
-	P.firstNote = 60;
+	P.firstNote = 48;
 	P.numWhiteKeys = 14;
 	P.inputPadWidth = FinchBlox ? InputPad.width : InputPad.width*3
 	P.whiteKeyW = (P.inputPadWidth - P.bnMargin * (P.numWhiteKeys-1)) / P.numWhiteKeys;
@@ -29,32 +29,14 @@ InputWidget.Piano.setConstants = function() {
 	P.blackKeyH = P.blackKeyW * bKeyRatio;
 	P.font = Font.uiFont(34).bold();
 
-	P.blackKeys = [61, 63, 66, 68, 70, 73, 75, 78, 80, 82];
+	P.blackKeys = [49, 51, 54, 56, 58, 61, 63, 66, 68, 70, 73, 75, 78, 80, 82];
 	P.noteStrings = {
-		60:"C4",
-		61:"C#4",
-		62:"D4",
-		63:"D#4",
-		64:"E4",
-		65:"F4",
-		66:"F#4",
-		67:"G4",
-		68:"G#4",
-		69:"A4",
-		70:"A#4",
-		71:"B4",
-		72:"C5",
-		73:"C#5",
-		74:"D5",
-		75:"D#5",
-		76:"E5",
-		77:"F5",
-		78:"F#5",
-		79:"G5",
-		80:"G#5",
-		81:"A5",
-		82:"A#5",
-		83:"B5",
+		48:"C3", 49:"C#3", 50:"D3", 51:"D#3", 52:"E3", 53:"F3",
+		54:"F#3", 55:"G3", 56:"G#3", 57:"A3", 58:"A#3", 59:"B3",
+		60:"C4", 61:"C#4", 62:"D4", 63:"D#4", 64:"E4", 65:"F4",
+		66:"F#4", 67:"G4", 68:"G#4", 69:"A4", 70:"A#4", 71:"B4",
+		72:"C5", 73:"C#5", 74:"D5", 75:"D#5", 76:"E5", 77:"F5",
+		78:"F#5", 79:"G5", 80:"G#5", 81:"A5", 82:"A#5", 83:"B5",
 		84:"C6"
 	}
 };

@@ -6,6 +6,7 @@ Language.es = {
   "block_Position_Servo":"Servo de posicion (Slot 1) (Slot 2) °",
   "block_Rotation_Servo":"Servo de rotacion (Slot 1) (Slot 2) %",
   "block_Play_Note":"Emitir un sonido (Slot 1) por (Slot 2) pulsos",
+  "block_play_note":"emitir un sonido (Slot 1) por (Slot 2) pulsos",
   "Light":"Luz",
   "Distance":"Distancia",
   "Dial":"Dial",
