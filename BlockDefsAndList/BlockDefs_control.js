@@ -553,21 +553,26 @@ B_FBStartWhen.prototype.updateAction = function() {
 	const status = this.runMem.requestStatus;
 	if (status.requestSent) {
 		if (status.finished) {
-			if (status.error) { return new ExecutionStatusError(); }
-			const result = new StringData(status.result);
-			const num = (result.asNum().getValue());
-			if ((this.sensor == "clap" && num > 50) ||
-				(this.sensor == "dark" && num < 5)) {
-				return new ExecutionStatusDone();
-			} else {
-				this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+			if (!status.error) {
+				const result = new StringData(status.result);
+				const num = (result.asNum().getValue());
+				if ((this.sensor == "clap" && num > 50) ||
+					(this.sensor == "dark" && num < 5)) {
+					return new ExecutionStatusDone();
+				}
 			}
+			//If there's an error or if the condition hasn't been met, start over.
+			this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
 		}
 	} else {
 		let device = DeviceFinch.getManager().getDevice(0);
 	  if (device != null) {
 			if (this.sensor == "clap") {
-				device.readSensor(status, "V2sound");
+				if (device.hasV2Microbit) {
+					device.readSensor(status, "V2sound");
+				} else {
+					return new ExecutionStatusRunning();
+				}
 			} else {
 				device.readSensor(status, "light", "left");
 			}

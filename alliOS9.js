@@ -25679,7 +25679,7 @@ CallbackManager.robot.updateHasV2Microbit = function(robotId, hasV2String) {
   robotId = HtmlServer.decodeHtml(robotId);
   var hasV2 = (HtmlServer.decodeHtml(hasV2String) == 'true');
   DeviceManager.setHasV2Microbit(robotId, hasV2)
-  CodeManager.updateAvailableSensors(); //activates micro:bit V2 only blocks
+  CodeManager.updateAvailableSensors(); //activates or deactivates micro:bit V2 only blocks
 }
 /**
  * Tells the frontend that a device has just been discovered
@@ -35681,21 +35681,26 @@ B_FBStartWhen.prototype.updateAction = function() {
 	var status = this.runMem.requestStatus;
 	if (status.requestSent) {
 		if (status.finished) {
-			if (status.error) { return new ExecutionStatusError(); }
-			var result = new StringData(status.result);
-			var num = (result.asNum().getValue());
-			if ((this.sensor == "clap" && num > 50) ||
-				(this.sensor == "dark" && num < 5)) {
-				return new ExecutionStatusDone();
-			} else {
-				this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+			if (!status.error) {
+				var result = new StringData(status.result);
+				var num = (result.asNum().getValue());
+				if ((this.sensor == "clap" && num > 50) ||
+					(this.sensor == "dark" && num < 5)) {
+					return new ExecutionStatusDone();
+				}
 			}
+			//If there's an error or if the condition hasn't been met, start over.
+			this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
 		}
 	} else {
 		var device = DeviceFinch.getManager().getDevice(0);
 	  if (device != null) {
 			if (this.sensor == "clap") {
-				device.readSensor(status, "V2sound");
+				if (device.hasV2Microbit) {
+					device.readSensor(status, "V2sound");
+				} else {
+					return new ExecutionStatusRunning();
+				}
 			} else {
 				device.readSensor(status, "light", "left");
 			}
