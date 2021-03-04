@@ -23788,15 +23788,27 @@ CalibrateCompassDialog.prototype.closeDialog = function() {
 CalibrateCompassDialog.showVideo = function(robot) {
   var fileName = "Videos/MicroBit_Calibration.mp4";
 
-/*  if (robot.getDeviceTypeId() == "hummingbirdbit") {
-    fileName = "Videos/HummBit_Calibration.mp4";
-  }*/
   switch(robot.getDeviceTypeId()) {
     case "hummingbirdbit":
-      fileName = "Videos/HummBit_Calibration.mp4";
+      if (robot.hasV2Microbit) {
+        fileName = "Videos/HummBit_V2_Calibration.mp4";
+      } else {
+        fileName = "Videos/HummBit_Calibration.mp4";
+      }
       break;
     case "finch":
-      fileName = "Videos/Finch_Calibration.mp4";
+      if (robot.hasV2Microbit) {
+        fileName = "Videos/Finch_V2_Calibration.mp4";
+      } else {
+        fileName = "Videos/Finch_Calibration.mp4";
+      }
+      break;
+    case "microbit":
+      if (robot.hasV2Microbit) {
+        fileName = "Videos/MicroBit_V2_Calibration.mp4";
+      } else {
+        fileName = "Videos/MicroBit_Calibration.mp4";
+      }
       break;
   }
 
