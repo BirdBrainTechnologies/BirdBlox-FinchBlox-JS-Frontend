@@ -25536,6 +25536,7 @@ CallbackManager.data.markLoading = function(){
  * @return {boolean}
  */
 CallbackManager.data.filesChanged = function(){
+  if(FinchBlox) { LevelManager.checkSavedFiles() }
 	OpenDialog.filesChanged();
 	return true;
 };
