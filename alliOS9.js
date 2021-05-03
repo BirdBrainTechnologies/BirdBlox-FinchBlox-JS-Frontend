@@ -26914,6 +26914,7 @@ LevelManager.userDeleteFile = function(fileName) {
   /*if (fileName == SaveManager.fileName) {
     LevelManager.loadLevelSavePoint();
   }*/
+  var deletingCurrentFile = (fileName == SaveManager.fileName)
   GuiElements.blockInteraction();
   for (var i = 0; i < LevelManager.filesSavedLocally.length; i++) {
     if (LevelManager.filesSavedLocally[i] == fileName) {
@@ -26921,6 +26922,7 @@ LevelManager.userDeleteFile = function(fileName) {
     }
   }
   SaveManager.delete(false, fileName);
+  if (!deletingCurrentFile) GuiElements.unblockInteraction();
 }
 
 
