@@ -220,6 +220,7 @@ HtmlServer.sendFinishedLoadingRequest = function() {
  * @return  {Object}  Request status object
  */
 HtmlServer.sendTabletSoundRequest = function(note, duration) {
+	duration = Math.round(duration);
 	const request = "sound/note?note=" + note + "&duration=" + duration;
 	var requestStatus = function() {};
 	HtmlServer.sendRequest(request, requestStatus);

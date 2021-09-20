@@ -113,9 +113,10 @@ DeviceWithPorts.prototype.setTriLed = function(status, port, red, green, blue) {
  * Issues a request to set the buzzer.  Uses a status object to store the result.
  * @param {object} status - An object provided by the caller to track the progress of the request
  * @param {number} note - The note number to play (0-127)
- * @param {number} beats - The duration of the note
+ * @param {number} duration - The duration of the note in ms
  */
 DeviceWithPorts.prototype.setBuzzer = function(status, note, duration) {
+	duration = Math.round(duration);
 	const request = new HttpRequestBuilder("robot/out/buzzer");
 	request.addParam("type", this.getDeviceTypeId());
 	request.addParam("id", this.id);
