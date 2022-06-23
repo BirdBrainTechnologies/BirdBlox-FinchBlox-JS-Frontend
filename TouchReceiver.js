@@ -49,9 +49,10 @@ function TouchReceiver() {
  */
 TouchReceiver.addListeners = function() {
 	const TR = TouchReceiver;
-	TR.addEventListenerSafe(document.body, TR.handlerMove, TouchReceiver.handleMove, false);
-	TR.addEventListenerSafe(document.body, TR.handlerUp, TouchReceiver.handleUp, false);
-	TR.addEventListenerSafe(document.body, TR.handlerDown, TouchReceiver.handleDocumentDown, false);
+	TR.addEventListenerSafe(document.body, TR.handlerMove, TR.handleMove, false);
+	TR.addEventListenerSafe(document.body, TR.handlerUp, TR.handleUp, false);
+	TR.addEventListenerSafe(document.body, TR.handlerDown, TR.handleDocumentDown, false);
+  TR.addEventListenerSafe(document.body, ["wheel"], TR.wheelZoom, false);
 };
 
 /**
@@ -235,6 +236,19 @@ TouchReceiver.checkStartZoom = function(e) {
 		}
 	}
 };
+
+/**
+ * Handle a wheel event by zooming the canvas.
+ * @param {event} e - wheel event
+ */
+TouchReceiver.wheelZoom = function(e) {
+  const zoomIn = e.deltaY < 0
+  const x = e.pageX / GuiElements.zoomFactor
+  if (Language.isRTL) { x = GuiElements.width - x; }
+  const y = e.pageY / GuiElements.zoomFactor
+
+  TabManager.wheelZoom(x, y, zoomIn)
+}
 
 /**
  * Returns whether the current touch is in the canvas

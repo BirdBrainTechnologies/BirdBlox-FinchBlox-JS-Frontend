@@ -1,4 +1,4 @@
-var FinchBlox = false;
+var FinchBlox = true;
 var FrontendVersion = 393;
 
 
@@ -10258,9 +10258,10 @@ function TouchReceiver() {
  */
 TouchReceiver.addListeners = function() {
 	var TR = TouchReceiver;
-	TR.addEventListenerSafe(document.body, TR.handlerMove, TouchReceiver.handleMove, false);
-	TR.addEventListenerSafe(document.body, TR.handlerUp, TouchReceiver.handleUp, false);
-	TR.addEventListenerSafe(document.body, TR.handlerDown, TouchReceiver.handleDocumentDown, false);
+	TR.addEventListenerSafe(document.body, TR.handlerMove, TR.handleMove, false);
+	TR.addEventListenerSafe(document.body, TR.handlerUp, TR.handleUp, false);
+	TR.addEventListenerSafe(document.body, TR.handlerDown, TR.handleDocumentDown, false);
+  TR.addEventListenerSafe(document.body, ["wheel"], TR.wheelZoom, false);
 };
 
 /**
@@ -10444,6 +10445,19 @@ TouchReceiver.checkStartZoom = function(e) {
 		}
 	}
 };
+
+/**
+ * Handle a wheel event by zooming the canvas.
+ * @param {event} e - wheel event
+ */
+TouchReceiver.wheelZoom = function(e) {
+  var zoomIn = e.deltaY < 0
+  var x = e.pageX / GuiElements.zoomFactor
+  if (Language.isRTL) { x = GuiElements.width - x; }
+  var y = e.pageY / GuiElements.zoomFactor
+
+  TabManager.wheelZoom(x, y, zoomIn)
+}
 
 /**
  * Returns whether the current touch is in the canvas
@@ -20356,6 +20370,20 @@ TabManager.endZooming = function() {
 		TM.activeTab.endZooming();
 	}
 };
+/**
+ * Passes message to Tab
+ * @param {number} x
+ * @param {number} y
+ * @param {boolean} zoomIn
+ */
+TabManager.wheelZoom = function(x, y, zoomIn) {
+  var TM = TabManager;
+	if (!TM.zooming) {
+		TM.zooming = true;
+		TM.activeTab.wheelZoom(x, y, zoomIn);
+    TM.zooming = false;
+	}
+}
 
 /**
  * Tells tab to restore a deleted stack from XML data
@@ -20889,6 +20917,32 @@ Tab.prototype.updateZooming = function(x1, y1, x2, y2) {
  */
 Tab.prototype.endZooming = function() {
 	this.zooming = false;
+};
+
+/**
+ * Zoom the canvas in response to a wheel event.
+ * @param {number} x - x coord of mouse during event
+ * @param {number} y - y coord of mouse during event
+ * @param {boolean} zoomIn - true if the canvas should zoom in
+ */
+Tab.prototype.wheelZoom = function(x, y, zoomIn) {
+  if (this.zooming) { return; }
+  this.zooming = true;
+  this.scrollXOffset = this.scrollX - x;
+  this.scrollYOffset = this.scrollY - y;
+  this.startZoom = this.zoomFactor;
+  this.updateTabDim();
+
+  var zoomDelta = zoomIn ? 0.9 : 1.1
+  this.zoomFactor = this.startZoom * zoomDelta;
+  this.zoomFactor = Math.max(TabManager.minZoom, Math.min(TabManager.maxZoom, this.zoomFactor));
+  var zoomRatio = this.zoomFactor / this.startZoom;
+  this.scrollX = this.scrollXOffset * zoomRatio + x;
+  this.scrollY = this.scrollYOffset * zoomRatio + y;
+  this.updateTransform();
+  this.updateArrowsShift();
+
+  this.zooming = false;
 };
 
 /**

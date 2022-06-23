@@ -344,6 +344,32 @@ Tab.prototype.endZooming = function() {
 };
 
 /**
+ * Zoom the canvas in response to a wheel event.
+ * @param {number} x - x coord of mouse during event
+ * @param {number} y - y coord of mouse during event
+ * @param {boolean} zoomIn - true if the canvas should zoom in
+ */
+Tab.prototype.wheelZoom = function(x, y, zoomIn) {
+  if (this.zooming) { return; }
+  this.zooming = true;
+  this.scrollXOffset = this.scrollX - x;
+  this.scrollYOffset = this.scrollY - y;
+  this.startZoom = this.zoomFactor;
+  this.updateTabDim();
+
+  const zoomDelta = zoomIn ? 0.9 : 1.1
+  this.zoomFactor = this.startZoom * zoomDelta;
+  this.zoomFactor = Math.max(TabManager.minZoom, Math.min(TabManager.maxZoom, this.zoomFactor));
+  const zoomRatio = this.zoomFactor / this.startZoom;
+  this.scrollX = this.scrollXOffset * zoomRatio + x;
+  this.scrollY = this.scrollYOffset * zoomRatio + y;
+  this.updateTransform();
+  this.updateArrowsShift();
+
+  this.zooming = false;
+};
+
+/**
  * Updates the transformation on the group according to the scroll position and zoom.
  */
 Tab.prototype.updateTransform = function() {

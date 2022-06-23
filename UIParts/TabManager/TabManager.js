@@ -204,6 +204,20 @@ TabManager.endZooming = function() {
 		TM.activeTab.endZooming();
 	}
 };
+/**
+ * Passes message to Tab
+ * @param {number} x
+ * @param {number} y
+ * @param {boolean} zoomIn
+ */
+TabManager.wheelZoom = function(x, y, zoomIn) {
+  const TM = TabManager;
+	if (!TM.zooming) {
+		TM.zooming = true;
+		TM.activeTab.wheelZoom(x, y, zoomIn);
+    TM.zooming = false;
+	}
+}
 
 /**
  * Tells tab to restore a deleted stack from XML data
