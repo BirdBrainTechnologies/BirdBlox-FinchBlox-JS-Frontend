@@ -10553,30 +10553,30 @@ TouchReceiver.multiTouchMove = function(e) {
             mto.target = mto.target.parent
             mto.targetType = (mto.target.stack.isDisplayStack ? "displayStack" : "block")
           }
-        }
-        /* If the user drags a Block that is in a DisplayStack,
-  			 the DisplayStack copies to a new BlockStack, which can be dragged. */
-  			if (mto.targetType === "displayStack") {
-  	        var x = mto.target.stack.getAbsX();
-            var y = mto.target.stack.getAbsY();
-            // The first block of the duplicated BlockStack is the new target.
-            mto.target = mto.target.stack.duplicate(x, y).firstBlock;
-            mto.targetType = "block";
-  			}
-  			/* If the user drags a Block that is a member of a BlockStack,
-  			 then the BlockStack should move. */
-  			if (mto.targetType === "block") {
-  				// If the CodeManager has not started the movement, this must be done first.
-  				var x = TR.getMultiX(touch);
-  				var y = TR.getMultiY(touch);
-  				if (mto.blockMoveManager) {
-  					// The CodeManager handles moving BlockStacks.
-  					mto.blockMoveManager.update(x, y);
-  				} else {
-            mto.blockMoveManager = new BlockMoveManager(mto.target, x, y);
-  				}
-  			}
 
+          /* If the user drags a Block that is in a DisplayStack,
+    			 the DisplayStack copies to a new BlockStack, which can be dragged. */
+    			if (mto.targetType === "displayStack") {
+    	        var x = mto.target.stack.getAbsX();
+              var y = mto.target.stack.getAbsY();
+              // The first block of the duplicated BlockStack is the new target.
+              mto.target = mto.target.stack.duplicate(x, y).firstBlock;
+              mto.targetType = "block";
+    			}
+    			/* If the user drags a Block that is a member of a BlockStack,
+    			 then the BlockStack should move. */
+    			if (mto.targetType === "block") {
+    				// If the CodeManager has not started the movement, this must be done first.
+    				var x = TR.getMultiX(touch);
+    				var y = TR.getMultiY(touch);
+    				if (mto.blockMoveManager) {
+    					// The CodeManager handles moving BlockStacks.
+    					mto.blockMoveManager.update(x, y);
+    				} else {
+              mto.blockMoveManager = new BlockMoveManager(mto.target, x, y);
+    				}
+    			}
+        }
       }
     }
   }
