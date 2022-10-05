@@ -74,6 +74,11 @@ BlockContextMenu.prototype.addOptions = function() {
 		}
 	} else {
 
+    this.menuBnList.addOption(Language.getStr("Add_Comment"), function() {
+      this.block.addComment();
+      this.close();
+    }.bind(this));
+
 		this.menuBnList.addOption(Language.getStr("Duplicate"), function() {
 			this.duplicate();
 		}.bind(this));

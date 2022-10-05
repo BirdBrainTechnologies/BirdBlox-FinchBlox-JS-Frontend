@@ -30,6 +30,7 @@ Colors.setCommon = function() {
 	Colors.cyan = "#00FFFF";
 	Colors.magenta = "#FF00FF";
 	Colors.darkRed = "#c00000";
+	Colors.lightYellow = "#FFFFCC";
 	//Current BBT colors
 	Colors.bbt = "#209BA9";
 	Colors.tabletOrange = "#FAA525";

@@ -64,6 +64,8 @@ function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Comm
 	}
   //For FinchBlox. Keep a reference to a blockButton if there is one for saving.
   this.blockButton = null;
+
+  this.comment = null;
 }
 
 /**
@@ -1445,6 +1447,20 @@ Block.prototype.colorTopHalf = function(color) {
   this.topPath = GuiElements.create.path(this.group);
   GuiElements.update.color(this.topPath, this.topPathColor);
   TouchReceiver.addListenersChild(this.topPath, this);
+}
+
+/**
+ * Add a comment to this block
+ * @param {Comment} c - Comment to add, null to add a new comment
+ */
+Block.prototype.addComment = function(c) {
+  if (this.comment != null) { return; }
+
+  if (c == null) {
+    c = new Comment()
+  }
+  this.comment = c
+  c.updateParent(this)
 }
 
 /**

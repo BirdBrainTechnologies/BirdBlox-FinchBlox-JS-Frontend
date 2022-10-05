@@ -232,5 +232,7 @@ Language.en = {
 "any_key":"any key",
 "logo":"Logo",
 "V2_required":"V2 micro:bit required",
-"Temperature":"Temperature"
+"Temperature":"Temperature",
+"Add_Comment":"Add Comment",
+"Add_Comment_Here":"add comment here..."
 }

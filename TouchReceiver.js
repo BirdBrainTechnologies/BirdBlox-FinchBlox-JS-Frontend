@@ -431,7 +431,24 @@ TouchReceiver.multiTouchLong = function(t) {
 		new BlockContextMenu(t.target, t.startX, t.startY);
 	}
 }
-
+/**
+ * Handles new touch events for Comments.  Stores the target Comment.
+ * @param {Comment} target - The Comment that was touched.
+ * @param {event} e - passed event arguments.
+ */
+TouchReceiver.touchStartComment = function(target, e) {
+  const TR = TouchReceiver;
+  if (e.type.startsWith("mouse")) {
+    TR.checkStartZoom(e);
+  	if (TR.touchstart(e)) {
+  		Overlay.closeOverlays();   // Close any visible overlays.
+  		TR.target = target;   // Store target Comment.
+      TR.targetType = "comment"
+  	}
+  } else {
+    TR.multiTouchStart(e, target, "comment")
+  }
+}
 /**
  * Handles new touch events for Slots.  Stores the target Slot.
  * @param {Slot} slot - The Slot that was touched.
@@ -719,6 +736,12 @@ TouchReceiver.touchmove = function(e) {
 				TR.targetType = "scrollBox";
 				TR.target = null;
 			}
+      // If the user drags a Comment
+      if (TR.targetType === "comment") {
+        console.log("dragging comment")
+        TR.target.dragging = true;
+        TR.target.drag(TR.getX(e), TR.getY(e));
+      }
 		}
 	}
 	shouldPreventDefault &= TR.targetType !== "smoothMenuBnList";
@@ -816,6 +839,13 @@ TouchReceiver.touchend = function(e) {
 		} else if (TR.targetType === "slider") {
       //TR.target.drop(TR.getX(e));
       TR.target.drop();
+    } else if (TR.targetType === "comment") {
+      if (TR.target.dragging) {
+        TR.target.dragging = false
+      } else {
+        console.log("TR.touchend editText")
+        TR.target.editText()
+      }
     }
 	} else {
 		TR.touchDown = false;
@@ -926,6 +956,18 @@ TouchReceiver.addListenersChild = function(element, parent) {
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		// When it is touched, the SVG element will tell the TouchReceiver its Block.
 		TouchReceiver.touchStartBlock(parent, e);
+	}, false);
+};
+/**
+ * Adds handlerDown listeners to the parts of a Comment.
+ * @param {Element} element - The part of the Comment the listeners are being applied to.
+ * @param {Comment} comment - The Comment the SVG element belongs to.
+ */
+TouchReceiver.addListenersComment = function(element, comment) {
+	const TR = TouchReceiver;
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+		// When it is touched, the SVG element will tell the TouchReceiver its Comment.
+		TouchReceiver.touchStartComment(comment, e);
 	}, false);
 };
 /**

@@ -191,6 +191,8 @@ GuiElements.setConstants = function() {
 	CodeManager();
 	SaveManager.setConstants();
 	UndoManager();
+
+	Comment.setGlobals();
 };
 /** Once each class has its constants set, the UI can be built. UI-related classes are called. */
 GuiElements.buildUI = function() {
@@ -444,14 +446,15 @@ GuiElements.create.rect = function(group) {
  * @param  {number} w         text box width
  * @param  {number} h         text box height
  * @param  {Element} group     svg group to add the box to
+ * @param  {Object} parent  Parent object (ususally a Comment or null)
  * @return {Element}         editable text box element created
  */
-GuiElements.create.editableText = function(font, textColor, x, y, w, h, group) {
+GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, parent) {
 	const fo = document.createElementNS('http://www.w3.org/2000/svg',"foreignObject");
   fo.setAttribute('width', w);
   fo.setAttribute('height', h);
   fo.setAttribute("style", "text-align: center;");
-  fo.setAttribute("x", 0);
+  fo.setAttribute("x", x);
   fo.setAttribute("y", y);
 
   const editableText = document.createElement('div');
@@ -463,19 +466,20 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group) {
   editableText.style.display = "block";
   editableText.style.color = textColor;
   editableText.style.fontFamily = font.fontFamily;
-  editableText.style.fontSize = font.fontSize;
+  editableText.style.fontSize = font.fontSize + "px";
   editableText.style.outline = "none";
 
   fo.appendChild(editableText);
   group.appendChild(fo);
 
 	editableText.charCount = 0;
+	editableText.parent = parent;
 
 	//When user presses enter, leave the text box and close soft keyboard.
 	// When pressing delete or backspace, decrease the char count.
   editableText.addEventListener("keydown", function(event) {
 		//Use of keyCode is depricated, but necessary for old iPads at least
-    if (event.code == 'Enter' || event.keyCode === 13) { //enter
+    if (FinchBlox && (event.code == 'Enter' || event.keyCode === 13)) { //enter
       this.blur();
 			if (GuiElements.isPWA && FBPopup.currentPopup != null) {
 				FBPopup.currentPopup.confirm()
@@ -485,18 +489,21 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group) {
     if (event.code == 'Delete' || event.code == 'Backspace' ||
       event.keyCode === 46 || event.keyCode === 8) { //delete or backspace
       this.charCount--;
+			if (this.parent != null) { this.parent.update() }
     }
 	});
 
-	//Keep track of the characters typed and limit total to 24.
+	//Keep track of the characters typed and limit total to 24 for FinchBlox.
 	// https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
 	editableText.addEventListener('keypress', function(event) {
 		//console.log("pressed a key count=" + this.charCount);
-		if (this.charCount > 24) {
+		if (this.charCount > 24 && FinchBlox) {
 			event.preventDefault();
 		} else {
 			this.charCount++;
 		}
+
+		if (this.parent != null) { this.parent.update() }
 	});
 
 	//When focused, move cursor to the end of the content
@@ -517,6 +524,11 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group) {
         range.select();//Select the range (make it the visible selection
     }
   }
+
+	editableText.onblur = function() {
+		if (Comment.isEditingText) { Comment.isEditingText = false }
+		if (this.parent != null) { this.parent.update() }
+	}
 
 	return editableText
 }
