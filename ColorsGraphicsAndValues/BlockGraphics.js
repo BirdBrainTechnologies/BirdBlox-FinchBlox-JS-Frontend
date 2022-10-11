@@ -948,7 +948,7 @@ BlockGraphics.update.blockActive = function(path, category, returnsValue, active
  * @param {boolean} isSlot
  * @return {string}
  */
-BlockGraphics.buildPath.highlight = function(x, y, width, height, type, isSlot) {
+BlockGraphics.buildPath.highlight = function(x, y, width, height, type, isSlot, isComment) {
 	const bG = BlockGraphics.highlight;
 	let pathD;
 	const hX = x - bG.margin;
@@ -968,6 +968,18 @@ BlockGraphics.buildPath.highlight = function(x, y, width, height, type, isSlot) 
 		case 3:
 			pathD = BlockGraphics.buildPath.string(hX, hY, hWidth, hHeight);
 			break;
+	}
+	if (isComment) {
+		switch(type) {
+			case 0:
+				pathD = "";
+				pathD += "m " + x + "," + y + " ";
+				//pathD += BlockGraphics.command.path2;
+				pathD += "l 0," + height//(height - BlockGraphics.command.extraHeight);
+				//pathD += BlockGraphics.command.path3;
+				break;
+		}
+		console.log("Built comment highlight: " + pathD)
 	}
 	return pathD;
 };

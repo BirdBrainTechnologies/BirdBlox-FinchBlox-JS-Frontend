@@ -65,7 +65,7 @@ function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Comm
   //For FinchBlox. Keep a reference to a blockButton if there is one for saving.
   this.blockButton = null;
 
-  this.comment = null;
+  this.commentID = null;
 }
 
 /**
@@ -736,7 +736,25 @@ Block.prototype.findBestFit = function(moveManager) {
 				fit.dist = dist;
 			}
 		}
-	}
+	} else if (move.comment) {
+    console.log("checking a block")
+    let snap = BlockGraphics.command.snap; //Load snap bounding box
+    let boxLeft = x + width - snap.left
+    let boxTop = y - snap.top
+    let boxW = snap.left + snap.right
+    let boxH = snap.top + height + snap.bottom
+    let success = CodeManager.move.pInRange(move.topX, move.topY, boxLeft, boxTop, boxW, boxH);
+    if (success) {
+      let xDist = move.topX - x; //If it does, compute the distance with the distance formula.
+			let yDist = move.topY - (y + height);
+      let dist = xDist * xDist + yDist * yDist; //Technically this is the distance^2.
+			if (!fit.found || dist < fit.dist) { //See if this fit is closer than the current best fit.
+				fit.found = true; //If so, save it and other helpful infromation.
+				fit.bestFit = this;
+				fit.dist = dist;
+			}
+    }
+  }
 	if (this.hasBlockSlot1) { //Pass the message on recursively.
 		this.blockSlot1.findBestFit(moveManager);
 	}
@@ -752,9 +770,13 @@ Block.prototype.findBestFit = function(moveManager) {
 /**
  * Adds an indicator showing that the moving BlockStack will snap onto this Block if released.
  * The indicator is a different color/shape depending on the Block's type and if it is running.
+ * If it is a Comment snaping onto a block instead of a BlockStack, the highlight is modified.
+ * @param {boolean} forComment  - True if it is a Comment that will snap on
  */
-Block.prototype.highlight = function() {
-	if (this.bottomOpen) {
+Block.prototype.highlight = function(forComment) {
+  if (forComment) {
+    Highlighter.highlight(this.relToAbsX(this.width), this.getAbsY(), this.width, this.height, 0, false, this.isGlowing, true);
+	} else if (this.bottomOpen) {
     if (FinchBlox) {
       Highlighter.highlight(this.relToAbsX(this.width), this.getAbsY(), this.width, this.height, 0, false, this.isGlowing);
     } else {
@@ -1459,7 +1481,6 @@ Block.prototype.addComment = function(c) {
   if (c == null) {
     c = new Comment()
   }
-  this.comment = c
   c.updateParent(this)
 }
 

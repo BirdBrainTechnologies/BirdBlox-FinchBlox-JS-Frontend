@@ -31,11 +31,12 @@ Highlighter.createPath = function() {
  * @param {boolean} isSlot - Whether the thing being highlighted is a Slot
  * @param {boolean} isGlowing - Whether the thing being highlighted already has a white outline (since it is running)
  *                              and should therefore by highlighted in black
+ * @param {boolean} isComment - Whether the instigator is a Comment
  */
-Highlighter.highlight = function(x, y, width, height, type, isSlot, isGlowing) {
+Highlighter.highlight = function(x, y, width, height, type, isSlot, isGlowing, isComment) {
 	const myX = CodeManager.dragAbsToRelX(x);
 	const myY = CodeManager.dragAbsToRelX(y);
-	const pathD = BlockGraphics.buildPath.highlight(myX, myY, width, height, type, isSlot);
+	const pathD = BlockGraphics.buildPath.highlight(myX, myY, width, height, type, isSlot, isComment);
 	Highlighter.path.setAttributeNS(null, "d", pathD);
 	if (!Highlighter.visible) {
 		GuiElements.layers.highlight.appendChild(Highlighter.path);

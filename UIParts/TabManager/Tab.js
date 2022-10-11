@@ -19,6 +19,8 @@ function Tab() {
 	TabManager.addTab(this);
 	// List of stacks to pass messages to
 	this.stackList = [];
+  //List of comments
+  this.commentList = [];
 	this.isRunning = false;
 	this.scrolling = false;
 	this.zooming = false;

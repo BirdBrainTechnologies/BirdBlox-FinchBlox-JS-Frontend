@@ -367,6 +367,16 @@ TouchReceiver.multiTouchMove = function(e) {
               mto.blockMoveManager = new BlockMoveManager(mto.target, x, y);
     				}
     			}
+
+          if (mto.targetType === "comment") {
+            let x = TR.getMultiX(touch);
+    				let y = TR.getMultiY(touch);
+    				if (mto.commentMoveManager) {
+    					mto.commentMoveManager.update(x, y);
+    				} else {
+              mto.commentMoveManager = new CommentMoveManager(mto.target, x, y);
+    				}
+          }
         }
       }
     }
@@ -389,6 +399,13 @@ TouchReceiver.multiTouchEnd = function(e) {
       				mto.blockMoveManager = null;
       			} else {   // The stack was tapped, so it should run.
       				mto.target.stack.startRun();
+      			}
+          } else if (mto.targetType === "comment") {
+            if (mto.commentMoveManager != null) {
+      				mto.commentMoveManager.end();
+      				mto.commentMoveManager = null;
+      			} else {  //the comment was tapped
+      				mto.target.editText();
       			}
       		} else if (mto.targetType === "slot") {
       			// If a Slot is pressed and released without dragging, it is time to edit its value.
@@ -738,9 +755,13 @@ TouchReceiver.touchmove = function(e) {
 			}
       // If the user drags a Comment
       if (TR.targetType === "comment") {
-        console.log("dragging comment")
-        TR.target.dragging = true;
-        TR.target.drag(TR.getX(e), TR.getY(e));
+        const x = TR.getX(e)
+        const y = TR.getY(e)
+        if (TR.commentMoveManager) {
+          TR.commentMoveManager.update(x, y);
+        } else {
+          TR.commentMoveManager = new CommentMoveManager(TR.target, x, y);
+        }
       }
 		}
 	}
@@ -840,10 +861,10 @@ TouchReceiver.touchend = function(e) {
       //TR.target.drop(TR.getX(e));
       TR.target.drop();
     } else if (TR.targetType === "comment") {
-      if (TR.target.dragging) {
-        TR.target.dragging = false
-      } else {
-        console.log("TR.touchend editText")
+      if (TR.commentMoveManager != null) {
+        TR.commentMoveManager.end();
+        TR.commentMoveManager = null;
+      } else { //the comment was tapped
         TR.target.editText()
       }
     }

@@ -23,6 +23,23 @@ UndoManager.setUndoButton = function(button) {
 };
 
 /**
+ * Deletes a Comment and adds it to the undo stack.  If the stack is larger
+ * than the limit, the last item is removed.
+ * @param stack
+ */
+UndoManager.deleteComment = function(comment) {
+	const UM = UndoManager;
+  const doc = XmlWriter.newDoc("undoData");
+  var commentData = comment.createXml(doc);
+  comment.delete()
+  UM.undoStack.push(commentData);
+	while(UM.undoStack.length > UM.undoLimit) {
+		UM.undoStack.shift();
+	}
+	UM.updateButtonEnabled();
+}
+
+/**
  * Deletes a BlockStack and adds it to the undo stack.  If the stack is larger
  * than the limit, the last item is removed.
  * @param stack

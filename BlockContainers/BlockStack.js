@@ -152,6 +152,22 @@ BlockStack.prototype.findBestFit = function(moveManager) {
   if (moveManager != null) {
     move = moveManager.move
   }
+  // If the thing being moved is a comment...
+  if (move.comment) {
+    console.log("looking for best fit for a comment.")
+    // Only check recursively if the corner of the moving BlockStack falls within this BlockStack's snap box.
+    const snap = BlockGraphics.command.snap
+		let absCx = this.x
+		let absCy = this.y - snap.top
+		let absW = this.getWidth() + snap.left + snap.right
+		let absH = this.getHeight() + snap.bottom
+    console.log(move.topX + ", " + move.topY + ", " + absCx + ", " + absCy + ", " + absW + ", " + absH)
+		if (CodeManager.move.pInRange(move.topX, move.topY, absCx, absCy, absW, absH)) {
+      console.log("checking stack's first block.")
+			this.firstBlock.findBestFit(moveManager);
+		}
+  }
+
 	// If this BlockStack is the one being moved, it can't attach to itself.
 	if (move.stack === this) {
 		return;
