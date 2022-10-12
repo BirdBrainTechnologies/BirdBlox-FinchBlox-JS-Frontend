@@ -138,6 +138,9 @@ Tab.prototype.getAbsY = function() {
 };
 
 /* Recursively passed messages.  Each of these function simply calls the function on the Tab's stacks */
+Tab.prototype.findBlockByID = function(request) {
+	this.passRecursively("findBlockByID", request);
+};
 Tab.prototype.findBestFit = function(moveManager) {
 	this.passRecursively("findBestFit", moveManager);
 };
@@ -468,6 +471,8 @@ Tab.prototype.undoDelete = function(stackNode) {
   //if the node is really a tab node, undo delete of each stack within
   if (stackNode.nodeName === "tab") {
     return this.undoDeleteTab(stackNode);
+  } else if (stackNode.nodeName === "comment") {
+    return this.undoDeleteComment(stackNode);
   }
 
 	// The position is randomized slightly to make multiple undos look like a "pile" of blocks, so all are visible
@@ -502,6 +507,12 @@ Tab.prototype.undoDeleteTab = function(tabNode) {
 		}
 	}
   return success;
+}
+
+Tab.prototype.undoDeleteComment = function(commentNode) {
+  console.log(commentNode)
+  const comment = Comment.importXml(commentNode, this)
+  return true
 }
 
 /**

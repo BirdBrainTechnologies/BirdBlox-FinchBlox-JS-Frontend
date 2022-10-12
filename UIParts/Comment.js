@@ -7,14 +7,16 @@
  *
  */
 function Comment() {
-  this.id = Comment.count;
-  Comment.count++;
+  //this.id = Comment.count;
+  //Comment.count++;
   this.parent = null //The block this comment is attached to
   //this.draggable = true;
   //this.dragging = false;
   this.edited = false;
   this.x = 0
   this.y = 0
+  this.lastX = 0 //last non-flying location
+  this.lastY = 0
   this.width = 200
   this.height = Comment.font.charHeight + 2*Comment.margin
   this.group = GuiElements.create.group(0, 0);
@@ -55,10 +57,40 @@ Comment.writeToXml = function(xmlDoc) {
 
 }
 
+Comment.importXml = function(commentNode, tab) {
+  const comment = new Comment()
+  comment.x = XmlWriter.getAttribute(commentNode, "x", 0, true);
+	comment.y = XmlWriter.getAttribute(commentNode, "y", 0, true);
+  //comment.id = XmlWriter.getAttribute(commentNode, "id", 0, true);
+  comment.editableText.textContent = XmlWriter.getAttribute(commentNode, "text", "", false);
+  comment.edited = true
+
+  const parentID = XmlWriter.getAttribute(commentNode, "id", 0, true);
+  //const hasParent = XmlWriter.getAttribute(commentNode, "hasParent", 0, false);
+  //console.log("importing xml: " + comment.x + ", " + comment.y + ", " + comment.id + ", " + comment.editableText.textContent + ", " + hasParent)
+  console.log("importing xml: " + comment.x + ", " + comment.y + ", " + parentID + ", " + comment.editableText.textContent)
+  if (parentID > -1) {
+    const request = {}
+    request.id = parentID
+    request.block = null
+    tab.findBlockByID(request)
+
+    if (request.block != null) {
+      comment.updateParent(request.block)
+    } else {
+      console.error("This comment should have a parent (" + parentID + "), but it wasn't found")
+    }
+  } else {
+    comment.tab = tab
+    comment.tab.mainG.appendChild(comment.group)
+    comment.updateParent()
+  }
+}
+
 Comment.prototype.updateParent = function(newParent) {
-console.log("updating parent to " + newParent)
+
   if (this.parent != null) {
-    this.parent.commentID = null;
+    //this.parent.commentID = null;
     this.group.remove()
     if (this.line != null) {
       this.line.remove()
@@ -66,8 +98,8 @@ console.log("updating parent to " + newParent)
     }
 
     if (newParent == null) { //moving from a block to the tab
-      this.x = this.parent.stack.x + this.x
-      this.y = this.parent.stack.y + this.y
+      //this.x = this.parent.stack.x + this.x
+      //this.y = this.parent.stack.y + this.y
       this.tab.mainG.appendChild(this.group)
     }
   }
@@ -75,7 +107,7 @@ console.log("updating parent to " + newParent)
   this.parent = newParent;
 
   if (newParent != null) {
-    this.parent.commentID = this.id;
+    //this.parent.commentID = this.id;
     const newTab = newParent.stack.getTab()
     if (this.tab != null && this.tab != newTab) {
       const index = this.tab.commentList.indexOf(this)
@@ -115,20 +147,23 @@ Comment.prototype.update = function() {
 
   if (height != this.height - 2*Comment.margin) {
     this.height = height + 2*Comment.margin
-    console.log("updating height to " + this.height)
     GuiElements.update.rect(this.bgRect, 0, 0, this.width, this.height)
-
     this.editableText.parentNode.setAttribute('height', height);
   }
 
-  if (this.parent != null && this.height > this.parent.height) {
+  if (this.parent != null && !this.flying) {
     let maxWidth = this.parent.width
     let totalHeight = this.parent.height
     let nextBlock = this.parent.nextBlock
-    while (nextBlock != null && totalHeight < this.height) {
-      maxWidth = Math.max(maxWidth, nextBlock.width)
-      totalHeight = totalHeight + nextBlock.height
-      nextBlock = nextBlock.nextBlock
+    if (this.parent.parent != null && this.parent.parent.isSlot) {
+      nextBlock = this.parent.parent.parent.nextBlock
+    }
+    if (this.height > this.parent.height) {
+      while (nextBlock != null && totalHeight < this.height) {
+        maxWidth = Math.max(maxWidth, nextBlock.width)
+        totalHeight = totalHeight + nextBlock.height
+        nextBlock = nextBlock.nextBlock
+      }
     }
     this.x = maxWidth + 2*Comment.margin
     this.y = 0
@@ -137,24 +172,18 @@ Comment.prototype.update = function() {
   }
 
   GuiElements.move.group(this.group, this.x, this.y)
+  if (!this.flying) {
+    this.lastX = this.x
+    this.lastY = this.y
+  }
 }
 
 Comment.prototype.move = function(x, y) {
   this.x = x;
   this.y = y;
-
-  /*if (this.parent != null) {
-    this.updateParent()
-  } else {
-    this.update()
-  }*/
-  if (this.parent != null) {
-    console.error("COMMENT SHOULD NOT BE MOVING WITH A PARENT")
-  }
+  console.log("move " + x + " " + y)
   this.update()
 }
-
-
 
 Comment.prototype.delete = function() {
   if (this.parent != null) { this.updateParent() }
@@ -170,7 +199,12 @@ Comment.prototype.delete = function() {
  */
 Comment.prototype.fly = function() {
   //Disconnect from current parent if there is one
-  if (this.parent != null) { this.updateParent() }
+  //if (this.parent != null) { this.updateParent() }
+  if (this.parent != null) {
+    this.x = this.parent.stack.x + this.x
+    this.y = this.parent.stack.y + this.y
+    if (this.line != null) { this.line.remove() }
+  }
   // Remove group from Tab (visually only).
 	this.group.remove();
 	// Add group to drag layer.
@@ -242,10 +276,11 @@ Comment.prototype.relToAbsY = function(y) {
  */
 Comment.prototype.createXml = function(xmlDoc) {
   const commentData = XmlWriter.createElement(xmlDoc, "comment");
-	XmlWriter.setAttribute(commentData, "x", this.x);
-	XmlWriter.setAttribute(commentData, "y", this.y);
+	XmlWriter.setAttribute(commentData, "x", this.lastX);
+	XmlWriter.setAttribute(commentData, "y", this.lastY);
   XmlWriter.setAttribute(commentData, "text", this.editableText.textContent);
-  XmlWriter.setAttribute(commentData, "id", this.id);
+  XmlWriter.setAttribute(commentData, "id", this.parent != null ? this.parent.id : -1);
   XmlWriter.setAttribute(commentData, "hasParent", (this.parent != null));
+  console.log(commentData)
 	return commentData;
 }

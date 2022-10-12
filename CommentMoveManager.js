@@ -91,7 +91,9 @@ CommentMoveManager.prototype.end = function() {
       console.log("fit found!")
       move.comment.updateParent(fit.bestFit)
 			Sound.playSnap();
-		}
+		} else {
+      move.comment.updateParent()
+    }
 	}
   SaveManager.markEdited();
 	Highlighter.hide();   // Hide any existing highlight.
@@ -117,7 +119,6 @@ CommentMoveManager.prototype.interrupt = function() {
  * All results are stored in CommentMoveManager.fit.  Nothing is returned.
  */
 CommentMoveManager.prototype.findBestFit = function() {
-  console.log("Find best fit")
 	const fit = this.fit;   // shorthand
 	fit.found = false;   // Have any matching slot/block been found?
 	fit.bestFit = null;   // Slot/Block that is closest to the item?
