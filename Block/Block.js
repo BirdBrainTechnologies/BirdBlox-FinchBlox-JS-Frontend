@@ -741,7 +741,7 @@ Block.prototype.findBestFit = function(moveManager) {
 			}
 		}
 	} else if (move.comment) {
-    console.log("checking a block")
+    //console.log("checking a block")
     let snap = BlockGraphics.command.snap; //Load snap bounding box
     let boxLeft = x + width - snap.left
     let boxTop = y - snap.top
@@ -1159,6 +1159,7 @@ Block.prototype.writeToXml = function(xmlDoc, xmlBlocks) {
 Block.prototype.createXml = function(xmlDoc) {
 	let block = XmlWriter.createElement(xmlDoc, "block");
 	XmlWriter.setAttribute(block, "type", this.blockTypeName);
+  XmlWriter.setAttribute(block, "id", this.id);
 	let slots = XmlWriter.createElement(xmlDoc, "slots");
 	// Indicates that we are using the new saving system, which uses keys assigned to each Slot to identify
 	// which data goes to which Slot.  The old system uses the order of appearance in the XML to match data to Slots
@@ -1220,6 +1221,13 @@ Block.importXml = function(blockNode) {
  * @param {Node} blockNode - The node to copy the data from
  */
 Block.prototype.copyFromXml = function(blockNode) {
+  let id = XmlWriter.getAttribute(blockNode, "id");
+  if (id != null) {
+    this.id = id
+    if (id > Block.count) {
+      Block.count = id
+    }
+  }
 	let slotsNode = XmlWriter.findSubElement(blockNode, "slots");
 	// Copy the data about the Slots into the Block.
 	this.importSlotXml(slotsNode);

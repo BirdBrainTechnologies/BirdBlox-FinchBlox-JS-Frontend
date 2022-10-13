@@ -974,12 +974,9 @@ BlockGraphics.buildPath.highlight = function(x, y, width, height, type, isSlot, 
 			case 0:
 				pathD = "";
 				pathD += "m " + x + "," + y + " ";
-				//pathD += BlockGraphics.command.path2;
-				pathD += "l 0," + height//(height - BlockGraphics.command.extraHeight);
-				//pathD += BlockGraphics.command.path3;
+				pathD += "l 0," + height;
 				break;
 		}
-		console.log("Built comment highlight: " + pathD)
 	}
 	return pathD;
 };

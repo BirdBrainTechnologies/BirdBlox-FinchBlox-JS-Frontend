@@ -186,6 +186,7 @@ TouchReceiver.touchstart = function(e, preventD) {
 		e.preventDefault();
 		return false;
 	}
+  if (Comment.currentlyEditing) { Comment.currentlyEditing.editableText.blur() }
 	if (preventD == null) {
 		preventD = true;
 	}
@@ -299,6 +300,7 @@ TouchReceiver.multiTouchStart = function(e, target, targetType) {
   const TR = TouchReceiver;
   e.preventDefault();
   if (!TR.interactionEnabeled) { return; }
+  if (Comment.currentlyEditing) { Comment.currentlyEditing.editableText.blur() }
 
   Overlay.closeOverlays();
   for (var i = 0; i < e.changedTouches.length; i++) {

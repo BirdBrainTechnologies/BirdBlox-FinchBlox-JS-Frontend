@@ -16,8 +16,8 @@ function CommentMoveManager(comment, x, y) {
   Overlay.closeOverlays();   // Close any visible overlays.
 
 	comment.fly();   // Make the Comment fly (disconnects from current block and moves it into the drag layer).
-	move.bottomX = comment.relToAbsX(comment.width);   // Store the BlockStack's dimensions.
-	move.bottomY = comment.relToAbsY(comment.height);
+	//move.bottomX = comment.relToAbsX(comment.width);   // Store the Comment's dimensions.
+	//move.bottomY = comment.relToAbsY(comment.height);
 
 	move.touchX = x;   // Store coords
 	move.touchY = y;
@@ -25,8 +25,8 @@ function CommentMoveManager(comment, x, y) {
 	move.offsetY = comment.getAbsY() - y;
 	move.comment = comment;
 
-  move.topX = 0;   // The top-left corner's x coord of the BlockStack being moved.
-	move.topY = 0;   // The top-left corner's y-coord of the BlockStack being moved.
+  move.topX = 0;   // The top-left corner's x coord of the Comment being moved.
+	move.topY = 0;   // The top-left corner's y-coord of the Comment being moved.
   this.move = move;
   // Stores information used when determine which slot is closest to the moving stack.
 	this.fit = {};
@@ -45,8 +45,8 @@ CommentMoveManager.prototype.update = function(x, y) {
 	move.touchY = y;
 	move.topX = move.offsetX + x;
 	move.topY = move.offsetY + y;
-	move.bottomX = move.comment.relToAbsX(move.comment.width);
-	move.bottomY = move.comment.relToAbsY(move.comment.height);
+	//move.bottomX = move.comment.relToAbsX(move.comment.width);
+	//move.bottomY = move.comment.relToAbsY(move.comment.height);
 	// Move the Comment to the correct location.
 	move.comment.move(CodeManager.dragAbsToRelX(move.topX), CodeManager.dragAbsToRelY(move.topY));
 	// If the Comment overlaps with the BlockPalette then no slots are highlighted.
@@ -71,14 +71,13 @@ CommentMoveManager.prototype.update = function(x, y) {
  * Drops the Comment that is currently moving and connects it to the Block that fits it.
  */
 CommentMoveManager.prototype.end = function() {
-  console.log("CommentMoveManager end")
 	const move = this.move;   // shorthand
 	const fit = this.fit;   // shorthand
 
 	move.topX = move.offsetX + move.touchX;
 	move.topY = move.offsetY + move.touchY;
-	move.bottomX = move.comment.relToAbsX(move.comment.width);
-	move.bottomY = move.comment.relToAbsY(move.comment.height);
+	//move.bottomX = move.comment.relToAbsX(move.comment.width);
+	//move.bottomY = move.comment.relToAbsY(move.comment.height);
 	// If the BlockStack overlaps with the BlockPalette, delete it.
   var shouldDelete = BlockPalette.isStackOverPalette(move.touchX, move.touchY);
 	if (shouldDelete) {
@@ -88,7 +87,6 @@ CommentMoveManager.prototype.end = function() {
 		this.findBestFit();
     move.comment.land();
 		if (fit.found) {
-      console.log("fit found!")
       move.comment.updateParent(fit.bestFit)
 			Sound.playSnap();
 		} else {

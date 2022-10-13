@@ -157,14 +157,14 @@ BlockStack.prototype.findBestFit = function(moveManager) {
   }
   // If the thing being moved is a comment...
   if (move.comment) {
-    // Only check recursively if the corner of the moving BlockStack falls within this BlockStack's snap box.
+    // Check if the corner of the moving Comment falls within this BlockStack's
+    // bounding box plus snap region.
     const snap = BlockGraphics.command.snap
-		let absCx = this.x
-		let absCy = this.y - snap.top
-		let absW = this.getWidth() + snap.left + snap.right
-		let absH = this.getHeight() + snap.bottom
+		let absCx = this.relToAbsX(this.dim.rx1);
+		let absCy = this.relToAbsY(this.dim.ry1 - snap.top);
+		let absW = this.relToAbsX(this.dim.rw + snap.left + snap.right) - absCx;
+		let absH = this.relToAbsY(this.dim.rh + snap.bottom) - absCy;
 		if (CodeManager.move.pInRange(move.topX, move.topY, absCx, absCy, absW, absH)) {
-      console.log("checking stack's first block.")
 			this.firstBlock.findBestFit(moveManager);
 		}
   }

@@ -49,7 +49,7 @@ Comment.setGlobals = function() {
   Comment.margin = 10
   Comment.lineHeight = 2 //Height of line connecting comment to block.
 
-  Comment.isEditingText = false
+  Comment.currentlyEditing = null //Store reference to comment that is being edited
   Comment.count = 0;
 }
 
@@ -138,7 +138,7 @@ Comment.prototype.editText = function() {
     this.edited = true
   }
 
-  Comment.isEditingText = true;
+  Comment.currentlyEditing = this;
   this.editableText.focus();
 }
 
@@ -181,7 +181,6 @@ Comment.prototype.update = function() {
 Comment.prototype.move = function(x, y) {
   this.x = x;
   this.y = y;
-  console.log("move " + x + " " + y)
   this.update()
 }
 
@@ -201,8 +200,8 @@ Comment.prototype.fly = function() {
   //Disconnect from current parent if there is one
   //if (this.parent != null) { this.updateParent() }
   if (this.parent != null) {
-    this.x = this.parent.stack.x + this.x
-    this.y = this.parent.stack.y + this.y
+    this.x = this.parent.stack.x + this.parent.x + this.x
+    this.y = this.parent.stack.y + this.parent.y + this.y
     if (this.line != null) { this.line.remove() }
   }
   // Remove group from Tab (visually only).
@@ -225,8 +224,10 @@ Comment.prototype.land = function() {
 	const absX = this.getAbsX(); // Get current location on screen.
 	const absY = this.getAbsY();
 	this.flying = false;
-	// Move to ensure that position on screen does not change.
-	this.move(this.tab.absToRelX(absX), this.tab.absToRelY(absY));
+	// Update coordinates to ensure that position on screen does not change.
+	// Actual move will take place after new parent is determined.
+  this.x = this.tab.absToRelX(absX)
+  this.y = this.tab.absToRelY(absY)
   //this.tab.updateArrows();
 }
 

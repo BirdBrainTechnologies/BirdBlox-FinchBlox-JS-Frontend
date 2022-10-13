@@ -426,6 +426,11 @@ Tab.prototype.createXml = function(xmlDoc, skipStartBlock) {
 		if (stack != null) { stacks.appendChild(stack); }
 	}
 	tab.appendChild(stacks);
+  const comments = XmlWriter.createElement(xmlDoc, "comments")
+  for (let i = 0; i < this.commentList.length; i++) {
+    let comment = this.commentList[i].createXml(xmlDoc)
+    comments.appendChild(comment)
+  }
 	return tab;
 };
 
@@ -450,6 +455,13 @@ Tab.importXml = function(tabNode) {
 			BlockStack.importXml(stackNodes[i], tab);
 		}
 	}
+  const commentsNode = XmlWriter.findSubElement(tabNode, "comments");
+  if (commentsNode != null) {
+    const commentNodes = XmlWriter.findSubElements(commentsNode, "comment");
+    for (let i = 0; i < commentNodes.length; i++) {
+      Comment.importXml(commentNodes[i], tab)
+    }
+  }
 	tab.updateArrows();
 	return tab;
 };
