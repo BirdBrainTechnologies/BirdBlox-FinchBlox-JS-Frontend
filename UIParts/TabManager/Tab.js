@@ -88,6 +88,14 @@ Tab.prototype.clear = function() {
 };
 
 /**
+ * Updates the positioning of all comments. Called after a new block is added
+ * to a stack.
+ */
+Tab.prototype.updateComments = function() {
+  this.commentList.forEach(function(comment) { comment.update(); });
+}
+
+/**
  * Adds a new start block to the tab. Used in FinchBlox.
  */
 Tab.prototype.addStartBlock = function() {
@@ -522,7 +530,6 @@ Tab.prototype.undoDeleteTab = function(tabNode) {
 }
 
 Tab.prototype.undoDeleteComment = function(commentNode) {
-  console.log(commentNode)
   const comment = Comment.importXml(commentNode, this)
   return true
 }

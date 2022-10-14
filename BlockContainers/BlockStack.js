@@ -407,6 +407,7 @@ BlockStack.prototype.snap = function(block) {
 	oldG.remove();
 
 	this.updateDim();
+  this.tab.updateComments()
   this.startRunIfAutoExec();
 };
 
@@ -486,6 +487,68 @@ BlockStack.prototype.remove = function() {
 	this.tab.removeStack(this);
 	this.tab.updateArrows();
 };
+
+/**
+ * Deletes all the comments attached to blocks in this stack. Called when
+ * deleting the stack.
+ */
+BlockStack.prototype.deleteComments = function() {
+  let nextBlock = this.firstBlock
+  while (nextBlock != null) {
+    if (nextBlock.comment != null) {
+      UndoManager.deleteComment(nextBlock.comment)
+    }
+    nextBlock = nextBlock.nextBlock
+  }
+}
+
+/**
+ * Arranges the comments attached to this stack so that none overlap
+ */
+BlockStack.prototype.arrangeComments = function() {
+  let block = this.firstBlock
+  let commentsPlaced = []
+  while (block != null) {
+    if (block.comment != null) {
+      let cmnt = block.comment
+      let maxWidth = block.width
+      let totalHeight = block.height
+      if (cmnt.height > block.height) {
+        let nextBlock = block.nextBlock
+        if (block.parent != null && block.parent.isSlot) {
+          nextBlock = block.parent.parent.nextBlock
+        }
+        while (nextBlock != null && totalHeight < cmnt.height) {
+          maxWidth = Math.max(maxWidth, nextBlock.width)
+          totalHeight = totalHeight + nextBlock.height
+          nextBlock = nextBlock.nextBlock
+        }
+      }
+      cmnt.x = maxWidth + 2*Comment.margin
+      cmnt.y = 0
+      commentsPlaced.forEach(function(placedComment) {
+        let x1 = cmnt.x
+        let y1 = cmnt.parent.y
+        let w1 = cmnt.width
+        let h1 = cmnt.height
+        let x2 = placedComment.x
+        let y2 = placedComment.parent.y
+        let w2 = placedComment.width
+        let h2 = placedComment.height
+        if (CodeManager.move.rInRange(x1, y1, w1, h1, x2, y2, w2, h2)) {
+          maxWidth = x2 + w2
+          cmnt.x = maxWidth + 2*Comment.margin
+        }
+      });
+      GuiElements.move.group(cmnt.group, cmnt.x, cmnt.y)
+
+      const lineWidth = 2*Comment.margin + maxWidth - block.width
+      GuiElements.update.rect(cmnt.line, cmnt.lineX, cmnt.lineY, lineWidth, Comment.lineHeight)
+      commentsPlaced.push(cmnt)
+    }
+    block = block.nextBlock
+  }
+}
 
 /**
  * Passes message to first Block in BlockStack that the flag was tapped.

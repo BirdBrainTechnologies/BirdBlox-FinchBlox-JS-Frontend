@@ -59,6 +59,7 @@ UndoManager.deleteStack = function(stack) {
 	} else {
     stackData = stack.createXml(doc);
   }
+  stack.deleteComments();
 	stack.remove();
 	UM.undoStack.push(stackData);
 	while(UM.undoStack.length > UM.undoLimit) {

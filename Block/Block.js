@@ -65,7 +65,7 @@ function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Comm
   //For FinchBlox. Keep a reference to a blockButton if there is one for saving.
   this.blockButton = null;
 
-  //this.commentID = null;
+  this.comment = null;
   this.id = Block.count;
   Block.count++;
 }
@@ -842,6 +842,8 @@ Block.prototype.snap = function(block) {
 		this.stack.updateDim();
 		//Update the arros on the sides of the screen in case the new block now extends beyond the edge
 		this.stack.tab.updateArrows();
+    //Update comment positioning to accomidate new blocks if necessary.
+    this.stack.tab.updateComments();
 	}
 };
 
@@ -1488,8 +1490,9 @@ Block.prototype.colorTopHalf = function(color) {
  * @param {Comment} c - Comment to add, null to add a new comment
  */
 Block.prototype.addComment = function(c) {
-  if (this.commentID != null) {
-    console.error("Adding a comment to block already associated with id " + this.commentID)
+  if (this.comment != null) {
+    console.error("Adding a comment to block that already has one")
+    return
   }
 
   if (c == null) {
@@ -1499,9 +1502,7 @@ Block.prototype.addComment = function(c) {
 }
 
 Block.prototype.findBlockByID = function(request) {
-  console.log("findBlockByID ID=" + request.id + " this.id=" + this.id)
   if (request.id == this.id) {
-    console.log("FOUND IT")
     request.block = this
   } else if (this.nextBlock != null) {
     this.nextBlock.findBlockByID(request)

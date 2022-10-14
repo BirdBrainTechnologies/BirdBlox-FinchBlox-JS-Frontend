@@ -89,8 +89,13 @@ Comment.importXml = function(commentNode, tab) {
 
 Comment.prototype.updateParent = function(newParent) {
 
+  if (newParent != null && newParent.comment != null && newParent.comment != this) {
+    //Prevent attaching a comment to a block that already has one.
+    newParent = null
+  }
+
   if (this.parent != null) {
-    //this.parent.commentID = null;
+    this.parent.comment = null;
     this.group.remove()
     if (this.line != null) {
       this.line.remove()
@@ -107,17 +112,19 @@ Comment.prototype.updateParent = function(newParent) {
   this.parent = newParent;
 
   if (newParent != null) {
-    //this.parent.commentID = this.id;
+    newParent.comment = this
+
     const newTab = newParent.stack.getTab()
-    if (this.tab != null && this.tab != newTab) {
-      const index = this.tab.commentList.indexOf(this)
-      this.tab.commentList.splice(index, 1)
-      console.log("adding the comment to a new tab")
+    if (this.tab != newTab) {
+      if (this.tab != null) {
+        const index = this.tab.commentList.indexOf(this)
+        this.tab.commentList.splice(index, 1)
+        console.log("moving the comment to a new tab")
+      }
       this.tab = newTab
       this.tab.commentList.push(this)
-    } else if (this.tab == null) {
-      this.tab = newTab
     }
+
     this.x = this.parent.width + 2*Comment.margin
     this.y = 0
     this.parent.group.appendChild(this.group)
@@ -152,7 +159,8 @@ Comment.prototype.update = function() {
   }
 
   if (this.parent != null && !this.flying) {
-    let maxWidth = this.parent.width
+    this.parent.stack.arrangeComments()
+    /*let maxWidth = this.parent.width
     let totalHeight = this.parent.height
     let nextBlock = this.parent.nextBlock
     if (this.parent.parent != null && this.parent.parent.isSlot) {
@@ -171,7 +179,11 @@ Comment.prototype.update = function() {
     GuiElements.update.rect(this.line, this.lineX, this.lineY, lineWidth, Comment.lineHeight)
   }
 
-  GuiElements.move.group(this.group, this.x, this.y)
+  GuiElements.move.group(this.group, this.x, this.y) */
+
+  } else {
+    GuiElements.move.group(this.group, this.x, this.y)
+  }
   if (!this.flying) {
     this.lastX = this.x
     this.lastY = this.y
@@ -198,7 +210,6 @@ Comment.prototype.delete = function() {
  */
 Comment.prototype.fly = function() {
   //Disconnect from current parent if there is one
-  //if (this.parent != null) { this.updateParent() }
   if (this.parent != null) {
     this.x = this.parent.stack.x + this.parent.x + this.x
     this.y = this.parent.stack.y + this.parent.y + this.y
@@ -282,6 +293,5 @@ Comment.prototype.createXml = function(xmlDoc) {
   XmlWriter.setAttribute(commentData, "text", this.editableText.textContent);
   XmlWriter.setAttribute(commentData, "id", this.parent != null ? this.parent.id : -1);
   XmlWriter.setAttribute(commentData, "hasParent", (this.parent != null));
-  console.log(commentData)
 	return commentData;
 }

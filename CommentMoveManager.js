@@ -58,7 +58,7 @@ CommentMoveManager.prototype.update = function(x, y) {
 		BlockPalette.hideTrash();
 		// The Block which fits it best (if any) will be stored in this.fit.bestFit.
 		this.findBestFit();
-		if (this.fit.found) {
+		if (this.fit.found && (this.fit.bestFit.comment == null || this.fit.bestFit.comment == this.move.comment)) {
 			this.fit.bestFit.highlight(true);   // If such a Block exists, highlight it.
 		} else {
 			Highlighter.hide();   // If not, hide any existing highlight.
