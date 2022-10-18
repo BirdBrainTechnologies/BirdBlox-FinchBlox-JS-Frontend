@@ -79,6 +79,8 @@ BlockStack.prototype.updateDim = function() {
 	this.dim.ch = this.dim.cy2 - this.dim.cy1;
 	this.dim.rw = this.dim.rx2 - this.dim.rx1;
 	this.dim.rh = this.dim.ry2 - this.dim.ry1;
+  //Reallign any comments
+  this.arrangeComments();
 };
 
 /**
@@ -407,7 +409,6 @@ BlockStack.prototype.snap = function(block) {
 	oldG.remove();
 
 	this.updateDim();
-  this.tab.updateComments()
   this.startRunIfAutoExec();
 };
 
@@ -542,6 +543,8 @@ BlockStack.prototype.arrangeComments = function() {
       const lineWidth = cmnt.x - block.width
       cmnt.lineX = block.width
       GuiElements.update.rect(cmnt.line, cmnt.lineX, cmnt.lineY, lineWidth, Comment.lineHeight)
+
+      cmnt.setPosition()
       commentsPlaced.push(cmnt)
     }
     return commentsPlaced

@@ -86,6 +86,7 @@ TabManager.createInitialTab = function() {
 TabManager.activateTab = function(tab) {
 	tab.activate();
 	TabManager.activeTab = tab;
+	tab.commentList.forEach(function(comment) { comment.update(); });
 };
 
 /**

@@ -6878,8 +6878,11 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, p
   }
 
 	editableText.onblur = function() {
-		if (this.parent != null) { this.parent.update() }
-		if (Comment.currentlyEditing) { Comment.currentlyEditing = null }
+		if (this.parent != null) {
+			this.parent.update()
+			if (Comment.currentlyEditing) { Comment.currentlyEditing = null }
+			this.parent.setPosition()
+		}
 	}
 
 	return editableText
@@ -15024,13 +15027,10 @@ Comment.importXml = function(commentNode, tab) {
   const comment = new Comment()
   comment.x = XmlWriter.getAttribute(commentNode, "x", 0, true);
 	comment.y = XmlWriter.getAttribute(commentNode, "y", 0, true);
-  //comment.id = XmlWriter.getAttribute(commentNode, "id", 0, true);
-  comment.editableText.textContent = XmlWriter.getAttribute(commentNode, "text", "", false);
+  comment.editableText.innerHTML = XmlWriter.getAttribute(commentNode, "text", "", false);
   comment.edited = true
 
   const parentID = XmlWriter.getAttribute(commentNode, "id", 0, true);
-  //const hasParent = XmlWriter.getAttribute(commentNode, "hasParent", 0, false);
-  //console.log("importing xml: " + comment.x + ", " + comment.y + ", " + comment.id + ", " + comment.editableText.textContent + ", " + hasParent)
   console.log("importing xml: " + comment.x + ", " + comment.y + ", " + parentID + ", " + comment.editableText.textContent)
   if (parentID > -1) {
     const request = {}
@@ -15045,7 +15045,7 @@ Comment.importXml = function(commentNode, tab) {
     }
   } else {
     comment.tab = tab
-    comment.tab.mainG.appendChild(comment.group)
+    //comment.tab.mainG.appendChild(comment.group)
     comment.updateParent()
   }
 }
@@ -15114,16 +15114,23 @@ Comment.prototype.editText = function() {
 }
 
 Comment.prototype.update = function() {
+  const height = this.editableText.offsetHeight
+  //console.log("offset height " + height)
+  if (height == 0) { return } //The comment has not been shown on screen yet.
 
   if (Comment.currentlyEditing == this || !this.updated) {
-    this.updated = true;
-    const height = this.editableText.offsetHeight
-    console.log("offset height " + height)
+
     if (height != this.height - 2*Comment.margin) {
       this.height = height + 2*Comment.margin
       GuiElements.update.rect(this.bgRect, 0, 0, this.width, this.height)
       this.editableText.parentNode.setAttribute('height', height);
       if (this.parent != null) { this.parent.stack.arrangeComments() }
+    }
+
+    if (!this.updated) {
+      this.updated = true;
+      console.log("moving to " + this.x + ", " + this.y)
+      GuiElements.move.group(this.group, this.x, this.y)
     }
   } else if (this.parent != null && !this.flying) {
     this.parent.stack.arrangeComments()
@@ -15131,9 +15138,17 @@ Comment.prototype.update = function() {
     GuiElements.move.group(this.group, this.x, this.y)
   }
 
-  if (!this.flying) {
+  if (!this.flying && Comment.currentlyEditing != this) {
+    this.setPosition()
+  }
+}
+
+Comment.prototype.setPosition = function() {
+  if (this.x != this.lastX || this.y != this.lastY || !Comment.currentlyEditing) {
     this.lastX = this.x
     this.lastY = this.y
+
+    SaveManager.markEdited()
   }
 }
 
@@ -15147,7 +15162,6 @@ Comment.prototype.delete = function() {
   if (this.parent != null) {
     let stack = this.parent.stack
     this.updateParent()
-    //stack.arrangeComments()
   }
   this.group.remove();
   if (this.line != null) { this.line.remove() }
@@ -15238,12 +15252,12 @@ Comment.prototype.relToAbsY = function(y) {
  * @return {Node}
  */
 Comment.prototype.createXml = function(xmlDoc) {
+  console.log("createXml " + this.lastX + ", " + this.lastY + " : " + (this.parent == null))
   const commentData = XmlWriter.createElement(xmlDoc, "comment");
 	XmlWriter.setAttribute(commentData, "x", this.lastX);
 	XmlWriter.setAttribute(commentData, "y", this.lastY);
-  XmlWriter.setAttribute(commentData, "text", this.editableText.textContent);
+  XmlWriter.setAttribute(commentData, "text", this.editableText.innerHTML);
   XmlWriter.setAttribute(commentData, "id", this.parent != null ? this.parent.id : -1);
-  XmlWriter.setAttribute(commentData, "hasParent", (this.parent != null));
 	return commentData;
 }
 
@@ -20763,6 +20777,7 @@ TabManager.createInitialTab = function() {
 TabManager.activateTab = function(tab) {
 	tab.activate();
 	TabManager.activeTab = tab;
+	tab.commentList.forEach(function(comment) { comment.update(); });
 };
 
 /**
@@ -21175,14 +21190,6 @@ Tab.prototype.clear = function() {
 };
 
 /**
- * Updates the positioning of all comments. Called after a new block is added
- * to a stack.
- */
-Tab.prototype.updateComments = function() {
-  this.commentList.forEach(function(comment) { comment.update(); });
-}
-
-/**
  * Adds a new start block to the tab. Used in FinchBlox.
  */
 Tab.prototype.addStartBlock = function() {
@@ -21526,6 +21533,7 @@ Tab.prototype.createXml = function(xmlDoc, skipStartBlock) {
     let comment = this.commentList[i].createXml(xmlDoc)
     comments.appendChild(comment)
   }
+  tab.appendChild(comments);
 	return tab;
 };
 
@@ -24775,6 +24783,8 @@ BlockStack.prototype.updateDim = function() {
 	this.dim.ch = this.dim.cy2 - this.dim.cy1;
 	this.dim.rw = this.dim.rx2 - this.dim.rx1;
 	this.dim.rh = this.dim.ry2 - this.dim.ry1;
+  //Reallign any comments
+  this.arrangeComments();
 };
 
 /**
@@ -25103,7 +25113,6 @@ BlockStack.prototype.snap = function(block) {
 	oldG.remove();
 
 	this.updateDim();
-  this.tab.updateComments()
   this.startRunIfAutoExec();
 };
 
@@ -25238,6 +25247,8 @@ BlockStack.prototype.arrangeComments = function() {
       const lineWidth = cmnt.x - block.width
       cmnt.lineX = block.width
       GuiElements.update.rect(cmnt.line, cmnt.lineX, cmnt.lineY, lineWidth, Comment.lineHeight)
+
+      cmnt.setPosition()
       commentsPlaced.push(cmnt)
     }
     return commentsPlaced
@@ -28501,8 +28512,6 @@ Block.prototype.snap = function(block) {
 		this.stack.updateDim();
 		//Update the arros on the sides of the screen in case the new block now extends beyond the edge
 		this.stack.tab.updateArrows();
-    //Update comment positioning to accomidate new blocks if necessary.
-    this.stack.tab.updateComments();
 	}
 };
 

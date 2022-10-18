@@ -62,13 +62,10 @@ Comment.importXml = function(commentNode, tab) {
   const comment = new Comment()
   comment.x = XmlWriter.getAttribute(commentNode, "x", 0, true);
 	comment.y = XmlWriter.getAttribute(commentNode, "y", 0, true);
-  //comment.id = XmlWriter.getAttribute(commentNode, "id", 0, true);
-  comment.editableText.textContent = XmlWriter.getAttribute(commentNode, "text", "", false);
+  comment.editableText.innerHTML = XmlWriter.getAttribute(commentNode, "text", "", false);
   comment.edited = true
 
   const parentID = XmlWriter.getAttribute(commentNode, "id", 0, true);
-  //const hasParent = XmlWriter.getAttribute(commentNode, "hasParent", 0, false);
-  //console.log("importing xml: " + comment.x + ", " + comment.y + ", " + comment.id + ", " + comment.editableText.textContent + ", " + hasParent)
   console.log("importing xml: " + comment.x + ", " + comment.y + ", " + parentID + ", " + comment.editableText.textContent)
   if (parentID > -1) {
     const request = {}
@@ -83,7 +80,7 @@ Comment.importXml = function(commentNode, tab) {
     }
   } else {
     comment.tab = tab
-    comment.tab.mainG.appendChild(comment.group)
+    //comment.tab.mainG.appendChild(comment.group)
     comment.updateParent()
   }
 }
@@ -152,16 +149,23 @@ Comment.prototype.editText = function() {
 }
 
 Comment.prototype.update = function() {
+  const height = this.editableText.offsetHeight
+  //console.log("offset height " + height)
+  if (height == 0) { return } //The comment has not been shown on screen yet.
 
   if (Comment.currentlyEditing == this || !this.updated) {
-    this.updated = true;
-    const height = this.editableText.offsetHeight
-    console.log("offset height " + height)
+
     if (height != this.height - 2*Comment.margin) {
       this.height = height + 2*Comment.margin
       GuiElements.update.rect(this.bgRect, 0, 0, this.width, this.height)
       this.editableText.parentNode.setAttribute('height', height);
       if (this.parent != null) { this.parent.stack.arrangeComments() }
+    }
+
+    if (!this.updated) {
+      this.updated = true;
+      console.log("moving to " + this.x + ", " + this.y)
+      GuiElements.move.group(this.group, this.x, this.y)
     }
   } else if (this.parent != null && !this.flying) {
     this.parent.stack.arrangeComments()
@@ -169,9 +173,17 @@ Comment.prototype.update = function() {
     GuiElements.move.group(this.group, this.x, this.y)
   }
 
-  if (!this.flying) {
+  if (!this.flying && Comment.currentlyEditing != this) {
+    this.setPosition()
+  }
+}
+
+Comment.prototype.setPosition = function() {
+  if (this.x != this.lastX || this.y != this.lastY || !Comment.currentlyEditing) {
     this.lastX = this.x
     this.lastY = this.y
+
+    SaveManager.markEdited()
   }
 }
 
@@ -185,7 +197,6 @@ Comment.prototype.delete = function() {
   if (this.parent != null) {
     let stack = this.parent.stack
     this.updateParent()
-    //stack.arrangeComments()
   }
   this.group.remove();
   if (this.line != null) { this.line.remove() }
@@ -276,11 +287,11 @@ Comment.prototype.relToAbsY = function(y) {
  * @return {Node}
  */
 Comment.prototype.createXml = function(xmlDoc) {
+  console.log("createXml " + this.lastX + ", " + this.lastY + " : " + (this.parent == null))
   const commentData = XmlWriter.createElement(xmlDoc, "comment");
 	XmlWriter.setAttribute(commentData, "x", this.lastX);
 	XmlWriter.setAttribute(commentData, "y", this.lastY);
-  XmlWriter.setAttribute(commentData, "text", this.editableText.textContent);
+  XmlWriter.setAttribute(commentData, "text", this.editableText.innerHTML);
   XmlWriter.setAttribute(commentData, "id", this.parent != null ? this.parent.id : -1);
-  XmlWriter.setAttribute(commentData, "hasParent", (this.parent != null));
 	return commentData;
 }

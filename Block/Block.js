@@ -842,8 +842,6 @@ Block.prototype.snap = function(block) {
 		this.stack.updateDim();
 		//Update the arros on the sides of the screen in case the new block now extends beyond the edge
 		this.stack.tab.updateArrows();
-    //Update comment positioning to accomidate new blocks if necessary.
-    this.stack.tab.updateComments();
 	}
 };
 
