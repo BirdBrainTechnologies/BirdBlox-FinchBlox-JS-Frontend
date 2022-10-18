@@ -130,7 +130,7 @@ Comment.prototype.updateParent = function(newParent) {
     this.parent.group.appendChild(this.group)
 
     this.lineX = this.parent.width
-    this.lineY = this.parent.height / 2
+    this.lineY = this.parent.hasBlockSlot1 ? this.parent.topHeight/2 : this.parent.height/2
     this.line = GuiElements.draw.rect(this.lineX, this.lineY, 2*Comment.margin, Comment.lineHeight, Comment.outlineColor)
     this.parent.group.appendChild(this.line);
   }
@@ -197,7 +197,11 @@ Comment.prototype.move = function(x, y) {
 }
 
 Comment.prototype.delete = function() {
-  if (this.parent != null) { this.updateParent() }
+  if (this.parent != null) {
+    let stack = this.parent.stack
+    this.updateParent() 
+    stack.arrangeComments()
+  }
   this.group.remove();
   if (this.line != null) { this.line.remove() }
 

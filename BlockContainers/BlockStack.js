@@ -506,48 +506,83 @@ BlockStack.prototype.deleteComments = function() {
  * Arranges the comments attached to this stack so that none overlap
  */
 BlockStack.prototype.arrangeComments = function() {
-  let block = this.firstBlock
-  let commentsPlaced = []
-  while (block != null) {
-    if (block.comment != null) {
-      let cmnt = block.comment
-      let maxWidth = block.width
-      let totalHeight = block.height
-      if (cmnt.height > block.height) {
-        let nextBlock = block.nextBlock
-        if (block.parent != null && block.parent.isSlot) {
-          nextBlock = block.parent.parent.nextBlock
-        }
-        while (nextBlock != null && totalHeight < cmnt.height) {
-          maxWidth = Math.max(maxWidth, nextBlock.width)
-          totalHeight = totalHeight + nextBlock.height
-          nextBlock = nextBlock.nextBlock
-        }
+  console.log("ARRANGE COMMENTS")
+  function checkBelow(block, commentHeight, maxWidth) {
+    console.log("check below " + block.id)
+    if (block.blockSlot1 != null && commentHeight > block.topHeight) {
+      if (block.blockSlot1.hasChild) {
+        maxWidth = checkBelow(block.blockSlot1.child, commentHeight - block.topHeight, maxWidth)
       }
-      cmnt.x = maxWidth + 2*Comment.margin
+      if (block.blockSlot2 != null && block.blockSlot2.hasChild &&
+        commentHeight > block.topHeight + block.blockSlot1.height + block.midHeight) {
+        maxWidth = checkBelow(block.blockSlot2.child, commentHeight - (block.topHeight + block.blockSlot1.height + block.midHeight), maxWidth)
+      }
+    }
+    let nextBlock = block.nextBlock
+    if (block.parent != null && block.parent.isSlot) {
+      nextBlock = block.parent.parent.nextBlock
+    }
+    if (commentHeight > block.height && nextBlock != null) {
+      maxWidth = checkBelow(nextBlock, commentHeight - block.height, maxWidth)
+    }
+    //
+    // TODO: What if this block is WITHIN a blockSlot? it's direct parent may be a regular block.
+    //
+    return Math.max(maxWidth, block.stack.absToRelX(block.relToAbsX(block.width)))
+  }
+  function checkBlock(block) {
+    if (block == null) { return; }
+    console.log("checking block " + block.id)
+    if (block.comment != null) {
+      console.log("placing comment for " + block.id)
+      let cmnt = block.comment
+      let xOffset = 0
+      let check = block
+      if (block.parent != null && block.parent.isSlot) {
+        xOffset = block.parent.x
+        maxWidth = block.parent.parent.width
+        check = block.parent.parent
+        console.log("Found a slot. Setting xOffset=" + xOffset)
+      }
+      let distFromStackEdge = check.stack.absToRelX(check.relToAbsX(check.width))
+      maxDistFromStackEdge = checkBelow(check, cmnt.height, distFromStackEdge)
+      maxWidth = check.absToRelX(check.stack.relToAbsX(maxDistFromStackEdge))
+      console.log("dists " + maxDistFromStackEdge + " " + maxWidth)
+      cmnt.x = maxWidth + 2*Comment.margin - xOffset
       cmnt.y = 0
       commentsPlaced.forEach(function(placedComment) {
-        let x1 = cmnt.x
-        let y1 = cmnt.parent.y
+        const b2 = placedComment.parent
+        let x1 = block.stack.absToRelX(block.relToAbsX(cmnt.x))
+        let y1 = block.stack.absToRelY(block.relToAbsY(cmnt.y))//cmnt.parent.y
         let w1 = cmnt.width
         let h1 = cmnt.height
-        let x2 = placedComment.x
-        let y2 = placedComment.parent.y
+        let x2 = b2.stack.absToRelX(b2.relToAbsX(placedComment.x))
+        let y2 = b2.stack.absToRelY(b2.relToAbsY(placedComment.y))//placedComment.parent.y
         let w2 = placedComment.width
         let h2 = placedComment.height
         if (CodeManager.move.rInRange(x1, y1, w1, h1, x2, y2, w2, h2)) {
-          maxWidth = x2 + w2
-          cmnt.x = maxWidth + 2*Comment.margin
+          maxWidth = block.absToRelX(block.stack.relToAbsX(x2 + w2))
+          cmnt.x = maxWidth + 2*Comment.margin - xOffset
         }
       });
       GuiElements.move.group(cmnt.group, cmnt.x, cmnt.y)
 
-      const lineWidth = 2*Comment.margin + maxWidth - block.width
+      const lineWidth = 2*Comment.margin + maxWidth - block.width - xOffset
+      cmnt.lineX = cmnt.parent.width
       GuiElements.update.rect(cmnt.line, cmnt.lineX, cmnt.lineY, lineWidth, Comment.lineHeight)
       commentsPlaced.push(cmnt)
     }
-    block = block.nextBlock
+
+    for (let i = 0; i < block.slots.length; i++) {
+      checkBlock(block.slots[i].child)
+    }
+    if (block.blockSlot1 != null) { checkBlock(block.blockSlot1.child) }
+    if (block.blockSlot2 != null) { checkBlock(block.blockSlot2.child) }
+    checkBlock(block.nextBlock)
   }
+
+  let commentsPlaced = []
+  checkBlock(this.firstBlock)
 }
 
 /**
