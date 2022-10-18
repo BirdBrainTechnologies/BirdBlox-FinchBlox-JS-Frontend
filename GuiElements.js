@@ -526,8 +526,8 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, p
   }
 
 	editableText.onblur = function() {
-		if (Comment.currentlyEditing) { Comment.currentlyEditing = null }
 		if (this.parent != null) { this.parent.update() }
+		if (Comment.currentlyEditing) { Comment.currentlyEditing = null }
 	}
 
 	return editableText

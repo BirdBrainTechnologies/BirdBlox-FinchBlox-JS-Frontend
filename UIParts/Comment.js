@@ -13,6 +13,7 @@ function Comment() {
   //this.draggable = true;
   //this.dragging = false;
   this.edited = false;
+  this.updated = false;
   this.x = 0
   this.y = 0
   this.lastX = 0 //last non-flying location
@@ -101,6 +102,7 @@ Comment.prototype.updateParent = function(newParent) {
       this.line.remove()
       this.line = null
     }
+    this.parent.stack.arrangeComments()
 
     if (newParent == null) { //moving from a block to the tab
       //this.x = this.parent.stack.x + this.x
@@ -150,40 +152,23 @@ Comment.prototype.editText = function() {
 }
 
 Comment.prototype.update = function() {
-  const height = this.editableText.offsetHeight
 
-  if (height != this.height - 2*Comment.margin) {
-    this.height = height + 2*Comment.margin
-    GuiElements.update.rect(this.bgRect, 0, 0, this.width, this.height)
-    this.editableText.parentNode.setAttribute('height', height);
-  }
-
-  if (this.parent != null && !this.flying) {
+  if (Comment.currentlyEditing == this || !this.updated) {
+    this.updated = true;
+    const height = this.editableText.offsetHeight
+    console.log("offset height " + height)
+    if (height != this.height - 2*Comment.margin) {
+      this.height = height + 2*Comment.margin
+      GuiElements.update.rect(this.bgRect, 0, 0, this.width, this.height)
+      this.editableText.parentNode.setAttribute('height', height);
+      if (this.parent != null) { this.parent.stack.arrangeComments() }
+    }
+  } else if (this.parent != null && !this.flying) {
     this.parent.stack.arrangeComments()
-    /*let maxWidth = this.parent.width
-    let totalHeight = this.parent.height
-    let nextBlock = this.parent.nextBlock
-    if (this.parent.parent != null && this.parent.parent.isSlot) {
-      nextBlock = this.parent.parent.parent.nextBlock
-    }
-    if (this.height > this.parent.height) {
-      while (nextBlock != null && totalHeight < this.height) {
-        maxWidth = Math.max(maxWidth, nextBlock.width)
-        totalHeight = totalHeight + nextBlock.height
-        nextBlock = nextBlock.nextBlock
-      }
-    }
-    this.x = maxWidth + 2*Comment.margin
-    this.y = 0
-    const lineWidth = 2*Comment.margin + maxWidth - this.parent.width
-    GuiElements.update.rect(this.line, this.lineX, this.lineY, lineWidth, Comment.lineHeight)
-  }
-
-  GuiElements.move.group(this.group, this.x, this.y) */
-
   } else {
     GuiElements.move.group(this.group, this.x, this.y)
   }
+
   if (!this.flying) {
     this.lastX = this.x
     this.lastY = this.y
@@ -199,8 +184,8 @@ Comment.prototype.move = function(x, y) {
 Comment.prototype.delete = function() {
   if (this.parent != null) {
     let stack = this.parent.stack
-    this.updateParent() 
-    stack.arrangeComments()
+    this.updateParent()
+    //stack.arrangeComments()
   }
   this.group.remove();
   if (this.line != null) { this.line.remove() }

@@ -506,48 +506,20 @@ BlockStack.prototype.deleteComments = function() {
  * Arranges the comments attached to this stack so that none overlap
  */
 BlockStack.prototype.arrangeComments = function() {
-  console.log("ARRANGE COMMENTS")
-  function checkBelow(block, commentHeight, maxWidth) {
-    console.log("check below " + block.id)
-    if (block.blockSlot1 != null && commentHeight > block.topHeight) {
-      if (block.blockSlot1.hasChild) {
-        maxWidth = checkBelow(block.blockSlot1.child, commentHeight - block.topHeight, maxWidth)
-      }
-      if (block.blockSlot2 != null && block.blockSlot2.hasChild &&
-        commentHeight > block.topHeight + block.blockSlot1.height + block.midHeight) {
-        maxWidth = checkBelow(block.blockSlot2.child, commentHeight - (block.topHeight + block.blockSlot1.height + block.midHeight), maxWidth)
-      }
-    }
-    let nextBlock = block.nextBlock
-    if (block.parent != null && block.parent.isSlot) {
-      nextBlock = block.parent.parent.nextBlock
-    }
-    if (commentHeight > block.height && nextBlock != null) {
-      maxWidth = checkBelow(nextBlock, commentHeight - block.height, maxWidth)
-    }
-    //
-    // TODO: What if this block is WITHIN a blockSlot? it's direct parent may be a regular block.
-    //
-    return Math.max(maxWidth, block.stack.absToRelX(block.relToAbsX(block.width)))
-  }
-  function checkBlock(block) {
-    if (block == null) { return; }
-    console.log("checking block " + block.id)
+
+  function checkBlock(block, commentsPlaced) {
+
     if (block.comment != null) {
-      console.log("placing comment for " + block.id)
       let cmnt = block.comment
       let xOffset = 0
       let check = block
       if (block.parent != null && block.parent.isSlot) {
         xOffset = block.parent.x
-        maxWidth = block.parent.parent.width
         check = block.parent.parent
-        console.log("Found a slot. Setting xOffset=" + xOffset)
       }
-      let distFromStackEdge = check.stack.absToRelX(check.relToAbsX(check.width))
-      maxDistFromStackEdge = checkBelow(check, cmnt.height, distFromStackEdge)
-      maxWidth = check.absToRelX(check.stack.relToAbsX(maxDistFromStackEdge))
-      console.log("dists " + maxDistFromStackEdge + " " + maxWidth)
+
+      let maxDistFromStackEdge = getWidthFromMap(check, cmnt.height)
+      let maxWidth = check.absToRelX(check.stack.relToAbsX(maxDistFromStackEdge))
       cmnt.x = maxWidth + 2*Comment.margin - xOffset
       cmnt.y = 0
       commentsPlaced.forEach(function(placedComment) {
@@ -562,27 +534,55 @@ BlockStack.prototype.arrangeComments = function() {
         let h2 = placedComment.height
         if (CodeManager.move.rInRange(x1, y1, w1, h1, x2, y2, w2, h2)) {
           maxWidth = block.absToRelX(block.stack.relToAbsX(x2 + w2))
-          cmnt.x = maxWidth + 2*Comment.margin - xOffset
+          cmnt.x = maxWidth + 2*Comment.margin
         }
       });
       GuiElements.move.group(cmnt.group, cmnt.x, cmnt.y)
 
-      const lineWidth = 2*Comment.margin + maxWidth - block.width - xOffset
-      cmnt.lineX = cmnt.parent.width
+      const lineWidth = cmnt.x - block.width
+      cmnt.lineX = block.width
       GuiElements.update.rect(cmnt.line, cmnt.lineX, cmnt.lineY, lineWidth, Comment.lineHeight)
       commentsPlaced.push(cmnt)
     }
-
-    for (let i = 0; i < block.slots.length; i++) {
-      checkBlock(block.slots[i].child)
-    }
-    if (block.blockSlot1 != null) { checkBlock(block.blockSlot1.child) }
-    if (block.blockSlot2 != null) { checkBlock(block.blockSlot2.child) }
-    checkBlock(block.nextBlock)
+    return commentsPlaced
   }
 
-  let commentsPlaced = []
-  checkBlock(this.firstBlock)
+  function mapBlock(block, mapArray) {
+    //skip slots since they are within other blocks
+    if (block.parent != null && block.parent.isSlot) { return mapArray }
+
+    mapArray.push({'x': (block.x + block.width), 'y': block.y})
+    return mapArray
+  }
+
+  function traverseStack(block, func, variable) {
+    if (block == null) { return variable }
+    variable = func(block, variable)
+    for (let i = 0; i < block.slots.length; i++) {
+      variable = traverseStack(block.slots[i].child, func, variable)
+    }
+    if (block.blockSlot1 != null) { variable = traverseStack(block.blockSlot1.child, func, variable) }
+    if (block.blockSlot2 != null) { variable = traverseStack(block.blockSlot2.child, func, variable) }
+    variable = traverseStack(block.nextBlock, func, variable)
+    return variable
+  }
+
+  function getWidthFromMap(block, commentHeight) {
+    let maxW = block.width + block.x
+    for (let i = 0; i < map.length; i++) {
+      let y = map[i].y
+      if (y > block.y && y < (block.y + commentHeight)) {
+        maxW = Math.max(maxW, map[i].x)
+      }
+    }
+    return maxW
+  }
+
+  let map = traverseStack(this.firstBlock, mapBlock, [])
+  map.sort(function(a, b){ return a.y - b.y })
+
+  let commentsPlaced = traverseStack(this.firstBlock, checkBlock, [])
+
 }
 
 /**

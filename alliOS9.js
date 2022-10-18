@@ -1,4 +1,4 @@
-var FinchBlox = true;
+var FinchBlox = false;
 var FrontendVersion = 393;
 
 
@@ -2513,7 +2513,9 @@ Language.en = {
 "any_key":"any key",
 "logo":"Logo",
 "V2_required":"V2 micro:bit required",
-"Temperature":"Temperature"
+"Temperature":"Temperature",
+"Add_Comment":"Add Comment",
+"Add_Comment_Here":"add comment here..."
 }
 
 //Spanish Translation
@@ -6540,6 +6542,8 @@ GuiElements.setConstants = function() {
 	CodeManager();
 	SaveManager.setConstants();
 	UndoManager();
+
+	Comment.setGlobals();
 };
 /** Once each class has its constants set, the UI can be built. UI-related classes are called. */
 GuiElements.buildUI = function() {
@@ -6793,14 +6797,15 @@ GuiElements.create.rect = function(group) {
  * @param  {number} w         text box width
  * @param  {number} h         text box height
  * @param  {Element} group     svg group to add the box to
+ * @param  {Object} parent  Parent object (ususally a Comment or null)
  * @return {Element}         editable text box element created
  */
-GuiElements.create.editableText = function(font, textColor, x, y, w, h, group) {
+GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, parent) {
 	var fo = document.createElementNS('http://www.w3.org/2000/svg',"foreignObject");
   fo.setAttribute('width', w);
   fo.setAttribute('height', h);
   fo.setAttribute("style", "text-align: center;");
-  fo.setAttribute("x", 0);
+  fo.setAttribute("x", x);
   fo.setAttribute("y", y);
 
   var editableText = document.createElement('div');
@@ -6812,19 +6817,20 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group) {
   editableText.style.display = "block";
   editableText.style.color = textColor;
   editableText.style.fontFamily = font.fontFamily;
-  editableText.style.fontSize = font.fontSize;
+  editableText.style.fontSize = font.fontSize + "px";
   editableText.style.outline = "none";
 
   fo.appendChild(editableText);
   group.appendChild(fo);
 
 	editableText.charCount = 0;
+	editableText.parent = parent;
 
 	//When user presses enter, leave the text box and close soft keyboard.
 	// When pressing delete or backspace, decrease the char count.
   editableText.addEventListener("keydown", function(event) {
 		//Use of keyCode is depricated, but necessary for old iPads at least
-    if (event.code == 'Enter' || event.keyCode === 13) { //enter
+    if (FinchBlox && (event.code == 'Enter' || event.keyCode === 13)) { //enter
       this.blur();
 			if (GuiElements.isPWA && FBPopup.currentPopup != null) {
 				FBPopup.currentPopup.confirm()
@@ -6834,18 +6840,21 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group) {
     if (event.code == 'Delete' || event.code == 'Backspace' ||
       event.keyCode === 46 || event.keyCode === 8) { //delete or backspace
       this.charCount--;
+			if (this.parent != null) { this.parent.update() }
     }
 	});
 
-	//Keep track of the characters typed and limit total to 24.
+	//Keep track of the characters typed and limit total to 24 for FinchBlox.
 	// https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
 	editableText.addEventListener('keypress', function(event) {
 		//console.log("pressed a key count=" + this.charCount);
-		if (this.charCount > 24) {
+		if (this.charCount > 24 && FinchBlox) {
 			event.preventDefault();
 		} else {
 			this.charCount++;
 		}
+
+		if (this.parent != null) { this.parent.update() }
 	});
 
 	//When focused, move cursor to the end of the content
@@ -6866,6 +6875,11 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group) {
         range.select();//Select the range (make it the visible selection
     }
   }
+
+	editableText.onblur = function() {
+		if (this.parent != null) { this.parent.update() }
+		if (Comment.currentlyEditing) { Comment.currentlyEditing = null }
+	}
 
 	return editableText
 }
@@ -8351,6 +8365,7 @@ Colors.setCommon = function() {
 	Colors.cyan = "#00FFFF";
 	Colors.magenta = "#FF00FF";
 	Colors.darkRed = "#c00000";
+	Colors.lightYellow = "#FFFFCC";
 	//Current BBT colors
 	Colors.bbt = "#209BA9";
 	Colors.tabletOrange = "#FAA525";
@@ -9904,7 +9919,7 @@ BlockGraphics.update.blockActive = function(path, category, returnsValue, active
  * @param {boolean} isSlot
  * @return {string}
  */
-BlockGraphics.buildPath.highlight = function(x, y, width, height, type, isSlot) {
+BlockGraphics.buildPath.highlight = function(x, y, width, height, type, isSlot, isComment) {
 	var bG = BlockGraphics.highlight;
 	var pathD;
 	var hX = x - bG.margin;
@@ -9924,6 +9939,15 @@ BlockGraphics.buildPath.highlight = function(x, y, width, height, type, isSlot) 
 		case 3:
 			pathD = BlockGraphics.buildPath.string(hX, hY, hWidth, hHeight);
 			break;
+	}
+	if (isComment) {
+		switch(type) {
+			case 0:
+				pathD = "";
+				pathD += "m " + x + "," + y + " ";
+				pathD += "l 0," + height;
+				break;
+		}
 	}
 	return pathD;
 };
@@ -10395,6 +10419,7 @@ TouchReceiver.touchstart = function(e, preventD) {
 		e.preventDefault();
 		return false;
 	}
+  if (Comment.currentlyEditing) { Comment.currentlyEditing.editableText.blur() }
 	if (preventD == null) {
 		preventD = true;
 	}
@@ -10508,6 +10533,7 @@ TouchReceiver.multiTouchStart = function(e, target, targetType) {
   var TR = TouchReceiver;
   e.preventDefault();
   if (!TR.interactionEnabeled) { return; }
+  if (Comment.currentlyEditing) { Comment.currentlyEditing.editableText.blur() }
 
   Overlay.closeOverlays();
   for (var i = 0; i < e.changedTouches.length; i++) {
@@ -10576,6 +10602,16 @@ TouchReceiver.multiTouchMove = function(e) {
               mto.blockMoveManager = new BlockMoveManager(mto.target, x, y);
     				}
     			}
+
+          if (mto.targetType === "comment") {
+            var x = TR.getMultiX(touch);
+    				var y = TR.getMultiY(touch);
+    				if (mto.commentMoveManager) {
+    					mto.commentMoveManager.update(x, y);
+    				} else {
+              mto.commentMoveManager = new CommentMoveManager(mto.target, x, y);
+    				}
+          }
         }
       }
     }
@@ -10598,6 +10634,13 @@ TouchReceiver.multiTouchEnd = function(e) {
       				mto.blockMoveManager = null;
       			} else {   // The stack was tapped, so it should run.
       				mto.target.stack.startRun();
+      			}
+          } else if (mto.targetType === "comment") {
+            if (mto.commentMoveManager != null) {
+      				mto.commentMoveManager.end();
+      				mto.commentMoveManager = null;
+      			} else {  //the comment was tapped
+      				mto.target.editText();
       			}
       		} else if (mto.targetType === "slot") {
       			// If a Slot is pressed and released without dragging, it is time to edit its value.
@@ -10640,7 +10683,24 @@ TouchReceiver.multiTouchLong = function(t) {
 		new BlockContextMenu(t.target, t.startX, t.startY);
 	}
 }
-
+/**
+ * Handles new touch events for Comments.  Stores the target Comment.
+ * @param {Comment} target - The Comment that was touched.
+ * @param {event} e - passed event arguments.
+ */
+TouchReceiver.touchStartComment = function(target, e) {
+  var TR = TouchReceiver;
+  if (e.type.startsWith("mouse")) {
+    TR.checkStartZoom(e);
+  	if (TR.touchstart(e)) {
+  		Overlay.closeOverlays();   // Close any visible overlays.
+  		TR.target = target;   // Store target Comment.
+      TR.targetType = "comment"
+  	}
+  } else {
+    TR.multiTouchStart(e, target, "comment")
+  }
+}
 /**
  * Handles new touch events for Slots.  Stores the target Slot.
  * @param {Slot} slot - The Slot that was touched.
@@ -10928,6 +10988,16 @@ TouchReceiver.touchmove = function(e) {
 				TR.targetType = "scrollBox";
 				TR.target = null;
 			}
+      // If the user drags a Comment
+      if (TR.targetType === "comment") {
+        var x = TR.getX(e)
+        var y = TR.getY(e)
+        if (TR.commentMoveManager) {
+          TR.commentMoveManager.update(x, y);
+        } else {
+          TR.commentMoveManager = new CommentMoveManager(TR.target, x, y);
+        }
+      }
 		}
 	}
 	shouldPreventDefault &= TR.targetType !== "smoothMenuBnList";
@@ -11025,6 +11095,13 @@ TouchReceiver.touchend = function(e) {
 		} else if (TR.targetType === "slider") {
       //TR.target.drop(TR.getX(e));
       TR.target.drop();
+    } else if (TR.targetType === "comment") {
+      if (TR.commentMoveManager != null) {
+        TR.commentMoveManager.end();
+        TR.commentMoveManager = null;
+      } else { //the comment was tapped
+        TR.target.editText()
+      }
     }
 	} else {
 		TR.touchDown = false;
@@ -11135,6 +11212,18 @@ TouchReceiver.addListenersChild = function(element, parent) {
 	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
 		// When it is touched, the SVG element will tell the TouchReceiver its Block.
 		TouchReceiver.touchStartBlock(parent, e);
+	}, false);
+};
+/**
+ * Adds handlerDown listeners to the parts of a Comment.
+ * @param {Element} element - The part of the Comment the listeners are being applied to.
+ * @param {Comment} comment - The Comment the SVG element belongs to.
+ */
+TouchReceiver.addListenersComment = function(element, comment) {
+	var TR = TouchReceiver;
+	TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+		// When it is touched, the SVG element will tell the TouchReceiver its Comment.
+		TouchReceiver.touchStartComment(comment, e);
 	}, false);
 };
 /**
@@ -14869,6 +14958,419 @@ FBFileNameDisplay.prototype.addButton = function(isSaveBn) {
 FBFileNameDisplay.prototype.remove = function() {
   this.group.remove();
 }
+
+//TODO:
+// - Saving
+// - Draggable to another block or the canvas
+// - Multi line, position to avoid other blocks.
+
+/**
+ *
+ */
+function Comment() {
+  //this.id = Comment.count;
+  //Comment.count++;
+  this.parent = null //The block this comment is attached to
+  //this.draggable = true;
+  //this.dragging = false;
+  this.edited = false;
+  this.updated = false;
+  this.x = 0
+  this.y = 0
+  this.lastX = 0 //last non-flying location
+  this.lastY = 0
+  this.width = 200
+  this.height = Comment.font.charHeight + 2*Comment.margin
+  this.group = GuiElements.create.group(0, 0);
+  this.flying = false;
+  this.tab = null;
+
+  this.bgRect = GuiElements.draw.rect(this.x, this.y, this.width, this.height, Comment.bgColor, Comment.cornerRadius, Comment.cornerRadius);
+  GuiElements.update.stroke(this.bgRect, Comment.outlineColor, Comment.outlineWidth)
+  TouchReceiver.addListenersComment(this.bgRect, this);
+  this.group.appendChild(this.bgRect);
+
+  var textY = Comment.margin; //Comment.font.charHeight/2 + Comment.margin;
+  var textX = Comment.margin;
+  var textW = this.width - 2*Comment.margin;
+  var textH = this.height - 2*Comment.margin;
+  this.editableText = GuiElements.create.editableText(Comment.font, Comment.textColor, textX, textY, textW, textH, this.group, this)
+
+  TouchReceiver.addListenersComment(this.editableText, this);
+
+  this.editableText.textContent = Language.getStr("Add_Comment_Here")
+}
+
+Comment.setGlobals = function() {
+  Comment.bgColor = Colors.lightYellow
+  Comment.outlineColor = Colors.white //Colors.controlYellow
+  Comment.outlineWidth = 2
+  Comment.textColor = Colors.black
+  Comment.font = Font.uiFont(11)
+  Comment.cornerRadius = 3
+  Comment.margin = 10
+  Comment.lineHeight = 2 //Height of line connecting comment to block.
+
+  Comment.currentlyEditing = null //Store reference to comment that is being edited
+  Comment.count = 0;
+}
+
+Comment.writeToXml = function(xmlDoc) {
+
+}
+
+Comment.importXml = function(commentNode, tab) {
+  var comment = new Comment()
+  comment.x = XmlWriter.getAttribute(commentNode, "x", 0, true);
+	comment.y = XmlWriter.getAttribute(commentNode, "y", 0, true);
+  //comment.id = XmlWriter.getAttribute(commentNode, "id", 0, true);
+  comment.editableText.textContent = XmlWriter.getAttribute(commentNode, "text", "", false);
+  comment.edited = true
+
+  var parentID = XmlWriter.getAttribute(commentNode, "id", 0, true);
+  //var hasParent = XmlWriter.getAttribute(commentNode, "hasParent", 0, false);
+  //console.log("importing xml: " + comment.x + ", " + comment.y + ", " + comment.id + ", " + comment.editableText.textContent + ", " + hasParent)
+  console.log("importing xml: " + comment.x + ", " + comment.y + ", " + parentID + ", " + comment.editableText.textContent)
+  if (parentID > -1) {
+    var request = {}
+    request.id = parentID
+    request.block = null
+    tab.findBlockByID(request)
+
+    if (request.block != null) {
+      comment.updateParent(request.block)
+    } else {
+      console.error("This comment should have a parent (" + parentID + "), but it wasn't found")
+    }
+  } else {
+    comment.tab = tab
+    comment.tab.mainG.appendChild(comment.group)
+    comment.updateParent()
+  }
+}
+
+Comment.prototype.updateParent = function(newParent) {
+
+  if (newParent != null && newParent.comment != null && newParent.comment != this) {
+    //Prevent attaching a comment to a block that already has one.
+    newParent = null
+  }
+
+  if (this.parent != null) {
+    this.parent.comment = null;
+    this.group.remove()
+    if (this.line != null) {
+      this.line.remove()
+      this.line = null
+    }
+    this.parent.stack.arrangeComments()
+
+    if (newParent == null) { //moving from a block to the tab
+      //this.x = this.parent.stack.x + this.x
+      //this.y = this.parent.stack.y + this.y
+      this.tab.mainG.appendChild(this.group)
+    }
+  }
+
+  this.parent = newParent;
+
+  if (newParent != null) {
+    newParent.comment = this
+
+    var newTab = newParent.stack.getTab()
+    if (this.tab != newTab) {
+      if (this.tab != null) {
+        var index = this.tab.commentList.indexOf(this)
+        this.tab.commentList.splice(index, 1)
+        console.log("moving the comment to a new tab")
+      }
+      this.tab = newTab
+      this.tab.commentList.push(this)
+    }
+
+    this.x = this.parent.width + 2*Comment.margin
+    this.y = 0
+    this.parent.group.appendChild(this.group)
+
+    this.lineX = this.parent.width
+    this.lineY = this.parent.hasBlockSlot1 ? this.parent.topHeight/2 : this.parent.height/2
+    this.line = GuiElements.draw.rect(this.lineX, this.lineY, 2*Comment.margin, Comment.lineHeight, Comment.outlineColor)
+    this.parent.group.appendChild(this.line);
+  }
+
+  this.update()
+}
+
+Comment.prototype.editText = function() {
+  //Remove the default text
+  if (!this.edited) {
+    this.editableText.textContent = ""
+    this.edited = true
+  }
+
+  Comment.currentlyEditing = this;
+  this.editableText.focus();
+}
+
+Comment.prototype.update = function() {
+
+  if (Comment.currentlyEditing == this || !this.updated) {
+    this.updated = true;
+    var height = this.editableText.offsetHeight
+    console.log("offset height " + height)
+    if (height != this.height - 2*Comment.margin) {
+      this.height = height + 2*Comment.margin
+      GuiElements.update.rect(this.bgRect, 0, 0, this.width, this.height)
+      this.editableText.parentNode.setAttribute('height', height);
+      if (this.parent != null) { this.parent.stack.arrangeComments() }
+    }
+  } else if (this.parent != null && !this.flying) {
+    this.parent.stack.arrangeComments()
+  } else {
+    GuiElements.move.group(this.group, this.x, this.y)
+  }
+
+  if (!this.flying) {
+    this.lastX = this.x
+    this.lastY = this.y
+  }
+}
+
+Comment.prototype.move = function(x, y) {
+  this.x = x;
+  this.y = y;
+  this.update()
+}
+
+Comment.prototype.delete = function() {
+  if (this.parent != null) {
+    var stack = this.parent.stack
+    this.updateParent()
+    //stack.arrangeComments()
+  }
+  this.group.remove();
+  if (this.line != null) { this.line.remove() }
+
+  var index = this.tab.commentList.indexOf(this)
+  this.tab.commentList.splice(index, 1)
+}
+
+/**
+ * Moves this Comment out of the Tab's group and into the drag layer about other Blocks.
+ */
+Comment.prototype.fly = function() {
+  //Disconnect from current parent if there is one
+  if (this.parent != null) {
+    this.x = this.parent.stack.x + this.parent.x + this.x
+    this.y = this.parent.stack.y + this.parent.y + this.y
+    if (this.line != null) { this.line.remove() }
+  }
+  // Remove group from Tab (visually only).
+	this.group.remove();
+	// Add group to drag layer.
+	GuiElements.layers.drag.appendChild(this.group);
+	// Get current location on screen.
+	var absX = this.getAbsX();
+	var absY = this.getAbsY();
+	// Record that this BlockStack is flying.
+	this.flying = true;
+	// Move to ensure that position on screen does not change.
+	this.move(CodeManager.dragAbsToRelX(absX), CodeManager.dragAbsToRelY(absY));
+	//this.tab.updateArrows();
+}
+
+Comment.prototype.land = function() {
+  this.group.remove(); // Remove from drag layer.
+	this.tab.mainG.appendChild(this.group); // Go back into tab group.
+	var absX = this.getAbsX(); // Get current location on screen.
+	var absY = this.getAbsY();
+	this.flying = false;
+	// Update coordinates to ensure that position on screen does not change.
+	// Actual move will take place after new parent is determined.
+  this.x = this.tab.absToRelX(absX)
+  this.y = this.tab.absToRelY(absY)
+  //this.tab.updateArrows();
+}
+
+/**
+ * Returns the x coord of the Comment relative to the screen.
+ * @return {number} The x coord of the Comment relative to the screen.
+ */
+Comment.prototype.getAbsX = function() {
+	return this.relToAbsX(0);
+};
+/**
+ * Returns the y coord of the Comment relative to the screen.
+ * @return {number} The y coord of the Comment relative to the screen.
+ */
+Comment.prototype.getAbsY = function() {
+	return this.relToAbsY(0);
+};
+/**
+ * Converts a coordinate relative to the Comment to one relative to the screen.
+ * @param {number} x - The coord relative to the Comment.
+ * @return {number} - The coord relative to the screen.
+ */
+Comment.prototype.relToAbsX = function(x) {
+	if (this.flying) {
+		return CodeManager.dragRelToAbsX(x + this.x);
+	} else {
+		return this.tab.relToAbsX(x + this.x); // In a Tab; return x plus Tab's offset.
+	}
+};
+
+/**
+ * @param {number} y
+ * @return {number}
+ */
+Comment.prototype.relToAbsY = function(y) {
+	if (this.flying) {
+		return CodeManager.dragRelToAbsY(y + this.y); // Not in a Tab; scale by dragLayer's scale
+	} else {
+		return this.tab.relToAbsY(y + this.y); // In a Tab; return y plus Tab's offset.
+	}
+};
+
+/**
+ * Writes this Comment to XML (non recursive)
+ * @param {Document} xmlDoc - The document to write to
+ * @return {Node}
+ */
+Comment.prototype.createXml = function(xmlDoc) {
+  var commentData = XmlWriter.createElement(xmlDoc, "comment");
+	XmlWriter.setAttribute(commentData, "x", this.lastX);
+	XmlWriter.setAttribute(commentData, "y", this.lastY);
+  XmlWriter.setAttribute(commentData, "text", this.editableText.textContent);
+  XmlWriter.setAttribute(commentData, "id", this.parent != null ? this.parent.id : -1);
+  XmlWriter.setAttribute(commentData, "hasParent", (this.parent != null));
+	return commentData;
+}
+
+
+
+/**
+ * CommentMoveManager is a class that moves the Comment that the user is dragging
+ * CommentMoveManager contains function to start, stop, and update the movement of a Comment.
+ * These functions are called by the TouchReceiver class when the user drags a Comment.
+ * Initializer - Picks up a Comment so that it can be moved.  Stores necessary information in CommentMoveManager.move.
+ * Transfers the Comment into the drag layer above other blocks.
+ * @param {Comment} comment - The Comment the user dragged.
+ * @param {number} x - The x coord of the user's finger.
+ * @param {number} y - The y coord of the user's finger.
+ */
+function CommentMoveManager(comment, x, y) {
+  var move = {}
+
+  Overlay.closeOverlays();   // Close any visible overlays.
+
+	comment.fly();   // Make the Comment fly (disconnects from current block and moves it into the drag layer).
+	//move.bottomX = comment.relToAbsX(comment.width);   // Store the Comment's dimensions.
+	//move.bottomY = comment.relToAbsY(comment.height);
+
+	move.touchX = x;   // Store coords
+	move.touchY = y;
+	move.offsetX = comment.getAbsX() - x;   // Store offset.
+	move.offsetY = comment.getAbsY() - y;
+	move.comment = comment;
+
+  move.topX = 0;   // The top-left corner's x coord of the Comment being moved.
+	move.topY = 0;   // The top-left corner's y-coord of the Comment being moved.
+  this.move = move;
+  // Stores information used when determine which slot is closest to the moving stack.
+	this.fit = {};
+}
+
+/**
+ * Updates the position of the currently moving Comment.
+ * Also highlights the block that fits it best (if any).
+ * @param {number} x - The x coord of the user's finger.
+ * @param {number} y - The y coord of the user's finger.
+ */
+CommentMoveManager.prototype.update = function(x, y) {
+	var move = this.move;   // shorthand
+
+	move.touchX = x;
+	move.touchY = y;
+	move.topX = move.offsetX + x;
+	move.topY = move.offsetY + y;
+	//move.bottomX = move.comment.relToAbsX(move.comment.width);
+	//move.bottomY = move.comment.relToAbsY(move.comment.height);
+	// Move the Comment to the correct location.
+	move.comment.move(CodeManager.dragAbsToRelX(move.topX), CodeManager.dragAbsToRelY(move.topY));
+	// If the Comment overlaps with the BlockPalette then no slots are highlighted.
+  var wouldDelete = BlockPalette.isStackOverPalette(move.touchX, move.touchY);
+	if (wouldDelete) {
+		Highlighter.hide();   // Hide any existing highlight.
+    BlockPalette.showTrash();
+	} else {
+		BlockPalette.hideTrash();
+		// The Block which fits it best (if any) will be stored in this.fit.bestFit.
+		this.findBestFit();
+		if (this.fit.found && (this.fit.bestFit.comment == null || this.fit.bestFit.comment == this.move.comment)) {
+			this.fit.bestFit.highlight(true);   // If such a Block exists, highlight it.
+		} else {
+			Highlighter.hide();   // If not, hide any existing highlight.
+		}
+	}
+
+};
+
+/**
+ * Drops the Comment that is currently moving and connects it to the Block that fits it.
+ */
+CommentMoveManager.prototype.end = function() {
+	var move = this.move;   // shorthand
+	var fit = this.fit;   // shorthand
+
+	move.topX = move.offsetX + move.touchX;
+	move.topY = move.offsetY + move.touchY;
+	//move.bottomX = move.comment.relToAbsX(move.comment.width);
+	//move.bottomY = move.comment.relToAbsY(move.comment.height);
+	// If the BlockStack overlaps with the BlockPalette, delete it.
+  var shouldDelete = BlockPalette.isStackOverPalette(move.touchX, move.touchY);
+	if (shouldDelete) {
+		UndoManager.deleteComment(move.comment);
+	} else {
+		// The Block which fits it best (if any) will be stored in this.fit.bestFit.
+		this.findBestFit();
+    move.comment.land();
+		if (fit.found) {
+      move.comment.updateParent(fit.bestFit)
+			Sound.playSnap();
+		} else {
+      move.comment.updateParent()
+    }
+	}
+  SaveManager.markEdited();
+	Highlighter.hide();   // Hide any existing highlight.
+	BlockPalette.hideTrash();
+};
+
+/**
+ * Drops the Comment where it is without attaching it to anything or deleting it.
+ */
+CommentMoveManager.prototype.interrupt = function() {
+	var move = this.move;   // shorthand
+
+	move.topX = move.offsetX + move.touchX;
+	move.topY = move.offsetY + move.touchY;
+	move.stack.land();
+	move.stack.updateDim();   // Fix! this line of code might not be needed.
+	Highlighter.hide();   // Hide any existing highlight.
+
+};
+
+/**
+ * Recursively searches for the Block that best fits the moving Comment.
+ * All results are stored in CommentMoveManager.fit.  Nothing is returned.
+ */
+CommentMoveManager.prototype.findBestFit = function() {
+	var fit = this.fit;   // shorthand
+	fit.found = false;   // Have any matching slot/block been found?
+	fit.bestFit = null;   // Slot/Block that is closest to the item?
+	fit.dist = 0;   // How far is the best candidate from the ideal location?
+	TabManager.activeTab.findBestFit(this);   // Begins the recursive calls.
+};
 
 /**
  * An abstract class representing a way of inputting data into an EditableSlot.  Each EditableSlot can make an
@@ -18740,6 +19242,13 @@ BlockContextMenu.prototype.addOptions = function() {
 		}
 	} else {
 
+    if (this.block.comment == null) {
+      this.menuBnList.addOption(Language.getStr("Add_Comment"), function() {
+        this.block.addComment();
+        this.close();
+      }.bind(this));
+    }
+    
 		this.menuBnList.addOption(Language.getStr("Duplicate"), function() {
 			this.duplicate();
 		}.bind(this));
@@ -18958,11 +19467,12 @@ Highlighter.createPath = function() {
  * @param {boolean} isSlot - Whether the thing being highlighted is a Slot
  * @param {boolean} isGlowing - Whether the thing being highlighted already has a white outline (since it is running)
  *                              and should therefore by highlighted in black
+ * @param {boolean} isComment - Whether the instigator is a Comment
  */
-Highlighter.highlight = function(x, y, width, height, type, isSlot, isGlowing) {
+Highlighter.highlight = function(x, y, width, height, type, isSlot, isGlowing, isComment) {
 	var myX = CodeManager.dragAbsToRelX(x);
 	var myY = CodeManager.dragAbsToRelX(y);
-	var pathD = BlockGraphics.buildPath.highlight(myX, myY, width, height, type, isSlot);
+	var pathD = BlockGraphics.buildPath.highlight(myX, myY, width, height, type, isSlot, isComment);
 	Highlighter.path.setAttributeNS(null, "d", pathD);
 	if (!Highlighter.visible) {
 		GuiElements.layers.highlight.appendChild(Highlighter.path);
@@ -20595,6 +21105,8 @@ function Tab() {
 	TabManager.addTab(this);
 	// List of stacks to pass messages to
 	this.stackList = [];
+  //List of comments
+  this.commentList = [];
 	this.isRunning = false;
 	this.scrolling = false;
 	this.zooming = false;
@@ -20662,6 +21174,14 @@ Tab.prototype.clear = function() {
 };
 
 /**
+ * Updates the positioning of all comments. Called after a new block is added
+ * to a stack.
+ */
+Tab.prototype.updateComments = function() {
+  this.commentList.forEach(function(comment) { comment.update(); });
+}
+
+/**
  * Adds a new start block to the tab. Used in FinchBlox.
  */
 Tab.prototype.addStartBlock = function() {
@@ -20712,6 +21232,9 @@ Tab.prototype.getAbsY = function() {
 };
 
 /* Recursively passed messages.  Each of these function simply calls the function on the Tab's stacks */
+Tab.prototype.findBlockByID = function(request) {
+	this.passRecursively("findBlockByID", request);
+};
 Tab.prototype.findBestFit = function(moveManager) {
 	this.passRecursively("findBestFit", moveManager);
 };
@@ -20997,6 +21520,11 @@ Tab.prototype.createXml = function(xmlDoc, skipStartBlock) {
 		if (stack != null) { stacks.appendChild(stack); }
 	}
 	tab.appendChild(stacks);
+  var comments = XmlWriter.createElement(xmlDoc, "comments")
+  for (var i = 0; i < this.commentList.length; i++) {
+    var comment = this.commentList[i].createXml(xmlDoc)
+    comments.appendChild(comment)
+  }
 	return tab;
 };
 
@@ -21021,6 +21549,13 @@ Tab.importXml = function(tabNode) {
 			BlockStack.importXml(stackNodes[i], tab);
 		}
 	}
+  var commentsNode = XmlWriter.findSubElement(tabNode, "comments");
+  if (commentsNode != null) {
+    var commentNodes = XmlWriter.findSubElements(commentsNode, "comment");
+    for (var i = 0; i < commentNodes.length; i++) {
+      Comment.importXml(commentNodes[i], tab)
+    }
+  }
 	tab.updateArrows();
 	return tab;
 };
@@ -21042,6 +21577,8 @@ Tab.prototype.undoDelete = function(stackNode) {
   //if the node is really a tab node, undo delete of each stack within
   if (stackNode.nodeName === "tab") {
     return this.undoDeleteTab(stackNode);
+  } else if (stackNode.nodeName === "comment") {
+    return this.undoDeleteComment(stackNode);
   }
 
 	// The position is randomized slightly to make multiple undos look like a "pile" of blocks, so all are visible
@@ -21076,6 +21613,11 @@ Tab.prototype.undoDeleteTab = function(tabNode) {
 		}
 	}
   return success;
+}
+
+Tab.prototype.undoDeleteComment = function(commentNode) {
+  var comment = Comment.importXml(commentNode, this)
+  return true
 }
 
 /**
@@ -24296,6 +24838,9 @@ BlockStack.prototype.getAbsY = function() {
 	return this.relToAbsY(0);
 };
 
+BlockStack.prototype.findBlockByID = function(request) {
+  this.firstBlock.findBlockByID(request)
+}
 /**
  * Searches the Blocks within this BlockStack to find one which fits the moving BlockStack.
  * Returns no values but stores results on CodeManager.fit.
@@ -24305,6 +24850,20 @@ BlockStack.prototype.findBestFit = function(moveManager) {
   if (moveManager != null) {
     move = moveManager.move
   }
+  // If the thing being moved is a comment...
+  if (move.comment) {
+    // Check if the corner of the moving Comment falls within this BlockStack's
+    // bounding box plus snap region.
+    var snap = BlockGraphics.command.snap
+		var absCx = this.relToAbsX(this.dim.rx1);
+		var absCy = this.relToAbsY(this.dim.ry1 - snap.top);
+		var absW = this.relToAbsX(this.dim.rw + snap.left + snap.right) - absCx;
+		var absH = this.relToAbsY(this.dim.rh + snap.bottom) - absCy;
+		if (CodeManager.move.pInRange(move.topX, move.topY, absCx, absCy, absW, absH)) {
+			this.firstBlock.findBestFit(moveManager);
+		}
+  }
+
 	// If this BlockStack is the one being moved, it can't attach to itself.
 	if (move.stack === this) {
 		return;
@@ -24543,6 +25102,7 @@ BlockStack.prototype.snap = function(block) {
 	oldG.remove();
 
 	this.updateDim();
+  this.tab.updateComments()
   this.startRunIfAutoExec();
 };
 
@@ -24622,6 +25182,103 @@ BlockStack.prototype.remove = function() {
 	this.tab.removeStack(this);
 	this.tab.updateArrows();
 };
+
+/**
+ * Deletes all the comments attached to blocks in this stack. Called when
+ * deleting the stack.
+ */
+BlockStack.prototype.deleteComments = function() {
+  var nextBlock = this.firstBlock
+  while (nextBlock != null) {
+    if (nextBlock.comment != null) {
+      UndoManager.deleteComment(nextBlock.comment)
+    }
+    nextBlock = nextBlock.nextBlock
+  }
+}
+
+/**
+ * Arranges the comments attached to this stack so that none overlap
+ */
+BlockStack.prototype.arrangeComments = function() {
+
+  function checkBlock(block, commentsPlaced) {
+
+    if (block.comment != null) {
+      var cmnt = block.comment
+      var xOffset = 0
+      var check = block
+      if (block.parent != null && block.parent.isSlot) {
+        xOffset = block.parent.x
+        check = block.parent.parent
+      }
+
+      var maxDistFromStackEdge = getWidthFromMap(check, cmnt.height)
+      var maxWidth = check.absToRelX(check.stack.relToAbsX(maxDistFromStackEdge))
+      cmnt.x = maxWidth + 2*Comment.margin - xOffset
+      cmnt.y = 0
+      commentsPlaced.forEach(function(placedComment) {
+        var b2 = placedComment.parent
+        var x1 = block.stack.absToRelX(block.relToAbsX(cmnt.x))
+        var y1 = block.stack.absToRelY(block.relToAbsY(cmnt.y))//cmnt.parent.y
+        var w1 = cmnt.width
+        var h1 = cmnt.height
+        var x2 = b2.stack.absToRelX(b2.relToAbsX(placedComment.x))
+        var y2 = b2.stack.absToRelY(b2.relToAbsY(placedComment.y))//placedComment.parent.y
+        var w2 = placedComment.width
+        var h2 = placedComment.height
+        if (CodeManager.move.rInRange(x1, y1, w1, h1, x2, y2, w2, h2)) {
+          maxWidth = block.absToRelX(block.stack.relToAbsX(x2 + w2))
+          cmnt.x = maxWidth + 2*Comment.margin
+        }
+      });
+      GuiElements.move.group(cmnt.group, cmnt.x, cmnt.y)
+
+      var lineWidth = cmnt.x - block.width
+      cmnt.lineX = block.width
+      GuiElements.update.rect(cmnt.line, cmnt.lineX, cmnt.lineY, lineWidth, Comment.lineHeight)
+      commentsPlaced.push(cmnt)
+    }
+    return commentsPlaced
+  }
+
+  function mapBlock(block, mapArray) {
+    //skip slots since they are within other blocks
+    if (block.parent != null && block.parent.isSlot) { return mapArray }
+
+    mapArray.push({'x': (block.x + block.width), 'y': block.y})
+    return mapArray
+  }
+
+  function traverseStack(block, func, variable) {
+    if (block == null) { return variable }
+    variable = func(block, variable)
+    for (var i = 0; i < block.slots.length; i++) {
+      variable = traverseStack(block.slots[i].child, func, variable)
+    }
+    if (block.blockSlot1 != null) { variable = traverseStack(block.blockSlot1.child, func, variable) }
+    if (block.blockSlot2 != null) { variable = traverseStack(block.blockSlot2.child, func, variable) }
+    variable = traverseStack(block.nextBlock, func, variable)
+    return variable
+  }
+
+  function getWidthFromMap(block, commentHeight) {
+    var maxW = block.width + block.x
+    for (var i = 0; i < map.length; i++) {
+      var y = map[i].y
+      if (y > block.y && y < (block.y + commentHeight)) {
+        maxW = Math.max(maxW, map[i].x)
+      }
+    }
+    return maxW
+  }
+
+  var map = traverseStack(this.firstBlock, mapBlock, [])
+  map.sort(function(a, b){ return a.y - b.y })
+
+  var commentsPlaced = traverseStack(this.firstBlock, checkBlock, [])
+
+}
 
 /**
  * Passes message to first Block in BlockStack that the flag was tapped.
@@ -26728,6 +27385,23 @@ UndoManager.setUndoButton = function(button) {
 };
 
 /**
+ * Deletes a Comment and adds it to the undo stack.  If the stack is larger
+ * than the limit, the last item is removed.
+ * @param stack
+ */
+UndoManager.deleteComment = function(comment) {
+	var UM = UndoManager;
+  var doc = XmlWriter.newDoc("undoData");
+  var commentData = comment.createXml(doc);
+  comment.delete()
+  UM.undoStack.push(commentData);
+	while(UM.undoStack.length > UM.undoLimit) {
+		UM.undoStack.shift();
+	}
+	UM.updateButtonEnabled();
+}
+
+/**
  * Deletes a BlockStack and adds it to the undo stack.  If the stack is larger
  * than the limit, the last item is removed.
  * @param stack
@@ -26747,6 +27421,7 @@ UndoManager.deleteStack = function(stack) {
 	} else {
     stackData = stack.createXml(doc);
   }
+  stack.deleteComments();
 	stack.remove();
 	UM.undoStack.push(stackData);
 	while(UM.undoStack.length > UM.undoLimit) {
@@ -27047,6 +27722,10 @@ function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Comm
 	}
   //For FinchBlox. Keep a reference to a blockButton if there is one for saving.
   this.blockButton = null;
+
+  this.comment = null;
+  this.id = Block.count;
+  Block.count++;
 }
 
 /**
@@ -27059,6 +27738,8 @@ Block.setConstants = function() {
 	Block.returnTypes.string = 2;
 	Block.returnTypes.bool = 3;
 	Block.returnTypes.list = 4;
+
+  Block.count = 0;
 };
 
 /**
@@ -27717,7 +28398,25 @@ Block.prototype.findBestFit = function(moveManager) {
 				fit.dist = dist;
 			}
 		}
-	}
+	} else if (move.comment) {
+    //console.log("checking a block")
+    var snap = BlockGraphics.command.snap; //Load snap bounding box
+    var boxLeft = x + width - snap.left
+    var boxTop = y - snap.top
+    var boxW = snap.left + snap.right
+    var boxH = snap.top + height + snap.bottom
+    var success = CodeManager.move.pInRange(move.topX, move.topY, boxLeft, boxTop, boxW, boxH);
+    if (success) {
+      var xDist = move.topX - x; //If it does, compute the distance with the distance formula.
+			var yDist = move.topY - (y + height);
+      var dist = xDist * xDist + yDist * yDist; //Technically this is the distance^2.
+			if (!fit.found || dist < fit.dist) { //See if this fit is closer than the current best fit.
+				fit.found = true; //If so, save it and other helpful infromation.
+				fit.bestFit = this;
+				fit.dist = dist;
+			}
+    }
+  }
 	if (this.hasBlockSlot1) { //Pass the message on recursively.
 		this.blockSlot1.findBestFit(moveManager);
 	}
@@ -27733,9 +28432,13 @@ Block.prototype.findBestFit = function(moveManager) {
 /**
  * Adds an indicator showing that the moving BlockStack will snap onto this Block if released.
  * The indicator is a different color/shape depending on the Block's type and if it is running.
+ * If it is a Comment snaping onto a block instead of a BlockStack, the highlight is modified.
+ * @param {boolean} forComment  - True if it is a Comment that will snap on
  */
-Block.prototype.highlight = function() {
-	if (this.bottomOpen) {
+Block.prototype.highlight = function(forComment) {
+  if (forComment) {
+    Highlighter.highlight(this.relToAbsX(this.width), this.getAbsY(), this.width, this.height, 0, false, this.isGlowing, true);
+	} else if (this.bottomOpen) {
     if (FinchBlox) {
       Highlighter.highlight(this.relToAbsX(this.width), this.getAbsY(), this.width, this.height, 0, false, this.isGlowing);
     } else {
@@ -27797,6 +28500,8 @@ Block.prototype.snap = function(block) {
 		this.stack.updateDim();
 		//Update the arros on the sides of the screen in case the new block now extends beyond the edge
 		this.stack.tab.updateArrows();
+    //Update comment positioning to accomidate new blocks if necessary.
+    this.stack.tab.updateComments();
 	}
 };
 
@@ -28114,6 +28819,7 @@ Block.prototype.writeToXml = function(xmlDoc, xmlBlocks) {
 Block.prototype.createXml = function(xmlDoc) {
 	var block = XmlWriter.createElement(xmlDoc, "block");
 	XmlWriter.setAttribute(block, "type", this.blockTypeName);
+  XmlWriter.setAttribute(block, "id", this.id);
 	var slots = XmlWriter.createElement(xmlDoc, "slots");
 	// Indicates that we are using the new saving system, which uses keys assigned to each Slot to identify
 	// which data goes to which Slot.  The old system uses the order of appearance in the XML to match data to Slots
@@ -28175,6 +28881,13 @@ Block.importXml = function(blockNode) {
  * @param {Node} blockNode - The node to copy the data from
  */
 Block.prototype.copyFromXml = function(blockNode) {
+  var id = XmlWriter.getAttribute(blockNode, "id");
+  if (id != null) {
+    this.id = id
+    if (id > Block.count) {
+      Block.count = id
+    }
+  }
 	var slotsNode = XmlWriter.findSubElement(blockNode, "slots");
 	// Copy the data about the Slots into the Block.
 	this.importSlotXml(slotsNode);
@@ -28428,6 +29141,30 @@ Block.prototype.colorTopHalf = function(color) {
   this.topPath = GuiElements.create.path(this.group);
   GuiElements.update.color(this.topPath, this.topPathColor);
   TouchReceiver.addListenersChild(this.topPath, this);
+}
+
+/**
+ * Add a comment to this block
+ * @param {Comment} c - Comment to add, null to add a new comment
+ */
+Block.prototype.addComment = function(c) {
+  if (this.comment != null) {
+    console.error("Adding a comment to block that already has one")
+    return
+  }
+
+  if (c == null) {
+    c = new Comment()
+  }
+  c.updateParent(this)
+}
+
+Block.prototype.findBlockByID = function(request) {
+  if (request.id == this.id) {
+    request.block = this
+  } else if (this.nextBlock != null) {
+    this.nextBlock.findBlockByID(request)
+  }
 }
 
 /**
