@@ -162,7 +162,7 @@ InputWidget.Piano.prototype.makeKey = function(x, y, num, w, h) {
 }
 
 InputWidget.Piano.prototype.isBlackKey = function(noteNum){
-	if (InputWidget.Piano.blackKeys.includes(noteNum)) { return true; }
+	if (InputWidget.Piano.blackKeys.indexOf(noteNum) !== -1) { return true; }
 	return false;
 }
 /**
@@ -189,7 +189,7 @@ InputWidget.Piano.prototype.updatePressed = function(num) {
 		const oldPressed = this.keys[this.pressedKey];
 		oldPressed.unToggle();
 
-		const isBlack = InputWidget.Piano.blackKeys.includes(this.pressedKey);
+		const isBlack = (InputWidget.Piano.blackKeys.indexOf(this.pressedKey) !== -1);
 		if (isBlack) {
 			GuiElements.update.stroke(oldPressed.icon.pathE, Colors.black, 0);
 		} else {

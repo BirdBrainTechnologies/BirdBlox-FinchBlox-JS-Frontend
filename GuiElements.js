@@ -474,6 +474,7 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, p
 
 	editableText.charCount = 0;
 	editableText.parent = parent;
+	if (parent != null) { fo.setAttribute("style", "text-align: left;"); }
 
 	//When user presses enter, leave the text box and close soft keyboard.
 	// When pressing delete or backspace, decrease the char count.

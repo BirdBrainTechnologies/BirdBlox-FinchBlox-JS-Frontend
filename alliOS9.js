@@ -6825,6 +6825,7 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, p
 
 	editableText.charCount = 0;
 	editableText.parent = parent;
+	if (parent != null) { fo.setAttribute("style", "text-align: left;"); }
 
 	//When user presses enter, leave the text box and close soft keyboard.
 	// When pressing delete or backspace, decrease the char count.
@@ -15030,7 +15031,6 @@ Comment.importXml = function(commentNode, tab) {
   comment.edited = true
 
   var parentID = XmlWriter.getAttribute(commentNode, "id", 0, true);
-  console.log("importing xml: " + comment.x + ", " + comment.y + ", " + parentID + ", " + comment.editableText.textContent)
   if (parentID > -1) {
     var request = {}
     request.id = parentID
@@ -15082,7 +15082,7 @@ Comment.prototype.updateParent = function(newParent) {
       if (this.tab != null) {
         var index = this.tab.commentList.indexOf(this)
         this.tab.commentList.splice(index, 1)
-        console.log("moving the comment to a new tab")
+        console.log("moving the comment to a new tab - this will only ever happen if there are multiple tabs")
       }
       this.tab = newTab
       this.tab.commentList.push(this)
@@ -15128,7 +15128,6 @@ Comment.prototype.update = function() {
 
     if (!this.updated) {
       this.updated = true;
-      console.log("moving to " + this.x + ", " + this.y)
       GuiElements.move.group(this.group, this.x, this.y)
     }
   } else if (this.parent != null && !this.flying) {
@@ -15251,7 +15250,6 @@ Comment.prototype.relToAbsY = function(y) {
  * @return {Node}
  */
 Comment.prototype.createXml = function(xmlDoc) {
-  console.log("createXml " + this.lastX + ", " + this.lastY + " : " + (this.parent == null))
   var commentData = XmlWriter.createElement(xmlDoc, "comment");
 	XmlWriter.setAttribute(commentData, "x", this.lastX);
 	XmlWriter.setAttribute(commentData, "y", this.lastY);
@@ -16935,7 +16933,7 @@ InputWidget.Piano.prototype.makeKey = function(x, y, num, w, h) {
 }
 
 InputWidget.Piano.prototype.isBlackKey = function(noteNum){
-	if (InputWidget.Piano.blackKeys.includes(noteNum)) { return true; }
+	if (InputWidget.Piano.blackKeys.indexOf(noteNum) !== -1) { return true; }
 	return false;
 }
 /**
@@ -16962,7 +16960,7 @@ InputWidget.Piano.prototype.updatePressed = function(num) {
 		var oldPressed = this.keys[this.pressedKey];
 		oldPressed.unToggle();
 
-		var isBlack = InputWidget.Piano.blackKeys.includes(this.pressedKey);
+		var isBlack = (InputWidget.Piano.blackKeys.indexOf(this.pressedKey) !== -1);
 		if (isBlack) {
 			GuiElements.update.stroke(oldPressed.icon.pathE, Colors.black, 0);
 		} else {
@@ -25217,15 +25215,15 @@ BlockStack.prototype.arrangeComments = function() {
       var cmnt = block.comment
       var xOffset = 0
       var check = block
-      if (block.parent != null && block.parent.isSlot) {
-        xOffset = block.parent.x
-        check = block.parent.parent
+      while (check.parent != null && check.parent.isSlot) {
+        xOffset += check.parent.x
+        check = check.parent.parent
       }
 
       var maxDistFromStackEdge = getWidthFromMap(check, cmnt.height)
       var maxWidth = check.absToRelX(check.stack.relToAbsX(maxDistFromStackEdge))
       cmnt.x = maxWidth + 2*Comment.margin - xOffset
-      cmnt.y = 0
+      cmnt.y = check.y - block.y //0
       commentsPlaced.forEach(function(placedComment) {
         var b2 = placedComment.parent
         var x1 = block.stack.absToRelX(block.relToAbsX(cmnt.x))
@@ -25245,6 +25243,7 @@ BlockStack.prototype.arrangeComments = function() {
 
       var lineWidth = cmnt.x - block.width
       cmnt.lineX = block.width
+      cmnt.lineY = block.hasBlockSlot1 ? block.topHeight/2 : block.height/2
       GuiElements.update.rect(cmnt.line, cmnt.lineX, cmnt.lineY, lineWidth, Comment.lineHeight)
 
       cmnt.setPosition()
@@ -27583,7 +27582,7 @@ LevelManager.loadLevelSavePoint = function() {
     }, 200);
     return;
   }
-  if (!LM.filesSavedLocally.includes(levelFileName)) {
+  if (LM.filesSavedLocally.indexOf(levelFileName) === -1) {
     //console.log("file '" + levelFileName + "' not found. Must create...");
     var request = new HttpRequestBuilder("data/new");
     request.addParam("filename", levelFileName);
@@ -27875,7 +27874,7 @@ Block.prototype.parseTranslation = function(text) {
 	}
 	//Check to make sure all slots got added, and add any that were missed.
 	for (var i = 0; i < this.slots.length; i++){
-		if (!slotsInserted.includes(i)) {
+		if (slotsInserted.indexOf(i) === -1) {
 			newParts.push(this.slots[i]);
 		}
 	}
@@ -29955,7 +29954,7 @@ BlockPart.prototype.setActive = function(active) {
 function Slot(parent, key, snapType, outputType){
 	DebugOptions.validateNonNull(parent, key, snapType, outputType);
 	//Key always includes "_" and is of the form DataType_description. See BlockDefs for examples
-	DebugOptions.assert(key.includes("_"));
+	DebugOptions.assert(key.indexOf("_") !== -1);
 	//Store data passed by constructor.
 	this.snapType = snapType;
 	this.outputType = outputType;

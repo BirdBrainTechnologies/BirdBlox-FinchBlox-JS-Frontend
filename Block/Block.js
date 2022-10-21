@@ -206,7 +206,7 @@ Block.prototype.parseTranslation = function(text) {
 	}
 	//Check to make sure all slots got added, and add any that were missed.
 	for (var i = 0; i < this.slots.length; i++){
-		if (!slotsInserted.includes(i)) {
+		if (slotsInserted.indexOf(i) === -1) {
 			newParts.push(this.slots[i]);
 		}
 	}

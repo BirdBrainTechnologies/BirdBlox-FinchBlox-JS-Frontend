@@ -514,15 +514,15 @@ BlockStack.prototype.arrangeComments = function() {
       let cmnt = block.comment
       let xOffset = 0
       let check = block
-      if (block.parent != null && block.parent.isSlot) {
-        xOffset = block.parent.x
-        check = block.parent.parent
+      while (check.parent != null && check.parent.isSlot) {
+        xOffset += check.parent.x
+        check = check.parent.parent
       }
 
       let maxDistFromStackEdge = getWidthFromMap(check, cmnt.height)
       let maxWidth = check.absToRelX(check.stack.relToAbsX(maxDistFromStackEdge))
       cmnt.x = maxWidth + 2*Comment.margin - xOffset
-      cmnt.y = 0
+      cmnt.y = check.y - block.y //0
       commentsPlaced.forEach(function(placedComment) {
         const b2 = placedComment.parent
         let x1 = block.stack.absToRelX(block.relToAbsX(cmnt.x))
@@ -542,6 +542,7 @@ BlockStack.prototype.arrangeComments = function() {
 
       const lineWidth = cmnt.x - block.width
       cmnt.lineX = block.width
+      cmnt.lineY = block.hasBlockSlot1 ? block.topHeight/2 : block.height/2
       GuiElements.update.rect(cmnt.line, cmnt.lineX, cmnt.lineY, lineWidth, Comment.lineHeight)
 
       cmnt.setPosition()

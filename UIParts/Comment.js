@@ -66,7 +66,6 @@ Comment.importXml = function(commentNode, tab) {
   comment.edited = true
 
   const parentID = XmlWriter.getAttribute(commentNode, "id", 0, true);
-  console.log("importing xml: " + comment.x + ", " + comment.y + ", " + parentID + ", " + comment.editableText.textContent)
   if (parentID > -1) {
     const request = {}
     request.id = parentID
@@ -118,7 +117,7 @@ Comment.prototype.updateParent = function(newParent) {
       if (this.tab != null) {
         const index = this.tab.commentList.indexOf(this)
         this.tab.commentList.splice(index, 1)
-        console.log("moving the comment to a new tab")
+        console.log("moving the comment to a new tab - this will only ever happen if there are multiple tabs")
       }
       this.tab = newTab
       this.tab.commentList.push(this)
@@ -164,7 +163,6 @@ Comment.prototype.update = function() {
 
     if (!this.updated) {
       this.updated = true;
-      console.log("moving to " + this.x + ", " + this.y)
       GuiElements.move.group(this.group, this.x, this.y)
     }
   } else if (this.parent != null && !this.flying) {
@@ -287,7 +285,6 @@ Comment.prototype.relToAbsY = function(y) {
  * @return {Node}
  */
 Comment.prototype.createXml = function(xmlDoc) {
-  console.log("createXml " + this.lastX + ", " + this.lastY + " : " + (this.parent == null))
   const commentData = XmlWriter.createElement(xmlDoc, "comment");
 	XmlWriter.setAttribute(commentData, "x", this.lastX);
 	XmlWriter.setAttribute(commentData, "y", this.lastY);

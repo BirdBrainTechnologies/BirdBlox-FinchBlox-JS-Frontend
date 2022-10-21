@@ -79,7 +79,7 @@ LevelManager.loadLevelSavePoint = function() {
     }, 200);
     return;
   }
-  if (!LM.filesSavedLocally.includes(levelFileName)) {
+  if (LM.filesSavedLocally.indexOf(levelFileName) === -1) {
     //console.log("file '" + levelFileName + "' not found. Must create...");
     const request = new HttpRequestBuilder("data/new");
     request.addParam("filename", levelFileName);

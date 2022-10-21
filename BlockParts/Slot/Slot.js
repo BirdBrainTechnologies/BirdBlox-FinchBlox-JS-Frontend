@@ -17,7 +17,7 @@
 function Slot(parent, key, snapType, outputType){
 	DebugOptions.validateNonNull(parent, key, snapType, outputType);
 	//Key always includes "_" and is of the form DataType_description. See BlockDefs for examples
-	DebugOptions.assert(key.includes("_"));
+	DebugOptions.assert(key.indexOf("_") !== -1);
 	//Store data passed by constructor.
 	this.snapType = snapType;
 	this.outputType = outputType;
