@@ -1,2 +1,2 @@
-var FinchBlox = false;
+var FinchBlox = true;
 const FrontendVersion = 393;

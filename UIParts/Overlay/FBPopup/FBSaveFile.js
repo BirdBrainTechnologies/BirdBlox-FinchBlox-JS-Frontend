@@ -33,7 +33,7 @@ FBSaveFile.prototype.show = function() {
   const textY = font.charHeight/2;//(innerHeight/3 + font.charHeight) / 2;
   this.charCount = 0;
 
-  this.editableText = GuiElements.create.editableText(font, textColor, 0, textY, this.innerWidth, this.textBoxHeight, this.innerGroup, this)
+  this.editableText = GuiElements.create.editableText(font, textColor, 0, textY, this.innerWidth, this.textBoxHeight, this.innerGroup)
   if (this.currentName != null) { this.editableText.textContent = this.currentName; }
 
   TouchReceiver.addListenersEditText(this.editableText, this);

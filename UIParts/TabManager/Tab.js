@@ -88,6 +88,66 @@ Tab.prototype.clear = function() {
 };
 
 /**
+ * Recenters the view so that blocks are visible. Used in FinchBlox.
+ */
+Tab.prototype.recenter = function() {
+  //Create a bounding box around stacks with hat blocks. If none are found, the
+  // entire tab will be used.
+  const ssDim = {}
+  for (let i = 0; i < this.stackList.length; i++) {
+    if (this.stackList[i].firstBlock.hasHat) {//this.stackList[i].firstBlock.isStartBlock) {
+      let s = this.stackList[i]
+      if (ssDim.x1 == null || s.x < ssDim.x1) {
+    		ssDim.x1 = s.x;
+    	}
+    	if (ssDim.y1 == null || s.y < ssDim.y1) {
+    		ssDim.y1 = s.y;
+    	}
+    	const x2 = s.x + s.dim.rw;
+    	if (ssDim.x2 == null || x2 > ssDim.x2) {
+    		ssDim.x2 = x2;
+    	}
+    	const y2 = s.y + s.dim.rh;
+    	if (ssDim.y2 == null || y2 > ssDim.y2) {
+    		ssDim.y2 = y2;
+    	}
+    }
+  }
+
+  if (ssDim.x1 != null) {
+    this.fitBox(ssDim)
+  } else {
+    this.fitBox(this.dim)
+  }
+}
+Tab.prototype.fitBox = function(box) {
+  const oa = this.overFlowArr
+  let left = this.relToAbsX(box.x1);
+  let top = this.relToAbsY(box.y1);
+  let right = this.relToAbsX(box.x2);
+  let bottom = this.relToAbsY(box.y2);
+  let horizontalOverflow = (right - left) - (oa.right - oa.left)
+  let verticalOverflow = (bottom - top) - (oa.bottom - oa.top)
+
+  //If the box cannot fit on the screen, then zoom out if possible.
+  if ((horizontalOverflow > 0 || verticalOverflow > 0) && (this.zoomFactor > TabManager.minZoom)){
+    this.zoomFactor = Math.max(TabManager.minZoom, this.zoomFactor * 0.9);
+    GuiElements.move.group(this.mainG, this.scrollX, this.scrollY, this.zoomFactor);
+    this.updateTabDim();
+    this.fitBox(box)
+  } else {
+    let leftOverflow = oa.left - left
+    let topOverflow = oa.top - top
+    this.scrollX = this.scrollX + leftOverflow - (horizontalOverflow < 0 ? horizontalOverflow/2 : 0)
+    this.scrollY = this.scrollY + topOverflow - (verticalOverflow < 0 ? verticalOverflow/2 : 0)
+    GuiElements.move.group(this.mainG, this.scrollX, this.scrollY, this.zoomFactor);
+    this.updateTabDim();
+    this.updateTransform();
+  	this.updateArrowsShift();
+  }
+}
+
+/**
  * Adds a new start block to the tab. Used in FinchBlox.
  */
 Tab.prototype.addStartBlock = function() {

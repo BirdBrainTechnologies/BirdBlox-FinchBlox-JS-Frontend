@@ -19,7 +19,9 @@ OverflowArrows.setConstants = function() {
 	OA.margin = 15;
 	OA.opacity = 0.5;
 	if (FinchBlox) {
-		OA.color = Colors.lightLightGray;
+		OA.color = Colors.fbGray; //Colors.iron; //Colors.lightLightGray;
+		OA.outlineColor = Colors.bbtDarkGray;
+		OA.outlineW = 1;
 	} else {
 		OA.color = Colors.white;
 	}
@@ -34,6 +36,7 @@ OverflowArrows.prototype.makeTriangle = function() {
 	const tri = GuiElements.create.path();
 	GuiElements.update.color(tri, OA.color);
 	GuiElements.update.opacity(tri, OA.opacity);
+	if (FinchBlox) { GuiElements.update.stroke(tri, OA.outlineColor, OA.outlineW) }
 	GuiElements.update.makeClickThrough(tri);
 	return tri;
 };

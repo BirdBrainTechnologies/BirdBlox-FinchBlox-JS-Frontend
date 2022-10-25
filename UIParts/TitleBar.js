@@ -268,11 +268,7 @@ TitleBar.makeButtons = function() {
     }
     DeviceManager.setStatusListener(TB.updateStatus);
 
-    //TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.tallButtonH/2), TB.finchBnW, TB.tallButtonH, TBLayer, Colors.finchGreen, TB.longButtonW/2, TB.tallButtonH/2);
-    //TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.buttonH/2), TB.finchBnW, TB.buttonH, TBLayer, Colors.fbGray, r, r);
-		TB.finchButton = new Button((TB.sideWidth - TB.longButtonW)/2, (TB.height/2) - (TB.tallButtonH/2), TB.longButtonW, TB.tallButtonH, TBLayer, Colors.fbGray, r, r);
-    //TB.finchButton.addIcon(VectorPaths.stop, TB.bnIconH * 0.8);
-    //TB.finchButton.addSecondIcon(VectorPaths.battery, TB.bnIconH * 0.6, Colors.iron, 90);
+    TB.finchButton = new Button((TB.sideWidth - TB.longButtonW)/2, (TB.height/2) - (TB.tallButtonH/2), TB.longButtonW, TB.tallButtonH, TBLayer, Colors.fbGray, r, r);
 		TB.finchButton.addFinchBnIcons();
 		TB.finchButton.setCallbackFunction(function(){
 			switch (DeviceManager.getStatus()){
@@ -288,27 +284,16 @@ TitleBar.makeButtons = function() {
 			}
 		}, true);
 
-    /*const fdMarg = TB.buttonMargin*2/3;
-    const fdX = TB.width - TB.buttonW;
-    const fdY = TB.height + fdMarg;
-    const fdW = TB.longButtonW;
-    const fdH = h - 2*fdMarg;
-    TB.fileDisplay = GuiElements.create.group(fdX, fdY, TBLayer);
-    const fileDisplayBG = GuiElements.draw.rect(0, 0, fdW, fdH, Colors.fbGray, r, r);
-	  TB.fileDisplay.appendChild(fileDisplayBG);
-
-    const fileBnW = h - 3*fdMarg;
-    const fileBnX = (TB.buttonW - fileBnW)/2;
-    const fileBnH = h - 4*fdMarg;
-    TB.fileBn = new Button(fileBnX, fdMarg, fileBnW, fileBnH, TB.fileDisplay, Colors.easternBlue, r/2, r/2);
-  	TB.fileBn.addIcon(VectorPaths.faSave, TB.bnIconH * 0.5);
-  	//TB.fileBn.setCallbackFunction(function() {(new FBFileSelect(TB.fileBn, TB.fileDisplay)).show();}, true);
-    TB.fileBn.setCallbackFunction(function() {(new FBSaveFile(fdX, fdY, fdW, fdH, TB.fileDisplay, TBLayer)).show();}, true);
-
-    TB.updateFileBn = function() {
-
-    }*/
     TB.fileBn = new FBFileNameDisplay();
+    const rcBnW = TB.fileBn.H + TB.fileBn.r//TB.shortButtonW
+    const rcBnH = TB.fileBn.H - TB.fileBn.margin
+    const rcBnX = TB.width - rcBnW + TB.fileBn.r
+    const rcBnY = TB.height + 2*TB.fileBn.margin + TB.fileBn.H
+    TB.recenterBn = new Button(rcBnX, rcBnY, rcBnW, rcBnH, TBLayer, TB.fileBn.bgColor, TB.fileBn.r, TB.fileBn.r)
+    TB.recenterBn.addColorIcon(VectorPaths.faCrosshairs, TB.bnIconH * 0.5, Colors.bbtDarkGray)
+    TB.recenterBn.setCallbackFunction(function(){
+      TabManager.activeTab.recenter()
+    })
 
   } else {
     TB.flagBn = new Button(TB.flagBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);

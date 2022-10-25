@@ -1,5 +1,5 @@
 "use strict";
-var FinchBlox = false;
+var FinchBlox = true;
 const FrontendVersion = 393;
 
 
@@ -8731,6 +8731,10 @@ function VectorPaths(){
   VP.mvArrow.width=83;
   VP.mvArrow.height=83;
   VP.mvArrow.transform="matrix(8.76256e-17,-1.43103,1.43103,8.76256e-17,-721.241,439.328)";
+  VP.faCrosshairs={};
+  VP.faCrosshairs.path="M256 0c17.7 0 32 14.3 32 32V42.4c93.7 13.9 167.7 88 181.6 181.6H480c17.7 0 32 14.3 32 32s-14.3 32-32 32H469.6c-13.9 93.7-88 167.7-181.6 181.6V480c0 17.7-14.3 32-32 32s-32-14.3-32-32V469.6C130.3 455.7 56.3 381.7 42.4 288H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H42.4C56.3 130.3 130.3 56.3 224 42.4V32c0-17.7 14.3-32 32-32zM107.4 288c12.5 58.3 58.4 104.1 116.6 116.6V384c0-17.7 14.3-32 32-32s32 14.3 32 32v20.6c58.3-12.5 104.1-58.4 116.6-116.6H384c-17.7 0-32-14.3-32-32s14.3-32 32-32h20.6C392.1 165.7 346.3 119.9 288 107.4V128c0 17.7-14.3 32-32 32s-32-14.3-32-32V107.4C165.7 119.9 119.9 165.7 107.4 224H128c17.7 0 32 14.3 32 32s-14.3 32-32 32H107.4zM256 288c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z";
+  VP.faCrosshairs.width=512;
+  VP.faCrosshairs.height=512;
   VP.faSave={};
   VP.faSave.path="M433.941 129.941l-83.882-83.882A48 48 0 0 0 316.118 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V163.882a48 48 0 0 0-14.059-33.941zM224 416c-35.346 0-64-28.654-64-64 0-35.346 28.654-64 64-64s64 28.654 64 64c0 35.346-28.654 64-64 64zm96-304.52V212c0 6.627-5.373 12-12 12H76c-6.627 0-12-5.373-12-12V108c0-6.627 5.373-12 12-12h228.52c3.183 0 6.235 1.264 8.485 3.515l3.48 3.48A11.996 11.996 0 0 1 320 111.48z";
   VP.faSave.width=448;
@@ -11701,11 +11705,7 @@ TitleBar.makeButtons = function() {
     }
     DeviceManager.setStatusListener(TB.updateStatus);
 
-    //TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.tallButtonH/2), TB.finchBnW, TB.tallButtonH, TBLayer, Colors.finchGreen, TB.longButtonW/2, TB.tallButtonH/2);
-    //TB.finchButton = new Button(TB.finchBnX, (TB.height/2) - (TB.buttonH/2), TB.finchBnW, TB.buttonH, TBLayer, Colors.fbGray, r, r);
-		TB.finchButton = new Button((TB.sideWidth - TB.longButtonW)/2, (TB.height/2) - (TB.tallButtonH/2), TB.longButtonW, TB.tallButtonH, TBLayer, Colors.fbGray, r, r);
-    //TB.finchButton.addIcon(VectorPaths.stop, TB.bnIconH * 0.8);
-    //TB.finchButton.addSecondIcon(VectorPaths.battery, TB.bnIconH * 0.6, Colors.iron, 90);
+    TB.finchButton = new Button((TB.sideWidth - TB.longButtonW)/2, (TB.height/2) - (TB.tallButtonH/2), TB.longButtonW, TB.tallButtonH, TBLayer, Colors.fbGray, r, r);
 		TB.finchButton.addFinchBnIcons();
 		TB.finchButton.setCallbackFunction(function(){
 			switch (DeviceManager.getStatus()){
@@ -11721,27 +11721,16 @@ TitleBar.makeButtons = function() {
 			}
 		}, true);
 
-    /*const fdMarg = TB.buttonMargin*2/3;
-    const fdX = TB.width - TB.buttonW;
-    const fdY = TB.height + fdMarg;
-    const fdW = TB.longButtonW;
-    const fdH = h - 2*fdMarg;
-    TB.fileDisplay = GuiElements.create.group(fdX, fdY, TBLayer);
-    const fileDisplayBG = GuiElements.draw.rect(0, 0, fdW, fdH, Colors.fbGray, r, r);
-	  TB.fileDisplay.appendChild(fileDisplayBG);
-
-    const fileBnW = h - 3*fdMarg;
-    const fileBnX = (TB.buttonW - fileBnW)/2;
-    const fileBnH = h - 4*fdMarg;
-    TB.fileBn = new Button(fileBnX, fdMarg, fileBnW, fileBnH, TB.fileDisplay, Colors.easternBlue, r/2, r/2);
-  	TB.fileBn.addIcon(VectorPaths.faSave, TB.bnIconH * 0.5);
-  	//TB.fileBn.setCallbackFunction(function() {(new FBFileSelect(TB.fileBn, TB.fileDisplay)).show();}, true);
-    TB.fileBn.setCallbackFunction(function() {(new FBSaveFile(fdX, fdY, fdW, fdH, TB.fileDisplay, TBLayer)).show();}, true);
-
-    TB.updateFileBn = function() {
-
-    }*/
     TB.fileBn = new FBFileNameDisplay();
+    const rcBnW = TB.fileBn.H + TB.fileBn.r//TB.shortButtonW
+    const rcBnH = TB.fileBn.H - TB.fileBn.margin
+    const rcBnX = TB.width - rcBnW + TB.fileBn.r
+    const rcBnY = TB.height + 2*TB.fileBn.margin + TB.fileBn.H
+    TB.recenterBn = new Button(rcBnX, rcBnY, rcBnW, rcBnH, TBLayer, TB.fileBn.bgColor, TB.fileBn.r, TB.fileBn.r)
+    TB.recenterBn.addColorIcon(VectorPaths.faCrosshairs, TB.bnIconH * 0.5, Colors.bbtDarkGray)
+    TB.recenterBn.setCallbackFunction(function(){
+      TabManager.activeTab.recenter()
+    })
 
   } else {
     TB.flagBn = new Button(TB.flagBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
@@ -17772,7 +17761,7 @@ FBSaveFile.prototype.show = function() {
   const textY = font.charHeight/2;//(innerHeight/3 + font.charHeight) / 2;
   this.charCount = 0;
 
-  this.editableText = GuiElements.create.editableText(font, textColor, 0, textY, this.innerWidth, this.textBoxHeight, this.innerGroup, this)
+  this.editableText = GuiElements.create.editableText(font, textColor, 0, textY, this.innerWidth, this.textBoxHeight, this.innerGroup)
   if (this.currentName != null) { this.editableText.textContent = this.currentName; }
 
   TouchReceiver.addListenersEditText(this.editableText, this);
@@ -21188,6 +21177,66 @@ Tab.prototype.clear = function() {
 };
 
 /**
+ * Recenters the view so that blocks are visible. Used in FinchBlox.
+ */
+Tab.prototype.recenter = function() {
+  //Create a bounding box around stacks with hat blocks. If none are found, the
+  // entire tab will be used.
+  const ssDim = {}
+  for (let i = 0; i < this.stackList.length; i++) {
+    if (this.stackList[i].firstBlock.hasHat) {//this.stackList[i].firstBlock.isStartBlock) {
+      let s = this.stackList[i]
+      if (ssDim.x1 == null || s.x < ssDim.x1) {
+    		ssDim.x1 = s.x;
+    	}
+    	if (ssDim.y1 == null || s.y < ssDim.y1) {
+    		ssDim.y1 = s.y;
+    	}
+    	const x2 = s.x + s.dim.rw;
+    	if (ssDim.x2 == null || x2 > ssDim.x2) {
+    		ssDim.x2 = x2;
+    	}
+    	const y2 = s.y + s.dim.rh;
+    	if (ssDim.y2 == null || y2 > ssDim.y2) {
+    		ssDim.y2 = y2;
+    	}
+    }
+  }
+
+  if (ssDim.x1 != null) {
+    this.fitBox(ssDim)
+  } else {
+    this.fitBox(this.dim)
+  }
+}
+Tab.prototype.fitBox = function(box) {
+  const oa = this.overFlowArr
+  let left = this.relToAbsX(box.x1);
+  let top = this.relToAbsY(box.y1);
+  let right = this.relToAbsX(box.x2);
+  let bottom = this.relToAbsY(box.y2);
+  let horizontalOverflow = (right - left) - (oa.right - oa.left)
+  let verticalOverflow = (bottom - top) - (oa.bottom - oa.top)
+
+  //If the box cannot fit on the screen, then zoom out if possible.
+  if ((horizontalOverflow > 0 || verticalOverflow > 0) && (this.zoomFactor > TabManager.minZoom)){
+    this.zoomFactor = Math.max(TabManager.minZoom, this.zoomFactor * 0.9);
+    GuiElements.move.group(this.mainG, this.scrollX, this.scrollY, this.zoomFactor);
+    this.updateTabDim();
+    this.fitBox(box)
+  } else {
+    let leftOverflow = oa.left - left
+    let topOverflow = oa.top - top
+    this.scrollX = this.scrollX + leftOverflow - (horizontalOverflow < 0 ? horizontalOverflow/2 : 0)
+    this.scrollY = this.scrollY + topOverflow - (verticalOverflow < 0 ? verticalOverflow/2 : 0)
+    GuiElements.move.group(this.mainG, this.scrollX, this.scrollY, this.zoomFactor);
+    this.updateTabDim();
+    this.updateTransform();
+  	this.updateArrowsShift();
+  }
+}
+
+/**
  * Adds a new start block to the tab. Used in FinchBlox.
  */
 Tab.prototype.addStartBlock = function() {
@@ -24585,7 +24634,9 @@ OverflowArrows.setConstants = function() {
 	OA.margin = 15;
 	OA.opacity = 0.5;
 	if (FinchBlox) {
-		OA.color = Colors.lightLightGray;
+		OA.color = Colors.fbGray; //Colors.iron; //Colors.lightLightGray;
+		OA.outlineColor = Colors.bbtDarkGray;
+		OA.outlineW = 1;
 	} else {
 		OA.color = Colors.white;
 	}
@@ -24600,6 +24651,7 @@ OverflowArrows.prototype.makeTriangle = function() {
 	const tri = GuiElements.create.path();
 	GuiElements.update.color(tri, OA.color);
 	GuiElements.update.opacity(tri, OA.opacity);
+	if (FinchBlox) { GuiElements.update.stroke(tri, OA.outlineColor, OA.outlineW) }
 	GuiElements.update.makeClickThrough(tri);
 	return tri;
 };
