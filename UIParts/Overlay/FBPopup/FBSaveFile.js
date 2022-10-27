@@ -7,7 +7,7 @@
  * @param  {type} h           parent h
  * @param  {type} parentGroup parent group
  */
-function FBSaveFile (x, y, w, h, parentGroup, currentName) {
+function FBSaveFile(x, y, w, h, parentGroup, currentName) {
   FBPopup.call(this, x, y, w, h, parentGroup);
   this.currentName = currentName;
 }
@@ -15,12 +15,12 @@ FBSaveFile.prototype = Object.create(FBPopup.prototype);
 FBSaveFile.prototype.constructor = FBSaveFile;
 
 FBSaveFile.prototype.show = function() {
-  FBPopup.prototype.show.call(this, 3/10);
+  FBPopup.prototype.show.call(this, 3 / 10);
 
   const r = TitleBar.defaultCornerRounding;
 
   //The grey rectangle around the text box
-  this.textBoxHeight = this.innerHeight/3;
+  this.textBoxHeight = this.innerHeight / 3;
   this.textRect = GuiElements.draw.rect(0, 0, this.innerWidth, this.textBoxHeight, Colors.white, r, r);
   GuiElements.update.stroke(this.textRect, Colors.fbGray, 2);
   this.innerGroup.appendChild(this.textRect);
@@ -30,11 +30,13 @@ FBSaveFile.prototype.show = function() {
 
   const font = FBPopup.font;
   const textColor = FBPopup.fontColor;
-  const textY = font.charHeight/2;//(innerHeight/3 + font.charHeight) / 2;
+  const textY = font.charHeight / 2; //(innerHeight/3 + font.charHeight) / 2;
   this.charCount = 0;
 
   this.editableText = GuiElements.create.editableText(font, textColor, 0, textY, this.innerWidth, this.textBoxHeight, this.innerGroup)
-  if (this.currentName != null) { this.editableText.textContent = this.currentName; }
+  if (this.currentName != null) {
+    this.editableText.textContent = this.currentName;
+  }
 
   TouchReceiver.addListenersEditText(this.editableText, this);
 
@@ -46,13 +48,13 @@ FBSaveFile.prototype.editText = function() {
   this.editableText.focus();
 }
 
-FBSaveFile.prototype.confirm = function () {
+FBSaveFile.prototype.confirm = function() {
   if (this.editableText == null ||
     this.editableText.textContent == null ||
     this.editableText.textContent == "") {
-      //console.log("confirm button pressed without a name");
-      return;
-    }
+    //console.log("confirm button pressed without a name");
+    return;
+  }
 
   let fileName = this.editableText.textContent
 

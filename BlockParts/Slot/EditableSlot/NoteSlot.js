@@ -16,23 +16,23 @@ NoteSlot.prototype = Object.create(NumSlot.prototype);
 NoteSlot.prototype.constructor = NoteSlot;
 
 /**
-  * @inheritDoc
-  * @return {InputPad}
-  */
+ * @inheritDoc
+ * @return {InputPad}
+ */
 NoteSlot.prototype.createInputSystem = function() {
-	const x1 = this.getAbsX();
-	const y1 = this.getAbsY();
-	const x2 = this.relToAbsX(this.width);
-	const y2 = this.relToAbsY(this.height);
+  const x1 = this.getAbsX();
+  const y1 = this.getAbsY();
+  const x2 = this.relToAbsX(this.width);
+  const y2 = this.relToAbsY(this.height);
 
   const labelText = InputWidget.Piano.noteStrings[this.enteredData.getValue()]
   this.label = new InputWidget.Label(labelText)
 
-	const inputPad = new InputPad(x1, x2, y1, y2);
+  const inputPad = new InputPad(x1, x2, y1, y2);
   inputPad.addWidget(this.label);
-	inputPad.addWidget(new InputWidget.Piano(0));
+  inputPad.addWidget(new InputWidget.Piano(0));
 
-	return inputPad;
+  return inputPad;
 };
 
 
@@ -46,10 +46,10 @@ NoteSlot.prototype.updateEdit = function(data) {
   const labelText = InputWidget.Piano.noteStrings[midiNote]
   const ipW = InputWidget.Piano.inputPadWidth;
   GuiElements.update.textLimitWidth(this.label.textE, labelText, ipW);
-	const textW = GuiElements.measure.textWidth(this.label.textE);
-	const textX = ipW / 2 - textW / 2;
-	const textY = this.label.textY;
-	GuiElements.move.text(this.label.textE, textX, textY);
+  const textW = GuiElements.measure.textWidth(this.label.textE);
+  const textX = ipW / 2 - textW / 2;
+  const textY = this.label.textY;
+  GuiElements.move.text(this.label.textE, textX, textY);
 
   //Play the proposed note
   HtmlServer.sendTabletSoundRequest(midiNote, CodeManager.beatsToMs(0.5));

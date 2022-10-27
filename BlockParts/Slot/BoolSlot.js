@@ -6,9 +6,9 @@
  * @param {Block} parent
  * @param {string} key
  */
-function BoolSlot(parent,key){
-	//Make HexSlot.
-	HexSlot.call(this,parent,key,Slot.snapTypes.bool);
+function BoolSlot(parent, key) {
+  //Make HexSlot.
+  HexSlot.call(this, parent, key, Slot.snapTypes.bool);
 }
 BoolSlot.prototype = Object.create(HexSlot.prototype);
 BoolSlot.prototype.constructor = BoolSlot;

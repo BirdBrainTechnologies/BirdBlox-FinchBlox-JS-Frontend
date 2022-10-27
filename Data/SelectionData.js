@@ -13,12 +13,12 @@
  * @constructor
  */
 function SelectionData(displayText, value, isValid) {
-	// Only the empty SelectionData can have "" as the value.  So value === "" implies displayText === ""
-	DebugOptions.assert(value !== "" || displayText === "");
+  // Only the empty SelectionData can have "" as the value.  So value === "" implies displayText === ""
+  DebugOptions.assert(value !== "" || displayText === "");
 
-	DebugOptions.validateNonNull(displayText, value);
-	Data.call(this, Data.types.selection, value, isValid);
-	this.displayText = displayText;
+  DebugOptions.validateNonNull(displayText, value);
+  Data.call(this, Data.types.selection, value, isValid);
+  this.displayText = displayText;
 }
 SelectionData.prototype = Object.create(Data.prototype);
 SelectionData.prototype.constructor = SelectionData;
@@ -28,14 +28,14 @@ SelectionData.prototype.constructor = SelectionData;
  * @return {StringData}
  */
 SelectionData.prototype.asString = function() {
-	return new StringData(this.displayText, true);
+  return new StringData(this.displayText, true);
 };
 
 /**
  * @return {SelectionData}
  */
 SelectionData.prototype.asSelection = function() {
-	return this;
+  return this;
 };
 
 /**
@@ -43,7 +43,7 @@ SelectionData.prototype.asSelection = function() {
  * @return {boolean}
  */
 SelectionData.prototype.isEmpty = function() {
-	return this.value === "";
+  return this.value === "";
 };
 
 /**
@@ -55,9 +55,9 @@ SelectionData.prototype.isEmpty = function() {
  * @return {SelectionData|null}
  */
 SelectionData.importXml = function(dataNode) {
-	const value = XmlWriter.getTextNode(dataNode, "value");
-	if (value == null) return null;
-	return new SelectionData("", value);
+  const value = XmlWriter.getTextNode(dataNode, "value");
+  if (value == null) return null;
+  return new SelectionData("", value);
 };
 
 /**
@@ -67,5 +67,5 @@ SelectionData.importXml = function(dataNode) {
  * @return {SelectionData}
  */
 SelectionData.empty = function(isValid) {
-	return new SelectionData("", "", isValid);
+  return new SelectionData("", "", isValid);
 };

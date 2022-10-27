@@ -11,105 +11,107 @@
  * @constructor
  */
 function Category(buttonX, buttonY, name, id) {
-	this.buttonX = buttonX;
-	this.buttonY = buttonY;
-	this.id = id;
-	this.name = name;
+  this.buttonX = buttonX;
+  this.buttonY = buttonY;
+  this.id = id;
+  this.name = name;
 
-	//this.x = 0;
-	//this.y = TitleBar.height + BlockPalette.catH;
+  //this.x = 0;
+  //this.y = TitleBar.height + BlockPalette.catH;
   this.x = BlockPalette.catX;
   this.y = BlockPalette.catY + BlockPalette.catH;
 
   this.level = 4;
   const l = parseInt(this.id.split("_").pop());
-  if (!isNaN(l)) { this.level = l; }
+  if (!isNaN(l)) {
+    this.level = l;
+  }
 
-	this.group = GuiElements.create.group(0, 0);
-	this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, 0, BlockPalette.y,
-		BlockPalette.width, BlockPalette.height, 0, 0);
-	this.button = new CategoryBN(this.buttonX, this.buttonY, this);
+  this.group = GuiElements.create.group(0, 0);
+  this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, 0, BlockPalette.y,
+    BlockPalette.width, BlockPalette.height, 0, 0);
+  this.button = new CategoryBN(this.buttonX, this.buttonY, this);
 
-	//When the screen is flipped for right to left languages, the categories will
-	// still appear left justified (so that long blocks push the rest off the
-	// screen) unless this value is set. TODO: find a more logical solution to this problem
-	if (Language.isRTL) {
-		this.group.parentNode.parentNode.setAttribute('style', 'position: absolute; left: 0px;');
-	}
+  //When the screen is flipped for right to left languages, the categories will
+  // still appear left justified (so that long blocks push the rest off the
+  // screen) unless this value is set. TODO: find a more logical solution to this problem
+  if (Language.isRTL) {
+    this.group.parentNode.parentNode.setAttribute('style', 'position: absolute; left: 0px;');
+  }
 
-	this.prepareToFill();
-	this.fillGroup();
+  this.prepareToFill();
+  this.fillGroup();
 }
 
 /**
  * Prepares this Category to be filled with Block/Buttons/etc.
  */
 Category.prototype.prepareToFill = function() {
-	// Initialize arrays to track contents
-	this.blocks = [];
-	this.displayStacks = [];
-	this.buttons = [];
-	this.labels = [];
-	this.collapsibleSets = [];
-	this.buttonsThatRequireFiles = [];
+  // Initialize arrays to track contents
+  this.blocks = [];
+  this.displayStacks = [];
+  this.buttons = [];
+  this.labels = [];
+  this.collapsibleSets = [];
+  this.buttonsThatRequireFiles = [];
 
-	// Keep track of current position in category
-	this.currentBlockX = BlockPalette.mainHMargin;
-	this.currentBlockY = BlockPalette.mainVMargin;
-	this.lastHadStud = false;
+  // Keep track of current position in category
+  this.currentBlockX = BlockPalette.mainHMargin;
+  this.currentBlockY = BlockPalette.mainVMargin;
+  this.lastHadStud = false;
 
-	// Used to determine when filling the category is done
-	this.finalized = false;
+  // Used to determine when filling the category is done
+  this.finalized = false;
 };
 
 /**
  * Uses a function in BlockList to fill this Category, and marks the Category as finalized once filled.
  */
 Category.prototype.fillGroup = function() {
-	DebugOptions.assert(!this.finalized);
-	BlockList["populateCat_" + this.id](this);
-	this.finalize();
+  DebugOptions.assert(!this.finalized);
+  BlockList["populateCat_" + this.id](this);
+  this.finalize();
 };
 
 /**
  * Removes all contents of the category so it can be rebuilt
  */
 Category.prototype.clearGroup = function() {
-	this.displayStacks.forEach(function(stack) {
-		stack.remove();
-	});
-	this.buttons.forEach(function(button) {
-		button.remove();
-	});
-	this.labels.forEach(function(label) {
-		label.remove();
-	});
-	this.collapsibleSets.forEach(function(set) {
-		set.remove();
-	});
+  this.displayStacks.forEach(function(stack) {
+    stack.remove();
+  });
+  this.buttons.forEach(function(button) {
+    button.remove();
+  });
+  this.labels.forEach(function(label) {
+    label.remove();
+  });
+  this.collapsibleSets.forEach(function(set) {
+    set.remove();
+  });
 };
 
 /**
  * Removes all contents and rebuilds the category.  Called when available blocks should change
  */
 Category.prototype.refreshGroup = function() {
-	this.clearGroup();
-	this.prepareToFill();
-	this.fillGroup();
+  this.clearGroup();
+  this.prepareToFill();
+  this.fillGroup();
 };
 
 /**
  * Marks this category as no longer being filled
  */
 Category.prototype.finalize = function() {
-	DebugOptions.assert(!this.finalized);
-	this.finalized = true;
+  DebugOptions.assert(!this.finalized);
+  this.finalized = true;
   if (FinchBlox) {
-    this.height = this.maxBlockHeight + BlockPalette.blockButtonOverhang + BlockPalette.mainVMargin;;// + 2*BlockPalette.mainVMargin;
+    this.height = this.maxBlockHeight + BlockPalette.blockButtonOverhang + BlockPalette.mainVMargin;; // + 2*BlockPalette.mainVMargin;
   } else {
     this.height = this.currentBlockY;
   }
-	this.updateWidth();
+  this.updateWidth();
 };
 
 /**
@@ -117,9 +119,9 @@ Category.prototype.finalize = function() {
  * @param {string} blockName
  */
 Category.prototype.addBlockByName = function(blockName) {
-	DebugOptions.assert(!this.finalized);
-	const block = new window[blockName](this.currentBlockX, this.currentBlockY);
-	this.addBlock(block);
+  DebugOptions.assert(!this.finalized);
+  const block = new window[blockName](this.currentBlockX, this.currentBlockY);
+  this.addBlock(block);
 };
 
 /**
@@ -127,9 +129,9 @@ Category.prototype.addBlockByName = function(blockName) {
  * @param {Variable} variable
  */
 Category.prototype.addVariableBlock = function(variable) {
-	DebugOptions.assert(!this.finalized);
-	const block = new B_Variable(this.currentBlockX, this.currentBlockY, variable);
-	this.addBlock(block);
+  DebugOptions.assert(!this.finalized);
+  const block = new B_Variable(this.currentBlockX, this.currentBlockY, variable);
+  this.addBlock(block);
 };
 
 /**
@@ -137,9 +139,9 @@ Category.prototype.addVariableBlock = function(variable) {
  * @param {List} list
  */
 Category.prototype.addListBlock = function(list) {
-	DebugOptions.assert(!this.finalized);
-	const block = new B_List(this.currentBlockX, this.currentBlockY, list);
-	this.addBlock(block);
+  DebugOptions.assert(!this.finalized);
+  const block = new B_List(this.currentBlockX, this.currentBlockY, list);
+  this.addBlock(block);
 };
 
 /**
@@ -147,23 +149,23 @@ Category.prototype.addListBlock = function(list) {
  * @param {Block} block
  */
 Category.prototype.addBlock = function(block) {
-	DebugOptions.assert(!this.finalized);
-	this.blocks.push(block);
-	// If the last Block had a stud and the top of this Block is flat, we shift this Block down a bit
-	if (this.lastHadStud && !block.topOpen) {
-		this.currentBlockY += BlockGraphics.command.bumpDepth;
-		block.move(this.currentBlockX, this.currentBlockY);
-	}
-	// If this Block is a hat block, we make room for the hat
-	if (block.hasHat && !FinchBlox) {
-		this.currentBlockY += BlockGraphics.hat.hatHEstimate;
-		block.move(this.currentBlockX, this.currentBlockY);
-	}
-	// We put the Block in a DisplayStack
-	const displayStack = new DisplayStack(block, this.group, this);
-	this.displayStacks.push(displayStack);
-	// Update the coords for the next Block
-  if (FinchBlox){
+  DebugOptions.assert(!this.finalized);
+  this.blocks.push(block);
+  // If the last Block had a stud and the top of this Block is flat, we shift this Block down a bit
+  if (this.lastHadStud && !block.topOpen) {
+    this.currentBlockY += BlockGraphics.command.bumpDepth;
+    block.move(this.currentBlockX, this.currentBlockY);
+  }
+  // If this Block is a hat block, we make room for the hat
+  if (block.hasHat && !FinchBlox) {
+    this.currentBlockY += BlockGraphics.hat.hatHEstimate;
+    block.move(this.currentBlockX, this.currentBlockY);
+  }
+  // We put the Block in a DisplayStack
+  const displayStack = new DisplayStack(block, this.group, this);
+  this.displayStacks.push(displayStack);
+  // Update the coords for the next Block
+  if (FinchBlox) {
     this.currentBlockX += displayStack.firstBlock.width * displayStack.zoom;
     this.currentBlockX += BlockPalette.blockMargin;
     if (this.maxBlockHeight == null ||
@@ -172,8 +174,8 @@ Category.prototype.addBlock = function(block) {
     }
   } else {
     this.currentBlockY += displayStack.firstBlock.height;
-  	this.currentBlockY += BlockPalette.blockMargin;
-  	this.lastHadStud = block.bottomOpen;
+    this.currentBlockY += BlockPalette.blockMargin;
+    this.lastHadStud = block.bottomOpen;
   }
 };
 
@@ -184,23 +186,23 @@ Category.prototype.addBlock = function(block) {
  * @return {CollapsibleSet}
  */
 Category.prototype.addCollapsibleSet = function(nameIdList) {
-	DebugOptions.assert(!this.finalized);
-	const x = this.currentBlockX;
-	const y = this.currentBlockY;
-	const set = new CollapsibleSet(y, nameIdList, this, this.group);
-	this.collapsibleSets.push(set);
-	this.lastHadStud = false;
-	this.currentBlockY += set.height;
-	this.currentBlockY += BlockPalette.blockMargin;
-	return set;
+  DebugOptions.assert(!this.finalized);
+  const x = this.currentBlockX;
+  const y = this.currentBlockY;
+  const set = new CollapsibleSet(y, nameIdList, this, this.group);
+  this.collapsibleSets.push(set);
+  this.lastHadStud = false;
+  this.currentBlockY += set.height;
+  this.currentBlockY += BlockPalette.blockMargin;
+  return set;
 };
 
 /**
  * Adds space between Blocks to denote sections
  */
 Category.prototype.addSpace = function() {
-	DebugOptions.assert(!this.finalized);
-	this.currentBlockY += BlockPalette.sectionMargin;
+  DebugOptions.assert(!this.finalized);
+  this.currentBlockY += BlockPalette.sectionMargin;
 };
 
 /**
@@ -211,32 +213,32 @@ Category.prototype.addSpace = function() {
  * @return {Button} - The created button
  */
 Category.prototype.addButton = function(text, callback, onlyEnabledIfOpen) {
-	DebugOptions.assert(!this.finalized);
-	if (onlyEnabledIfOpen == null) {
-		onlyEnabledIfOpen = false;
-	}
+  DebugOptions.assert(!this.finalized);
+  if (onlyEnabledIfOpen == null) {
+    onlyEnabledIfOpen = false;
+  }
 
-	const width = BlockPalette.insideBnW;
-	const height = BlockPalette.insideBnH;
-	if (this.lastHadStud) {
-		this.currentBlockY += BlockGraphics.command.bumpDepth;
-	}
+  const width = BlockPalette.insideBnW;
+  const height = BlockPalette.insideBnH;
+  if (this.lastHadStud) {
+    this.currentBlockY += BlockGraphics.command.bumpDepth;
+  }
 
-	const button = new Button(this.currentBlockX, this.currentBlockY, width, height, this.group);
-	const BP = BlockPalette;
-	button.addText(text);
-	button.setCallbackFunction(callback, true);
-	this.currentBlockY += height;
-	this.currentBlockY += BlockPalette.blockMargin;
-	this.buttons.push(button);
-	this.lastHadStud = false;
-	if (onlyEnabledIfOpen) {
-		if(!SaveManager.fileIsOpen()) {
-			button.disable();
-		}
-		this.buttonsThatRequireFiles.push(button);
-	}
-	return button;
+  const button = new Button(this.currentBlockX, this.currentBlockY, width, height, this.group);
+  const BP = BlockPalette;
+  button.addText(text);
+  button.setCallbackFunction(callback, true);
+  this.currentBlockY += height;
+  this.currentBlockY += BlockPalette.blockMargin;
+  this.buttons.push(button);
+  this.lastHadStud = false;
+  if (onlyEnabledIfOpen) {
+    if (!SaveManager.fileIsOpen()) {
+      button.disable();
+    }
+    this.buttonsThatRequireFiles.push(button);
+  }
+  return button;
 };
 
 /**
@@ -244,30 +246,30 @@ Category.prototype.addButton = function(text, callback, onlyEnabledIfOpen) {
  * @param {string} text - The text to display
  */
 Category.prototype.addLabel = function(text) {
-	DebugOptions.assert(!this.finalized);
-	const BP = BlockPalette;
-	const x = this.currentBlockX;
-	const y = this.currentBlockY;
-	const labelE = GuiElements.draw.text(x, y, text, BP.labelFont, BP.labelColor);
-	this.group.appendChild(labelE);
-	this.labels.push(labelE);
-	const height = GuiElements.measure.textHeight(labelE);
-	GuiElements.move.element(labelE, x, y + height);
-	this.currentBlockY += height;
-	this.currentBlockY += BlockPalette.blockMargin;
-	this.lastHadStud = false;
+  DebugOptions.assert(!this.finalized);
+  const BP = BlockPalette;
+  const x = this.currentBlockX;
+  const y = this.currentBlockY;
+  const labelE = GuiElements.draw.text(x, y, text, BP.labelFont, BP.labelColor);
+  this.group.appendChild(labelE);
+  this.labels.push(labelE);
+  const height = GuiElements.measure.textHeight(labelE);
+  GuiElements.move.element(labelE, x, y + height);
+  this.currentBlockY += height;
+  this.currentBlockY += BlockPalette.blockMargin;
+  this.lastHadStud = false;
 };
 
 /**
  * Removes some of the space at the bottom so the height measurement is correct
  */
 Category.prototype.trimBottom = function() {
-	DebugOptions.assert(!this.finalized);
-	if (this.lastHadStud) {
-		this.currentBlockY += BlockGraphics.command.bumpDepth;
-	}
-	this.currentBlockY -= BlockPalette.blockMargin;
-	this.currentBlockY += BlockPalette.mainVMargin;
+  DebugOptions.assert(!this.finalized);
+  if (this.lastHadStud) {
+    this.currentBlockY += BlockGraphics.command.bumpDepth;
+  }
+  this.currentBlockY -= BlockPalette.blockMargin;
+  this.currentBlockY += BlockPalette.mainVMargin;
 };
 
 /**
@@ -275,7 +277,7 @@ Category.prototype.trimBottom = function() {
  */
 Category.prototype.centerBlocks = function() {
   this.computeWidth();
-  const newX = (BlockPalette.width - this.width)/2;
+  const newX = (BlockPalette.width - this.width) / 2;
   this.smoothScrollBox.move(newX, BlockPalette.y);
 }
 
@@ -283,24 +285,24 @@ Category.prototype.centerBlocks = function() {
  * Brings the category to the foreground and marks it as selected in the BlockPalette
  */
 Category.prototype.select = function() {
-	if (BlockPalette.selectedCat === this) {
-		return;
-	}
-	if (BlockPalette.selectedCat != null) {
-		BlockPalette.selectedCat.deselect();
-	}
-	BlockPalette.selectedCat = this;
-	this.button.select();
-	this.smoothScrollBox.show();
+  if (BlockPalette.selectedCat === this) {
+    return;
+  }
+  if (BlockPalette.selectedCat != null) {
+    BlockPalette.selectedCat.deselect();
+  }
+  BlockPalette.selectedCat = this;
+  this.button.select();
+  this.smoothScrollBox.show();
 };
 
 /**
  * Removes the category from the foreground
  */
 Category.prototype.deselect = function() {
-	BlockPalette.selectedCat = null;
-	this.smoothScrollBox.hide();
-	this.button.deselect();
+  BlockPalette.selectedCat = null;
+  this.smoothScrollBox.hide();
+  this.button.deselect();
 };
 
 /**
@@ -310,25 +312,25 @@ Category.prototype.computeWidth = function() {
   if (FinchBlox) {
     let totalW = BlockPalette.blockMargin * (this.blocks.length - 1);
     for (let i = 0; i < this.blocks.length; i++) {
-  		totalW += this.blocks[i].width;
+      totalW += this.blocks[i].width;
     }
     //totalW += 15; //Add for the extra bump on the last block
     totalW += 2 * BlockPalette.mainHMargin;
     this.width = totalW;
   } else {
     let currentWidth = 0;
-  	// The width is the maximum width across DisplayStacks and CollapsibleSets
-  	for (let i = 0; i < this.blocks.length; i++) {
-  		const blockW = this.blocks[i].width;
-  		if (blockW > currentWidth) {
-  			currentWidth = blockW;
-  		}
-  	}
-  	this.collapsibleSets.forEach(function(set) {
-  		const width = set.width;
-  		currentWidth = Math.max(width, currentWidth);
-  	});
-  	this.width = Math.max(currentWidth + 2 * BlockPalette.mainHMargin, BlockPalette.width);
+    // The width is the maximum width across DisplayStacks and CollapsibleSets
+    for (let i = 0; i < this.blocks.length; i++) {
+      const blockW = this.blocks[i].width;
+      if (blockW > currentWidth) {
+        currentWidth = blockW;
+      }
+    }
+    this.collapsibleSets.forEach(function(set) {
+      const width = set.width;
+      currentWidth = Math.max(width, currentWidth);
+    });
+    this.width = Math.max(currentWidth + 2 * BlockPalette.mainHMargin, BlockPalette.width);
   }
 };
 
@@ -336,9 +338,9 @@ Category.prototype.computeWidth = function() {
  * Recomputes the width of the Category and updates the smoothScrollBox to match it
  */
 Category.prototype.updateWidth = function() {
-	if (!this.finalized) return;
-	this.computeWidth();
-	this.smoothScrollBox.setContentDims(this.width, this.height);
+  if (!this.finalized) return;
+  this.computeWidth();
+  this.smoothScrollBox.setContentDims(this.width, this.height);
 };
 
 /**
@@ -346,26 +348,26 @@ Category.prototype.updateWidth = function() {
  * expand/collapse
  */
 Category.prototype.updateDimSet = function() {
-	if (!this.finalized) return;
-	this.computeWidth();
-	let currentH = BlockPalette.mainVMargin;
-	this.collapsibleSets.forEach(function(set) {
-		currentH += set.height;
-		currentH += BlockPalette.blockMargin;
-	});
-	currentH -= BlockPalette.blockMargin;
-	currentH += BlockPalette.mainVMargin;
-	this.height = currentH;
-	this.smoothScrollBox.setContentDims(this.width, this.height);
+  if (!this.finalized) return;
+  this.computeWidth();
+  let currentH = BlockPalette.mainVMargin;
+  this.collapsibleSets.forEach(function(set) {
+    currentH += set.height;
+    currentH += BlockPalette.blockMargin;
+  });
+  currentH -= BlockPalette.blockMargin;
+  currentH += BlockPalette.mainVMargin;
+  this.height = currentH;
+  this.smoothScrollBox.setContentDims(this.width, this.height);
 };
 
 /**
  * Indicates that a file is now open.
  */
 Category.prototype.markOpen = function() {
-	this.buttonsThatRequireFiles.forEach(function(button) {
-		button.enable();
-	});
+  this.buttonsThatRequireFiles.forEach(function(button) {
+    button.enable();
+  });
 };
 
 /* Convert coordinates relative to the Category to coords relative to the screen */
@@ -374,44 +376,44 @@ Category.prototype.markOpen = function() {
  * @return {number}
  */
 Category.prototype.relToAbsX = function(x) {
-	if (!this.finalized) return x;
-	return this.smoothScrollBox.relToAbsX(x);
+  if (!this.finalized) return x;
+  return this.smoothScrollBox.relToAbsX(x);
 };
 /**
  * @param {number} y
  * @return {number}
  */
 Category.prototype.relToAbsY = function(y) {
-	if (!this.finalized) return y;
-	return this.smoothScrollBox.relToAbsY(y);
+  if (!this.finalized) return y;
+  return this.smoothScrollBox.relToAbsY(y);
 };
 /**
  * @param {number} x
  * @return {number}
  */
 Category.prototype.absToRelX = function(x) {
-	if (!this.finalized) return x;
-	return this.smoothScrollBox.absToRelX(x);
+  if (!this.finalized) return x;
+  return this.smoothScrollBox.absToRelX(x);
 };
 /**
  * @param {number} y
  * @return {number}
  */
 Category.prototype.absToRelY = function(y) {
-	if (!this.finalized) return y;
-	return this.smoothScrollBox.absToRelY(y);
+  if (!this.finalized) return y;
+  return this.smoothScrollBox.absToRelY(y);
 };
 /**
  * @return {number}
  */
 Category.prototype.getAbsX = function() {
-	return this.relToAbsX(0);
+  return this.relToAbsX(0);
 };
 /**
  * @return {number}
  */
 Category.prototype.getAbsY = function() {
-	return this.relToAbsY(0);
+  return this.relToAbsY(0);
 };
 
 /**
@@ -419,35 +421,35 @@ Category.prototype.getAbsY = function() {
  * @param {string} message
  */
 Category.prototype.passRecursivelyDown = function(message) {
-	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
-	this.passRecursively.apply(this, arguments);
+  Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+  this.passRecursively.apply(this, arguments);
 };
 /**
  * @param {string} functionName
  */
 Category.prototype.passRecursively = function(functionName) {
-	const args = Array.prototype.slice.call(arguments, 1);
-	this.displayStacks.forEach(function(stack) {
-		stack[functionName].apply(stack, args);
-	});
-	this.collapsibleSets.forEach(function(set) {
-		set[functionName].apply(set, args);
-	});
+  const args = Array.prototype.slice.call(arguments, 1);
+  this.displayStacks.forEach(function(stack) {
+    stack[functionName].apply(stack, args);
+  });
+  this.collapsibleSets.forEach(function(set) {
+    set[functionName].apply(set, args);
+  });
 };
 
 /**
  * Updates the dimensions of the category in response to a screen resize
  */
 Category.prototype.updateZoom = function() {
-	if (!this.finalized) return;
+  if (!this.finalized) return;
   if (FinchBlox) {
-    const newX = (BlockPalette.width - this.width)/2;
+    const newX = (BlockPalette.width - this.width) / 2;
     this.smoothScrollBox.move(newX, BlockPalette.y);
   } else {
     this.smoothScrollBox.move(0, BlockPalette.y);
   }
-	this.smoothScrollBox.updateZoom();
-	this.smoothScrollBox.setDims(BlockPalette.width, BlockPalette.height);
+  this.smoothScrollBox.updateZoom();
+  this.smoothScrollBox.setDims(BlockPalette.width, BlockPalette.height);
 };
 
 /**
@@ -456,7 +458,7 @@ Category.prototype.updateZoom = function() {
  * @param {boolean} collapsed
  */
 Category.prototype.setSuggestedCollapse = function(id, collapsed) {
-	this.collapsibleSets.forEach(function(set) {
-		set.setSuggestedCollapse(id, collapsed);
-	});
+  this.collapsibleSets.forEach(function(set) {
+    set.setSuggestedCollapse(id, collapsed);
+  });
 };

@@ -6,40 +6,40 @@
  * @constructor
  */
 function OpenCloudDialog(fileList, cloudFileList, error) {
-	const OD = OpenDialog;
-	const RD = RowDialog;
-	this.fileList = fileList;
-	// We need to load the files if the user is signed in and the files aren't loaded and there isn't an error
-	this.loading = cloudFileList == null && this.fileList.signedIn && error == null;
-	// There's only one row for the sign in button if there are no files
-	let count = 1;
-	// There isn't any hint text unless we are signed in
-	let hintText = "";
+  const OD = OpenDialog;
+  const RD = RowDialog;
+  this.fileList = fileList;
+  // We need to load the files if the user is signed in and the files aren't loaded and there isn't an error
+  this.loading = cloudFileList == null && this.fileList.signedIn && error == null;
+  // There's only one row for the sign in button if there are no files
+  let count = 1;
+  // There isn't any hint text unless we are signed in
+  let hintText = "";
 
-	if (this.fileList.signedIn) {
-		if (error != null) {
-			// An error occurred, display the error
-			hintText = error;
-		} else if (this.loading) {
-			hintText = Language.getStr("Loading") + "...";
-		} else {
-			hintText = Language.getStr("No_saved_programs");
-		}
-		this.files = cloudFileList;
-		if (this.files == null) {
-			this.files = [];
-		}
-		count = this.files.length;
-	}
+  if (this.fileList.signedIn) {
+    if (error != null) {
+      // An error occurred, display the error
+      hintText = error;
+    } else if (this.loading) {
+      hintText = Language.getStr("Loading") + "...";
+    } else {
+      hintText = Language.getStr("No_saved_programs");
+    }
+    this.files = cloudFileList;
+    if (this.files == null) {
+      this.files = [];
+    }
+    count = this.files.length;
+  }
 
-	RD.call(this, false, Language.getStr("Open"), count, OD.tabRowHeight, 0, OD.tabRowHeight - 1);
-	// this.addCenteredButton("Cancel", this.closeDialog.bind(this));
-	this.addHintText(hintText);
+  RD.call(this, false, Language.getStr("Open"), count, OD.tabRowHeight, 0, OD.tabRowHeight - 1);
+  // this.addCenteredButton("Cancel", this.closeDialog.bind(this));
+  this.addHintText(hintText);
 
-	// Load the files from the backend
-	if (this.loading) {
-		this.loadFiles();
-	}
+  // Load the files from the backend
+  if (this.loading) {
+    this.loadFiles();
+  }
 }
 OpenCloudDialog.prototype = Object.create(RowDialog.prototype);
 OpenCloudDialog.prototype.constructor = OpenCloudDialog;
@@ -48,9 +48,9 @@ OpenCloudDialog.prototype.constructor = OpenCloudDialog;
  * @inheritDoc
  */
 OpenCloudDialog.prototype.show = function() {
-	RowDialog.prototype.show.call(this);
-	OpenDialog.currentDialog = this;
-	this.createTabRow();
+  RowDialog.prototype.show.call(this);
+  OpenDialog.currentDialog = this;
+  this.createTabRow();
 };
 
 /**
@@ -62,22 +62,22 @@ OpenCloudDialog.prototype.show = function() {
  * @param {Element} contentGroup
  */
 OpenCloudDialog.prototype.createRow = function(index, y, width, contentGroup) {
-	const RD = RowDialog;
-	if (this.fileList.signedIn) {
-		const cols = 2;
-		const file = this.files[index];
+  const RD = RowDialog;
+  if (this.fileList.signedIn) {
+    const cols = 2;
+    const file = this.files[index];
 
-		const largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols;
-		this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
+    const largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols;
+    this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
 
-		let currentX = largeBnWidth + RD.bnMargin;
-		this.createRenameBn(file, currentX, y, contentGroup);
-		currentX += RD.bnMargin + RD.smallBnWidth;
-		this.createMoreBn(file, currentX, y, contentGroup);
+    let currentX = largeBnWidth + RD.bnMargin;
+    this.createRenameBn(file, currentX, y, contentGroup);
+    currentX += RD.bnMargin + RD.smallBnWidth;
+    this.createMoreBn(file, currentX, y, contentGroup);
 
-	} else {
-		this.createSignInBn(width, 0, y, contentGroup);
-	}
+  } else {
+    this.createSignInBn(width, 0, y, contentGroup);
+  }
 };
 
 /**
@@ -89,12 +89,12 @@ OpenCloudDialog.prototype.createRow = function(index, y, width, contentGroup) {
  * @param {Element} contentGroup
  */
 OpenCloudDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup) {
-	const button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, function() {
-		const request = new HttpRequestBuilder("cloud/download");
-		request.addParam("filename", file);
-		HtmlServer.sendRequestWithCallback(request.toString());
-	}.bind(this));
-	button.addSideTextAndIcon(VectorPaths.cloudDownload, null, file);
+  const button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, function() {
+    const request = new HttpRequestBuilder("cloud/download");
+    request.addParam("filename", file);
+    HtmlServer.sendRequestWithCallback(request.toString());
+  }.bind(this));
+  button.addSideTextAndIcon(VectorPaths.cloudDownload, null, file);
 };
 
 /**
@@ -105,10 +105,10 @@ OpenCloudDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGr
  * @param {Element} contentGroup
  */
 OpenCloudDialog.prototype.createSignInBn = function(bnWidth, x, y, contentGroup) {
-	const button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, function() {
-		HtmlServer.sendRequestWithCallback("cloud/signIn");
-	}.bind(this));
-	button.addText(Language.getStr("Sign_in"));
+  const button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, function() {
+    HtmlServer.sendRequestWithCallback("cloud/signIn");
+  }.bind(this));
+  button.addText(Language.getStr("Sign_in"));
 };
 
 /**
@@ -119,12 +119,12 @@ OpenCloudDialog.prototype.createSignInBn = function(bnWidth, x, y, contentGroup)
  * @param {Element} contentGroup
  */
 OpenCloudDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
-	const me = this;
-	RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function() {
-		const request = new HttpRequestBuilder("cloud/rename");
-		request.addParam("filename", file);
-		HtmlServer.sendRequestWithCallback(request.toString());
-	});
+  const me = this;
+  RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function() {
+    const request = new HttpRequestBuilder("cloud/rename");
+    request.addParam("filename", file);
+    HtmlServer.sendRequestWithCallback(request.toString());
+  });
 };
 
 /**
@@ -135,15 +135,15 @@ OpenCloudDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
  * @param {Element} contentGroup
  */
 OpenCloudDialog.prototype.createMoreBn = function(file, x, y, contentGroup) {
-	RowDialog.createSmallBnWithIcon(VectorPaths.dots, x, y, contentGroup, function() {
-		// Get the coords to show the menu at
-		const x1 = this.contentRelToAbsX(x);
-		const x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
-		const y1 = this.contentRelToAbsY(y);
-		const y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
-		// Show the more options menu
-		new FileContextMenu(this, file, FileContextMenu.types.cloud, x1, x2, y1, y2);
-	}.bind(this));
+  RowDialog.createSmallBnWithIcon(VectorPaths.dots, x, y, contentGroup, function() {
+    // Get the coords to show the menu at
+    const x1 = this.contentRelToAbsX(x);
+    const x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
+    const y1 = this.contentRelToAbsY(y);
+    const y2 = this.contentRelToAbsY(y + RowDialog.bnHeight);
+    // Show the more options menu
+    new FileContextMenu(this, file, FileContextMenu.types.cloud, x1, x2, y1, y2);
+  }.bind(this));
 };
 
 /**
@@ -151,21 +151,21 @@ OpenCloudDialog.prototype.createMoreBn = function(file, x, y, contentGroup) {
  * @return {TabRow}
  */
 OpenCloudDialog.prototype.createTabRow = function() {
-	const OD = OpenDialog;
-	let y = this.getExtraTopY();
-	let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 1);
+  const OD = OpenDialog;
+  let y = this.getExtraTopY();
+  let tabRow = new TabRow(0, y, this.width, OD.tabRowHeight, this.group, 1);
 
-	tabRow.addTab(Language.getStr("On_Device"), "device");
-	let signOutFn = null;
-	// If signed in, an X appears in the tab which signs the user out
-	if (this.fileList.signedIn) {
-		signOutFn = this.userSignOut.bind(this);
-	}
-	tabRow.addTab(this.fileList.getCloudTitle(), "cloud", signOutFn);
+  tabRow.addTab(Language.getStr("On_Device"), "device");
+  let signOutFn = null;
+  // If signed in, an X appears in the tab which signs the user out
+  if (this.fileList.signedIn) {
+    signOutFn = this.userSignOut.bind(this);
+  }
+  tabRow.addTab(this.fileList.getCloudTitle(), "cloud", signOutFn);
 
-	tabRow.setCallbackFunction(this.tabSelected.bind(this));
-	tabRow.show();
-	return tabRow;
+  tabRow.setCallbackFunction(this.tabSelected.bind(this));
+  tabRow.show();
+  return tabRow;
 };
 
 /**
@@ -173,34 +173,34 @@ OpenCloudDialog.prototype.createTabRow = function() {
  * @param {string} tab - The id of the selected tab
  */
 OpenCloudDialog.prototype.tabSelected = function(tab) {
-	if (tab === "device") {
-		const openDialog = new OpenDialog(this.fileList);
-		this.hide();
-		openDialog.show();
-		openDialog.reloadDialog();
-	}
+  if (tab === "device") {
+    const openDialog = new OpenDialog(this.fileList);
+    this.hide();
+    openDialog.show();
+    openDialog.reloadDialog();
+  }
 };
 
 /**
  * @inheritDoc
  */
 OpenCloudDialog.prototype.closeDialog = function() {
-	OpenDialog.currentDialog = null;
-	RowDialog.prototype.closeDialog.call(this);
+  OpenDialog.currentDialog = null;
+  RowDialog.prototype.closeDialog.call(this);
 };
 
 /**
  * Re-retrieves the local files and shows an OpenDialog
  */
 OpenCloudDialog.prototype.reloadToOpen = function() {
-	const me = this;
-	HtmlServer.sendRequestWithCallback("data/files", function(response) {
-		if (OpenDialog.currentDialog === me) {
-			me.closeDialog();
-			const openDialog = new OpenDialog(new FileList(response));
-			openDialog.show();
-		}
-	});
+  const me = this;
+  HtmlServer.sendRequestWithCallback("data/files", function(response) {
+    if (OpenDialog.currentDialog === me) {
+      me.closeDialog();
+      const openDialog = new OpenDialog(new FileList(response));
+      openDialog.show();
+    }
+  });
 };
 
 /**
@@ -208,70 +208,70 @@ OpenCloudDialog.prototype.reloadToOpen = function() {
  * @param {Array<string>} [cloudFileList] - The list of cloud files.  If  undefined, redownloads
  */
 OpenCloudDialog.prototype.reloadDialog = function(cloudFileList) {
-	if (cloudFileList == null) {
-		cloudFileList = null;
-	}
+  if (cloudFileList == null) {
+    cloudFileList = null;
+  }
 
-	let thisScroll = this.getScroll();
-	let me = this;
-	HtmlServer.sendRequestWithCallback("data/files", function(response) {
-		if (OpenDialog.currentDialog === me) {
-			me.closeDialog();
-			const openDialog = new OpenCloudDialog(new FileList(response), cloudFileList);
-			openDialog.show();
-			openDialog.setScroll(thisScroll);
-		}
-	});
+  let thisScroll = this.getScroll();
+  let me = this;
+  HtmlServer.sendRequestWithCallback("data/files", function(response) {
+    if (OpenDialog.currentDialog === me) {
+      me.closeDialog();
+      const openDialog = new OpenCloudDialog(new FileList(response), cloudFileList);
+      openDialog.show();
+      openDialog.setScroll(thisScroll);
+    }
+  });
 };
 
 /**
  * Confirms the user's intent to sign out and then signs out
  */
 OpenCloudDialog.prototype.userSignOut = function() {
-	DebugOptions.assert(this.fileList.account != null);
-	let message = Language.getStr("Disconnect_account_question");
-	//message += Language.getStr("Files_will_remain");
-	const me = this;
-	DialogManager.showChoiceDialog(Language.getStr("Disconnect_account"), message, Language.getStr("Dont_disconnect"), Language.getStr("Disconnect"), true, function(result) {
-		if (result === "2") {
-			me.signOut();
-		}
-	});
+  DebugOptions.assert(this.fileList.account != null);
+  let message = Language.getStr("Disconnect_account_question");
+  //message += Language.getStr("Files_will_remain");
+  const me = this;
+  DialogManager.showChoiceDialog(Language.getStr("Disconnect_account"), message, Language.getStr("Dont_disconnect"), Language.getStr("Disconnect"), true, function(result) {
+    if (result === "2") {
+      me.signOut();
+    }
+  });
 };
 
 /**
  * Issues a signOut request and reloads the dialog
  */
 OpenCloudDialog.prototype.signOut = function() {
-	const me = this;
-	HtmlServer.sendRequestWithCallback("cloud/signOut", function() {
-		me.reloadDialog();
-	});
+  const me = this;
+  HtmlServer.sendRequestWithCallback("cloud/signOut", function() {
+    me.reloadDialog();
+  });
 };
 
 /**
  * Requests the list of cloud files and creates a new OpenCloudDialog with them, or shows an error
  */
 OpenCloudDialog.prototype.loadFiles = function() {
-	const me = this;
-	HtmlServer.sendRequestWithCallback("cloud/list", function(response) {
-		if (OpenDialog.currentDialog === me) {
-			const object = JSON.parse(response);
-			//let files = object.files;
-			let files = FileList.getSortedList(object.files);
-			if (files != null) {
-				me.closeDialog();
-				const cloudDialog = new OpenCloudDialog(me.fileList, files);
-				cloudDialog.show();
-			}
-		}
-	}, function(status, error) {
-		if (OpenDialog.currentDialog === me) {
-			me.closeDialog();
-			const cloudDialog = new OpenCloudDialog(me.fileList, null, error);
-			cloudDialog.show();
-		}
-	});
+  const me = this;
+  HtmlServer.sendRequestWithCallback("cloud/list", function(response) {
+    if (OpenDialog.currentDialog === me) {
+      const object = JSON.parse(response);
+      //let files = object.files;
+      let files = FileList.getSortedList(object.files);
+      if (files != null) {
+        me.closeDialog();
+        const cloudDialog = new OpenCloudDialog(me.fileList, files);
+        cloudDialog.show();
+      }
+    }
+  }, function(status, error) {
+    if (OpenDialog.currentDialog === me) {
+      me.closeDialog();
+      const cloudDialog = new OpenCloudDialog(me.fileList, null, error);
+      cloudDialog.show();
+    }
+  });
 };
 
 /**
@@ -279,10 +279,10 @@ OpenCloudDialog.prototype.loadFiles = function() {
  * @param {string} [jsonString] - List of new cloud files as a JSON array of strings encoded as a string
  */
 OpenCloudDialog.filesChanged = function(jsonString) {
-	if (OpenDialog.currentDialog != null && OpenDialog.currentDialog.constructor === OpenCloudDialog) {
-		if (jsonString != null) {
-			jsonString = JSON.parse(jsonString).files;
-		}
-		OpenDialog.currentDialog.reloadDialog(jsonString);
-	}
+  if (OpenDialog.currentDialog != null && OpenDialog.currentDialog.constructor === OpenCloudDialog) {
+    if (jsonString != null) {
+      jsonString = JSON.parse(jsonString).files;
+    }
+    OpenDialog.currentDialog.reloadDialog(jsonString);
+  }
 };

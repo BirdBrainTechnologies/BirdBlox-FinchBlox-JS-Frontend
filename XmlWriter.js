@@ -11,10 +11,10 @@ function XmlWriter() {
  * @return {Document} - An XML document to write to
  */
 XmlWriter.newDoc = function(tagName) {
-	tagName = XmlWriter.escape(tagName);
-	const xmlString = "<" + tagName + "></" + tagName + ">";
-	const parser = new DOMParser();
-	return parser.parseFromString(xmlString, "text/xml");
+  tagName = XmlWriter.escape(tagName);
+  const xmlString = "<" + tagName + "></" + tagName + ">";
+  const parser = new DOMParser();
+  return parser.parseFromString(xmlString, "text/xml");
 };
 
 /**
@@ -24,8 +24,8 @@ XmlWriter.newDoc = function(tagName) {
  * @return {Element} - The resulting element
  */
 XmlWriter.createElement = function(xmlDoc, tagName) {
-	tagName = XmlWriter.escape(tagName);
-	return xmlDoc.createElement(tagName);
+  tagName = XmlWriter.escape(tagName);
+  return xmlDoc.createElement(tagName);
 };
 
 /**
@@ -35,9 +35,9 @@ XmlWriter.createElement = function(xmlDoc, tagName) {
  * @param {string} value - The value to set
  */
 XmlWriter.setAttribute = function(element, name, value) {
-	name = XmlWriter.escape(name);
-	value = XmlWriter.escape(value);
-	element.setAttribute(name, value);
+  name = XmlWriter.escape(name);
+  value = XmlWriter.escape(value);
+  element.setAttribute(name, value);
 };
 
 /**
@@ -47,8 +47,8 @@ XmlWriter.setAttribute = function(element, name, value) {
  * @return {Text}
  */
 XmlWriter.createTextNode = function(xmlDoc, data) {
-	data = XmlWriter.escape(data);
-	return xmlDoc.createTextNode(data);
+  data = XmlWriter.escape(data);
+  return xmlDoc.createTextNode(data);
 };
 
 /**
@@ -58,14 +58,14 @@ XmlWriter.createTextNode = function(xmlDoc, data) {
  * @return {string}
  */
 XmlWriter.escape = function(string) {
-	string = string + "";
-	string = string.replace(/&/g, '&amp;');
-	string = string.replace(/</g, '&lt;');
-	string = string.replace(/>/g, '&gt;');
-	string = string.replace(/"/g, '&quot;');
-	string = string.replace(/'/g, '&apos;');
-	string = string.replace(/ /g, '&#32;');
-	return string;
+  string = string + "";
+  string = string.replace(/&/g, '&amp;');
+  string = string.replace(/</g, '&lt;');
+  string = string.replace(/>/g, '&gt;');
+  string = string.replace(/"/g, '&quot;');
+  string = string.replace(/'/g, '&apos;');
+  string = string.replace(/ /g, '&#32;');
+  return string;
 };
 
 /**
@@ -74,14 +74,14 @@ XmlWriter.escape = function(string) {
  * @return {string}
  */
 XmlWriter.unEscape = function(string) {
-	string = string + "";
-	string = string.replace(/&#32;/g, ' ');
-	string = string.replace(/&apos;/g, "'");
-	string = string.replace(/&quot;/g, '"');
-	string = string.replace(/&gt;/g, '>');
-	string = string.replace(/&lt;/g, '<');
-	string = string.replace(/&amp;/g, '&');
-	return string;
+  string = string + "";
+  string = string.replace(/&#32;/g, ' ');
+  string = string.replace(/&apos;/g, "'");
+  string = string.replace(/&quot;/g, '"');
+  string = string.replace(/&gt;/g, '>');
+  string = string.replace(/&lt;/g, '<');
+  string = string.replace(/&amp;/g, '&');
+  return string;
 };
 
 /**
@@ -89,7 +89,7 @@ XmlWriter.unEscape = function(string) {
  * @param {Document} xmlDoc - The document to open
  */
 XmlWriter.downloadDoc = function(xmlDoc) {
-	window.open('data:text/xml,' + HtmlServer.encodeHtml(XmlWriter.docToText(xmlDoc)));
+  window.open('data:text/xml,' + HtmlServer.encodeHtml(XmlWriter.docToText(xmlDoc)));
 };
 
 /**
@@ -98,8 +98,8 @@ XmlWriter.downloadDoc = function(xmlDoc) {
  * @return {Document}
  */
 XmlWriter.openDoc = function(xmlString) {
-	const parser = new DOMParser();
-	return parser.parseFromString(xmlString, "text/xml");
+  const parser = new DOMParser();
+  return parser.parseFromString(xmlString, "text/xml");
 };
 
 /**
@@ -109,12 +109,12 @@ XmlWriter.openDoc = function(xmlString) {
  * @return {null|Node} - The node or null if no tag has that name
  */
 XmlWriter.findElement = function(xmlDoc, tagName) {
-	tagName = XmlWriter.escape(tagName);
-	const results = xmlDoc.getElementsByTagName(tagName);
-	if (results.length === 0) {
-		return null;
-	}
-	return results[0];
+  tagName = XmlWriter.escape(tagName);
+  const results = xmlDoc.getElementsByTagName(tagName);
+  if (results.length === 0) {
+    return null;
+  }
+  return results[0];
 };
 
 /**
@@ -124,17 +124,17 @@ XmlWriter.findElement = function(xmlDoc, tagName) {
  * @return {Array<Node>} - All children with a matching name
  */
 XmlWriter.findSubElements = function(node, tagName) {
-	if (node == null) {
-		return [];
-	}
-	const children = node.childNodes;
-	const results = [];
-	for (let i = 0; i < children.length; i++) {
-		if (children[i].nodeType === 1 && children[i].nodeName === tagName) {
-			results.push(children[i]);
-		}
-	}
-	return results;
+  if (node == null) {
+    return [];
+  }
+  const children = node.childNodes;
+  const results = [];
+  for (let i = 0; i < children.length; i++) {
+    if (children[i].nodeType === 1 && children[i].nodeName === tagName) {
+      results.push(children[i]);
+    }
+  }
+  return results;
 };
 
 /**
@@ -144,16 +144,16 @@ XmlWriter.findSubElements = function(node, tagName) {
  * @return {Node|null}
  */
 XmlWriter.findSubElement = function(node, tagName) {
-	if (node == null) {
-		return null;
-	}
-	const children = node.childNodes;
-	for (let i = 0; i < children.length; i++) {
-		if (children[i].nodeType === 1 && children[i].nodeName === tagName) {
-			return children[i];
-		}
-	}
-	return null;
+  if (node == null) {
+    return null;
+  }
+  const children = node.childNodes;
+  for (let i = 0; i < children.length; i++) {
+    if (children[i].nodeType === 1 && children[i].nodeName === tagName) {
+      return children[i];
+    }
+  }
+  return null;
 };
 
 /**
@@ -165,25 +165,25 @@ XmlWriter.findSubElement = function(node, tagName) {
  * @return {*}
  */
 XmlWriter.getAttribute = function(element, name, defaultVal, isNum) {
-	if (isNum == null) {
-		isNum = false;
-	}
-	if (defaultVal == null) {
-		defaultVal = null;
-	}
-	let val = element.getAttribute(XmlWriter.escape(name));
-	if (val == null) {
-		return defaultVal;
-	}
-	val = XmlWriter.unEscape(val);
-	if (isNum) {
-		const numData = (new StringData(val)).asNum();
-		if (numData.isValid) {
-			return numData.getValue();
-		}
-		return defaultVal;
-	}
-	return val;
+  if (isNum == null) {
+    isNum = false;
+  }
+  if (defaultVal == null) {
+    defaultVal = null;
+  }
+  let val = element.getAttribute(XmlWriter.escape(name));
+  if (val == null) {
+    return defaultVal;
+  }
+  val = XmlWriter.unEscape(val);
+  if (isNum) {
+    const numData = (new StringData(val)).asNum();
+    if (numData.isValid) {
+      return numData.getValue();
+    }
+    return defaultVal;
+  }
+  return val;
 };
 
 /**
@@ -195,35 +195,35 @@ XmlWriter.getAttribute = function(element, name, defaultVal, isNum) {
  * @return {string|null|number}
  */
 XmlWriter.getTextNode = function(element, name, defaultVal, isNum) {
-	if (isNum == null) {
-		isNum = false;
-	}
-	if (defaultVal == null) {
-		defaultVal = null;
-	}
-	const innerNode = XmlWriter.findSubElement(element, name);
-	if (innerNode == null) {
-		return defaultVal;
-	}
-	const childNodes = innerNode.childNodes;
-	if (childNodes.length >= 1 && childNodes[0].nodeType === 3) {
-		let val = childNodes[0].nodeValue;
-		if (val == null) {
-			return defaultVal;
-		}
-		val = XmlWriter.unEscape(val);
-		if (isNum) {
-			const numData = (new StringData(val)).asNum();
-			if (numData.isValid) {
-				return numData.getValue();
-			}
-			return defaultVal;
-		}
-		return val;
-	} else if (childNodes.length === 0) {
-		return "";
-	}
-	return defaultVal;
+  if (isNum == null) {
+    isNum = false;
+  }
+  if (defaultVal == null) {
+    defaultVal = null;
+  }
+  const innerNode = XmlWriter.findSubElement(element, name);
+  if (innerNode == null) {
+    return defaultVal;
+  }
+  const childNodes = innerNode.childNodes;
+  if (childNodes.length >= 1 && childNodes[0].nodeType === 3) {
+    let val = childNodes[0].nodeValue;
+    if (val == null) {
+      return defaultVal;
+    }
+    val = XmlWriter.unEscape(val);
+    if (isNum) {
+      const numData = (new StringData(val)).asNum();
+      if (numData.isValid) {
+        return numData.getValue();
+      }
+      return defaultVal;
+    }
+    return val;
+  } else if (childNodes.length === 0) {
+    return "";
+  }
+  return defaultVal;
 };
 
 /**
@@ -232,8 +232,8 @@ XmlWriter.getTextNode = function(element, name, defaultVal, isNum) {
  * @return {string}
  */
 XmlWriter.docToText = function(xmlDoc) {
-	const serializer = new XMLSerializer();
-	return serializer.serializeToString(xmlDoc);
+  const serializer = new XMLSerializer();
+  return serializer.serializeToString(xmlDoc);
 };
 
 /**
@@ -244,11 +244,11 @@ XmlWriter.docToText = function(xmlDoc) {
  * @return {null|Node}
  */
 XmlWriter.findNodeByKey = function(nodes, key) {
-	for (let i = 0; i < nodes.length; i++) {
-		const nodeKey = XmlWriter.getAttribute(nodes[i], "key", "");
-		if (nodeKey === key) {
-			return nodes[i];
-		}
-	}
-	return null;
+  for (let i = 0; i < nodes.length; i++) {
+    const nodeKey = XmlWriter.getAttribute(nodes[i], "key", "");
+    if (nodeKey === key) {
+      return nodes[i];
+    }
+  }
+  return null;
 };

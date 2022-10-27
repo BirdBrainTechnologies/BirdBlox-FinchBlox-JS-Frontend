@@ -14,72 +14,72 @@
  * @constructor
  */
 function RowDialog(autoHeight, title, rowCount, extraTop, extraBottom, extendTitleBar) {
-	if (extendTitleBar == null) {
-		extendTitleBar = 0;
-	}
-	this.autoHeight = autoHeight;
-	this.title = title;
-	this.rowCount = rowCount;
-	this.extraTopSpace = extraTop;
-	this.extraBottomSpace = extraBottom;
-	this.extendTitleBar = extendTitleBar;
-	/* The close/cancel/dismiss buttons at the bottom of the dialog are centeredButtons.  They should be added with
-	 * addCenteredButton before show() is called */
-	/** @type {Array<object>} - An array of entries including text and callbackFn for each button */
-	this.centeredButtons = [];
-	/** @type {string} - The text to display if there are no rows. Set using addHintText before show() is called */
-	this.hintText = "";
-	this.visible = false;
+  if (extendTitleBar == null) {
+    extendTitleBar = 0;
+  }
+  this.autoHeight = autoHeight;
+  this.title = title;
+  this.rowCount = rowCount;
+  this.extraTopSpace = extraTop;
+  this.extraBottomSpace = extraBottom;
+  this.extendTitleBar = extendTitleBar;
+  /* The close/cancel/dismiss buttons at the bottom of the dialog are centeredButtons.  They should be added with
+   * addCenteredButton before show() is called */
+  /** @type {Array<object>} - An array of entries including text and callbackFn for each button */
+  this.centeredButtons = [];
+  /** @type {string} - The text to display if there are no rows. Set using addHintText before show() is called */
+  this.hintText = "";
+  this.visible = false;
 }
 
 RowDialog.setConstants = function() {
-	//TODO: This really should be in a separate "setStatics" function, since it isn't a constant
-	RowDialog.currentDialog = null;
+  //TODO: This really should be in a separate "setStatics" function, since it isn't a constant
+  RowDialog.currentDialog = null;
 
-	if (FinchBlox){
-		RowDialog.titleBarColor = Colors.finchGreen;
-		RowDialog.bgColor = Colors.white;
-		RowDialog.bnMargin = 0;
-		RowDialog.cornerR = 5;
-		RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
-		RowDialog.titleBarH = RowDialog.bnHeight*2;
-		RowDialog.outlineColor = Colors.flagGreen;
-	} else {
-		RowDialog.titleBarColor = Colors.lightGray;
-		RowDialog.bgColor = Colors.lightLightGray;
-		RowDialog.bnMargin = 5;
-		RowDialog.cornerR = 0;
-		RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
-		RowDialog.titleBarH = RowDialog.bnHeight + RowDialog.bnMargin;
-	}
-	RowDialog.titleBarFontC = Colors.white;
-	RowDialog.centeredBnWidth = 100;
+  if (FinchBlox) {
+    RowDialog.titleBarColor = Colors.finchGreen;
+    RowDialog.bgColor = Colors.white;
+    RowDialog.bnMargin = 0;
+    RowDialog.cornerR = 5;
+    RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
+    RowDialog.titleBarH = RowDialog.bnHeight * 2;
+    RowDialog.outlineColor = Colors.flagGreen;
+  } else {
+    RowDialog.titleBarColor = Colors.lightGray;
+    RowDialog.bgColor = Colors.lightLightGray;
+    RowDialog.bnMargin = 5;
+    RowDialog.cornerR = 0;
+    RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
+    RowDialog.titleBarH = RowDialog.bnHeight + RowDialog.bnMargin;
+  }
+  RowDialog.titleBarFontC = Colors.white;
+  RowDialog.centeredBnWidth = 100;
 
 
-	// The dialog tries to take up a certain ratio of the smaller of the screen's dimensions
-	if (FinchBlox) {
-		RowDialog.widthRatio = 0.7;
-		RowDialog.heightRatio = 0.2;
-	} else {
-		RowDialog.widthRatio = 0.7;
-		RowDialog.heightRatio = 0.75;
-	}
+  // The dialog tries to take up a certain ratio of the smaller of the screen's dimensions
+  if (FinchBlox) {
+    RowDialog.widthRatio = 0.7;
+    RowDialog.heightRatio = 0.2;
+  } else {
+    RowDialog.widthRatio = 0.7;
+    RowDialog.heightRatio = 0.75;
+  }
 
-	// But if that is too small, it uses the min dimensions
-	if (FinchBlox) {
-		RowDialog.minWidth = 400;
-		RowDialog.minHeight = 200;
-	} else {
-		RowDialog.minWidth = 400;
-		RowDialog.minHeight = 400;
-	}
+  // But if that is too small, it uses the min dimensions
+  if (FinchBlox) {
+    RowDialog.minWidth = 400;
+    RowDialog.minHeight = 200;
+  } else {
+    RowDialog.minWidth = 400;
+    RowDialog.minHeight = 400;
+  }
 
-	RowDialog.hintMargin = 5;
-	RowDialog.titleBarFont = Font.uiFont(16).bold();
-	RowDialog.hintTextFont = Font.uiFont(16);
-	RowDialog.centeredfontWeight = "bold";
-	RowDialog.smallBnWidth = 45;
-	RowDialog.iconH = 15;
+  RowDialog.hintMargin = 5;
+  RowDialog.titleBarFont = Font.uiFont(16).bold();
+  RowDialog.hintTextFont = Font.uiFont(16);
+  RowDialog.centeredfontWeight = "bold";
+  RowDialog.smallBnWidth = 45;
+  RowDialog.iconH = 15;
 };
 
 /**
@@ -89,87 +89,87 @@ RowDialog.setConstants = function() {
  * @param {function} callbackFn - The function to call when the button is tapped
  */
 RowDialog.prototype.addCenteredButton = function(text, callbackFn) {
-	let entry = {};
-	entry.text = text;
-	entry.callbackFn = callbackFn;
-	this.centeredButtons.push(entry);
+  let entry = {};
+  entry.text = text;
+  entry.callbackFn = callbackFn;
+  this.centeredButtons.push(entry);
 };
 
 /**
  * Builds all the visuals of the dialog and sets the dialog as currentDialog.  Closes any existing dialogs.
  */
 RowDialog.prototype.show = function() {
-	if (!this.visible) {
-		this.visible = true;
-		// Close existing dialog if any
-		if (RowDialog.currentDialog != null && RowDialog.currentDialog !== this) {
-			RowDialog.currentDialog.closeDialog();
-		}
-		RowDialog.currentDialog = this;
-		this.calcHeights();
-		this.calcWidths();
-		this.x = GuiElements.width / 2 - this.width / 2;
-		this.y = GuiElements.height / 2 - this.height / 2;
-		this.group = GuiElements.create.group(this.x, this.y);
-		this.bgRect = this.drawBackground();
+  if (!this.visible) {
+    this.visible = true;
+    // Close existing dialog if any
+    if (RowDialog.currentDialog != null && RowDialog.currentDialog !== this) {
+      RowDialog.currentDialog.closeDialog();
+    }
+    RowDialog.currentDialog = this;
+    this.calcHeights();
+    this.calcWidths();
+    this.x = GuiElements.width / 2 - this.width / 2;
+    this.y = GuiElements.height / 2 - this.height / 2;
+    this.group = GuiElements.create.group(this.x, this.y);
+    this.bgRect = this.drawBackground();
 
 
-		this.titleRect = this.createTitleRect();
-		if (FinchBlox){
-			this.icon = this.createTitleIcon(VectorPaths.mvFinch);
-		} else {
-			this.titleText = this.createTitleLabel(this.title);
-		}
+    this.titleRect = this.createTitleRect();
+    if (FinchBlox) {
+      this.icon = this.createTitleIcon(VectorPaths.mvFinch);
+    } else {
+      this.titleText = this.createTitleLabel(this.title);
+    }
 
 
-		// All the rows go in this group, which is scrollable
-		this.rowGroup = this.createContent();
-		this.createCenteredBns();
-		this.scrollBox = this.createScrollBox(); // could be null
-		if (this.scrollBox != null) {
-			this.scrollBox.show();
-		}
+    // All the rows go in this group, which is scrollable
+    this.rowGroup = this.createContent();
+    this.createCenteredBns();
+    this.scrollBox = this.createScrollBox(); // could be null
+    if (this.scrollBox != null) {
+      this.scrollBox.show();
+    }
 
-		GuiElements.layers.overlay.appendChild(this.group);
+    GuiElements.layers.overlay.appendChild(this.group);
 
-		GuiElements.blockInteraction();
-	}
+    GuiElements.blockInteraction();
+  }
 };
 
 /**
  * Computes the height of the dialog and its content.
  */
 RowDialog.prototype.calcHeights = function() {
-	const RD = RowDialog;
-	let centeredBnHeight = (RD.bnHeight + RD.bnMargin) * this.centeredButtons.length + RD.bnMargin;
-	let nonScrollHeight = centeredBnHeight + RD.bnMargin;
-	nonScrollHeight += this.extraTopSpace + this.extraBottomSpace;
-	nonScrollHeight += RD.titleBarH;
-	const shorterDim = Math.min(GuiElements.height, GuiElements.width);
-	let minHeight = Math.max(shorterDim * RowDialog.heightRatio, RD.minHeight);
-	let ScrollHeight = this.rowCount * (RD.bnMargin + RD.bnHeight) - RD.bnMargin;
-	let totalHeight = nonScrollHeight + ScrollHeight;
-	if (!this.autoHeight) totalHeight = 0;
-	this.height = Math.min(Math.max(minHeight, totalHeight), GuiElements.height);
-	this.centeredButtonY = this.height - centeredBnHeight + RD.bnMargin;
-	this.innerHeight = ScrollHeight;
-	this.scrollBoxHeight = Math.min(this.height - nonScrollHeight, ScrollHeight);
-	this.scrollBoxY = RD.bnMargin + RD.titleBarH + this.extraTopSpace;
-	this.extraTopY = RD.titleBarH;
-	this.extraBottomY = this.height - centeredBnHeight - this.extraBottomSpace + RD.bnMargin;
+  const RD = RowDialog;
+  let centeredBnHeight = (RD.bnHeight + RD.bnMargin) * this.centeredButtons.length + RD.bnMargin;
+  let nonScrollHeight = centeredBnHeight + RD.bnMargin;
+  nonScrollHeight += this.extraTopSpace + this.extraBottomSpace;
+  nonScrollHeight += RD.titleBarH;
+  const shorterDim = Math.min(GuiElements.height, GuiElements.width);
+  let minHeight = Math.max(shorterDim * RowDialog.heightRatio, RD.minHeight);
+  let ScrollHeight = this.rowCount * (RD.bnMargin + RD.bnHeight) - RD.bnMargin;
+  let totalHeight = nonScrollHeight + ScrollHeight;
+  if (!this.autoHeight) totalHeight = 0;
+  this.height = Math.min(Math.max(minHeight, totalHeight), GuiElements.height);
+  this.centeredButtonY = this.height - centeredBnHeight + RD.bnMargin;
+  this.innerHeight = ScrollHeight;
+  this.scrollBoxHeight = Math.min(this.height - nonScrollHeight, ScrollHeight);
+  this.scrollBoxY = RD.bnMargin + RD.titleBarH + this.extraTopSpace;
+  this.extraTopY = RD.titleBarH;
+  this.extraBottomY = this.height - centeredBnHeight - this.extraBottomSpace + RD.bnMargin;
 };
 
 /**
  * Computes the width of the dialog and its content.
  */
 RowDialog.prototype.calcWidths = function() {
-	const RD = RowDialog;
-	const shorterDim = Math.min(GuiElements.height, GuiElements.width);
-	this.width = Math.min(GuiElements.width, Math.max(shorterDim * RD.widthRatio, RD.minWidth));
-	this.scrollBoxWidth = this.width - 2 * RD.bnMargin;
-	this.scrollBoxX = RD.bnMargin;
-	this.centeredButtonX = this.width / 2 - RD.centeredBnWidth / 2;
-	this.contentWidth = this.width - RD.bnMargin * 2;
+  const RD = RowDialog;
+  const shorterDim = Math.min(GuiElements.height, GuiElements.width);
+  this.width = Math.min(GuiElements.width, Math.max(shorterDim * RD.widthRatio, RD.minWidth));
+  this.scrollBoxWidth = this.width - 2 * RD.bnMargin;
+  this.scrollBoxX = RD.bnMargin;
+  this.centeredButtonX = this.width / 2 - RD.centeredBnWidth / 2;
+  this.contentWidth = this.width - RD.bnMargin * 2;
 };
 
 /**
@@ -177,10 +177,10 @@ RowDialog.prototype.calcWidths = function() {
  * @return {Element} - The SVG rect element
  */
 RowDialog.prototype.drawBackground = function() {
-	const RD = RowDialog;
-	let rect = GuiElements.draw.rect(0, 0, this.width, this.height, RD.bgColor, RD.cornerR, RD.cornerR);
-	this.group.appendChild(rect);
-	return rect;
+  const RD = RowDialog;
+  let rect = GuiElements.draw.rect(0, 0, this.width, this.height, RD.bgColor, RD.cornerR, RD.cornerR);
+  this.group.appendChild(rect);
+  return rect;
 };
 
 /**
@@ -188,16 +188,16 @@ RowDialog.prototype.drawBackground = function() {
  * @return {Element} - The SVG rect element
  */
 RowDialog.prototype.createTitleRect = function() {
-	const RD = RowDialog;
-	var rect;
-	if (FinchBlox) {
-		rect = GuiElements.draw.tab(0, 0, this.width, RD.titleBarH + this.extendTitleBar, RD.titleBarColor, RD.cornerR);
-		GuiElements.update.stroke(rect, RD.outlineColor, 1);
-	} else {
-		rect = GuiElements.draw.rect(0, 0, this.width, RD.titleBarH + this.extendTitleBar, RD.titleBarColor);
-	}
-	this.group.appendChild(rect);
-	return rect;
+  const RD = RowDialog;
+  var rect;
+  if (FinchBlox) {
+    rect = GuiElements.draw.tab(0, 0, this.width, RD.titleBarH + this.extendTitleBar, RD.titleBarColor, RD.cornerR);
+    GuiElements.update.stroke(rect, RD.outlineColor, 1);
+  } else {
+    rect = GuiElements.draw.rect(0, 0, this.width, RD.titleBarH + this.extendTitleBar, RD.titleBarColor);
+  }
+  this.group.appendChild(rect);
+  return rect;
 };
 
 /**
@@ -206,13 +206,13 @@ RowDialog.prototype.createTitleRect = function() {
  * @return {Element} - The SVG text element
  */
 RowDialog.prototype.createTitleLabel = function(title) {
-	var RD = RowDialog;
-	var textE = GuiElements.draw.text(0, 0, title, RD.titleBarFont, RD.titleBarFontC);
-	var x = this.width / 2 - GuiElements.measure.textWidth(textE) / 2;
-	var y = RD.titleBarH / 2 + RD.titleBarFont.charHeight / 2;
-	GuiElements.move.text(textE, x, y);
-	this.group.appendChild(textE);
-	return textE;
+  var RD = RowDialog;
+  var textE = GuiElements.draw.text(0, 0, title, RD.titleBarFont, RD.titleBarFontC);
+  var x = this.width / 2 - GuiElements.measure.textWidth(textE) / 2;
+  var y = RD.titleBarH / 2 + RD.titleBarFont.charHeight / 2;
+  GuiElements.move.text(textE, x, y);
+  this.group.appendChild(textE);
+  return textE;
 };
 
 /**
@@ -221,16 +221,16 @@ RowDialog.prototype.createTitleLabel = function(title) {
  * @return {Element} - The SVG element
  */
 RowDialog.prototype.createTitleIcon = function(pathId) {
-	var RD = RowDialog;
+  var RD = RowDialog;
 
-	const iconH = RD.titleBarH * 0.9;
-	const iconW = VectorIcon.computeWidth(pathId, iconH);
-	const iconX = (this.width - iconW) / 2;
-	const iconY = (RD.titleBarH - iconH) / 2;
+  const iconH = RD.titleBarH * 0.9;
+  const iconW = VectorIcon.computeWidth(pathId, iconH);
+  const iconX = (this.width - iconW) / 2;
+  const iconY = (RD.titleBarH - iconH) / 2;
 
-	const icon = new VectorIcon(iconX, iconY, pathId, Colors.white, iconH, this.group, null, 90);
-	GuiElements.update.stroke(icon.pathE, RD.outlineColor, 4);
-	return icon;
+  const icon = new VectorIcon(iconX, iconY, pathId, Colors.white, iconH, this.group, null, 90);
+  GuiElements.update.stroke(icon.pathE, RD.outlineColor, 4);
+  return icon;
 };
 
 /**
@@ -238,27 +238,27 @@ RowDialog.prototype.createTitleIcon = function(pathId) {
  * @return {Element} the SVG group element containing the rows
  */
 RowDialog.prototype.createContent = function() {
-	const RD = RowDialog;
-	let y = 0;
-	const rowGroup = GuiElements.create.group(0, 0);
-	if (this.rowCount > 0) {
-	    if (this.title === Language.getStr("Connect_Multiple")) {
-                this.createMultipleDialogRow(y, this.contentWidth, rowGroup)
-	    } else {
-            for (let i = 0; i < this.rowCount; i++) {
-                // Determined by subclass
-                this.createRow(i, y, this.contentWidth, rowGroup);
-                y += RD.bnHeight + RD.bnMargin;
-            }
-        }
-    } else if (this.hintText !== "") {
-		this.createHintText();
-	}
-	return rowGroup;
+  const RD = RowDialog;
+  let y = 0;
+  const rowGroup = GuiElements.create.group(0, 0);
+  if (this.rowCount > 0) {
+    if (this.title === Language.getStr("Connect_Multiple")) {
+      this.createMultipleDialogRow(y, this.contentWidth, rowGroup)
+    } else {
+      for (let i = 0; i < this.rowCount; i++) {
+        // Determined by subclass
+        this.createRow(i, y, this.contentWidth, rowGroup);
+        y += RD.bnHeight + RD.bnMargin;
+      }
+    }
+  } else if (this.hintText !== "") {
+    this.createHintText();
+  }
+  return rowGroup;
 };
 
 RowDialog.prototype.createMultipleDialogRow = function(y, width, contentGroup) {
-	DebugOptions.markAbstract();
+  DebugOptions.markAbstract();
 };
 
 
@@ -270,21 +270,21 @@ RowDialog.prototype.createMultipleDialogRow = function(y, width, contentGroup) {
  * @param {Element} contentGroup - The SVG group element the content should be added to
  */
 RowDialog.prototype.createRow = function(index, y, width, contentGroup) {
-	DebugOptions.markAbstract();
+  DebugOptions.markAbstract();
 };
 
 /**
  * Generates the centered buttons and adds them to the group
  */
 RowDialog.prototype.createCenteredBns = function() {
-	const RD = RowDialog;
-	let y = this.centeredButtonY;
-	this.centeredButtonEs = [];
-	for (let i = 0; i < this.centeredButtons.length; i++) {
-		let bn = this.createCenteredBn(y, this.centeredButtons[i]);
-		this.centeredButtonEs.push(bn);
-		y += RD.bnHeight + RD.bnMargin;
-	}
+  const RD = RowDialog;
+  let y = this.centeredButtonY;
+  this.centeredButtonEs = [];
+  for (let i = 0; i < this.centeredButtons.length; i++) {
+    let bn = this.createCenteredBn(y, this.centeredButtons[i]);
+    this.centeredButtonEs.push(bn);
+    y += RD.bnHeight + RD.bnMargin;
+  }
 };
 
 /**
@@ -294,11 +294,11 @@ RowDialog.prototype.createCenteredBns = function() {
  * @return {Button}
  */
 RowDialog.prototype.createCenteredBn = function(y, entry) {
-	const RD = RowDialog;
-	const button = new Button(this.centeredButtonX, y, RD.centeredBnWidth, RD.bnHeight, this.group);
-	button.addText(entry.text, null, null, RD.centeredfontWeight);
-	button.setCallbackFunction(entry.callbackFn, true);
-	return button;
+  const RD = RowDialog;
+  const button = new Button(this.centeredButtonX, y, RD.centeredBnWidth, RD.bnHeight, this.group);
+  button.addText(entry.text, null, null, RD.centeredfontWeight);
+  button.setCallbackFunction(entry.callbackFn, true);
+  return button;
 };
 
 /**
@@ -306,41 +306,41 @@ RowDialog.prototype.createCenteredBn = function(y, entry) {
  * @return {SmoothScrollBox}
  */
 RowDialog.prototype.createScrollBox = function() {
-	if (this.rowCount === 0) return null;
-	let x = this.x + this.scrollBoxX;
-	let y = this.y + this.scrollBoxY;
-	return new SmoothScrollBox(this.rowGroup, GuiElements.layers.frontScroll, x, y,
-		this.scrollBoxWidth, this.scrollBoxHeight, this.scrollBoxWidth, this.innerHeight);
+  if (this.rowCount === 0) return null;
+  let x = this.x + this.scrollBoxX;
+  let y = this.y + this.scrollBoxY;
+  return new SmoothScrollBox(this.rowGroup, GuiElements.layers.frontScroll, x, y,
+    this.scrollBoxWidth, this.scrollBoxHeight, this.scrollBoxWidth, this.innerHeight);
 };
 
 /**
  * Creates the text below the title bar.  Should only be called if hinText !== "" and there are no rows
  */
-RowDialog.prototype.createHintText = function(offsetX,offsetY) {
-    if (offsetX == null) {
-        offsetX = 0;
-    }
-    if (offsetY == null) {
-        offsetY = 0;
-    }
-	const RD = RowDialog;
-	this.hintTextE = GuiElements.draw.text(0, 0, "", RD.hintTextFont, RD.titleBarFontC);
-	GuiElements.update.textLimitWidth(this.hintTextE, this.hintText, this.width);
-	let textWidth = GuiElements.measure.textWidth(this.hintTextE);
-	let x = this.width / 2 - textWidth / 2 + offsetX;
-	let y = this.scrollBoxY + RD.hintTextFont.charHeight + RD.hintMargin + offsetY;
-	GuiElements.move.text(this.hintTextE, x, y);
-	this.group.appendChild(this.hintTextE);
+RowDialog.prototype.createHintText = function(offsetX, offsetY) {
+  if (offsetX == null) {
+    offsetX = 0;
+  }
+  if (offsetY == null) {
+    offsetY = 0;
+  }
+  const RD = RowDialog;
+  this.hintTextE = GuiElements.draw.text(0, 0, "", RD.hintTextFont, RD.titleBarFontC);
+  GuiElements.update.textLimitWidth(this.hintTextE, this.hintText, this.width);
+  let textWidth = GuiElements.measure.textWidth(this.hintTextE);
+  let x = this.width / 2 - textWidth / 2 + offsetX;
+  let y = this.scrollBoxY + RD.hintTextFont.charHeight + RD.hintMargin + offsetY;
+  GuiElements.move.text(this.hintTextE, x, y);
+  this.group.appendChild(this.hintTextE);
 };
 
 /**
  * Removes the dialog from view and unblocks the ui behind it.  Subclasses to cleanup here.
  */
 RowDialog.prototype.closeDialog = function() {
-	if (this.visible) {
-		this.hide();
-		GuiElements.unblockInteraction();
-	}
+  if (this.visible) {
+    this.hide();
+    GuiElements.unblockInteraction();
+  }
 };
 
 /**
@@ -348,8 +348,8 @@ RowDialog.prototype.closeDialog = function() {
  * @return {number}
  */
 RowDialog.prototype.getScroll = function() {
-	if (this.scrollBox == null) return 0;
-	return this.scrollBox.getScrollY();
+  if (this.scrollBox == null) return 0;
+  return this.scrollBox.getScrollY();
 };
 
 /**
@@ -357,46 +357,46 @@ RowDialog.prototype.getScroll = function() {
  * @param y
  */
 RowDialog.prototype.setScroll = function(y) {
-	if (this.scrollBox == null) return;
-	this.scrollBox.setScrollY(y);
+  if (this.scrollBox == null) return;
+  this.scrollBox.setScrollY(y);
 };
 
 /**
  * Reloads the dialog if the zoom level changes
  */
 RowDialog.prototype.updateZoom = function() {
-	if (this.visible) {
-		let scroll = this.getScroll();
-		this.closeDialog();
-		this.show();
-		this.setScroll(scroll);
-	}
+  if (this.visible) {
+    let scroll = this.getScroll();
+    this.closeDialog();
+    this.show();
+    this.setScroll(scroll);
+  }
 };
 
 /**
  * Notifies the open dialog that the zoom level has changed
  */
 RowDialog.updateZoom = function() {
-	if (RowDialog.currentDialog != null) {
-		RowDialog.currentDialog.updateZoom();
-	}
+  if (RowDialog.currentDialog != null) {
+    RowDialog.currentDialog.updateZoom();
+  }
 };
 
 /**
  * Removes the content of the dialog from view, but does not unblock the UI or preform cleanup
  */
 RowDialog.prototype.hide = function() {
-	if (this.visible) {
-		this.visible = false;
-		this.group.remove();
-		if (this.scrollBox != null) {
-			this.scrollBox.hide();
-		}
-		this.scrollBox = null;
-		if (RowDialog.currentDialog === this) {
-			RowDialog.currentDialog = null;
-		}
-	}
+  if (this.visible) {
+    this.visible = false;
+    this.group.remove();
+    if (this.scrollBox != null) {
+      this.scrollBox.hide();
+    }
+    this.scrollBox = null;
+    if (RowDialog.currentDialog === this) {
+      RowDialog.currentDialog = null;
+    }
+  }
 };
 
 /**
@@ -404,13 +404,13 @@ RowDialog.prototype.hide = function() {
  * @param {number} rowCount - The new number of rows
  */
 RowDialog.prototype.reloadRows = function(rowCount) {
-	this.rowCount = rowCount;
-	if (this.visible) {
-		let scroll = this.getScroll();
-		this.hide();
-		this.show();
-		this.setScroll(scroll);
-	}
+  this.rowCount = rowCount;
+  if (this.visible) {
+    let scroll = this.getScroll();
+    this.hide();
+    this.show();
+    this.setScroll(scroll);
+  }
 };
 
 /**
@@ -418,10 +418,10 @@ RowDialog.prototype.reloadRows = function(rowCount) {
  * @return {boolean}
  */
 RowDialog.prototype.isScrolling = function() {
-	if (this.scrollBox != null) {
-		return this.scrollBox.isMoving();
-	}
-	return false;
+  if (this.scrollBox != null) {
+    return this.scrollBox.isMoving();
+  }
+  return false;
 };
 
 /**
@@ -429,7 +429,7 @@ RowDialog.prototype.isScrolling = function() {
  * @param {string} hintText
  */
 RowDialog.prototype.addHintText = function(hintText) {
-	this.hintText = hintText;
+  this.hintText = hintText;
 };
 
 /**
@@ -437,7 +437,7 @@ RowDialog.prototype.addHintText = function(hintText) {
  * @return {number} - The amount of space above the content
  */
 RowDialog.prototype.getExtraTopY = function() {
-	return this.extraTopY;
+  return this.extraTopY;
 };
 
 /**
@@ -445,7 +445,7 @@ RowDialog.prototype.getExtraTopY = function() {
  * @return {number} - The amount of space below the content
  */
 RowDialog.prototype.getExtraBottomY = function() {
-	return this.extraBottomY;
+  return this.extraBottomY;
 };
 
 /**
@@ -453,7 +453,7 @@ RowDialog.prototype.getExtraBottomY = function() {
  * @return {number}
  */
 RowDialog.prototype.getContentWidth = function() {
-	return this.contentWidth;
+  return this.contentWidth;
 };
 
 /**
@@ -461,7 +461,7 @@ RowDialog.prototype.getContentWidth = function() {
  * @return {Button}
  */
 RowDialog.prototype.getCenteredButton = function(i) {
-	return this.centeredButtonEs[i];
+  return this.centeredButtonEs[i];
 };
 
 /* Convert between relative and abs coords for items in the contentGroup */
@@ -470,16 +470,16 @@ RowDialog.prototype.getCenteredButton = function(i) {
  * @return {number}
  */
 RowDialog.prototype.contentRelToAbsX = function(x) {
-	if (!this.visible) return x;
-	return this.scrollBox.relToAbsX(x);
+  if (!this.visible) return x;
+  return this.scrollBox.relToAbsX(x);
 };
 /**
  * @param {number} y
  * @return {number}
  */
 RowDialog.prototype.contentRelToAbsY = function(y) {
-	if (!this.visible) return y;
-	return this.scrollBox.relToAbsY(y);
+  if (!this.visible) return y;
+  return this.scrollBox.relToAbsY(y);
 };
 
 /**
@@ -492,13 +492,13 @@ RowDialog.prototype.contentRelToAbsY = function(y) {
  * @return {Button}
  */
 RowDialog.createMainBn = function(bnWidth, x, y, contentGroup, callbackFn) {
-	const RD = RowDialog;
-	const button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
-	if (callbackFn != null) {
-		button.setCallbackFunction(callbackFn, true);
-	}
-	button.makeScrollable();
-	return button;
+  const RD = RowDialog;
+  const button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
+  if (callbackFn != null) {
+    button.setCallbackFunction(callbackFn, true);
+  }
+  button.makeScrollable();
+  return button;
 };
 
 /**
@@ -512,9 +512,9 @@ RowDialog.createMainBn = function(bnWidth, x, y, contentGroup, callbackFn) {
  * @return {Button}
  */
 RowDialog.createMainBnWithText = function(text, bnWidth, x, y, contentGroup, callbackFn) {
-	const button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, callbackFn);
-	button.addText(text);
-	return button;
+  const button = RowDialog.createMainBn(bnWidth, x, y, contentGroup, callbackFn);
+  button.addText(text);
+  return button;
 };
 
 /**
@@ -526,13 +526,13 @@ RowDialog.createMainBnWithText = function(text, bnWidth, x, y, contentGroup, cal
  * @return {Button}
  */
 RowDialog.createSmallBn = function(x, y, contentGroup, callbackFn) {
-	const RD = RowDialog;
-	const button = new Button(x, y, RD.smallBnWidth, RD.bnHeight, contentGroup);
-	if (callbackFn != null) {
-		button.setCallbackFunction(callbackFn, true);
-	}
-	button.makeScrollable();
-	return button;
+  const RD = RowDialog;
+  const button = new Button(x, y, RD.smallBnWidth, RD.bnHeight, contentGroup);
+  if (callbackFn != null) {
+    button.setCallbackFunction(callbackFn, true);
+  }
+  button.makeScrollable();
+  return button;
 };
 
 /**
@@ -545,8 +545,8 @@ RowDialog.createSmallBn = function(x, y, contentGroup, callbackFn) {
  * @return {Button}
  */
 RowDialog.createSmallBnWithIcon = function(pathId, x, y, contentGroup, callbackFn) {
-	let RD = RowDialog;
-	let button = RowDialog.createSmallBn(x, y, contentGroup, callbackFn);
-	button.addIcon(pathId, RD.iconH);
-	return button;
+  let RD = RowDialog;
+  let button = RowDialog.createSmallBn(x, y, contentGroup, callbackFn);
+  button.addIcon(pathId, RD.iconH);
+  return button;
 };

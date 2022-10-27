@@ -5,16 +5,16 @@
  * @constructor
  */
 function LabelText(parent, text) {
-	DebugOptions.validateNonNull(parent, text);
-	this.text = text;
-	this.width = 0;   // Computed later with updateDim
-	this.height = BlockGraphics.labelText.font.charHeight;
-	this.x = 0;
-	this.y = 0;
-	this.parent = parent;
-	this.textE = this.generateText(text);
-	this.isSlot = false;   // All BlockParts have this property
-	this.visible = true;
+  DebugOptions.validateNonNull(parent, text);
+  this.text = text;
+  this.width = 0; // Computed later with updateDim
+  this.height = BlockGraphics.labelText.font.charHeight;
+  this.x = 0;
+  this.y = 0;
+  this.parent = parent;
+  this.textE = this.generateText(text);
+  this.isSlot = false; // All BlockParts have this property
+  this.visible = true;
 }
 LabelText.prototype = Object.create(BlockPart.prototype);
 LabelText.prototype.constructor = LabelText;
@@ -25,21 +25,21 @@ LabelText.prototype.constructor = LabelText;
  * @return {number} - The width of the text, indicating how much the next item should be shifted over.
  */
 LabelText.prototype.updateAlign = function(x, y) {
-	this.move(x, y + this.height / 2);
-	return this.width;
+  this.move(x, y + this.height / 2);
+  return this.width;
 };
 
 /**
  * Computes the dimensions of the text and stores them in this.height and this.width
  */
 LabelText.prototype.updateDim = function() {
-	// Dimensions are only computed once, since text can't change
-	if (this.width === 0) {
-		GuiElements.layers.temp.appendChild(this.textE);
-		this.width = GuiElements.measure.textWidth(this.textE);
-		this.textE.remove();
-		this.parent.group.appendChild(this.textE);
-	}
+  // Dimensions are only computed once, since text can't change
+  if (this.width === 0) {
+    GuiElements.layers.temp.appendChild(this.textE);
+    this.width = GuiElements.measure.textWidth(this.textE);
+    this.textE.remove();
+    this.parent.group.appendChild(this.textE);
+  }
 };
 
 /**
@@ -48,9 +48,9 @@ LabelText.prototype.updateDim = function() {
  * @return {Node} - The SVG text element
  */
 LabelText.prototype.generateText = function(text) {
-	const obj = BlockGraphics.create.labelText(text, this.parent.group);
-	TouchReceiver.addListenersChild(obj, this.parent);
-	return obj;
+  const obj = BlockGraphics.create.labelText(text, this.parent.group);
+  TouchReceiver.addListenersChild(obj, this.parent);
+  return obj;
 };
 
 /**
@@ -59,9 +59,9 @@ LabelText.prototype.generateText = function(text) {
  * @param {number} y
  */
 LabelText.prototype.move = function(x, y) {
-	this.x = x;
-	this.y = y;
-	BlockGraphics.update.text(this.textE, x, y);
+  this.x = x;
+  this.y = y;
+  BlockGraphics.update.text(this.textE, x, y);
 };
 
 /**
@@ -69,40 +69,40 @@ LabelText.prototype.move = function(x, y) {
  * @return {string}
  */
 LabelText.prototype.textSummary = function() {
-	return this.text;
+  return this.text;
 };
 
 /**
  * Unhides the label
  */
 LabelText.prototype.show = function() {
-	if (!this.visible) {
-		this.parent.group.appendChild(this.textE);
-		this.visible = true;
-	}
+  if (!this.visible) {
+    this.parent.group.appendChild(this.textE);
+    this.visible = true;
+  }
 };
 
 /**
  * Removes the label from the SVG
  */
 LabelText.prototype.hide = function() {
-	if (this.visible) {
-		this.textE.remove();
-		this.visible = false;
-	}
+  if (this.visible) {
+    this.textE.remove();
+    this.visible = false;
+  }
 };
 
 /**
  * Intended to permanently remove label from SVG
  */
 LabelText.prototype.remove = function() {
-	this.textE.remove();
+  this.textE.remove();
 };
 
 LabelText.prototype.makeActive = function() {
-	GuiElements.update.color(this.textE, BlockGraphics.labelText.fill);
+  GuiElements.update.color(this.textE, BlockGraphics.labelText.fill);
 };
 
 LabelText.prototype.makeInactive = function() {
-	GuiElements.update.color(this.textE, BlockGraphics.labelText.disabledFill);
+  GuiElements.update.color(this.textE, BlockGraphics.labelText.disabledFill);
 };

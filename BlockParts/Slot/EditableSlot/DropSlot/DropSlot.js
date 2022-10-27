@@ -10,26 +10,26 @@
  * @constructor
  */
 function DropSlot(parent, key, inputType, snapType, data, nullable) {
-	if (inputType == null) {
-		inputType = EditableSlot.inputTypes.select;
-	}
-	if (snapType == null) {
-		snapType = Slot.snapTypes.none;
-	}
-	if (data == null) {
-		// If no Data was provided, it must be nullable
-		DebugOptions.assert(nullable !== false);
-		nullable = true;
-		data = SelectionData.empty();
-	} else if (nullable == null) {
-		// If data was provided and nullable is not defined, set it to false
-		nullable = false;
-	}
-	EditableSlot.call(this, parent, key, inputType, snapType, Slot.outputTypes.any, data);
-	this.slotShape = new DropSlotShape(this, this.dataToString(data));
-	this.slotShape.show();
-	this.optionsList = [];
-	this.nullable = nullable;
+  if (inputType == null) {
+    inputType = EditableSlot.inputTypes.select;
+  }
+  if (snapType == null) {
+    snapType = Slot.snapTypes.none;
+  }
+  if (data == null) {
+    // If no Data was provided, it must be nullable
+    DebugOptions.assert(nullable !== false);
+    nullable = true;
+    data = SelectionData.empty();
+  } else if (nullable == null) {
+    // If data was provided and nullable is not defined, set it to false
+    nullable = false;
+  }
+  EditableSlot.call(this, parent, key, inputType, snapType, Slot.outputTypes.any, data);
+  this.slotShape = new DropSlotShape(this, this.dataToString(data));
+  this.slotShape.show();
+  this.optionsList = [];
+  this.nullable = nullable;
 }
 DropSlot.prototype = Object.create(EditableSlot.prototype);
 DropSlot.prototype.constructor = DropSlot;
@@ -39,8 +39,8 @@ DropSlot.prototype.constructor = DropSlot;
  * TODO: fix BlockGraphics
  */
 DropSlot.prototype.highlight = function() {
-	const isSlot = !this.hasChild;
-	Highlighter.highlight(this.getAbsX(), this.getAbsY(), this.width, this.height, 3, isSlot);
+  const isSlot = !this.hasChild;
+  Highlighter.highlight(this.getAbsX(), this.getAbsY(), this.width, this.height, 3, isSlot);
 };
 
 /**
@@ -49,7 +49,7 @@ DropSlot.prototype.highlight = function() {
  * @return {string}
  */
 DropSlot.prototype.formatTextSummary = function(textSummary) {
-	return "[" + textSummary + "]";
+  return "[" + textSummary + "]";
 };
 
 /**
@@ -57,10 +57,10 @@ DropSlot.prototype.formatTextSummary = function(textSummary) {
  * @param {string} displayText - The text used to display the option
  */
 DropSlot.prototype.addEnterText = function(displayText) {
-	const option = {};
-	option.displayText = displayText;
-	option.isAction = true;
-	this.optionsList.push(option);
+  const option = {};
+  option.displayText = displayText;
+  option.isAction = true;
+  this.optionsList.push(option);
 };
 
 /**
@@ -69,14 +69,14 @@ DropSlot.prototype.addEnterText = function(displayText) {
  * @param {string} [displayText=null]
  */
 DropSlot.prototype.addOption = function(data, displayText) {
-	if (displayText == null) {
-		displayText = null;
-	}
-	const option = {};
-	option.displayText = displayText;
-	option.data = data;
-	option.isAction = false;
-	this.optionsList.push(option);
+  if (displayText == null) {
+    displayText = null;
+  }
+  const option = {};
+  option.displayText = displayText;
+  option.data = data;
+  option.isAction = false;
+  this.optionsList.push(option);
 };
 
 /**
@@ -84,21 +84,21 @@ DropSlot.prototype.addOption = function(data, displayText) {
  * @param {InputWidget.SelectPad} selectPad - The pad to add the options to
  */
 DropSlot.prototype.populatePad = function(selectPad) {
-	this.optionsList.forEach(function(option) {
-		// All actions are Edit Text actions
-		if (option.isAction) {
-			selectPad.addAction(option.displayText, function(callbackFn) {
-				// When selected, the item shows a text entry dialog
-				const inputDialog = new InputDialog(this.parent.textSummary(this), true);
-				inputDialog.show(this.slotShape, function() {}, function(data, cancelled) {
-					// When the dialog is closed, the item runns the callback with the data the user entered
-					callbackFn(data, !cancelled);
-				}, this.enteredData);
-			}.bind(this)); //TODO: clean up edit text options
-		} else {
-			selectPad.addOption(option.data, option.displayText);
-		}
-	}.bind(this));
+  this.optionsList.forEach(function(option) {
+    // All actions are Edit Text actions
+    if (option.isAction) {
+      selectPad.addAction(option.displayText, function(callbackFn) {
+        // When selected, the item shows a text entry dialog
+        const inputDialog = new InputDialog(this.parent.textSummary(this), true);
+        inputDialog.show(this.slotShape, function() {}, function(data, cancelled) {
+          // When the dialog is closed, the item runns the callback with the data the user entered
+          callbackFn(data, !cancelled);
+        }, this.enteredData);
+      }.bind(this)); //TODO: clean up edit text options
+    } else {
+      selectPad.addOption(option.data, option.displayText);
+    }
+  }.bind(this));
 };
 
 /**
@@ -106,17 +106,17 @@ DropSlot.prototype.populatePad = function(selectPad) {
  * @return {InputPad}
  */
 DropSlot.prototype.createInputSystem = function() {
-	const x1 = this.getAbsX();
-	const y1 = this.getAbsY();
-	const x2 = this.relToAbsX(this.width);
-	const y2 = this.relToAbsY(this.height);
-	const inputPad = new InputPad(x1, x2, y1, y2);
+  const x1 = this.getAbsX();
+  const y1 = this.getAbsY();
+  const x2 = this.relToAbsX(this.width);
+  const y2 = this.relToAbsY(this.height);
+  const inputPad = new InputPad(x1, x2, y1, y2);
 
-	const selectPad = new InputWidget.SelectPad();
-	this.populatePad(selectPad);
-	inputPad.addWidget(selectPad);
+  const selectPad = new InputWidget.SelectPad();
+  this.populatePad(selectPad);
+  inputPad.addWidget(selectPad);
 
-	return inputPad;
+  return inputPad;
 };
 
 /**
@@ -125,13 +125,13 @@ DropSlot.prototype.createInputSystem = function() {
  * @return {SelectionData|null}
  */
 DropSlot.prototype.selectionDataFromValue = function(value) {
-	for (let i = 0; i < this.optionsList.length; i++) {
-		const option = this.optionsList[i];
-		if (!option.isAction && option.data.getValue() == value) {
-			return option.data;
-		}
-	}
-	return null;
+  for (let i = 0; i < this.optionsList.length; i++) {
+    const option = this.optionsList[i];
+    if (!option.isAction && option.data.getValue() == value) {
+      return option.data;
+    }
+  }
+  return null;
 };
 
 /**
@@ -140,7 +140,7 @@ DropSlot.prototype.selectionDataFromValue = function(value) {
  * @return {Data|null}
  */
 DropSlot.prototype.sanitizeNonSelectionData = function(data) {
-	return data;
+  return data;
 };
 
 /**
@@ -149,14 +149,14 @@ DropSlot.prototype.sanitizeNonSelectionData = function(data) {
  * @return {Data|null}
  */
 DropSlot.prototype.sanitizeData = function(data) {
-	data = EditableSlot.prototype.sanitizeData.call(this, data);
-	if (data == null) return null;
-	if (data.isSelection()) {
-		const value = data.getValue();
-		if (value === "" && this.nullable) {
-			return SelectionData.empty();
-		}
-		return this.selectionDataFromValue(value);
-	}
-	return this.sanitizeNonSelectionData(data);
+  data = EditableSlot.prototype.sanitizeData.call(this, data);
+  if (data == null) return null;
+  if (data.isSelection()) {
+    const value = data.getValue();
+    if (value === "" && this.nullable) {
+      return SelectionData.empty();
+    }
+    return this.selectionDataFromValue(value);
+  }
+  return this.sanitizeNonSelectionData(data);
 };

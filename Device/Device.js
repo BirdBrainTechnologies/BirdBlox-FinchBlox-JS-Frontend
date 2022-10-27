@@ -13,41 +13,43 @@
  * @constructor
  */
 function Device(name, id, RSSI, device) {
-	this.name = name;
-	this.id = id;
-	this.RSSI = RSSI;
-	this.device = device;
+  this.name = name;
+  this.id = id;
+  this.RSSI = RSSI;
+  this.device = device;
 
-	const nameWords = name.split(" ");
-	this.shortName = "";
-	for (var i = 0; i < nameWords.length; i++) {
-		this.shortName += nameWords[i][0];
-	}
-	this.listLabel = this.shortName + " - " + name + " (" + device + ")";
-	if (Language.isRTL) { this.listLabel += Language.forceLTR; }
+  const nameWords = name.split(" ");
+  this.shortName = "";
+  for (var i = 0; i < nameWords.length; i++) {
+    this.shortName += nameWords[i][0];
+  }
+  this.listLabel = this.shortName + " - " + name + " (" + device + ")";
+  if (Language.isRTL) {
+    this.listLabel += Language.forceLTR;
+  }
 
-	/* Fields keep track of whether the device currently has a good connection with the backend and has up to date
-	 * firmware.  In this context, a device might have "connected = false" but still be on the list of devices
-	 * the user is trying to connect to, but with a red status light. */
-	this.connected = false;
-	/** @type {Device.firmwareStatuses} */
-	this.firmwareStatus = Device.firmwareStatuses.upToDate;
-    this.batteryState = "4";
-	/* Field hold functions that are called each time the device's status or firmwareStatus changes.  DeviceStatusLights
-	 * configure these fields so they can update when the status changes */
-	this.statusListener = null;
-	this.firmwareStatusListener = null;
+  /* Fields keep track of whether the device currently has a good connection with the backend and has up to date
+   * firmware.  In this context, a device might have "connected = false" but still be on the list of devices
+   * the user is trying to connect to, but with a red status light. */
+  this.connected = false;
+  /** @type {Device.firmwareStatuses} */
+  this.firmwareStatus = Device.firmwareStatuses.upToDate;
+  this.batteryState = "4";
+  /* Field hold functions that are called each time the device's status or firmwareStatus changes.  DeviceStatusLights
+   * configure these fields so they can update when the status changes */
+  this.statusListener = null;
+  this.firmwareStatusListener = null;
   this.hasV2Microbit;
 }
 
 
 Device.setStatics = function() {
-	/** @enum {string} */
-	Device.firmwareStatuses = {
-		upToDate: "upToDate",
-		old: "old",
-		incompatible: "incompatible"
-	};
+  /** @enum {string} */
+  Device.firmwareStatuses = {
+    upToDate: "upToDate",
+    old: "old",
+    incompatible: "incompatible"
+  };
 };
 Device.setStatics();
 
@@ -61,58 +63,58 @@ Device.setStatics();
  * @param {string} shortTypeName - The abbreviated name for the type. Ex: "HB". USed where the typeName doesn't fit.
  */
 Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName) {
-	/**
-	 * Retrieves the typeName from the deviceClass
-	 * @param {boolean} shorten - Whether the shortTypeName should be returned
-	 * @param {number} [maxChars] - The maximum number of characters before the short name is used, even if !shorten
-	 * @return {string} - The name or short name of the deviceClass.
-	 */
-	deviceClass.getDeviceTypeName = function(shorten, maxChars) {
-		if (shorten || (maxChars != null && typeName.length > maxChars)) {
-			return shortTypeName;
-		} else {
-			return typeName;
-		}
-	};
+  /**
+   * Retrieves the typeName from the deviceClass
+   * @param {boolean} shorten - Whether the shortTypeName should be returned
+   * @param {number} [maxChars] - The maximum number of characters before the short name is used, even if !shorten
+   * @return {string} - The name or short name of the deviceClass.
+   */
+  deviceClass.getDeviceTypeName = function(shorten, maxChars) {
+    if (shorten || (maxChars != null && typeName.length > maxChars)) {
+      return shortTypeName;
+    } else {
+      return typeName;
+    }
+  };
 
-	/**
-	 * Returns the id of the deviceClass
-	 * @return {string}
-	 */
-	deviceClass.getDeviceTypeId = function() {
-		return typeId;
-	};
+  /**
+   * Returns the id of the deviceClass
+   * @return {string}
+   */
+  deviceClass.getDeviceTypeId = function() {
+    return typeId;
+  };
 
-	/**
-	 * Returns a string to show the user when a block is run that tries to control a robot that is not connected
-	 * @param {number} [errorCode] - The status code from the request to communicate with the robot
-	 * @param {string} [errorResult] - The message returned from the backend
-	 * @return {string}
-	 */
-	deviceClass.getNotConnectedMessage = function(errorCode, errorResult) {
-		if (errorResult == null || true) {
-			//return typeName + " " + Language.getStr("not_connected");
-			const translatedText = Language.getStr("not_connected");
-			const returnText = translatedText.replace("(Device)", typeName);
-			return returnText;
-		} else {
-			return errorResult;
-		}
-	};
+  /**
+   * Returns a string to show the user when a block is run that tries to control a robot that is not connected
+   * @param {number} [errorCode] - The status code from the request to communicate with the robot
+   * @param {string} [errorResult] - The message returned from the backend
+   * @return {string}
+   */
+  deviceClass.getNotConnectedMessage = function(errorCode, errorResult) {
+    if (errorResult == null || true) {
+      //return typeName + " " + Language.getStr("not_connected");
+      const translatedText = Language.getStr("not_connected");
+      const returnText = translatedText.replace("(Device)", typeName);
+      return returnText;
+    } else {
+      return errorResult;
+    }
+  };
 
-	const manager = new DeviceManager(deviceClass);
-	/** @return {DeviceManager} */
-	deviceClass.getManager = function() {
-		return manager;
-	};
+  const manager = new DeviceManager(deviceClass);
+  /** @return {DeviceManager} */
+  deviceClass.getManager = function() {
+    return manager;
+  };
 
-	/**
-	 * Gets the string to show at the top of the connection dialog when no devices have been found
-	 * @return {string}
-	 */
-	deviceClass.getConnectionInstructions = function() {
-		return Language.getStr("Scanning_for_devices") + "...";
-	};
+  /**
+   * Gets the string to show at the top of the connection dialog when no devices have been found
+   * @return {string}
+   */
+  deviceClass.getConnectionInstructions = function() {
+    return Language.getStr("Scanning_for_devices") + "...";
+  };
 };
 
 /**
@@ -122,7 +124,7 @@ Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName
  * @return {string}
  */
 Device.prototype.getDeviceTypeName = function(shorten, maxChars) {
-	return this.constructor.getDeviceTypeName(shorten, maxChars);
+  return this.constructor.getDeviceTypeName(shorten, maxChars);
 };
 
 /**
@@ -130,7 +132,7 @@ Device.prototype.getDeviceTypeName = function(shorten, maxChars) {
  * @return {string}
  */
 Device.prototype.getDeviceTypeId = function() {
-	return this.constructor.getDeviceTypeId();
+  return this.constructor.getDeviceTypeId();
 };
 
 /**
@@ -138,10 +140,10 @@ Device.prototype.getDeviceTypeId = function() {
  * list of robots it is trying to connect to.
  */
 Device.prototype.disconnect = function() {
-	const request = new HttpRequestBuilder("robot/disconnect");
-	request.addParam("type", this.getDeviceTypeId());
-	request.addParam("id", this.id);
-	HtmlServer.sendRequestWithCallback(request.toString());
+  const request = new HttpRequestBuilder("robot/disconnect");
+  request.addParam("type", this.getDeviceTypeId());
+  request.addParam("id", this.id);
+  HtmlServer.sendRequestWithCallback(request.toString());
 };
 
 /**
@@ -149,10 +151,10 @@ Device.prototype.disconnect = function() {
  * list of robots it is trying to connect to.
  */
 Device.prototype.connect = function() {
-	const request = new HttpRequestBuilder("robot/connect");
-	request.addParam("type", this.getDeviceTypeId());
-	request.addParam("id", this.id);
-	HtmlServer.sendRequestWithCallback(request.toString());
+  const request = new HttpRequestBuilder("robot/connect");
+  request.addParam("type", this.getDeviceTypeId());
+  request.addParam("id", this.id);
+  HtmlServer.sendRequestWithCallback(request.toString());
 };
 
 /**
@@ -163,26 +165,26 @@ Device.prototype.connect = function() {
  * @param {boolean} isConnected - Whether the robot is currently in good communication with the backend
  */
 Device.prototype.setConnected = function(isConnected) {
-	this.connected = isConnected;
-	if (this.statusListener != null) this.statusListener(this.getStatus());
-	DeviceManager.updateStatus();
+  this.connected = isConnected;
+  if (this.statusListener != null) this.statusListener(this.getStatus());
+  DeviceManager.updateStatus();
 };
 Device.prototype.setBatteryStatus = function(batteryStatus) {
-    this.batteryState = batteryStatus;
+  this.batteryState = batteryStatus;
 }
 
 Device.prototype.getBatteryStatus = function() {
-    return this.batteryState;
+  return this.batteryState;
 }
 
-Device.prototype.setCompassCalibrationStatus = function(success){
-		this.compassCalibrated = (success == "true");
+Device.prototype.setCompassCalibrationStatus = function(success) {
+  this.compassCalibrated = (success == "true");
 }
 /**
  * @return {boolean}
  */
 Device.prototype.getConnected = function() {
-	return this.connected;
+  return this.connected;
 }
 
 /**
@@ -191,12 +193,12 @@ Device.prototype.getConnected = function() {
  * @param {Device.firmwareStatuses} status
  */
 Device.prototype.setFirmwareStatus = function(status) {
-	this.firmwareStatus = status;
-	if (this.statusListener != null) this.statusListener(this.getStatus());
-	if (this.firmwareStatusListener != null) this.firmwareStatusListener(this.getFirmwareStatus());
+  this.firmwareStatus = status;
+  if (this.statusListener != null) this.statusListener(this.getStatus());
+  if (this.firmwareStatusListener != null) this.firmwareStatusListener(this.getFirmwareStatus());
 
-	// Update the status of the total status light and DeviceManagers
-	DeviceManager.updateStatus();
+  // Update the status of the total status light and DeviceManagers
+  DeviceManager.updateStatus();
 };
 
 /**
@@ -205,19 +207,19 @@ Device.prototype.setFirmwareStatus = function(status) {
  * @return {DeviceManager.statuses}
  */
 Device.prototype.getStatus = function() {
-	const statuses = DeviceManager.statuses;
-	const firmwareStatuses = Device.firmwareStatuses;
-	if (!this.connected) {
-		return statuses.disconnected;
-	} else {
-		if (this.firmwareStatus === firmwareStatuses.incompatible) {
-			return statuses.incompatibleFirmware;
-		} else if (this.firmwareStatus === firmwareStatuses.old) {
-			return statuses.oldFirmware;
-		} else {
-			return statuses.connected;
-		}
-	}
+  const statuses = DeviceManager.statuses;
+  const firmwareStatuses = Device.firmwareStatuses;
+  if (!this.connected) {
+    return statuses.disconnected;
+  } else {
+    if (this.firmwareStatus === firmwareStatuses.incompatible) {
+      return statuses.incompatibleFirmware;
+    } else if (this.firmwareStatus === firmwareStatuses.old) {
+      return statuses.oldFirmware;
+    } else {
+      return statuses.connected;
+    }
+  }
 };
 
 /**
@@ -225,21 +227,21 @@ Device.prototype.getStatus = function() {
  * @return {Device.firmwareStatuses}
  */
 Device.prototype.getFirmwareStatus = function() {
-	return this.firmwareStatus;
+  return this.firmwareStatus;
 };
 
 /**
  * @param {function} callbackFn
  */
 Device.prototype.setStatusListener = function(callbackFn) {
-	this.statusListener = callbackFn;
+  this.statusListener = callbackFn;
 };
 
 /**
  * @param {function} callbackFn
  */
 Device.prototype.setFirmwareStatusListener = function(callbackFn) {
-	this.firmwareStatusListener = callbackFn;
+  this.firmwareStatusListener = callbackFn;
 };
 
 /**
@@ -248,10 +250,10 @@ Device.prototype.setFirmwareStatusListener = function(callbackFn) {
  * with choices "Close" and "Update Firmware".
  */
 Device.prototype.showFirmwareInfo = function() {
-	const request = new HttpRequestBuilder("robot/showInfo");
-	request.addParam("type", this.getDeviceTypeId());
-	request.addParam("id", this.id);
-	HtmlServer.sendRequestWithCallback(request.toString());
+  const request = new HttpRequestBuilder("robot/showInfo");
+  request.addParam("type", this.getDeviceTypeId());
+  request.addParam("id", this.id);
+  HtmlServer.sendRequestWithCallback(request.toString());
 };
 
 /**
@@ -260,16 +262,16 @@ Device.prototype.showFirmwareInfo = function() {
  * @param {string} minFirmware
  */
 Device.prototype.notifyIncompatible = function(oldFirmware, minFirmware) {
-	let msg = this.name + " " + Language.getStr("Firmware_incompatible") + ". ";
-	msg += Language.getStr("Device_firmware") + oldFirmware + " ";
-	msg += Language.getStr("Required_firmware") + minFirmware;
-	DialogManager.showChoiceDialog(Language.getStr("Firmware_incompatible"), msg, Language.getStr("Dismiss"), Language.getStr("Update_firmware"), true, function (result) {
-		if (result === "2") {
-			const request = new HttpRequestBuilder("robot/showUpdateInstructions");
-			request.addParam("type", this.getDeviceTypeId());
-			HtmlServer.sendRequestWithCallback(request.toString());
-		}
-	}.bind(this));
+  let msg = this.name + " " + Language.getStr("Firmware_incompatible") + ". ";
+  msg += Language.getStr("Device_firmware") + oldFirmware + " ";
+  msg += Language.getStr("Required_firmware") + minFirmware;
+  DialogManager.showChoiceDialog(Language.getStr("Firmware_incompatible"), msg, Language.getStr("Dismiss"), Language.getStr("Update_firmware"), true, function(result) {
+    if (result === "2") {
+      const request = new HttpRequestBuilder("robot/showUpdateInstructions");
+      request.addParam("type", this.getDeviceTypeId());
+      HtmlServer.sendRequestWithCallback(request.toString());
+    }
+  }.bind(this));
 };
 
 Device.prototype.setHasV2Microbit = function(hasV2) {
@@ -283,17 +285,17 @@ Device.prototype.setHasV2Microbit = function(hasV2) {
  * @return {Device}
  */
 Device.fromJson = function(json) {
-    if (json.device === "micro:bit") {
-        return new DeviceMicroBit(json.name, json.id, json.RSSI, json.device);
-    } else if (json.device === "Bit") {
-        return new DeviceHummingbirdBit(json.name, json.id, json.RSSI, json.device);
-    } else if (json.device === "Duo") {
-        return new DeviceHummingbird(json.name, json.id, json.RSSI, json.device);
-    } else if (json.device === "Finch") {
-        return new DeviceFinch(json.name, json.id, json.RSSI, json.device);
-    } else {
-        return null;
-    }
+  if (json.device === "micro:bit") {
+    return new DeviceMicroBit(json.name, json.id, json.RSSI, json.device);
+  } else if (json.device === "Bit") {
+    return new DeviceHummingbirdBit(json.name, json.id, json.RSSI, json.device);
+  } else if (json.device === "Duo") {
+    return new DeviceHummingbird(json.name, json.id, json.RSSI, json.device);
+  } else if (json.device === "Finch") {
+    return new DeviceFinch(json.name, json.id, json.RSSI, json.device);
+  } else {
+    return null;
+  }
 };
 
 /**
@@ -303,14 +305,14 @@ Device.fromJson = function(json) {
  * @return {Array}
  */
 Device.fromJsonArray = function(json) {
-	let res = [];
-	for (let i = 0; i < json.length; i++) {
+  let res = [];
+  for (let i = 0; i < json.length; i++) {
     const device = Device.fromJson(json[i]);
-    if (device != null){
+    if (device != null) {
       res.push(device);
     }
-	}
-	return res;
+  }
+  return res;
 };
 
 /**
@@ -320,14 +322,14 @@ Device.fromJsonArray = function(json) {
  * @return {Array}
  */
 Device.fromJsonArrayString = function(deviceList) {
-	if (deviceList == null) return [];
-	let json = [];
-	try {
-		json = JSON.parse(deviceList);
-	} catch (e) {
-		json = [];
-	}
-	return Device.fromJsonArray(json);
+  if (deviceList == null) return [];
+  let json = [];
+  try {
+    json = JSON.parse(deviceList);
+  } catch (e) {
+    json = [];
+  }
+  return Device.fromJsonArray(json);
 };
 
 /**
@@ -335,14 +337,14 @@ Device.fromJsonArrayString = function(deviceList) {
  * @return {Array}
  */
 Device.getTypeList = function() {
-	//return [DeviceHummingbird, DeviceFlutter, DeviceFinch];
-	return [DeviceHummingbird, DeviceHummingbirdBit, DeviceMicroBit, DeviceFinch];
+  //return [DeviceHummingbird, DeviceFlutter, DeviceFinch];
+  return [DeviceHummingbird, DeviceHummingbirdBit, DeviceMicroBit, DeviceFinch];
 };
 
 /**
  * Sends a request to the backend to turn off all motors, servos, LEDs, etc. on all robots
  */
 Device.stopAll = function() {
-	const request = new HttpRequestBuilder("robot/stopAll");
-	HtmlServer.sendRequestWithCallback(request.toString());
+  const request = new HttpRequestBuilder("robot/stopAll");
+  HtmlServer.sendRequestWithCallback(request.toString());
 };

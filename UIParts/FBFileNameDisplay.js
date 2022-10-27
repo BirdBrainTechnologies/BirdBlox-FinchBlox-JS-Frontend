@@ -9,13 +9,13 @@ function FBFileNameDisplay() {
   const TBLayer = GuiElements.layers.titlebar;
   const h = TB.tallButtonH;
   this.margin = TB.buttonMargin * 2 / 3;
-  this.W = 2*TB.longButtonW;
+  this.W = 2 * TB.longButtonW;
   this.H = h - 2 * this.margin;
   this.bnW = this.H - this.margin;
-  this.X = TB.width - this.bnW - 4*this.margin;//- TB.buttonW;
+  this.X = TB.width - this.bnW - 4 * this.margin; //- TB.buttonW;
   this.Y = TB.height + this.margin;
   this.r = TB.defaultCornerRounding;
-  this.font = Font.secondaryUiFont(16);//Button.defaultFont;
+  this.font = Font.secondaryUiFont(16); //Button.defaultFont;
   this.textW = 0;
   this.bgColor = Colors.fbGray;
 
@@ -38,34 +38,34 @@ FBFileNameDisplay.prototype.update = function() {
     this.textW = 0;
   }
 
-  if (SaveManager.fileName == undefined) {//When the app is first loaded
+  if (SaveManager.fileName == undefined) { //When the app is first loaded
     this.addButton(false);
   } else if (SaveManager.fileName == LevelManager.savePointFileNames[LevelManager.currentLevel]) {
-    this.X = TB.width - this.bnW - 4*this.margin;//- TB.buttonW;
+    this.X = TB.width - this.bnW - 4 * this.margin; //- TB.buttonW;
     GuiElements.move.group(this.group, this.X, this.Y);
     const stackList = TabManager.activeTab.stackList;
     //If there is anything to save, make the button a save button
     if (stackList.length > 1 || !(stackList.length != 0 &&
-      stackList[0].firstBlock.isStartBlock && stackList[0].firstBlock.nextBlock == null)) {
+        stackList[0].firstBlock.isStartBlock && stackList[0].firstBlock.nextBlock == null)) {
       this.addButton(true);
       //this.isInNoSaveState = false;
-    //Otherwise, let the user skip to the file menu
+      //Otherwise, let the user skip to the file menu
     } else {
       this.addButton(false);
       //this.isInNoSaveState = true;
     }
   } else {
     //console.log("will display " + SaveManager.fileName)
-    const displayName = SaveManager.fileName.slice(0,-2);
-    const textX = 2*this.margin;
-    const textY = (this.H + this.font.charHeight)/2
+    const displayName = SaveManager.fileName.slice(0, -2);
+    const textX = 2 * this.margin;
+    const textY = (this.H + this.font.charHeight) / 2
     //const textY = 0//(this.H - this.font.charHeight)/2
     this.textW = GuiElements.measure.stringWidth(displayName, this.font);
     //this.textE = GuiElements.draw.text(textX, textY, displayName, this.font, Colors.bbtDarkGray);
     //this.group.appendChild(this.textE);
     this.textBn = new Button(textX, 0, this.textW, this.H, this.group, this.bgColor);
     this.textBn.addText(displayName, this.font, Colors.bbtDarkGray);
-    this.X = TB.width - this.bnW - this.textW - 6*this.margin;
+    this.X = TB.width - this.bnW - this.textW - 6 * this.margin;
     GuiElements.move.group(this.group, this.X, this.Y);
     this.textBn.setCallbackFunction(function() {
       (new FBSaveFile(this.X, this.Y, this.W, this.H, this.group, displayName)).show();
@@ -80,12 +80,14 @@ FBFileNameDisplay.prototype.update = function() {
 FBFileNameDisplay.prototype.addButton = function(isSaveBn) {
   //console.log("Called add button with " + isSaveBn);
   const TB = TitleBar;
-  const bnX = TB.width - this.X - this.bnW - 2*this.margin;//(TB.buttonW - this.bnW) / 2;
+  const bnX = TB.width - this.X - this.bnW - 2 * this.margin; //(TB.buttonW - this.bnW) / 2;
   const bnH = this.H - 2 * this.margin;
-  const bnR = this.r/2;
+  const bnR = this.r / 2;
   const icon = isSaveBn ? VectorPaths.faSave : VectorPaths.faFile
 
-  if (this.button != null) { this.button.remove(); }
+  if (this.button != null) {
+    this.button.remove();
+  }
 
   this.button = new Button(bnX, this.margin, this.bnW, bnH, this.group, Colors.easternBlue, bnR, bnR);
   this.button.addIcon(icon, TB.bnIconH * 0.5);

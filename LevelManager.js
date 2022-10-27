@@ -52,7 +52,11 @@ LevelManager.checkSavedFiles = function() {
     const fileList = new FileList(response);
     LevelManager.filesSavedLocally = fileList.localFiles;
     LevelManager.fileListRetreived = true;
-    LevelManager.levelFileList = { 1: [], 2: [], 3: [] }
+    LevelManager.levelFileList = {
+      1: [],
+      2: [],
+      3: []
+    }
 
     fileList.localFiles.forEach(function(file) {
       //console.log(file);
@@ -126,13 +130,15 @@ LevelManager.saveAs = function(name, rename) {
   GuiElements.blockInteraction();
   //console.log("Rename " + currentFile + " to " + fileName);
   //SaveManager.sanitizeRename(false, currentLevelFile, "", fileName, function () {
-  SaveManager.sanitizeRename(false, currentFile, "", fileName, function () {
+  SaveManager.sanitizeRename(false, currentFile, "", fileName, function() {
     LM.checkSavedFiles()
     //console.log("Renamed " + currentLevelFile + " to " + fileName);
     //console.log("Renamed " + currentFile + " to " + fileName);
     //console.log(LM.filesSavedLocally);
     TitleBar.fileBn.update();
-    if (GuiElements.isAndroid) { GuiElements.unblockInteraction(); }
+    if (GuiElements.isAndroid) {
+      GuiElements.unblockInteraction();
+    }
   });
 }
 

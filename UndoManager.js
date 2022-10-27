@@ -4,10 +4,10 @@
  * The UndoManager stores the deleted BlockStacks as XML nodes.
  */
 function UndoManager() {
-	const UM = UndoManager;
-	UM.undoButton = null;
-	UM.undoStack = [];
-	UM.undoLimit = 20;
+  const UM = UndoManager;
+  UM.undoButton = null;
+  UM.undoStack = [];
+  UM.undoLimit = 20;
 }
 
 /**
@@ -16,10 +16,10 @@ function UndoManager() {
  * @param {Button} button
  */
 UndoManager.setUndoButton = function(button) {
-	const UM = UndoManager;
-	UM.undoButton = button;
-	UM.undoButton.setCallbackFunction(UndoManager.undoDelete, true);
-	UM.updateButtonEnabled();
+  const UM = UndoManager;
+  UM.undoButton = button;
+  UM.undoButton.setCallbackFunction(UndoManager.undoDelete, true);
+  UM.updateButtonEnabled();
 };
 
 /**
@@ -28,15 +28,15 @@ UndoManager.setUndoButton = function(button) {
  * @param stack
  */
 UndoManager.deleteComment = function(comment) {
-	const UM = UndoManager;
+  const UM = UndoManager;
   const doc = XmlWriter.newDoc("undoData");
   var commentData = comment.createXml(doc);
   comment.delete()
   UM.undoStack.push(commentData);
-	while(UM.undoStack.length > UM.undoLimit) {
-		UM.undoStack.shift();
-	}
-	UM.updateButtonEnabled();
+  while (UM.undoStack.length > UM.undoLimit) {
+    UM.undoStack.shift();
+  }
+  UM.updateButtonEnabled();
 }
 
 /**
@@ -45,27 +45,27 @@ UndoManager.deleteComment = function(comment) {
  * @param stack
  */
 UndoManager.deleteStack = function(stack) {
-	const UM = UndoManager;
+  const UM = UndoManager;
   const doc = XmlWriter.newDoc("undoData");
   var stackData;
-  if(FinchBlox && (LevelManager.currentLevel != 3) && stack.firstBlock.isStartBlock){
-		TabManager.activeTab.addStartBlock();
+  if (FinchBlox && (LevelManager.currentLevel != 3) && stack.firstBlock.isStartBlock) {
+    TabManager.activeTab.addStartBlock();
     if (stack.firstBlock.nextBlock != null) {
       stackData = stack.createXml(doc, true);
     } else {
       stack.remove();
       return;
     }
-	} else {
+  } else {
     stackData = stack.createXml(doc);
   }
   stack.deleteComments();
-	stack.remove();
-	UM.undoStack.push(stackData);
-	while(UM.undoStack.length > UM.undoLimit) {
-		UM.undoStack.shift();
-	}
-	UM.updateButtonEnabled();
+  stack.remove();
+  UM.undoStack.push(stackData);
+  while (UM.undoStack.length > UM.undoLimit) {
+    UM.undoStack.shift();
+  }
+  UM.updateButtonEnabled();
 };
 
 /**
@@ -77,54 +77,54 @@ UndoManager.deleteTab = function() {
   const tab = TabManager.activeTab;
   const doc = XmlWriter.newDoc("undoData");
   var tabData;
-  if(FinchBlox && (LevelManager.currentLevel != 3)){
+  if (FinchBlox && (LevelManager.currentLevel != 3)) {
     tabData = tab.createXml(doc, true);
     tab.clear();
     TabManager.activeTab.addStartBlock();
-	} else {
+  } else {
     tabData = tab.createXml(doc);
     tab.clear();
   }
-	UM.undoStack.push(tabData);
-	while(UM.undoStack.length > UM.undoLimit) {
-		UM.undoStack.shift();
-	}
-	UM.updateButtonEnabled();
+  UM.undoStack.push(tabData);
+  while (UM.undoStack.length > UM.undoLimit) {
+    UM.undoStack.shift();
+  }
+  UM.updateButtonEnabled();
 }
 
 /**
  * Pops an item from the stack and rebuilds it, placing it in the corner of the canvas
  */
-UndoManager.undoDelete = function(){
-	const UM = UndoManager;
-	if(UM.undoStack.length === 0) return;
-	let success = false;
-	while (!success) {
-		const stackData = UM.undoStack.pop();
-		success = success || TabManager.undoDelete(stackData);
-	}
-	UM.updateButtonEnabled();
-	SaveManager.markEdited();
+UndoManager.undoDelete = function() {
+  const UM = UndoManager;
+  if (UM.undoStack.length === 0) return;
+  let success = false;
+  while (!success) {
+    const stackData = UM.undoStack.pop();
+    success = success || TabManager.undoDelete(stackData);
+  }
+  UM.updateButtonEnabled();
+  SaveManager.markEdited();
 };
 
 /**
  * Updates the enabled/disabled state of the undo button based in if the stack is empty
  */
-UndoManager.updateButtonEnabled = function(){
-	const UM = UndoManager;
-	if(UM.undoButton == null) return;
-	if(UM.undoStack.length > 0) {
-		UM.undoButton.enable();
-	} else {
-		UM.undoButton.disable();
-	}
+UndoManager.updateButtonEnabled = function() {
+  const UM = UndoManager;
+  if (UM.undoButton == null) return;
+  if (UM.undoStack.length > 0) {
+    UM.undoButton.enable();
+  } else {
+    UM.undoButton.disable();
+  }
 };
 
 /**
  * Deletes the undo stack (for when a program is closed/opened)
  */
 UndoManager.clearUndos = function() {
-	const UM = UndoManager;
-	UM.undoStack = [];
-	UM.updateButtonEnabled();
+  const UM = UndoManager;
+  UM.undoStack = [];
+  UM.updateButtonEnabled();
 };

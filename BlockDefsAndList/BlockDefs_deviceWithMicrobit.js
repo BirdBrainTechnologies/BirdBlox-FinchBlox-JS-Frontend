@@ -12,14 +12,14 @@
  * @constructor
  */
 function B_MicroBitLedArray(x, y, deviceClass) {
-  CommandBlock.call(this,x,y,deviceClass.getDeviceTypeId());
+  CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+  this.addPart(new DeviceDropSlot(this, "DDS_1", this.deviceClass));
   const label = new LabelText(this, Language.getStr("block_LED_Display"));
   label.isEndOfLine = true;
   this.addPart(label);
 
-  for (let i = 0; i < 5; i++ ){
+  for (let i = 0; i < 5; i++) {
     this.addPart(new ToggleSlot(this, "Toggle_led1" + i, false));
     this.addPart(new ToggleSlot(this, "Toggle_led2" + i, false));
     this.addPart(new ToggleSlot(this, "Toggle_led3" + i, false));
@@ -36,13 +36,13 @@ B_MicroBitLedArray.prototype.startAction = function() {
   let deviceIndex = this.slots[0].getData().getValue();
   let device = this.deviceClass.getManager().getDevice(deviceIndex);
   if (device == null) {
-     this.displayError(this.deviceClass.getNotConnectedMessage());
-     return new ExecutionStatusError(); // device was invalid, exit early
+    this.displayError(this.deviceClass.getNotConnectedMessage());
+    return new ExecutionStatusError(); // device was invalid, exit early
   }
 
   let ledStatusString = "";
-  for (let i = 0; i < 25; i++){
-    if (this.slots[i + 1].getData().getValue()){
+  for (let i = 0; i < 25; i++) {
+    if (this.slots[i + 1].getData().getValue()) {
       ledStatusString += "1";
     } else {
       ledStatusString += "0";
@@ -69,10 +69,10 @@ B_MicroBitLedArray.prototype.updateAction = B_DeviceWithPortsOutputBase.prototyp
  * @param deviceClass - A subclass of Device indicating the type of robot
  * @constructor
  */
-function B_MicroBitPrint(x, y, deviceClass){
+function B_MicroBitPrint(x, y, deviceClass) {
   CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+  this.addPart(new DeviceDropSlot(this, "DDS_1", this.deviceClass));
   // StrS_1 refers to the first string slot.
   this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
   this.parseTranslation(Language.getStr("block_Print"));
@@ -112,12 +112,12 @@ B_MicroBitPrint.prototype.updateAction = function() {
     const status = mem.requestStatus;
     if (!mem.requestSent) {
       const ps = mem.printString;
-      const psSubstring = ps.substring(0,10);//18);
+      const psSubstring = ps.substring(0, 10); //18);
       mem.device.readPrintBlock(mem.requestStatus, psSubstring);
       mem.blockDuration = (psSubstring.length * 600);
       mem.requestSent = true;
-      if (ps.length > 10) {//18) {
-        mem.printString = ps.substring(10);//18);
+      if (ps.length > 10) { //18) {
+        mem.printString = ps.substring(10); //18);
       } else {
         mem.printString = null;
       }
@@ -151,10 +151,10 @@ B_MicroBitPrint.prototype.updateAction = function() {
  * @param deviceClass - A subclass of Device indicating the type of robot
  * @constructor
  */
-function B_MicroBitButton(x, y, deviceClass){
+function B_MicroBitButton(x, y, deviceClass) {
   PredicateBlock.call(this, x, y, deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+  this.addPart(new DeviceDropSlot(this, "DDS_1", this.deviceClass));
 
   const choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
   choice.addOption(new SelectionData("A", "buttonA"));
@@ -166,7 +166,7 @@ function B_MicroBitButton(x, y, deviceClass){
 B_MicroBitButton.prototype = Object.create(PredicateBlock.prototype);
 B_MicroBitButton.prototype.constructor = B_MicroBitButton;
 
-B_MicroBitButton.prototype.startAction=function(){
+B_MicroBitButton.prototype.startAction = function() {
   let deviceIndex = this.slots[0].getData().getValue();
   let sensorSelection = this.slots[1].getData().getValue();
   let device = this.deviceClass.getManager().getDevice(deviceIndex);
@@ -195,10 +195,10 @@ B_MicroBitButton.prototype.updateAction = function() {
       return new ExecutionStatusResult(new BoolData(status.result === "1", true));
     } else {
       if (status.result.length > 0) {
-          this.displayError(status.result);
-          return new ExecutionStatusError();
+        this.displayError(status.result);
+        return new ExecutionStatusError();
       } else {
-          return new ExecutionStatusResult(new BoolData(false, false)); // false is default.
+        return new ExecutionStatusResult(new BoolData(false, false)); // false is default.
       }
     }
   } else {
@@ -214,13 +214,13 @@ B_MicroBitButton.prototype.updateAction = function() {
  * @param deviceClass - A subclass of Device indicating the type of robot
  * @constructor
  */
-function B_MicroBitOrientation(x, y, deviceClass){
+function B_MicroBitOrientation(x, y, deviceClass) {
   PredicateBlock.call(this, x, y, deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
-  this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+  this.addPart(new DeviceDropSlot(this, "DDS_1", this.deviceClass));
 
   var displayStrings = {
-    "shake":Language.getStr("Shake")
+    "shake": Language.getStr("Shake")
   };
   if (deviceClass == DeviceFinch) {
     displayStrings["screenUp"] = Language.getStr("Finch_Is_Level");
@@ -251,7 +251,7 @@ function B_MicroBitOrientation(x, y, deviceClass){
 B_MicroBitOrientation.prototype = Object.create(PredicateBlock.prototype);
 B_MicroBitOrientation.prototype.constructor = B_MicroBitOrientation;
 
-B_MicroBitOrientation.prototype.startAction=function(){
+B_MicroBitOrientation.prototype.startAction = function() {
   let deviceIndex = this.slots[0].getData().getValue();
   let sensorSelection = this.slots[1].getData().getValue();
   let device = this.deviceClass.getManager().getDevice(deviceIndex);
@@ -295,38 +295,38 @@ B_MicroBitOrientation.prototype.updateAction = function() {
  * @param deviceClass - A subclass of Device indicating the type of robot
  * @constructor
  */
-function B_MicroBitMagnetometer(x, y, deviceClass){
-   ReporterBlock.call(this,x,y,deviceClass.getDeviceTypeId());
-   this.deviceClass = deviceClass;
-   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+function B_MicroBitMagnetometer(x, y, deviceClass) {
+  ReporterBlock.call(this, x, y, deviceClass.getDeviceTypeId());
+  this.deviceClass = deviceClass;
+  this.addPart(new DeviceDropSlot(this, "DDS_1", this.deviceClass));
 
-   const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
-   pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer"), "magnetometer"));
-   pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
-   this.addPart(pickBlock);
+  const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
+  pickBlock.addOption(new SelectionData(Language.getStr("Magnetometer"), "magnetometer"));
+  pickBlock.addOption(new SelectionData(Language.getStr("Accelerometer"), "accelerometer"));
+  this.addPart(pickBlock);
 
-   const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
-   pickAxis.addOption(new SelectionData("X", "x"));
-   pickAxis.addOption(new SelectionData("Y", "y"));
-   pickAxis.addOption(new SelectionData("Z", "z"));
-   this.addPart(pickAxis);
+  const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "x"));
+  pickAxis.addOption(new SelectionData("X", "x"));
+  pickAxis.addOption(new SelectionData("Y", "y"));
+  pickAxis.addOption(new SelectionData("Z", "z"));
+  this.addPart(pickAxis);
 }
 B_MicroBitMagnetometer.prototype = Object.create(ReporterBlock.prototype);
 B_MicroBitMagnetometer.prototype.constructor = B_MicroBitMagnetometer;
 /* Sends the request for the sensor data. */
-B_MicroBitMagnetometer.prototype.startAction=function(){
+B_MicroBitMagnetometer.prototype.startAction = function() {
   let deviceIndex = this.slots[0].getData().getValue();
   let sensorSelection = this.slots[1].getData().getValue();
   if (sensorSelection == "accelerometer") {
-     Block.setDisplaySuffix(B_MicroBitMagnetometer, "m/s" + String.fromCharCode(178));
+    Block.setDisplaySuffix(B_MicroBitMagnetometer, "m/s" + String.fromCharCode(178));
   } else {
-     Block.setDisplaySuffix(B_MicroBitMagnetometer, String.fromCharCode(956) + "T");
+    Block.setDisplaySuffix(B_MicroBitMagnetometer, String.fromCharCode(956) + "T");
   }
   let axisSelection = this.slots[2].getData().getValue();
   let device = this.deviceClass.getManager().getDevice(deviceIndex);
   if (device == null) {
-     this.displayError(this.deviceClass.getNotConnectedMessage());
-     return new ExecutionStatusError(); // device was invalid, exit early
+    this.displayError(this.deviceClass.getNotConnectedMessage());
+    return new ExecutionStatusError(); // device was invalid, exit early
   }
   let mem = this.runMem;
   mem.requestStatus = {};
@@ -337,18 +337,18 @@ B_MicroBitMagnetometer.prototype.startAction=function(){
   return new ExecutionStatusRunning();
 };
 
-B_MicroBitMagnetometer.prototype.updateAction = function(){
+B_MicroBitMagnetometer.prototype.updateAction = function() {
   const status = this.runMem.requestStatus;
   if (status.finished) {
-     if(status.error){
-         this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
-         return new ExecutionStatusError();
-     } else {
-         const result = new StringData(status.result);
-         const num = Math.round(result.asNum().getValue() * 100) / 100;
+    if (status.error) {
+      this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+      return new ExecutionStatusError();
+    } else {
+      const result = new StringData(status.result);
+      const num = Math.round(result.asNum().getValue() * 100) / 100;
 
-         return new ExecutionStatusResult(new NumData(num));
-     }
+      return new ExecutionStatusResult(new NumData(num));
+    }
   }
   return new ExecutionStatusRunning(); // Still running
 };
@@ -361,45 +361,45 @@ B_MicroBitMagnetometer.prototype.updateAction = function(){
  * @param deviceClass - A subclass of Device indicating the type of robot
  * @constructor
  */
-function B_MicroBitCompass(x, y, deviceClass){
-   ReporterBlock.call(this,x,y,deviceClass.getDeviceTypeId());
-   this.deviceClass = deviceClass;
-   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
-   this.addPart(new LabelText(this, Language.getStr("block_Compass")));
+function B_MicroBitCompass(x, y, deviceClass) {
+  ReporterBlock.call(this, x, y, deviceClass.getDeviceTypeId());
+  this.deviceClass = deviceClass;
+  this.addPart(new DeviceDropSlot(this, "DDS_1", this.deviceClass));
+  this.addPart(new LabelText(this, Language.getStr("block_Compass")));
 }
 B_MicroBitCompass.prototype = Object.create(ReporterBlock.prototype);
 B_MicroBitCompass.prototype.constructor = B_MicroBitCompass;
 
-B_MicroBitCompass.prototype.startAction=function(){
-   let deviceIndex = this.slots[0].getData().getValue();
-   let device = this.deviceClass.getManager().getDevice(deviceIndex);
-   if (device == null) {
-       this.displayError(this.deviceClass.getNotConnectedMessage());
-       return new ExecutionStatusError(); // Flutter was invalid, exit early
-   }
-   let mem = this.runMem;
-   mem.requestStatus = {};
-   mem.requestStatus.finished = false;
-   mem.requestStatus.error = false;
-   mem.requestStatus.result = null;
-   device.readCompass(mem.requestStatus);
-   return new ExecutionStatusRunning();
+B_MicroBitCompass.prototype.startAction = function() {
+  let deviceIndex = this.slots[0].getData().getValue();
+  let device = this.deviceClass.getManager().getDevice(deviceIndex);
+  if (device == null) {
+    this.displayError(this.deviceClass.getNotConnectedMessage());
+    return new ExecutionStatusError(); // Flutter was invalid, exit early
+  }
+  let mem = this.runMem;
+  mem.requestStatus = {};
+  mem.requestStatus.finished = false;
+  mem.requestStatus.error = false;
+  mem.requestStatus.result = null;
+  device.readCompass(mem.requestStatus);
+  return new ExecutionStatusRunning();
 };
 
-B_MicroBitCompass.prototype.updateAction = function(){
-   const status = this.runMem.requestStatus;
-       if (status.finished) {
-           if(status.error){
-               this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
-               return new ExecutionStatusError();
-           } else {
-               const result = new StringData(status.result);
-               const numResult = result.asNum();
-               const num = Math.round(numResult.getValue());
-               return new ExecutionStatusResult(new NumData(num, numResult.isValid));
-           }
-       }
-       return new ExecutionStatusRunning(); // Still running
+B_MicroBitCompass.prototype.updateAction = function() {
+  const status = this.runMem.requestStatus;
+  if (status.finished) {
+    if (status.error) {
+      this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+      return new ExecutionStatusError();
+    } else {
+      const result = new StringData(status.result);
+      const numResult = result.asNum();
+      const num = Math.round(numResult.getValue());
+      return new ExecutionStatusResult(new NumData(num, numResult.isValid));
+    }
+  }
+  return new ExecutionStatusRunning(); // Still running
 };
 Block.setDisplaySuffix(B_MicroBitCompass, String.fromCharCode(176));
 
@@ -410,33 +410,33 @@ Block.setDisplaySuffix(B_MicroBitCompass, String.fromCharCode(176));
  * @param  {type} y
  * @param  {type} deviceClass
  */
-function B_MicroBitV2Sensor(x, y, deviceClass){
-   ReporterBlock.call(this,x,y,deviceClass.getDeviceTypeId());
-   this.deviceClass = deviceClass;
-   this.addPart(new DeviceDropSlot(this,"DDS_1", this.deviceClass));
+function B_MicroBitV2Sensor(x, y, deviceClass) {
+  ReporterBlock.call(this, x, y, deviceClass.getDeviceTypeId());
+  this.deviceClass = deviceClass;
+  this.addPart(new DeviceDropSlot(this, "DDS_1", this.deviceClass));
 
-   const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Sound"), "V2sound"));
-   pickBlock.addOption(new SelectionData(Language.getStr("Sound"), "V2sound"));
-   pickBlock.addOption(new SelectionData(Language.getStr("Temperature"), "V2temperature"));
-   this.addPart(pickBlock);
+  const pickBlock = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("Sound"), "V2sound"));
+  pickBlock.addOption(new SelectionData(Language.getStr("Sound"), "V2sound"));
+  pickBlock.addOption(new SelectionData(Language.getStr("Temperature"), "V2temperature"));
+  this.addPart(pickBlock);
 }
 B_MicroBitV2Sensor.prototype = Object.create(ReporterBlock.prototype);
 B_MicroBitV2Sensor.prototype.constructor = B_MicroBitV2Sensor;
 
-B_MicroBitV2Sensor.prototype.startAction=function(){
+B_MicroBitV2Sensor.prototype.startAction = function() {
   let deviceIndex = this.slots[0].getData().getValue();
   let sensorSelection = this.slots[1].getData().getValue();
   let device = this.deviceClass.getManager().getDevice(deviceIndex);
   if (device == null) {
-     this.displayError(this.deviceClass.getNotConnectedMessage());
-     return new ExecutionStatusError(); // Flutter was invalid, exit early
+    this.displayError(this.deviceClass.getNotConnectedMessage());
+    return new ExecutionStatusError(); // Flutter was invalid, exit early
   }
   if (!device.hasV2Microbit) {
-   this.displayError(Language.getStr("V2_required"))
-   return new ExecutionStatusError(); //touch sensor only available on V2 micro:bit
+    this.displayError(Language.getStr("V2_required"))
+    return new ExecutionStatusError(); //touch sensor only available on V2 micro:bit
   }
   if (sensorSelection == "V2temperature") {
-     Block.setDisplaySuffix(B_MicroBitV2Sensor, String.fromCharCode(176) + "C");
+    Block.setDisplaySuffix(B_MicroBitV2Sensor, String.fromCharCode(176) + "C");
   } else {
     Block.removeDisplaySuffix(B_MicroBitV2Sensor);
   }
@@ -449,21 +449,21 @@ B_MicroBitV2Sensor.prototype.startAction=function(){
   return new ExecutionStatusRunning();
 }
 
-B_MicroBitV2Sensor.prototype.updateAction = function(){
+B_MicroBitV2Sensor.prototype.updateAction = function() {
   const status = this.runMem.requestStatus;
   if (status.finished) {
-      if(status.error){
-          this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
-          return new ExecutionStatusError();
-      } else {
-          const result = new StringData(status.result);
-          const numResult = result.asNum();
-          const num = Math.round(numResult.getValue());
-          return new ExecutionStatusResult(new NumData(num, numResult.isValid));
-      }
+    if (status.error) {
+      this.displayError(this.deviceClass.getNotConnectedMessage(status.code, status.result));
+      return new ExecutionStatusError();
+    } else {
+      const result = new StringData(status.result);
+      const numResult = result.asNum();
+      const num = Math.round(numResult.getValue());
+      return new ExecutionStatusResult(new NumData(num, numResult.isValid));
+    }
   }
   return new ExecutionStatusRunning(); // Still running
 };
 B_MicroBitV2Sensor.prototype.checkActive = function() {
-	return DeviceManager.hasV2MicrobitConnected(this.deviceClass)
+  return DeviceManager.hasV2MicrobitConnected(this.deviceClass)
 };

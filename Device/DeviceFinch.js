@@ -5,8 +5,8 @@
  * @constructor
  */
 function DeviceFinch(name, id, RSSI, device) {
-	DeviceWithPorts.call(this, name, id, RSSI, device);
-	this.isMoving = false; //FinchBlox
+  DeviceWithPorts.call(this, name, id, RSSI, device);
+  this.isMoving = false; //FinchBlox
 }
 DeviceFinch.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFinch, "finch", "Finch", "Finch");
@@ -26,13 +26,13 @@ DeviceFinch.cmPerDistance = 0.0919; //Convert raw distance sensor value to cm.
  * @param {number} blue
  */
 DeviceFinch.prototype.setBeak = function(status, red, green, blue) {
-	const request = new HttpRequestBuilder("robot/out/beak");
-	request.addParam("type", this.getDeviceTypeId());
-	request.addParam("id", this.id);
-	request.addParam("red", red);
-	request.addParam("green", green);
-	request.addParam("blue", blue);
-	HtmlServer.sendRequest(request.toString(), status, true);
+  const request = new HttpRequestBuilder("robot/out/beak");
+  request.addParam("type", this.getDeviceTypeId());
+  request.addParam("id", this.id);
+  request.addParam("red", red);
+  request.addParam("green", green);
+  request.addParam("blue", blue);
+  HtmlServer.sendRequest(request.toString(), status, true);
 };
 
 /**
@@ -44,14 +44,14 @@ DeviceFinch.prototype.setBeak = function(status, red, green, blue) {
  * @param {number} blue
  */
 DeviceFinch.prototype.setTail = function(status, port, red, green, blue) {
-	const request = new HttpRequestBuilder("robot/out/tail");
-	request.addParam("type", this.getDeviceTypeId());
-	request.addParam("id", this.id);
-	request.addParam("port", port);
-	request.addParam("red", red);
-	request.addParam("green", green);
-	request.addParam("blue", blue);
-	HtmlServer.sendRequest(request.toString(), status, true);
+  const request = new HttpRequestBuilder("robot/out/tail");
+  request.addParam("type", this.getDeviceTypeId());
+  request.addParam("id", this.id);
+  request.addParam("port", port);
+  request.addParam("red", red);
+  request.addParam("green", green);
+  request.addParam("blue", blue);
+  HtmlServer.sendRequest(request.toString(), status, true);
 };
 
 /**
@@ -64,36 +64,52 @@ DeviceFinch.prototype.setTail = function(status, port, red, green, blue) {
  */
 DeviceFinch.prototype.setMotors = function(status, speedL, ticksL, speedR, ticksR) {
 
-	// Convert from distance in cm to encoder ticks.
-	//const ticksPerCM = DeviceFinch.ticksPerCM;
-	const speedScaling = 36/100;//45/100;//127/100;
+  // Convert from distance in cm to encoder ticks.
+  //const ticksPerCM = DeviceFinch.ticksPerCM;
+  const speedScaling = 36 / 100; //45/100;//127/100;
 
-	//Make sure speeds do not exceed 100%
-	if (speedL > 100) { speedL = 100; }
-	if (speedL < -100) { speedL = -100; }
-	if (speedR > 100) { speedR = 100; }
-	if (speedR < -100) { speedR = -100; }
+  //Make sure speeds do not exceed 100%
+  if (speedL > 100) {
+    speedL = 100;
+  }
+  if (speedL < -100) {
+    speedL = -100;
+  }
+  if (speedR > 100) {
+    speedR = 100;
+  }
+  if (speedR < -100) {
+    speedR = -100;
+  }
 
-	//scale speeds
-	speedL = Math.round(speedL * speedScaling);
-	speedR = Math.round(speedR * speedScaling);
+  //scale speeds
+  speedL = Math.round(speedL * speedScaling);
+  speedR = Math.round(speedR * speedScaling);
 
-	//to make sure finch still moves at low numbers, give min value of 3
-	if (speedL > 0 && speedL < 3) { speedL = 3; }
-	if (speedL < 0 && speedL > -3) { speedL = -3; }
-	if (speedR > 0 && speedR < 3) { speedR = 3; }
-	if (speedR < 0 && speedR > -3) { speedR = -3; }
+  //to make sure finch still moves at low numbers, give min value of 3
+  if (speedL > 0 && speedL < 3) {
+    speedL = 3;
+  }
+  if (speedL < 0 && speedL > -3) {
+    speedL = -3;
+  }
+  if (speedR > 0 && speedR < 3) {
+    speedR = 3;
+  }
+  if (speedR < 0 && speedR > -3) {
+    speedR = -3;
+  }
 
-	const request = new HttpRequestBuilder("robot/out/motors");
-	request.addParam("type", this.getDeviceTypeId());
-	request.addParam("id", this.id);
-	request.addParam("speedL", speedL);
-	request.addParam("ticksL", ticksL);
-	request.addParam("speedR", speedR);
-	request.addParam("ticksR", ticksR);
-	//Since these requests may wait for a response from the finch, the second
-	// true here keeps the request from timing out
-	HtmlServer.sendRequest(request.toString(), status, true, true);
+  const request = new HttpRequestBuilder("robot/out/motors");
+  request.addParam("type", this.getDeviceTypeId());
+  request.addParam("id", this.id);
+  request.addParam("speedL", speedL);
+  request.addParam("ticksL", ticksL);
+  request.addParam("speedR", speedR);
+  request.addParam("ticksR", ticksR);
+  //Since these requests may wait for a response from the finch, the second
+  // true here keeps the request from timing out
+  HtmlServer.sendRequest(request.toString(), status, true, true);
 };
 
 /**
@@ -101,10 +117,10 @@ DeviceFinch.prototype.setMotors = function(status, speedL, ticksL, speedR, ticks
  * @param {object} status - An object provided by the caller to track the progress of the request
  */
 DeviceFinch.prototype.resetEncoders = function(status) {
-	const request = new HttpRequestBuilder("robot/out/resetEncoders");
-	request.addParam("type", this.getDeviceTypeId());
-	request.addParam("id", this.id);
-	HtmlServer.sendRequest(request.toString(), status, true);
+  const request = new HttpRequestBuilder("robot/out/resetEncoders");
+  request.addParam("type", this.getDeviceTypeId());
+  request.addParam("id", this.id);
+  HtmlServer.sendRequest(request.toString(), status, true);
 };
 
 /**
@@ -114,12 +130,12 @@ DeviceFinch.prototype.resetEncoders = function(status) {
  * @param {string} position - Which sensor to read (right or left)
  */
 DeviceFinch.prototype.readSensor = function(status, sensor, position) {
-	const request = new HttpRequestBuilder("robot/in");
-	request.addParam("type", this.getDeviceTypeId());
-	request.addParam("id", this.id);
-	request.addParam("sensor", sensor);
-	if (position != null) {
-		request.addParam("position", position);
-	}
-	HtmlServer.sendRequest(request.toString(), status, true);
+  const request = new HttpRequestBuilder("robot/in");
+  request.addParam("type", this.getDeviceTypeId());
+  request.addParam("id", this.id);
+  request.addParam("sensor", sensor);
+  if (position != null) {
+    request.addParam("position", position);
+  }
+  HtmlServer.sendRequest(request.toString(), status, true);
 }

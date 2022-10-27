@@ -6,7 +6,7 @@
  * @param {string} category - The Block's category in string form. Used mainly to color it.
  */
 function PredicateBlock(x, y, category) {
-	Block.call(this, 2, Block.returnTypes.bool, x, y, category); // Call constructor.
+  Block.call(this, 2, Block.returnTypes.bool, x, y, category); // Call constructor.
 }
 PredicateBlock.prototype = Object.create(Block.prototype); // Everything else is the same as Block.
 PredicateBlock.prototype.constructor = PredicateBlock;

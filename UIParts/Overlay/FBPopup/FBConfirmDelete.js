@@ -10,16 +10,16 @@ FBConfirmDelete.prototype = Object.create(FBPopup.prototype);
 FBConfirmDelete.prototype.constructor = FBConfirmDelete;
 
 FBConfirmDelete.prototype.show = function() {
-  FBPopup.prototype.show.call(this, 1/2);
+  FBPopup.prototype.show.call(this, 1 / 2);
 
-  const titleFont = Font.secondaryUiFont(82);//Font.uiFont(82);
+  const titleFont = Font.secondaryUiFont(82); //Font.uiFont(82);
   const titleK = 5; //Space between trash and question mark
   const qmE = GuiElements.draw.text(0, 0, "?", titleFont, FBPopup.trashColor)
   const qmW = GuiElements.measure.textWidth(qmE)
   const trashH = 60;
   const trashW = VectorIcon.computeWidth(FBPopup.trashIcon, trashH);
   const qmX = (this.innerWidth - trashW - qmW - titleK) / 2 + trashW + titleK;
-  const qmY = 1 + (trashH + titleFont.charHeight) / 2;//FBPopup.bubbleMargin + 1 + (trashH + titleFont.charHeight) / 2;
+  const qmY = 1 + (trashH + titleFont.charHeight) / 2; //FBPopup.bubbleMargin + 1 + (trashH + titleFont.charHeight) / 2;
   const trashX = (this.innerWidth - trashW - qmW - titleK) / 2;
   const trashY = 0; //FBPopup.bubbleMargin;
   const trash = new VectorIcon(trashX, trashY, FBPopup.trashIcon, FBPopup.trashColor, trashH, this.innerGroup);

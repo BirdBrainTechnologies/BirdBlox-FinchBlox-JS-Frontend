@@ -3,13 +3,13 @@
  * @param {Block} parent - The Block this part is a member of
  * @constructor
  */
-function BlockPart(parent){
-	DebugOptions.markAbstract();
-	this.parent = parent;
-	this.isSlot = false;
-	this.width = NaN;
-	this.height = NaN;
-	this.isEndOfLine = false; //Set to true if the next block part should rap to next line
+function BlockPart(parent) {
+  DebugOptions.markAbstract();
+  this.parent = parent;
+  this.isSlot = false;
+  this.width = NaN;
+  this.height = NaN;
+  this.isEndOfLine = false; //Set to true if the next block part should rap to next line
 }
 
 /**
@@ -20,17 +20,17 @@ function BlockPart(parent){
  * @return {number} - The width of the part, indicating how much the next item in the Block should be shifted over.
  */
 BlockPart.prototype.updateAlign = function(x, y) {
-	DebugOptions.markAbstract();
-	return this.width;
+  DebugOptions.markAbstract();
+  return this.width;
 };
 
 /**
  * Makes this part recalculate its dimensions, which it stores in this.width and this.height for the Block to retrieve.
  */
 BlockPart.prototype.updateDim = function() {
-	DebugOptions.markAbstract();
-	this.width = NaN;
-	this.height = NaN;
+  DebugOptions.markAbstract();
+  this.width = NaN;
+  this.height = NaN;
 };
 
 /**
@@ -38,8 +38,8 @@ BlockPart.prototype.updateDim = function() {
  * @return {string}
  */
 BlockPart.prototype.textSummary = function() {
-	DebugOptions.markAbstract();
-	return "";
+  DebugOptions.markAbstract();
+  return "";
 };
 
 /**
@@ -60,9 +60,9 @@ BlockPart.prototype.makeInactive = function() {
  * @param {boolean} active
  */
 BlockPart.prototype.setActive = function(active) {
-	if(active){
-		this.makeActive();
-	} else {
-		this.makeInactive();
-	}
+  if (active) {
+    this.makeActive();
+  } else {
+    this.makeInactive();
+  }
 };

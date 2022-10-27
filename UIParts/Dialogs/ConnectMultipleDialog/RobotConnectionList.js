@@ -11,36 +11,36 @@
  * @constructor
  */
 function RobotConnectionList(x, upperY, lowerY, index) {
-	if (index == null) {
-		index = null;
-	}
-	this.x = x;
-	this.upperY = upperY;
-	this.lowerY = lowerY;
-	this.index = index;
-	this.deviceClass = DeviceHummingbirdBit;
-	this.visible = false;
+  if (index == null) {
+    index = null;
+  }
+  this.x = x;
+  this.upperY = upperY;
+  this.lowerY = lowerY;
+  this.index = index;
+  this.deviceClass = DeviceHummingbirdBit;
+  this.visible = false;
 
-	/* Sometimes the list is told to update its entries but can't since it is currently being scrolled.  In that case,
-	 * marks a pending update and starts a timer which keeps trying to update until it succeeds */
-	this.updatePending = false;
-	this.updateTimer = new Timer(1000, this.checkPendingUpdate.bind(this));
+  /* Sometimes the list is told to update its entries but can't since it is currently being scrolled.  In that case,
+   * marks a pending update and starts a timer which keeps trying to update until it succeeds */
+  this.updatePending = false;
+  this.updateTimer = new Timer(1000, this.checkPendingUpdate.bind(this));
 }
 
 RobotConnectionList.setConstants = function() {
-	let RCL = RobotConnectionList;
-	RCL.bnMargin = 5;
-	RCL.bgColor = Colors.lightGray;
-	RCL.updateInterval = DiscoverDialog.updateInterval;
-	RCL.height = 150;
-	RCL.width = 350;
+  let RCL = RobotConnectionList;
+  RCL.bnMargin = 5;
+  RCL.bgColor = Colors.lightGray;
+  RCL.updateInterval = DiscoverDialog.updateInterval;
+  RCL.height = 150;
+  RCL.width = 350;
 };
 
 /**
  * Makes the list visible with whatever devices have been detected so far (according to the cache in DeviceManager)
  */
 RobotConnectionList.prototype.show = function() {
-	this.showWithList(this.deviceClass.getManager().getDiscoverCache());
+  this.showWithList(this.deviceClass.getManager().getDiscoverCache());
 };
 
 /**
@@ -48,25 +48,25 @@ RobotConnectionList.prototype.show = function() {
  * @param {string} list - A JSON-encoded list of robots as a string
  */
 RobotConnectionList.prototype.showWithList = function(list) {
-	let RCL = RobotConnectionList;
-	this.visible = true;
-	this.group = GuiElements.create.group(0, 0);
-	this.menuBnList = null;
-	let layer = GuiElements.layers.overlayOverlay;
-	let overlayType = Overlay.types.connectionList;
-	this.bubbleOverlay = new BubbleOverlay(overlayType, RCL.bgColor, RCL.bnMargin, this.group, this, layer);
-	this.bubbleOverlay.display(this.x, this.x, this.upperY, this.lowerY, RCL.width, RCL.height);
-	this.deviceClass.getManager().registerDiscoverCallback(this.updateRobotList.bind(this));
-	this.updateRobotList(list);
+  let RCL = RobotConnectionList;
+  this.visible = true;
+  this.group = GuiElements.create.group(0, 0);
+  this.menuBnList = null;
+  let layer = GuiElements.layers.overlayOverlay;
+  let overlayType = Overlay.types.connectionList;
+  this.bubbleOverlay = new BubbleOverlay(overlayType, RCL.bgColor, RCL.bnMargin, this.group, this, layer);
+  this.bubbleOverlay.display(this.x, this.x, this.upperY, this.lowerY, RCL.width, RCL.height);
+  this.deviceClass.getManager().registerDiscoverCallback(this.updateRobotList.bind(this));
+  this.updateRobotList(list);
 };
 
 /**
  * Checks if the list needs to be updated and tries if it does
  */
 RobotConnectionList.prototype.checkPendingUpdate = function() {
-	if (this.updatePending) {
-		this.updateRobotList(this.deviceClass.getManager().getDiscoverCache());
-	}
+  if (this.updatePending) {
+    this.updateRobotList(this.deviceClass.getManager().getDiscoverCache());
+  }
 };
 
 /**
@@ -74,42 +74,42 @@ RobotConnectionList.prototype.checkPendingUpdate = function() {
  * @param {string} jsonArray - A JSON-encoded array of robots as a string
  */
 RobotConnectionList.prototype.updateRobotList = function(jsonArray) {
-	const RCL = RobotConnectionList;
-	let isScrolling = this.menuBnList != null && this.menuBnList.isScrolling();
-	if (TouchReceiver.touchDown || !this.visible || isScrolling) {
-		// Can't update, mark update pending and return
-		this.updatePending = true;
-		this.updateTimer.start();
-		return;
-	}
-	// We're updating, so the pending update is cleared
-	this.updatePending = false;
-	this.updateTimer.stop();
-	/* We include connected devices if this list is associated with a slot of the ConnectMultipleDialog to allow
-	 * Robots to swap places. */
-	const includeConnected = this.index !== null;
-	const robotArrayUnsorted = this.deviceClass.getManager().fromJsonArrayString(jsonArray, includeConnected, this.index);
+  const RCL = RobotConnectionList;
+  let isScrolling = this.menuBnList != null && this.menuBnList.isScrolling();
+  if (TouchReceiver.touchDown || !this.visible || isScrolling) {
+    // Can't update, mark update pending and return
+    this.updatePending = true;
+    this.updateTimer.start();
+    return;
+  }
+  // We're updating, so the pending update is cleared
+  this.updatePending = false;
+  this.updateTimer.stop();
+  /* We include connected devices if this list is associated with a slot of the ConnectMultipleDialog to allow
+   * Robots to swap places. */
+  const includeConnected = this.index !== null;
+  const robotArrayUnsorted = this.deviceClass.getManager().fromJsonArrayString(jsonArray, includeConnected, this.index);
 
-	const robotArray = robotArrayUnsorted.sort(function(a,b) {
-		return parseFloat(b.RSSI) - parseFloat(a.RSSI);
-	});
-	// We perform the update and try to keep the scrolling the same
-	let oldScroll = null;
-	if (this.menuBnList != null) {
-		oldScroll = this.menuBnList.getScroll();
-		this.menuBnList.hide();
-	}
-	let layer = GuiElements.layers.overlayOverlayScroll;
-	this.menuBnList = new SmoothMenuBnList(this, this.group, 0, 0, RCL.width, layer);
-	this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
-	this.menuBnList.setMaxHeight(RCL.height);
-	for (let i = 0; i < robotArray.length; i++) {
-		this.addBnListOption(robotArray[i]);
-	}
-	this.menuBnList.show();
-	if (oldScroll != null) {
-		this.menuBnList.setScroll(oldScroll);
-	}
+  const robotArray = robotArrayUnsorted.sort(function(a, b) {
+    return parseFloat(b.RSSI) - parseFloat(a.RSSI);
+  });
+  // We perform the update and try to keep the scrolling the same
+  let oldScroll = null;
+  if (this.menuBnList != null) {
+    oldScroll = this.menuBnList.getScroll();
+    this.menuBnList.hide();
+  }
+  let layer = GuiElements.layers.overlayOverlayScroll;
+  this.menuBnList = new SmoothMenuBnList(this, this.group, 0, 0, RCL.width, layer);
+  this.menuBnList.markAsOverlayPart(this.bubbleOverlay);
+  this.menuBnList.setMaxHeight(RCL.height);
+  for (let i = 0; i < robotArray.length; i++) {
+    this.addBnListOption(robotArray[i]);
+  }
+  this.menuBnList.show();
+  if (oldScroll != null) {
+    this.menuBnList.setScroll(oldScroll);
+  }
 };
 
 /**
@@ -117,35 +117,35 @@ RobotConnectionList.prototype.updateRobotList = function(jsonArray) {
  * @param {Device} robot
  */
 RobotConnectionList.prototype.addBnListOption = function(robot) {
-	let me = this;
-	this.menuBnList.addOption(robot.listLabel, function() {
-		me.close();
-		if (me.index == null) {
-		    me.deviceClass = DeviceManager.getDeviceClass(robot);
+  let me = this;
+  this.menuBnList.addOption(robot.listLabel, function() {
+    me.close();
+    if (me.index == null) {
+      me.deviceClass = DeviceManager.getDeviceClass(robot);
 
-			me.deviceClass.getManager().appendDevice(robot);
-		} else {
-			me.deviceClass.getManager().setOrSwapDevice(me.index, robot);
-		}
-	});
+      me.deviceClass.getManager().appendDevice(robot);
+    } else {
+      me.deviceClass.getManager().setOrSwapDevice(me.index, robot);
+    }
+  });
 };
 
 /**
  * Closes the list
  */
 RobotConnectionList.prototype.close = function() {
-	this.bubbleOverlay.hide();
-	this.visible = false;
-	this.updateTimer.stop();
-	if (this.menuBnList != null) this.menuBnList.hide();
+  this.bubbleOverlay.hide();
+  this.visible = false;
+  this.updateTimer.stop();
+  if (this.menuBnList != null) this.menuBnList.hide();
 };
 
 /* Convert between relative and absolute coordinates */
 RobotConnectionList.prototype.relToAbsX = function(x) {
-	if (!this.visible) return x;
-	return this.bubbleOverlay.relToAbsX(x);
+  if (!this.visible) return x;
+  return this.bubbleOverlay.relToAbsX(x);
 };
 RobotConnectionList.prototype.relToAbsY = function(y) {
-	if (!this.visible) return y;
-	return this.bubbleOverlay.relToAbsY(y);
+  if (!this.visible) return y;
+  return this.bubbleOverlay.relToAbsY(y);
 };

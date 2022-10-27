@@ -2,9 +2,9 @@
  * Adds a button to the block. Used in FinchBlox.
  * @param {Block} parent - The Block this button is a part of
  */
-function BlockButton(parent){
-  this.buttonMargin = 2*BlockPalette.blockButtonOverhang * (1/9);
-  this.lineHeight = 2*BlockPalette.blockButtonOverhang * (8/9);
+function BlockButton(parent) {
+  this.buttonMargin = 2 * BlockPalette.blockButtonOverhang * (1 / 9);
+  this.lineHeight = 2 * BlockPalette.blockButtonOverhang * (8 / 9);
   this.cornerRadius = BlockPalette.blockButtonOverhang;
 
   this.height = this.blockButtonMargin + this.lineHeight;
@@ -13,32 +13,36 @@ function BlockButton(parent){
   this.font = Font.uiFont(12);
   this.outlineStroke = 1;
 
- this.parent = parent;
- this.x = 0;
- this.y = 0;
- this.widgets = [];
- this.displaySuffixes = [];
- this.values = [];
- this.popupIsDisplayed = false;
+  this.parent = parent;
+  this.x = 0;
+  this.y = 0;
+  this.widgets = [];
+  this.displaySuffixes = [];
+  this.values = [];
+  this.popupIsDisplayed = false;
 
- this.outlineColor = Colors.blockOutline[parent.category];
- if (this.outlineColor == null) { this.outlineColor = Colors.categoryColors[parent.category]; }
- if (this.outlineColor == null) { this.outlineColor = Colors.iron; }
+  this.outlineColor = Colors.blockOutline[parent.category];
+  if (this.outlineColor == null) {
+    this.outlineColor = Colors.categoryColors[parent.category];
+  }
+  if (this.outlineColor == null) {
+    this.outlineColor = Colors.iron;
+  }
 
- const me = this;
- this.callbackFunction = function() {
-   if (!me.parent.stack.isDisplayStack) { //Disable popups for blocks in the blockpalette
-     const inputSys = me.createInputSystem();
-     inputSys.show(null, me.updateValue.bind(me), function(){
-       SaveManager.markEdited();
-       me.popupIsDisplayed = false;
-     }, me.values, me.outlineColor, parent);
-     me.popupIsDisplayed = true;
-   }
- }
+  const me = this;
+  this.callbackFunction = function() {
+    if (!me.parent.stack.isDisplayStack) { //Disable popups for blocks in the blockpalette
+      const inputSys = me.createInputSystem();
+      inputSys.show(null, me.updateValue.bind(me), function() {
+        SaveManager.markEdited();
+        me.popupIsDisplayed = false;
+      }, me.values, me.outlineColor, parent);
+      me.popupIsDisplayed = true;
+    }
+  }
 
- this.isSlot = false;
- parent.blockButton = this;
+  this.isSlot = false;
+  parent.blockButton = this;
 };
 BlockButton.prototype = Object.create(BlockPart.prototype);
 BlockButton.prototype.constructor = BlockButton;
@@ -47,20 +51,22 @@ BlockButton.prototype.constructor = BlockButton;
  * Creates or recreates the button and sets its callback function.
  */
 BlockButton.prototype.draw = function() {
-  if (this.button != null) { this.button.remove(); }
+  if (this.button != null) {
+    this.button.remove();
+  }
   this.button = new Button(this.x, this.y, this.width, this.height, this.parent.group, Colors.white, this.cornerRadius, this.cornerRadius);
   GuiElements.update.stroke(this.button.bgRect, this.outlineColor, this.outlineStroke);
   this.button.setCallbackFunction(this.callbackFunction, true);
 }
 
 /**
-* @param {number} x - The x coord the icon should have relative to the Block it is in
-* @param {number} y - The y coord ths icon should have measured from the center of the icon
-* @return {number} - The width of the icon, indicating how much the next item should be shifted over.
-*/
+ * @param {number} x - The x coord the icon should have relative to the Block it is in
+ * @param {number} y - The y coord ths icon should have measured from the center of the icon
+ * @return {number} - The width of the icon, indicating how much the next item should be shifted over.
+ */
 BlockButton.prototype.updateAlign = function(x, y) {
-	DebugOptions.validateNumbers(x, y);
-	this.move(x, y);
+  DebugOptions.validateNumbers(x, y);
+  this.move(x, y);
   //Hide the button while the block is in the blockPalette
   if (this.parent.stack === null || this.parent.stack.isDisplayStack) {
     this.button.hide();
@@ -69,12 +75,12 @@ BlockButton.prototype.updateAlign = function(x, y) {
     this.button.show();
     this.isHidden = false;
   }
-	return this.width;
+  return this.width;
 };
 
 /**
-* BlockButtons are of constant size, so updateDim does nothing
-*/
+ * BlockButtons are of constant size, so updateDim does nothing
+ */
 BlockButton.prototype.updateDim = function() {
 
 };
@@ -85,10 +91,10 @@ BlockButton.prototype.updateDim = function() {
  * @param {number} y
  */
 BlockButton.prototype.move = function(x, y) {
-	DebugOptions.validateNumbers(x, y);
-	this.x = x;
-	this.y = y;
-	this.button.move(x, y);
+  DebugOptions.validateNumbers(x, y);
+  this.x = x;
+  this.y = y;
+  this.button.move(x, y);
 };
 
 /**
@@ -96,13 +102,13 @@ BlockButton.prototype.move = function(x, y) {
  * @param newValue - the new value to use.
  * @param {number} index - the index at which to place the new value.
  */
-BlockButton.prototype.updateValue = function(newValue, index) {//, displayString) {
+BlockButton.prototype.updateValue = function(newValue, index) { //, displayString) {
   this.values[index] = newValue;
   let text = [];
   for (let i = 0; i < this.widgets.length; i++) {
     text[i] = "";
-    if (typeof this.values[i] == 'object' && this.values[i].r != null){
-      const s = 255/100;
+    if (typeof this.values[i] == 'object' && this.values[i].r != null) {
+      const s = 255 / 100;
       const color = Colors.rgbToHex(this.values[i].r * s, this.values[i].g * s, this.values[i].b * s);
       //console.log("new button color: " + color);
       //GuiElements.update.color(this.button.bgRect, color);
@@ -114,7 +120,7 @@ BlockButton.prototype.updateValue = function(newValue, index) {//, displayString
           this.colorLabel.remove();
         }
         const clW = this.button.width;
-        const clH = this.button.height/this.widgets.length;
+        const clH = this.button.height / this.widgets.length;
         const clX = 0;
         const clY = i * clH;
         const clR = this.cornerRadius;
@@ -123,7 +129,7 @@ BlockButton.prototype.updateValue = function(newValue, index) {//, displayString
         TouchReceiver.addListenersBN(this.colorLabel, this.button);
 
         for (let j = 0; j < this.widgets.length; j++) {
-          if (j != i && (j == 0 || j == this.widgets.length-1)) {
+          if (j != i && (j == 0 || j == this.widgets.length - 1)) {
             const bgY = j * clH;
             const bg = GuiElements.draw.tab(clX, bgY, clW, clH, Colors.white, clR, true);
             this.button.group.appendChild(bg);
@@ -142,9 +148,9 @@ BlockButton.prototype.updateValue = function(newValue, index) {//, displayString
         this.ledArrayImage.group.remove();
       }
       let image = GuiElements.draw.ledArray(this.button.group, this.values[i], 1.8);
-      const iX = this.button.width/2 - image.width/2;
+      const iX = this.button.width / 2 - image.width / 2;
       //const iY = this.button.height/2 - image.width/2;
-      const iY = (i+1) * this.button.height/(this.widgets.length + 1) - image.width/2;
+      const iY = (i + 1) * this.button.height / (this.widgets.length + 1) - image.width / 2;
       GuiElements.move.group(image.group, iX, iY);
       this.ledArrayImage = image;
     } else {
@@ -152,15 +158,17 @@ BlockButton.prototype.updateValue = function(newValue, index) {//, displayString
     }
 
     if (this.widgets[i].type == "time") {
-      if (this.timeIcon != null) { this.timeIcon.remove(); }
+      if (this.timeIcon != null) {
+        this.timeIcon.remove();
+      }
       const textM = text[i] + "...."
       text[i] = text[i] + "    ";
       const textW = GuiElements.measure.stringWidth(textM, this.font);
       const tiH = 11;
       const tiPath = VectorPaths.faClock;
       const tiW = VectorIcon.computeWidth(tiPath, tiH);
-      const tiX = this.button.width/2 + textW/2 - tiW;
-      const tiY = (i+1) * this.button.height/(this.widgets.length + 1) - tiH/2 + 0.75;
+      const tiX = this.button.width / 2 + textW / 2 - tiW;
+      const tiY = (i + 1) * this.button.height / (this.widgets.length + 1) - tiH / 2 + 0.75;
       this.timeIcon = new VectorIcon(tiX, tiY, tiPath, Colors.bbtDarkGray, tiH, this.button.group);
     }
   }
@@ -173,10 +181,10 @@ BlockButton.prototype.updateValue = function(newValue, index) {//, displayString
  */
 BlockButton.prototype.createInputSystem = function() {
   const x1 = this.getAbsX();
-	const y1 = this.getAbsY();
-	const x2 = this.relToAbsX(this.width);
-	const y2 = this.relToAbsY(this.height);
-	const inputPad = new InputPad(x1, x2, y1, y2);
+  const y1 = this.getAbsY();
+  const x2 = this.relToAbsX(this.width);
+  const y2 = this.relToAbsY(this.height);
+  const inputPad = new InputPad(x1, x2, y1, y2);
 
   this.widgets.forEach(function(widget) {
     inputPad.addWidget(widget);
@@ -244,55 +252,55 @@ BlockButton.prototype.addWidget = function(widget, suffix, startingValue) {
  * @param {number} x
  * @returns {number}
  */
-BlockButton.prototype.relToAbsX = function(x){
-	return this.parent.relToAbsX(x + this.x);
+BlockButton.prototype.relToAbsX = function(x) {
+  return this.parent.relToAbsX(x + this.x);
 };
 /**
  * @param {number} y
  * @returns {number}
  */
-BlockButton.prototype.relToAbsY = function(y){
-	return this.parent.relToAbsY(y + this.y);
+BlockButton.prototype.relToAbsY = function(y) {
+  return this.parent.relToAbsY(y + this.y);
 };
 /**
  * @param {number} x
  * @returns {number}
  */
-BlockButton.prototype.absToRelX = function(x){
-	return this.parent.absToRelX(x) - this.x;
+BlockButton.prototype.absToRelX = function(x) {
+  return this.parent.absToRelX(x) - this.x;
 };
 /**
  * @param {number} y
  * @returns {number}
  */
-BlockButton.prototype.absToRelY = function(y){
-	return this.parent.absToRelY(y) - this.y;
+BlockButton.prototype.absToRelY = function(y) {
+  return this.parent.absToRelY(y) - this.y;
 };
 /**
  * Returns the x coord of the Slot relative to the screen (not the group it is contained in).
  * @return {number} - The x coord of the Slot relative to the screen.
  */
-BlockButton.prototype.getAbsX = function(){
-	return this.relToAbsX(0);
+BlockButton.prototype.getAbsX = function() {
+  return this.relToAbsX(0);
 };
 /**
  * Returns the y coord of the Slot relative to the screen (not the group it is contained in).
  * @return {number} - The y coord of the Slot relative to the screen.
  */
-BlockButton.prototype.getAbsY = function(){//Fix for tabs
-	return this.relToAbsY(0);
+BlockButton.prototype.getAbsY = function() { //Fix for tabs
+  return this.relToAbsY(0);
 };
 /**
  * @returns {number}
  */
-BlockButton.prototype.getAbsWidth = function(){
-	return this.relToAbsX(this.width) - this.getAbsX();
+BlockButton.prototype.getAbsWidth = function() {
+  return this.relToAbsX(this.width) - this.getAbsX();
 };
 /**
  * @returns {number}
  */
-BlockButton.prototype.getAbsHeight = function(){
-	return this.relToAbsY(this.height) - this.getAbsY();
+BlockButton.prototype.getAbsHeight = function() {
+  return this.relToAbsY(this.height) - this.getAbsY();
 };
 
 /**

@@ -4,34 +4,33 @@
  * concatenation.  They all return a boolean indicating if the callback ran without error.  A result of true means
  * everything worked, while false indicates the request was bad, unimplemented, or encountered an error.
  */
-function CallbackManager(){
-}
+function CallbackManager() {}
 
 CallbackManager.sounds = {};
 /**
  * Called when recording stops unexpectedly
  * @return {boolean}
  */
-CallbackManager.sounds.recordingEnded = function(){
-	RecordingManager.interruptRecording();
-	return true;
+CallbackManager.sounds.recordingEnded = function() {
+  RecordingManager.interruptRecording();
+  return true;
 };
 /**
  * Called when permission to record is granted by the user
  * @return {boolean}
  */
-CallbackManager.sounds.permissionGranted = function(){
-	RecordingManager.permissionGranted();
-	return true;
+CallbackManager.sounds.permissionGranted = function() {
+  RecordingManager.permissionGranted();
+  return true;
 };
 /**
  * Called to notify the frontend that the list of recordings has changed
  * @returns {boolean}
  */
-CallbackManager.sounds.recordingsChanged = function(){
-	Sound.loadSounds(true);
-	RecordingDialog.recordingsChanged();
-	return true;
+CallbackManager.sounds.recordingsChanged = function() {
+  Sound.loadSounds(true);
+  RecordingDialog.recordingsChanged();
+  return true;
 };
 
 CallbackManager.data = {};
@@ -42,45 +41,47 @@ CallbackManager.data = {};
  * @return {boolean}
  */
 CallbackManager.data.open = function(fileName, data) {
-	fileName = HtmlServer.decodeHtml(fileName);
-	data = HtmlServer.decodeHtml(data);
-	SaveManager.backendOpen(fileName, data);
-	return true;
+  fileName = HtmlServer.decodeHtml(fileName);
+  data = HtmlServer.decodeHtml(data);
+  SaveManager.backendOpen(fileName, data);
+  return true;
 };
 /**
  * Sets the name of the currently open file (when there is a rename request, for example)
  * @param {string} fileName - The percent encoded new name of the file
  * @return {boolean}
  */
-CallbackManager.data.setName = function(fileName){
-	fileName = HtmlServer.decodeHtml(fileName);
-	SaveManager.backendSetName(fileName);
-	return true;
+CallbackManager.data.setName = function(fileName) {
+  fileName = HtmlServer.decodeHtml(fileName);
+  SaveManager.backendSetName(fileName);
+  return true;
 };
 /**
  * Closes the current file and opens the blank file
  * @return {boolean}
  */
-CallbackManager.data.close = function(){
-	SaveManager.backendClose();
-	return true;
+CallbackManager.data.close = function() {
+  SaveManager.backendClose();
+  return true;
 };
 /**
  * Tells the frontend to lock the UI and show Loading... until the file loads (or 1 sec passes)
  * @return {boolean}
  */
-CallbackManager.data.markLoading = function(){
-	SaveManager.backendMarkLoading();
-	return true;
+CallbackManager.data.markLoading = function() {
+  SaveManager.backendMarkLoading();
+  return true;
 };
 /**
  * Tells the frontend to reload the OpenDialog if it is open because the local files have changed
  * @return {boolean}
  */
-CallbackManager.data.filesChanged = function(){
-  if(FinchBlox) { LevelManager.checkSavedFiles() }
-	OpenDialog.filesChanged();
-	return true;
+CallbackManager.data.filesChanged = function() {
+  if (FinchBlox) {
+    LevelManager.checkSavedFiles()
+  }
+  OpenDialog.filesChanged();
+  return true;
 };
 
 CallbackManager.cloud = {};
@@ -89,10 +90,10 @@ CallbackManager.cloud = {};
  * @param {string} newFiles - A percent encoded JSON object containing the new list of files
  * @return {boolean}
  */
-CallbackManager.cloud.filesChanged = function(newFiles){
-	newFiles = HtmlServer.decodeHtml(newFiles);
-	OpenCloudDialog.filesChanged(newFiles);
-	return true;
+CallbackManager.cloud.filesChanged = function(newFiles) {
+  newFiles = HtmlServer.decodeHtml(newFiles);
+  OpenCloudDialog.filesChanged(newFiles);
+  return true;
 };
 /**
  * Tells the frontend that a cloud file have finished downloading
@@ -100,18 +101,18 @@ CallbackManager.cloud.filesChanged = function(newFiles){
  * @return {boolean}
  */
 CallbackManager.cloud.downloadComplete = function(filename) {
-	filename = HtmlServer.decodeHtml(filename);
-	OpenDialog.filesChanged();
-	return true;
+  filename = HtmlServer.decodeHtml(filename);
+  OpenDialog.filesChanged();
+  return true;
 };
 /**
  * Tells the frontend that the user has just signed in, so the OpenDialog needs to be reloaded if open
  * @return {boolean}
  */
-CallbackManager.cloud.signIn = function(){
-	OpenDialog.filesChanged();
-	OpenCloudDialog.filesChanged();
-	return true;
+CallbackManager.cloud.signIn = function() {
+  OpenDialog.filesChanged();
+  OpenCloudDialog.filesChanged();
+  return true;
 };
 
 CallbackManager.dialog = {};
@@ -121,12 +122,12 @@ CallbackManager.dialog = {};
  * @param {string} [response] - The percent encoded string containing the user's response (or null/undefined if N/A)
  * @return {boolean}
  */
-CallbackManager.dialog.promptResponded = function(cancelled, response){
-	if(response != null) {
-		response = HtmlServer.decodeHtml(response);
-	}
-	DialogManager.promptDialogResponded(cancelled, response);
-	return true;
+CallbackManager.dialog.promptResponded = function(cancelled, response) {
+  if (response != null) {
+    response = HtmlServer.decodeHtml(response);
+  }
+  DialogManager.promptDialogResponded(cancelled, response);
+  return true;
 };
 /**
  * Tells the frontend that the user has just closed a choice dialog or alert dialog
@@ -134,9 +135,9 @@ CallbackManager.dialog.promptResponded = function(cancelled, response){
  * @param {boolean} firstSelected - Whether the first option was selected
  * @return {boolean}
  */
-CallbackManager.dialog.choiceResponded = function(cancelled, firstSelected){
-	DialogManager.choiceDialogResponded(cancelled, firstSelected);
-	return true;
+CallbackManager.dialog.choiceResponded = function(cancelled, firstSelected) {
+  DialogManager.choiceDialogResponded(cancelled, firstSelected);
+  return true;
 };
 
 CallbackManager.robot = {};
@@ -146,10 +147,10 @@ CallbackManager.robot = {};
  * @param {boolean} isConnected - Whether the backend is able to communicate with the robot
  * @return {boolean}
  */
-CallbackManager.robot.updateStatus = function(robotId, isConnected){
-	robotId = HtmlServer.decodeHtml(robotId);
-	DeviceManager.updateConnectionStatus(robotId, isConnected);
-	return true;
+CallbackManager.robot.updateStatus = function(robotId, isConnected) {
+  robotId = HtmlServer.decodeHtml(robotId);
+  DeviceManager.updateConnectionStatus(robotId, isConnected);
+  return true;
 };
 /**
  * Updates the status of the battery for display in the battery menu.
@@ -158,9 +159,9 @@ CallbackManager.robot.updateStatus = function(robotId, isConnected){
  * @return {boolean}
  */
 CallbackManager.robot.updateBatteryStatus = function(robotId, batteryStatus) {
-    robotId = HtmlServer.decodeHtml(robotId);
-    DeviceManager.updateRobotBatteryStatus(robotId, batteryStatus);
-    return true;
+  robotId = HtmlServer.decodeHtml(robotId);
+  DeviceManager.updateRobotBatteryStatus(robotId, batteryStatus);
+  return true;
 };
 /**
  * While the micro:bit compass is being calibrated, we will play the instructional
@@ -171,20 +172,20 @@ CallbackManager.robot.updateBatteryStatus = function(robotId, batteryStatus) {
  * @return {boolean} - true if a video element was found for the robot id.
  */
 CallbackManager.robot.compassCalibrationResult = function(robotId, success) {
-	DeviceManager.updateCompassCalibrationStatus(robotId, success);
-	const dialog = RowDialog.currentDialog;
-	if (dialog != null) {
-		if (dialog.constructor === CalibrateCompassDialog) {
-			const rows = dialog.rowCount;
-			dialog.reloadRows(rows);
-		}
-	}
-	const videoElement = document.getElementById("video" + robotId);
-	if (videoElement != null) {
-		GuiElements.removeVideo(videoElement);
-		return true;
-	}
-	return false;
+  DeviceManager.updateCompassCalibrationStatus(robotId, success);
+  const dialog = RowDialog.currentDialog;
+  if (dialog != null) {
+    if (dialog.constructor === CalibrateCompassDialog) {
+      const rows = dialog.rowCount;
+      dialog.reloadRows(rows);
+    }
+  }
+  const videoElement = document.getElementById("video" + robotId);
+  if (videoElement != null) {
+    GuiElements.removeVideo(videoElement);
+    return true;
+  }
+  return false;
 };
 /**
  * Tells the frontend that a robot has just been disconnected because it has incompatible firmware
@@ -193,25 +194,25 @@ CallbackManager.robot.compassCalibrationResult = function(robotId, success) {
  * @param {string} minFirmware - The percent encoded minimum version of firmware the backend requires
  */
 CallbackManager.robot.disconnectIncompatible = function(robotId, oldFirmware, minFirmware) {
-	robotId = HtmlServer.decodeHtml(robotId);
-	oldFirmware = HtmlServer.decodeHtml(oldFirmware);
-	minFirmware = HtmlServer.decodeHtml(minFirmware);
-	//DeviceManager.removeDisconnected(robotId, oldFirmware, minFirmware);
+  robotId = HtmlServer.decodeHtml(robotId);
+  oldFirmware = HtmlServer.decodeHtml(oldFirmware);
+  minFirmware = HtmlServer.decodeHtml(minFirmware);
+  //DeviceManager.removeDisconnected(robotId, oldFirmware, minFirmware);
 
-	//November 2018 - for now, while there is really no old firmware
-	// out there, the incompatible message comes up incorrectly more
-	// often than correctly. Just report it as a connection failure
-	// (which is what it usually is).
-	CallBackManager.robot.connectionFailure(robotId);
+  //November 2018 - for now, while there is really no old firmware
+  // out there, the incompatible message comes up incorrectly more
+  // often than correctly. Just report it as a connection failure
+  // (which is what it usually is).
+  CallBackManager.robot.connectionFailure(robotId);
 };
 
 CallbackManager.robot.connectionFailure = function(robotId) {
-    robotId = HtmlServer.decodeHtml(robotId);
-		DeviceManager.removeDisconnected(robotId);
-    let msg = Language.getStr("Connection_failed_try_again");
-    DialogManager.showChoiceDialog(Language.getStr("Connection_Failure"), msg, "", Language.getStr("Dismiss"), true, function (result) {
-    		return;
-    	}.bind(this));
+  robotId = HtmlServer.decodeHtml(robotId);
+  DeviceManager.removeDisconnected(robotId);
+  let msg = Language.getStr("Connection_failed_try_again");
+  DialogManager.showChoiceDialog(Language.getStr("Connection_Failure"), msg, "", Language.getStr("Dismiss"), true, function(result) {
+    return;
+  }.bind(this));
 }
 /**
  * Tells the frontend that the status of a robot's firmware
@@ -220,21 +221,21 @@ CallbackManager.robot.connectionFailure = function(robotId) {
  * @return {boolean}
  */
 CallbackManager.robot.updateFirmwareStatus = function(robotId, status) {
-	robotId = HtmlServer.decodeHtml(robotId);
-	status = HtmlServer.decodeHtml(status);
-	const statuses = Device.firmwareStatuses;
-	let firmwareStatus;
-	if(status === "upToDate") {
-		firmwareStatus = statuses.upToDate;
-	} else if(status === "old") {
-		firmwareStatus = statuses.old;
-	} else if(status === "incompatible") {
-		firmwareStatus = statuses.incompatible;
-	} else {
-		return false;
-	}
-	DeviceManager.updateFirmwareStatus(robotId, firmwareStatus);
-	return true;
+  robotId = HtmlServer.decodeHtml(robotId);
+  status = HtmlServer.decodeHtml(status);
+  const statuses = Device.firmwareStatuses;
+  let firmwareStatus;
+  if (status === "upToDate") {
+    firmwareStatus = statuses.upToDate;
+  } else if (status === "old") {
+    firmwareStatus = statuses.old;
+  } else if (status === "incompatible") {
+    firmwareStatus = statuses.incompatible;
+  } else {
+    return false;
+  }
+  DeviceManager.updateFirmwareStatus(robotId, firmwareStatus);
+  return true;
 };
 
 CallbackManager.robot.updateHasV2Microbit = function(robotId, hasV2String) {
@@ -249,10 +250,10 @@ CallbackManager.robot.updateHasV2Microbit = function(robotId, hasV2String) {
  * @param {string} robotList - A percent encoded JSON array of discovered devices
  * @return {boolean}
  */
-CallbackManager.robot.discovered = function(robotList){
-	robotList = HtmlServer.decodeHtml(robotList);
-	DeviceManager.backendDiscovered(robotList);
-	return true;
+CallbackManager.robot.discovered = function(robotList) {
+  robotList = HtmlServer.decodeHtml(robotList);
+  DeviceManager.backendDiscovered(robotList);
+  return true;
 };
 /**
  * Tells the frontend that the discover timed out so the frontend has a chance to start the discover again.
@@ -260,8 +261,8 @@ CallbackManager.robot.discovered = function(robotList){
  * @return {boolean}
  */
 CallbackManager.robot.discoverTimeOut = function() {
-	DeviceManager.possiblyRescan();
-	return true;
+  DeviceManager.possiblyRescan();
+  return true;
 };
 /**
  * Tells the frontend that the backend has stopped scanning for devices. The frontend might start the scan again.
@@ -269,8 +270,8 @@ CallbackManager.robot.discoverTimeOut = function() {
  * @return {boolean}
  */
 CallbackManager.robot.stopDiscover = function() {
-	DeviceManager.possiblyRescan();
-	return true;
+  DeviceManager.possiblyRescan();
+  return true;
 };
 
 CallbackManager.tablet = {};
@@ -279,25 +280,25 @@ CallbackManager.tablet = {};
  * @param {string} sensorList - A non percent encoded, return separated list of supported sensors
  * @return {boolean}
  */
-CallbackManager.tablet.availableSensors = function(sensorList){
-	TabletSensors.updateAvailable(sensorList);
-	return true;
+CallbackManager.tablet.availableSensors = function(sensorList) {
+  TabletSensors.updateAvailable(sensorList);
+  return true;
 };
 /**
  * Tells the frontend that the backend supports a specific sensor
  * @param {string} sensor - A non percent encoded string representing the supported sensor
  * @return {boolean} - Whether the sensor string was valid
  */
-CallbackManager.tablet.addSensor = function(sensor){
-	return TabletSensors.addSensor(sensor);
+CallbackManager.tablet.addSensor = function(sensor) {
+  return TabletSensors.addSensor(sensor);
 };
 /**
  * Tells the frontend that the backend does not support a specific sensor
  * @param {string} sensor - A non percent encoded string representing the unsupported sensor
  * @return {boolean} - Whether the sensor string was valid
  */
-CallbackManager.tablet.removeSensor = function(sensor){
-	return TabletSensors.removeSensor(sensor);
+CallbackManager.tablet.removeSensor = function(sensor) {
+  return TabletSensors.removeSensor(sensor);
 };
 
 /**
@@ -305,20 +306,20 @@ CallbackManager.tablet.removeSensor = function(sensor){
  * Only use the system language if no language has been selected by the user
  * @param {string} lang - current system language 2 letter code
  */
-CallbackManager.tablet.getLanguage = function(lang){
-	const userSelectedLang = sessionStorage.getItem("language");
-  if (userSelectedLang == undefined || userSelectedLang == null){
+CallbackManager.tablet.getLanguage = function(lang) {
+  const userSelectedLang = sessionStorage.getItem("language");
+  if (userSelectedLang == undefined || userSelectedLang == null) {
     Language.setLanguage(lang);
-	}
+  }
 };
 
 
 CallbackManager.tablet.setFile = function(fileName) {
-    OpenDialog.setDefaultFile(HtmlServer.decodeHtml(fileName));
+  OpenDialog.setDefaultFile(HtmlServer.decodeHtml(fileName));
 }
 
 CallbackManager.tablet.runFile = function(fileName) {
-    SaveManager.userOpenFile(HtmlServer.decodeHtml(fileName));
+  SaveManager.userOpenFile(HtmlServer.decodeHtml(fileName));
 }
 
 /**
@@ -326,13 +327,13 @@ CallbackManager.tablet.runFile = function(fileName) {
  * each other easily.  This wasn't my idea and I will take no responsibility for this function's existence.
  * @param {string} request - The percent encoded string representing request the backend wants the frontend to make
  */
-CallbackManager.echo = function(request){
-	// decode the request
-	request = HtmlServer.decodeHtml(request);
-	/* Send it back.  Hopefully it has all its parameters percent encoded already.  That means the backend needs
-	 * to percent encode each parameter individually, and then percent encode the entire string again to pass it
-	 * to this function. */
-	HtmlServer.sendRequestWithCallback(request);
+CallbackManager.echo = function(request) {
+  // decode the request
+  request = HtmlServer.decodeHtml(request);
+  /* Send it back.  Hopefully it has all its parameters percent encoded already.  That means the backend needs
+   * to percent encode each parameter individually, and then percent encode the entire string again to pass it
+   * to this function. */
+  HtmlServer.sendRequestWithCallback(request);
 };
 
 /**
@@ -342,10 +343,10 @@ CallbackManager.echo = function(request){
  * @param {string} body - The percent encoded response from the backend
  */
 CallbackManager.httpResponse = function(id, status, body) {
-	if (body != null) {
-		body = HtmlServer.decodeHtml(body);
-	}
-	HtmlServer.responseFromNativeCall(id, status, body);
+  if (body != null) {
+    body = HtmlServer.decodeHtml(body);
+  }
+  HtmlServer.responseFromNativeCall(id, status, body);
 };
 
 /**
@@ -356,6 +357,6 @@ CallbackManager.httpResponse = function(id, status, body) {
  * @param {string} fileName - The name of the file prefered
  */
 CallbackManager.setFilePreference = function(fileName) {
-		GuiElements.alert("Setting default file to " + fileName);
-		OpenDialog.lastOpenFile = fileName;
+  GuiElements.alert("Setting default file to " + fileName);
+  OpenDialog.lastOpenFile = fileName;
 };

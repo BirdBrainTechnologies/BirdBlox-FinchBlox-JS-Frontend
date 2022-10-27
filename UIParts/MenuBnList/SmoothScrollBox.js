@@ -27,53 +27,53 @@
  * @constructor
  */
 function SmoothScrollBox(group, layer, absX, absY, width, height, innerWidth, innerHeight, partOfOverlay) {
-	if (partOfOverlay == null) {
-		partOfOverlay = null;
-	}
-	DebugOptions.validateNonNull(group, layer);
-	DebugOptions.validateNumbers(width, height, innerWidth, innerHeight);
-	this.x = absX;
-	this.y = absY;
-	this.width = width;
-	this.height = height;
-	this.innerWidth = innerWidth;
-	this.innerHeight = innerHeight;
-	this.layer = layer;
-	this.scrollDiv = GuiElements.create.scrollDiv();
-	TouchReceiver.addListenersScrollBox(this.scrollDiv, this);
-	this.contentSvg = GuiElements.create.svg(this.scrollDiv);
-	this.contentGroup = GuiElements.create.group(0, 0, this.contentSvg);
-	this.contentGroup.appendChild(group);
-	this.scrollStatus = {};
-	this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv, this.scrollStatus);
-	this.visible = false;
-	this.currentZoom = GuiElements.zoomFactor;
-	this.partOfOverlay = partOfOverlay;
+  if (partOfOverlay == null) {
+    partOfOverlay = null;
+  }
+  DebugOptions.validateNonNull(group, layer);
+  DebugOptions.validateNumbers(width, height, innerWidth, innerHeight);
+  this.x = absX;
+  this.y = absY;
+  this.width = width;
+  this.height = height;
+  this.innerWidth = innerWidth;
+  this.innerHeight = innerHeight;
+  this.layer = layer;
+  this.scrollDiv = GuiElements.create.scrollDiv();
+  TouchReceiver.addListenersScrollBox(this.scrollDiv, this);
+  this.contentSvg = GuiElements.create.svg(this.scrollDiv);
+  this.contentGroup = GuiElements.create.group(0, 0, this.contentSvg);
+  this.contentGroup.appendChild(group);
+  this.scrollStatus = {};
+  this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv, this.scrollStatus);
+  this.visible = false;
+  this.currentZoom = GuiElements.zoomFactor;
+  this.partOfOverlay = partOfOverlay;
 }
 
 /**
  * Recomputes the sizes and positions of the SmoothScrollBox
  */
 SmoothScrollBox.prototype.updateScrollSet = function() {
-	if (this.visible) {
-		let realX = GuiElements.relToAbsX(this.x);
-		let realY = GuiElements.relToAbsY(this.y);
+  if (this.visible) {
+    let realX = GuiElements.relToAbsX(this.x);
+    let realY = GuiElements.relToAbsY(this.y);
 
-		GuiElements.update.smoothScrollSet(this.scrollDiv, this.contentSvg, this.contentGroup, realX, realY, this.width,
-			this.height, this.innerWidth, this.innerHeight);
-	}
+    GuiElements.update.smoothScrollSet(this.scrollDiv, this.contentSvg, this.contentGroup, realX, realY, this.width,
+      this.height, this.innerWidth, this.innerHeight);
+  }
 };
 
 /**
  * Captures the scroll position, calls updateScrollSet, and restores the scroll position
  */
 SmoothScrollBox.prototype.updateZoom = function() {
-	const currentScrollX = this.getScrollX();
-	const currentScrollY = this.getScrollY();
-	this.currentZoom = GuiElements.zoomFactor;
-	this.updateScrollSet();
-	this.setScrollX(currentScrollX);
-	this.setScrollY(currentScrollY);
+  const currentScrollX = this.getScrollX();
+  const currentScrollY = this.getScrollY();
+  this.currentZoom = GuiElements.zoomFactor;
+  this.updateScrollSet();
+  this.setScrollX(currentScrollX);
+  this.setScrollY(currentScrollY);
 };
 
 /**
@@ -82,9 +82,9 @@ SmoothScrollBox.prototype.updateZoom = function() {
  * @param {number} innerHeight - The new height of the content
  */
 SmoothScrollBox.prototype.setContentDims = function(innerWidth, innerHeight) {
-	this.innerHeight = innerHeight;
-	this.innerWidth = innerWidth;
-	this.updateScrollSet();
+  this.innerHeight = innerHeight;
+  this.innerWidth = innerWidth;
+  this.updateScrollSet();
 };
 
 /**
@@ -93,9 +93,9 @@ SmoothScrollBox.prototype.setContentDims = function(innerWidth, innerHeight) {
  * @param {number} height
  */
 SmoothScrollBox.prototype.setDims = function(width, height) {
-	this.width = width;
-	this.height = height;
-	this.updateScrollSet();
+  this.width = width;
+  this.height = height;
+  this.updateScrollSet();
 };
 
 /**
@@ -104,35 +104,35 @@ SmoothScrollBox.prototype.setDims = function(width, height) {
  * @param {number} absY
  */
 SmoothScrollBox.prototype.move = function(absX, absY) {
-	this.x = absX;
-	this.y = absY;
-	this.updateScrollSet();
+  this.x = absX;
+  this.y = absY;
+  this.updateScrollSet();
 };
 
 /**
  * Makes the SmoothScrollBox visible
  */
 SmoothScrollBox.prototype.show = function() {
-	if (!this.visible) {
-		this.visible = true;
-		this.layer.appendChild(this.scrollDiv);
-		this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
-		this.updateScrollSet();
-		TouchReceiver.setInitialScrollFix(this.scrollDiv);
-	}
+  if (!this.visible) {
+    this.visible = true;
+    this.layer.appendChild(this.scrollDiv);
+    this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
+    this.updateScrollSet();
+    TouchReceiver.setInitialScrollFix(this.scrollDiv);
+  }
 };
 
 /**
  * Hides the SmoothScrollBox
  */
 SmoothScrollBox.prototype.hide = function() {
-	if (this.visible) {
-		this.visible = false;
-		this.layer.removeChild(this.scrollDiv);
-		if (this.fixScrollTimer != null) {
-			window.clearInterval(this.fixScrollTimer);
-		}
-	}
+  if (this.visible) {
+    this.visible = false;
+    this.layer.removeChild(this.scrollDiv);
+    if (this.fixScrollTimer != null) {
+      window.clearInterval(this.fixScrollTimer);
+    }
+  }
 };
 
 /* Convert between coords inside the group in the SmoothScrollBox and screen coords */
@@ -141,28 +141,28 @@ SmoothScrollBox.prototype.hide = function() {
  * @return {number}
  */
 SmoothScrollBox.prototype.relToAbsX = function(x) {
-	return x - this.scrollDiv.scrollLeft / this.currentZoom + this.x;
+  return x - this.scrollDiv.scrollLeft / this.currentZoom + this.x;
 };
 /**
  * @param {number} y
  * @return {number}
  */
 SmoothScrollBox.prototype.relToAbsY = function(y) {
-	return y - this.scrollDiv.scrollTop / this.currentZoom + this.y;
+  return y - this.scrollDiv.scrollTop / this.currentZoom + this.y;
 };
 /**
  * @param {number} x
  * @return {number}
  */
 SmoothScrollBox.prototype.absToRelX = function(x) {
-	return x + this.scrollDiv.scrollLeft * this.currentZoom - this.x;
+  return x + this.scrollDiv.scrollLeft * this.currentZoom - this.x;
 };
 /**
  * @param {number} y
  * @return {number}
  */
 SmoothScrollBox.prototype.absToRelY = function(y) {
-	return y + this.scrollDiv.scrollTop * this.currentZoom - this.y;
+  return y + this.scrollDiv.scrollTop * this.currentZoom - this.y;
 };
 
 /* Get/set the scroll amount in various directions */
@@ -170,29 +170,29 @@ SmoothScrollBox.prototype.absToRelY = function(y) {
  * @return {number}
  */
 SmoothScrollBox.prototype.getScrollY = function() {
-	if (!this.visible) return 0;
-	return this.scrollDiv.scrollTop / this.currentZoom;
+  if (!this.visible) return 0;
+  return this.scrollDiv.scrollTop / this.currentZoom;
 };
 /**
  * @return {number}
  */
 SmoothScrollBox.prototype.getScrollX = function() {
-	if (!this.visible) return 0;
-	return this.scrollDiv.scrollLeft / this.currentZoom;
+  if (!this.visible) return 0;
+  return this.scrollDiv.scrollLeft / this.currentZoom;
 };
 /**
  * @param {number} x
  */
 SmoothScrollBox.prototype.setScrollX = function(x) {
-	this.scrollDiv.scrollLeft = x * this.currentZoom;
-	TouchReceiver.setInitialScrollFix(this.scrollDiv);
+  this.scrollDiv.scrollLeft = x * this.currentZoom;
+  TouchReceiver.setInitialScrollFix(this.scrollDiv);
 };
 /**
  * @param {number} y
  */
 SmoothScrollBox.prototype.setScrollY = function(y) {
-	this.scrollDiv.scrollTop = y * this.currentZoom;
-	TouchReceiver.setInitialScrollFix(this.scrollDiv);
+  this.scrollDiv.scrollTop = y * this.currentZoom;
+  TouchReceiver.setInitialScrollFix(this.scrollDiv);
 };
 
 /**
@@ -200,5 +200,5 @@ SmoothScrollBox.prototype.setScrollY = function(y) {
  * @return {boolean}
  */
 SmoothScrollBox.prototype.isMoving = function() {
-	return !this.scrollStatus.still;
+  return !this.scrollStatus.still;
 };

@@ -7,48 +7,48 @@
  * @constructor
  */
 function Tab() {
-	// group for the canvas
-	this.mainG = GuiElements.create.group(0, 0);
-	// The amount the canvas has been scrolled in each direction
-	this.scrollX = 0;
-	this.scrollY = 0;
-	// The amount the canvas is zoomed
-	this.zoomFactor = 1;
-	// Whether the tab is visible (always true for the current tab)
-	this.visible = false;
-	TabManager.addTab(this);
-	// List of stacks to pass messages to
-	this.stackList = [];
+  // group for the canvas
+  this.mainG = GuiElements.create.group(0, 0);
+  // The amount the canvas has been scrolled in each direction
+  this.scrollX = 0;
+  this.scrollY = 0;
+  // The amount the canvas is zoomed
+  this.zoomFactor = 1;
+  // Whether the tab is visible (always true for the current tab)
+  this.visible = false;
+  TabManager.addTab(this);
+  // List of stacks to pass messages to
+  this.stackList = [];
   //List of comments
   this.commentList = [];
-	this.isRunning = false;
-	this.scrolling = false;
-	this.zooming = false;
-	// Used while dragging.  Stores difference between the touch coords and scrollX/scrollY
-	this.scrollXOffset = 0;
-	this.scrollYOffset = 0;
-	// Used while pinch zooming.  Stores the distance between the two fingers initially
-	this.zoomStartDist = null;
-	// Stores the initial zoomFactor while pinch zooming
-	this.startZoom = null;
-	// Updates the transformation on the group to reflect the zoom factor and scroll position
-	this.updateTransform();
-	// Arrows to show off-screen blocks
-	this.overFlowArr = new OverflowArrows();
-	// Dimension information
-	this.dim = {};
-	this.dim.x1 = 0;
-	this.dim.y1 = 0;
-	this.dim.x2 = 0;
-	this.dim.y2 = 0;
+  this.isRunning = false;
+  this.scrolling = false;
+  this.zooming = false;
+  // Used while dragging.  Stores difference between the touch coords and scrollX/scrollY
+  this.scrollXOffset = 0;
+  this.scrollYOffset = 0;
+  // Used while pinch zooming.  Stores the distance between the two fingers initially
+  this.zoomStartDist = null;
+  // Stores the initial zoomFactor while pinch zooming
+  this.startZoom = null;
+  // Updates the transformation on the group to reflect the zoom factor and scroll position
+  this.updateTransform();
+  // Arrows to show off-screen blocks
+  this.overFlowArr = new OverflowArrows();
+  // Dimension information
+  this.dim = {};
+  this.dim.x1 = 0;
+  this.dim.y1 = 0;
+  this.dim.x2 = 0;
+  this.dim.y2 = 0;
 }
 
 /**
  * Brings the tab to the foreground.  Called by TabManager.
  */
 Tab.prototype.activate = function() {
-	GuiElements.layers.activeTab.appendChild(this.mainG);
-	this.overFlowArr.show();
+  GuiElements.layers.activeTab.appendChild(this.mainG);
+  this.overFlowArr.show();
   if (FinchBlox) {
     const stacks = this.stackList;
     var startBlockFound = false;
@@ -57,7 +57,9 @@ Tab.prototype.activate = function() {
         startBlockFound = true;
       }
     }
-    if (!startBlockFound) { this.addStartBlock(); }
+    if (!startBlockFound) {
+      this.addStartBlock();
+    }
   }
 };
 
@@ -66,7 +68,7 @@ Tab.prototype.activate = function() {
  * @param {BlockStack} stack
  */
 Tab.prototype.addStack = function(stack) {
-	this.stackList.push(stack);
+  this.stackList.push(stack);
 };
 
 /**
@@ -74,8 +76,8 @@ Tab.prototype.addStack = function(stack) {
  * @param {BlockStack} stack
  */
 Tab.prototype.removeStack = function(stack) {
-	const index = this.stackList.indexOf(stack);
-	this.stackList.splice(index, 1);
+  const index = this.stackList.indexOf(stack);
+  this.stackList.splice(index, 1);
 };
 
 /**
@@ -83,7 +85,9 @@ Tab.prototype.removeStack = function(stack) {
  */
 Tab.prototype.clear = function() {
   let oldList = this.stackList.slice();
-  oldList.forEach(function(stack) { stack.remove(); });
+  oldList.forEach(function(stack) {
+    stack.remove();
+  });
   //this.addStartBlock();
 };
 
@@ -95,22 +99,22 @@ Tab.prototype.recenter = function() {
   // entire tab will be used.
   const ssDim = {}
   for (let i = 0; i < this.stackList.length; i++) {
-    if (this.stackList[i].firstBlock.hasHat) {//this.stackList[i].firstBlock.isStartBlock) {
+    if (this.stackList[i].firstBlock.hasHat) { //this.stackList[i].firstBlock.isStartBlock) {
       let s = this.stackList[i]
       if (ssDim.x1 == null || s.x < ssDim.x1) {
-    		ssDim.x1 = s.x;
-    	}
-    	if (ssDim.y1 == null || s.y < ssDim.y1) {
-    		ssDim.y1 = s.y;
-    	}
-    	const x2 = s.x + s.dim.rw;
-    	if (ssDim.x2 == null || x2 > ssDim.x2) {
-    		ssDim.x2 = x2;
-    	}
-    	const y2 = s.y + s.dim.rh;
-    	if (ssDim.y2 == null || y2 > ssDim.y2) {
-    		ssDim.y2 = y2;
-    	}
+        ssDim.x1 = s.x;
+      }
+      if (ssDim.y1 == null || s.y < ssDim.y1) {
+        ssDim.y1 = s.y;
+      }
+      const x2 = s.x + s.dim.rw;
+      if (ssDim.x2 == null || x2 > ssDim.x2) {
+        ssDim.x2 = x2;
+      }
+      const y2 = s.y + s.dim.rh;
+      if (ssDim.y2 == null || y2 > ssDim.y2) {
+        ssDim.y2 = y2;
+      }
     }
   }
 
@@ -130,7 +134,7 @@ Tab.prototype.fitBox = function(box) {
   let verticalOverflow = (bottom - top) - (oa.bottom - oa.top)
 
   //If the box cannot fit on the screen, then zoom out if possible.
-  if ((horizontalOverflow > 0 || verticalOverflow > 0) && (this.zoomFactor > TabManager.minZoom)){
+  if ((horizontalOverflow > 0 || verticalOverflow > 0) && (this.zoomFactor > TabManager.minZoom)) {
     this.zoomFactor = Math.max(TabManager.minZoom, this.zoomFactor * 0.9);
     GuiElements.move.group(this.mainG, this.scrollX, this.scrollY, this.zoomFactor);
     this.updateTabDim();
@@ -138,12 +142,12 @@ Tab.prototype.fitBox = function(box) {
   } else {
     let leftOverflow = oa.left - left
     let topOverflow = oa.top - top
-    this.scrollX = this.scrollX + leftOverflow - (horizontalOverflow < 0 ? horizontalOverflow/2 : 0)
-    this.scrollY = this.scrollY + topOverflow - (verticalOverflow < 0 ? verticalOverflow/2 : 0)
+    this.scrollX = this.scrollX + leftOverflow - (horizontalOverflow < 0 ? horizontalOverflow / 2 : 0)
+    this.scrollY = this.scrollY + topOverflow - (verticalOverflow < 0 ? verticalOverflow / 2 : 0)
     GuiElements.move.group(this.mainG, this.scrollX, this.scrollY, this.zoomFactor);
     this.updateTabDim();
     this.updateTransform();
-  	this.updateArrowsShift();
+    this.updateArrowsShift();
   }
 }
 
@@ -151,7 +155,7 @@ Tab.prototype.fitBox = function(box) {
  * Adds a new start block to the tab. Used in FinchBlox.
  */
 Tab.prototype.addStartBlock = function() {
-  let blockY = GuiElements.height/2 - BlockPalette.height;
+  let blockY = GuiElements.height / 2 - BlockPalette.height;
   let stack = new BlockStack(new B_WhenFlagTapped(50, blockY), this);
 }
 
@@ -161,69 +165,69 @@ Tab.prototype.addStartBlock = function() {
  * @return {number}
  */
 Tab.prototype.relToAbsX = function(x) {
-	return x * this.zoomFactor + this.scrollX;
+  return x * this.zoomFactor + this.scrollX;
 };
 /**
  * @param {number} y
  * @return {number}
  */
 Tab.prototype.relToAbsY = function(y) {
-	return y * this.zoomFactor + this.scrollY;
+  return y * this.zoomFactor + this.scrollY;
 };
 /**
  * @param {number} x
  * @return {number}
  */
 Tab.prototype.absToRelX = function(x) {
-	return (x - this.scrollX) / this.zoomFactor;
+  return (x - this.scrollX) / this.zoomFactor;
 };
 /**
  * @param {number} y
  * @return {number}
  */
 Tab.prototype.absToRelY = function(y) {
-	return (y - this.scrollY) / this.zoomFactor;
+  return (y - this.scrollY) / this.zoomFactor;
 };
 /**
  * @return {number}
  */
 Tab.prototype.getAbsX = function() {
-	return this.relToAbsX(0);
+  return this.relToAbsX(0);
 };
 /**
  * @return {number}
  */
 Tab.prototype.getAbsY = function() {
-	return this.relToAbsY(0);
+  return this.relToAbsY(0);
 };
 
 /* Recursively passed messages.  Each of these function simply calls the function on the Tab's stacks */
 Tab.prototype.findBlockByID = function(request) {
-	this.passRecursively("findBlockByID", request);
+  this.passRecursively("findBlockByID", request);
 };
 Tab.prototype.findBestFit = function(moveManager) {
-	this.passRecursively("findBestFit", moveManager);
+  this.passRecursively("findBestFit", moveManager);
 };
 Tab.prototype.eventFlagClicked = function() {
-	this.passRecursively("eventFlagClicked");
+  this.passRecursively("eventFlagClicked");
 };
 Tab.prototype.eventBroadcast = function(message) {
-	this.passRecursively("eventBroadcast", message);
+  this.passRecursively("eventBroadcast", message);
 };
 Tab.prototype.updateAvailableMessages = function() {
-	this.passRecursively("updateAvailableMessages");
+  this.passRecursively("updateAvailableMessages");
 };
 Tab.prototype.renameVariable = function(variable) {
-	this.passRecursively("renameVariable", variable);
+  this.passRecursively("renameVariable", variable);
 };
 Tab.prototype.deleteVariable = function(variable) {
-	this.passRecursively("deleteVariable", variable);
+  this.passRecursively("deleteVariable", variable);
 };
 Tab.prototype.renameList = function(list) {
-	this.passRecursively("renameList", list);
+  this.passRecursively("renameList", list);
 };
 Tab.prototype.deleteList = function(list) {
-	this.passRecursively("deleteList", list);
+  this.passRecursively("deleteList", list);
 };
 
 /* Recursive functions that return booleans.  These functions call a function on each stack and return true if any
@@ -233,41 +237,41 @@ Tab.prototype.deleteList = function(list) {
  * @return {boolean}
  */
 Tab.prototype.checkBroadcastRunning = function(message) {
-	if (this.isRunning) {
-		const stacks = this.stackList;
-		for (let i = 0; i < stacks.length; i++) {
-			if (stacks[i].checkBroadcastRunning(message)) {
-				return true;
-			}
-		}
-	}
-	return false;
+  if (this.isRunning) {
+    const stacks = this.stackList;
+    for (let i = 0; i < stacks.length; i++) {
+      if (stacks[i].checkBroadcastRunning(message)) {
+        return true;
+      }
+    }
+  }
+  return false;
 };
 /**
  * @param {Variable} variable
  * @return {boolean}
  */
 Tab.prototype.checkVariableUsed = function(variable) {
-	const stacks = this.stackList;
-	for (let i = 0; i < stacks.length; i++) {
-		if (stacks[i].checkVariableUsed(variable)) {
-			return true;
-		}
-	}
-	return false;
+  const stacks = this.stackList;
+  for (let i = 0; i < stacks.length; i++) {
+    if (stacks[i].checkVariableUsed(variable)) {
+      return true;
+    }
+  }
+  return false;
 };
 /**
  * @param {List} list
  * @return {boolean}
  */
 Tab.prototype.checkListUsed = function(list) {
-	const stacks = this.stackList;
-	for (let i = 0; i < stacks.length; i++) {
-		if (stacks[i].checkListUsed(list)) {
-			return true;
-		}
-	}
-	return false;
+  const stacks = this.stackList;
+  for (let i = 0; i < stacks.length; i++) {
+    if (stacks[i].checkListUsed(list)) {
+      return true;
+    }
+  }
+  return false;
 };
 
 /**
@@ -275,28 +279,28 @@ Tab.prototype.checkListUsed = function(list) {
  * @returns {ExecutionStatus} - Whether the tab is still running
  */
 Tab.prototype.updateRun = function() {
-	if (!this.isRunning) {
-		return new ExecutionStatusDone();
-	}
-	const stacks = this.stackList;
-	let rVal = false;
-	for (let i = 0; i < stacks.length; i++) {
-		rVal = stacks[i].updateRun().isRunning() || rVal;
-	}
-	this.isRunning = rVal;
-	if (this.isRunning) {
-		return new ExecutionStatusRunning();
-	} else {
-		return new ExecutionStatusDone();
-	}
+  if (!this.isRunning) {
+    return new ExecutionStatusDone();
+  }
+  const stacks = this.stackList;
+  let rVal = false;
+  for (let i = 0; i < stacks.length; i++) {
+    rVal = stacks[i].updateRun().isRunning() || rVal;
+  }
+  this.isRunning = rVal;
+  if (this.isRunning) {
+    return new ExecutionStatusRunning();
+  } else {
+    return new ExecutionStatusDone();
+  }
 };
 
 /**
  * Stops execution of all stacks
  */
 Tab.prototype.stop = function() {
-	this.passRecursively("stop");
-	this.isRunning = false;
+  this.passRecursively("stop");
+  this.isRunning = false;
 };
 
 /**
@@ -304,20 +308,20 @@ Tab.prototype.stop = function() {
  * @param stack
  */
 Tab.prototype.stopAllButStack = function(stack) {
-	const stacks = this.stackList;
-	for (let i = 0; i < stacks.length; i++) {
-		if (stacks[i] !== stack) {
-			stacks[i].stop();
-		}
-	}
+  const stacks = this.stackList;
+  for (let i = 0; i < stacks.length; i++) {
+    if (stacks[i] !== stack) {
+      stacks[i].stop();
+    }
+  }
 };
 
 /**
  * Passes up the message to start running to the TabManager.  Called by a stack when it is tapped.
  */
 Tab.prototype.startRun = function() {
-	this.isRunning = true;
-	TabManager.startRun();
+  this.isRunning = true;
+  TabManager.startRun();
 };
 
 /**
@@ -326,12 +330,12 @@ Tab.prototype.startRun = function() {
  * @param {number} y - The y coord of the touch
  */
 Tab.prototype.startScroll = function(x, y) {
-	if (!this.scrolling) {
-		this.scrolling = true;
-		this.scrollXOffset = this.scrollX - x;
-		this.scrollYOffset = this.scrollY - y;
-		this.updateTabDim();
-	}
+  if (!this.scrolling) {
+    this.scrolling = true;
+    this.scrollXOffset = this.scrollX - x;
+    this.scrollYOffset = this.scrollY - y;
+    this.updateTabDim();
+  }
 };
 
 /**
@@ -340,19 +344,19 @@ Tab.prototype.startScroll = function(x, y) {
  * @param {number} y - The y coord of the touch
  */
 Tab.prototype.updateScroll = function(x, y) {
-	if (this.scrolling) {
-		this.scrollX = this.scrollXOffset + x;
-		this.scrollY = this.scrollYOffset + y;
-		GuiElements.move.group(this.mainG, this.scrollX, this.scrollY, this.zoomFactor);
-		this.updateArrowsShift();
-	}
+  if (this.scrolling) {
+    this.scrollX = this.scrollXOffset + x;
+    this.scrollY = this.scrollYOffset + y;
+    GuiElements.move.group(this.mainG, this.scrollX, this.scrollY, this.zoomFactor);
+    this.updateArrowsShift();
+  }
 };
 
 /**
  * Notes that the canvas is done scrolling
  */
 Tab.prototype.endScroll = function() {
-	this.scrolling = false;
+  this.scrolling = false;
 };
 
 /**
@@ -363,18 +367,18 @@ Tab.prototype.endScroll = function() {
  * @param {number} y2 - The y coord of the second touch
  */
 Tab.prototype.startZooming = function(x1, y1, x2, y2) {
-	if (!this.zooming) {
-		this.zooming = true;
-		const x = (x1 + x2) / 2;
-		const y = (y1 + y2) / 2;
-		this.scrollXOffset = this.scrollX - x;
-		this.scrollYOffset = this.scrollY - y;
-		const deltaX = x2 - x1;
-		const deltaY = y2 - y1;
-		this.zoomStartDist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-		this.startZoom = this.zoomFactor;
-		this.updateTabDim();
-	}
+  if (!this.zooming) {
+    this.zooming = true;
+    const x = (x1 + x2) / 2;
+    const y = (y1 + y2) / 2;
+    this.scrollXOffset = this.scrollX - x;
+    this.scrollYOffset = this.scrollY - y;
+    const deltaX = x2 - x1;
+    const deltaY = y2 - y1;
+    this.zoomStartDist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    this.startZoom = this.zoomFactor;
+    this.updateTabDim();
+  }
 };
 
 /**
@@ -385,27 +389,27 @@ Tab.prototype.startZooming = function(x1, y1, x2, y2) {
  * @param {number} y2 - The y coord of the second touch
  */
 Tab.prototype.updateZooming = function(x1, y1, x2, y2) {
-	if (this.zooming) {
-		const x = (x1 + x2) / 2;
-		const y = (y1 + y2) / 2;
-		const deltaX = x2 - x1;
-		const deltaY = y2 - y1;
-		const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-		this.zoomFactor = this.startZoom * dist / this.zoomStartDist;
-		this.zoomFactor = Math.max(TabManager.minZoom, Math.min(TabManager.maxZoom, this.zoomFactor));
-		const zoomRatio = this.zoomFactor / this.startZoom;
-		this.scrollX = this.scrollXOffset * zoomRatio + x;
-		this.scrollY = this.scrollYOffset * zoomRatio + y;
-		this.updateTransform();
-		this.updateArrowsShift();
-	}
+  if (this.zooming) {
+    const x = (x1 + x2) / 2;
+    const y = (y1 + y2) / 2;
+    const deltaX = x2 - x1;
+    const deltaY = y2 - y1;
+    const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    this.zoomFactor = this.startZoom * dist / this.zoomStartDist;
+    this.zoomFactor = Math.max(TabManager.minZoom, Math.min(TabManager.maxZoom, this.zoomFactor));
+    const zoomRatio = this.zoomFactor / this.startZoom;
+    this.scrollX = this.scrollXOffset * zoomRatio + x;
+    this.scrollY = this.scrollYOffset * zoomRatio + y;
+    this.updateTransform();
+    this.updateArrowsShift();
+  }
 };
 
 /**
  * Notes that the canvas is done zooming
  */
 Tab.prototype.endZooming = function() {
-	this.zooming = false;
+  this.zooming = false;
 };
 
 /**
@@ -415,7 +419,9 @@ Tab.prototype.endZooming = function() {
  * @param {boolean} zoomIn - true if the canvas should zoom in
  */
 Tab.prototype.wheelZoom = function(x, y, zoomIn) {
-  if (this.zooming) { return; }
+  if (this.zooming) {
+    return;
+  }
   this.zooming = true;
   this.scrollXOffset = this.scrollX - x;
   this.scrollYOffset = this.scrollY - y;
@@ -438,29 +444,29 @@ Tab.prototype.wheelZoom = function(x, y, zoomIn) {
  * Updates the transformation on the group according to the scroll position and zoom.
  */
 Tab.prototype.updateTransform = function() {
-	GuiElements.move.group(this.mainG, this.scrollX, this.scrollY, this.zoomFactor);
-	GuiElements.update.zoom(GuiElements.layers.drag, this.zoomFactor);
-	GuiElements.update.zoom(GuiElements.layers.highlight, this.zoomFactor);
+  GuiElements.move.group(this.mainG, this.scrollX, this.scrollY, this.zoomFactor);
+  GuiElements.update.zoom(GuiElements.layers.drag, this.zoomFactor);
+  GuiElements.update.zoom(GuiElements.layers.highlight, this.zoomFactor);
 };
 
 /**
  * Recursively computes the dimensions of the Tab by allowing all stacks to update the bounding box
  */
 Tab.prototype.updateTabDim = function() {
-	const dim = this.dim;
-	dim.width = 0;
-	dim.height = 0;
-	dim.x1 = null;
-	dim.y1 = null;
-	dim.x2 = null;
-	dim.y2 = null;
-	this.passRecursively("updateTabDim");
-	if (dim.x1 == null) {
-		dim.x1 = 0;
-		dim.y1 = 0;
-		dim.x2 = 0;
-		dim.y2 = 0;
-	}
+  const dim = this.dim;
+  dim.width = 0;
+  dim.height = 0;
+  dim.x1 = null;
+  dim.y1 = null;
+  dim.x2 = null;
+  dim.y2 = null;
+  this.passRecursively("updateTabDim");
+  if (dim.x1 == null) {
+    dim.x1 = 0;
+    dim.y1 = 0;
+    dim.x2 = 0;
+    dim.y2 = 0;
+  }
 };
 
 /**
@@ -470,29 +476,31 @@ Tab.prototype.updateTabDim = function() {
  * @return {Node} - The XML Node for this Tab
  */
 Tab.prototype.createXml = function(xmlDoc, skipStartBlock) {
-	const tab = XmlWriter.createElement(xmlDoc, "tab");
-	//XmlWriter.setAttribute(tab,"name",this.name);
-	XmlWriter.setAttribute(tab, "x", this.scrollX);
-	XmlWriter.setAttribute(tab, "y", this.scrollY);
-	XmlWriter.setAttribute(tab, "zoom", this.zoomFactor);
-	const stacks = XmlWriter.createElement(xmlDoc, "stacks");
-	for (let i = 0; i < this.stackList.length; i++) {
+  const tab = XmlWriter.createElement(xmlDoc, "tab");
+  //XmlWriter.setAttribute(tab,"name",this.name);
+  XmlWriter.setAttribute(tab, "x", this.scrollX);
+  XmlWriter.setAttribute(tab, "y", this.scrollY);
+  XmlWriter.setAttribute(tab, "zoom", this.zoomFactor);
+  const stacks = XmlWriter.createElement(xmlDoc, "stacks");
+  for (let i = 0; i < this.stackList.length; i++) {
     var stack;
     if (skipStartBlock && this.stackList[i].firstBlock.isStartBlock) {
       stack = this.stackList[i].createXml(xmlDoc, true);
     } else {
       stack = this.stackList[i].createXml(xmlDoc);
     }
-		if (stack != null) { stacks.appendChild(stack); }
-	}
-	tab.appendChild(stacks);
+    if (stack != null) {
+      stacks.appendChild(stack);
+    }
+  }
+  tab.appendChild(stacks);
   const comments = XmlWriter.createElement(xmlDoc, "comments")
   for (let i = 0; i < this.commentList.length; i++) {
     let comment = this.commentList[i].createXml(xmlDoc)
     comments.appendChild(comment)
   }
   tab.appendChild(comments);
-	return tab;
+  return tab;
 };
 
 /**
@@ -501,21 +509,21 @@ Tab.prototype.createXml = function(xmlDoc, skipStartBlock) {
  * @return {Tab}
  */
 Tab.importXml = function(tabNode) {
-	const x = XmlWriter.getAttribute(tabNode, "x", 0, true);
-	const y = XmlWriter.getAttribute(tabNode, "y", 0, true);
-	const zoom = XmlWriter.getAttribute(tabNode, "zoom", 1, true);
-	const tab = new Tab();
-	tab.scrollX = x;
-	tab.scrollY = y;
-	tab.zoomFactor = zoom;
-	tab.updateTransform();
-	const stacksNode = XmlWriter.findSubElement(tabNode, "stacks");
-	if (stacksNode != null) {
-		const stackNodes = XmlWriter.findSubElements(stacksNode, "stack");
-		for (let i = 0; i < stackNodes.length; i++) {
-			BlockStack.importXml(stackNodes[i], tab);
-		}
-	}
+  const x = XmlWriter.getAttribute(tabNode, "x", 0, true);
+  const y = XmlWriter.getAttribute(tabNode, "y", 0, true);
+  const zoom = XmlWriter.getAttribute(tabNode, "zoom", 1, true);
+  const tab = new Tab();
+  tab.scrollX = x;
+  tab.scrollY = y;
+  tab.zoomFactor = zoom;
+  tab.updateTransform();
+  const stacksNode = XmlWriter.findSubElement(tabNode, "stacks");
+  if (stacksNode != null) {
+    const stackNodes = XmlWriter.findSubElements(stacksNode, "stack");
+    for (let i = 0; i < stackNodes.length; i++) {
+      BlockStack.importXml(stackNodes[i], tab);
+    }
+  }
   const commentsNode = XmlWriter.findSubElement(tabNode, "comments");
   if (commentsNode != null) {
     const commentNodes = XmlWriter.findSubElements(commentsNode, "comment");
@@ -523,16 +531,16 @@ Tab.importXml = function(tabNode) {
       Comment.importXml(commentNodes[i], tab)
     }
   }
-	tab.updateArrows();
-	return tab;
+  tab.updateArrows();
+  return tab;
 };
 
 /**
  * Removes the tab
  */
 Tab.prototype.delete = function() {
-	this.passRecursively("remove");
-	this.mainG.remove();
+  this.passRecursively("remove");
+  this.mainG.remove();
 };
 
 /**
@@ -548,20 +556,22 @@ Tab.prototype.undoDelete = function(stackNode) {
     return this.undoDeleteComment(stackNode);
   }
 
-	// The position is randomized slightly to make multiple undos look like a "pile" of blocks, so all are visible
-	const xMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
-	const yMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
+  // The position is randomized slightly to make multiple undos look like a "pile" of blocks, so all are visible
+  const xMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
+  const yMargin = TabManager.undoDeleteMarginRand * Math.random() + TabManager.undoDeleteMarginBase;
 
-	var x = this.absToRelX(xMargin + BlockPalette.width);
-  if (FinchBlox) { x = this.absToRelX(xMargin); }
-	const y = this.absToRelY(yMargin + TitleBar.height);
-	const stack = BlockStack.importXml(stackNode, this);
-	if (stack == null) {
-		return false;
-	}
-	stack.move(x, y);
-	this.updateArrows();
-	return true;
+  var x = this.absToRelX(xMargin + BlockPalette.width);
+  if (FinchBlox) {
+    x = this.absToRelX(xMargin);
+  }
+  const y = this.absToRelY(yMargin + TitleBar.height);
+  const stack = BlockStack.importXml(stackNode, this);
+  if (stack == null) {
+    return false;
+  }
+  stack.move(x, y);
+  this.updateArrows();
+  return true;
 };
 
 /**
@@ -571,14 +581,16 @@ Tab.prototype.undoDelete = function(stackNode) {
 Tab.prototype.undoDeleteTab = function(tabNode) {
   var success = false;
   const stacksNode = XmlWriter.findSubElement(tabNode, "stacks");
-	if (stacksNode != null) {
-		const stackNodes = XmlWriter.findSubElements(stacksNode, "stack");
-    if (stackNodes.length != 0) { success = true; }
-		for (let i = 0; i < stackNodes.length; i++) {
-			const result = this.undoDelete(stackNodes[i]);
+  if (stacksNode != null) {
+    const stackNodes = XmlWriter.findSubElements(stacksNode, "stack");
+    if (stackNodes.length != 0) {
+      success = true;
+    }
+    for (let i = 0; i < stackNodes.length; i++) {
+      const result = this.undoDelete(stackNodes[i]);
       success = success && result;
-		}
-	}
+    }
+  }
   return success;
 }
 
@@ -593,12 +605,12 @@ Tab.prototype.undoDeleteComment = function(commentNode) {
  * @return {number}
  */
 Tab.prototype.countDevicesInUse = function(deviceClass) {
-	let largest = 0;
-	const stacks = this.stackList;
-	for (let i = 0; i < stacks.length; i++) {
-		largest = Math.max(largest, stacks[i].countDevicesInUse(deviceClass));
-	}
-	return largest;
+  let largest = 0;
+  const stacks = this.stackList;
+  for (let i = 0; i < stacks.length; i++) {
+    largest = Math.max(largest, stacks[i].countDevicesInUse(deviceClass));
+  }
+  return largest;
 };
 
 /**
@@ -606,8 +618,8 @@ Tab.prototype.countDevicesInUse = function(deviceClass) {
  * @param {string} message - The message to send.  Probably a function in the target object
  */
 Tab.prototype.passRecursivelyDown = function(message) {
-	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
-	this.passRecursively.apply(this, arguments);
+  Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+  this.passRecursively.apply(this, arguments);
 };
 
 /**
@@ -615,16 +627,16 @@ Tab.prototype.passRecursivelyDown = function(message) {
  * @param {function} functionName - The name of the function to call
  */
 Tab.prototype.passRecursively = function(functionName) {
-	const args = Array.prototype.slice.call(arguments, 1);
-	const stacks = this.stackList;
-	for (let i = 0; i < stacks.length; i++) {
-		const currentStack = stacks[i];
-		const currentL = stacks.length;
-		currentStack[functionName].apply(currentStack, args);
-		if (currentL !== stacks.length) {
-			i--;
-		}
-	}
+  const args = Array.prototype.slice.call(arguments, 1);
+  const stacks = this.stackList;
+  for (let i = 0; i < stacks.length; i++) {
+    const currentStack = stacks[i];
+    const currentL = stacks.length;
+    currentStack[functionName].apply(currentStack, args);
+    if (currentL !== stacks.length) {
+      i--;
+    }
+  }
 };
 
 /**
@@ -632,27 +644,27 @@ Tab.prototype.passRecursively = function(functionName) {
  * @return {number}
  */
 Tab.prototype.getZoom = function() {
-	return this.zoomFactor;
+  return this.zoomFactor;
 };
 
 /**
  * Updates the UI for the new zoom level
  */
 Tab.prototype.updateZoom = function() {
-	this.overFlowArr.updateZoom();
-	this.updateArrows();
+  this.overFlowArr.updateZoom();
+  this.updateArrows();
 };
 
 /**
  * Makes the arrows appear/disappear depending on the size/position of the canvas
  */
 Tab.prototype.updateArrows = function() {
-	this.updateTabDim();
-	const x1 = this.relToAbsX(this.dim.x1);
-	const y1 = this.relToAbsY(this.dim.y1);
-	const x2 = this.relToAbsX(this.dim.x2);
-	const y2 = this.relToAbsY(this.dim.y2);
-	this.overFlowArr.setArrows(x1, x2, y1, y2);
+  this.updateTabDim();
+  const x1 = this.relToAbsX(this.dim.x1);
+  const y1 = this.relToAbsY(this.dim.y1);
+  const x2 = this.relToAbsX(this.dim.x2);
+  const y2 = this.relToAbsY(this.dim.y2);
+  this.overFlowArr.setArrows(x1, x2, y1, y2);
 };
 
 /**
@@ -660,9 +672,9 @@ Tab.prototype.updateArrows = function() {
  * and the Blocks have not changed
  */
 Tab.prototype.updateArrowsShift = function() {
-	const x1 = this.relToAbsX(this.dim.x1);
-	const y1 = this.relToAbsY(this.dim.y1);
-	const x2 = this.relToAbsX(this.dim.x2);
-	const y2 = this.relToAbsY(this.dim.y2);
-	this.overFlowArr.setArrows(x1, x2, y1, y2);
+  const x1 = this.relToAbsX(this.dim.x1);
+  const y1 = this.relToAbsY(this.dim.y1);
+  const x2 = this.relToAbsX(this.dim.x2);
+  const y2 = this.relToAbsY(this.dim.y2);
+  this.overFlowArr.setArrows(x1, x2, y1, y2);
 };

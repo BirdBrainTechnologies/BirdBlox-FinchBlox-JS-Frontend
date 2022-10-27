@@ -9,20 +9,20 @@
  * @constructor
  */
 function BlockIcon(parent, pathId, color, altText, height, rotation) {
-	DebugOptions.validateNonNull(parent, pathId, color, altText);
-	DebugOptions.validateNumbers(height);
-	this.pathId = pathId;
-	this.color = color;
-	this.altText = altText;
-	this.width = VectorIcon.computeWidth(pathId, height);
-	this.height = height;
-	this.x = 0;
-	this.y = 0;
-	this.parent = parent;
-	this.icon = new VectorIcon(0, 0, pathId, color, height, this.parent.group, false, rotation);
-	TouchReceiver.addListenersChild(this.icon.pathE, this.parent);
-	this.isSlot = false;
-	this.xOffset = 0;
+  DebugOptions.validateNonNull(parent, pathId, color, altText);
+  DebugOptions.validateNumbers(height);
+  this.pathId = pathId;
+  this.color = color;
+  this.altText = altText;
+  this.width = VectorIcon.computeWidth(pathId, height);
+  this.height = height;
+  this.x = 0;
+  this.y = 0;
+  this.parent = parent;
+  this.icon = new VectorIcon(0, 0, pathId, color, height, this.parent.group, false, rotation);
+  TouchReceiver.addListenersChild(this.icon.pathE, this.parent);
+  this.isSlot = false;
+  this.xOffset = 0;
 }
 BlockIcon.prototype = Object.create(BlockPart.prototype);
 BlockIcon.prototype.constructor = BlockIcon;
@@ -33,9 +33,9 @@ BlockIcon.prototype.constructor = BlockIcon;
  * @return {number} - The width of the icon, indicating how much the next item should be shifted over.
  */
 BlockIcon.prototype.updateAlign = function(x, y) {
-	DebugOptions.validateNumbers(x, y);
-	this.move(x, y - this.height / 2);
-	return this.width;
+  DebugOptions.validateNumbers(x, y);
+  this.move(x, y - this.height / 2);
+  return this.width;
 };
 
 /**
@@ -51,22 +51,22 @@ BlockIcon.prototype.updateDim = function() {
  * @param {number} y
  */
 BlockIcon.prototype.move = function(x, y) {
-	DebugOptions.validateNumbers(x, y);
-	this.x = x;
-	this.y = y;
-	this.icon.move(x + this.xOffset, y);
-	if (this.textE != null){
-		GuiElements.move.text(this.textE, this.x + this.textXOffset, this.y + this.textYOffset);
-	}
-	if (this.negateG != null){
-		GuiElements.move.group(this.negateG, this.x, this.y);
-	}
-	if (this.icon2 != null){
-		this.icon2.move(x + this.icon2xOffset, y + this.icon2yOffset);
-	}
-	if (this.obstacle != null){
-		GuiElements.move.element(this.obstacle, this.x + this.xOffset, this.y);
-	}
+  DebugOptions.validateNumbers(x, y);
+  this.x = x;
+  this.y = y;
+  this.icon.move(x + this.xOffset, y);
+  if (this.textE != null) {
+    GuiElements.move.text(this.textE, this.x + this.textXOffset, this.y + this.textYOffset);
+  }
+  if (this.negateG != null) {
+    GuiElements.move.group(this.negateG, this.x, this.y);
+  }
+  if (this.icon2 != null) {
+    this.icon2.move(x + this.icon2xOffset, y + this.icon2yOffset);
+  }
+  if (this.obstacle != null) {
+    GuiElements.move.element(this.obstacle, this.x + this.xOffset, this.y);
+  }
 };
 
 /**
@@ -74,7 +74,7 @@ BlockIcon.prototype.move = function(x, y) {
  * @return {string}
  */
 BlockIcon.prototype.textSummary = function() {
-	return this.altText;
+  return this.altText;
 };
 
 /**
@@ -85,27 +85,33 @@ BlockIcon.prototype.textSummary = function() {
  * @param {number} height - height of the second icon
  * @param {number} margin - space between icons
  */
-BlockIcon.prototype.addSecondIcon = function(pathId, color, centerBelow, height, margin){
-	if (centerBelow == null) { centerBelow = false; }
-	if (height == null) { height = this.height; }
-	if (margin == null) { margin = 0; }
-	if (centerBelow) {
+BlockIcon.prototype.addSecondIcon = function(pathId, color, centerBelow, height, margin) {
+  if (centerBelow == null) {
+    centerBelow = false;
+  }
+  if (height == null) {
+    height = this.height;
+  }
+  if (margin == null) {
+    margin = 0;
+  }
+  if (centerBelow) {
     const w = VectorIcon.computeWidth(pathId, height);
-		if (w > this.width) {
-			this.xOffset = w/2 - this.width/2;
-			this.icon2xOffset = 0;
-			this.width = w;
-		} else {
-			this.icon2xOffset = this.width/2 - w/2;
-		}
+    if (w > this.width) {
+      this.xOffset = w / 2 - this.width / 2;
+      this.icon2xOffset = 0;
+      this.width = w;
+    } else {
+      this.icon2xOffset = this.width / 2 - w / 2;
+    }
     this.icon2yOffset = this.height + margin;
-		this.height += height + margin;
-		this.icon2 = new VectorIcon(0, 0, pathId, color, height, this.parent.group);
-		TouchReceiver.addListenersChild(this.icon2.pathE, this.parent);
+    this.height += height + margin;
+    this.icon2 = new VectorIcon(0, 0, pathId, color, height, this.parent.group);
+    TouchReceiver.addListenersChild(this.icon2.pathE, this.parent);
   } else {
-		this.icon.addSecondPath(pathId, color, centerBelow);
-		TouchReceiver.addListenersChild(this.icon.pathE2, this.parent);
-	}
+    this.icon.addSecondPath(pathId, color, centerBelow);
+    TouchReceiver.addListenersChild(this.icon.pathE2, this.parent);
+  }
 }
 
 /**
@@ -114,82 +120,82 @@ BlockIcon.prototype.addSecondIcon = function(pathId, color, centerBelow, height,
  * @param {string} text - Text to add
  */
 BlockIcon.prototype.addText = function(text, xOffset, yOffset) {
-	if (this.textE != null) {
-		this.parent.group.removeChild(this.textE);
-	}
-	
-	const font = Font.uiFont(28);
-	//this.textXOffset = 12;
-	//this.textYOffset = 30 + font.charHeight/2;
-	this.textXOffset = xOffset;
-	this.textYOffset = yOffset + font.charHeight/2;
-	const x = this.x + this.textXOffset;
-	const y = this.y + this.textYOffset;
+  if (this.textE != null) {
+    this.parent.group.removeChild(this.textE);
+  }
 
-	this.textE = GuiElements.draw.text(x, y, text, font, this.color);
-	this.parent.group.appendChild(this.textE);
-	TouchReceiver.addListenersChild(this.textE, this.parent);
+  const font = Font.uiFont(28);
+  //this.textXOffset = 12;
+  //this.textYOffset = 30 + font.charHeight/2;
+  this.textXOffset = xOffset;
+  this.textYOffset = yOffset + font.charHeight / 2;
+  const x = this.x + this.textXOffset;
+  const y = this.y + this.textYOffset;
 
-	const textHeight = GuiElements.measure.textHeight(this.textE);
-	const textWidth = GuiElements.measure.textWidth(this.textE);
-	this.height = this.textYOffset;
-	this.width = this.textXOffset + textWidth;
-	//console.log("BlockIcon addText " + x + ", " + y + "; " + this.height + " " + this.width);
+  this.textE = GuiElements.draw.text(x, y, text, font, this.color);
+  this.parent.group.appendChild(this.textE);
+  TouchReceiver.addListenersChild(this.textE, this.parent);
+
+  const textHeight = GuiElements.measure.textHeight(this.textE);
+  const textWidth = GuiElements.measure.textWidth(this.textE);
+  this.height = this.textYOffset;
+  this.width = this.textXOffset + textWidth;
+  //console.log("BlockIcon addText " + x + ", " + y + "; " + this.height + " " + this.width);
 }
 
 /**
  * Add a white rounded rectangle background behind the icon
  */
 BlockIcon.prototype.addBackgroundRect = function() {
-	this.icon.addBackgroundRect();
-	TouchReceiver.addListenersChild(this.icon.bgRect, this.parent);
+  this.icon.addBackgroundRect();
+  TouchReceiver.addListenersChild(this.icon.bgRect, this.parent);
 }
 
 /**
-	* Add a circle with a slash over the icon
-	* @param color - color of the circle and slash
-	*/
+ * Add a circle with a slash over the icon
+ * @param color - color of the circle and slash
+ */
 BlockIcon.prototype.negate = function(color) {
-	this.negateG = GuiElements.create.group(this.x, this.y, this.parent.group);
-	const cr = this.width/2;//(2*this.scaleX);
-	const cx = this.x + cr;
-	const cy = this.y + cr;
-	const circle = GuiElements.draw.circle(cx, cy, cr, "none", this.negateG);
-	GuiElements.update.stroke(circle, color, 3);
+  this.negateG = GuiElements.create.group(this.x, this.y, this.parent.group);
+  const cr = this.width / 2; //(2*this.scaleX);
+  const cx = this.x + cr;
+  const cy = this.y + cr;
+  const circle = GuiElements.draw.circle(cx, cy, cr, "none", this.negateG);
+  GuiElements.update.stroke(circle, color, 3);
 
-	const slash = GuiElements.create.path(this.negateG);
-	let slashPath = "M " + (cx + cr*Math.cos(315 * Math.PI/180)) + ",";
-	slashPath += (cy + cr*Math.sin(315 * Math.PI/180));
-	slashPath += " L " + (cx + cr*Math.cos(135 * Math.PI/180)) + ",";
-	slashPath += (cy + cr*Math.sin(135 * Math.PI/180));
-	slash.setAttributeNS(null, "d", slashPath);
-	GuiElements.update.stroke(slash, color, 3);
+  const slash = GuiElements.create.path(this.negateG);
+  let slashPath = "M " + (cx + cr * Math.cos(315 * Math.PI / 180)) + ",";
+  slashPath += (cy + cr * Math.sin(315 * Math.PI / 180));
+  slashPath += " L " + (cx + cr * Math.cos(135 * Math.PI / 180)) + ",";
+  slashPath += (cy + cr * Math.sin(135 * Math.PI / 180));
+  slash.setAttributeNS(null, "d", slashPath);
+  GuiElements.update.stroke(slash, color, 3);
 }
 
 /**
-	* Add a rectangular obstacle above the icon
-	* @param color - color of the rectangle
-	*/
+ * Add a rectangular obstacle above the icon
+ * @param color - color of the rectangle
+ */
 BlockIcon.prototype.addObstacle = function(color) {
 
-	const w = 30;//40;//60;
-	const o = 5;//10;
-	const h = 7;//11;
-	const r = 1.5;//2;
-	const margin = 5;
-	if (w > this.width) {
-		this.xOffset = 0;
-		this.icon2xOffset = w/2 - this.width/2;
-		this.width = w;
-	} else {
-		this.xOffset = this.width/2 - w/2;
-	}
-	this.xOffset -= o;
-	this.icon2yOffset = h + margin;
-	this.height += h + margin;
-	this.icon2 = this.icon;
+  const w = 30; //40;//60;
+  const o = 5; //10;
+  const h = 7; //11;
+  const r = 1.5; //2;
+  const margin = 5;
+  if (w > this.width) {
+    this.xOffset = 0;
+    this.icon2xOffset = w / 2 - this.width / 2;
+    this.width = w;
+  } else {
+    this.xOffset = this.width / 2 - w / 2;
+  }
+  this.xOffset -= o;
+  this.icon2yOffset = h + margin;
+  this.height += h + margin;
+  this.icon2 = this.icon;
 
-	this.obstacle = GuiElements.draw.rect((-o), 0, w+2*o, h, color, r, r);
-	this.parent.group.appendChild(this.obstacle);
-	TouchReceiver.addListenersChild(this.obstacle, this.parent);
+  this.obstacle = GuiElements.draw.rect((-o), 0, w + 2 * o, h, color, r, r);
+  this.parent.group.appendChild(this.obstacle);
+  TouchReceiver.addListenersChild(this.obstacle, this.parent);
 }

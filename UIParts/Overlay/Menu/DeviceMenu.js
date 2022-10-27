@@ -5,48 +5,48 @@
  * @constructor
  */
 function DeviceMenu(button) {
-	Menu.call(this, button, DeviceMenu.width);
-	this.addAlternateFn(function() {
-		// If more than one device is connected, the connect multiple dialog is used instead
-		ConnectMultipleDialog.showDialog();
-	});
+  Menu.call(this, button, DeviceMenu.width);
+  this.addAlternateFn(function() {
+    // If more than one device is connected, the connect multiple dialog is used instead
+    ConnectMultipleDialog.showDialog();
+  });
 }
 DeviceMenu.prototype = Object.create(Menu.prototype);
 DeviceMenu.prototype.constructor = ViewMenu;
 
 DeviceMenu.setGraphics = function() {
-	DeviceMenu.width = 150;
-	DeviceMenu.maxDeviceNameChars = 8;
+  DeviceMenu.width = 150;
+  DeviceMenu.maxDeviceNameChars = 8;
 };
 
 /**
  * @inheritDoc
  */
 DeviceMenu.prototype.loadOptions = function() {
-	let connectedClass = null;
-	Device.getTypeList().forEach(function(deviceClass) {
-		/* The menu only shows up if no more than 1 device is connected. So if a DeviceManager has at least one device
-		 * is it the connectedClass */
-		let deviceManager = deviceClass.getManager();
-		const statuses = DeviceManager.statuses;
-		if (deviceManager.getDeviceCount() > 0 ) {
-			connectedClass = deviceClass;
-		}
-	});
-	if (connectedClass != null) {
-		// If there is a device connected, we add an option to display firmware info about the device
-		this.addDeviceOption(connectedClass);
-		// And we add an option to disconnect from it.
-		this.addOption(Language.getStr("Disconnect_Device"), function() {
-			connectedClass.getManager().removeAllDevices();
-		});
-	} else {
-        this.addOption(Language.getStr("Connect_Device"), function() {
-            (new DiscoverDialog(DeviceHummingbirdBit)).show();
-        });
-	}
-	// Regardless, we provide an option to connect to every type of device
-	this.addOption(Language.getStr("Connect_Multiple"), ConnectMultipleDialog.showDialog);
+  let connectedClass = null;
+  Device.getTypeList().forEach(function(deviceClass) {
+    /* The menu only shows up if no more than 1 device is connected. So if a DeviceManager has at least one device
+     * is it the connectedClass */
+    let deviceManager = deviceClass.getManager();
+    const statuses = DeviceManager.statuses;
+    if (deviceManager.getDeviceCount() > 0) {
+      connectedClass = deviceClass;
+    }
+  });
+  if (connectedClass != null) {
+    // If there is a device connected, we add an option to display firmware info about the device
+    this.addDeviceOption(connectedClass);
+    // And we add an option to disconnect from it.
+    this.addOption(Language.getStr("Disconnect_Device"), function() {
+      connectedClass.getManager().removeAllDevices();
+    });
+  } else {
+    this.addOption(Language.getStr("Connect_Device"), function() {
+      (new DiscoverDialog(DeviceHummingbirdBit)).show();
+    });
+  }
+  // Regardless, we provide an option to connect to every type of device
+  this.addOption(Language.getStr("Connect_Multiple"), ConnectMultipleDialog.showDialog);
 };
 
 /**
@@ -55,22 +55,22 @@ DeviceMenu.prototype.loadOptions = function() {
  * @param connectedClass - Subclass of Device
  */
 DeviceMenu.prototype.addDeviceOption = function(connectedClass) {
-	const device = connectedClass.getManager().getDevice(0);
-	const status = device.getFirmwareStatus();
-	const statuses = Device.firmwareStatuses;
-	let icon = null;
-	let color = null;
-	if (status === statuses.old) {
-		// If the firmware is old but usable, a yellow icon is used
-		icon = VectorPaths.warning;
-		color = DeviceStatusLight.yellowColor;
-	} else if (status === statuses.incompatible) {
-		// If the firmware is not usable, a red icon is used
-		icon = VectorPaths.warning;
-		color = DeviceStatusLight.redColor;
-	}
-	//this.addOption("", device.showFirmwareInfo.bind(device), false, this.createAddIconToBnFn(icon, device.name, color));
-	this.addOption("", null, false, this.createAddIconToBnFn(icon, device.name, color));
+  const device = connectedClass.getManager().getDevice(0);
+  const status = device.getFirmwareStatus();
+  const statuses = Device.firmwareStatuses;
+  let icon = null;
+  let color = null;
+  if (status === statuses.old) {
+    // If the firmware is old but usable, a yellow icon is used
+    icon = VectorPaths.warning;
+    color = DeviceStatusLight.yellowColor;
+  } else if (status === statuses.incompatible) {
+    // If the firmware is not usable, a red icon is used
+    icon = VectorPaths.warning;
+    color = DeviceStatusLight.redColor;
+  }
+  //this.addOption("", device.showFirmwareInfo.bind(device), false, this.createAddIconToBnFn(icon, device.name, color));
+  this.addOption("", null, false, this.createAddIconToBnFn(icon, device.name, color));
 };
 
 /**
@@ -79,11 +79,11 @@ DeviceMenu.prototype.addDeviceOption = function(connectedClass) {
  * @return {boolean}
  */
 DeviceMenu.prototype.previewOpen = function() {
-	let connectionCount = 0;
-	Device.getTypeList().forEach(function(deviceClass) {
-		connectionCount += deviceClass.getManager().getDeviceCount();
-	});
-	return (connectionCount <= 1);
+  let connectionCount = 0;
+  Device.getTypeList().forEach(function(deviceClass) {
+    connectionCount += deviceClass.getManager().getDeviceCount();
+  });
+  return (connectionCount <= 1);
 };
 
 /**
@@ -94,12 +94,12 @@ DeviceMenu.prototype.previewOpen = function() {
  * @return {function} - type (Button) -> (), a function to format the provided button with the specified icon and text
  */
 DeviceMenu.prototype.createAddIconToBnFn = function(pathId, text, color) {
-	if (pathId == null) {
-		return function(bn) {
-			bn.addText(text);
-		}
-	}
-	return function(bn) {
-		bn.addSideTextAndIcon(pathId, null, text, null, null, null, null, null, color, true, false);
-	}
+  if (pathId == null) {
+    return function(bn) {
+      bn.addText(text);
+    }
+  }
+  return function(bn) {
+    bn.addSideTextAndIcon(pathId, null, text, null, null, null, null, null, color, true, false);
+  }
 };

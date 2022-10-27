@@ -5,7 +5,7 @@
  * @constructor
  */
 function InputWidget() {
-	DebugOptions.markAbstract();
+  DebugOptions.markAbstract();
 }
 
 /**
@@ -20,19 +20,19 @@ function InputWidget() {
  * @param {Data} data - The initial Data stored in the Slot
  */
 InputWidget.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
-	this.x = x;
-	this.y = y;
-	this.slotShape = slotShape;
-	this.updateFn = updateFn;
-	this.finishFn = finishFn;
-	this.overlay = overlay;
+  this.x = x;
+  this.y = y;
+  this.slotShape = slotShape;
+  this.updateFn = updateFn;
+  this.finishFn = finishFn;
+  this.overlay = overlay;
 };
 
 /**
  * Called by the InputPad to compute the size of the Widget.  Results stored in this.width and this.height
  */
 InputWidget.prototype.updateDim = function() {
-	DebugOptions.markAbstract();
+  DebugOptions.markAbstract();
 };
 
 /**
@@ -47,7 +47,7 @@ InputWidget.prototype.close = function() {
  * @return {boolean}
  */
 InputWidget.prototype.fixedHeight = function() {
-	return true;
+  return true;
 };
 
 /**

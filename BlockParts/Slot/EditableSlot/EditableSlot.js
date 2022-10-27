@@ -11,22 +11,22 @@
  * @constructor
  */
 function EditableSlot(parent, key, inputType, snapType, outputType, data) {
-	Slot.call(this, parent, key, snapType, outputType);
-	this.inputType = inputType;
-	this.enteredData = data;
-	this.editing = false;
-	//TODO: make the slotShape be an extra argument
+  Slot.call(this, parent, key, snapType, outputType);
+  this.inputType = inputType;
+  this.enteredData = data;
+  this.editing = false;
+  //TODO: make the slotShape be an extra argument
 }
 EditableSlot.prototype = Object.create(Slot.prototype);
 EditableSlot.prototype.constructor = EditableSlot;
 
 EditableSlot.setConstants = function() {
-	/* The type of Data that can be directly entered into the Slot. */
-	EditableSlot.inputTypes = {};
-	EditableSlot.inputTypes.any = 0;
-	EditableSlot.inputTypes.num = 1;
-	EditableSlot.inputTypes.string = 2;
-	EditableSlot.inputTypes.select = 3;
+  /* The type of Data that can be directly entered into the Slot. */
+  EditableSlot.inputTypes = {};
+  EditableSlot.inputTypes.any = 0;
+  EditableSlot.inputTypes.num = 1;
+  EditableSlot.inputTypes.string = 2;
+  EditableSlot.inputTypes.select = 3;
 };
 
 /**
@@ -34,37 +34,37 @@ EditableSlot.setConstants = function() {
  * @param {boolean} updateDim - Should the Stack be told to update after this?
  */
 EditableSlot.prototype.changeText = function(text, updateDim) {
-	this.slotShape.changeText(text);
-	if (updateDim && this.parent.stack != null) {
-		this.parent.stack.updateDim(); //Update dimensions.
-	}
+  this.slotShape.changeText(text);
+  if (updateDim && this.parent.stack != null) {
+    this.parent.stack.updateDim(); //Update dimensions.
+  }
 };
 
 /**
  * Tells the Slot to display an InputSystem so it can be edited. Also sets the slotShape to appear selected
  */
 EditableSlot.prototype.edit = function() {
-	DebugOptions.assert(!this.hasChild);
-	if (!this.editing) {
-		this.editing = true;
-		this.slotShape.select();
-		const inputSys = this.createInputSystem();
-		inputSys.show(this.slotShape, this.updateEdit.bind(this), this.finishEdit.bind(this), this.enteredData);
-	}
+  DebugOptions.assert(!this.hasChild);
+  if (!this.editing) {
+    this.editing = true;
+    this.slotShape.select();
+    const inputSys = this.createInputSystem();
+    inputSys.show(this.slotShape, this.updateEdit.bind(this), this.finishEdit.bind(this), this.enteredData);
+  }
 };
 
 /**
  * @inheritDoc
  */
 EditableSlot.prototype.onTap = function() {
-	this.edit();
+  this.edit();
 };
 
 /**
  * Generates and displays an interface to modify the Slot's value
  */
 EditableSlot.prototype.createInputSystem = function() {
-	DebugOptions.markAbstract();
+  DebugOptions.markAbstract();
 };
 
 /**
@@ -73,13 +73,13 @@ EditableSlot.prototype.createInputSystem = function() {
  * @param {string} [visibleText] - The text the Slot should display as its value. Should correspond to Data.
  */
 EditableSlot.prototype.updateEdit = function(data, visibleText) {
-	DebugOptions.assert(this.editing);
-	if (visibleText == null) {
-		visibleText = this.dataToString(data);
-	}
-	this.enteredData = data;
-	this.changeText(visibleText, true);
-	SaveManager.markEdited();
+  DebugOptions.assert(this.editing);
+  if (visibleText == null) {
+    visibleText = this.dataToString(data);
+  }
+  this.enteredData = data;
+  this.changeText(visibleText, true);
+  SaveManager.markEdited();
 };
 
 /**
@@ -87,13 +87,13 @@ EditableSlot.prototype.updateEdit = function(data, visibleText) {
  * @param {Data} data - The Data the Slot should be set to
  */
 EditableSlot.prototype.finishEdit = function(data) {
-	DebugOptions.assert(this.editing);
-	if (this.editing) {
-		this.setData(data, true, true); //Sanitize data, updateDims
-		this.slotShape.deselect();
-		this.editing = false;
-		SaveManager.markEdited();
-	}
+  DebugOptions.assert(this.editing);
+  if (this.editing) {
+    this.setData(data, true, true); //Sanitize data, updateDims
+    this.slotShape.deselect();
+    this.editing = false;
+    SaveManager.markEdited();
+  }
 };
 
 /**
@@ -101,7 +101,7 @@ EditableSlot.prototype.finishEdit = function(data) {
  * @return {boolean}
  */
 EditableSlot.prototype.isEditing = function() {
-	return this.editing;
+  return this.editing;
 };
 
 /**
@@ -111,12 +111,12 @@ EditableSlot.prototype.isEditing = function() {
  * @param {boolean} updateDim - indicates if the Stack should updateDim after this
  */
 EditableSlot.prototype.setData = function(data, sanitize, updateDim) {
-	if (sanitize) {
-		data = this.sanitizeData(data);
-	}
-	if (data == null) return;
-	this.enteredData = data;
-	this.changeText(this.dataToString(this.enteredData), updateDim);
+  if (sanitize) {
+    data = this.sanitizeData(data);
+  }
+  if (data == null) return;
+  this.enteredData = data;
+  this.changeText(this.dataToString(this.enteredData), updateDim);
 };
 
 /**
@@ -125,7 +125,7 @@ EditableSlot.prototype.setData = function(data, sanitize, updateDim) {
  * @return {string}
  */
 EditableSlot.prototype.dataToString = function(data) {
-	return data.asString().getValue();
+  return data.asString().getValue();
 };
 
 /**
@@ -136,20 +136,20 @@ EditableSlot.prototype.dataToString = function(data) {
  * @return {Data|null} - The sanitized Data or null if the Data cannot be sanitized
  */
 EditableSlot.prototype.sanitizeData = function(data) {
-	if (data == null) return null;
-	const inputTypes = EditableSlot.inputTypes;
-	// Only valid Data of the correct type is allowed
-	if (this.inputType === inputTypes.string) {
-		data = data.asString();
-	} else if (this.inputType === inputTypes.num) {
-		data = data.asNum();
-	} else if (this.inputType === inputTypes.select) {
-		data = data.asSelection();
-	}
-	if (data.isValid) {
-		return data;
-	}
-	return null;
+  if (data == null) return null;
+  const inputTypes = EditableSlot.inputTypes;
+  // Only valid Data of the correct type is allowed
+  if (this.inputType === inputTypes.string) {
+    data = data.asString();
+  } else if (this.inputType === inputTypes.num) {
+    data = data.asNum();
+  } else if (this.inputType === inputTypes.select) {
+    data = data.asSelection();
+  }
+  if (data.isValid) {
+    return data;
+  }
+  return null;
 };
 
 /**
@@ -157,11 +157,11 @@ EditableSlot.prototype.sanitizeData = function(data) {
  * @return {string}
  */
 EditableSlot.prototype.textSummary = function() {
-	let result = "...";
-	if (!this.hasChild) { //If it has a child, just use an ellipsis.
-		result = this.dataToString(this.enteredData);
-	}
-	return this.formatTextSummary(result);
+  let result = "...";
+  if (!this.hasChild) { //If it has a child, just use an ellipsis.
+    result = this.dataToString(this.enteredData);
+  }
+  return this.formatTextSummary(result);
 };
 
 /**
@@ -170,7 +170,7 @@ EditableSlot.prototype.textSummary = function() {
  * @return {string}
  */
 EditableSlot.prototype.formatTextSummary = function(textSummary) {
-	DebugOptions.markAbstract();
+  DebugOptions.markAbstract();
 };
 
 /**
@@ -178,7 +178,7 @@ EditableSlot.prototype.formatTextSummary = function(textSummary) {
  * @return {Data} - The Data stored in the Slot
  */
 EditableSlot.prototype.getDataNotFromChild = function() {
-	return this.enteredData;
+  return this.enteredData;
 };
 
 /**
@@ -188,11 +188,11 @@ EditableSlot.prototype.getDataNotFromChild = function() {
  * @return {Node}
  */
 EditableSlot.prototype.createXml = function(xmlDoc) {
-	let slot = Slot.prototype.createXml.call(this, xmlDoc);
-	let enteredData = XmlWriter.createElement(xmlDoc, "enteredData");
-	enteredData.appendChild(this.enteredData.createXml(xmlDoc));
-	slot.appendChild(enteredData);
-	return slot;
+  let slot = Slot.prototype.createXml.call(this, xmlDoc);
+  let enteredData = XmlWriter.createElement(xmlDoc, "enteredData");
+  enteredData.appendChild(this.enteredData.createXml(xmlDoc));
+  slot.appendChild(enteredData);
+  return slot;
 };
 
 /**
@@ -201,16 +201,16 @@ EditableSlot.prototype.createXml = function(xmlDoc) {
  * @return {EditableSlot}
  */
 EditableSlot.prototype.importXml = function(slotNode) {
-	Slot.prototype.importXml.call(this, slotNode);
-	const enteredDataNode = XmlWriter.findSubElement(slotNode, "enteredData");
-	const dataNode = XmlWriter.findSubElement(enteredDataNode, "data");
-	if (dataNode != null) {
-		const data = Data.importXml(dataNode);
-		if (data != null) {
-			this.setData(data, true, false);
-		}
-	}
-	return this;
+  Slot.prototype.importXml.call(this, slotNode);
+  const enteredDataNode = XmlWriter.findSubElement(slotNode, "enteredData");
+  const dataNode = XmlWriter.findSubElement(enteredDataNode, "data");
+  if (dataNode != null) {
+    const data = Data.importXml(dataNode);
+    if (data != null) {
+      this.setData(data, true, false);
+    }
+  }
+  return this;
 };
 
 /**
@@ -218,8 +218,8 @@ EditableSlot.prototype.importXml = function(slotNode) {
  * @param {EditableSlot} slot
  */
 EditableSlot.prototype.copyFrom = function(slot) {
-	Slot.prototype.copyFrom.call(this, slot);
-	this.setData(slot.enteredData, false, false);
+  Slot.prototype.copyFrom.call(this, slot);
+  this.setData(slot.enteredData, false, false);
 };
 
 /**
@@ -227,5 +227,5 @@ EditableSlot.prototype.copyFrom = function(slot) {
  * @return {boolean}
  */
 EditableSlot.prototype.isEditable = function() {
-	return true;
+  return true;
 };

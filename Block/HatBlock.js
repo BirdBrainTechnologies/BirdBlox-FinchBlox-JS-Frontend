@@ -6,7 +6,7 @@
  * @param {string} category - The Block's category in string form. Used mainly to color it.
  */
 function HatBlock(x, y, category, autoExecute) {
-	Block.call(this, 4, Block.returnTypes.none, x, y, category, autoExecute); //Call constructor.
+  Block.call(this, 4, Block.returnTypes.none, x, y, category, autoExecute); //Call constructor.
 }
 HatBlock.prototype = Object.create(Block.prototype); //Everything else is the same as Block.
 HatBlock.prototype.constructor = HatBlock;

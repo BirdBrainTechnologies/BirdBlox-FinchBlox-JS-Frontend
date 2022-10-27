@@ -6,15 +6,15 @@
  * @constructor
  */
 function CalibrateCompassDialog() {
-	let title = Language.getStr("CompassCalibrate");
+  let title = Language.getStr("CompassCalibrate");
 
   this.bits = DeviceHummingbirdBit.getManager().getDeviceCount();
   this.microbits = DeviceMicroBit.getManager().getDeviceCount();
   this.finches = DeviceFinch.getManager().getDeviceCount()
   let count = this.bits + this.microbits + this.finches;
 
-	RowDialog.call(this, false, title, count, 0, 0);
-	this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
+  RowDialog.call(this, false, title, count, 0, 0);
+  this.addCenteredButton(Language.getStr("Done"), this.closeDialog.bind(this));
 }
 CalibrateCompassDialog.prototype = Object.create(RowDialog.prototype);
 CalibrateCompassDialog.prototype.constructor = CalibrateCompassDialog;
@@ -36,25 +36,25 @@ CalibrateCompassDialog.prototype.createRow = function(index, y, width, contentGr
   } else {
     robot = DeviceFinch.getManager().getDevice(index - this.bits - this.microbits);
   }
-	GuiElements.alert("Loading rows for the compass calibration dialog.");
+  GuiElements.alert("Loading rows for the compass calibration dialog.");
   if (robot != null) {
-		GuiElements.alert("Found a robot. " + robot.compassCalibrated);
-    const button = RowDialog.createMainBnWithText(robot.listLabel, width, 0, y, contentGroup, function () {
+    GuiElements.alert("Found a robot. " + robot.compassCalibrated);
+    const button = RowDialog.createMainBnWithText(robot.listLabel, width, 0, y, contentGroup, function() {
       CalibrateCompassDialog.showVideo(robot);
       robot.calibrateCompass();
     });
-		if (robot.compassCalibrated){
-			GuiElements.alert("Adding checkmark");
-			button.addSideTextAndIcon(VectorPaths.checkmark, null, robot.listLabel, null, null, Colors.green, false, false);
-		} else if (robot.compassCalibrated == false) {
-			button.addSideTextAndIcon(VectorPaths.letterX, null, robot.listLabel, null, null, Colors.red, false, false);
-		}
+    if (robot.compassCalibrated) {
+      GuiElements.alert("Adding checkmark");
+      button.addSideTextAndIcon(VectorPaths.checkmark, null, robot.listLabel, null, null, Colors.green, false, false);
+    } else if (robot.compassCalibrated == false) {
+      button.addSideTextAndIcon(VectorPaths.letterX, null, robot.listLabel, null, null, Colors.red, false, false);
+    }
   }
 };
 
 CalibrateCompassDialog.prototype.closeDialog = function() {
-	RowDialog.prototype.closeDialog.call(this);
-	GuiElements.removeVideos();
+  RowDialog.prototype.closeDialog.call(this);
+  GuiElements.removeVideos();
 }
 
 /**
@@ -63,7 +63,7 @@ CalibrateCompassDialog.prototype.closeDialog = function() {
 CalibrateCompassDialog.showVideo = function(robot) {
   var fileName = "Videos/MicroBit_Calibration.mp4";
 
-  switch(robot.getDeviceTypeId()) {
+  switch (robot.getDeviceTypeId()) {
     case "hummingbirdbit":
       if (robot.hasV2Microbit) {
         fileName = "Videos/HummBit_V2_Calibration.mp4";

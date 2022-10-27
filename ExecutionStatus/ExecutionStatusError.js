@@ -13,5 +13,5 @@ ExecutionStatusError.constructor = ExecutionStatusError;
  * @return {boolean}
  */
 ExecutionStatusError.prototype.hasError = function() {
-	return true;
+  return true;
 };

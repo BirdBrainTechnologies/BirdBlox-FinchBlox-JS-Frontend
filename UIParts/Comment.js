@@ -19,7 +19,7 @@ function Comment() {
   this.lastX = 0 //last non-flying location
   this.lastY = 0
   this.width = 200
-  this.height = Comment.font.charHeight + 2*Comment.margin
+  this.height = Comment.font.charHeight + 2 * Comment.margin
   this.group = GuiElements.create.group(0, 0);
   this.flying = false;
   this.tab = null;
@@ -31,8 +31,8 @@ function Comment() {
 
   const textY = Comment.margin; //Comment.font.charHeight/2 + Comment.margin;
   const textX = Comment.margin;
-  const textW = this.width - 2*Comment.margin;
-  const textH = this.height - 2*Comment.margin;
+  const textW = this.width - 2 * Comment.margin;
+  const textH = this.height - 2 * Comment.margin;
   this.editableText = GuiElements.create.editableText(Comment.font, Comment.textColor, textX, textY, textW, textH, this.group, this)
 
   TouchReceiver.addListenersComment(this.editableText, this);
@@ -61,7 +61,7 @@ Comment.writeToXml = function(xmlDoc) {
 Comment.importXml = function(commentNode, tab) {
   const comment = new Comment()
   comment.x = XmlWriter.getAttribute(commentNode, "x", 0, true);
-	comment.y = XmlWriter.getAttribute(commentNode, "y", 0, true);
+  comment.y = XmlWriter.getAttribute(commentNode, "y", 0, true);
   comment.editableText.innerHTML = XmlWriter.getAttribute(commentNode, "text", "", false);
   comment.edited = true
 
@@ -123,13 +123,13 @@ Comment.prototype.updateParent = function(newParent) {
       this.tab.commentList.push(this)
     }
 
-    this.x = this.parent.width + 2*Comment.margin
+    this.x = this.parent.width + 2 * Comment.margin
     this.y = 0
     this.parent.group.appendChild(this.group)
 
     this.lineX = this.parent.width
-    this.lineY = this.parent.hasBlockSlot1 ? this.parent.topHeight/2 : this.parent.height/2
-    this.line = GuiElements.draw.rect(this.lineX, this.lineY, 2*Comment.margin, Comment.lineHeight, Comment.outlineColor)
+    this.lineY = this.parent.hasBlockSlot1 ? this.parent.topHeight / 2 : this.parent.height / 2
+    this.line = GuiElements.draw.rect(this.lineX, this.lineY, 2 * Comment.margin, Comment.lineHeight, Comment.outlineColor)
     this.parent.group.appendChild(this.line);
   }
 
@@ -150,15 +150,19 @@ Comment.prototype.editText = function() {
 Comment.prototype.update = function() {
   const height = this.editableText.offsetHeight
   //console.log("offset height " + height)
-  if (height == 0) { return } //The comment has not been shown on screen yet.
+  if (height == 0) {
+    return
+  } //The comment has not been shown on screen yet.
 
   if (Comment.currentlyEditing == this || !this.updated) {
 
-    if (height != this.height - 2*Comment.margin) {
-      this.height = height + 2*Comment.margin
+    if (height != this.height - 2 * Comment.margin) {
+      this.height = height + 2 * Comment.margin
       GuiElements.update.rect(this.bgRect, 0, 0, this.width, this.height)
       this.editableText.parentNode.setAttribute('height', height);
-      if (this.parent != null) { this.parent.stack.arrangeComments() }
+      if (this.parent != null) {
+        this.parent.stack.arrangeComments()
+      }
     }
 
     if (!this.updated) {
@@ -197,7 +201,9 @@ Comment.prototype.delete = function() {
     this.updateParent()
   }
   this.group.remove();
-  if (this.line != null) { this.line.remove() }
+  if (this.line != null) {
+    this.line.remove()
+  }
 
   const index = this.tab.commentList.indexOf(this)
   this.tab.commentList.splice(index, 1)
@@ -211,30 +217,32 @@ Comment.prototype.fly = function() {
   if (this.parent != null) {
     this.x = this.parent.stack.x + this.parent.x + this.x
     this.y = this.parent.stack.y + this.parent.y + this.y
-    if (this.line != null) { this.line.remove() }
+    if (this.line != null) {
+      this.line.remove()
+    }
   }
   // Remove group from Tab (visually only).
-	this.group.remove();
-	// Add group to drag layer.
-	GuiElements.layers.drag.appendChild(this.group);
-	// Get current location on screen.
-	const absX = this.getAbsX();
-	const absY = this.getAbsY();
-	// Record that this BlockStack is flying.
-	this.flying = true;
-	// Move to ensure that position on screen does not change.
-	this.move(CodeManager.dragAbsToRelX(absX), CodeManager.dragAbsToRelY(absY));
-	//this.tab.updateArrows();
+  this.group.remove();
+  // Add group to drag layer.
+  GuiElements.layers.drag.appendChild(this.group);
+  // Get current location on screen.
+  const absX = this.getAbsX();
+  const absY = this.getAbsY();
+  // Record that this BlockStack is flying.
+  this.flying = true;
+  // Move to ensure that position on screen does not change.
+  this.move(CodeManager.dragAbsToRelX(absX), CodeManager.dragAbsToRelY(absY));
+  //this.tab.updateArrows();
 }
 
 Comment.prototype.land = function() {
   this.group.remove(); // Remove from drag layer.
-	this.tab.mainG.appendChild(this.group); // Go back into tab group.
-	const absX = this.getAbsX(); // Get current location on screen.
-	const absY = this.getAbsY();
-	this.flying = false;
-	// Update coordinates to ensure that position on screen does not change.
-	// Actual move will take place after new parent is determined.
+  this.tab.mainG.appendChild(this.group); // Go back into tab group.
+  const absX = this.getAbsX(); // Get current location on screen.
+  const absY = this.getAbsY();
+  this.flying = false;
+  // Update coordinates to ensure that position on screen does not change.
+  // Actual move will take place after new parent is determined.
   this.x = this.tab.absToRelX(absX)
   this.y = this.tab.absToRelY(absY)
   //this.tab.updateArrows();
@@ -245,14 +253,14 @@ Comment.prototype.land = function() {
  * @return {number} The x coord of the Comment relative to the screen.
  */
 Comment.prototype.getAbsX = function() {
-	return this.relToAbsX(0);
+  return this.relToAbsX(0);
 };
 /**
  * Returns the y coord of the Comment relative to the screen.
  * @return {number} The y coord of the Comment relative to the screen.
  */
 Comment.prototype.getAbsY = function() {
-	return this.relToAbsY(0);
+  return this.relToAbsY(0);
 };
 /**
  * Converts a coordinate relative to the Comment to one relative to the screen.
@@ -260,11 +268,11 @@ Comment.prototype.getAbsY = function() {
  * @return {number} - The coord relative to the screen.
  */
 Comment.prototype.relToAbsX = function(x) {
-	if (this.flying) {
-		return CodeManager.dragRelToAbsX(x + this.x);
-	} else {
-		return this.tab.relToAbsX(x + this.x); // In a Tab; return x plus Tab's offset.
-	}
+  if (this.flying) {
+    return CodeManager.dragRelToAbsX(x + this.x);
+  } else {
+    return this.tab.relToAbsX(x + this.x); // In a Tab; return x plus Tab's offset.
+  }
 };
 
 /**
@@ -272,11 +280,11 @@ Comment.prototype.relToAbsX = function(x) {
  * @return {number}
  */
 Comment.prototype.relToAbsY = function(y) {
-	if (this.flying) {
-		return CodeManager.dragRelToAbsY(y + this.y); // Not in a Tab; scale by dragLayer's scale
-	} else {
-		return this.tab.relToAbsY(y + this.y); // In a Tab; return y plus Tab's offset.
-	}
+  if (this.flying) {
+    return CodeManager.dragRelToAbsY(y + this.y); // Not in a Tab; scale by dragLayer's scale
+  } else {
+    return this.tab.relToAbsY(y + this.y); // In a Tab; return y plus Tab's offset.
+  }
 };
 
 /**
@@ -286,9 +294,9 @@ Comment.prototype.relToAbsY = function(y) {
  */
 Comment.prototype.createXml = function(xmlDoc) {
   const commentData = XmlWriter.createElement(xmlDoc, "comment");
-	XmlWriter.setAttribute(commentData, "x", this.lastX);
-	XmlWriter.setAttribute(commentData, "y", this.lastY);
+  XmlWriter.setAttribute(commentData, "x", this.lastX);
+  XmlWriter.setAttribute(commentData, "y", this.lastY);
   XmlWriter.setAttribute(commentData, "text", this.editableText.innerHTML);
   XmlWriter.setAttribute(commentData, "id", this.parent != null ? this.parent.id : -1);
-	return commentData;
+  return commentData;
 }

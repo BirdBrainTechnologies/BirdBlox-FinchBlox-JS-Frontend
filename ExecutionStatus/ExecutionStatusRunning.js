@@ -13,5 +13,5 @@ ExecutionStatusRunning.constructor = ExecutionStatus;
  * @return {boolean}
  */
 ExecutionStatusRunning.prototype.isRunning = function() {
-	return true;
+  return true;
 };

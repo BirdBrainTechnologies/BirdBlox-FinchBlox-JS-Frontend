@@ -10,45 +10,45 @@
  * @constructor
  */
 function ResultBubble(leftX, rightX, upperY, lowerY, text, error) {
-	const RB = ResultBubble;
-	if (error == null) {
-		error = false;
-	}
-	let fontColor = RB.fontColor;
-	let bgColor = RB.bgColor;
-	if (error) {
-		fontColor = RB.errorFontColor;
-		bgColor = RB.errorBgColor;
-	}
-	const height = RB.font.charHeight;
-	const textE = GuiElements.draw.text(0, height, text, RB.font, fontColor);
-	GuiElements.update.textLimitWidth(textE, text, GuiElements.width - RB.hMargin * 2);
-	const width = GuiElements.measure.textWidth(textE);
-	const group = GuiElements.create.group(0, 0);
-	group.appendChild(textE);
-	let layer = GuiElements.layers.resultBubble;
-	let overlayType = Overlay.types.resultBubble;
-	this.bubbleOverlay = new BubbleOverlay(overlayType, bgColor, RB.margin, group, this, layer);
-	this.bubbleOverlay.display(leftX, rightX, upperY, lowerY, width, height);
+  const RB = ResultBubble;
+  if (error == null) {
+    error = false;
+  }
+  let fontColor = RB.fontColor;
+  let bgColor = RB.bgColor;
+  if (error) {
+    fontColor = RB.errorFontColor;
+    bgColor = RB.errorBgColor;
+  }
+  const height = RB.font.charHeight;
+  const textE = GuiElements.draw.text(0, height, text, RB.font, fontColor);
+  GuiElements.update.textLimitWidth(textE, text, GuiElements.width - RB.hMargin * 2);
+  const width = GuiElements.measure.textWidth(textE);
+  const group = GuiElements.create.group(0, 0);
+  group.appendChild(textE);
+  let layer = GuiElements.layers.resultBubble;
+  let overlayType = Overlay.types.resultBubble;
+  this.bubbleOverlay = new BubbleOverlay(overlayType, bgColor, RB.margin, group, this, layer);
+  this.bubbleOverlay.display(leftX, rightX, upperY, lowerY, width, height);
 }
 
 ResultBubble.setConstants = function() {
-	const RB = ResultBubble;
-	RB.fontColor = Colors.black;
-	RB.errorFontColor = Colors.white;
-	RB.bgColor = Colors.white;
-	RB.errorBgColor = Colors.darkRed;
-	RB.font = Font.uiFont(16);
-	RB.margin = 4;
-	/*RB.lifetime=3000;*/
-	RB.hMargin = 20;
+  const RB = ResultBubble;
+  RB.fontColor = Colors.black;
+  RB.errorFontColor = Colors.white;
+  RB.bgColor = Colors.white;
+  RB.errorBgColor = Colors.darkRed;
+  RB.font = Font.uiFont(16);
+  RB.margin = 4;
+  /*RB.lifetime=3000;*/
+  RB.hMargin = 20;
 };
 
 /**
  * Hides the result
  */
 ResultBubble.prototype.close = function() {
-	this.bubbleOverlay.hide();
+  this.bubbleOverlay.hide();
 };
 
 /**
@@ -61,12 +61,12 @@ ResultBubble.prototype.close = function() {
  * @param {boolean} [error=false] - Whether the bubble should be formatted as an error
  */
 ResultBubble.displayValue = function(value, x, y, width, height, error) {
-	if (error == null) {
-		error = false;
-	}
-	const leftX = x;
-	const rightX = x + width;
-	const upperY = y;
-	const lowerY = y + height;
-	new ResultBubble(leftX, rightX, upperY, lowerY, value, error);
+  if (error == null) {
+    error = false;
+  }
+  const leftX = x;
+  const rightX = x + width;
+  const upperY = y;
+  const lowerY = y + height;
+  new ResultBubble(leftX, rightX, upperY, lowerY, value, error);
 };

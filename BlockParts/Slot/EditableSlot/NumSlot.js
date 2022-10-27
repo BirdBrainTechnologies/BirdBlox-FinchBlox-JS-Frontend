@@ -10,23 +10,23 @@
  * @param {boolean} [integer] - Determines if the NumPad will have the decimal point Button disabled.
  */
 function NumSlot(parent, key, value, positive, integer) {
-	// Optional parameters are false by default.
-	if (positive == null) {
-		positive = false;
-	}
-	if (integer == null) {
-		integer = false;
-	}
-	const inputType = EditableSlot.inputTypes.num;
-	const snapType = Slot.snapTypes.numStrBool;
-	const outputType = Slot.outputTypes.num;
+  // Optional parameters are false by default.
+  if (positive == null) {
+    positive = false;
+  }
+  if (integer == null) {
+    integer = false;
+  }
+  const inputType = EditableSlot.inputTypes.num;
+  const snapType = Slot.snapTypes.numStrBool;
+  const outputType = Slot.outputTypes.num;
 
-	// Make RoundSlot.
-	RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(value), positive, integer);
+  // Make RoundSlot.
+  RoundSlot.call(this, parent, key, inputType, snapType, outputType, new NumData(value), positive, integer);
 
-	// Limits can be set later
-	this.minVal = null;
-	this.maxVal = null;
+  // Limits can be set later
+  this.minVal = null;
+  this.maxVal = null;
 }
 NumSlot.prototype = Object.create(RoundSlot.prototype);
 NumSlot.prototype.constructor = NumSlot;
@@ -39,14 +39,14 @@ NumSlot.prototype.constructor = NumSlot;
  * @param {string|null} [displayUnits] - The units/label to show before the min/max or null if none
  */
 NumSlot.prototype.addLimits = function(min, max, displayUnits) {
-	this.minVal = min;
-	this.maxVal = max;
-	if(min == null || max == null) return;
-	if (displayUnits == null) {
-		this.labelText = "(" + min + " - " + max + ")";
-	} else {
-		this.labelText = displayUnits + " (" + min + " - " + max + ")";
-	}
+  this.minVal = min;
+  this.maxVal = max;
+  if (min == null || max == null) return;
+  if (displayUnits == null) {
+    this.labelText = "(" + min + " - " + max + ")";
+  } else {
+    this.labelText = displayUnits + " (" + min + " - " + max + ")";
+  }
 };
 
 /**
@@ -55,9 +55,9 @@ NumSlot.prototype.addLimits = function(min, max, displayUnits) {
  * @return {Data|null}
  */
 NumSlot.prototype.sanitizeData = function(data) {
-	// Forces Data to NumData
-	data = RoundSlot.prototype.sanitizeData.call(this, data);
-	if (data == null) return null;
-	const value = data.asNum().getValueInR(this.minVal, this.maxVal, this.positive, this.integer);
-	return new NumData(value, data.isValid);
+  // Forces Data to NumData
+  data = RoundSlot.prototype.sanitizeData.call(this, data);
+  if (data == null) return null;
+  const value = data.asNum().getValueInR(this.minVal, this.maxVal, this.positive, this.integer);
+  return new NumData(value, data.isValid);
 };

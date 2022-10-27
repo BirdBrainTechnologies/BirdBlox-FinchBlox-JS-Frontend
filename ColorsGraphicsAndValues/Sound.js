@@ -13,34 +13,34 @@
  * @param {boolean} isRecording - Whether the sound is a recording
  * @constructor
  */
-function Sound(id, isRecording){
-	// Ids are used in save files while names are shown in the UI.
-	// If we decide to change display names for built-in sounds, we will keep ids the same.
-	this.id = id;
-	this.name = Sound.nameFromId(id, isRecording);
-	this.isRecording = isRecording;
+function Sound(id, isRecording) {
+  // Ids are used in save files while names are shown in the UI.
+  // If we decide to change display names for built-in sounds, we will keep ids the same.
+  this.id = id;
+  this.name = Sound.nameFromId(id, isRecording);
+  this.isRecording = isRecording;
 }
 
-Sound.setConstants = function(){
-	// Cached lists
-	Sound.soundList = [];
-	Sound.recordingList = [];
+Sound.setConstants = function() {
+  // Cached lists
+  Sound.soundList = [];
+  Sound.recordingList = [];
 
-	// List of data about currently playing sounds
-	Sound.playingSoundStatuses = [];
+  // List of data about currently playing sounds
+  Sound.playingSoundStatuses = [];
 
-	// Enum for types of sounds
-	Sound.type = {};
-	Sound.type.effect = "effect"; // Sounds built in to app
-	Sound.type.ui = "ui"; // Sounds used in UI, not sound blocks (snap sound, for example)
-	Sound.type.recording = "recording"; // Sounds local to project, recorded by user
+  // Enum for types of sounds
+  Sound.type = {};
+  Sound.type.effect = "effect"; // Sounds built in to app
+  Sound.type.ui = "ui"; // Sounds used in UI, not sound blocks (snap sound, for example)
+  Sound.type.recording = "recording"; // Sounds local to project, recorded by user
 
-	// Load into cache
-	Sound.loadSounds(true);
-	Sound.loadSounds(false);
+  // Load into cache
+  Sound.loadSounds(true);
+  Sound.loadSounds(false);
 
-	// Sound when Blocks are snapped together
-	Sound.click = "click2";
+  // Sound when Blocks are snapped together
+  Sound.click = "click2";
 };
 
 /**
@@ -51,10 +51,10 @@ Sound.setConstants = function(){
  * @param {function} errorCallback - Called if backend encounters an error (such as sound not found)
  * @param {function} donePlayingCallback - Called when sound stops playing, is interrupted, etc.
  */
-Sound.playAndStopPrev = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback){
-	Sound.stopAllSounds(null, function(){
-		Sound.playWithCallback(id, isRecording, sentCallback, errorCallback, donePlayingCallback);
-	});
+Sound.playAndStopPrev = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback) {
+  Sound.stopAllSounds(null, function() {
+    Sound.playWithCallback(id, isRecording, sentCallback, errorCallback, donePlayingCallback);
+  });
 };
 
 /**
@@ -65,37 +65,37 @@ Sound.playAndStopPrev = function(id, isRecording, sentCallback, errorCallback, d
  * @param {function} errorCallback - Called if backend encounters an error (such as sound not found)
  * @param {function} donePlayingCallback - Called when sound stops playing, is interrupted, etc.
  */
-Sound.playWithCallback = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback){
-	let status = {};
-	status.donePlayingCallback = donePlayingCallback;
-	Sound.playingSoundStatuses.push(status);
-	const removeEntry = function(){
-		let index = Sound.playingSoundStatuses.indexOf(status);
-		if(index > -1) {
-			Sound.playingSoundStatuses.splice(index, 1);
-			return true;
-		}
-		return false;
-	};
-	const errorFn = function(){
-		removeEntry();
-		if(errorCallback != null) errorCallback();
-	};
-	const donePlayingFn = function(){
-		if(removeEntry()) {
-			if (donePlayingCallback != null) donePlayingCallback();
-		}
-	};
-	Sound.getDuration(id, isRecording, function(duration){
-		//id = id.split(".wav").join(""); //TODO: remove .wav replacement
-		let request = new HttpRequestBuilder("sound/play");
-		request.addParam("filename", id);
-		request.addParam("type", Sound.boolToType(isRecording));
-		HtmlServer.sendRequestWithCallback(request.toString(), function(){
-			setTimeout(donePlayingFn, duration);
-			if(sentCallback != null) sentCallback();
-		}, errorFn);
-	}, errorFn);
+Sound.playWithCallback = function(id, isRecording, sentCallback, errorCallback, donePlayingCallback) {
+  let status = {};
+  status.donePlayingCallback = donePlayingCallback;
+  Sound.playingSoundStatuses.push(status);
+  const removeEntry = function() {
+    let index = Sound.playingSoundStatuses.indexOf(status);
+    if (index > -1) {
+      Sound.playingSoundStatuses.splice(index, 1);
+      return true;
+    }
+    return false;
+  };
+  const errorFn = function() {
+    removeEntry();
+    if (errorCallback != null) errorCallback();
+  };
+  const donePlayingFn = function() {
+    if (removeEntry()) {
+      if (donePlayingCallback != null) donePlayingCallback();
+    }
+  };
+  Sound.getDuration(id, isRecording, function(duration) {
+    //id = id.split(".wav").join(""); //TODO: remove .wav replacement
+    let request = new HttpRequestBuilder("sound/play");
+    request.addParam("filename", id);
+    request.addParam("type", Sound.boolToType(isRecording));
+    HtmlServer.sendRequestWithCallback(request.toString(), function() {
+      setTimeout(donePlayingFn, duration);
+      if (sentCallback != null) sentCallback();
+    }, errorFn);
+  }, errorFn);
 };
 
 /**
@@ -104,25 +104,24 @@ Sound.playWithCallback = function(id, isRecording, sentCallback, errorCallback, 
  * @param {boolean} isRecording
  * @param {object} status
  */
-Sound.play = function(id, isRecording, status){
-	if(status == null){
-		Sound.playWithCallback(id, isRecording);
-	}
-	else{
-		status.donePlaying = false;
-		status.requestSent = false;
-		status.error = false;
-		Sound.playWithCallback(id, isRecording, function(){
-			status.requestSent = true;
-		}, function(){
-			status.donePlaying = false;
-			status.requestSent = false;
-			status.error = true;
-		}, function(){
-			status.donePlaying = true;
-			status.requestSent = true;
-		});
-	}
+Sound.play = function(id, isRecording, status) {
+  if (status == null) {
+    Sound.playWithCallback(id, isRecording);
+  } else {
+    status.donePlaying = false;
+    status.requestSent = false;
+    status.error = false;
+    Sound.playWithCallback(id, isRecording, function() {
+      status.requestSent = true;
+    }, function() {
+      status.donePlaying = false;
+      status.requestSent = false;
+      status.error = true;
+    }, function() {
+      status.donePlaying = true;
+      status.requestSent = true;
+    });
+  }
 };
 
 /**
@@ -132,48 +131,48 @@ Sound.play = function(id, isRecording, status){
  * @param {function} callbackFn - called with the duration as a number
  * @param {function} callbackError
  */
-Sound.getDuration = function(id, isRecording, callbackFn, callbackError){
-	let request = new HttpRequestBuilder("sound/duration");
-	request.addParam("filename", id);
-	request.addParam("type", Sound.boolToType(isRecording));
-	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
-		let res = Number(result);
-		if(!isNaN(res)){
-			if(callbackFn != null) callbackFn(res);
-		} else{
-			if(callbackError != null) callbackError();
-		}
-	}, callbackError);
+Sound.getDuration = function(id, isRecording, callbackFn, callbackError) {
+  let request = new HttpRequestBuilder("sound/duration");
+  request.addParam("filename", id);
+  request.addParam("type", Sound.boolToType(isRecording));
+  HtmlServer.sendRequestWithCallback(request.toString(), function(result) {
+    let res = Number(result);
+    if (!isNaN(res)) {
+      if (callbackFn != null) callbackFn(res);
+    } else {
+      if (callbackError != null) callbackError();
+    }
+  }, callbackError);
 };
 
 /**
  * Tells the Sound class that the file has changed.  Prompts cache of recordings to be reloaded
  */
-Sound.changeFile = function(){
-	Sound.recordingList = [];
-	Sound.loadSounds(true);
+Sound.changeFile = function() {
+  Sound.recordingList = [];
+  Sound.loadSounds(true);
 };
 
 /**
  * @param {boolean} isRecording
  * @param {function} [callbackFn] - Called with a list of Sounds when that are loaded
  */
-Sound.loadSounds = function(isRecording, callbackFn){
-	let request = new HttpRequestBuilder("sound/names");
-	request.addParam("type", Sound.boolToType(isRecording));
-	HtmlServer.sendRequestWithCallback(request.toString(), function(result){
-		let list = result.split("\n");
-		if(result === "") list = [];
-		let resultList = list.map(function(id){
-			return new Sound(id, isRecording);
-		});
-		if(isRecording){
-			Sound.recordingList = resultList;
-		} else {
-			Sound.soundList = resultList;
-		}
-		if(callbackFn != null) callbackFn(resultList);
-	});
+Sound.loadSounds = function(isRecording, callbackFn) {
+  let request = new HttpRequestBuilder("sound/names");
+  request.addParam("type", Sound.boolToType(isRecording));
+  HtmlServer.sendRequestWithCallback(request.toString(), function(result) {
+    let list = result.split("\n");
+    if (result === "") list = [];
+    let resultList = list.map(function(id) {
+      return new Sound(id, isRecording);
+    });
+    if (isRecording) {
+      Sound.recordingList = resultList;
+    } else {
+      Sound.soundList = resultList;
+    }
+    if (callbackFn != null) callbackFn(resultList);
+  });
 };
 
 /**
@@ -182,18 +181,18 @@ Sound.loadSounds = function(isRecording, callbackFn){
  * @param {boolean} isRecording
  * @return {string}
  */
-Sound.nameFromId = function(id, isRecording){
-	if(isRecording) return id;
-	let name = id;
-	/*if(name.substring(name.length - 4) === ".wav") { //TODO: remove this line
-		name = name.substring(0, name.length - 4);
-	}*/
-	name = name.split("_").join(" ");
-	//name = name.replace(/\b\w/g, l => l.toUpperCase());
-	name = name.replace(/\b\w/g, function(l){
-		return l.toUpperCase();
-	});
-	return name;
+Sound.nameFromId = function(id, isRecording) {
+  if (isRecording) return id;
+  let name = id;
+  /*if(name.substring(name.length - 4) === ".wav") { //TODO: remove this line
+  	name = name.substring(0, name.length - 4);
+  }*/
+  name = name.split("_").join(" ");
+  //name = name.replace(/\b\w/g, l => l.toUpperCase());
+  name = name.replace(/\b\w/g, function(l) {
+    return l.toUpperCase();
+  });
+  return name;
 };
 
 /**
@@ -201,18 +200,18 @@ Sound.nameFromId = function(id, isRecording){
  * @param {object} [status] - A status object for the request
  * @param {function} [callbackFn] - Called when the request completes (even if there is an error)
  */
-Sound.stopAllSounds=function(status, callbackFn){
-	if(status == null) status = {};
-	let request = new HttpRequestBuilder("sound/stopAll");
-	let callback = function() {
-		status.finished = true;
-		Sound.playingSoundStatuses.forEach(function (playStatus) {
-			if(playStatus.donePlayingCallback != null) playStatus.donePlayingCallback();
-		});
-		Sound.playingSoundStatuses = [];
-		if(callbackFn != null) callbackFn();
-	};
-	HtmlServer.sendRequestWithCallback(request.toString(), callback, callback);
+Sound.stopAllSounds = function(status, callbackFn) {
+  if (status == null) status = {};
+  let request = new HttpRequestBuilder("sound/stopAll");
+  let callback = function() {
+    status.finished = true;
+    Sound.playingSoundStatuses.forEach(function(playStatus) {
+      if (playStatus.donePlayingCallback != null) playStatus.donePlayingCallback();
+    });
+    Sound.playingSoundStatuses = [];
+    if (callbackFn != null) callbackFn();
+  };
+  HtmlServer.sendRequestWithCallback(request.toString(), callback, callback);
 };
 
 /**
@@ -220,11 +219,11 @@ Sound.stopAllSounds=function(status, callbackFn){
  * @param {boolean} isRecording
  * @return {Array}
  */
-Sound.getSoundList = function(isRecording){
-	if(isRecording) {
-		return Sound.recordingList;
-	}
-	return Sound.soundList;
+Sound.getSoundList = function(isRecording) {
+  if (isRecording) {
+    return Sound.recordingList;
+  }
+  return Sound.soundList;
 };
 
 /**
@@ -232,12 +231,12 @@ Sound.getSoundList = function(isRecording){
  * @param {boolean} isRecording
  * @return {string}
  */
-Sound.boolToType = function(isRecording){
-	if(isRecording){
-		return Sound.type.recording;
-	} else {
-		return Sound.type.effect;
-	}
+Sound.boolToType = function(isRecording) {
+  if (isRecording) {
+    return Sound.type.recording;
+  } else {
+    return Sound.type.effect;
+  }
 };
 
 /**
@@ -245,24 +244,24 @@ Sound.boolToType = function(isRecording){
  * @param {string} id (of sound effect, not recording)
  * @return {string|null}
  */
-Sound.lookupById = function(id){
-	let result = null;
-	Sound.soundList.forEach(function(sound){
-		if(sound.id === id) {
-			result = sound;
-		}
-	});
-	return result;
+Sound.lookupById = function(id) {
+  let result = null;
+  Sound.soundList.forEach(function(sound) {
+    if (sound.id === id) {
+      result = sound;
+    }
+  });
+  return result;
 };
 
 /**
  * Plays the snap sound effect if it is enabled
  */
-Sound.playSnap = function(){
-	if(SettingsManager.enableSnapNoise.getValue() === "true") {
-		let snapSoundRequest = new HttpRequestBuilder("sound/play");
-		snapSoundRequest.addParam("type", Sound.type.ui);
-		snapSoundRequest.addParam("filename", Sound.click);
-		HtmlServer.sendRequestWithCallback(snapSoundRequest.toString());
-	}
+Sound.playSnap = function() {
+  if (SettingsManager.enableSnapNoise.getValue() === "true") {
+    let snapSoundRequest = new HttpRequestBuilder("sound/play");
+    snapSoundRequest.addParam("type", Sound.type.ui);
+    snapSoundRequest.addParam("filename", Sound.click);
+    HtmlServer.sendRequestWithCallback(snapSoundRequest.toString());
+  }
 };

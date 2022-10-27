@@ -6,12 +6,12 @@
  * @constructor
  */
 function Variable(name, data) {
-	this.name = name;
-	this.data = data;
-	if (this.data == null) {
-		this.data = new NumData(0);
-	}
-	CodeManager.addVariable(this);
+  this.name = name;
+  this.data = data;
+  if (this.data == null) {
+    this.data = new NumData(0);
+  }
+  CodeManager.addVariable(this);
 }
 
 /**
@@ -19,7 +19,7 @@ function Variable(name, data) {
  * @return {string}
  */
 Variable.prototype.getName = function() {
-	return this.name;
+  return this.name;
 };
 
 /**
@@ -27,7 +27,7 @@ Variable.prototype.getName = function() {
  * @return {SelectionData}
  */
 Variable.prototype.getSelectionData = function() {
-	return new SelectionData(this.name, this);
+  return new SelectionData(this.name, this);
 };
 
 /**
@@ -35,7 +35,7 @@ Variable.prototype.getSelectionData = function() {
  * @return {Data}
  */
 Variable.prototype.getData = function() {
-	return this.data;
+  return this.data;
 };
 
 /**
@@ -43,15 +43,15 @@ Variable.prototype.getData = function() {
  * @param data
  */
 Variable.prototype.setData = function(data) {
-	this.data = data;
+  this.data = data;
 };
 
 /**
  * Removes the Variable from the CodeManager
  */
 Variable.prototype.remove = function() {
-	this.data = null;
-	CodeManager.removeVariable(this);
+  this.data = null;
+  CodeManager.removeVariable(this);
 };
 
 /**
@@ -60,10 +60,10 @@ Variable.prototype.remove = function() {
  * @return {Node} - The node for the Variable
  */
 Variable.prototype.createXml = function(xmlDoc) {
-	const variable = XmlWriter.createElement(xmlDoc, "variable");
-	XmlWriter.setAttribute(variable, "name", this.name);
-	variable.appendChild(this.data.createXml(xmlDoc));
-	return variable;
+  const variable = XmlWriter.createElement(xmlDoc, "variable");
+  XmlWriter.setAttribute(variable, "name", this.name);
+  variable.appendChild(this.data.createXml(xmlDoc));
+  return variable;
 };
 
 /**
@@ -72,51 +72,51 @@ Variable.prototype.createXml = function(xmlDoc) {
  * @return {Variable|null}
  */
 Variable.importXml = function(variableNode) {
-	const name = XmlWriter.getAttribute(variableNode, "name");
-	if (name != null) {
-		const dataNode = XmlWriter.findSubElement(variableNode, "data");
-		let data = new NumData(0);
-		if (dataNode != null) {
-			const newData = Data.importXml(dataNode);
-			if (newData != null) {
-				data = newData;
-			}
-		}
-		return new Variable(name, data);
-	}
-	return null
+  const name = XmlWriter.getAttribute(variableNode, "name");
+  if (name != null) {
+    const dataNode = XmlWriter.findSubElement(variableNode, "data");
+    let data = new NumData(0);
+    if (dataNode != null) {
+      const newData = Data.importXml(dataNode);
+      if (newData != null) {
+        data = newData;
+      }
+    }
+    return new Variable(name, data);
+  }
+  return null
 };
 
 /**
  * Prompts the user to rename the variable
  */
 Variable.prototype.rename = function() {
-	const callbackFn = function(cancelled, response) {
-		if (!cancelled && CodeManager.checkVarName(response)) {
-			callbackFn.variable.name = response;
-			CodeManager.renameVariable(callbackFn.variable);
-		}
-	};
-	callbackFn.variable = this;
-	DialogManager.showPromptDialog(Language.getStr("Rename"), Language.getStr("Enter_new_name"), this.name, true, callbackFn);
+  const callbackFn = function(cancelled, response) {
+    if (!cancelled && CodeManager.checkVarName(response)) {
+      callbackFn.variable.name = response;
+      CodeManager.renameVariable(callbackFn.variable);
+    }
+  };
+  callbackFn.variable = this;
+  DialogManager.showPromptDialog(Language.getStr("Rename"), Language.getStr("Enter_new_name"), this.name, true, callbackFn);
 };
 
 /**
  * Prompts the user to delete the Variable
  */
 Variable.prototype.delete = function() {
-	if (CodeManager.checkVariableUsed(this)) {
-		const callbackFn = function(response) {
-			if (response === "2") {
-				callbackFn.variable.remove();
-				CodeManager.deleteVariable(callbackFn.variable);
-			}
-		};
-		callbackFn.variable = this;
-		let question = Language.getStr("Delete_question");
-		DialogManager.showChoiceDialog(Language.getStr("Delete"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
-	} else {
-		this.remove();
-		CodeManager.deleteVariable(this);
-	}
+  if (CodeManager.checkVariableUsed(this)) {
+    const callbackFn = function(response) {
+      if (response === "2") {
+        callbackFn.variable.remove();
+        CodeManager.deleteVariable(callbackFn.variable);
+      }
+    };
+    callbackFn.variable = this;
+    let question = Language.getStr("Delete_question");
+    DialogManager.showChoiceDialog(Language.getStr("Delete"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
+  } else {
+    this.remove();
+    CodeManager.deleteVariable(this);
+  }
 };

@@ -7,10 +7,10 @@
  * @param {Data} data
  * @constructor
  */
-function RectSlot(parent, key, snapType, outputType, data){
-	EditableSlot.call(this, parent, key, EditableSlot.inputTypes.string, snapType, outputType, data);
-	this.slotShape = new RectSlotShape(this, this.dataToString(data));
-	this.slotShape.show();
+function RectSlot(parent, key, snapType, outputType, data) {
+  EditableSlot.call(this, parent, key, EditableSlot.inputTypes.string, snapType, outputType, data);
+  this.slotShape = new RectSlotShape(this, this.dataToString(data));
+  this.slotShape.show();
 }
 RectSlot.prototype = Object.create(EditableSlot.prototype);
 RectSlot.prototype.constructor = RectSlot;
@@ -18,9 +18,9 @@ RectSlot.prototype.constructor = RectSlot;
 /**
  * @inheritDoc
  */
-RectSlot.prototype.highlight = function(){ //TODO: Fix BlockGraphics
-	let isSlot = !this.hasChild;
-	Highlighter.highlight(this.getAbsX(),this.getAbsY(),this.width,this.height,3,isSlot);
+RectSlot.prototype.highlight = function() { //TODO: Fix BlockGraphics
+  let isSlot = !this.hasChild;
+  Highlighter.highlight(this.getAbsX(), this.getAbsY(), this.width, this.height, 3, isSlot);
 };
 
 /**
@@ -29,13 +29,13 @@ RectSlot.prototype.highlight = function(){ //TODO: Fix BlockGraphics
  * @return {string}
  */
 RectSlot.prototype.formatTextSummary = function(textSummary) {
-	return "[" + textSummary + "]";
+  return "[" + textSummary + "]";
 };
 
 /**
  * @inheritDoc
  * @return {InputDialog}
  */
-RectSlot.prototype.createInputSystem = function(){
-	return new InputDialog(this.parent.textSummary(this), true);
+RectSlot.prototype.createInputSystem = function() {
+  return new InputDialog(this.parent.textSummary(this), true);
 };

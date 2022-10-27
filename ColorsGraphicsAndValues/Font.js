@@ -8,10 +8,10 @@
  * @constructor
  */
 function Font(fontFamily, fontSize, fontWeight) {
-	this.fontFamily = fontFamily;
-	this.fontSize = fontSize;
-	this.charHeight = this.lookupCharH(fontSize);
-	this.fontWeight = fontWeight;
+  this.fontFamily = fontFamily;
+  this.fontSize = fontSize;
+  this.charHeight = this.lookupCharH(fontSize);
+  this.fontWeight = fontWeight;
 }
 
 /**
@@ -19,26 +19,26 @@ function Font(fontFamily, fontSize, fontWeight) {
  * @param {number} fontSize
  * @return {number}
  */
-Font.prototype.lookupCharH = function(fontSize){
+Font.prototype.lookupCharH = function(fontSize) {
   let scale = 0.6639;
   //if (this.fontFamily == 'AvenirHeavy') { scale = 0.63; }//0.59; } //number determined empirically, may need adjustment
-	return scale * fontSize + 1.644;
+  return scale * fontSize + 1.644;
 };
 
 /**
  * Returns a Font that is identical to this font but bold
  * @return {Font}
  */
-Font.prototype.bold = function(){
-	return new Font(this.fontFamily, this.fontSize, "bold");
+Font.prototype.bold = function() {
+  return new Font(this.fontFamily, this.fontSize, "bold");
 };
 
 /**
  * Returns a Font that is identical to this font but not bold
  * @return {Font}
  */
-Font.prototype.unBold = function(){
-	return new Font(this.fontFamily, this.fontSize, "normal");
+Font.prototype.unBold = function() {
+  return new Font(this.fontFamily, this.fontSize, "normal");
 };
 
 /**
@@ -46,12 +46,14 @@ Font.prototype.unBold = function(){
  * @param {number} fontSize
  * @return {Font}
  */
-Font.uiFont = function(fontSize){
-	//if (FinchBlox) { return new Font('AvenirHeavy', fontSize, "normal"); }
+Font.uiFont = function(fontSize) {
+  //if (FinchBlox) { return new Font('AvenirHeavy', fontSize, "normal"); }
   //if (FinchBlox) { return new Font('FredericBlack', fontSize, "normal"); }
   //if (FinchBlox) { return new Font("NunitoSans-ExtraBold", fontSize, "normal"); }
-  if (FinchBlox) { return new Font("Nunito-ExtraBold", fontSize, "normal"); }
-	return new Font("Arial", fontSize, "normal");
+  if (FinchBlox) {
+    return new Font("Nunito-ExtraBold", fontSize, "normal");
+  }
+  return new Font("Arial", fontSize, "normal");
 };
 
 
@@ -63,6 +65,8 @@ Font.uiFont = function(fontSize){
 Font.secondaryUiFont = function(fontSize) {
   //if (FinchBlox) { return new Font('FredericRegular', fontSize, "normal"); }
   //if (FinchBlox) { return new Font("NunitoSans-Regular", fontSize, "normal"); }
-  if (FinchBlox) { return new Font("Nunito-Regular", fontSize, "normal"); }
-	return new Font("Arial", fontSize, "normal");
+  if (FinchBlox) {
+    return new Font("Nunito-Regular", fontSize, "normal");
+  }
+  return new Font("Arial", fontSize, "normal");
 }

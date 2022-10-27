@@ -5,10 +5,12 @@
 
 function B_FBSound(x, y, level) {
   this.level = level;
-  CommandBlock.call(this,x,y,"sound_"+level);
+  CommandBlock.call(this, x, y, "sound_" + level);
 
   let iconH = 35;
-  if (level == 1) { iconH = 24; }
+  if (level == 1) {
+    iconH = 24;
+  }
   this.blockIcon = new BlockIcon(this, VectorPaths.mvMusicNote, Colors.white, "finchSound", iconH);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
@@ -19,7 +21,7 @@ function B_FBSound(x, y, level) {
 B_FBSound.prototype = Object.create(CommandBlock.prototype);
 B_FBSound.prototype.constructor = B_FBSound;
 
-B_FBSound.prototype.startAction = function () {
+B_FBSound.prototype.startAction = function() {
   const mem = this.runMem;
   mem.timerStarted = false;
   //mem.duration = CodeManager.beatsToMs(this.beats);
@@ -32,11 +34,11 @@ B_FBSound.prototype.startAction = function () {
   let device = DeviceFinch.getManager().getDevice(0);
   if (device != null) {
     //Setting a buzzer with a duration of 0 has strange results on the micro:bit.
-		if (mem.duration > 0) {
-			device.setBuzzer(mem.requestStatus, this.midiNote, mem.duration);
-		} else {
-			mem.requestStatus.finished = true;
-		}
+    if (mem.duration > 0) {
+      device.setBuzzer(mem.requestStatus, this.midiNote, mem.duration);
+    } else {
+      mem.requestStatus.finished = true;
+    }
   } else {
     mem.requestStatus.finished = true;
     mem.duration = 0;
@@ -46,24 +48,24 @@ B_FBSound.prototype.startAction = function () {
 
   return new ExecutionStatusRunning();
 }
-B_FBSound.prototype.updateAction = function () {
+B_FBSound.prototype.updateAction = function() {
   const mem = this.runMem;
   if (!mem.timerStarted) {
-      const status = mem.requestStatus;
-      if (status.finished === true) {
-          mem.startTime = new Date().getTime();
-          mem.timerStarted = true;
-      } else {
-          return new ExecutionStatusRunning(); // Still running
-      }
+    const status = mem.requestStatus;
+    if (status.finished === true) {
+      mem.startTime = new Date().getTime();
+      mem.timerStarted = true;
+    } else {
+      return new ExecutionStatusRunning(); // Still running
+    }
   }
   if (new Date().getTime() >= mem.startTime + mem.duration) {
-      return new ExecutionStatusDone(); // Done running
+    return new ExecutionStatusDone(); // Done running
   } else {
-      return new ExecutionStatusRunning(); // Still running
+    return new ExecutionStatusRunning(); // Still running
   }
 }
-B_FBSound.prototype.updateValues = function () {
+B_FBSound.prototype.updateValues = function() {
   if (this.noteButton != null) {
     this.midiNote = this.noteButton.values[0];
 
@@ -150,10 +152,10 @@ function B_FBSoundL3(x, y) {
 
   this.noteButton.addSlider("time", this.beats, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
-/*
-  this.beatsButton = new BlockButton(this);
-  this.beatsButton.addSlider("beats", this.beats, [1, 2, 3, 4]);
-  this.addPart(this.beatsButton);*/
+  /*
+    this.beatsButton = new BlockButton(this);
+    this.beatsButton.addSlider("beats", this.beats, [1, 2, 3, 4]);
+    this.addPart(this.beatsButton);*/
 }
 B_FBSoundL3.prototype = Object.create(B_FBSound.prototype);
 B_FBSoundL3.prototype.constructor = B_FBSoundL3;

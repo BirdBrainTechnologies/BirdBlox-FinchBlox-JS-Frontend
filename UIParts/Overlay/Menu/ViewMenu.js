@@ -4,26 +4,26 @@
  * @constructor
  */
 function ViewMenu(button) {
-	Menu.call(this, button);
+  Menu.call(this, button);
 }
 ViewMenu.prototype = Object.create(Menu.prototype);
 ViewMenu.prototype.constructor = ViewMenu;
 ViewMenu.prototype.loadOptions = function() {
-	this.addOption(Language.getStr("Zoom_in"), this.optionZoomIn, false);
-	this.addOption(Language.getStr("Zoom_out"), this.optionZoomOut, false);
-	this.addOption(Language.getStr("Reset_zoom"), this.optionResetZoom, true);
+  this.addOption(Language.getStr("Zoom_in"), this.optionZoomIn, false);
+  this.addOption(Language.getStr("Zoom_out"), this.optionZoomOut, false);
+  this.addOption(Language.getStr("Reset_zoom"), this.optionResetZoom, true);
 };
 ViewMenu.prototype.optionZoomIn = function() {
-	GuiElements.zoomMultiple += GuiElements.zoomAmount;
-	GuiElements.zoomMultiple = Math.min(GuiElements.zoomMultiple, GuiElements.maxZoomMult);
-	GuiElements.updateZoom();
+  GuiElements.zoomMultiple += GuiElements.zoomAmount;
+  GuiElements.zoomMultiple = Math.min(GuiElements.zoomMultiple, GuiElements.maxZoomMult);
+  GuiElements.updateZoom();
 };
 ViewMenu.prototype.optionZoomOut = function() {
-	GuiElements.zoomMultiple -= GuiElements.zoomAmount;
-	GuiElements.zoomMultiple = Math.max(GuiElements.zoomMultiple, GuiElements.minZoomMult);
-	GuiElements.updateZoom();
+  GuiElements.zoomMultiple -= GuiElements.zoomAmount;
+  GuiElements.zoomMultiple = Math.max(GuiElements.zoomMultiple, GuiElements.minZoomMult);
+  GuiElements.updateZoom();
 };
 ViewMenu.prototype.optionResetZoom = function() {
-	GuiElements.zoomMultiple = 1;
-	GuiElements.updateZoom();
+  GuiElements.zoomMultiple = 1;
+  GuiElements.updateZoom();
 };

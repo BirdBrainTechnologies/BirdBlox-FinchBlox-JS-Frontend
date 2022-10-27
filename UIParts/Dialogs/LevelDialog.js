@@ -2,7 +2,7 @@
  * A dialog for changing the difficulty level. Used in FinchBlox.
  */
 function LevelDialog() {
-//  RowDialog.call(this, true, null, 5, 0, 0, 0, true);
+  //  RowDialog.call(this, true, null, 5, 0, 0, 0, true);
   this.visible = false;
   this.buttons = [];
 }
@@ -21,18 +21,18 @@ LevelDialog.prototype.show = function() {
     this.visible = true;
 
     // Close existing dialog if any
-		if (RowDialog.currentDialog != null && RowDialog.currentDialog !== this) {
-			RowDialog.currentDialog.closeDialog();
-		}
-		RowDialog.currentDialog = this;
+    if (RowDialog.currentDialog != null && RowDialog.currentDialog !== this) {
+      RowDialog.currentDialog.closeDialog();
+    }
+    RowDialog.currentDialog = this;
 
     this.width = GuiElements.width * 0.6;
     this.height = this.width * 0.35;
-    this.font = Font.uiFont(this.height/2);
+    this.font = Font.uiFont(this.height / 2);
     this.x = GuiElements.width / 2 - this.width / 2;
-		this.y = GuiElements.height / 2 - this.height / 2;
+    this.y = GuiElements.height / 2 - this.height / 2;
     this.group = GuiElements.create.group(this.x, this.y);
-		this.bgRect = this.drawBackground();
+    this.bgRect = this.drawBackground();
     this.rowGroup = this.createContent();
   }
 
@@ -46,10 +46,10 @@ LevelDialog.prototype.show = function() {
  * @return {Element} - The SVG rect element
  */
 LevelDialog.prototype.drawBackground = function() {
-	const RD = RowDialog;
-	let rect = GuiElements.draw.rect(0, 0, this.width, this.height, RD.bgColor, RD.cornerR, RD.cornerR);
-	this.group.appendChild(rect);
-	return rect;
+  const RD = RowDialog;
+  let rect = GuiElements.draw.rect(0, 0, this.width, this.height, RD.bgColor, RD.cornerR, RD.cornerR);
+  this.group.appendChild(rect);
+  return rect;
 };
 
 LevelDialog.prototype.createContent = function() {
@@ -58,13 +58,13 @@ LevelDialog.prototype.createContent = function() {
   const rowGroup = GuiElements.create.group(0, 0);
 
   //const margin = this.width/16;
-  const bnMargin = this.width * 0.1//0.08; //Margin between buttons
-  const hMargin = bnMargin * 0.5;//4/3; //Margin on outer edges
+  const bnMargin = this.width * 0.1 //0.08; //Margin between buttons
+  const hMargin = bnMargin * 0.5; //4/3; //Margin on outer edges
   //const bnDim = (this.width - margin*(2+(LD.totalLevels-1)*1.5))/LD.totalLevels; //buttons are square
-  const bnDim = (this.width - 2*hMargin - bnMargin*(LM.totalLevels-1))/LM.totalLevels
+  const bnDim = (this.width - 2 * hMargin - bnMargin * (LM.totalLevels - 1)) / LM.totalLevels
 
   //const y = margin;
-  const y = (this.height - bnDim)/2;
+  const y = (this.height - bnDim) / 2;
   //var x = margin;
   var x = hMargin
 
@@ -75,17 +75,25 @@ LevelDialog.prototype.createContent = function() {
     //for iOS 9, using i directly in the callback causes variable scoping problems
     switch (i) {
       case 1:
-        button.setCallbackFunction(function(){this.setLevel(1);}.bind(this), false);
+        button.setCallbackFunction(function() {
+          this.setLevel(1);
+        }.bind(this), false);
         break;
       case 2:
-        button.setCallbackFunction(function(){this.setLevel(2);}.bind(this), false);
+        button.setCallbackFunction(function() {
+          this.setLevel(2);
+        }.bind(this), false);
         break;
       case 3:
-        button.setCallbackFunction(function(){this.setLevel(3);}.bind(this), false);
+        button.setCallbackFunction(function() {
+          this.setLevel(3);
+        }.bind(this), false);
         break;
     }
     //button.setCallbackFunction(function(){this.setLevel(i);}.bind(this), false);
-    button.setCallbackFunction(function(){this.close();}.bind(this), true);
+    button.setCallbackFunction(function() {
+      this.close();
+    }.bind(this), true);
 
     this.buttons.push(button);
     //x+= bnDim + 1.5*margin;
@@ -106,9 +114,9 @@ LevelDialog.prototype.setLevel = function(level) {
 
 LevelDialog.prototype.highlightSelected = function() {
   const LM = LevelManager;
-  for (let i = 0; i < LM.totalLevels; i++){
+  for (let i = 0; i < LM.totalLevels; i++) {
     const bn = this.buttons[i];
-    if (LM.currentLevel == i + 1){
+    if (LM.currentLevel == i + 1) {
       GuiElements.update.color(bn.bgRect, LevelDialog.color);
       GuiElements.update.color(bn.textE, Colors.white);
     } else {
@@ -121,11 +129,11 @@ LevelDialog.prototype.highlightSelected = function() {
 LevelDialog.prototype.close = function() {
   if (this.visible) {
     this.visible = false;
-		this.group.remove();
+    this.group.remove();
     if (RowDialog.currentDialog === this) {
-			RowDialog.currentDialog = null;
-		}
-	}
+      RowDialog.currentDialog = null;
+    }
+  }
 }
 
 /**
@@ -133,6 +141,6 @@ LevelDialog.prototype.close = function() {
  */
 LevelDialog.prototype.closeDialog = function() {
   //console.log("LevelDialog.prototype.closeDialog")
-	this.close();
+  this.close();
   GuiElements.unblockInteraction();
 }

@@ -7,13 +7,13 @@
  * @constructor
  */
 function List(name, data) {
-	this.name = name;
-	if (data != null) {
-		this.data = data;
-	} else {
-		this.data = new ListData();
-	}
-	CodeManager.addList(this);
+  this.name = name;
+  if (data != null) {
+    this.data = data;
+  } else {
+    this.data = new ListData();
+  }
+  CodeManager.addList(this);
 }
 
 /**
@@ -21,7 +21,7 @@ function List(name, data) {
  * @return {string}
  */
 List.prototype.getName = function() {
-	return this.name;
+  return this.name;
 };
 
 /**
@@ -29,7 +29,7 @@ List.prototype.getName = function() {
  * @return {SelectionData}
  */
 List.prototype.getSelectionData = function() {
-	return new SelectionData(this.name, this);
+  return new SelectionData(this.name, this);
 };
 
 /**
@@ -37,7 +37,7 @@ List.prototype.getSelectionData = function() {
  * @return {ListData}
  */
 List.prototype.getData = function() {
-	return this.data;
+  return this.data;
 };
 
 /**
@@ -45,15 +45,15 @@ List.prototype.getData = function() {
  * @param {ListData} data
  */
 List.prototype.setData = function(data) {
-	this.data = data;
+  this.data = data;
 };
 
 /**
  * Removes the list from the CodeManager, effectively deleting it
  */
 List.prototype.remove = function() {
-	this.data = null;
-	CodeManager.removeList(this);
+  this.data = null;
+  CodeManager.removeList(this);
 };
 
 /**
@@ -62,10 +62,10 @@ List.prototype.remove = function() {
  * @return {Node} - The XML Node for the List
  */
 List.prototype.createXml = function(xmlDoc) {
-	const list = XmlWriter.createElement(xmlDoc, "list");
-	XmlWriter.setAttribute(list, "name", this.name);
-	list.appendChild(this.data.createXml(xmlDoc));
-	return list;
+  const list = XmlWriter.createElement(xmlDoc, "list");
+  XmlWriter.setAttribute(list, "name", this.name);
+  list.appendChild(this.data.createXml(xmlDoc));
+  return list;
 };
 
 /**
@@ -74,49 +74,49 @@ List.prototype.createXml = function(xmlDoc) {
  * @return {List}
  */
 List.importXml = function(listNode) {
-	const name = XmlWriter.getAttribute(listNode, "name");
-	if (name != null) {
-		const dataNode = XmlWriter.findSubElement(listNode, "data");
-		let data = new ListData();
-		if (dataNode != null) {
-			const newData = Data.importXml(dataNode);
-			if (newData != null) {
-				data = newData;
-			}
-		}
-		return new List(name, data);
-	}
+  const name = XmlWriter.getAttribute(listNode, "name");
+  if (name != null) {
+    const dataNode = XmlWriter.findSubElement(listNode, "data");
+    let data = new ListData();
+    if (dataNode != null) {
+      const newData = Data.importXml(dataNode);
+      if (newData != null) {
+        data = newData;
+      }
+    }
+    return new List(name, data);
+  }
 };
 
 /**
  * Prompts the user to rename the list
  */
 List.prototype.rename = function() {
-	const callbackFn = function(cancelled, response) {
-		if (!cancelled && CodeManager.checkListName(response)) {
-			this.name = response;
-			CodeManager.renameList(this);
-		}
-	}.bind(this);
-	DialogManager.showPromptDialog(Language.getStr("Rename"), Language.getStr("Enter_new_name"), this.name, true, callbackFn);
+  const callbackFn = function(cancelled, response) {
+    if (!cancelled && CodeManager.checkListName(response)) {
+      this.name = response;
+      CodeManager.renameList(this);
+    }
+  }.bind(this);
+  DialogManager.showPromptDialog(Language.getStr("Rename"), Language.getStr("Enter_new_name"), this.name, true, callbackFn);
 };
 
 /**
  * Prompts the user to delete the list, or just deletes it if it is never used
  */
 List.prototype.delete = function() {
-	if (CodeManager.checkListUsed(this)) {
-		const callbackFn = function(response) {
-			if (response === "2") {
-				this.remove();
-				CodeManager.deleteList(this);
-			}
-		}.bind(this);
-		callbackFn.list = this;
-		let question = Language.getStr("Delete_question");
-		DialogManager.showChoiceDialog(Language.getStr("Delete"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
-	} else {
-		this.remove();
-		CodeManager.deleteList(this);
-	}
+  if (CodeManager.checkListUsed(this)) {
+    const callbackFn = function(response) {
+      if (response === "2") {
+        this.remove();
+        CodeManager.deleteList(this);
+      }
+    }.bind(this);
+    callbackFn.list = this;
+    let question = Language.getStr("Delete_question");
+    DialogManager.showChoiceDialog(Language.getStr("Delete"), question, Language.getStr("Dont_delete"), Language.getStr("Delete"), true, callbackFn);
+  } else {
+    this.remove();
+    CodeManager.deleteList(this);
+  }
 };

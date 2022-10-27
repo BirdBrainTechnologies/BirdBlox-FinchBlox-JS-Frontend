@@ -5,7 +5,7 @@
  * @constructor
  */
 function DeviceFlutter(name, id, RSSI, device) {
-	DeviceWithPorts.call(this, name, id, RSSI, device);
+  DeviceWithPorts.call(this, name, id, RSSI, device);
 }
 DeviceFlutter.prototype = Object.create(DeviceWithPorts.prototype);
 Device.setDeviceTypeName(DeviceFlutter, "flutter", "Flutter", "F");
@@ -18,12 +18,12 @@ DeviceFlutter.prototype.constructor = DeviceFlutter;
  * @param {number} frequency - The frequency of the sound the buzzer produces
  */
 DeviceFlutter.prototype.setBuzzer = function(status, volume, frequency) {
-	const request = new HttpRequestBuilder("robot/out/buzzer");
-	request.addParam("type", this.getDeviceTypeId());
-	request.addParam("id", this.id);
-	request.addParam("volume", volume);
-	request.addParam("frequency", frequency);
-	HtmlServer.sendRequest(request.toString(), status, true);
+  const request = new HttpRequestBuilder("robot/out/buzzer");
+  request.addParam("type", this.getDeviceTypeId());
+  request.addParam("id", this.id);
+  request.addParam("volume", volume);
+  request.addParam("frequency", frequency);
+  HtmlServer.sendRequest(request.toString(), status, true);
 };
 
 /**
@@ -31,5 +31,5 @@ DeviceFlutter.prototype.setBuzzer = function(status, volume, frequency) {
  * @return {string}
  */
 DeviceFlutter.getConnectionInstructions = function() {
-	return "Press the \"find me\" button on your Flutter";
+  return "Press the \"find me\" button on your Flutter";
 };

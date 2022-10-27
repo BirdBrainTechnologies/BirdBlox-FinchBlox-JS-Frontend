@@ -5,46 +5,46 @@
  * keeps track of variables/lists, and passes messages to Blocks/Stacks/Slots/Tabs
  */
 function CodeManager() {
-	const move = CodeManager.move;   // shorthand
-	move.moving = false;   // Is there a BlockStack that is currently moving?
-	move.stack = null;   // Reference to BlockStack that is currently moving.
-	move.offsetX = 0;   // The difference between the BlockStack's x and the touch x.
-	move.offsetY = 0;   // The difference between the BlockStack's y and the touch y.
-	move.touchX = 0;   // The x coord of the user's finger.
-	move.touchY = 0;   // The y coord of the user's finger.
-	move.topX = 0;   // The top-left corner's x coord of the BlockStack being moved.
-	move.topY = 0;   // The top-left corner's y-coord of the BlockStack being moved.
-	move.bottomX = 0;   // The bottom-right corner
-	move.bottomY = 0;
-	move.startedFromPalette = false;   // Whether the block being dragged originated from the BLockPalette
-	// The return type of the BlockStack. (none unless it is a reporter, predicate, etc.)
-	move.returnType = null;
-	// Stores information used when determine which slot is closest to the moving stack.
-	CodeManager.fit = {};
+  const move = CodeManager.move; // shorthand
+  move.moving = false; // Is there a BlockStack that is currently moving?
+  move.stack = null; // Reference to BlockStack that is currently moving.
+  move.offsetX = 0; // The difference between the BlockStack's x and the touch x.
+  move.offsetY = 0; // The difference between the BlockStack's y and the touch y.
+  move.touchX = 0; // The x coord of the user's finger.
+  move.touchY = 0; // The y coord of the user's finger.
+  move.topX = 0; // The top-left corner's x coord of the BlockStack being moved.
+  move.topY = 0; // The top-left corner's y-coord of the BlockStack being moved.
+  move.bottomX = 0; // The bottom-right corner
+  move.bottomY = 0;
+  move.startedFromPalette = false; // Whether the block being dragged originated from the BLockPalette
+  // The return type of the BlockStack. (none unless it is a reporter, predicate, etc.)
+  move.returnType = null;
+  // Stores information used when determine which slot is closest to the moving stack.
+  CodeManager.fit = {};
 
-	CodeManager.variableList = [];   // A list of all the variables the user has created
-	CodeManager.listList = [];   // A list of all the lists the user has created
-	CodeManager.broadcastList = [];   // A list of broadcast messages in use.
+  CodeManager.variableList = []; // A list of all the variables the user has created
+  CodeManager.listList = []; // A list of all the lists the user has created
+  CodeManager.broadcastList = []; // A list of broadcast messages in use.
 
-	CodeManager.isRunning = false;   // Are at least some Blocks currently executing?
+  CodeManager.isRunning = false; // Are at least some Blocks currently executing?
 
-	CodeManager.updateTimer = null;   // A timer which tells executing Blocks to update.
-	CodeManager.updateInterval = 10;   // How quickly does the update timer fire (in ms)?
+  CodeManager.updateTimer = null; // A timer which tells executing Blocks to update.
+  CodeManager.updateInterval = 10; // How quickly does the update timer fire (in ms)?
 
-	// Stores the answer to the "ask" block. When the app first opens, the answer is an empty string.
-	CodeManager.answer = new StringData("");
-	CodeManager.message = new StringData("");   // Stores the broadcast message.
+  // Stores the answer to the "ask" block. When the app first opens, the answer is an empty string.
+  CodeManager.answer = new StringData("");
+  CodeManager.message = new StringData(""); // Stores the broadcast message.
 
-	CodeManager.sound = {};   // Store data for sound playback
-	CodeManager.sound.tempo = 60;   // Default tempo is 60 bpm for sound blocks.
-	CodeManager.sound.volume = 50;   // Default volume if 50%.
+  CodeManager.sound = {}; // Store data for sound playback
+  CodeManager.sound.tempo = 60; // Default tempo is 60 bpm for sound blocks.
+  CodeManager.sound.volume = 50; // Default volume if 50%.
 
-	CodeManager.timerForSensingBlock = new Date().getTime();   // Initialize the timer to the current time.
+  CodeManager.timerForSensingBlock = new Date().getTime(); // Initialize the timer to the current time.
 
-	// Track creation and modified times for the current file
-	// TODO: move this into SaveManager
-	CodeManager.modifiedTime = new Date().getTime();
-	CodeManager.createdTime = new Date().getTime();
+  // Track creation and modified times for the current file
+  // TODO: move this into SaveManager
+  CodeManager.modifiedTime = new Date().getTime();
+  CodeManager.createdTime = new Date().getTime();
 }
 
 /* CodeManager.move contains function to start, stop, and update the movement of a BlockStack.
@@ -59,30 +59,30 @@ CodeManager.move = {};
  * @param {number} y - The y coord of the user's finger.
  */
 CodeManager.move.start = function(block, x, y) {
-	const move = CodeManager.move;   // shorthand
-	if (!move.moving) {   // Only start moving the Block if no other Blocks are moving.
-		Overlay.closeOverlays();   // Close any visible overlays.
-		move.moving = true;   // Record that a Block is now moving.
-		/* Disconnect the Block from its current BlockStack to form a new BlockStack
-		containing only the Block and the Blocks below it. */
-		const stack = block.unsnap();
-		stack.fly();   // Make the new BlockStack fly (moves it into the drag layer).
-		move.bottomX = stack.relToAbsX(stack.dim.rw);   // Store the BlockStack's dimensions.
-		move.bottomY = stack.relToAbsY(stack.dim.rh);
-		move.returnType = stack.returnType;   // Store the BlockStack's return type.
-		move.startedFromPalette = BlockPalette.isStackOverPalette(x, y);
+  const move = CodeManager.move; // shorthand
+  if (!move.moving) { // Only start moving the Block if no other Blocks are moving.
+    Overlay.closeOverlays(); // Close any visible overlays.
+    move.moving = true; // Record that a Block is now moving.
+    /* Disconnect the Block from its current BlockStack to form a new BlockStack
+    containing only the Block and the Blocks below it. */
+    const stack = block.unsnap();
+    stack.fly(); // Make the new BlockStack fly (moves it into the drag layer).
+    move.bottomX = stack.relToAbsX(stack.dim.rw); // Store the BlockStack's dimensions.
+    move.bottomY = stack.relToAbsY(stack.dim.rh);
+    move.returnType = stack.returnType; // Store the BlockStack's return type.
+    move.startedFromPalette = BlockPalette.isStackOverPalette(x, y);
 
-		// Store other information about how the BlockStack can connect to other Blocks.
-		move.bottomOpen = stack.getLastBlock().bottomOpen;
-		move.topOpen = stack.firstBlock.topOpen;
-		move.returnsValue = stack.firstBlock.returnsValue;
+    // Store other information about how the BlockStack can connect to other Blocks.
+    move.bottomOpen = stack.getLastBlock().bottomOpen;
+    move.topOpen = stack.firstBlock.topOpen;
+    move.returnsValue = stack.firstBlock.returnsValue;
 
-		move.touchX = x;   // Store coords
-		move.touchY = y;
-		move.offsetX = stack.getAbsX() - x;   // Store offset.
-		move.offsetY = stack.getAbsY() - y;
-		move.stack = stack;   // Store stack.
-	}
+    move.touchX = x; // Store coords
+    move.touchY = y;
+    move.offsetX = stack.getAbsX() - x; // Store offset.
+    move.offsetY = stack.getAbsY() - y;
+    move.stack = stack; // Store stack.
+  }
 };
 
 /**
@@ -92,96 +92,100 @@ CodeManager.move.start = function(block, x, y) {
  * @param {number} y - The y coord of the user's finger.
  */
 CodeManager.move.update = function(x, y) {
-	const move = CodeManager.move;   // shorthand
-	if (move.moving) {   // Only update if a BlockStack is currently moving.
-		move.touchX = x;
-		move.touchY = y;
-		move.topX = move.offsetX + x;
-		move.topY = move.offsetY + y;
-		move.bottomX = move.stack.relToAbsX(move.stack.dim.rw);
-		move.bottomY = move.stack.relToAbsY(move.stack.dim.rh);
-		// Move the BlockStack to the correct location.
-		move.stack.move(CodeManager.dragAbsToRelX(move.topX), CodeManager.dragAbsToRelY(move.topY));
-		// If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
+  const move = CodeManager.move; // shorthand
+  if (move.moving) { // Only update if a BlockStack is currently moving.
+    move.touchX = x;
+    move.touchY = y;
+    move.topX = move.offsetX + x;
+    move.topY = move.offsetY + y;
+    move.bottomX = move.stack.relToAbsX(move.stack.dim.rw);
+    move.bottomY = move.stack.relToAbsY(move.stack.dim.rh);
+    // Move the BlockStack to the correct location.
+    move.stack.move(CodeManager.dragAbsToRelX(move.topX), CodeManager.dragAbsToRelY(move.topY));
+    // If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
     var wouldDelete = BlockPalette.isStackOverPalette(move.touchX, move.touchY);
-    if (FinchBlox) { wouldDelete |= TitleBar.isStackOverTitleBar(move.touchX, move.touchY); }
-		if (wouldDelete) {
-			Highlighter.hide();   // Hide any existing highlight.
-			if (!move.startedFromPalette) {
-				BlockPalette.showTrash();
-			}
-		} else {
-			BlockPalette.hideTrash();
-			// The slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
-			CodeManager.findBestFit();
-			if (CodeManager.fit.found) {
-				if (FinchBlox) {
-					let fit = CodeManager.fit.bestFit;
-					Highlighter.showShadow(fit, move.stack);
-				} else {
-					CodeManager.fit.bestFit.highlight();   // If such a slot exists, highlight it.
-				}
-			} else {
-				Highlighter.hide();   // If not, hide any existing highlight.
-			}
-		}
-	}
+    if (FinchBlox) {
+      wouldDelete |= TitleBar.isStackOverTitleBar(move.touchX, move.touchY);
+    }
+    if (wouldDelete) {
+      Highlighter.hide(); // Hide any existing highlight.
+      if (!move.startedFromPalette) {
+        BlockPalette.showTrash();
+      }
+    } else {
+      BlockPalette.hideTrash();
+      // The slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
+      CodeManager.findBestFit();
+      if (CodeManager.fit.found) {
+        if (FinchBlox) {
+          let fit = CodeManager.fit.bestFit;
+          Highlighter.showShadow(fit, move.stack);
+        } else {
+          CodeManager.fit.bestFit.highlight(); // If such a slot exists, highlight it.
+        }
+      } else {
+        Highlighter.hide(); // If not, hide any existing highlight.
+      }
+    }
+  }
 };
 
 /**
  * Drops the BlockStack that is currently moving and connects it to the Slot/Block that fits it.
  */
 CodeManager.move.end = function() {
-	const move = CodeManager.move;   // shorthand
-	const fit = CodeManager.fit;   // shorthand
-	if (move.moving) {   // Only run if a BlockStack is currently moving.
-		move.topX = move.offsetX + move.touchX;
-		move.topY = move.offsetY + move.touchY;
-		move.bottomX = move.stack.relToAbsX(move.stack.dim.rw);
-		move.bottomY = move.stack.relToAbsY(move.stack.dim.rh);
-		// If the BlockStack overlaps with the BlockPalette, delete it.
+  const move = CodeManager.move; // shorthand
+  const fit = CodeManager.fit; // shorthand
+  if (move.moving) { // Only run if a BlockStack is currently moving.
+    move.topX = move.offsetX + move.touchX;
+    move.topY = move.offsetY + move.touchY;
+    move.bottomX = move.stack.relToAbsX(move.stack.dim.rw);
+    move.bottomY = move.stack.relToAbsY(move.stack.dim.rh);
+    // If the BlockStack overlaps with the BlockPalette, delete it.
     var shouldDelete = BlockPalette.isStackOverPalette(move.touchX, move.touchY);
-    if (FinchBlox) { shouldDelete |= TitleBar.isStackOverTitleBar(move.touchX, move.touchY); }
-		if (shouldDelete) {
-			if (move.startedFromPalette) {
-				move.stack.remove();
-			} else {
-				UndoManager.deleteStack(move.stack);
-				SaveManager.markEdited();
-			}
-		} else {
-			// The Block/Slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
-			CodeManager.findBestFit();
-			if (fit.found) {
-				// Snap is onto the Block/Slot that fits it best.
-				fit.bestFit.snap(move.stack.firstBlock);
-				Sound.playSnap();
-			} else {
-				// If it is not going to be snapped or deleted, simply drop it onto the current tab.
-				move.stack.land();
-				move.stack.updateDim();   // Fix! this line of code might not be needed.
-			}
-			SaveManager.markEdited();
-		}
-		Highlighter.hide();   // Hide any existing highlight.
-		move.moving = false;   // There are now no moving BlockStacks.
-		BlockPalette.hideTrash();
-	}
+    if (FinchBlox) {
+      shouldDelete |= TitleBar.isStackOverTitleBar(move.touchX, move.touchY);
+    }
+    if (shouldDelete) {
+      if (move.startedFromPalette) {
+        move.stack.remove();
+      } else {
+        UndoManager.deleteStack(move.stack);
+        SaveManager.markEdited();
+      }
+    } else {
+      // The Block/Slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
+      CodeManager.findBestFit();
+      if (fit.found) {
+        // Snap is onto the Block/Slot that fits it best.
+        fit.bestFit.snap(move.stack.firstBlock);
+        Sound.playSnap();
+      } else {
+        // If it is not going to be snapped or deleted, simply drop it onto the current tab.
+        move.stack.land();
+        move.stack.updateDim(); // Fix! this line of code might not be needed.
+      }
+      SaveManager.markEdited();
+    }
+    Highlighter.hide(); // Hide any existing highlight.
+    move.moving = false; // There are now no moving BlockStacks.
+    BlockPalette.hideTrash();
+  }
 };
 
 /**
  * Drops the BlockStack where it is without attaching it to anything or deleting it.
  */
 CodeManager.move.interrupt = function() {
-	const move = CodeManager.move;   // shorthand
-	if (move.moving) {   // Only run if a BlockStack is currently moving.
-		move.topX = move.offsetX + move.touchX;
-		move.topY = move.offsetY + move.touchY;
-		move.stack.land();
-		move.stack.updateDim();   // Fix! this line of code might not be needed.
-		Highlighter.hide();   // Hide any existing highlight.
-		move.moving = false;   // There are now no moving BlockStacks.
-	}
+  const move = CodeManager.move; // shorthand
+  if (move.moving) { // Only run if a BlockStack is currently moving.
+    move.topX = move.offsetX + move.touchX;
+    move.topY = move.offsetY + move.touchY;
+    move.stack.land();
+    move.stack.updateDim(); // Fix! this line of code might not be needed.
+    Highlighter.hide(); // Hide any existing highlight.
+    move.moving = false; // There are now no moving BlockStacks.
+  }
 };
 
 /**
@@ -196,8 +200,8 @@ CodeManager.move.interrupt = function() {
  * @return {boolean} - Is the point within the region?
  */
 CodeManager.move.pInRange = function(x1, y1, xR, yR, width, height) {
-	// Checks to see if the point is on the correct side of all four sides of the rectangular region.
-	return (x1 >= xR && x1 <= xR + width && y1 >= yR && y1 <= yR + height);
+  // Checks to see if the point is on the correct side of all four sides of the rectangular region.
+  return (x1 >= xR && x1 <= xR + width && y1 >= yR && y1 <= yR + height);
 };
 
 /**
@@ -214,17 +218,17 @@ CodeManager.move.pInRange = function(x1, y1, xR, yR, width, height) {
  * @return {boolean} - Do the rectangular regions overlap?
  */
 CodeManager.move.rInRange = function(x1, y1, width1, height1, x2, y2, width2, height2) {
-	// These conditions check that there are no vertical or horizontal gaps between the regions.
-	// Is the right side of region 1 to the right of the left side of region 2?
-	const xBigEnough = x1 + width1 >= x2;
-	// Is the bottom side of region 1 below the top side of region 2?
-	const yBigEnough = y1 + height1 >= y2;
-	// Is the left side of region 1 to the left of the right side of region 2?
-	const xSmallEnough = x1 <= x2 + width2;
-	// Is the top side of region 1 above the bottom side of region 2?
-	const ySmallEnough = y1 <= y2 + height2;
-	// If it passes all 4 checks, the regions overlap.
-	return xBigEnough && yBigEnough && xSmallEnough && ySmallEnough;
+  // These conditions check that there are no vertical or horizontal gaps between the regions.
+  // Is the right side of region 1 to the right of the left side of region 2?
+  const xBigEnough = x1 + width1 >= x2;
+  // Is the bottom side of region 1 below the top side of region 2?
+  const yBigEnough = y1 + height1 >= y2;
+  // Is the left side of region 1 to the left of the right side of region 2?
+  const xSmallEnough = x1 <= x2 + width2;
+  // Is the top side of region 1 above the bottom side of region 2?
+  const ySmallEnough = y1 <= y2 + height2;
+  // If it passes all 4 checks, the regions overlap.
+  return xBigEnough && yBigEnough && xSmallEnough && ySmallEnough;
 };
 
 /**
@@ -232,11 +236,11 @@ CodeManager.move.rInRange = function(x1, y1, width1, height1, x2, y2, width2, he
  * All results are stored in CodeManager.fit.  Nothing is returned.
  */
 CodeManager.findBestFit = function() {
-	const fit = CodeManager.fit;   // shorthand
-	fit.found = false;   // Have any matching slot/block been found?
-	fit.bestFit = null;   // Slot/Block that is closest to the item?
-	fit.dist = 0;   // How far is the best candidate from the ideal location?
-	TabManager.activeTab.findBestFit();   // Begins the recursive calls.
+  const fit = CodeManager.fit; // shorthand
+  fit.found = false; // Have any matching slot/block been found?
+  fit.bestFit = null; // Slot/Block that is closest to the item?
+  fit.dist = 0; // How far is the best candidate from the ideal location?
+  TabManager.activeTab.findBestFit(); // Begins the recursive calls.
 };
 
 
@@ -245,24 +249,24 @@ CodeManager.findBestFit = function() {
  * Stops the update timer if all Blocks are finished.
  */
 CodeManager.updateRun = function() {
-	const CM = CodeManager;
-	if (!TabManager.updateRun().isRunning()) {   // A recursive call.  Returns true if any Blocks are running.
-		CM.stopUpdateTimer();   // If no Blocks are running, stop the update timer.
-	}
+  const CM = CodeManager;
+  if (!TabManager.updateRun().isRunning()) { // A recursive call.  Returns true if any Blocks are running.
+    CM.stopUpdateTimer(); // If no Blocks are running, stop the update timer.
+  }
 };
 
 /**
  * Recursively stops all Block execution.
  */
 CodeManager.stop = function() {
-	Device.stopAll();   // Stop any motors and LEDs on the devices
-	TabManager.stop();   // Recursive call.
-	CodeManager.stopUpdateTimer();   // Stop the update timer.
-	DisplayBoxManager.hide();   // Hide any messages being displayed.
-	Sound.stopAllSounds() // Stops all sounds and tones
+  Device.stopAll(); // Stop any motors and LEDs on the devices
+  TabManager.stop(); // Recursive call.
+  CodeManager.stopUpdateTimer(); // Stop the update timer.
+  DisplayBoxManager.hide(); // Hide any messages being displayed.
+  Sound.stopAllSounds() // Stops all sounds and tones
   BlockPalette.passRecursively("passRecursively", "stop"); //Stop any block running in the block palette
-	// Note: Tones are not allowed to be async, so they
-	// must be stopped manually
+  // Note: Tones are not allowed to be async, so they
+  // must be stopped manually
 
   //If an autoExecute block is on the active tab, restart it.
   TabManager.activeTab.passRecursively("startRunIfAutoExec")
@@ -272,22 +276,22 @@ CodeManager.stop = function() {
  * Stops the update timer for block execution
  */
 CodeManager.stopUpdateTimer = function() {
-	if (CodeManager.isRunning) {   // If the timer is currently running...
-		//...Stop the timer.
-		CodeManager.updateTimer = window.clearInterval(CodeManager.updateTimer);
-		CodeManager.isRunning = false;
-	}
+  if (CodeManager.isRunning) { // If the timer is currently running...
+    //...Stop the timer.
+    CodeManager.updateTimer = window.clearInterval(CodeManager.updateTimer);
+    CodeManager.isRunning = false;
+  }
 };
 
 /**
  * Starts the update timer.  When it fires, the timer will call the CodeManager.updateRun function.
  */
 CodeManager.startUpdateTimer = function() {
-	if (!CodeManager.isRunning) {   // If the timer is not running...
-		//...Start the timer.
-		CodeManager.updateTimer = self.setInterval(DebugOptions.safeFunc(CodeManager.updateRun), CodeManager.updateInterval);
-		CodeManager.isRunning = true;
-	}
+  if (!CodeManager.isRunning) { // If the timer is not running...
+    //...Start the timer.
+    CodeManager.updateTimer = self.setInterval(DebugOptions.safeFunc(CodeManager.updateRun), CodeManager.updateInterval);
+    CodeManager.isRunning = true;
+  }
 };
 
 /**
@@ -295,7 +299,7 @@ CodeManager.startUpdateTimer = function() {
  * @return {boolean} - Whether a broadcast Block should run now or wait
  */
 CodeManager.checkBroadcastDelay = function() {
-	return HtmlServer.unansweredCount < HtmlServer.unansweredCap;
+  return HtmlServer.unansweredCount < HtmlServer.unansweredCap;
 };
 
 
@@ -304,7 +308,7 @@ CodeManager.checkBroadcastDelay = function() {
  * @param {Variable} variable
  */
 CodeManager.addVariable = function(variable) {
-	CodeManager.variableList.push(variable);
+  CodeManager.variableList.push(variable);
 };
 
 /**
@@ -312,8 +316,8 @@ CodeManager.addVariable = function(variable) {
  * @param {Variable} variable
  */
 CodeManager.removeVariable = function(variable) {
-	const index = CodeManager.variableList.indexOf(variable);
-	CodeManager.variableList.splice(index, 1);
+  const index = CodeManager.variableList.indexOf(variable);
+  CodeManager.variableList.splice(index, 1);
 };
 
 /**
@@ -322,17 +326,17 @@ CodeManager.removeVariable = function(variable) {
  * @param {function} [callbackCancel] - type () -> (), called if the user cancels variable creation
  */
 CodeManager.newVariable = function(callbackCreate, callbackCancel) {
-	DialogManager.showPromptDialog(Language.getStr("Create_Variable"), Language.getStr("Enter_new_name"), "", true, function(cancelled, result) {
-		if (!cancelled && CodeManager.checkVarName(result)) {
-			result = result.trim();
-			const variable = new Variable(result);
-			SaveManager.markEdited();
-			BlockPalette.getCategory("variables").refreshGroup();
-			if (callbackCreate != null) callbackCreate(variable);
-		} else {
-			if (callbackCancel != null) callbackCancel();
-		}
-	});
+  DialogManager.showPromptDialog(Language.getStr("Create_Variable"), Language.getStr("Enter_new_name"), "", true, function(cancelled, result) {
+    if (!cancelled && CodeManager.checkVarName(result)) {
+      result = result.trim();
+      const variable = new Variable(result);
+      SaveManager.markEdited();
+      BlockPalette.getCategory("variables").refreshGroup();
+      if (callbackCreate != null) callbackCreate(variable);
+    } else {
+      if (callbackCancel != null) callbackCancel();
+    }
+  });
 };
 
 /**
@@ -341,17 +345,17 @@ CodeManager.newVariable = function(callbackCreate, callbackCancel) {
  * @return {boolean} - false if the name is empty or already in use
  */
 CodeManager.checkVarName = function(name) {
-	name = name.trim();
-	if (name.length > 0) {
-		const variables = CodeManager.variableList;
-		for (let i = 0; i < variables.length; i++) {
-			if (variables[i].getName() === name) {
-				return false;
-			}
-		}
-		return true;
-	}
-	return false;
+  name = name.trim();
+  if (name.length > 0) {
+    const variables = CodeManager.variableList;
+    for (let i = 0; i < variables.length; i++) {
+      if (variables[i].getName() === name) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
 };
 
 /**
@@ -360,13 +364,13 @@ CodeManager.checkVarName = function(name) {
  * @return {Variable|null} - The variable or null if it can't be found
  */
 CodeManager.findVar = function(name) {
-	const variables = CodeManager.variableList;
-	for (let i = 0; i < variables.length; i++) {
-		if (variables[i].getName() === name) {
-			return variables[i];
-		}
-	}
-	return null;
+  const variables = CodeManager.variableList;
+  for (let i = 0; i < variables.length; i++) {
+    if (variables[i].getName() === name) {
+      return variables[i];
+    }
+  }
+  return null;
 };
 
 /**
@@ -374,7 +378,7 @@ CodeManager.findVar = function(name) {
  * @param {List} list
  */
 CodeManager.addList = function(list) {
-	CodeManager.listList.push(list);
+  CodeManager.listList.push(list);
 };
 
 /**
@@ -382,8 +386,8 @@ CodeManager.addList = function(list) {
  * @param {List} list
  */
 CodeManager.removeList = function(list) {
-	const index = CodeManager.listList.indexOf(list);
-	CodeManager.listList.splice(index, 1);
+  const index = CodeManager.listList.indexOf(list);
+  CodeManager.listList.splice(index, 1);
 };
 
 /**
@@ -392,17 +396,17 @@ CodeManager.removeList = function(list) {
  * @param {function} callbackCancel - type () -> (), called if the user cancels list creation
  */
 CodeManager.newList = function(callbackCreate, callbackCancel) {
-	DialogManager.showPromptDialog(Language.getStr("Create_List"), Language.getStr("Enter_new_name"), "", true, function(cancelled, result) {
-		if (!cancelled && CodeManager.checkListName(result)) {
-			result = result.trim();
-			const list = new List(result);
-			SaveManager.markEdited();
-			BlockPalette.getCategory("variables").refreshGroup();
-			if (callbackCreate != null) callbackCreate(list);
-		} else {
-			if (callbackCancel != null) callbackCancel();
-		}
-	});
+  DialogManager.showPromptDialog(Language.getStr("Create_List"), Language.getStr("Enter_new_name"), "", true, function(cancelled, result) {
+    if (!cancelled && CodeManager.checkListName(result)) {
+      result = result.trim();
+      const list = new List(result);
+      SaveManager.markEdited();
+      BlockPalette.getCategory("variables").refreshGroup();
+      if (callbackCreate != null) callbackCreate(list);
+    } else {
+      if (callbackCancel != null) callbackCancel();
+    }
+  });
 };
 
 /**
@@ -411,17 +415,17 @@ CodeManager.newList = function(callbackCreate, callbackCancel) {
  * @return {boolean} - false if the name is empty or in use
  */
 CodeManager.checkListName = function(name) {
-	name = name.trim();
-	if (name.length > 0) {
-		const lists = CodeManager.listList;
-		for (let i = 0; i < lists.length; i++) {
-			if (lists[i].getName() === name) {
-				return false;
-			}
-		}
-		return true;
-	}
-	return false;
+  name = name.trim();
+  if (name.length > 0) {
+    const lists = CodeManager.listList;
+    for (let i = 0; i < lists.length; i++) {
+      if (lists[i].getName() === name) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
 };
 
 /**
@@ -430,13 +434,13 @@ CodeManager.checkListName = function(name) {
  * @return {List|null} - The List or null if it can't be found
  */
 CodeManager.findList = function(name) {
-	const lists = CodeManager.listList;
-	for (let i = 0; i < lists.length; i++) {
-		if (lists[i].getName() === name) {
-			return lists[i];
-		}
-	}
-	return null;
+  const lists = CodeManager.listList;
+  for (let i = 0; i < lists.length; i++) {
+    if (lists[i].getName() === name) {
+      return lists[i];
+    }
+  }
+  return null;
 };
 
 /**
@@ -444,9 +448,9 @@ CodeManager.findList = function(name) {
  * @param {Variable} variable
  */
 CodeManager.renameVariable = function(variable) {
-	TabManager.renameVariable(variable);
-	BlockPalette.getCategory("variables").refreshGroup();
-	SaveManager.markEdited();
+  TabManager.renameVariable(variable);
+  BlockPalette.getCategory("variables").refreshGroup();
+  SaveManager.markEdited();
 };
 
 /**
@@ -454,9 +458,9 @@ CodeManager.renameVariable = function(variable) {
  * @param {Variable} variable
  */
 CodeManager.deleteVariable = function(variable) {
-	TabManager.deleteVariable(variable);
-	BlockPalette.getCategory("variables").refreshGroup();
-	SaveManager.markEdited();
+  TabManager.deleteVariable(variable);
+  BlockPalette.getCategory("variables").refreshGroup();
+  SaveManager.markEdited();
 };
 
 /**
@@ -464,9 +468,9 @@ CodeManager.deleteVariable = function(variable) {
  * @param {List} list
  */
 CodeManager.renameList = function(list) {
-	TabManager.renameList(list);
-	BlockPalette.getCategory("variables").refreshGroup();
-	SaveManager.markEdited();
+  TabManager.renameList(list);
+  BlockPalette.getCategory("variables").refreshGroup();
+  SaveManager.markEdited();
 };
 
 /**
@@ -474,9 +478,9 @@ CodeManager.renameList = function(list) {
  * @param {List} list
  */
 CodeManager.deleteList = function(list) {
-	TabManager.deleteList(list);
-	BlockPalette.getCategory("variables").refreshGroup();
-	SaveManager.markEdited();
+  TabManager.deleteList(list);
+  BlockPalette.getCategory("variables").refreshGroup();
+  SaveManager.markEdited();
 };
 
 /**
@@ -486,7 +490,7 @@ CodeManager.deleteList = function(list) {
  * @return {boolean}
  */
 CodeManager.checkVariableUsed = function(variable) {
-	return TabManager.checkVariableUsed(variable);
+  return TabManager.checkVariableUsed(variable);
 };
 
 /**
@@ -495,7 +499,7 @@ CodeManager.checkVariableUsed = function(variable) {
  * @return {boolean}
  */
 CodeManager.checkListUsed = function(list) {
-	return TabManager.checkListUsed(list);
+  return TabManager.checkListUsed(list);
 };
 
 
@@ -505,8 +509,8 @@ CodeManager.checkListUsed = function(list) {
  * @param {string} newName
  */
 CodeManager.renameRecording = function(oldName, newName) {
-	CodeManager.passRecursivelyDown("renameRecording", true, oldName, newName);
-	SaveManager.markEdited();
+  CodeManager.passRecursivelyDown("renameRecording", true, oldName, newName);
+  SaveManager.markEdited();
 };
 
 /**
@@ -514,8 +518,8 @@ CodeManager.renameRecording = function(oldName, newName) {
  * @param {string} recording
  */
 CodeManager.deleteRecording = function(recording) {
-	CodeManager.passRecursivelyDown("deleteRecording", true, recording);
-	SaveManager.markEdited();
+  CodeManager.passRecursivelyDown("deleteRecording", true, recording);
+  SaveManager.markEdited();
 };
 
 
@@ -526,13 +530,13 @@ CodeManager.deleteRecording = function(recording) {
  * TODO: Just use a set instead of a list for CodeManager.broadcastList
  */
 CodeManager.checkBroadcastMessage = function(message) {
-	const messages = CodeManager.broadcastList;
-	for (let i = 0; i < messages.length; i++) {
-		if (messages[i] === message) {
-			return false;
-		}
-	}
-	return true;
+  const messages = CodeManager.broadcastList;
+  for (let i = 0; i < messages.length; i++) {
+    if (messages[i] === message) {
+      return false;
+    }
+  }
+  return true;
 };
 
 /**
@@ -540,17 +544,17 @@ CodeManager.checkBroadcastMessage = function(message) {
  * @param {string} message
  */
 CodeManager.addBroadcastMessage = function(message) {
-	if (CodeManager.checkBroadcastMessage(message)) {
-		CodeManager.broadcastList.push(message);
-	}
+  if (CodeManager.checkBroadcastMessage(message)) {
+    CodeManager.broadcastList.push(message);
+  }
 };
 
 /**
  * Recursively tells children to populate the broadcastList
  */
 CodeManager.updateAvailableMessages = function() {
-	CodeManager.broadcastList = [];
-	TabManager.updateAvailableMessages();
+  CodeManager.broadcastList = [];
+  TabManager.updateAvailableMessages();
 };
 
 /**
@@ -558,7 +562,7 @@ CodeManager.updateAvailableMessages = function() {
  * @param {string} message
  */
 CodeManager.eventBroadcast = function(message) {
-	TabManager.eventBroadcast(message);
+  TabManager.eventBroadcast(message);
 };
 
 /**
@@ -567,14 +571,14 @@ CodeManager.eventBroadcast = function(message) {
  * @return {boolean}
  */
 CodeManager.checkBroadcastRunning = function(message) {
-	return TabManager.checkBroadcastRunning(message);
+  return TabManager.checkBroadcastRunning(message);
 };
 
 /**
  * Recursively passes on the message that the flag button was tapped.
  */
 CodeManager.eventFlagClicked = function() {
-	TabManager.eventFlagClicked();
+  TabManager.eventFlagClicked();
 };
 
 /**
@@ -582,7 +586,7 @@ CodeManager.eventFlagClicked = function() {
  * @param deviceClass - subclass of Device, type of slots affected
  */
 CodeManager.hideDeviceDropDowns = function(deviceClass) {
-	CodeManager.passRecursivelyDown("hideDeviceDropDowns", true, deviceClass);
+  CodeManager.passRecursivelyDown("hideDeviceDropDowns", true, deviceClass);
 };
 
 /**
@@ -590,7 +594,7 @@ CodeManager.hideDeviceDropDowns = function(deviceClass) {
  * @param deviceClass - subclass of Device, type of slots affected
  */
 CodeManager.showDeviceDropDowns = function(deviceClass) {
-	CodeManager.passRecursivelyDown("showDeviceDropDowns", true, deviceClass);
+  CodeManager.passRecursivelyDown("showDeviceDropDowns", true, deviceClass);
 };
 
 /**
@@ -599,7 +603,7 @@ CodeManager.showDeviceDropDowns = function(deviceClass) {
  * @return {number}
  */
 CodeManager.countDevicesInUse = function(deviceClass) {
-	return TabManager.countDevicesInUse(deviceClass);
+  return TabManager.countDevicesInUse(deviceClass);
 };
 
 
@@ -607,15 +611,15 @@ CodeManager.countDevicesInUse = function(deviceClass) {
  * Recursively tells Blocks to become active/inactive based on the sensors that are available
  */
 CodeManager.updateAvailableSensors = function() {
-	TabManager.passRecursivelyDown("updateAvailableSensors");
-	BlockPalette.passRecursivelyDown("updateAvailableSensors");
+  TabManager.passRecursivelyDown("updateAvailableSensors");
+  BlockPalette.passRecursivelyDown("updateAvailableSensors");
 };
 
 /**
  * Recursively tells Blocks to become active/inactive based on the devices that are connected
  */
 CodeManager.updateConnectionStatus = function() {
-	CodeManager.passRecursivelyDown("updateConnectionStatus", true);
+  CodeManager.passRecursivelyDown("updateConnectionStatus", true);
 };
 
 
@@ -625,12 +629,12 @@ CodeManager.updateConnectionStatus = function() {
  * @return {number}
  */
 CodeManager.beatsToMs = function(beats) {
-	const tempo = CodeManager.sound.tempo;
-	const res = beats / tempo * 60 * 1000;
-	if (isNaN(res) || !isFinite(res)) {
-		return 0;
-	}
-	return res;
+  const tempo = CodeManager.sound.tempo;
+  const res = beats / tempo * 60 * 1000;
+  if (isNaN(res) || !isFinite(res)) {
+    return 0;
+  }
+  return res;
 };
 
 /**
@@ -638,15 +642,15 @@ CodeManager.beatsToMs = function(beats) {
  * @param {number} newTempo
  */
 CodeManager.setSoundTempo = function(newTempo) {
-	if (isFinite(newTempo) && !isNaN(newTempo)) {
-		if (newTempo >= 500) {
-			CodeManager.sound.tempo = 500;
-		} else if (newTempo <= 20) {
-			CodeManager.sound.tempo = 20;
-		} else {
-			CodeManager.sound.tempo = newTempo;
-		}
-	}
+  if (isFinite(newTempo) && !isNaN(newTempo)) {
+    if (newTempo >= 500) {
+      CodeManager.sound.tempo = 500;
+    } else if (newTempo <= 20) {
+      CodeManager.sound.tempo = 20;
+    } else {
+      CodeManager.sound.tempo = newTempo;
+    }
+  }
 };
 
 
@@ -656,11 +660,11 @@ CodeManager.setSoundTempo = function(newTempo) {
  * @param {boolean} includePalette - Whether Blocks in the palette should also get the message
  */
 CodeManager.passRecursivelyDown = function(message, includePalette) {
-	let args = [message].concat(Array.prototype.splice.call(arguments, 2));
-	TabManager.passRecursivelyDown.apply(TabManager, args);
-	if (includePalette) {
-		BlockPalette.passRecursivelyDown.apply(BlockPalette, args);
-	}
+  let args = [message].concat(Array.prototype.splice.call(arguments, 2));
+  TabManager.passRecursivelyDown.apply(TabManager, args);
+  if (includePalette) {
+    BlockPalette.passRecursivelyDown.apply(BlockPalette, args);
+  }
 };
 
 
@@ -669,29 +673,29 @@ CodeManager.passRecursivelyDown = function(message, includePalette) {
  * @return {Document} - The completed XML document
  */
 CodeManager.createXml = function() {
-	const CM = CodeManager;
-	const xmlDoc = XmlWriter.newDoc("project");
-	const project = xmlDoc.getElementsByTagName("project")[0];
-	let fileName = "project";
-	if (SaveManager.fileName != null) {
-		fileName = SaveManager.fileName;
-	}
-	XmlWriter.setAttribute(project, "name", fileName);
-	XmlWriter.setAttribute(project, "appVersion", GuiElements.appVersion);
-	XmlWriter.setAttribute(project, "created", CodeManager.createdTime);
-	XmlWriter.setAttribute(project, "modified", CodeManager.modifiedTime);
-	const variables = XmlWriter.createElement(xmlDoc, "variables");
-	for (let i = 0; i < CM.variableList.length; i++) {
-		variables.appendChild(CM.variableList[i].createXml(xmlDoc));
-	}
-	project.appendChild(variables);
-	const lists = XmlWriter.createElement(xmlDoc, "lists");
-	for (let i = 0; i < CM.listList.length; i++) {
-		lists.appendChild(CM.listList[i].createXml(xmlDoc));
-	}
-	project.appendChild(lists);
-	project.appendChild(TabManager.createXml(xmlDoc));
-	return xmlDoc;
+  const CM = CodeManager;
+  const xmlDoc = XmlWriter.newDoc("project");
+  const project = xmlDoc.getElementsByTagName("project")[0];
+  let fileName = "project";
+  if (SaveManager.fileName != null) {
+    fileName = SaveManager.fileName;
+  }
+  XmlWriter.setAttribute(project, "name", fileName);
+  XmlWriter.setAttribute(project, "appVersion", GuiElements.appVersion);
+  XmlWriter.setAttribute(project, "created", CodeManager.createdTime);
+  XmlWriter.setAttribute(project, "modified", CodeManager.modifiedTime);
+  const variables = XmlWriter.createElement(xmlDoc, "variables");
+  for (let i = 0; i < CM.variableList.length; i++) {
+    variables.appendChild(CM.variableList[i].createXml(xmlDoc));
+  }
+  project.appendChild(variables);
+  const lists = XmlWriter.createElement(xmlDoc, "lists");
+  for (let i = 0; i < CM.listList.length; i++) {
+    lists.appendChild(CM.listList[i].createXml(xmlDoc));
+  }
+  project.appendChild(lists);
+  project.appendChild(TabManager.createXml(xmlDoc));
+  return xmlDoc;
 };
 
 /**
@@ -699,50 +703,52 @@ CodeManager.createXml = function() {
  * @param projectNode
  */
 CodeManager.importXml = function(projectNode) {
-	CodeManager.deleteAll();
-	Sound.changeFile();
-	CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
-	CodeManager.createdTime = XmlWriter.getAttribute(projectNode, "created", new Date().getTime(), true);
-	const variablesNode = XmlWriter.findSubElement(projectNode, "variables");
-	if (variablesNode != null) {
-		const variableNodes = XmlWriter.findSubElements(variablesNode, "variable");
-		for (let i = 0; i < variableNodes.length; i++) {
-			Variable.importXml(variableNodes[i]);
-		}
-	}
-	const listsNode = XmlWriter.findSubElement(projectNode, "lists");
-	if (listsNode != null) {
-		const listNodes = XmlWriter.findSubElements(listsNode, "list");
-		for (let i = 0; i < listNodes.length; i++) {
-			List.importXml(listNodes[i]);
-		}
-	}
-  if (!FinchBlox) { BlockPalette.getCategory("variables").refreshGroup(); }
-	const tabsNode = XmlWriter.findSubElement(projectNode, "tabs");
-	TabManager.importXml(tabsNode);
-	BlockPalette.refresh();
-	DeviceManager.updateSelectableDevices();
-	TitleBar.setText(SaveManager.fileName);
-	TouchReceiver.enableInteraction();
+  CodeManager.deleteAll();
+  Sound.changeFile();
+  CodeManager.modifiedTime = XmlWriter.getAttribute(projectNode, "modified", new Date().getTime(), true);
+  CodeManager.createdTime = XmlWriter.getAttribute(projectNode, "created", new Date().getTime(), true);
+  const variablesNode = XmlWriter.findSubElement(projectNode, "variables");
+  if (variablesNode != null) {
+    const variableNodes = XmlWriter.findSubElements(variablesNode, "variable");
+    for (let i = 0; i < variableNodes.length; i++) {
+      Variable.importXml(variableNodes[i]);
+    }
+  }
+  const listsNode = XmlWriter.findSubElement(projectNode, "lists");
+  if (listsNode != null) {
+    const listNodes = XmlWriter.findSubElements(listsNode, "list");
+    for (let i = 0; i < listNodes.length; i++) {
+      List.importXml(listNodes[i]);
+    }
+  }
+  if (!FinchBlox) {
+    BlockPalette.getCategory("variables").refreshGroup();
+  }
+  const tabsNode = XmlWriter.findSubElement(projectNode, "tabs");
+  TabManager.importXml(tabsNode);
+  BlockPalette.refresh();
+  DeviceManager.updateSelectableDevices();
+  TitleBar.setText(SaveManager.fileName);
+  TouchReceiver.enableInteraction();
 };
 
 /**
  * Updates the modified time of the document
  */
 CodeManager.updateModified = function() {
-	CodeManager.modifiedTime = new Date().getTime();
+  CodeManager.modifiedTime = new Date().getTime();
 };
 
 /**
  * Deletes all tabs, stacks, and Blocks so a new project can be loaded
  */
 CodeManager.deleteAll = function() {
-	const CM = CodeManager;
-	CM.stop();
-	TabManager.deleteAll();
-	UndoManager.clearUndos();
+  const CM = CodeManager;
+  CM.stop();
+  TabManager.deleteAll();
+  UndoManager.clearUndos();
 
-	CodeManager();
+  CodeManager();
 };
 
 /**
@@ -750,24 +756,24 @@ CodeManager.deleteAll = function() {
  * @param message
  */
 CodeManager.markLoading = function(message) {
-	TitleBar.setText(message);
-	TouchReceiver.disableInteraction(1000);
+  TitleBar.setText(message);
+  TouchReceiver.disableInteraction(1000);
 };
 
 /**
  * Undoes markLoading, by restoring the filename and enabling interaction
  */
 CodeManager.cancelLoading = function() {
-	TitleBar.setText(SaveManager.fileName);
-	TouchReceiver.enableInteraction();
+  TitleBar.setText(SaveManager.fileName);
+  TouchReceiver.enableInteraction();
 };
 
 /**
  * Indicates that a file is now open.  Called from SaveManager.backendSetName
  */
 CodeManager.markOpen = function() {
-	TouchReceiver.enableInteraction();
-	BlockPalette.markOpen();
+  TouchReceiver.enableInteraction();
+  BlockPalette.markOpen();
 };
 
 
@@ -777,26 +783,26 @@ CodeManager.markOpen = function() {
  * @return {number}
  */
 CodeManager.dragAbsToRelX = function(x) {
-	return x / TabManager.getActiveZoom();
+  return x / TabManager.getActiveZoom();
 };
 /**
  * @param {number} y
  * @return {number}
  */
 CodeManager.dragAbsToRelY = function(y) {
-	return y / TabManager.getActiveZoom();
+  return y / TabManager.getActiveZoom();
 };
 /**
  * @param {number} x
  * @return {number}
  */
 CodeManager.dragRelToAbsX = function(x) {
-	return x * TabManager.getActiveZoom();
+  return x * TabManager.getActiveZoom();
 };
 /**
  * @param {number} y
  * @return {number}
  */
 CodeManager.dragRelToAbsY = function(y) {
-	return y * TabManager.getActiveZoom();
+  return y * TabManager.getActiveZoom();
 };

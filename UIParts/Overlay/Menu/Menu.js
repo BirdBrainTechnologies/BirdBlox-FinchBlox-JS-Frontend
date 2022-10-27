@@ -9,70 +9,70 @@
  * @constructor
  */
 function Menu(button, width) {
-	if (width == null) {
-		width = Menu.defaultWidth;
-	}
-	// Menus are a type of Overlay
-	Overlay.call(this, Overlay.types.menu);
-	DebugOptions.validateNumbers(width);
-	this.width = width;
-	// The position of the menu is determined by the button
-	this.x = button.x;
-	this.y = button.y + button.height;
-	this.group = GuiElements.create.group(this.x, this.y);
-	TouchReceiver.addListenersOverlayPart(this.group);
-	this.bgRect = GuiElements.create.rect(this.group);
-	GuiElements.update.color(this.bgRect, Menu.bgColor);
-	this.menuBnList = null;
-	this.visible = false;
+  if (width == null) {
+    width = Menu.defaultWidth;
+  }
+  // Menus are a type of Overlay
+  Overlay.call(this, Overlay.types.menu);
+  DebugOptions.validateNumbers(width);
+  this.width = width;
+  // The position of the menu is determined by the button
+  this.x = button.x;
+  this.y = button.y + button.height;
+  this.group = GuiElements.create.group(this.x, this.y);
+  TouchReceiver.addListenersOverlayPart(this.group);
+  this.bgRect = GuiElements.create.rect(this.group);
+  GuiElements.update.color(this.bgRect, Menu.bgColor);
+  this.menuBnList = null;
+  this.visible = false;
 
-	// Configure callbacks
-	button.setCallbackFunction(this.open.bind(this), false);
-	button.setUnToggleFunction(this.close.bind(this));
+  // Configure callbacks
+  button.setCallbackFunction(this.open.bind(this), false);
+  button.setUnToggleFunction(this.close.bind(this));
 
-	this.button = button;
+  this.button = button;
 
-	/* The alternateFn is specified using addAlternateFn() and is called if previewOpen returns false */
-	this.alternateFn = null;
-	this.scheduleAlternate = false;
+  /* The alternateFn is specified using addAlternateFn() and is called if previewOpen returns false */
+  this.alternateFn = null;
+  this.scheduleAlternate = false;
 }
 Menu.prototype = Object.create(Overlay.prototype);
 Menu.prototype.constructor = Menu;
 
 Menu.setGraphics = function() {
-	Menu.defaultWidth = 170;
-	Menu.bnMargin = Button.defaultMargin;
-	Menu.bgColor = Colors.lightGray;
+  Menu.defaultWidth = 170;
+  Menu.bnMargin = Button.defaultMargin;
+  Menu.bgColor = Colors.lightGray;
 };
 
 /**
  * Recomputes the Menu's location based on the location of the Button
  */
 Menu.prototype.move = function() {
-	this.x = this.button.x;
-	this.y = this.button.y + this.button.height;
-	GuiElements.move.group(this.group, this.x, this.y);
-	if (this.menuBnList != null) {
-		this.menuBnList.updatePosition();
-	}
+  this.x = this.button.x;
+  this.y = this.button.y + this.button.height;
+  GuiElements.move.group(this.group, this.x, this.y);
+  if (this.menuBnList != null) {
+    this.menuBnList.updatePosition();
+  }
 };
 
 /**
  * Generates the SmoothMenuBnList for the Menu
  */
 Menu.prototype.createMenuBnList = function() {
-	if (this.menuBnList != null) {
-		this.menuBnList.hide();
-	}
-	const bnM = Menu.bnMargin;
-	//if (this.constructor.name === "BatteryMenu") {
-		this.menuBnList = new SmoothMenuBnList(this, this.group, bnM, bnM, this.width);
-	//} else {
-	//	this.menuBnList = new SmoothMenuBnList(this, this.group, bnM, bnM);
-	//}
-	this.menuBnList.markAsOverlayPart(this);
-	const maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
-	this.menuBnList.setMaxHeight(maxH);
+  if (this.menuBnList != null) {
+    this.menuBnList.hide();
+  }
+  const bnM = Menu.bnMargin;
+  //if (this.constructor.name === "BatteryMenu") {
+  this.menuBnList = new SmoothMenuBnList(this, this.group, bnM, bnM, this.width);
+  //} else {
+  //	this.menuBnList = new SmoothMenuBnList(this, this.group, bnM, bnM);
+  //}
+  this.menuBnList.markAsOverlayPart(this);
+  const maxH = GuiElements.height - this.y - Menu.bnMargin * 2;
+  this.menuBnList.setMaxHeight(maxH);
 };
 
 /**
@@ -85,29 +85,29 @@ Menu.prototype.createMenuBnList = function() {
  *                                 to do all formatting.
  */
 Menu.prototype.addOption = function(text, func, close, addTextFn) {
-	if (addTextFn == null) {
-		addTextFn = null;
-	}
-	if (close == null) {
-		close = true;
-	}
-	this.menuBnList.addOption(text, function() {
-		if (close) {
-			this.close();
-		}
-		if (func != null) {
-			func.call(this);
-		}
-	}.bind(this), addTextFn);
+  if (addTextFn == null) {
+    addTextFn = null;
+  }
+  if (close == null) {
+    close = true;
+  }
+  this.menuBnList.addOption(text, function() {
+    if (close) {
+      this.close();
+    }
+    if (func != null) {
+      func.call(this);
+    }
+  }.bind(this), addTextFn);
 };
 
 /**
  * Creates the buttons and background of the menu
  */
 Menu.prototype.buildMenu = function() {
-	const mBL = this.menuBnList;
-	mBL.generateBns();
-	GuiElements.update.rect(this.bgRect, 0, 0, mBL.width + 2 * Menu.bnMargin, mBL.height + 2 * Menu.bnMargin);
+  const mBL = this.menuBnList;
+  mBL.generateBns();
+  GuiElements.update.rect(this.bgRect, 0, 0, mBL.width + 2 * Menu.bnMargin, mBL.height + 2 * Menu.bnMargin);
 };
 
 /**
@@ -116,37 +116,37 @@ Menu.prototype.buildMenu = function() {
  * @return {boolean}
  */
 Menu.prototype.previewOpen = function() {
-	// By default, the Menu always opens.  But subclasses like the DeviceMenu override this method
-	return true;
+  // By default, the Menu always opens.  But subclasses like the DeviceMenu override this method
+  return true;
 };
 
 /**
  * Abstract function that is called when the Menu opens to populate the options.  Calls addOption for each option
  */
 Menu.prototype.loadOptions = function() {
-	DebugOptions.markAbstract();
+  DebugOptions.markAbstract();
 };
 Menu.prototype.open = function() {
-	if (!this.visible) {
-		if (this.previewOpen()) {
-			this.createMenuBnList();
-			this.loadOptions();
-			this.buildMenu();
-			GuiElements.layers.overlay.appendChild(this.group);
-			this.menuBnList.show();
-			this.visible = true;
-			if (this.isSubMenu){
-				Overlay.addOverlay(this);
-			} else {
-				this.addOverlayAndCloseOthers();
-			}
-			this.button.markAsOverlayPart(this);
-			this.scheduleAlternate = false;
-		} else {
-			this.button.toggled = true;
-			this.scheduleAlternate = true;
-		}
-	}
+  if (!this.visible) {
+    if (this.previewOpen()) {
+      this.createMenuBnList();
+      this.loadOptions();
+      this.buildMenu();
+      GuiElements.layers.overlay.appendChild(this.group);
+      this.menuBnList.show();
+      this.visible = true;
+      if (this.isSubMenu) {
+        Overlay.addOverlay(this);
+      } else {
+        this.addOverlayAndCloseOthers();
+      }
+      this.button.markAsOverlayPart(this);
+      this.scheduleAlternate = false;
+    } else {
+      this.button.toggled = true;
+      this.scheduleAlternate = true;
+    }
+  }
 };
 
 /**
@@ -154,14 +154,14 @@ Menu.prototype.open = function() {
  * @inheritDoc
  */
 Menu.prototype.close = function() {
-	if (this.visible) {
-		this.hide();
-		this.button.unToggle();
-		this.button.unmarkAsOverlayPart();
-	} else if (this.scheduleAlternate) {
-		this.scheduleAlternate = false;
-		this.alternateFn();
-	}
+  if (this.visible) {
+    this.hide();
+    this.button.unToggle();
+    this.button.unmarkAsOverlayPart();
+  } else if (this.scheduleAlternate) {
+    this.scheduleAlternate = false;
+    this.alternateFn();
+  }
 };
 
 /**
@@ -169,10 +169,10 @@ Menu.prototype.close = function() {
  * @inheritDoc
  */
 Menu.prototype.hide = function() {
-	this.group.remove();
-	this.menuBnList.hide();
-	this.visible = false;
-	Overlay.removeOverlay(this);
+  this.group.remove();
+  this.menuBnList.hide();
+  this.visible = false;
+  Overlay.removeOverlay(this);
 };
 
 /**
@@ -180,7 +180,7 @@ Menu.prototype.hide = function() {
  * @param {function} alternateFn - type () -> ()
  */
 Menu.prototype.addAlternateFn = function(alternateFn) {
-	this.alternateFn = alternateFn;
+  this.alternateFn = alternateFn;
 };
 
 /**
@@ -188,21 +188,21 @@ Menu.prototype.addAlternateFn = function(alternateFn) {
  * @return {number}
  */
 Menu.prototype.relToAbsX = function(x) {
-	return x + this.x;
+  return x + this.x;
 };
 /**
  * @param {number} y
  * @return {number}
  */
 Menu.prototype.relToAbsY = function(y) {
-	return y + this.y;
+  return y + this.y;
 };
 
 /**
  * Resizes and repositions the menu
  */
 Menu.prototype.updateZoom = function() {
-	if (this.menuBnList != null) {
-		this.menuBnList.updateZoom();
-	}
+  if (this.menuBnList != null) {
+    this.menuBnList.updateZoom();
+  }
 };

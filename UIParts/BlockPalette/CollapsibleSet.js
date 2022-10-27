@@ -7,21 +7,21 @@
  * @constructor
  */
 function CollapsibleSet(y, nameIdList, category, group) {
-	this.y = y;
-	this.category = category;
-	this.group = group;
-	// Create a collapsibleItem for each entry of the nameIdList
-	this.collapsibleItems = [];
-	nameIdList.forEach(function(entry){
-		this.collapsibleItems.push(new CollapsibleItem(entry.name, entry.id, this, group));
-	}.bind(this));
-	// Stack the collapsibleItems appropriately
-	this.updateDimAlign();
+  this.y = y;
+  this.category = category;
+  this.group = group;
+  // Create a collapsibleItem for each entry of the nameIdList
+  this.collapsibleItems = [];
+  nameIdList.forEach(function(entry) {
+    this.collapsibleItems.push(new CollapsibleItem(entry.name, entry.id, this, group));
+  }.bind(this));
+  // Stack the collapsibleItems appropriately
+  this.updateDimAlign();
 }
 
-CollapsibleSet.setConstants = function(){
-	const CS = CollapsibleSet;
-	CS.itemMargin = 0;
+CollapsibleSet.setConstants = function() {
+  const CS = CollapsibleSet;
+  CS.itemMargin = 0;
 };
 
 /**
@@ -30,7 +30,7 @@ CollapsibleSet.setConstants = function(){
  * @return {CollapsibleItem}
  */
 CollapsibleSet.prototype.getItem = function(index) {
-	return this.collapsibleItems[index];
+  return this.collapsibleItems[index];
 };
 
 /**
@@ -39,13 +39,13 @@ CollapsibleSet.prototype.getItem = function(index) {
  * @return {number}
  */
 CollapsibleSet.prototype.findItem = function(id) {
-	const items = this.collapsibleItems;
-	for(let i = 0; i < items.length; i++) {
-		if(items[i].id === id) {
-			return i;
-		}
-	}
-	DebugOptions.throw("Collapsible item not found.");
+  const items = this.collapsibleItems;
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].id === id) {
+      return i;
+    }
+  }
+  DebugOptions.throw("Collapsible item not found.");
 };
 
 /**
@@ -53,8 +53,8 @@ CollapsibleSet.prototype.findItem = function(id) {
  * @param {number} index
  */
 CollapsibleSet.prototype.expand = function(index) {
-	this.collapsibleItems[index].expand();
-	this.updateDimAlign();
+  this.collapsibleItems[index].expand();
+  this.updateDimAlign();
 };
 
 /**
@@ -62,26 +62,26 @@ CollapsibleSet.prototype.expand = function(index) {
  * @param {number} index
  */
 CollapsibleSet.prototype.collapse = function(index) {
-	this.collapsibleItems[index].collapse();
-	this.updateDimAlign();
+  this.collapsibleItems[index].collapse();
+  this.updateDimAlign();
 };
 
 /**
  * Updates the dimensions and alignment of the CollapsibleSet and notifies its Category to update dimensions
  */
 CollapsibleSet.prototype.updateDimAlign = function() {
-	const CS = CollapsibleSet;
-	let currentY = this.y;
-	let width = 0;
-	this.collapsibleItems.forEach(function(item) {
-		currentY += item.updateDimAlign(currentY);
-		currentY += CS.itemMargin;
-		width = Math.max(width, item.getWidth());
-	});
-	currentY -= CS.itemMargin;
-	this.height = currentY;
-	this.width = width;
-	this.category.updateDimSet();
+  const CS = CollapsibleSet;
+  let currentY = this.y;
+  let width = 0;
+  this.collapsibleItems.forEach(function(item) {
+    currentY += item.updateDimAlign(currentY);
+    currentY += CS.itemMargin;
+    width = Math.max(width, item.getWidth());
+  });
+  currentY -= CS.itemMargin;
+  this.height = currentY;
+  this.width = width;
+  this.category.updateDimSet();
 };
 
 /**
@@ -89,28 +89,28 @@ CollapsibleSet.prototype.updateDimAlign = function() {
  * Triggered when a block inside changes width
  */
 CollapsibleSet.prototype.updateWidth = function() {
-	let width = 0;
-	this.collapsibleItems.forEach(function(item) {
-		width = Math.max(width, item.getWidth());
-	});
-	this.width = width;
-	this.category.updateWidth();
+  let width = 0;
+  this.collapsibleItems.forEach(function(item) {
+    width = Math.max(width, item.getWidth());
+  });
+  this.width = width;
+  this.category.updateWidth();
 };
 
 /**
  * Removes the CollapsibleSet from the SVG
  */
 CollapsibleSet.prototype.remove = function() {
-	this.collapsibleItems.forEach(function(item){
-		item.remove();
-	});
+  this.collapsibleItems.forEach(function(item) {
+    item.remove();
+  });
 };
 
 /**
  * Stop all executing blocks in the set
  */
 CollapsibleSet.prototype.stop = function() {
-	this.passRecursively("passRecursively", "stop");
+  this.passRecursively("passRecursively", "stop");
 }
 
 /**
@@ -119,16 +119,16 @@ CollapsibleSet.prototype.stop = function() {
  * @param {boolean} collapsed
  */
 CollapsibleSet.prototype.setSuggestedCollapse = function(id, collapsed) {
-	this.passRecursively("setSuggestedCollapse", id, collapsed);
+  this.passRecursively("setSuggestedCollapse", id, collapsed);
 };
 
-CollapsibleSet.prototype.passRecursivelyDown = function(message){
-	Array.prototype.unshift.call(arguments, "passRecursivelyDown");
-	this.passRecursively.apply(this, arguments);
+CollapsibleSet.prototype.passRecursivelyDown = function(message) {
+  Array.prototype.unshift.call(arguments, "passRecursivelyDown");
+  this.passRecursively.apply(this, arguments);
 };
-CollapsibleSet.prototype.passRecursively = function(functionName){
-	const args = Array.prototype.slice.call(arguments, 1);
-	this.collapsibleItems.forEach(function(item){
-		item[functionName].apply(item,args);
-	});
+CollapsibleSet.prototype.passRecursively = function(functionName) {
+  const args = Array.prototype.slice.call(arguments, 1);
+  this.collapsibleItems.forEach(function(item) {
+    item[functionName].apply(item, args);
+  });
 };

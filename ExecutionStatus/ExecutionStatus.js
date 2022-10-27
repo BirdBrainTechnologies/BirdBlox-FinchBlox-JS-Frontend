@@ -3,7 +3,7 @@
  * @constructor
  */
 function ExecutionStatus() {
-	DebugOptions.markAbstract();
+  DebugOptions.markAbstract();
 }
 
 /**
@@ -11,7 +11,7 @@ function ExecutionStatus() {
  * @return {boolean}
  */
 ExecutionStatus.prototype.isRunning = function() {
-	return false;
+  return false;
 };
 
 /**
@@ -20,7 +20,7 @@ ExecutionStatus.prototype.isRunning = function() {
  */
 
 ExecutionStatus.prototype.hasError = function() {
-	return false;
+  return false;
 };
 
 /**
@@ -28,5 +28,5 @@ ExecutionStatus.prototype.hasError = function() {
  * @return {Data}
  */
 ExecutionStatus.prototype.getResult = function() {
-	return null;
+  return null;
 };

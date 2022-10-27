@@ -4,7 +4,7 @@
  * @constructor
  */
 function ExecutionStatusResult(result) {
-	this.result = result;
+  this.result = result;
 }
 ExecutionStatusResult.prototype = Object.create(ExecutionStatus.prototype);
 ExecutionStatusResult.constructor = ExecutionStatusResult;
@@ -14,5 +14,5 @@ ExecutionStatusResult.constructor = ExecutionStatusResult;
  * @return {Data}
  */
 ExecutionStatusResult.prototype.getResult = function() {
-	return this.result;
+  return this.result;
 };

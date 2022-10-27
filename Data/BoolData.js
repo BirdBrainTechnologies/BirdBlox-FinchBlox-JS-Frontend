@@ -5,7 +5,7 @@
  * @constructor
  */
 function BoolData(value, isValid) {
-	Data.call(this, Data.types.bool, value, isValid);
+  Data.call(this, Data.types.bool, value, isValid);
 }
 BoolData.prototype = Object.create(Data.prototype);
 BoolData.prototype.constructor = BoolData;
@@ -15,29 +15,29 @@ BoolData.prototype.constructor = BoolData;
  * @return {NumData}
  */
 BoolData.prototype.asNum = function() {
-	if (this.getValue()) {
-		return new NumData(1, this.isValid);
-	} else {
-		return new NumData(0, this.isValid);
-	}
+  if (this.getValue()) {
+    return new NumData(1, this.isValid);
+  } else {
+    return new NumData(0, this.isValid);
+  }
 };
 
 /**
  * @return {BoolData}
  */
 BoolData.prototype.asBool = function() {
-	return this;
+  return this;
 };
 
 /**
  * @return {StringData}
  */
 BoolData.prototype.asString = function() {
-	if (this.getValue()) {
-		return new StringData(Language.getStr("true"), true);
-	} else {
-		return new StringData(Language.getStr("false"), true);
-	}
+  if (this.getValue()) {
+    return new StringData(Language.getStr("true"), true);
+  } else {
+    return new StringData(Language.getStr("false"), true);
+  }
 };
 
 /**
@@ -45,7 +45,7 @@ BoolData.prototype.asString = function() {
  * @return {BoolData|null}
  */
 BoolData.importXml = function(dataNode) {
-	let value = XmlWriter.getTextNode(dataNode, "value");
-	if (value == null) return null;
-	return new BoolData(value === "true");
+  let value = XmlWriter.getTextNode(dataNode, "value");
+  if (value == null) return null;
+  return new BoolData(value === "true");
 };

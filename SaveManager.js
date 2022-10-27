@@ -2,20 +2,20 @@
  * Static class for file management.  Tracks the currently open file and deals with saving/opening files.
  */
 function SaveManager() {
-	// The name of the name, or null when the blank canvas is open
-	SaveManager.fileName = null;
-	// The file is auto saved any time it is edited and one every few seconds
-	SaveManager.autoSaveTimer = new Timer(SaveManager.autoSaveInterval, SaveManager.autoSave);
-	SaveManager.autoSaveTimer.start();
+  // The name of the name, or null when the blank canvas is open
+  SaveManager.fileName = null;
+  // The file is auto saved any time it is edited and one every few seconds
+  SaveManager.autoSaveTimer = new Timer(SaveManager.autoSaveInterval, SaveManager.autoSave);
+  SaveManager.autoSaveTimer.start();
 }
 
 SaveManager.setConstants = function() {
-	//SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
-	// These characters can't be used in file names
-	SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
-	SaveManager.autoSaveInterval = 1000 * 60;
-	SaveManager.newProgName = Language.getStr("New_program");
-	SaveManager.emptyProgData = "<project><tabs></tabs></project>";
+  //SaveManager.invalidCharacters = "\\/:*?<>|.\n\r\0\"";
+  // These characters can't be used in file names
+  SaveManager.invalidCharactersFriendly = "\\/:*?<>|.$";
+  SaveManager.autoSaveInterval = 1000 * 60;
+  SaveManager.newProgName = Language.getStr("New_program");
+  SaveManager.emptyProgData = "<project><tabs></tabs></project>";
 };
 
 /**
@@ -25,17 +25,17 @@ SaveManager.setConstants = function() {
  * @param {boolean} named - false if the user should be prompted to name the file when they try to use the OpenDialog
  */
 SaveManager.backendOpen = function(fileName, data) {
-	SaveManager.fileName = fileName;
-	SaveManager.loadData(data);
-	if (FinchBlox) {
-	  const fileLevel = parseInt(fileName.slice(fileName.length - 1));
-	  if (fileLevel != LevelManager.currentLevel && fileLevel > 0 && fileLevel <= LevelManager.totalLevels) {
-	    LevelManager.setLevel(fileLevel)
-	  }
-	  TitleBar.fileBn.update();
-	}
-	OpenDialog.closeDialog();
-	GuiElements.unblockInteraction();
+  SaveManager.fileName = fileName;
+  SaveManager.loadData(data);
+  if (FinchBlox) {
+    const fileLevel = parseInt(fileName.slice(fileName.length - 1));
+    if (fileLevel != LevelManager.currentLevel && fileLevel > 0 && fileLevel <= LevelManager.totalLevels) {
+      LevelManager.setLevel(fileLevel)
+    }
+    TitleBar.fileBn.update();
+  }
+  OpenDialog.closeDialog();
+  GuiElements.unblockInteraction();
 };
 
 /**
@@ -44,23 +44,23 @@ SaveManager.backendOpen = function(fileName, data) {
  * TODO: Provide a way for loading to fail if critical tags are missing rather than opening a blank document
  */
 SaveManager.loadData = function(data) {
-	if (data.length > 0) {
-		if (data.charAt(0) === "%") {
-			// The data haas an extra layer of encoding that needs to be removed
-			data = decodeURIComponent(data);
-		}
-		const xmlDoc = XmlWriter.openDoc(data);
-		const project = XmlWriter.findElement(xmlDoc, "project");
-		if (project == null) {
-			// There's no project tag.  The data is seriously corrupt, so we just open an empty file
-			SaveManager.loadData(SaveManager.emptyProgData);
-		} else {
-			(DebugOptions.safeFunc(CodeManager.importXml))(project);
-		}
-	} else {
-		// There's no data at all, so open an empty file
-		SaveManager.loadData(SaveManager.emptyProgData);
-	}
+  if (data.length > 0) {
+    if (data.charAt(0) === "%") {
+      // The data haas an extra layer of encoding that needs to be removed
+      data = decodeURIComponent(data);
+    }
+    const xmlDoc = XmlWriter.openDoc(data);
+    const project = XmlWriter.findElement(xmlDoc, "project");
+    if (project == null) {
+      // There's no project tag.  The data is seriously corrupt, so we just open an empty file
+      SaveManager.loadData(SaveManager.emptyProgData);
+    } else {
+      (DebugOptions.safeFunc(CodeManager.importXml))(project);
+    }
+  } else {
+    // There's no data at all, so open an empty file
+    SaveManager.loadData(SaveManager.emptyProgData);
+  }
 };
 
 /**
@@ -68,9 +68,9 @@ SaveManager.loadData = function(data) {
  * @param {string} fileName
  */
 SaveManager.backendSetName = function(fileName) {
-	SaveManager.fileName = fileName;
-	TitleBar.setText(fileName);
-	CodeManager.markOpen();
+  SaveManager.fileName = fileName;
+  TitleBar.setText(fileName);
+  CodeManager.markOpen();
 };
 
 /**
@@ -78,28 +78,28 @@ SaveManager.backendSetName = function(fileName) {
  * the current level's save point.
  */
 SaveManager.backendClose = function() {
-	if (FinchBlox) {
-		LevelManager.loadLevelSavePoint();
-	} else {
-		SaveManager.loadBlank();
-		OpenDialog.showDialog();
-	}
+  if (FinchBlox) {
+    LevelManager.loadLevelSavePoint();
+  } else {
+    SaveManager.loadBlank();
+    OpenDialog.showDialog();
+  }
 };
 
 /**
  * Shows that a file is loading
  */
 SaveManager.backendMarkLoading = function() {
-	OpenDialog.closeDialog();
-	CodeManager.markLoading(Language.getStr("Loading"));
+  OpenDialog.closeDialog();
+  CodeManager.markLoading(Language.getStr("Loading"));
 };
 
 /**
  * Loads a blank canvas
  */
 SaveManager.loadBlank = function() {
-	SaveManager.fileName = null;
-	SaveManager.loadData(SaveManager.emptyProgData);
+  SaveManager.fileName = null;
+  SaveManager.loadData(SaveManager.emptyProgData);
 };
 
 /**
@@ -107,9 +107,9 @@ SaveManager.loadBlank = function() {
  * @param {function} nextAction
  */
 SaveManager.userClose = function(nextAction) {
-	SaveManager.loadBlank();
-	const request = new HttpRequestBuilder("data/close");
-	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+  SaveManager.loadBlank();
+  const request = new HttpRequestBuilder("data/close");
+  HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 
 /**
@@ -117,7 +117,7 @@ SaveManager.userClose = function(nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.userNew = function(nextAction) {
-	SaveManager.promptNewFile(Language.getStr("Enter_file_name"), nextAction);
+  SaveManager.promptNewFile(Language.getStr("Enter_file_name"), nextAction);
 };
 
 /**
@@ -126,9 +126,9 @@ SaveManager.userNew = function(nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.promptNewFile = function(message, nextAction) {
-	SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
-		SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
-	});
+  SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
+    SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
+  });
 };
 
 /**
@@ -138,11 +138,11 @@ SaveManager.promptNewFile = function(message, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.promptNewFileWithDefault = function(message, defaultName, nextAction) {
-	DialogManager.showPromptDialog(Language.getStr("New"), message, defaultName, true, function(cancelled, response) {
-		if (!cancelled) {
-			SaveManager.sanitizeNew(response.trim(), nextAction);
-		}
-	});
+  DialogManager.showPromptDialog(Language.getStr("New"), message, defaultName, true, function(cancelled, response) {
+    if (!cancelled) {
+      SaveManager.sanitizeNew(response.trim(), nextAction);
+    }
+  });
 };
 
 /**
@@ -151,26 +151,26 @@ SaveManager.promptNewFileWithDefault = function(message, defaultName, nextAction
  * @param {function} [nextAction]
  */
 SaveManager.sanitizeNew = function(proposedName, nextAction) {
-	if (proposedName === "") {
-		const message = Language.getStr("Name_error_blank");
-		SaveManager.promptNewFile(message, nextAction);
-	} else {
-		GuiElements.alert("getting name");
-		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
-			GuiElements.alert("Got available name" + availableName + "," + alreadySanitized + "," + alreadyAvailable);
-			if (alreadySanitized && alreadyAvailable) {
-				SaveManager.newSoft(availableName, nextAction);
-			} else if (!alreadySanitized) {
-				GuiElements.alert("not sanitized" + availableName + "," + alreadySanitized + "," + alreadyAvailable);
-				let message = Language.getStr("Name_error_invalid_characters");
-				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
-				SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
-			} else if (!alreadyAvailable) {
-				let message = "\"" + proposedName + Language.getStr("Name_error_already_exists");
-				SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
-			}
-		});
-	}
+  if (proposedName === "") {
+    const message = Language.getStr("Name_error_blank");
+    SaveManager.promptNewFile(message, nextAction);
+  } else {
+    GuiElements.alert("getting name");
+    SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
+      GuiElements.alert("Got available name" + availableName + "," + alreadySanitized + "," + alreadyAvailable);
+      if (alreadySanitized && alreadyAvailable) {
+        SaveManager.newSoft(availableName, nextAction);
+      } else if (!alreadySanitized) {
+        GuiElements.alert("not sanitized" + availableName + "," + alreadySanitized + "," + alreadyAvailable);
+        let message = Language.getStr("Name_error_invalid_characters");
+        message += SaveManager.invalidCharactersFriendly.split("").join(" ");
+        SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
+      } else if (!alreadyAvailable) {
+        let message = "\"" + proposedName + Language.getStr("Name_error_already_exists");
+        SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
+      }
+    });
+  }
 };
 
 /**
@@ -179,12 +179,12 @@ SaveManager.sanitizeNew = function(proposedName, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.newSoft = function(filename, nextAction) {
-	const request = new HttpRequestBuilder("data/new");
-	request.addParam("filename", filename);
-	SaveManager.loadBlank();
-	CodeManager.markLoading(Language.getStr("Saving"));
-	// If the saving fails, we show the open dialog so the user can try again.
-	HtmlServer.sendRequestWithCallback(request.toString(), nextAction, null, true, SaveManager.emptyProgData);
+  const request = new HttpRequestBuilder("data/new");
+  request.addParam("filename", filename);
+  SaveManager.loadBlank();
+  CodeManager.markLoading(Language.getStr("Saving"));
+  // If the saving fails, we show the open dialog so the user can try again.
+  HtmlServer.sendRequestWithCallback(request.toString(), nextAction, null, true, SaveManager.emptyProgData);
 };
 
 /**
@@ -192,14 +192,16 @@ SaveManager.newSoft = function(filename, nextAction) {
  * @param {function} [nextAction] - The function to call once the data is successfully sent
  */
 SaveManager.autoSave = function(nextAction) {
-	if (SaveManager.fileName == null) {
-		if (nextAction != null) nextAction();
-		return;
-	}
-	if (FinchBlox) { TitleBar.fileBn.update(); }
-	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
-	const request = new HttpRequestBuilder("data/autoSave");
-	HtmlServer.sendRequestWithCallback(request.toString(), nextAction, null, true, xmlDocText);
+  if (SaveManager.fileName == null) {
+    if (nextAction != null) nextAction();
+    return;
+  }
+  if (FinchBlox) {
+    TitleBar.fileBn.update();
+  }
+  const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
+  const request = new HttpRequestBuilder("data/autoSave");
+  HtmlServer.sendRequestWithCallback(request.toString(), nextAction, null, true, xmlDocText);
 };
 
 /**
@@ -207,18 +209,18 @@ SaveManager.autoSave = function(nextAction) {
  * @param {string} fileName - The file to open
  */
 SaveManager.userOpenFile = function(fileName) {
-    SaveManager.fileName = fileName;
-	const request = new HttpRequestBuilder("data/open");
-	request.addParam("filename", fileName);
-	CodeManager.markLoading(Language.getStr("Loading"));
-	HtmlServer.sendRequestWithCallback(request.toString(), function() {
-		if (FinchBlox && DebugOptions.enabled) {
-			//TitleBar.fileBn.update();
-			GuiElements.unblockInteraction();
-		}
-	}, function() {
-		CodeManager.cancelLoading();
-	});
+  SaveManager.fileName = fileName;
+  const request = new HttpRequestBuilder("data/open");
+  request.addParam("filename", fileName);
+  CodeManager.markLoading(Language.getStr("Loading"));
+  HtmlServer.sendRequestWithCallback(request.toString(), function() {
+    if (FinchBlox && DebugOptions.enabled) {
+      //TitleBar.fileBn.update();
+      GuiElements.unblockInteraction();
+    }
+  }, function() {
+    CodeManager.cancelLoading();
+  });
 };
 
 /**
@@ -229,8 +231,8 @@ SaveManager.userOpenFile = function(fileName) {
  * @param {function} nextAction - The function to call after the rename is done and succeeds
  */
 SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction) {
-	// We use the default message with the title "Name"
-	SaveManager.promptRename(isRecording, oldFilename, Language.getStr("Name"), null, nextAction);
+  // We use the default message with the title "Name"
+  SaveManager.promptRename(isRecording, oldFilename, Language.getStr("Name"), null, nextAction);
 };
 
 /**
@@ -242,8 +244,8 @@ SaveManager.userRenameFile = function(isRecording, oldFilename, nextAction) {
  * @param {function} nextAction
  */
 SaveManager.promptRename = function(isRecording, oldFilename, title, message, nextAction) {
-	// We prefill the old filename
-	SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, oldFilename, nextAction);
+  // We prefill the old filename
+  SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, oldFilename, nextAction);
 };
 
 /**
@@ -256,16 +258,16 @@ SaveManager.promptRename = function(isRecording, oldFilename, title, message, ne
  * @param {function} nextAction
  */
 SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, message, defaultName, nextAction) {
-	if (message == null) {
-		message = Language.getStr("Enter_file_name");
-	}
-	// We ask for a new name
-	DialogManager.showPromptDialog(title, message, defaultName, true, function(cancelled, response) {
-		if (!cancelled) {
-			// We see if that name is ok
-			SaveManager.sanitizeRename(isRecording, oldFilename, title, response.trim(), nextAction);
-		}
-	});
+  if (message == null) {
+    message = Language.getStr("Enter_file_name");
+  }
+  // We ask for a new name
+  DialogManager.showPromptDialog(title, message, defaultName, true, function(cancelled, response) {
+    if (!cancelled) {
+      // We see if that name is ok
+      SaveManager.sanitizeRename(isRecording, oldFilename, title, response.trim(), nextAction);
+    }
+  });
 };
 
 /**
@@ -277,30 +279,30 @@ SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, 
  * @param {function} nextAction
  */
 SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction) {
-	if (proposedName === "") {
-		const message = Language.getStr("Name_error_blank");
-		SaveManager.promptRename(isRecording, oldFilename, title, message, nextAction);
-	} else if (proposedName === oldFilename) {
-		if (!isRecording && SaveManager.fileName === oldFilename) {
-			const request = new HttpRequestBuilder("data/markAsNamed");
-			HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
-		} else {
-			if (nextAction != null) nextAction();
-		}
-	} else {
-		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
-			if (alreadySanitized && alreadyAvailable) {
-				SaveManager.renameSoft(isRecording, oldFilename, title, availableName, nextAction);
-			} else if (!alreadySanitized) {
-				let message = Language.getStr("Name_error_invalid_characters");
-				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
-				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
-			} else if (!alreadyAvailable) {
-				let message = "\"" + proposedName + Language.getStr("Name_error_already_exists");
-				SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
-			}
-		}, isRecording);
-	}
+  if (proposedName === "") {
+    const message = Language.getStr("Name_error_blank");
+    SaveManager.promptRename(isRecording, oldFilename, title, message, nextAction);
+  } else if (proposedName === oldFilename) {
+    if (!isRecording && SaveManager.fileName === oldFilename) {
+      const request = new HttpRequestBuilder("data/markAsNamed");
+      HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+    } else {
+      if (nextAction != null) nextAction();
+    }
+  } else {
+    SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
+      if (alreadySanitized && alreadyAvailable) {
+        SaveManager.renameSoft(isRecording, oldFilename, title, availableName, nextAction);
+      } else if (!alreadySanitized) {
+        let message = Language.getStr("Name_error_invalid_characters");
+        message += SaveManager.invalidCharactersFriendly.split("").join(" ");
+        SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
+      } else if (!alreadyAvailable) {
+        let message = "\"" + proposedName + Language.getStr("Name_error_already_exists");
+        SaveManager.promptRenameWithDefault(isRecording, oldFilename, title, message, availableName, nextAction);
+      }
+    }, isRecording);
+  }
 };
 
 /**
@@ -312,20 +314,20 @@ SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedN
  * @param {function} nextAction
  */
 SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, nextAction) {
-	const request = new HttpRequestBuilder("data/rename");
-	request.addParam("oldFilename", oldFilename);
-	request.addParam("newFilename", newName);
-	SaveManager.addTypeToRequest(request, isRecording);
-	let callback = nextAction;
-	if (isRecording) {
-		callback = function() {
-			CodeManager.renameRecording(oldFilename, newName);
-			if (nextAction != null) nextAction();
-		}
-	} else if (OpenDialog.lastOpenFile == oldFilename) {
-		OpenDialog.lastOpenFile = newName
-	}
-	HtmlServer.sendRequestWithCallback(request.toString(), callback);
+  const request = new HttpRequestBuilder("data/rename");
+  request.addParam("oldFilename", oldFilename);
+  request.addParam("newFilename", newName);
+  SaveManager.addTypeToRequest(request, isRecording);
+  let callback = nextAction;
+  if (isRecording) {
+    callback = function() {
+      CodeManager.renameRecording(oldFilename, newName);
+      if (nextAction != null) nextAction();
+    }
+  } else if (OpenDialog.lastOpenFile == oldFilename) {
+    OpenDialog.lastOpenFile = newName
+  }
+  HtmlServer.sendRequestWithCallback(request.toString(), callback);
 };
 
 /**
@@ -335,16 +337,16 @@ SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, next
  * @param {function} nextAction - The action to perform if the file is deleted successfully
  */
 SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
-	const title = Language.getStr("Delete") + " '" + filename + "'";
-	const question = Language.getStr("Delete_question");
-	DialogManager.showChoiceDialog(title, question, Language.getStr("Cancel"), Language.getStr("Delete"), true, function(response) {
-		if (response === "2") {
-			if (OpenDialog.lastOpenFile == filename){
-				OpenDialog.lastOpenFile = null;
-			}
-			SaveManager.delete(isRecording, filename, nextAction);
-		}
-	}, null);
+  const title = Language.getStr("Delete") + " '" + filename + "'";
+  const question = Language.getStr("Delete_question");
+  DialogManager.showChoiceDialog(title, question, Language.getStr("Cancel"), Language.getStr("Delete"), true, function(response) {
+    if (response === "2") {
+      if (OpenDialog.lastOpenFile == filename) {
+        OpenDialog.lastOpenFile = null;
+      }
+      SaveManager.delete(isRecording, filename, nextAction);
+    }
+  }, null);
 };
 
 /**
@@ -354,17 +356,17 @@ SaveManager.userDeleteFile = function(isRecording, filename, nextAction) {
  * @param {function} nextAction
  */
 SaveManager.delete = function(isRecording, filename, nextAction) {
-	const request = new HttpRequestBuilder("data/delete");
-	request.addParam("filename", filename);
-	SaveManager.addTypeToRequest(request, isRecording);
-	let callback = nextAction;
-	if (isRecording) {
-		callback = function() {
-			CodeManager.deleteRecording(filename);
-			if (nextAction != null) nextAction();
-		}
-	}
-	HtmlServer.sendRequestWithCallback(request.toString(), callback);
+  const request = new HttpRequestBuilder("data/delete");
+  request.addParam("filename", filename);
+  SaveManager.addTypeToRequest(request, isRecording);
+  let callback = nextAction;
+  if (isRecording) {
+    callback = function() {
+      CodeManager.deleteRecording(filename);
+      if (nextAction != null) nextAction();
+    }
+  }
+  HtmlServer.sendRequestWithCallback(request.toString(), callback);
 };
 
 /**
@@ -374,31 +376,31 @@ SaveManager.delete = function(isRecording, filename, nextAction) {
  * @param {boolean} [isRecording=false] - Whether the name should be compared to recordings instead of files
  */
 SaveManager.getAvailableName = function(filename, callbackFn, isRecording) {
-	if (isRecording == null) {
-		isRecording = false;
-	}
-	DebugOptions.validateNonNull(callbackFn);
-	// Ask the backend if the name is ok
-	const request = new HttpRequestBuilder("data/getAvailableName");
-	request.addParam("filename", filename);
-	SaveManager.addTypeToRequest(request, isRecording);
-	HtmlServer.sendRequestWithCallback(request.toString(), function(response) {
-		let json = {};
-		try {
-			// Response is a JSON object
-			json = JSON.parse(response);
-		} catch (e) {
+  if (isRecording == null) {
+    isRecording = false;
+  }
+  DebugOptions.validateNonNull(callbackFn);
+  // Ask the backend if the name is ok
+  const request = new HttpRequestBuilder("data/getAvailableName");
+  request.addParam("filename", filename);
+  SaveManager.addTypeToRequest(request, isRecording);
+  HtmlServer.sendRequestWithCallback(request.toString(), function(response) {
+    let json = {};
+    try {
+      // Response is a JSON object
+      json = JSON.parse(response);
+    } catch (e) {
 
-		}
-		if (json.availableName != null) {
-			/* 3 fields of response:
-			 * json.availableName - A name that is close to the filename and is valid (is the filename if filename is ok
-			 * json.alreadySanitized - boolean indicating if filename was already sanitized (had no illegal characters)
-			 * json.alreadyAvailable - boolean indicating if filename is a unique name
-			 * the availableName == filename iff alreadySanitized and alreadyAvailable */
-			callbackFn(json.availableName, json.alreadySanitized === true, json.alreadyAvailable === true);
-		}
-	});
+    }
+    if (json.availableName != null) {
+      /* 3 fields of response:
+       * json.availableName - A name that is close to the filename and is valid (is the filename if filename is ok
+       * json.alreadySanitized - boolean indicating if filename was already sanitized (had no illegal characters)
+       * json.alreadyAvailable - boolean indicating if filename is a unique name
+       * the availableName == filename iff alreadySanitized and alreadyAvailable */
+      callbackFn(json.availableName, json.alreadySanitized === true, json.alreadyAvailable === true);
+    }
+  });
 };
 
 /**
@@ -407,7 +409,7 @@ SaveManager.getAvailableName = function(filename, callbackFn, isRecording) {
  * @param {function} nextAction - The name of the function to call after successful duplication
  */
 SaveManager.userDuplicateFile = function(filename, nextAction) {
-	SaveManager.promptDuplicate(Language.getStr("Name_duplicate_file"), filename, nextAction);
+  SaveManager.promptDuplicate(Language.getStr("Name_duplicate_file"), filename, nextAction);
 };
 
 /**
@@ -417,9 +419,9 @@ SaveManager.userDuplicateFile = function(filename, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.promptDuplicate = function(message, filename, nextAction) {
-	SaveManager.getAvailableName(filename, function(availableName) {
-		SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
-	});
+  SaveManager.getAvailableName(filename, function(availableName) {
+    SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
+  });
 };
 
 /**
@@ -430,11 +432,11 @@ SaveManager.promptDuplicate = function(message, filename, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName, nextAction) {
-	DialogManager.showPromptDialog(Language.getStr("Duplicate"), message, defaultName, true, function(cancelled, response) {
-		if (!cancelled) {
-			SaveManager.sanitizeDuplicate(response.trim(), filename, nextAction);
-		}
-	});
+  DialogManager.showPromptDialog(Language.getStr("Duplicate"), message, defaultName, true, function(cancelled, response) {
+    if (!cancelled) {
+      SaveManager.sanitizeDuplicate(response.trim(), filename, nextAction);
+    }
+  });
 };
 
 /**
@@ -444,22 +446,22 @@ SaveManager.promptDuplicateWithDefault = function(message, filename, defaultName
  * @param {function} [nextAction]
  */
 SaveManager.sanitizeDuplicate = function(proposedName, filename, nextAction) {
-	if (proposedName === "") {
-		SaveManager.promptDuplicate(Language.getStr("Name_error_blank"), filename, nextAction);
-	} else {
-		SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
-			if (alreadySanitized && alreadyAvailable) {
-				SaveManager.duplicate(filename, availableName, nextAction);
-			} else if (!alreadySanitized) {
-				let message = Language.getStr("Name_error_invalid_characters");
-				message += SaveManager.invalidCharactersFriendly.split("").join(" ");
-				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
-			} else if (!alreadyAvailable) {
-				let message = "\"" + proposedName + Language.getStr("Name_error_already_exists");
-				SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
-			}
-		});
-	}
+  if (proposedName === "") {
+    SaveManager.promptDuplicate(Language.getStr("Name_error_blank"), filename, nextAction);
+  } else {
+    SaveManager.getAvailableName(proposedName, function(availableName, alreadySanitized, alreadyAvailable) {
+      if (alreadySanitized && alreadyAvailable) {
+        SaveManager.duplicate(filename, availableName, nextAction);
+      } else if (!alreadySanitized) {
+        let message = Language.getStr("Name_error_invalid_characters");
+        message += SaveManager.invalidCharactersFriendly.split("").join(" ");
+        SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
+      } else if (!alreadyAvailable) {
+        let message = "\"" + proposedName + Language.getStr("Name_error_already_exists");
+        SaveManager.promptDuplicateWithDefault(message, filename, availableName, nextAction);
+      }
+    });
+  }
 };
 
 /**
@@ -469,10 +471,10 @@ SaveManager.sanitizeDuplicate = function(proposedName, filename, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.duplicate = function(filename, newName, nextAction) {
-	const request = new HttpRequestBuilder("data/duplicate");
-	request.addParam("filename", filename);
-	request.addParam("newFilename", newName);
-	HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
+  const request = new HttpRequestBuilder("data/duplicate");
+  request.addParam("filename", filename);
+  request.addParam("newFilename", newName);
+  HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
 
 /**
@@ -484,7 +486,7 @@ SaveManager.duplicate = function(filename, newName, nextAction) {
  * @param {number} y2
  */
 SaveManager.userExportFile = function(filename, x1, x2, y1, y2) {
-	SaveManager.exportFile(filename, x1, x2, y1, y2);
+  SaveManager.exportFile(filename, x1, x2, y1, y2);
 };
 
 /**
@@ -496,15 +498,15 @@ SaveManager.userExportFile = function(filename, x1, x2, y1, y2) {
  * @param {number} y2
  */
 SaveManager.exportFile = function(filename, x1, x2, y1, y2) {
-	const request = new HttpRequestBuilder("data/export");
-	request.addParam("filename", filename);
-	if (x1 != null && x2 != null && y1 != null && y2 != null) {
-		request.addParam("tlx", x1);
-		request.addParam("tly", y1);
-		request.addParam("brx", x2);
-		request.addParam("bry", y2);
-	}
-	HtmlServer.sendRequestWithCallback(request.toString());
+  const request = new HttpRequestBuilder("data/export");
+  request.addParam("filename", filename);
+  if (x1 != null && x2 != null && y1 != null && y2 != null) {
+    request.addParam("tlx", x1);
+    request.addParam("tly", y1);
+    request.addParam("brx", x2);
+    request.addParam("bry", y2);
+  }
+  HtmlServer.sendRequestWithCallback(request.toString());
 };
 
 /**
@@ -512,24 +514,24 @@ SaveManager.exportFile = function(filename, x1, x2, y1, y2) {
  * when completed
  */
 SaveManager.saveAsNew = function() {
-	const request = new HttpRequestBuilder("data/new");
-	const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
-	CodeManager.markLoading(Language.getStr("Saving"));
-	HtmlServer.sendRequestWithCallback(request.toString(), function() {
+  const request = new HttpRequestBuilder("data/new");
+  const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
+  CodeManager.markLoading(Language.getStr("Saving"));
+  HtmlServer.sendRequestWithCallback(request.toString(), function() {
 
-	}, function() {
-		CodeManager.cancelLoading();
-	}, true, xmlDocText);
+  }, function() {
+    CodeManager.cancelLoading();
+  }, true, xmlDocText);
 };
 
 /**
  * Called any time the document is edited.  Saves changes and creates a new document if no file is open
  */
 SaveManager.markEdited = function() {
-	CodeManager.updateModified();
-	if (SaveManager.fileName != null) {
-		SaveManager.autoSave();
-	}
+  CodeManager.updateModified();
+  if (SaveManager.fileName != null) {
+    SaveManager.autoSave();
+  }
 };
 
 /**
@@ -537,11 +539,11 @@ SaveManager.markEdited = function() {
  * @return {object} - With fields for data and filename
  */
 SaveManager.currentDoc = function() {
-	if (SaveManager.fileName == null) return null;
-	const result = {};
-	result.data = XmlWriter.docToText(CodeManager.createXml());
-	result.filename = SaveManager.fileName;
-	return result;
+  if (SaveManager.fileName == null) return null;
+  const result = {};
+  result.data = XmlWriter.docToText(CodeManager.createXml());
+  result.filename = SaveManager.fileName;
+  return result;
 };
 
 /**
@@ -550,11 +552,11 @@ SaveManager.currentDoc = function() {
  * @param {function} [nextAction] - The function to call once the file is saved and named
  */
 SaveManager.saveAndName = function(message, nextAction) {
-	if (SaveManager.fileName == null) {
-		if (nextAction != null) nextAction();
-		return;
-	}
-	SaveManager.autoSave(nextAction);
+  if (SaveManager.fileName == null) {
+    if (nextAction != null) nextAction();
+    return;
+  }
+  SaveManager.autoSave(nextAction);
 };
 
 /**
@@ -563,7 +565,7 @@ SaveManager.saveAndName = function(message, nextAction) {
  * @param {boolean} isRecording - Whether the item is a recording instead of a file
  */
 SaveManager.addTypeToRequest = function(request, isRecording) {
-	request.addParam("type", isRecording ? "recording" : "file");
+  request.addParam("type", isRecording ? "recording" : "file");
 };
 
 /**
@@ -571,5 +573,5 @@ SaveManager.addTypeToRequest = function(request, isRecording) {
  * @return {boolean}
  */
 SaveManager.fileIsOpen = function() {
-	return SaveManager.fileName != null;
+  return SaveManager.fileName != null;
 };

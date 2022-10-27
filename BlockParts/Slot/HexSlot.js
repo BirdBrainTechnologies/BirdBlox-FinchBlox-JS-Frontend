@@ -8,9 +8,9 @@
  * @param {number} snapType - [none,numStrBool,bool,list,any] The type of Blocks which can be attached to the HexSlot.
  */
 function HexSlot(parent, key, snapType) {
-	Slot.call(this, parent, key, snapType, Slot.outputTypes.bool); //Call constructor.
-	this.slotShape = new HexSlotShape(this);
-	this.slotShape.show();
+  Slot.call(this, parent, key, snapType, Slot.outputTypes.bool); //Call constructor.
+  this.slotShape = new HexSlotShape(this);
+  this.slotShape.show();
 }
 HexSlot.prototype = Object.create(Slot.prototype);
 HexSlot.prototype.constructor = HexSlot;
@@ -20,8 +20,8 @@ HexSlot.prototype.constructor = HexSlot;
  * TODO: fix BlockGraphics
  */
 HexSlot.prototype.highlight = function() {
-	const slotGraphicShowing = !this.hasChild;
-	Highlighter.highlight(this.getAbsX(), this.getAbsY(), this.width, this.height, 2, slotGraphicShowing);
+  const slotGraphicShowing = !this.hasChild;
+  Highlighter.highlight(this.getAbsX(), this.getAbsY(), this.width, this.height, 2, slotGraphicShowing);
 };
 
 /**
@@ -29,12 +29,12 @@ HexSlot.prototype.highlight = function() {
  * @return {string}
  */
 HexSlot.prototype.textSummary = function() {
-	//Angle brackets are used because it is a HexSlot.
-	if (this.hasChild) { //If it has a child, just use an ellipsis.
-		return "<...>";
-	} else { //Otherwise, it is empty.
-		return "<>";
-	}
+  //Angle brackets are used because it is a HexSlot.
+  if (this.hasChild) { //If it has a child, just use an ellipsis.
+    return "<...>";
+  } else { //Otherwise, it is empty.
+    return "<>";
+  }
 };
 
 /**
@@ -42,5 +42,5 @@ HexSlot.prototype.textSummary = function() {
  * @return {Data}
  */
 HexSlot.prototype.getDataNotFromChild = function() {
-	return new BoolData(false, false); //The Slot is empty. Return default value of false.
+  return new BoolData(false, false); //The Slot is empty. Return default value of false.
 };

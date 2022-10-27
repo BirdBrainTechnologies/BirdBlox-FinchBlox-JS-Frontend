@@ -13,14 +13,14 @@ function FBPopup(x, y, w, h, parentGroup) {
 }
 
 FBPopup.setConstants = function() {
-	FBPopup.bnMargin = Button.defaultMargin;
+  FBPopup.bnMargin = Button.defaultMargin;
   FBPopup.color = Colors.easternBlue;
   FBPopup.bubbleMargin = 20;
   FBPopup.font = Font.secondaryUiFont(16);
   FBPopup.fontColor = Colors.bbtDarkGray;
   FBPopup.trashIcon = VectorPaths.faTrash;
   FBPopup.trashColor = Colors.stopRed;
-  FBPopup.innerWidth = GuiElements.width/2;
+  FBPopup.innerWidth = GuiElements.width / 2;
 
   //Keep iOS 9 from resizing the window when the keyboard comes up
   FBPopup.isEditingText = false;
@@ -58,23 +58,23 @@ FBPopup.prototype.close = function() {
 FBPopup.prototype.addConfirmCancelBns = function() {
   //console.log("adding buttons")
   const r = TitleBar.defaultCornerRounding;
-  const buttonW = this.innerWidth/3;
-  const buttonH = buttonW * 2/5;
-  const iconH = buttonH*2/3;
+  const buttonW = this.innerWidth / 3;
+  const buttonH = buttonW * 2 / 5;
+  const iconH = buttonH * 2 / 3;
   const buttonMargin = this.innerWidth / 20;
-  const cancelX = this.innerWidth/2 - buttonW - buttonMargin/2;
-  const confirmX = this.innerWidth/2 + buttonMargin/2;
+  const cancelX = this.innerWidth / 2 - buttonW - buttonMargin / 2;
+  const confirmX = this.innerWidth / 2 + buttonMargin / 2;
   const buttonY = this.innerHeight - buttonH; //- FBPopup.bubbleMargin;
 
   this.confirmBn = new Button(confirmX, buttonY, buttonW, buttonH, this.innerGroup, Colors.flagGreen, r, r);
   this.confirmBn.addIcon(VectorPaths.faCheck, iconH);
-  this.confirmBn.setCallbackFunction(function () {
+  this.confirmBn.setCallbackFunction(function() {
     this.confirm();
   }.bind(this), false);
 
   this.cancelBn = new Button(cancelX, buttonY, buttonW, buttonH, this.innerGroup, Colors.stopRed, r, r)
   this.cancelBn.addIcon(VectorPaths.faTimes, iconH);
-  this.cancelBn.setCallbackFunction(function () {
+  this.cancelBn.setCallbackFunction(function() {
     this.cancel();
   }.bind(this), true);
 }
