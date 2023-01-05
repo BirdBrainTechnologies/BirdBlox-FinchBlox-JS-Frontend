@@ -153,6 +153,19 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
       const iY = (i + 1) * this.button.height / (this.widgets.length + 1) - image.width / 2;
       GuiElements.move.group(image.group, iX, iY);
       this.ledArrayImage = image;
+    } else if (this.widgets[i].type == "hatchling") {
+      if (this.colorIcon != null) {
+        this.colorIcon.remove()
+      }
+
+      const iconPath = VectorPaths.faLightbulb
+      const iconH = 11
+      const iconW = VectorIcon.computeWidth(iconPath, iconH)
+      const iconX = this.button.width / 2 - iconW / 2
+      const iconY = this.button.height / 2 - iconH / 2
+      this.colorIcon = new VectorIcon(iconX, iconY, iconPath, this.values[i], iconH, this.button.group)
+      TouchReceiver.addListenersBN(this.colorIcon.group, this.button);
+
     } else {
       text[i] = this.values[i].toString() + this.displaySuffixes[i];
     }
@@ -212,6 +225,9 @@ BlockButton.prototype.addSlider = function(type, startingValue, options) {
     case "angle_left":
     case "angle_right":
       suffix = "°";
+      break;
+    case "hatchling":
+      this.width = 20
       break;
     default:
       suffix = "";

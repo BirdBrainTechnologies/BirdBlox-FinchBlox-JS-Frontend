@@ -3,7 +3,7 @@
  */
 function LevelManager() {
   const LM = LevelManager;
-  LM.currentLevel = 1;
+  LM.currentLevel = Hatchling ? 3 : 1;
   LM.fileListRetreived = false;
   LM.filesSavedLocally = [];
   LM.levelFileList = null;
@@ -20,6 +20,14 @@ LevelManager.setConstants = function() {
     2: "FinchBloxSavePoint_Level2",
     3: "FinchBloxSavePoint_Level3"
   }
+  if (Hatchling) {
+    LM.savePointFileNames = {
+      1: "HatchlingSavePoint_Level1",
+      2: "HatchlingSavePoint_Level2",
+      3: "HatchlingSavePoint_Level3"
+    }
+  }
+
   //Suffixes must be 2 characters to show correctly in FBFileSelect
   LM.fileLevelSuffixes = {
     1: "_1",

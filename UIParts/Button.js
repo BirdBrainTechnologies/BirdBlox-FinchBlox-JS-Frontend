@@ -60,6 +60,10 @@ Button.setGraphics = function() {
     Button.defaultMargin = 10;
     Button.disabledBg = Colors.darkenColor(Colors.easternBlue, 0.85);
     Button.disabledFore = Colors.darkenColor(Colors.blockPaletteMotion, 0.9);
+    if (Hatchling) {
+      Button.disabledBg = Colors.darkenColor(Colors.blockPaletteControl, 0.85);
+      Button.disabledFore = Colors.darkenColor(Colors.blockPaletteControl, 0.95);
+    }
   } else {
     Button.defaultMargin = 5;
     Button.disabledBg = Colors.darkGray;
@@ -364,7 +368,8 @@ Button.prototype.addSecondIcon = function(pathId, height, color, rotation) {
  * Function specific to the finch button of FinchBlox
  */
 Button.prototype.addFinchBnIcons = function() {
-  const finchPathId = VectorPaths.mvFinch;
+  let finchPathId = VectorPaths.mvFinch;
+  if (Hatchling) { finchPathId = VectorPaths.faEgg; }
   const battPathId = VectorPaths.battery;
   const xPathId = VectorPaths.faTimesCircle;
   const font = Font.uiFont(18);

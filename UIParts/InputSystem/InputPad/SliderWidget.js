@@ -17,7 +17,7 @@ InputWidget.Slider = function(type, options, startVal, sliderColor, displaySuffi
   this.index = index;
 
   this.snapToOption = false;
-  if (type == "ledArray") {
+  if (type == "ledArray" || type == "hatchling") {
     this.snapToOption = true;
   }
   this.optionXs = [];
@@ -35,7 +35,11 @@ InputWidget.Slider.setConstants = function() {
   S.hMargin = 20;
   S.barHeight = 4;
   S.barColor = Colors.iron;
-  S.sliderIconPath = VectorPaths.mvFinch;
+  if (Hatchling) {
+    S.sliderIconPath = VectorPaths.faEgg;
+  } else {
+    S.sliderIconPath = VectorPaths.mvFinch;
+  }
   S.optionMargin = 10; //5;//distance between ticks and option display
   S.font = Font.uiFont(24); //Font.uiFont(16);
   S.optionFont = Font.uiFont(16); //Font.uiFont(12);//InputWidget.Label.font;
@@ -186,14 +190,14 @@ InputWidget.Slider.prototype.makeSlider = function() {
   if (this.type == 'ledArray') {
     //Add an image at the bottom to show your selection
     this.imageG = GuiElements.create.group(0, 0, this.group);
-  } else if (this.type != 'color') {
+  } else if (this.type != 'color' && this.type != 'hatchling') {
     //Add a label at the bottom to show your selection
     this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
     this.group.appendChild(this.textE);
   }
-  if (this.type == 'time') {
+  if (this.type == 'time' || this.type == 'hatchling') {
     this.labelIconH = 23;
-    const labelIconP = VectorPaths.faClock;
+    const labelIconP = (this.type == 'hatchling') ? VectorPaths.faLightbulb : VectorPaths.faClock;
     this.labelIconW = VectorIcon.computeWidth(labelIconP, this.labelIconH);
     this.labelIcon = new VectorIcon(0, 0, labelIconP, Colors.bbtDarkGray, this.labelIconH, this.group);
   }
@@ -234,6 +238,14 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
       const iX = x - image.width / 2 + tickW / 2;
       const iY = y - image.width - S.optionMargin;
       GuiElements.move.group(image.group, iX, iY);
+      break;
+    case "hatchling":
+      const iconPath = VectorPaths.faLightbulb
+      const iconH = 23
+      const iconW = VectorIcon.computeWidth(iconPath, iconH)
+      const iconX = x - iconW / 2 + tickW / 2
+      const iconY = y - iconH - S.optionMargin
+      let icon = new VectorIcon(iconX, iconY, iconPath, option, iconH, this.group)
       break;
     case "percent":
     case "distance":
@@ -504,6 +516,10 @@ InputWidget.Slider.prototype.updateLabel = function() {
     //If there is an angle display, make space for that.
     textY += (this.cR ? this.cR + S.font.charHeight / 2 : 0)
     GuiElements.move.text(this.textE, textX, textY);
+  } else if (this.labelIcon != null) {
+    const iconX = this.width - S.hMargin - this.sideSpaceR - this.labelIconW / 2;
+    const iconY = this.height / 2 - this.labelIconH / 2;
+    this.labelIcon.move(iconX, iconY);
   }
   if (this.imageG != null) {
     this.imageG.remove();

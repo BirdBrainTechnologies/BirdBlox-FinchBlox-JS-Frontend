@@ -360,3 +360,14 @@ CallbackManager.setFilePreference = function(fileName) {
   GuiElements.alert("Setting default file to " + fileName);
   OpenDialog.lastOpenFile = fileName;
 };
+
+/**
+ * Sets the notification state of the currently connected Hatchling. Assumes
+ * only one Hatchling connection.
+ */
+CallbackManager.setHatchlingState = function(state) {
+  let device = DeviceHatchling.getManager().getDevice(0);
+  if (device != null) {
+    device.setHatchlingState(state)
+  }
+}

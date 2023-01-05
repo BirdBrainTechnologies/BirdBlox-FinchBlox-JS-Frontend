@@ -673,6 +673,11 @@ Block.prototype.updateAlignRI = function(x, y) {
       xCoord += BlockGraphics.block.pMargin;
     }
   }
+  if (Hatchling) {
+    if (this.hlButton != null) {
+      this.hlButton.updateAlign(-5, -5)
+    }
+  }
 };
 
 /**

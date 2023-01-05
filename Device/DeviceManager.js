@@ -143,21 +143,9 @@ DeviceManager.prototype.setDevice = function(index, newDevice) {
   this.connectedDevices[index].disconnect();
   newDevice.connect();
   this.connectedDevices[index] = newDevice;
-  this.devicesChanged(this.getDeviceClass(newDevice), true);
+  this.devicesChanged(DeviceManager.getDeviceClass(newDevice), true);
 };
 
-//TODO: Remove this function. redundant.
-DeviceManager.prototype.getDeviceClass = function(robot) {
-  if (robot.device === "micro:bit") {
-    return DeviceMicroBit;
-  } else if (robot.device === "Bit") {
-    return DeviceHummingbirdBit;
-  } else if (robot.device === "Duo") {
-    return DeviceHummingbird;
-  } else if (robot.device === "Finch") {
-    return DeviceFinch;
-  }
-};
 
 DeviceManager.getDeviceClass = function(robot) {
   if (robot.device === "micro:bit") {
@@ -168,6 +156,10 @@ DeviceManager.getDeviceClass = function(robot) {
     return DeviceHummingbird;
   } else if (robot.device === "Finch") {
     return DeviceFinch;
+  } else if (robot.device === "Hatch") {
+    return DeviceHatchling;
+  } else {
+    return null
   }
 }
 
@@ -200,7 +192,7 @@ DeviceManager.prototype.removeDevice = function(robotName) {
 DeviceManager.prototype.appendDevice = function(newDevice) {
   newDevice.connect();
   this.connectedDevices.push(newDevice);
-  this.devicesChanged(this.getDeviceClass(newDevice), true);
+  this.devicesChanged(DeviceManager.getDeviceClass(newDevice), true);
 };
 
 /**

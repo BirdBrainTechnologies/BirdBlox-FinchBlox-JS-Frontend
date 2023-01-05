@@ -38,17 +38,14 @@ TitleBar.setGraphicsPart1 = function() {
     TB.buttonH = TB.height / 2;
     TB.tallButtonH = TB.buttonH * 1.25;
     TB.buttonW = TB.tallButtonH * (5 / 4);
-    //TB.buttonW = TB.tallButtonH * (3/4);
     const maxBnWidth = (TB.width - 6 * TB.buttonMargin) / 8;
     TB.buttonW = Math.min(maxBnWidth, TB.buttonW);
-    //TB.longButtonW = 2.5 * TB.buttonW;
-    //TB.finchBnW = 1.5 * TB.buttonW;
     TB.longButtonW = TB.tallButtonH * (5 / 2);
     const maxLongBnW = maxBnWidth * 2;
     TB.longButtonW = Math.min(maxLongBnW, TB.longButtonW);
 
     TB.bnIconMargin = 3;
-    TB.bg = Colors.easternBlue;
+    TB.bg = Hatchling ? Colors.blockPaletteControl : Colors.easternBlue;
     TB.bnIconH = TB.buttonH - 2 * TB.bnIconMargin;
     const maxIconHeight = maxBnWidth * 0.7;
     TB.bnIconH = Math.min(maxIconHeight, TB.bnIconH);
@@ -81,14 +78,8 @@ TitleBar.setGraphicsPart2 = function() {
   const TB = TitleBar
   if (FinchBlox) {
     TB.finchBnX = 2 * TB.buttonMargin;
-    //TB.levelBnX = TB.finchBnX + TB.finchBnW + TB.buttonMargin;
-    //TB.levelBnY = (TB.height/2) - (TB.tallButtonH/2);
-    //TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonMargin/2 - TB.buttonW;
     TB.flagBnX = (GuiElements.width - TB.buttonMargin) / 2 - TB.longButtonW;
     TB.stopBnX = (GuiElements.width + TB.buttonMargin) / 2;
-    //TB.trashBnX = GuiElements.width - 2 * TB.buttonMargin - TB.buttonW;
-    //TB.undoBnX = TB.trashBnX - TB.buttonW - TB.buttonMargin;
-    //TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonMargin/2;
   } else {
     TB.stopBnX = GuiElements.width - TB.buttonW - TB.buttonMargin;
     TB.flagBnX = TB.stopBnX - TB.buttonW - TB.buttonMargin;
@@ -126,12 +117,6 @@ TitleBar.createBar = function() {
 
   GuiElements.layers.titleBg.appendChild(TB.bgRect);
   if (FinchBlox) {
-    //TB.bgShape = GuiElements.create.path(GuiElements.layers.titleBg);
-    //TB.bgShape.setAttributeNS(null, "fill", Colors.white);
-    //TB.leftShape = GuiElements.create.path(GuiElements.layers.titleBg);
-    //TB.rightShape = GuiElements.create.path(GuiElements.layers.titleBg);
-    //TB.leftShape.setAttributeNS(null, "fill", TB.bg);
-    //TB.rightShape.setAttributeNS(null, "fill", TB.bg);
     TB.bgShape = GuiElements.create.path(GuiElements.layers.titleBg);
     TB.bgShape.setAttributeNS(null, "fill", TB.bg);
     TB.updateShapePath();
@@ -155,44 +140,6 @@ TitleBar.updateShapePath = function() {
   TB.bgShape.setAttributeNS(null, "d", path);
 
   TB.sideWidth = shapeW + r;
-
-  /*
-  const shapeW = TB.width/2 - TB.longButtonW;
-  const shapeH = TB.height - TB.buttonMargin;
-  const r = shapeH/2;
-
-  var pathL = " m 0," + TB.buttonMargin;
-  pathL += " l " + shapeW + ",0";
-  pathL += " a " + r + " " + r + " 0 0 0 " + (-r) + " " + r;
-  pathL += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + r;
-  pathL += " l " + (-shapeW-2*r) + ",0";
-  pathL += " z ";
-
-  var pathR = " m " + TB.width + "," + TB.buttonMargin;
-  pathR += " l " + (-shapeW) + ",0";
-  pathR += " a " + r + " " + r + " 0 0 1 " + r + " " + r;
-  pathR += " a " + r + " " + r + " 0 0 0 " + r + " " + r;
-  pathR += " l " + (shapeW+2*r) + ",0";
-  pathR += " z ";
-
-  TB.leftShape.setAttributeNS(null, "d", pathL);
-  TB.rightShape.setAttributeNS(null, "d", pathR);
-  */
-
-  /*
-  const shapeW = 2*TB.longButtonW;
-  const shapeH = TB.height - TB.buttonMargin;
-  const r = shapeH/2;
-  var path = " m " + (TB.width - shapeW)/2 + "," + TB.buttonMargin;
-  path += " l " + shapeW + ",0";
-  path += " a " + r + " " + r + " 0 0 1 " + r + " " + r;
-  path += " a " + r + " " + r + " 0 0 0 " + r + " " + r;
-  path += " l " + (-shapeW-4*r) + ",0";
-  path += " a " + r + " " + r + " 0 0 0 " + r + " " + (-r);
-  path += " a " + r + " " + r + " 0 0 1 " + r + " " + (-r);
-  path += " z ";
-
-  TB.bgShape.setAttributeNS(null, "d", path);*/
 }
 
 /**
@@ -207,9 +154,6 @@ TitleBar.makeButtons = function() {
     const h = TB.tallButtonH;
     TB.undoBnX = TB.width - TB.sideWidth / 2 + TB.buttonMargin / 2;
     TB.levelBnX = TB.width - TB.sideWidth / 2 - TB.buttonMargin / 2 - TB.buttonW;
-    //TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonW/2 + TB.buttonMargin;
-    //TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonW/2;
-    //TB.trashBnX = TB.width - TB.sideWidth/2 - TB.buttonW/2 - TB.buttonMargin - TB.buttonW;
 
     TB.flagBn = new Button(TB.flagBnX, y, TB.longButtonW, h, TBLayer, Colors.flagGreen, r, r);
     TB.flagBn.addIcon(VectorPaths.faFlag, TB.bnIconH);
@@ -219,7 +163,6 @@ TitleBar.makeButtons = function() {
     TB.stopBn.addIcon(VectorPaths.stop, TB.bnIconH * 0.9);
     TB.stopBn.setCallbackFunction(CodeManager.stop, false);
 
-    //TB.undoButton = new Button(TB.undoBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.neonCarrot, r, r);
     TB.undoButton = new Button(TB.undoBnX, y, TB.buttonW, h, TBLayer, Colors.neonCarrot, r, r);
     TB.undoButton.addIcon(VectorPaths.faUndoAlt, TB.bnIconH * 0.8);
     UndoManager.setUndoButton(TB.undoButton);
@@ -230,23 +173,17 @@ TitleBar.makeButtons = function() {
     //TB.trashButton.setCallbackFunction(function(){TabManager.activeTab.clear();}, false);
     //TB.trashButton.setCallbackFunction(function(){ UndoManager.deleteTab(); }, false);
 
-    //TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.levelBN, r, r);
-    TB.levelButton = new Button(TB.levelBnX, y, TB.buttonW, h, TBLayer, Colors.seance, r, r);
-    //TB.levelButton.addText("1", Font.uiFont(24).bold(), Colors.bbtDarkGray);
-    TB.levelButton.addText(LevelManager.currentLevel, LevelManager.levelButtonFont, Colors.white);
-    //TB.levelButton.setCallbackFunction(function(){
-    //  new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
-    //},false);
-    TB.levelButton.setCallbackFunction(function() {
-      (new LevelDialog()).show();
-    }, true);
-
+    if (!Hatchling) {
+      TB.levelButton = new Button(TB.levelBnX, y, TB.buttonW, h, TBLayer, Colors.seance, r, r);
+      TB.levelButton.addText(LevelManager.currentLevel, LevelManager.levelButtonFont, Colors.white);
+      TB.levelButton.setCallbackFunction(function() {
+        (new LevelDialog()).show();
+      }, true);
+    }
 
     TB.updateStatus = function(status) {
       GuiElements.alert("TitleBar update status to " + status);
       const finchBn = TitleBar.finchButton;
-      //let color = Colors.fbGray;
-      //let outlineColor = Colors.iron;
       let color = Colors.stopRed;
       let outlineColor = Colors.darkenColor(Colors.stopRed, 0.5);
       let shortName = "";
@@ -273,18 +210,20 @@ TitleBar.makeButtons = function() {
     DeviceManager.setStatusListener(TB.updateStatus);
 
     TB.finchButton = new Button((TB.sideWidth - TB.longButtonW) / 2, (TB.height / 2) - (TB.tallButtonH / 2), TB.longButtonW, TB.tallButtonH, TBLayer, Colors.fbGray, r, r);
+
     TB.finchButton.addFinchBnIcons();
     TB.finchButton.setCallbackFunction(function() {
+      const deviceClass = Hatchling ? DeviceHatchling : DeviceFinch
       switch (DeviceManager.getStatus()) {
         case DeviceManager.statuses.noDevices:
-          (new DiscoverDialog(DeviceFinch)).show();
+          (new DiscoverDialog(deviceClass)).show();
           break;
         case DeviceManager.statuses.connected:
           DeviceManager.removeAllDevices();
           break;
         default:
           DeviceManager.removeAllDevices();
-          (new DiscoverDialog(DeviceFinch)).show();
+          (new DiscoverDialog(deviceClass)).show();
       }
     }, true);
 

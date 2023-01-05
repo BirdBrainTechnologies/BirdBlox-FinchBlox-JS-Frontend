@@ -10,12 +10,14 @@ function BlockList() {
   // List only includes categories that will appear in the BlockPalette in order.
   // Category names should be capitalized in the way they should be displayed on screen.
   if (FinchBlox) {
-    cat.push("Motion_1");
-    cat.push("Color_1");
-    cat.push("Sound_1");
-    cat.push("Motion_2");
-    cat.push("Color_2");
-    cat.push("Sound_2");
+    if (!Hatchling) {
+      cat.push("Motion_1");
+      cat.push("Color_1");
+      cat.push("Sound_1");
+      cat.push("Motion_2");
+      cat.push("Color_2");
+      cat.push("Sound_2");
+    }
     cat.push("Motion_3");
     cat.push("Color_3");
     cat.push("Sound_3");
@@ -116,12 +118,17 @@ BlockList.populateCat_sound_2 = function(category) {
   category.centerBlocks();
 }
 BlockList.populateCat_motion_3 = function(category) {
-  category.addBlockByName("B_FBForwardL3");
-  category.addBlockByName("B_FBBackwardL3");
-  category.addBlockByName("B_FBRightL3");
-  category.addBlockByName("B_FBLeftL3");
-  category.addBlockByName("B_FBForwardUntilDark");
-  category.addBlockByName("B_FBForwardUntilObstacle");
+  if (Hatchling) {
+    category.addBlockByName("B_HLPositionServo")
+    category.addBlockByName("B_HLRotationServo")
+  } else {
+    category.addBlockByName("B_FBForwardL3");
+    category.addBlockByName("B_FBBackwardL3");
+    category.addBlockByName("B_FBRightL3");
+    category.addBlockByName("B_FBLeftL3");
+    category.addBlockByName("B_FBForwardUntilDark");
+    category.addBlockByName("B_FBForwardUntilObstacle");
+  }
   category.trimBottom();
   category.centerBlocks();
 }

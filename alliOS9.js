@@ -1,4 +1,6 @@
 var FinchBlox = true;
+var Hatchling = true;
+if (Hatchling) { FinchBlox = true; }
 var FrontendVersion = 393;
 
 
@@ -5134,6 +5136,8 @@ Device.fromJson = function(json) {
     return new DeviceHummingbird(json.name, json.id, json.RSSI, json.device);
   } else if (json.device === "Finch") {
     return new DeviceFinch(json.name, json.id, json.RSSI, json.device);
+  } else if (json.device === "Hatch") {
+    return new DeviceHatchling(json.name, json.id, json.RSSI, json.device);
   } else {
     return null;
   }
@@ -5179,7 +5183,7 @@ Device.fromJsonArrayString = function(deviceList) {
  */
 Device.getTypeList = function() {
   //return [DeviceHummingbird, DeviceFlutter, DeviceFinch];
-  return [DeviceHummingbird, DeviceHummingbirdBit, DeviceMicroBit, DeviceFinch];
+  return [DeviceHummingbird, DeviceHummingbirdBit, DeviceMicroBit, DeviceFinch, DeviceHatchling];
 };
 
 /**
@@ -5498,21 +5502,9 @@ DeviceManager.prototype.setDevice = function(index, newDevice) {
   this.connectedDevices[index].disconnect();
   newDevice.connect();
   this.connectedDevices[index] = newDevice;
-  this.devicesChanged(this.getDeviceClass(newDevice), true);
+  this.devicesChanged(DeviceManager.getDeviceClass(newDevice), true);
 };
 
-//TODO: Remove this function. redundant.
-DeviceManager.prototype.getDeviceClass = function(robot) {
-  if (robot.device === "micro:bit") {
-    return DeviceMicroBit;
-  } else if (robot.device === "Bit") {
-    return DeviceHummingbirdBit;
-  } else if (robot.device === "Duo") {
-    return DeviceHummingbird;
-  } else if (robot.device === "Finch") {
-    return DeviceFinch;
-  }
-};
 
 DeviceManager.getDeviceClass = function(robot) {
   if (robot.device === "micro:bit") {
@@ -5523,6 +5515,10 @@ DeviceManager.getDeviceClass = function(robot) {
     return DeviceHummingbird;
   } else if (robot.device === "Finch") {
     return DeviceFinch;
+  } else if (robot.device === "Hatch") {
+    return DeviceHatchling;
+  } else {
+    return null
   }
 }
 
@@ -5555,7 +5551,7 @@ DeviceManager.prototype.removeDevice = function(robotName) {
 DeviceManager.prototype.appendDevice = function(newDevice) {
   newDevice.connect();
   this.connectedDevices.push(newDevice);
-  this.devicesChanged(this.getDeviceClass(newDevice), true);
+  this.devicesChanged(DeviceManager.getDeviceClass(newDevice), true);
 };
 
 /**
@@ -6303,6 +6299,24 @@ DeviceFinch.prototype.readSensor = function(status, sensor, position) {
     request.addParam("position", position);
   }
   HtmlServer.sendRequest(request.toString(), status, true);
+}
+
+/**
+ * Manages communication with a Hatchling
+ * @param {string} name
+ * @param {string} id
+ * @constructor
+ */
+function DeviceHatchling(name, id, RSSI, device) {
+  DeviceWithPorts.call(this, name, id, RSSI, device);
+  this.hlState = []
+}
+DeviceHatchling.prototype = Object.create(DeviceWithPorts.prototype);
+DeviceHatchling.prototype.constructor = DeviceHatchling;
+Device.setDeviceTypeName(DeviceHatchling, "hatchling", "Hatchling", "Hatch");
+
+DeviceHatchling.prototype.setHatchlingState = function(state) {
+  this.hlState = state
 }
 
 /**
@@ -7969,12 +7983,14 @@ function BlockList() {
   // List only includes categories that will appear in the BlockPalette in order.
   // Category names should be capitalized in the way they should be displayed on screen.
   if (FinchBlox) {
-    cat.push("Motion_1");
-    cat.push("Color_1");
-    cat.push("Sound_1");
-    cat.push("Motion_2");
-    cat.push("Color_2");
-    cat.push("Sound_2");
+    if (!Hatchling) {
+      cat.push("Motion_1");
+      cat.push("Color_1");
+      cat.push("Sound_1");
+      cat.push("Motion_2");
+      cat.push("Color_2");
+      cat.push("Sound_2");
+    }
     cat.push("Motion_3");
     cat.push("Color_3");
     cat.push("Sound_3");
@@ -8075,12 +8091,17 @@ BlockList.populateCat_sound_2 = function(category) {
   category.centerBlocks();
 }
 BlockList.populateCat_motion_3 = function(category) {
-  category.addBlockByName("B_FBForwardL3");
-  category.addBlockByName("B_FBBackwardL3");
-  category.addBlockByName("B_FBRightL3");
-  category.addBlockByName("B_FBLeftL3");
-  category.addBlockByName("B_FBForwardUntilDark");
-  category.addBlockByName("B_FBForwardUntilObstacle");
+  if (Hatchling) {
+    category.addBlockByName("B_HLPositionServo")
+    category.addBlockByName("B_HLRotationServo")
+  } else {
+    category.addBlockByName("B_FBForwardL3");
+    category.addBlockByName("B_FBBackwardL3");
+    category.addBlockByName("B_FBRightL3");
+    category.addBlockByName("B_FBLeftL3");
+    category.addBlockByName("B_FBForwardUntilDark");
+    category.addBlockByName("B_FBForwardUntilObstacle");
+  }
   category.trimBottom();
   category.centerBlocks();
 }
@@ -8803,6 +8824,19 @@ function VectorPaths(){
   VP.mvArrow.width=83;
   VP.mvArrow.height=83;
   VP.mvArrow.transform="matrix(8.76256e-17,-1.43103,1.43103,8.76256e-17,-721.241,439.328)";
+  VP.faCompassDrafting={};
+  VP.faCompassDrafting.path="M352 96c0 14.3-3.1 27.9-8.8 40.2L396 227.4c-23.7 25.3-54.2 44.1-88.5 53.6L256 192h0 0l-68 117.5c21.5 6.8 44.3 10.5 68.1 10.5c70.7 0 133.8-32.7 174.9-84c11.1-13.8 31.2-16 45-5s16 31.2 5 45C428.1 341.8 347 384 256 384c-35.4 0-69.4-6.4-100.7-18.1L98.7 463.7C94 471.8 87 478.4 78.6 482.6L23.2 510.3c-5 2.5-10.9 2.2-15.6-.7S0 501.5 0 496V440.6c0-8.4 2.2-16.7 6.5-24.1l60-103.7C53.7 301.6 41.8 289.3 31.2 276c-11.1-13.8-8.8-33.9 5-45s33.9-8.8 45 5c5.7 7.1 11.8 13.8 18.2 20.1l69.4-119.9c-5.6-12.2-8.8-25.8-8.8-40.2c0-53 43-96 96-96s96 43 96 96zm21 297.9c32.6-12.8 62.5-30.8 88.9-52.9l43.7 75.5c4.2 7.3 6.5 15.6 6.5 24.1V496c0 5.5-2.9 10.7-7.6 13.6s-10.6 3.2-15.6 .7l-55.4-27.7c-8.4-4.2-15.4-10.8-20.1-18.9L373 393.9zM256 128c17.7 0 32-14.3 32-32s-14.3-32-32-32s-32 14.3-32 32s14.3 32 32 32z"
+  VP.faCompassDrafting.width=512;
+  VP.faCompassDrafting.height=512;
+  VP.faArrowsSpin={};
+  VP.faArrowsSpin.path="M224 96c38.4 0 73.7 13.5 101.3 36.1l-32.6 32.6c-4.6 4.6-5.9 11.5-3.5 17.4s8.3 9.9 14.8 9.9H416c8.8 0 16-7.2 16-16V64c0-6.5-3.9-12.3-9.9-14.8s-12.9-1.1-17.4 3.5l-34 34C331.4 52.6 280.1 32 224 32c-10.9 0-21.5 .8-32 2.3V99.2c10.3-2.1 21-3.2 32-3.2zM100.1 154.7l32.6 32.6c4.6 4.6 11.5 5.9 17.4 3.5s9.9-8.3 9.9-14.8V64c0-8.8-7.2-16-16-16H32c-6.5 0-12.3 3.9-14.8 9.9s-1.1 12.9 3.5 17.4l34 34C20.6 148.6 0 199.9 0 256c0 10.9 .8 21.5 2.3 32H67.2c-2.1-10.3-3.2-21-3.2-32c0-38.4 13.5-73.7 36.1-101.3zM445.7 224H380.8c2.1 10.3 3.2 21 3.2 32c0 38.4-13.5 73.7-36.1 101.3l-32.6-32.6c-4.6-4.6-11.5-5.9-17.4-3.5s-9.9 8.3-9.9 14.8V448c0 8.8 7.2 16 16 16H416c6.5 0 12.3-3.9 14.8-9.9s1.1-12.9-3.5-17.4l-34-34C427.4 363.4 448 312.1 448 256c0-10.9-.8-21.5-2.3-32zM224 416c-38.4 0-73.7-13.5-101.3-36.1l32.6-32.6c4.6-4.6 5.9-11.5 3.5-17.4s-8.3-9.9-14.8-9.9H32c-8.8 0-16 7.2-16 16l0 112c0 6.5 3.9 12.3 9.9 14.8s12.9 1.1 17.4-3.5l34-34C116.6 459.4 167.9 480 224 480c10.9 0 21.5-.8 32-2.3V412.8c-10.3 2.1-21 3.2-32 3.2z"
+  VP.faArrowsSpin.width=448;
+  VP.faArrowsSpin.height=512;
+  VP.faEgg={};
+  //VP.faEgg.path="M192 496C86 496 0 394 0 288C0 176 64 16 192 16s192 160 192 272c0 106-86 208-192 208zM154.8 134c6.5-6 7-16.1 1-22.6s-16.1-7-22.6-1c-23.9 21.8-41.1 52.7-52.3 84.2C69.7 226.1 64 259.7 64 288c0 8.8 7.2 16 16 16s16-7.2 16-16c0-24.5 5-54.4 15.1-82.8c10.1-28.5 25-54.1 43.7-71.2z"; //original
+  VP.faEgg.path="M192 496C86 496 0 394 0 288C0 176 64 16 192 16s192 160 192 272c0 106-86 208-192 208z";
+  VP.faEgg.width=384;
+  VP.faEgg.height=512;
   VP.faCrosshairs={};
   VP.faCrosshairs.path="M256 0c17.7 0 32 14.3 32 32V42.4c93.7 13.9 167.7 88 181.6 181.6H480c17.7 0 32 14.3 32 32s-14.3 32-32 32H469.6c-13.9 93.7-88 167.7-181.6 181.6V480c0 17.7-14.3 32-32 32s-32-14.3-32-32V469.6C130.3 455.7 56.3 381.7 42.4 288H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H42.4C56.3 130.3 130.3 56.3 224 42.4V32c0-17.7 14.3-32 32-32zM107.4 288c12.5 58.3 58.4 104.1 116.6 116.6V384c0-17.7 14.3-32 32-32s32 14.3 32 32v20.6c58.3-12.5 104.1-58.4 116.6-116.6H384c-17.7 0-32-14.3-32-32s14.3-32 32-32h20.6C392.1 165.7 346.3 119.9 288 107.4V128c0 17.7-14.3 32-32 32s-32-14.3-32-32V107.4C165.7 119.9 119.9 165.7 107.4 224H128c17.7 0 32 14.3 32 32s-14.3 32-32 32H107.4zM256 288c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z";
   VP.faCrosshairs.width=512;
@@ -11570,17 +11604,14 @@ TitleBar.setGraphicsPart1 = function() {
     TB.buttonH = TB.height / 2;
     TB.tallButtonH = TB.buttonH * 1.25;
     TB.buttonW = TB.tallButtonH * (5 / 4);
-    //TB.buttonW = TB.tallButtonH * (3/4);
     var maxBnWidth = (TB.width - 6 * TB.buttonMargin) / 8;
     TB.buttonW = Math.min(maxBnWidth, TB.buttonW);
-    //TB.longButtonW = 2.5 * TB.buttonW;
-    //TB.finchBnW = 1.5 * TB.buttonW;
     TB.longButtonW = TB.tallButtonH * (5 / 2);
     var maxLongBnW = maxBnWidth * 2;
     TB.longButtonW = Math.min(maxLongBnW, TB.longButtonW);
 
     TB.bnIconMargin = 3;
-    TB.bg = Colors.easternBlue;
+    TB.bg = Hatchling ? Colors.blockPaletteControl : Colors.easternBlue;
     TB.bnIconH = TB.buttonH - 2 * TB.bnIconMargin;
     var maxIconHeight = maxBnWidth * 0.7;
     TB.bnIconH = Math.min(maxIconHeight, TB.bnIconH);
@@ -11613,14 +11644,8 @@ TitleBar.setGraphicsPart2 = function() {
   var TB = TitleBar
   if (FinchBlox) {
     TB.finchBnX = 2 * TB.buttonMargin;
-    //TB.levelBnX = TB.finchBnX + TB.finchBnW + TB.buttonMargin;
-    //TB.levelBnY = (TB.height/2) - (TB.tallButtonH/2);
-    //TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonMargin/2 - TB.buttonW;
     TB.flagBnX = (GuiElements.width - TB.buttonMargin) / 2 - TB.longButtonW;
     TB.stopBnX = (GuiElements.width + TB.buttonMargin) / 2;
-    //TB.trashBnX = GuiElements.width - 2 * TB.buttonMargin - TB.buttonW;
-    //TB.undoBnX = TB.trashBnX - TB.buttonW - TB.buttonMargin;
-    //TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonMargin/2;
   } else {
     TB.stopBnX = GuiElements.width - TB.buttonW - TB.buttonMargin;
     TB.flagBnX = TB.stopBnX - TB.buttonW - TB.buttonMargin;
@@ -11658,12 +11683,6 @@ TitleBar.createBar = function() {
 
   GuiElements.layers.titleBg.appendChild(TB.bgRect);
   if (FinchBlox) {
-    //TB.bgShape = GuiElements.create.path(GuiElements.layers.titleBg);
-    //TB.bgShape.setAttributeNS(null, "fill", Colors.white);
-    //TB.leftShape = GuiElements.create.path(GuiElements.layers.titleBg);
-    //TB.rightShape = GuiElements.create.path(GuiElements.layers.titleBg);
-    //TB.leftShape.setAttributeNS(null, "fill", TB.bg);
-    //TB.rightShape.setAttributeNS(null, "fill", TB.bg);
     TB.bgShape = GuiElements.create.path(GuiElements.layers.titleBg);
     TB.bgShape.setAttributeNS(null, "fill", TB.bg);
     TB.updateShapePath();
@@ -11687,44 +11706,6 @@ TitleBar.updateShapePath = function() {
   TB.bgShape.setAttributeNS(null, "d", path);
 
   TB.sideWidth = shapeW + r;
-
-  /*
-  var shapeW = TB.width/2 - TB.longButtonW;
-  var shapeH = TB.height - TB.buttonMargin;
-  var r = shapeH/2;
-
-  var pathL = " m 0," + TB.buttonMargin;
-  pathL += " l " + shapeW + ",0";
-  pathL += " a " + r + " " + r + " 0 0 0 " + (-r) + " " + r;
-  pathL += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + r;
-  pathL += " l " + (-shapeW-2*r) + ",0";
-  pathL += " z ";
-
-  var pathR = " m " + TB.width + "," + TB.buttonMargin;
-  pathR += " l " + (-shapeW) + ",0";
-  pathR += " a " + r + " " + r + " 0 0 1 " + r + " " + r;
-  pathR += " a " + r + " " + r + " 0 0 0 " + r + " " + r;
-  pathR += " l " + (shapeW+2*r) + ",0";
-  pathR += " z ";
-
-  TB.leftShape.setAttributeNS(null, "d", pathL);
-  TB.rightShape.setAttributeNS(null, "d", pathR);
-  */
-
-  /*
-  var shapeW = 2*TB.longButtonW;
-  var shapeH = TB.height - TB.buttonMargin;
-  var r = shapeH/2;
-  var path = " m " + (TB.width - shapeW)/2 + "," + TB.buttonMargin;
-  path += " l " + shapeW + ",0";
-  path += " a " + r + " " + r + " 0 0 1 " + r + " " + r;
-  path += " a " + r + " " + r + " 0 0 0 " + r + " " + r;
-  path += " l " + (-shapeW-4*r) + ",0";
-  path += " a " + r + " " + r + " 0 0 0 " + r + " " + (-r);
-  path += " a " + r + " " + r + " 0 0 1 " + r + " " + (-r);
-  path += " z ";
-
-  TB.bgShape.setAttributeNS(null, "d", path);*/
 }
 
 /**
@@ -11739,9 +11720,6 @@ TitleBar.makeButtons = function() {
     var h = TB.tallButtonH;
     TB.undoBnX = TB.width - TB.sideWidth / 2 + TB.buttonMargin / 2;
     TB.levelBnX = TB.width - TB.sideWidth / 2 - TB.buttonMargin / 2 - TB.buttonW;
-    //TB.undoBnX = TB.width - TB.sideWidth/2 + TB.buttonW/2 + TB.buttonMargin;
-    //TB.levelBnX = TB.width - TB.sideWidth/2 - TB.buttonW/2;
-    //TB.trashBnX = TB.width - TB.sideWidth/2 - TB.buttonW/2 - TB.buttonMargin - TB.buttonW;
 
     TB.flagBn = new Button(TB.flagBnX, y, TB.longButtonW, h, TBLayer, Colors.flagGreen, r, r);
     TB.flagBn.addIcon(VectorPaths.faFlag, TB.bnIconH);
@@ -11751,7 +11729,6 @@ TitleBar.makeButtons = function() {
     TB.stopBn.addIcon(VectorPaths.stop, TB.bnIconH * 0.9);
     TB.stopBn.setCallbackFunction(CodeManager.stop, false);
 
-    //TB.undoButton = new Button(TB.undoBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.neonCarrot, r, r);
     TB.undoButton = new Button(TB.undoBnX, y, TB.buttonW, h, TBLayer, Colors.neonCarrot, r, r);
     TB.undoButton.addIcon(VectorPaths.faUndoAlt, TB.bnIconH * 0.8);
     UndoManager.setUndoButton(TB.undoButton);
@@ -11762,23 +11739,17 @@ TitleBar.makeButtons = function() {
     //TB.trashButton.setCallbackFunction(function(){TabManager.activeTab.clear();}, false);
     //TB.trashButton.setCallbackFunction(function(){ UndoManager.deleteTab(); }, false);
 
-    //TB.levelButton = new Button(TB.levelBnX, TB.levelBnY, TB.buttonW, TB.buttonH, TBLayer, Colors.levelBN, r, r);
-    TB.levelButton = new Button(TB.levelBnX, y, TB.buttonW, h, TBLayer, Colors.seance, r, r);
-    //TB.levelButton.addText("1", Font.uiFont(24).bold(), Colors.bbtDarkGray);
-    TB.levelButton.addText(LevelManager.currentLevel, LevelManager.levelButtonFont, Colors.white);
-    //TB.levelButton.setCallbackFunction(function(){
-    //  new LevelMenu(TB.levelBnX + TB.buttonW/2, TB.levelBnY + TB.buttonH);
-    //},false);
-    TB.levelButton.setCallbackFunction(function() {
-      (new LevelDialog()).show();
-    }, true);
-
+    if (!Hatchling) {
+      TB.levelButton = new Button(TB.levelBnX, y, TB.buttonW, h, TBLayer, Colors.seance, r, r);
+      TB.levelButton.addText(LevelManager.currentLevel, LevelManager.levelButtonFont, Colors.white);
+      TB.levelButton.setCallbackFunction(function() {
+        (new LevelDialog()).show();
+      }, true);
+    }
 
     TB.updateStatus = function(status) {
       GuiElements.alert("TitleBar update status to " + status);
       var finchBn = TitleBar.finchButton;
-      //var color = Colors.fbGray;
-      //var outlineColor = Colors.iron;
       var color = Colors.stopRed;
       var outlineColor = Colors.darkenColor(Colors.stopRed, 0.5);
       var shortName = "";
@@ -11805,18 +11776,20 @@ TitleBar.makeButtons = function() {
     DeviceManager.setStatusListener(TB.updateStatus);
 
     TB.finchButton = new Button((TB.sideWidth - TB.longButtonW) / 2, (TB.height / 2) - (TB.tallButtonH / 2), TB.longButtonW, TB.tallButtonH, TBLayer, Colors.fbGray, r, r);
+
     TB.finchButton.addFinchBnIcons();
     TB.finchButton.setCallbackFunction(function() {
+      var deviceClass = Hatchling ? DeviceHatchling : DeviceFinch
       switch (DeviceManager.getStatus()) {
         case DeviceManager.statuses.noDevices:
-          (new DiscoverDialog(DeviceFinch)).show();
+          (new DiscoverDialog(deviceClass)).show();
           break;
         case DeviceManager.statuses.connected:
           DeviceManager.removeAllDevices();
           break;
         default:
           DeviceManager.removeAllDevices();
-          (new DiscoverDialog(DeviceFinch)).show();
+          (new DiscoverDialog(deviceClass)).show();
       }
     }, true);
 
@@ -12227,12 +12200,15 @@ BlockPalette.createCategories = function() {
   if (FinchBlox) {
     var currentY = 0;
     var currentX = BlockPalette.catW / 2 - 1.5 * CategoryBN.width - CategoryBN.hMargin;
+    if (Hatchling) {
+      currentX = BlockPalette.catW / 2 - 2 * CategoryBN.width - 1.5 * CategoryBN.hMargin;
+    }
     for (var i = 0; i < catCount; i++) {
       var currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
       BlockPalette.categories.push(currentCat);
-      if (i == 2) {
+      if (i == 2 && !Hatchling) {
         currentX = BlockPalette.catW / 2 - 1.5 * CategoryBN.width - CategoryBN.hMargin;
-      } else if (i == 5) {
+      } else if (i == 5 && !Hatchling) {
         //currentX = BlockPalette.catW/2 - 2.5*CategoryBN.width - 2*CategoryBN.hMargin;
         currentX = BlockPalette.catW / 2 - 2 * CategoryBN.width - 1.5 * CategoryBN.hMargin;
       } else {
@@ -13821,6 +13797,10 @@ Button.setGraphics = function() {
     Button.defaultMargin = 10;
     Button.disabledBg = Colors.darkenColor(Colors.easternBlue, 0.85);
     Button.disabledFore = Colors.darkenColor(Colors.blockPaletteMotion, 0.9);
+    if (Hatchling) {
+      Button.disabledBg = Colors.darkenColor(Colors.blockPaletteControl, 0.85);
+      Button.disabledFore = Colors.darkenColor(Colors.blockPaletteControl, 0.95);
+    }
   } else {
     Button.defaultMargin = 5;
     Button.disabledBg = Colors.darkGray;
@@ -14126,6 +14106,7 @@ Button.prototype.addSecondIcon = function(pathId, height, color, rotation) {
  */
 Button.prototype.addFinchBnIcons = function() {
   var finchPathId = VectorPaths.mvFinch;
+  if (Hatchling) { finchPathId = VectorPaths.faEgg; }
   var battPathId = VectorPaths.battery;
   var xPathId = VectorPaths.faTimesCircle;
   var font = Font.uiFont(18);
@@ -16416,7 +16397,7 @@ InputWidget.Slider = function(type, options, startVal, sliderColor, displaySuffi
   this.index = index;
 
   this.snapToOption = false;
-  if (type == "ledArray") {
+  if (type == "ledArray" || type == "hatchling") {
     this.snapToOption = true;
   }
   this.optionXs = [];
@@ -16434,7 +16415,11 @@ InputWidget.Slider.setConstants = function() {
   S.hMargin = 20;
   S.barHeight = 4;
   S.barColor = Colors.iron;
-  S.sliderIconPath = VectorPaths.mvFinch;
+  if (Hatchling) {
+    S.sliderIconPath = VectorPaths.faEgg;
+  } else {
+    S.sliderIconPath = VectorPaths.mvFinch;
+  }
   S.optionMargin = 10; //5;//distance between ticks and option display
   S.font = Font.uiFont(24); //Font.uiFont(16);
   S.optionFont = Font.uiFont(16); //Font.uiFont(12);//InputWidget.Label.font;
@@ -16585,14 +16570,14 @@ InputWidget.Slider.prototype.makeSlider = function() {
   if (this.type == 'ledArray') {
     //Add an image at the bottom to show your selection
     this.imageG = GuiElements.create.group(0, 0, this.group);
-  } else if (this.type != 'color') {
+  } else if (this.type != 'color' && this.type != 'hatchling') {
     //Add a label at the bottom to show your selection
     this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
     this.group.appendChild(this.textE);
   }
-  if (this.type == 'time') {
+  if (this.type == 'time' || this.type == 'hatchling') {
     this.labelIconH = 23;
-    var labelIconP = VectorPaths.faClock;
+    var labelIconP = (this.type == 'hatchling') ? VectorPaths.faLightbulb : VectorPaths.faClock;
     this.labelIconW = VectorIcon.computeWidth(labelIconP, this.labelIconH);
     this.labelIcon = new VectorIcon(0, 0, labelIconP, Colors.bbtDarkGray, this.labelIconH, this.group);
   }
@@ -16633,6 +16618,14 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
       var iX = x - image.width / 2 + tickW / 2;
       var iY = y - image.width - S.optionMargin;
       GuiElements.move.group(image.group, iX, iY);
+      break;
+    case "hatchling":
+      var iconPath = VectorPaths.faLightbulb
+      var iconH = 23
+      var iconW = VectorIcon.computeWidth(iconPath, iconH)
+      var iconX = x - iconW / 2 + tickW / 2
+      var iconY = y - iconH - S.optionMargin
+      var icon = new VectorIcon(iconX, iconY, iconPath, option, iconH, this.group)
       break;
     case "percent":
     case "distance":
@@ -16903,6 +16896,10 @@ InputWidget.Slider.prototype.updateLabel = function() {
     //If there is an angle display, make space for that.
     textY += (this.cR ? this.cR + S.font.charHeight / 2 : 0)
     GuiElements.move.text(this.textE, textX, textY);
+  } else if (this.labelIcon != null) {
+    var iconX = this.width - S.hMargin - this.sideSpaceR - this.labelIconW / 2;
+    var iconY = this.height / 2 - this.labelIconH / 2;
+    this.labelIcon.move(iconX, iconY);
   }
   if (this.imageG != null) {
     this.imageG.remove();
@@ -26858,6 +26855,17 @@ CallbackManager.setFilePreference = function(fileName) {
 };
 
 /**
+ * Sets the notification state of the currently connected Hatchling. Assumes
+ * only one Hatchling connection.
+ */
+CallbackManager.setHatchlingState = function(state) {
+  var device = DeviceHatchling.getManager().getDevice(0);
+  if (device != null) {
+    device.setHatchlingState(state)
+  }
+}
+
+/**
  * Static class that helps parse and write XML files
  */
 function XmlWriter() {
@@ -27826,7 +27834,7 @@ UndoManager.clearUndos = function() {
  */
 function LevelManager() {
   var LM = LevelManager;
-  LM.currentLevel = 1;
+  LM.currentLevel = Hatchling ? 3 : 1;
   LM.fileListRetreived = false;
   LM.filesSavedLocally = [];
   LM.levelFileList = null;
@@ -27843,6 +27851,14 @@ LevelManager.setConstants = function() {
     2: "FinchBloxSavePoint_Level2",
     3: "FinchBloxSavePoint_Level3"
   }
+  if (Hatchling) {
+    LM.savePointFileNames = {
+      1: "HatchlingSavePoint_Level1",
+      2: "HatchlingSavePoint_Level2",
+      3: "HatchlingSavePoint_Level3"
+    }
+  }
+
   //Suffixes must be 2 characters to show correctly in FBFileSelect
   LM.fileLevelSuffixes = {
     1: "_1",
@@ -28665,6 +28681,11 @@ Block.prototype.updateAlignRI = function(x, y) {
       }
     } else if (i < this.parts.length - 1) {
       xCoord += BlockGraphics.block.pMargin;
+    }
+  }
+  if (Hatchling) {
+    if (this.hlButton != null) {
+      this.hlButton.updateAlign(-5, -5)
     }
   }
 };
@@ -33310,6 +33331,19 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
       var iY = (i + 1) * this.button.height / (this.widgets.length + 1) - image.width / 2;
       GuiElements.move.group(image.group, iX, iY);
       this.ledArrayImage = image;
+    } else if (this.widgets[i].type == "hatchling") {
+      if (this.colorIcon != null) {
+        this.colorIcon.remove()
+      }
+
+      var iconPath = VectorPaths.faLightbulb
+      var iconH = 11
+      var iconW = VectorIcon.computeWidth(iconPath, iconH)
+      var iconX = this.button.width / 2 - iconW / 2
+      var iconY = this.button.height / 2 - iconH / 2
+      this.colorIcon = new VectorIcon(iconX, iconY, iconPath, this.values[i], iconH, this.button.group)
+      TouchReceiver.addListenersBN(this.colorIcon.group, this.button);
+
     } else {
       text[i] = this.values[i].toString() + this.displaySuffixes[i];
     }
@@ -33369,6 +33403,9 @@ BlockButton.prototype.addSlider = function(type, startingValue, options) {
     case "angle_left":
     case "angle_right":
       suffix = "°";
+      break;
+    case "hatchling":
+      this.width = 20
       break;
     default:
       suffix = "";
@@ -38765,4 +38802,109 @@ B_ListContainsItem.prototype.checkListContainsItem = function(listData, itemD) {
   }
   return new BoolData(false, true);
 };
+
+/*
+ * This file contains the implementations of hatchling blocks that aren't taken
+ * from FinchBlox
+ */
+
+var HL_Utils = {}
+HL_Utils.portColors = ["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
+HL_Utils.addHLButton = function(block) {
+  block.port = -1 //unknown
+  block.hlButton = new BlockButton(block);
+  block.hlButton.addSlider("hatchling", Colors.bbtDarkGray, HL_Utils.portColors)
+}
+HL_Utils.updatePort = function(block) {
+  if (block.hlButton != null) {
+    block.port = HL_Utils.portColors.indexOf(block.hlButton.values[0])
+  }
+}
+HL_Utils.setupAction = function(block) {
+  var mem = block.runMem;
+  mem.requestStatus = {};
+  mem.requestStatus.finished = false;
+  mem.requestStatus.error = false;
+  mem.requestStatus.result = null;
+
+  var device = DeviceHatchling.getManager().getDevice(0);
+  if (device == null) {
+    mem.requestStatus.finished = true;
+    mem.duration = 0;
+    TitleBar.flashFinchButton();
+  }
+  return device;
+}
+
+function B_HLOutputBase(x, y, category, outputType) {
+  this.outputType = outputType
+  CommandBlock.call(this, x, y, category);
+
+  HL_Utils.addHLButton(this)
+}
+B_HLOutputBase.prototype = Object.create(CommandBlock.prototype);
+B_HLOutputBase.prototype.constructor = B_HLOutputBase;
+
+B_HLOutputBase.prototype.startAction = function() {
+  var device = HL_Utils.setupAction(this);
+  if (device == null) {
+    return new ExecutionStatusError();
+  }
+  if (this.port == -1 || this.port >= HL_Utils.portColors.length) {
+    //no port chosen. Or possibly port our of bounds. Todo: pop up window if something is connected?
+    return new ExecutionStatusError();
+  }
+  device.setOutput(this.runMem.requestStatus, this.outputType, this.port, this.value, this.valueKey)
+  return new ExecutionStatusRunning();
+};
+B_HLOutputBase.prototype.updateValues = function() {
+  HL_Utils.updatePort(this)
+  if (this.valueBN != null) {
+    this.value = this.valueBN.values[0]
+  }
+}
+B_HLOutputBase.prototype.updateAction = function() {
+  if (this.runMem.requestStatus.finished) {
+    if (this.runMem.requestStatus.error) {
+      return new ExecutionStatusError();
+    }
+    return new ExecutionStatusDone();
+  } else {
+    return new ExecutionStatusRunning();
+  }
+};
+
+function B_HLPositionServo(x, y) {
+  this.value = 90; //defaultAngle
+  this.valueKey = "angle"
+  B_HLOutputBase.call(this, x, y, "motion_3", "positionServo");
+
+  var icon = VectorPaths["faCompassDrafting"];
+  var blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 27);
+  blockIcon.isEndOfLine = true;
+  this.addPart(blockIcon);
+
+  this.valueBN = new BlockButton(this, this.value);
+  this.valueBN.addSlider("angle_right", this.value, [5, 30, 60, 90, 120, 150, 180]);
+  this.addPart(this.valueBN);
+}
+B_HLPositionServo.prototype = Object.create(B_HLOutputBase.prototype);
+B_HLPositionServo.prototype.constructor = B_HLPositionServo;
+
+function B_HLRotationServo(x, y) {
+  this.value = 50; //defaultSpeed
+  this.valueKey = "percent"
+  B_HLOutputBase.call(this, x, y, "motion_3", "rotationServo");
+
+  var icon = VectorPaths["faArrowsSpin"];
+  var blockIcon = new BlockIcon(this, icon, Colors.white, "rServo", 27);
+  blockIcon.isEndOfLine = true;
+  this.addPart(blockIcon);
+
+  this.valueBN = new BlockButton(this, this.value);
+  this.valueBN.addSlider("percent", this.value, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  this.addPart(this.valueBN);
+}
+B_HLRotationServo.prototype = Object.create(B_HLOutputBase.prototype);
+B_HLRotationServo.prototype.constructor = B_HLRotationServo;
 
