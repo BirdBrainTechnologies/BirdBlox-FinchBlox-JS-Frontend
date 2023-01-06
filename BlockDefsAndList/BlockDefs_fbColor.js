@@ -66,6 +66,7 @@ B_FBColor.prototype.startAction = function() {
   mem.requestStatus.result = null;
 
   let device = DeviceFinch.getManager().getDevice(0);
+  if (Hatchling) { device = DeviceHatchling.getManager().getDevice(0) }
   if (device != null) {
     if (this.isBeak) {
       device.setBeak(mem.requestStatus, this.red, this.green, this.blue);

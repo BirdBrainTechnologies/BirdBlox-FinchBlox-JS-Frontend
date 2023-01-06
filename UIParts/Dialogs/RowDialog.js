@@ -116,7 +116,11 @@ RowDialog.prototype.show = function() {
 
     this.titleRect = this.createTitleRect();
     if (FinchBlox) {
-      this.icon = this.createTitleIcon(VectorPaths.mvFinch);
+      if (Hatchling) {
+        this.icon = this.createTitleIcon(VectorPaths.faEgg);
+      } else {
+        this.icon = this.createTitleIcon(VectorPaths.mvFinch);
+      }
     } else {
       this.titleText = this.createTitleLabel(this.title);
     }

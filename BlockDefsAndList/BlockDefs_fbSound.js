@@ -32,6 +32,7 @@ B_FBSound.prototype.startAction = function() {
   mem.requestStatus.result = null;
 
   let device = DeviceFinch.getManager().getDevice(0);
+  if (Hatchling) { device = DeviceHatchling.getManager().getDevice(0) }
   if (device != null) {
     //Setting a buzzer with a duration of 0 has strange results on the micro:bit.
     if (mem.duration > 0) {

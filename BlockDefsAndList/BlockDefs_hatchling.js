@@ -15,6 +15,18 @@ HL_Utils.updatePort = function(block) {
     block.port = HL_Utils.portColors.indexOf(block.hlButton.values[0])
   }
 }
+HL_Utils.findPorts = function(block) {
+  let device = DeviceHatchling.getManager().getDevice(0);
+  if (block.hlButton != null && device != null) {
+    let ports = device.getPortsByType(block.portType)
+    console.log("findPorts found:")
+    console.log(ports)
+    if (ports.length == 1) {
+      block.hlButton.updateValue(HL_Utils.portColors[ports[0]], 0)
+      block.port = ports[0]
+    }
+  }
+}
 HL_Utils.setupAction = function(block) {
   let mem = block.runMem;
   mem.requestStatus = {};
@@ -57,6 +69,13 @@ B_HLOutputBase.prototype.updateValues = function() {
   if (this.valueBN != null) {
     this.value = this.valueBN.values[0]
   }
+  if (this.colorButton != null) {
+    this.red = this.colorButton.values[0].r;
+    this.green = this.colorButton.values[0].g;
+    this.blue = this.colorButton.values[0].b;
+    this.value = this.red + ":" + this.green + ":" + this.blue
+    this.updateColor();
+  }
 }
 B_HLOutputBase.prototype.updateAction = function() {
   if (this.runMem.requestStatus.finished) {
@@ -72,6 +91,7 @@ B_HLOutputBase.prototype.updateAction = function() {
 function B_HLPositionServo(x, y) {
   this.value = 90; //defaultAngle
   this.valueKey = "angle"
+  this.portType = 3
   B_HLOutputBase.call(this, x, y, "motion_3", "positionServo");
 
   const icon = VectorPaths["faCompassDrafting"];
@@ -80,7 +100,7 @@ function B_HLPositionServo(x, y) {
   this.addPart(blockIcon);
 
   this.valueBN = new BlockButton(this, this.value);
-  this.valueBN.addSlider("angle_right", this.value, [5, 30, 60, 90, 120, 150, 180]);
+  this.valueBN.addSlider("angle_right", this.value, [0, 30, 60, 90, 120, 150, 180]);
   this.addPart(this.valueBN);
 }
 B_HLPositionServo.prototype = Object.create(B_HLOutputBase.prototype);
@@ -89,6 +109,7 @@ B_HLPositionServo.prototype.constructor = B_HLPositionServo;
 function B_HLRotationServo(x, y) {
   this.value = 50; //defaultSpeed
   this.valueKey = "percent"
+  this.portType = 1
   B_HLOutputBase.call(this, x, y, "motion_3", "rotationServo");
 
   const icon = VectorPaths["faArrowsSpin"];
@@ -102,3 +123,29 @@ function B_HLRotationServo(x, y) {
 }
 B_HLRotationServo.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLRotationServo.prototype.constructor = B_HLRotationServo;
+
+function B_HLSingleNeopix(x, y) {
+  this.value = ""
+  this.valueKey = "color"
+  this.portType = 9
+  this.red = 100;
+  this.green = 100;
+  this.blue = 100;
+  B_HLOutputBase.call(this, x, y, "color_3", "singleNeopix");
+
+  const icon = VectorPaths["faLightbulb"];
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "sNeopix", 27);
+  this.blockIcon.isEndOfLine = true;
+  this.addPart(this.blockIcon);
+
+  this.colorButton = new BlockButton(this);
+  this.colorButton.addSlider("color", { r: this.red, g: this.green, b: this.blue });
+  this.addPart(this.colorButton);
+}
+B_HLSingleNeopix.prototype = Object.create(B_HLOutputBase.prototype);
+B_HLSingleNeopix.prototype.constructor = B_HLSingleNeopix;
+B_HLSingleNeopix.prototype.updateColor = function() {
+  const s = 255 / 100;
+  this.colorHex = Colors.rgbToHex(this.red * s, this.green * s, this.blue * s);
+  GuiElements.update.color(this.blockIcon.icon.pathE, this.colorHex);
+}

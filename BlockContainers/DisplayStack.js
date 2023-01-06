@@ -211,7 +211,11 @@ DisplayStack.prototype.endRun = function() {
 DisplayStack.prototype.duplicate = function(x, y) {
   const tab = TabManager.activeTab;
   const firstCopyBlock = this.firstBlock.duplicate(x, y);
-  return new BlockStack(firstCopyBlock, tab);
+  let stack = new BlockStack(firstCopyBlock, tab);
+  if (Hatchling) {
+    HL_Utils.findPorts(firstCopyBlock)
+  }
+  return stack
 };
 
 /**

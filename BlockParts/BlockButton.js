@@ -154,7 +154,9 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
       GuiElements.move.group(image.group, iX, iY);
       this.ledArrayImage = image;
     } else if (this.widgets[i].type == "hatchling") {
-      if (this.colorIcon != null) {
+      this.button.updateBgColor(this.values[i]);
+
+      /*if (this.colorIcon != null) {
         this.colorIcon.remove()
       }
 
@@ -164,7 +166,7 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
       const iconX = this.button.width / 2 - iconW / 2
       const iconY = this.button.height / 2 - iconH / 2
       this.colorIcon = new VectorIcon(iconX, iconY, iconPath, this.values[i], iconH, this.button.group)
-      TouchReceiver.addListenersBN(this.colorIcon.group, this.button);
+      TouchReceiver.addListenersBN(this.colorIcon.group, this.button);*/
 
     } else {
       text[i] = this.values[i].toString() + this.displaySuffixes[i];

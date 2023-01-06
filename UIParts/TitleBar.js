@@ -190,7 +190,12 @@ TitleBar.makeButtons = function() {
       if (status === DeviceManager.statuses.connected) {
         color = Colors.finchGreen;
         outlineColor = Colors.flagGreen;
-        let sn = DeviceFinch.getManager().connectedDevices[0].shortName;
+        let sn = null
+        if (Hatchling) {
+          sn = DeviceHatchling.getManager().connectedDevices[0].shortName;
+        } else {
+          sn = DeviceFinch.getManager().connectedDevices[0].shortName;
+        }
         if (sn != null) {
           shortName = sn;
         }
@@ -290,7 +295,7 @@ TitleBar.removeButtons = function() {
   TB.undoButton.remove();
   if (FinchBlox) {
     TB.finchButton.remove();
-    TB.levelButton.remove();
+    if (!Hatchling) { TB.levelButton.remove(); }
     //  TB.trashButton.remove();
   } else {
     TB.viewBn.remove();

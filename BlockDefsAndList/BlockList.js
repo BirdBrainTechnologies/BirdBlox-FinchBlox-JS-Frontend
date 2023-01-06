@@ -133,9 +133,14 @@ BlockList.populateCat_motion_3 = function(category) {
   category.centerBlocks();
 }
 BlockList.populateCat_color_3 = function(category) {
-  category.addBlockByName("B_FBBeakL3");
-  category.addBlockByName("B_FBTailL3");
-  category.addBlockByName("B_FBLedArrayL3");
+  if (Hatchling) {
+    category.addBlockByName("B_HLSingleNeopix")
+    category.addBlockByName("B_FBLedArrayL2");
+  } else {
+    category.addBlockByName("B_FBBeakL3");
+    category.addBlockByName("B_FBTailL3");
+    category.addBlockByName("B_FBLedArrayL3");
+  }
   category.trimBottom();
   category.centerBlocks();
 }
