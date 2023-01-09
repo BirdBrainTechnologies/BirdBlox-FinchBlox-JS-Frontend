@@ -94,7 +94,7 @@ Colors.setCategory = function() {
     "color_3": Colors.neonCarrot,
     "sound_3": Colors.seance,
     "control_3": Colors.fbYellow,
-    "sensor_3": Colors.finchGreen
+    "sensor_3": Colors.flagGreen//Colors.finchGreen
   };
   //In FinchBlox, the block palette changes colors per category
   Colors.blockPalette = {
@@ -122,7 +122,7 @@ Colors.setCategory = function() {
     "color_3": Colors.fbOrangeBorder,
     "sound_3": Colors.fbPurpleBorder,
     "control_3": Colors.fbYellowBorder,
-    "sensor_3": Colors.finchGreen,
+    "sensor_3": Colors.fbDarkGreen, //Colors.finchGreen,
     "inactive": Colors.iron
   }
 };

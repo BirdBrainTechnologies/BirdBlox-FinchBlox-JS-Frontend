@@ -36,6 +36,7 @@ DeviceHatchling.prototype.setHatchlingState = function(state) {
       console.log("New value for port " + i + ": " + newPortVals[i])
       this.portStates[i] = newPortVals[i]
       //TODO: trigger enable/disable appropriate blocks
+      CodeManager.updateAvailableSensors();
     }
   }
 }

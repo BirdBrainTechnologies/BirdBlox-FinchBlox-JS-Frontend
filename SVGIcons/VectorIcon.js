@@ -8,6 +8,7 @@
  * @param {number} height - The height the path should be.  Width is computed from this
  * @param {Element} parent - An SVG group element the path should go inside
  * @param {boolean} mirror - True if the icon should be mirrored with the rest of the site for rtl languages
+ * @param {number} rotation - amount to rotate the icon in degrees
  * @constructor
  */
 function VectorIcon(x, y, pathId, color, height, parent, mirror, rotation) {

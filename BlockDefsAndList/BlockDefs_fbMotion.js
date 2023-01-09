@@ -132,7 +132,7 @@ B_FBMotion.prototype.addL2Button = function() {
       break;
     case "right":
     case "left":
-      this.angleBN = new BlockButton(this, this.defaultAngle);
+      this.angleBN = new BlockButton(this);
       this.angleBN.addSlider("angle_" + this.direction, this.defaultAngle, [5, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360]);
       this.addPart(this.angleBN);
       break;

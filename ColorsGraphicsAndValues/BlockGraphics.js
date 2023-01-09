@@ -739,13 +739,17 @@ BlockGraphics.create = {};
  */
 BlockGraphics.create.block = function(category, group, returnsValue, active) {
   if (!active) category = "inactive";
+
   const path = GuiElements.create.path(group);
   var fill = Colors.getGradient(category);
   if (FinchBlox) {
     fill = Colors.getColor(category)
   }
+  console.log("creating block with category " + category + " and fill " + fill)
   path.setAttributeNS(null, "fill", fill);
+  console.log(path)
   BlockGraphics.update.stroke(path, category, returnsValue, active);
+  console.log(path)
   return path;
 };
 

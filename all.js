@@ -6340,6 +6340,7 @@ DeviceHatchling.prototype.setHatchlingState = function(state) {
       console.log("New value for port " + i + ": " + newPortVals[i])
       this.portStates[i] = newPortVals[i]
       //TODO: trigger enable/disable appropriate blocks
+      CodeManager.updateAvailableSensors();
     }
   }
 }
@@ -8034,6 +8035,7 @@ function BlockList() {
     cat.push("Motion_3");
     cat.push("Color_3");
     cat.push("Sound_3");
+    if (Hatchling) { cat.push("Sensor_3") }
     cat.push("Control_3");
   } else {
     cat.push("Robots");
@@ -8134,6 +8136,7 @@ BlockList.populateCat_motion_3 = function(category) {
   if (Hatchling) {
     category.addBlockByName("B_HLPositionServo")
     category.addBlockByName("B_HLRotationServo")
+    category.addBlockByName("B_HLccRotationServo")
   } else {
     category.addBlockByName("B_FBForwardL3");
     category.addBlockByName("B_FBBackwardL3");
@@ -8148,6 +8151,7 @@ BlockList.populateCat_motion_3 = function(category) {
 BlockList.populateCat_color_3 = function(category) {
   if (Hatchling) {
     category.addBlockByName("B_HLSingleNeopix")
+    category.addBlockByName("B_HLNeopixStrip")
     category.addBlockByName("B_FBLedArrayL2");
   } else {
     category.addBlockByName("B_FBBeakL3");
@@ -8162,13 +8166,22 @@ BlockList.populateCat_sound_3 = function(category) {
   category.trimBottom();
   category.centerBlocks();
 }
+BlockList.populateCat_sensor_3 = function(category) {
+  category.addBlockByName("B_StartWhenDark");
+  category.addBlockByName("B_StartWhenClap");
+  category.addBlockByName("B_StartWhenDistance");
+  category.trimBottom();
+  category.centerBlocks();
+}
 BlockList.populateCat_control_3 = function(category) {
   category.addBlockByName("B_WhenFlagTapped");
   category.addBlockByName("B_Wait");
   category.addBlockByName("B_Forever");
   category.addBlockByName("B_Repeat");
-  category.addBlockByName("B_StartWhenDark");
-  category.addBlockByName("B_StartWhenClap");
+  if (!Hatchling) {
+    category.addBlockByName("B_StartWhenDark");
+    category.addBlockByName("B_StartWhenClap");
+  }
   category.trimBottom();
   category.centerBlocks();
 }
@@ -8568,7 +8581,7 @@ Colors.setCategory = function() {
     "color_3": Colors.neonCarrot,
     "sound_3": Colors.seance,
     "control_3": Colors.fbYellow,
-    "sensor_3": Colors.finchGreen
+    "sensor_3": Colors.flagGreen//Colors.finchGreen
   };
   //In FinchBlox, the block palette changes colors per category
   Colors.blockPalette = {
@@ -8596,7 +8609,7 @@ Colors.setCategory = function() {
     "color_3": Colors.fbOrangeBorder,
     "sound_3": Colors.fbPurpleBorder,
     "control_3": Colors.fbYellowBorder,
-    "sensor_3": Colors.finchGreen,
+    "sensor_3": Colors.fbDarkGreen, //Colors.finchGreen,
     "inactive": Colors.iron
   }
 };
@@ -8869,6 +8882,10 @@ function VectorPaths(){
   VP.mvArrow.width=83;
   VP.mvArrow.height=83;
   VP.mvArrow.transform="matrix(8.76256e-17,-1.43103,1.43103,8.76256e-17,-721.241,439.328)";
+  VP.faTowerBroadcast={};
+  VP.faTowerBroadcast.path="M80.3 44C69.8 69.9 64 98.2 64 128s5.8 58.1 16.3 84c6.6 16.4-1.3 35-17.7 41.7s-35-1.3-41.7-17.7C7.4 202.6 0 166.1 0 128S7.4 53.4 20.9 20C27.6 3.6 46.2-4.3 62.6 2.3S86.9 27.6 80.3 44zM555.1 20C568.6 53.4 576 89.9 576 128s-7.4 74.6-20.9 108c-6.6 16.4-25.3 24.3-41.7 17.7S489.1 228.4 495.7 212c10.5-25.9 16.3-54.2 16.3-84s-5.8-58.1-16.3-84C489.1 27.6 497 9 513.4 2.3s35 1.3 41.7 17.7zM352 128c0 23.7-12.9 44.4-32 55.4V480c0 17.7-14.3 32-32 32s-32-14.3-32-32V183.4c-19.1-11.1-32-31.7-32-55.4c0-35.3 28.7-64 64-64s64 28.7 64 64zM170.6 76.8C163.8 92.4 160 109.7 160 128s3.8 35.6 10.6 51.2c7.1 16.2-.3 35.1-16.5 42.1s-35.1-.3-42.1-16.5c-10.3-23.6-16-49.6-16-76.8s5.7-53.2 16-76.8c7.1-16.2 25.9-23.6 42.1-16.5s23.6 25.9 16.5 42.1zM464 51.2c10.3 23.6 16 49.6 16 76.8s-5.7 53.2-16 76.8c-7.1 16.2-25.9 23.6-42.1 16.5s-23.6-25.9-16.5-42.1c6.8-15.6 10.6-32.9 10.6-51.2s-3.8-35.6-10.6-51.2c-7.1-16.2 .3-35.1 16.5-42.1s35.1 .3 42.1 16.5z"
+  VP.faTowerBroadcast.width=576;
+  VP.faTowerBroadcast.height=512;
   VP.faCompassDrafting={};
   VP.faCompassDrafting.path="M352 96c0 14.3-3.1 27.9-8.8 40.2L396 227.4c-23.7 25.3-54.2 44.1-88.5 53.6L256 192h0 0l-68 117.5c21.5 6.8 44.3 10.5 68.1 10.5c70.7 0 133.8-32.7 174.9-84c11.1-13.8 31.2-16 45-5s16 31.2 5 45C428.1 341.8 347 384 256 384c-35.4 0-69.4-6.4-100.7-18.1L98.7 463.7C94 471.8 87 478.4 78.6 482.6L23.2 510.3c-5 2.5-10.9 2.2-15.6-.7S0 501.5 0 496V440.6c0-8.4 2.2-16.7 6.5-24.1l60-103.7C53.7 301.6 41.8 289.3 31.2 276c-11.1-13.8-8.8-33.9 5-45s33.9-8.8 45 5c5.7 7.1 11.8 13.8 18.2 20.1l69.4-119.9c-5.6-12.2-8.8-25.8-8.8-40.2c0-53 43-96 96-96s96 43 96 96zm21 297.9c32.6-12.8 62.5-30.8 88.9-52.9l43.7 75.5c4.2 7.3 6.5 15.6 6.5 24.1V496c0 5.5-2.9 10.7-7.6 13.6s-10.6 3.2-15.6 .7l-55.4-27.7c-8.4-4.2-15.4-10.8-20.1-18.9L373 393.9zM256 128c17.7 0 32-14.3 32-32s-14.3-32-32-32s-32 14.3-32 32s14.3 32 32 32z"
   VP.faCompassDrafting.width=512;
@@ -9111,7 +9128,7 @@ function VectorPaths(){
 		"color_3": VP.faLightbulb,
 		"sound_3": VP.faMusic,
 		"control_3": VP.faHandPointRight,
-		"sensor_3": VP.language
+		"sensor_3": VP.faTowerBroadcast //VP.language
   };
 
 }
@@ -9870,13 +9887,17 @@ BlockGraphics.create = {};
  */
 BlockGraphics.create.block = function(category, group, returnsValue, active) {
   if (!active) category = "inactive";
+
   const path = GuiElements.create.path(group);
   var fill = Colors.getGradient(category);
   if (FinchBlox) {
     fill = Colors.getColor(category)
   }
+  console.log("creating block with category " + category + " and fill " + fill)
   path.setAttributeNS(null, "fill", fill);
+  console.log(path)
   BlockGraphics.update.stroke(path, category, returnsValue, active);
+  console.log(path)
   return path;
 };
 
@@ -12251,7 +12272,8 @@ BlockPalette.createCategories = function() {
     let currentY = 0;
     let currentX = BlockPalette.catW / 2 - 1.5 * CategoryBN.width - CategoryBN.hMargin;
     if (Hatchling) {
-      currentX = BlockPalette.catW / 2 - 2 * CategoryBN.width - 1.5 * CategoryBN.hMargin;
+      //currentX = BlockPalette.catW / 2 - 2 * CategoryBN.width - 1.5 * CategoryBN.hMargin;
+      currentX = BlockPalette.catW / 2 - 2.5 * CategoryBN.width - 2 * CategoryBN.hMargin;
     }
     for (let i = 0; i < catCount; i++) {
       const currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
@@ -19547,6 +19569,7 @@ BlockContextMenu.prototype.close = function() {
  * @param {number} height - The height the path should be.  Width is computed from this
  * @param {Element} parent - An SVG group element the path should go inside
  * @param {boolean} mirror - True if the icon should be mirrored with the rest of the site for rtl languages
+ * @param {number} rotation - amount to rotate the icon in degrees
  * @constructor
  */
 function VectorIcon(x, y, pathId, color, height, parent, mirror, rotation) {
@@ -28102,6 +28125,7 @@ function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Comm
   this.category = category;
   this.isGlowing = false;
   this.active = this.checkActive(); //Indicates if the Block is full color or grayed out (as a result of a missing sensor/robot)
+  console.log("new block made active? " + this.active)
 
   this.stack = null; //It has no Stack yet.
   this.path = this.generatePath(); //This path is the main visual part of the Block. It is colored based on category.
@@ -28215,6 +28239,7 @@ Block.prototype.getAbsY = function() {
  * @return {Node} - The main SVG path element for the Block.
  */
 Block.prototype.generatePath = function() {
+  console.log("generatePath for active = " + this.active)
   const pathE = BlockGraphics.create.block(this.category, this.group, this.returnsValue, this.active);
   TouchReceiver.addListenersChild(pathE, this);
   return pathE;
@@ -28394,7 +28419,9 @@ Block.prototype.updateRunColor = function() {
       GuiElements.update.color(this.topPath, Colors.fbDarkGreen);
     }
   } else {
-    GuiElements.update.color(this.path, Colors.categoryColors[this.category]);
+    let cat = this.category
+    if (!this.active) { cat = "inactive" }
+    GuiElements.update.color(this.path, Colors.categoryColors[cat]);
     if (this.topPath != null) {
       GuiElements.update.color(this.topPath, this.topPathColor);
     }
@@ -28721,7 +28748,7 @@ Block.prototype.updateAlignRI = function(x, y) {
   xCoord += bG.hMargin;
   for (let i = 0; i < this.parts.length; i++) {
     xCoord += this.parts[i].updateAlign(xCoord, yCoord); //As each element is adjusted, shift over by the space used.
-    if (FinchBlox && i == 0 && (xCoord + bG.hMargin) < bG.width) {
+    if (FinchBlox && i == 0 && (xCoord + bG.hMargin) < bG.width && (this.parts.length == 1 || this.parts[i].isEndOfLine)) {
       //In this case, we will make sure the part is centered.
       //console.log("centering icon on " + this.constructor.name);
       xCoord = (bG.width - this.parts[i].width) / 2;
@@ -29019,6 +29046,7 @@ Block.prototype.addWidths = function() {
  * @return {Block} - This Block's copy.
  */
 Block.prototype.duplicate = function(x, y) {
+  console.log("duplicate " + this.stack.isDisplayStack)
   let myCopy = null;
   // First we use this Block's constructor to create a new block of the same type
   // If this Block is a list or variable Block, we must pass that data to the constructor
@@ -29186,6 +29214,7 @@ Block.prototype.stopGlow = function() {
  * robots that are not connected
  */
 Block.prototype.makeInactive = function() {
+  console.log("makeInactive " + this.active)
   if (this.active) {
     this.active = false;
     BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active, this.isGlowing);
@@ -29199,6 +29228,7 @@ Block.prototype.makeInactive = function() {
  * Undoes the visual changes of makeInactive.  Calls makeActive on all Slots
  */
 Block.prototype.makeActive = function() {
+  console.log("makeActive " + this.active)
   if (!this.active) {
     this.active = true;
     BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active, this.isGlowing);
@@ -29232,6 +29262,7 @@ Block.prototype.checkActive = function() {
  * Uses checkActive and setActive to update the Blocks appearance
  */
 Block.prototype.updateActive = function() {
+  console.log("updateActive")
   this.setActive(this.checkActive());
 };
 
@@ -33236,14 +33267,15 @@ BlockIcon.prototype.addObstacle = function(color) {
 /**
  * Adds a button to the block. Used in FinchBlox.
  * @param {Block} parent - The Block this button is a part of
+ * @param {number} width - (optional) button width
  */
-function BlockButton(parent) {
+function BlockButton(parent, width) {
   this.buttonMargin = 2 * BlockPalette.blockButtonOverhang * (1 / 9);
   this.lineHeight = 2 * BlockPalette.blockButtonOverhang * (8 / 9);
   this.cornerRadius = BlockPalette.blockButtonOverhang;
 
   this.height = this.blockButtonMargin + this.lineHeight;
-  this.width = 60;
+  this.width = width ? width : 60;
   this.textColor = Colors.bbtDarkGray;
   this.font = Font.uiFont(12);
   this.outlineStroke = 1;
@@ -33462,9 +33494,6 @@ BlockButton.prototype.addSlider = function(type, startingValue, options) {
     case "angle_left":
     case "angle_right":
       suffix = "°";
-      break;
-    case "hatchling":
-      this.width = 20
       break;
     default:
       suffix = "";
@@ -36012,7 +36041,7 @@ B_FBMotion.prototype.addL2Button = function() {
       break;
     case "right":
     case "left":
-      this.angleBN = new BlockButton(this, this.defaultAngle);
+      this.angleBN = new BlockButton(this);
       this.angleBN.addSlider("angle_" + this.direction, this.defaultAngle, [5, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360]);
       this.addPart(this.angleBN);
       break;
@@ -36979,10 +37008,11 @@ B_WhenKeyPressed.prototype.updateAction = function() {
   }
 }
 
-//FinchBlox only
+//FinchBlox and Hatchling only
 function B_FBStartWhen(x, y, sensor) {
   this.sensor = sensor
-  HatBlock.call(this, x, y, "control_3", true);
+  let category = Hatchling ? "sensor_3" : "control_3"
+  HatBlock.call(this, x, y, category, true);
 }
 B_FBStartWhen.prototype = Object.create(HatBlock.prototype);
 B_FBStartWhen.prototype.constructor = B_FBStartWhen;
@@ -37019,6 +37049,7 @@ B_FBStartWhen.prototype.updateAction = function() {
     }
   } else {
     let device = DeviceFinch.getManager().getDevice(0);
+    if (Hatchling) { device = DeviceHatchling.getManager().getDevice(0) }
     if (device != null) {
       if (this.sensor == "clap") {
         if (device.hasV2Microbit) {
@@ -37038,14 +37069,22 @@ B_FBStartWhen.prototype.updateAction = function() {
 function B_StartWhenDark(x, y) {
   B_FBStartWhen.call(this, x, y, "dark")
 
-  const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.fbDarkGreen, "sun", 25);
-  blockIcon.icon.setRotation(-8);
-  //blockIcon.icon.negate(Colors.flagGreen);
-  blockIcon.negate(Colors.flagGreen);
-  blockIcon.isEndOfLine = true;
-  blockIcon.addSecondIcon(VectorPaths.faFlag, Colors.flagGreen, true);
-  this.addPart(blockIcon);
-  //const icon2 = new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 30)
+  if (Hatchling) {
+    const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.white, "sun", 30);
+    blockIcon.icon.setRotation(-8);
+    blockIcon.negate(Colors.fbDarkGreen);
+    blockIcon.isEndOfLine = true;
+    this.addPart(blockIcon);
+  } else {
+    const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.fbDarkGreen, "sun", 25);
+    blockIcon.icon.setRotation(-8);
+    //blockIcon.icon.negate(Colors.flagGreen);
+    blockIcon.negate(Colors.flagGreen);
+    blockIcon.isEndOfLine = true;
+    blockIcon.addSecondIcon(VectorPaths.faFlag, Colors.flagGreen, true);
+    this.addPart(blockIcon);
+    //const icon2 = new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 30)
+  }
 }
 B_StartWhenDark.prototype = Object.create(B_FBStartWhen.prototype);
 B_StartWhenDark.prototype.constructor = B_StartWhenDark;
@@ -37053,10 +37092,16 @@ B_StartWhenDark.prototype.constructor = B_StartWhenDark;
 function B_StartWhenClap(x, y) {
   B_FBStartWhen.call(this, x, y, "clap")
 
-  const blockIcon = new BlockIcon(this, VectorPaths.clap, Colors.fbDarkGreen, "clap", 30);
-  blockIcon.isEndOfLine = true;
-  blockIcon.addSecondIcon(VectorPaths.faFlag, Colors.flagGreen, true, 25, -5);
-  this.addPart(blockIcon);
+  if (Hatchling) {
+    const blockIcon = new BlockIcon(this, VectorPaths.clap, Colors.white, "clap", 35);
+    blockIcon.isEndOfLine = true;
+    this.addPart(blockIcon);
+  } else {
+    const blockIcon = new BlockIcon(this, VectorPaths.clap, Colors.fbDarkGreen, "clap", 30);
+    blockIcon.isEndOfLine = true;
+    blockIcon.addSecondIcon(VectorPaths.faFlag, Colors.flagGreen, true, 25, -5);
+    this.addPart(blockIcon);
+  }
 }
 B_StartWhenClap.prototype = Object.create(B_FBStartWhen.prototype);
 B_StartWhenClap.prototype.constructor = B_StartWhenClap;
@@ -37067,6 +37112,32 @@ B_StartWhenClap.prototype.checkActive = function() {
   //console.log("when clap check active " + active + " with " + device)
   return active
 };
+
+//Hatchling only
+function B_StartWhenDistance(x, y) {
+  this.defaultDistance = 10;
+  this.distance = this.defaultDistance
+  B_FBStartWhen.call(this, x, y, "distance")
+
+  HL_Utils.addHLButton(this)
+
+  const blockIcon = new BlockIcon(this, VectorPaths.language, Colors.white, "dist", 35);
+  blockIcon.isEndOfLine = true;
+  this.addPart(blockIcon);
+
+  this.distanceBN = new BlockButton(this);
+  this.distanceBN.addSlider("distance", this.defaultDistance, [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  this.addPart(this.distanceBN);
+}
+B_StartWhenDistance.prototype = Object.create(B_FBStartWhen.prototype);
+B_StartWhenDistance.prototype.constructor = B_StartWhenDistance;
+
+B_StartWhenDistance.prototype.updateValues = function() {
+  HL_Utils.updatePort(this)
+  if (this.distanceBN != null) {
+    this.distance = this.distanceBN.values[0]
+  }
+}
 
 /* This file contains the implementations for sensing Blocks, which have been moved to the tablet category
  * TODO: merge with tablet
@@ -38873,7 +38944,7 @@ const HL_Utils = {}
 HL_Utils.portColors = ["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
 HL_Utils.addHLButton = function(block) {
   block.port = -1 //unknown
-  block.hlButton = new BlockButton(block);
+  block.hlButton = new BlockButton(block, 20);
   block.hlButton.addSlider("hatchling", Colors.bbtDarkGray, HL_Utils.portColors)
 }
 HL_Utils.updatePort = function(block) {
@@ -38882,11 +38953,12 @@ HL_Utils.updatePort = function(block) {
   }
 }
 HL_Utils.findPorts = function(block) {
+  console.log("findPorts for " + block.constructor.name)
   let device = DeviceHatchling.getManager().getDevice(0);
   if (block.hlButton != null && device != null) {
     let ports = device.getPortsByType(block.portType)
-    console.log("findPorts found:")
-    console.log(ports)
+    //console.log("findPorts found:")
+    //console.log(ports)
     if (ports.length == 1) {
       block.hlButton.updateValue(HL_Utils.portColors[ports[0]], 0)
       block.port = ports[0]
@@ -38908,6 +38980,7 @@ HL_Utils.setupAction = function(block) {
   }
   return device;
 }
+
 
 function B_HLOutputBase(x, y, category, outputType) {
   this.outputType = outputType
@@ -38933,14 +39006,37 @@ B_HLOutputBase.prototype.startAction = function() {
 B_HLOutputBase.prototype.updateValues = function() {
   HL_Utils.updatePort(this)
   if (this.valueBN != null) {
-    this.value = this.valueBN.values[0]
+    if (this.portType == 1) { //rotation servo
+      let percent = this.valueBN.values[0]
+      if (this.flip) { percent = -percent } //rotate counter clockwise
+      if (percent >= -10 && percent <= 10) {
+        this.value = 255 //off signal
+      } else if (percent > 100) {
+        this.value = 254
+      } else if (percent < -100) {
+        this.value = 0
+      } else {
+        this.value = ( (percent * 23) / 100 ) + 122  //from bambi
+      }
+    } else {
+      this.value = this.valueBN.values[0]
+    }
   }
   if (this.colorButton != null) {
     this.red = this.colorButton.values[0].r;
     this.green = this.colorButton.values[0].g;
     this.blue = this.colorButton.values[0].b;
-    this.value = this.red + ":" + this.green + ":" + this.blue
+    this.value = this.red*2.55 + ":" + this.green*2.55 + ":" + this.blue*2.55
     this.updateColor();
+  }
+  if (this.portType == 10 && this.colorButtons.length == 4) { //neopixel strip
+    console.log(this.colorButtons)
+    this.value = ""
+    for (let i = 0; i < this.colorButtons.length; i++) {
+      this.value = this.value + this.colorButtons[i].values[0].r*2.55 + ","
+      this.value = this.value + this.colorButtons[i].values[0].g*2.55 + ","
+      this.value = this.value + this.colorButtons[i].values[0].b*2.55 + ","
+    }
   }
 }
 B_HLOutputBase.prototype.updateAction = function() {
@@ -38953,6 +39049,27 @@ B_HLOutputBase.prototype.updateAction = function() {
     return new ExecutionStatusRunning();
   }
 };
+B_HLOutputBase.prototype.checkActive = function() {
+  console.log("checkActive " + this.constructor.name)
+  if (this.stack != null && this.stack.isDisplayStack) {
+    console.log("found display stack - returning true")
+    return true
+  }
+  let device = DeviceHatchling.getManager().getDevice(0);
+  if (device != null) {
+    let ports = device.getPortsByType(this.portType)
+    if (ports.indexOf(this.port) != -1) {
+      console.log("found port " + this.port + " within " + ports + " - returning true")
+      return true
+    }
+  }
+  console.log("found nothing - returning false")
+  return false
+
+  //let portFound = HL_Utils.findPorts(this)
+  //console.log(this.constructor.name + " " + portFound + " " + (this.stack == null ? "no stack" : this.stack.isDisplayStack))
+  //return portFound
+}
 
 function B_HLPositionServo(x, y) {
   this.value = 90; //defaultAngle
@@ -38965,30 +39082,39 @@ function B_HLPositionServo(x, y) {
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 
-  this.valueBN = new BlockButton(this, this.value);
+  this.valueBN = new BlockButton(this);
   this.valueBN.addSlider("angle_right", this.value, [0, 30, 60, 90, 120, 150, 180]);
   this.addPart(this.valueBN);
 }
 B_HLPositionServo.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLPositionServo.prototype.constructor = B_HLPositionServo;
 
-function B_HLRotationServo(x, y) {
-  this.value = 50; //defaultSpeed
+function B_HLRotationServo(x, y, flip) {
+  this.value = 255 //off signal
+  this.defaultSpeed = 50;
   this.valueKey = "percent"
   this.portType = 1
+  this.flip = flip
   B_HLOutputBase.call(this, x, y, "motion_3", "rotationServo");
 
-  const icon = VectorPaths["faArrowsSpin"];
-  let blockIcon = new BlockIcon(this, icon, Colors.white, "rServo", 27);
+  const icon = flip ? VectorPaths["mjTurnLeft"] : VectorPaths["faArrowsSpin"];
+  let blockIcon = new BlockIcon(this, icon, Colors.white, "rServo", 27, null, true);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 
-  this.valueBN = new BlockButton(this, this.value);
-  this.valueBN.addSlider("percent", this.value, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  this.valueBN = new BlockButton(this);
+  this.valueBN.addSlider("percent", this.defaultSpeed, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
   this.addPart(this.valueBN);
 }
 B_HLRotationServo.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLRotationServo.prototype.constructor = B_HLRotationServo;
+
+//To rotate the servo counter clockwise.
+function B_HLccRotationServo(x, y) {
+  B_HLRotationServo.call(this, x, y, true)
+}
+B_HLccRotationServo.prototype = Object.create(B_HLRotationServo.prototype);
+B_HLccRotationServo.prototype.constructor = B_HLccRotationServo;
 
 function B_HLSingleNeopix(x, y) {
   this.value = ""
@@ -39015,4 +39141,44 @@ B_HLSingleNeopix.prototype.updateColor = function() {
   this.colorHex = Colors.rgbToHex(this.red * s, this.green * s, this.blue * s);
   GuiElements.update.color(this.blockIcon.icon.pathE, this.colorHex);
 }
+
+function B_HLNeopixStrip(x, y) {
+  this.value = ""
+  this.valueKey = "colors"
+  this.portType = 10
+  this.red = 100;
+  this.green = 100;
+  this.blue = 100;
+  this.colorButtons = []
+
+  B_HLOutputBase.call(this, x, y, "color_3", "neopixStrip");
+
+  const icon = VectorPaths["faLightbulb"];
+  this.blockIcon1 = new BlockIcon(this, icon, Colors.white, "neopix1", 27);
+  this.addPart(this.blockIcon1);
+  this.blockIcon2 = new BlockIcon(this, icon, Colors.white, "neopix2", 27);
+  this.addPart(this.blockIcon2);
+  this.blockIcon3 = new BlockIcon(this, icon, Colors.white, "neopix3", 27);
+  this.addPart(this.blockIcon3);
+  this.blockIcon4 = new BlockIcon(this, icon, Colors.white, "neopix4", 27);
+  this.addPart(this.blockIcon4);
+  this.blockIcon4.isEndOfLine = true;
+
+  this.colorButtons[0] = new BlockButton(this, 25);
+  this.colorButtons[0].addSlider("color", { r: this.red, g: this.green, b: this.blue });
+  this.addPart(this.colorButtons[0]);
+  this.colorButtons[1] = new BlockButton(this, 25);
+  this.colorButtons[1].addSlider("color", { r: this.red, g: this.green, b: this.blue });
+  this.addPart(this.colorButtons[1]);
+  this.colorButtons[2] = new BlockButton(this, 25);
+  this.colorButtons[2].addSlider("color", { r: this.red, g: this.green, b: this.blue });
+  this.addPart(this.colorButtons[2]);
+  this.colorButtons[3] = new BlockButton(this, 25);
+  this.colorButtons[3].addSlider("color", { r: this.red, g: this.green, b: this.blue });
+  this.addPart(this.colorButtons[3]);
+
+
+}
+B_HLNeopixStrip.prototype = Object.create(B_HLOutputBase.prototype);
+B_HLNeopixStrip.prototype.constructor = B_HLNeopixStrip;
 

@@ -532,10 +532,11 @@ B_WhenKeyPressed.prototype.updateAction = function() {
   }
 }
 
-//FinchBlox only
+//FinchBlox and Hatchling only
 function B_FBStartWhen(x, y, sensor) {
   this.sensor = sensor
-  HatBlock.call(this, x, y, "control_3", true);
+  let category = Hatchling ? "sensor_3" : "control_3"
+  HatBlock.call(this, x, y, category, true);
 }
 B_FBStartWhen.prototype = Object.create(HatBlock.prototype);
 B_FBStartWhen.prototype.constructor = B_FBStartWhen;
@@ -572,6 +573,7 @@ B_FBStartWhen.prototype.updateAction = function() {
     }
   } else {
     let device = DeviceFinch.getManager().getDevice(0);
+    if (Hatchling) { device = DeviceHatchling.getManager().getDevice(0) }
     if (device != null) {
       if (this.sensor == "clap") {
         if (device.hasV2Microbit) {
@@ -591,14 +593,22 @@ B_FBStartWhen.prototype.updateAction = function() {
 function B_StartWhenDark(x, y) {
   B_FBStartWhen.call(this, x, y, "dark")
 
-  const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.fbDarkGreen, "sun", 25);
-  blockIcon.icon.setRotation(-8);
-  //blockIcon.icon.negate(Colors.flagGreen);
-  blockIcon.negate(Colors.flagGreen);
-  blockIcon.isEndOfLine = true;
-  blockIcon.addSecondIcon(VectorPaths.faFlag, Colors.flagGreen, true);
-  this.addPart(blockIcon);
-  //const icon2 = new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 30)
+  if (Hatchling) {
+    const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.white, "sun", 30);
+    blockIcon.icon.setRotation(-8);
+    blockIcon.negate(Colors.fbDarkGreen);
+    blockIcon.isEndOfLine = true;
+    this.addPart(blockIcon);
+  } else {
+    const blockIcon = new BlockIcon(this, VectorPaths.mjSun, Colors.fbDarkGreen, "sun", 25);
+    blockIcon.icon.setRotation(-8);
+    //blockIcon.icon.negate(Colors.flagGreen);
+    blockIcon.negate(Colors.flagGreen);
+    blockIcon.isEndOfLine = true;
+    blockIcon.addSecondIcon(VectorPaths.faFlag, Colors.flagGreen, true);
+    this.addPart(blockIcon);
+    //const icon2 = new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 30)
+  }
 }
 B_StartWhenDark.prototype = Object.create(B_FBStartWhen.prototype);
 B_StartWhenDark.prototype.constructor = B_StartWhenDark;
@@ -606,10 +616,16 @@ B_StartWhenDark.prototype.constructor = B_StartWhenDark;
 function B_StartWhenClap(x, y) {
   B_FBStartWhen.call(this, x, y, "clap")
 
-  const blockIcon = new BlockIcon(this, VectorPaths.clap, Colors.fbDarkGreen, "clap", 30);
-  blockIcon.isEndOfLine = true;
-  blockIcon.addSecondIcon(VectorPaths.faFlag, Colors.flagGreen, true, 25, -5);
-  this.addPart(blockIcon);
+  if (Hatchling) {
+    const blockIcon = new BlockIcon(this, VectorPaths.clap, Colors.white, "clap", 35);
+    blockIcon.isEndOfLine = true;
+    this.addPart(blockIcon);
+  } else {
+    const blockIcon = new BlockIcon(this, VectorPaths.clap, Colors.fbDarkGreen, "clap", 30);
+    blockIcon.isEndOfLine = true;
+    blockIcon.addSecondIcon(VectorPaths.faFlag, Colors.flagGreen, true, 25, -5);
+    this.addPart(blockIcon);
+  }
 }
 B_StartWhenClap.prototype = Object.create(B_FBStartWhen.prototype);
 B_StartWhenClap.prototype.constructor = B_StartWhenClap;
@@ -620,3 +636,29 @@ B_StartWhenClap.prototype.checkActive = function() {
   //console.log("when clap check active " + active + " with " + device)
   return active
 };
+
+//Hatchling only
+function B_StartWhenDistance(x, y) {
+  this.defaultDistance = 10;
+  this.distance = this.defaultDistance
+  B_FBStartWhen.call(this, x, y, "distance")
+
+  HL_Utils.addHLButton(this)
+
+  const blockIcon = new BlockIcon(this, VectorPaths.language, Colors.white, "dist", 35);
+  blockIcon.isEndOfLine = true;
+  this.addPart(blockIcon);
+
+  this.distanceBN = new BlockButton(this);
+  this.distanceBN.addSlider("distance", this.defaultDistance, [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  this.addPart(this.distanceBN);
+}
+B_StartWhenDistance.prototype = Object.create(B_FBStartWhen.prototype);
+B_StartWhenDistance.prototype.constructor = B_StartWhenDistance;
+
+B_StartWhenDistance.prototype.updateValues = function() {
+  HL_Utils.updatePort(this)
+  if (this.distanceBN != null) {
+    this.distance = this.distanceBN.values[0]
+  }
+}

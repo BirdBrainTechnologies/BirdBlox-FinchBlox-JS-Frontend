@@ -197,7 +197,8 @@ BlockPalette.createCategories = function() {
     let currentY = 0;
     let currentX = BlockPalette.catW / 2 - 1.5 * CategoryBN.width - CategoryBN.hMargin;
     if (Hatchling) {
-      currentX = BlockPalette.catW / 2 - 2 * CategoryBN.width - 1.5 * CategoryBN.hMargin;
+      //currentX = BlockPalette.catW / 2 - 2 * CategoryBN.width - 1.5 * CategoryBN.hMargin;
+      currentX = BlockPalette.catW / 2 - 2.5 * CategoryBN.width - 2 * CategoryBN.hMargin;
     }
     for (let i = 0; i < catCount; i++) {
       const currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));

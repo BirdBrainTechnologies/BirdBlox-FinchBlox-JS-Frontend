@@ -1,14 +1,15 @@
 /**
  * Adds a button to the block. Used in FinchBlox.
  * @param {Block} parent - The Block this button is a part of
+ * @param {number} width - (optional) button width
  */
-function BlockButton(parent) {
+function BlockButton(parent, width) {
   this.buttonMargin = 2 * BlockPalette.blockButtonOverhang * (1 / 9);
   this.lineHeight = 2 * BlockPalette.blockButtonOverhang * (8 / 9);
   this.cornerRadius = BlockPalette.blockButtonOverhang;
 
   this.height = this.blockButtonMargin + this.lineHeight;
-  this.width = 60;
+  this.width = width ? width : 60;
   this.textColor = Colors.bbtDarkGray;
   this.font = Font.uiFont(12);
   this.outlineStroke = 1;
@@ -227,9 +228,6 @@ BlockButton.prototype.addSlider = function(type, startingValue, options) {
     case "angle_left":
     case "angle_right":
       suffix = "°";
-      break;
-    case "hatchling":
-      this.width = 20
       break;
     default:
       suffix = "";

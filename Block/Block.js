@@ -35,6 +35,7 @@ function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Comm
   this.category = category;
   this.isGlowing = false;
   this.active = this.checkActive(); //Indicates if the Block is full color or grayed out (as a result of a missing sensor/robot)
+  console.log("new block made active? " + this.active)
 
   this.stack = null; //It has no Stack yet.
   this.path = this.generatePath(); //This path is the main visual part of the Block. It is colored based on category.
@@ -148,6 +149,7 @@ Block.prototype.getAbsY = function() {
  * @return {Node} - The main SVG path element for the Block.
  */
 Block.prototype.generatePath = function() {
+  console.log("generatePath for active = " + this.active)
   const pathE = BlockGraphics.create.block(this.category, this.group, this.returnsValue, this.active);
   TouchReceiver.addListenersChild(pathE, this);
   return pathE;
@@ -327,7 +329,9 @@ Block.prototype.updateRunColor = function() {
       GuiElements.update.color(this.topPath, Colors.fbDarkGreen);
     }
   } else {
-    GuiElements.update.color(this.path, Colors.categoryColors[this.category]);
+    let cat = this.category
+    if (!this.active) { cat = "inactive" }
+    GuiElements.update.color(this.path, Colors.categoryColors[cat]);
     if (this.topPath != null) {
       GuiElements.update.color(this.topPath, this.topPathColor);
     }
@@ -654,7 +658,7 @@ Block.prototype.updateAlignRI = function(x, y) {
   xCoord += bG.hMargin;
   for (let i = 0; i < this.parts.length; i++) {
     xCoord += this.parts[i].updateAlign(xCoord, yCoord); //As each element is adjusted, shift over by the space used.
-    if (FinchBlox && i == 0 && (xCoord + bG.hMargin) < bG.width) {
+    if (FinchBlox && i == 0 && (xCoord + bG.hMargin) < bG.width && (this.parts.length == 1 || this.parts[i].isEndOfLine)) {
       //In this case, we will make sure the part is centered.
       //console.log("centering icon on " + this.constructor.name);
       xCoord = (bG.width - this.parts[i].width) / 2;
@@ -952,6 +956,7 @@ Block.prototype.addWidths = function() {
  * @return {Block} - This Block's copy.
  */
 Block.prototype.duplicate = function(x, y) {
+  console.log("duplicate " + this.stack.isDisplayStack)
   let myCopy = null;
   // First we use this Block's constructor to create a new block of the same type
   // If this Block is a list or variable Block, we must pass that data to the constructor
@@ -1119,6 +1124,7 @@ Block.prototype.stopGlow = function() {
  * robots that are not connected
  */
 Block.prototype.makeInactive = function() {
+  console.log("makeInactive " + this.active)
   if (this.active) {
     this.active = false;
     BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active, this.isGlowing);
@@ -1132,6 +1138,7 @@ Block.prototype.makeInactive = function() {
  * Undoes the visual changes of makeInactive.  Calls makeActive on all Slots
  */
 Block.prototype.makeActive = function() {
+  console.log("makeActive " + this.active)
   if (!this.active) {
     this.active = true;
     BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active, this.isGlowing);
@@ -1165,6 +1172,7 @@ Block.prototype.checkActive = function() {
  * Uses checkActive and setActive to update the Blocks appearance
  */
 Block.prototype.updateActive = function() {
+  console.log("updateActive")
   this.setActive(this.checkActive());
 };
 
