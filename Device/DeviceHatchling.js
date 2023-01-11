@@ -32,11 +32,17 @@ DeviceHatchling.prototype.setHatchlingState = function(state) {
   newPortVals[5] = ((state[15] >> 5) << 3) | (state[16] >> 5) //port F
 
   for (let i = 0; i < this.portStates.length; i++) {
-    if (this.portStates[i] != newPortVals[i]) {
-      console.log("New value for port " + i + ": " + newPortVals[i])
-      this.portStates[i] = newPortVals[i]
-      //TODO: trigger enable/disable appropriate blocks
-      CodeManager.updateAvailableSensors();
+
+    //TODO: REMOVE! Once port 4 stops changing its value all the time...
+    if(i != 4) {
+
+      if (this.portStates[i] != newPortVals[i]) {
+        console.log("New value for port " + i + ": " + newPortVals[i])
+        this.portStates[i] = newPortVals[i]
+        //TODO: trigger enable/disable appropriate blocks
+        //CodeManager.updateAvailableSensors();
+        CodeManager.updateAvailablePorts(i);
+      }
     }
   }
 }
@@ -54,4 +60,21 @@ DeviceHatchling.prototype.getPortsByType = function(type) {
     }
   }
   return ports
+}
+
+/**
+ * Issues a request to read a hatchling sensor.
+ * @param {object} status - An object provided by the caller to track the progress of the request
+ * @param {string} sensor - What type of sensor (Light, distance, etc.)
+ * @param {string} port - Which port the sensor is plugged in to (null for micro:bit sensors)
+ */
+DeviceHatchling.prototype.readSensor = function(status, sensor, port) {
+  const request = new HttpRequestBuilder("robot/in");
+  request.addParam("type", this.getDeviceTypeId());
+  request.addParam("id", this.id);
+  request.addParam("sensor", sensor);
+  if (port != null) {
+    request.addParam("port", port);
+  }
+  HtmlServer.sendRequest(request.toString(), status, true);
 }

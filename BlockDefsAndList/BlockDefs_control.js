@@ -581,6 +581,8 @@ B_FBStartWhen.prototype.updateAction = function() {
         } else {
           return new ExecutionStatusRunning();
         }
+      } else if (this.sensor == "distance" && Hatchling) {
+        device.readSensor(status, "distance", this.port);
       } else {
         device.readSensor(status, "light", "left");
       }
@@ -661,4 +663,7 @@ B_StartWhenDistance.prototype.updateValues = function() {
   if (this.distanceBN != null) {
     this.distance = this.distanceBN.values[0]
   }
+}
+B_StartWhenDistance.prototype.checkActive = function() {
+  return HL_Utils.checkActive(this)
 }

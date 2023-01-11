@@ -35,7 +35,6 @@ function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Comm
   this.category = category;
   this.isGlowing = false;
   this.active = this.checkActive(); //Indicates if the Block is full color or grayed out (as a result of a missing sensor/robot)
-  console.log("new block made active? " + this.active)
 
   this.stack = null; //It has no Stack yet.
   this.path = this.generatePath(); //This path is the main visual part of the Block. It is colored based on category.
@@ -65,6 +64,7 @@ function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Comm
   }
   //For FinchBlox. Keep a reference to a blockButton if there is one for saving.
   this.blockButton = null;
+  if (Hatchling) { this.blockButtons = [] }
 
   this.comment = null;
   this.id = Block.count;
@@ -149,7 +149,6 @@ Block.prototype.getAbsY = function() {
  * @return {Node} - The main SVG path element for the Block.
  */
 Block.prototype.generatePath = function() {
-  console.log("generatePath for active = " + this.active)
   const pathE = BlockGraphics.create.block(this.category, this.group, this.returnsValue, this.active);
   TouchReceiver.addListenersChild(pathE, this);
   return pathE;
@@ -389,6 +388,8 @@ Block.prototype.changeStack = function(stack) {
   if (this.blockSlot2 != null) {
     this.blockSlot2.changeStack(stack); //If it has a second BlockSlot, move it too.
   }
+  //Hatchling blocks are always active when in display stack
+  if (this.stack != null && this.stack.isDisplayStack) { this.updateActive(); }
 };
 
 /**
@@ -956,7 +957,6 @@ Block.prototype.addWidths = function() {
  * @return {Block} - This Block's copy.
  */
 Block.prototype.duplicate = function(x, y) {
-  console.log("duplicate " + this.stack.isDisplayStack)
   let myCopy = null;
   // First we use this Block's constructor to create a new block of the same type
   // If this Block is a list or variable Block, we must pass that data to the constructor
@@ -1124,7 +1124,6 @@ Block.prototype.stopGlow = function() {
  * robots that are not connected
  */
 Block.prototype.makeInactive = function() {
-  console.log("makeInactive " + this.active)
   if (this.active) {
     this.active = false;
     BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active, this.isGlowing);
@@ -1138,7 +1137,6 @@ Block.prototype.makeInactive = function() {
  * Undoes the visual changes of makeInactive.  Calls makeActive on all Slots
  */
 Block.prototype.makeActive = function() {
-  console.log("makeActive " + this.active)
   if (!this.active) {
     this.active = true;
     BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active, this.isGlowing);
@@ -1172,7 +1170,6 @@ Block.prototype.checkActive = function() {
  * Uses checkActive and setActive to update the Blocks appearance
  */
 Block.prototype.updateActive = function() {
-  console.log("updateActive")
   this.setActive(this.checkActive());
 };
 
@@ -1216,6 +1213,13 @@ Block.prototype.createXml = function(xmlDoc) {
   //FinchBlox. Only one blockButton currently allowed.
   if (this.blockButton != null) {
     block.appendChild(this.blockButton.createXml(xmlDoc));
+  }
+  if (Hatchling) {
+    let blockButtons = XmlWriter.createElement(xmlDoc, "blockButtons");
+    for (let i = 0; i < this.blockButtons.length; i++) {
+      blockButtons.appendChild(this.blockButtons[i].createXml(xmlDoc));
+    }
+    block.appendChild(blockButtons);
   }
   return block;
 };
@@ -1282,6 +1286,13 @@ Block.prototype.copyFromXml = function(blockNode) {
   let blockButtonNodes = XmlWriter.findSubElements(blockNode, "blockButton");
   if (this.blockButton != null) {
     this.blockButton.importXml(blockButtonNodes[0]);
+  }
+  if (Hatchling) {
+    let blockButtonsNode = XmlWriter.findSubElement(blockNode, "blockButtons")
+    blockButtonNodes = XmlWriter.findSubElements(blockButtonsNode, "blockButton")
+    for (let i=0; i < blockButtonNodes.length; i++) {
+      this.blockButtons[i].importXml(blockButtonNodes[i])
+    }
   }
 };
 
@@ -1433,6 +1444,16 @@ Block.prototype.updateAvailableSensors = function() {
 };
 
 /**
+ * Hatchling only - called when port types change.
+ */
+Block.prototype.updateAvailablePorts = function(port) {
+  console.log("updateAvailablePorts " + port)
+  if (this.hlButton != null && port == this.port) {
+    this.updateActive()
+  }
+}
+
+/**
  * Calls a function on all the Block's slots.  All parameters after the functionName are passed to the function
  * as arguments
  * @param functionName - The name of the function to call on each child
@@ -1460,13 +1481,23 @@ Block.prototype.passRecursively = function(functionName) {
  * @param {string} message - Possibly the name of the function to call to send the message
  */
 Block.prototype.passRecursivelyDown = function(message) {
-  const myMessage = message;
+  /*const myMessage = message;
   let funArgs = Array.prototype.slice.call(arguments, 1);
   // If the message implemented by this Block...
 
   if (myMessage === "updateAvailableSensors" && this.updateAvailableSensors != null) {
     // Implemented by all Blocks, used by Tablet Blocks
     this.updateAvailableSensors.apply(this, funArgs);
+  }
+
+  if (myMessage === "updateAvailablePorts") {
+    //this.updateAvailablePorts.apply(this, funArgs)
+    this.updateAvailablePorts(funArgs)
+  }*/
+
+  //If this block implements message...
+  if (this[message] != null) {
+    this[message](Array.prototype.slice.call(arguments, 1))
   }
 
   // Add "passRecursivelyDown" as the first argument

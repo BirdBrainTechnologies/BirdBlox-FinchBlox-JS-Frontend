@@ -745,11 +745,9 @@ BlockGraphics.create.block = function(category, group, returnsValue, active) {
   if (FinchBlox) {
     fill = Colors.getColor(category)
   }
-  console.log("creating block with category " + category + " and fill " + fill)
   path.setAttributeNS(null, "fill", fill);
-  console.log(path)
   BlockGraphics.update.stroke(path, category, returnsValue, active);
-  console.log(path)
+
   return path;
 };
 

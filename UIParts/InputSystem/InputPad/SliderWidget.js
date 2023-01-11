@@ -11,13 +11,14 @@
 InputWidget.Slider = function(type, options, startVal, sliderColor, displaySuffix, index) {
   this.type = type;
   this.options = options;
+  this.optionDisabled = [];
   this.value = startVal;
   this.sliderColor = sliderColor;
   this.displaySuffix = displaySuffix;
   this.index = index;
 
   this.snapToOption = false;
-  if (type == "ledArray" || type == "hatchling") {
+  if (type == "ledArray" || type.startsWith("hatchling") || type == "sensor") {
     this.snapToOption = true;
   }
   this.optionXs = [];
@@ -63,6 +64,16 @@ InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotSha
   this.group.appendChild(this.bgRect);
   TouchReceiver.addListenersSlider(this.bgRect, this);
 
+  if(this.type.startsWith("hatchling")) {
+    let device = DeviceHatchling.getManager().getDevice(0);
+    if (device != null) {
+      let portType = this.type.split("_")[1]
+      let ports = device.getPortsByType(portType)
+      for (let i = 0; i < this.options.length; i++) {
+        this.optionDisabled[i] = (ports.indexOf(i) == -1)
+      }
+    }
+  }
   //this.value = data;
   //console.log("show slider at index " + this.index + " with data " + data);
   this.value = data[this.index];
@@ -173,7 +184,7 @@ InputWidget.Slider.prototype.makeSlider = function() {
     let tickY = this.barY - (tickH - S.barHeight) / 2;
     for (let i = 0; i < this.options.length; i++) {
       const isOnEdge = (i == 0 || i == (this.options.length - 1));
-      this.addOption(tickX, tickY, this.options[i], tickH, tickW, isOnEdge);
+      this.addOption(tickX, tickY, this.options[i], tickH, tickW, isOnEdge, this.optionDisabled[i]);
       tickX += (this.barW - tickW) / (this.options.length - 1);
     }
   }
@@ -190,14 +201,18 @@ InputWidget.Slider.prototype.makeSlider = function() {
   if (this.type == 'ledArray') {
     //Add an image at the bottom to show your selection
     this.imageG = GuiElements.create.group(0, 0, this.group);
-  } else if (this.type != 'color' && this.type != 'hatchling') {
+  } else if (this.type != 'color' && !this.type.startsWith('hatchling') && this.type != 'sensor') {
     //Add a label at the bottom to show your selection
     this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
     this.group.appendChild(this.textE);
   }
-  if (this.type == 'time' || this.type == 'hatchling') {
+  if (this.type == 'time' || this.type.startsWith('hatchling') || this.type == 'sensor') {
     this.labelIconH = 23;
-    const labelIconP = (this.type == 'hatchling') ? VectorPaths.faLightbulb : VectorPaths.faClock;
+    //const labelIconP = (this.type.startsWith('hatchling')) ? VectorPaths.faLightbulb : VectorPaths.faClock;
+    let labelIconP = VectorPaths.faClock
+    if (this.type.startsWith('hatchling')) { labelIconP = VectorPaths.faLightbulb }
+    if (this.type == 'sensor') { labelIconP = this.value }
+
     this.labelIconW = VectorIcon.computeWidth(labelIconP, this.labelIconH);
     this.labelIcon = new VectorIcon(0, 0, labelIconP, Colors.bbtDarkGray, this.labelIconH, this.group);
   }
@@ -212,8 +227,9 @@ InputWidget.Slider.prototype.makeSlider = function() {
  * @param {number} tickH - Hight of the tickmark to display for this option
  * @param {number} tickW - Width of the tickmark to display for this option
  * @param {boolean} isOnEdge - true if this is the first or last option on the slider.
+ * @param {boolean} isDisabled - true if this option is disabled
  */
-InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, isOnEdge) {
+InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, isOnEdge, isDisabled) {
   const S = InputWidget.Slider;
   const font = S.optionFont;
 
@@ -232,7 +248,8 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
   this.optionXs.push(x + tickW / 2);
   this.optionValues.push(option);
 
-  switch (this.type) {
+  const typeGroup = this.type.split("_")[0]
+  switch (typeGroup) {
     case "ledArray":
       let image = GuiElements.draw.ledArray(this.group, option, 2.2);
       const iX = x - image.width / 2 + tickW / 2;
@@ -246,11 +263,33 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
       const iconX = x - iconW / 2 + tickW / 2
       const iconY = y - iconH - S.optionMargin
       let icon = new VectorIcon(iconX, iconY, iconPath, option, iconH, this.group)
+
+      if (isDisabled) {
+        const slashG = GuiElements.create.group(0, 0, this.group);
+        const slash = GuiElements.create.path(slashG);
+        const cr = iconW
+        const cx = iconX + iconW/2
+        const cy = iconY + iconH/2
+        let slashPath = "M " + (cx + cr * Math.cos(315 * Math.PI / 180)) + ",";
+        slashPath += (cy + cr * Math.sin(315 * Math.PI / 180));
+        slashPath += " L " + (cx + cr * Math.cos(135 * Math.PI / 180)) + ",";
+        slashPath += (cy + cr * Math.sin(135 * Math.PI / 180));
+        slash.setAttributeNS(null, "d", slashPath);
+        GuiElements.update.stroke(slash, S.barColor, 3);
+        GuiElements.update.opacity(icon.pathE, 0.3)
+      }
+      break;
+    case "sensor":
+      const iconP = option
+      const iH = 23
+      const iW = VectorIcon.computeWidth(iconP, iH)
+      const sensorIconX = x - iW / 2 + tickW / 2
+      const sensorIconY = y - iH - S.optionMargin
+      let sensorIcon = new VectorIcon(sensorIconX, sensorIconY, iconP, Colors.bbtDarkGray, iH, this.group)
       break;
     case "percent":
     case "distance":
-    case "angle_left":
-    case "angle_right":
+    case "angle":
     case "time":
       let width = GuiElements.measure.stringWidth(option, font);
       let textX = x - width / 2 + tickW / 2;
@@ -517,9 +556,17 @@ InputWidget.Slider.prototype.updateLabel = function() {
     textY += (this.cR ? this.cR + S.font.charHeight / 2 : 0)
     GuiElements.move.text(this.textE, textX, textY);
   } else if (this.labelIcon != null) {
+    if (this.type == "sensor") {
+      this.labelIcon.remove()
+      let labelIconP = this.value
+      this.labelIcon = new VectorIcon(0, 0, labelIconP, Colors.bbtDarkGray, this.labelIconH, this.group);
+    }
     const iconX = this.width - S.hMargin - this.sideSpaceR - this.labelIconW / 2;
     const iconY = this.height / 2 - this.labelIconH / 2;
     this.labelIcon.move(iconX, iconY);
+    if (this.type.startsWith('hatchling')) {
+      this.labelIcon.setColor(this.value)
+    }
   }
   if (this.imageG != null) {
     this.imageG.remove();

@@ -6336,11 +6336,17 @@ DeviceHatchling.prototype.setHatchlingState = function(state) {
   newPortVals[5] = ((state[15] >> 5) << 3) | (state[16] >> 5) //port F
 
   for (let i = 0; i < this.portStates.length; i++) {
-    if (this.portStates[i] != newPortVals[i]) {
-      console.log("New value for port " + i + ": " + newPortVals[i])
-      this.portStates[i] = newPortVals[i]
-      //TODO: trigger enable/disable appropriate blocks
-      CodeManager.updateAvailableSensors();
+
+    //TODO: REMOVE! Once port 4 stops changing its value all the time...
+    if(i != 4) {
+
+      if (this.portStates[i] != newPortVals[i]) {
+        console.log("New value for port " + i + ": " + newPortVals[i])
+        this.portStates[i] = newPortVals[i]
+        //TODO: trigger enable/disable appropriate blocks
+        //CodeManager.updateAvailableSensors();
+        CodeManager.updateAvailablePorts(i);
+      }
     }
   }
 }
@@ -6358,6 +6364,23 @@ DeviceHatchling.prototype.getPortsByType = function(type) {
     }
   }
   return ports
+}
+
+/**
+ * Issues a request to read a hatchling sensor.
+ * @param {object} status - An object provided by the caller to track the progress of the request
+ * @param {string} sensor - What type of sensor (Light, distance, etc.)
+ * @param {string} port - Which port the sensor is plugged in to (null for micro:bit sensors)
+ */
+DeviceHatchling.prototype.readSensor = function(status, sensor, port) {
+  const request = new HttpRequestBuilder("robot/in");
+  request.addParam("type", this.getDeviceTypeId());
+  request.addParam("id", this.id);
+  request.addParam("sensor", sensor);
+  if (port != null) {
+    request.addParam("port", port);
+  }
+  HtmlServer.sendRequest(request.toString(), status, true);
 }
 
 /**
@@ -8170,6 +8193,7 @@ BlockList.populateCat_sensor_3 = function(category) {
   category.addBlockByName("B_StartWhenDark");
   category.addBlockByName("B_StartWhenClap");
   category.addBlockByName("B_StartWhenDistance");
+  category.addBlockByName("B_HLWaitUntil");
   category.trimBottom();
   category.centerBlocks();
 }
@@ -8581,7 +8605,7 @@ Colors.setCategory = function() {
     "color_3": Colors.neonCarrot,
     "sound_3": Colors.seance,
     "control_3": Colors.fbYellow,
-    "sensor_3": Colors.flagGreen//Colors.finchGreen
+    "sensor_3": Colors.finchGreen//Colors.flagGreen//Colors.finchGreen
   };
   //In FinchBlox, the block palette changes colors per category
   Colors.blockPalette = {
@@ -9893,11 +9917,9 @@ BlockGraphics.create.block = function(category, group, returnsValue, active) {
   if (FinchBlox) {
     fill = Colors.getColor(category)
   }
-  console.log("creating block with category " + category + " and fill " + fill)
   path.setAttributeNS(null, "fill", fill);
-  console.log(path)
   BlockGraphics.update.stroke(path, category, returnsValue, active);
-  console.log(path)
+
   return path;
 };
 
@@ -16467,13 +16489,14 @@ InputWidget.SelectPad.prototype.getAbsY = function() {
 InputWidget.Slider = function(type, options, startVal, sliderColor, displaySuffix, index) {
   this.type = type;
   this.options = options;
+  this.optionDisabled = [];
   this.value = startVal;
   this.sliderColor = sliderColor;
   this.displaySuffix = displaySuffix;
   this.index = index;
 
   this.snapToOption = false;
-  if (type == "ledArray" || type == "hatchling") {
+  if (type == "ledArray" || type.startsWith("hatchling") || type == "sensor") {
     this.snapToOption = true;
   }
   this.optionXs = [];
@@ -16519,6 +16542,16 @@ InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotSha
   this.group.appendChild(this.bgRect);
   TouchReceiver.addListenersSlider(this.bgRect, this);
 
+  if(this.type.startsWith("hatchling")) {
+    let device = DeviceHatchling.getManager().getDevice(0);
+    if (device != null) {
+      let portType = this.type.split("_")[1]
+      let ports = device.getPortsByType(portType)
+      for (let i = 0; i < this.options.length; i++) {
+        this.optionDisabled[i] = (ports.indexOf(i) == -1)
+      }
+    }
+  }
   //this.value = data;
   //console.log("show slider at index " + this.index + " with data " + data);
   this.value = data[this.index];
@@ -16629,7 +16662,7 @@ InputWidget.Slider.prototype.makeSlider = function() {
     let tickY = this.barY - (tickH - S.barHeight) / 2;
     for (let i = 0; i < this.options.length; i++) {
       const isOnEdge = (i == 0 || i == (this.options.length - 1));
-      this.addOption(tickX, tickY, this.options[i], tickH, tickW, isOnEdge);
+      this.addOption(tickX, tickY, this.options[i], tickH, tickW, isOnEdge, this.optionDisabled[i]);
       tickX += (this.barW - tickW) / (this.options.length - 1);
     }
   }
@@ -16646,14 +16679,18 @@ InputWidget.Slider.prototype.makeSlider = function() {
   if (this.type == 'ledArray') {
     //Add an image at the bottom to show your selection
     this.imageG = GuiElements.create.group(0, 0, this.group);
-  } else if (this.type != 'color' && this.type != 'hatchling') {
+  } else if (this.type != 'color' && !this.type.startsWith('hatchling') && this.type != 'sensor') {
     //Add a label at the bottom to show your selection
     this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
     this.group.appendChild(this.textE);
   }
-  if (this.type == 'time' || this.type == 'hatchling') {
+  if (this.type == 'time' || this.type.startsWith('hatchling') || this.type == 'sensor') {
     this.labelIconH = 23;
-    const labelIconP = (this.type == 'hatchling') ? VectorPaths.faLightbulb : VectorPaths.faClock;
+    //const labelIconP = (this.type.startsWith('hatchling')) ? VectorPaths.faLightbulb : VectorPaths.faClock;
+    let labelIconP = VectorPaths.faClock
+    if (this.type.startsWith('hatchling')) { labelIconP = VectorPaths.faLightbulb }
+    if (this.type == 'sensor') { labelIconP = this.value }
+
     this.labelIconW = VectorIcon.computeWidth(labelIconP, this.labelIconH);
     this.labelIcon = new VectorIcon(0, 0, labelIconP, Colors.bbtDarkGray, this.labelIconH, this.group);
   }
@@ -16668,8 +16705,9 @@ InputWidget.Slider.prototype.makeSlider = function() {
  * @param {number} tickH - Hight of the tickmark to display for this option
  * @param {number} tickW - Width of the tickmark to display for this option
  * @param {boolean} isOnEdge - true if this is the first or last option on the slider.
+ * @param {boolean} isDisabled - true if this option is disabled
  */
-InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, isOnEdge) {
+InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, isOnEdge, isDisabled) {
   const S = InputWidget.Slider;
   const font = S.optionFont;
 
@@ -16688,7 +16726,8 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
   this.optionXs.push(x + tickW / 2);
   this.optionValues.push(option);
 
-  switch (this.type) {
+  const typeGroup = this.type.split("_")[0]
+  switch (typeGroup) {
     case "ledArray":
       let image = GuiElements.draw.ledArray(this.group, option, 2.2);
       const iX = x - image.width / 2 + tickW / 2;
@@ -16702,11 +16741,33 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
       const iconX = x - iconW / 2 + tickW / 2
       const iconY = y - iconH - S.optionMargin
       let icon = new VectorIcon(iconX, iconY, iconPath, option, iconH, this.group)
+
+      if (isDisabled) {
+        const slashG = GuiElements.create.group(0, 0, this.group);
+        const slash = GuiElements.create.path(slashG);
+        const cr = iconW
+        const cx = iconX + iconW/2
+        const cy = iconY + iconH/2
+        let slashPath = "M " + (cx + cr * Math.cos(315 * Math.PI / 180)) + ",";
+        slashPath += (cy + cr * Math.sin(315 * Math.PI / 180));
+        slashPath += " L " + (cx + cr * Math.cos(135 * Math.PI / 180)) + ",";
+        slashPath += (cy + cr * Math.sin(135 * Math.PI / 180));
+        slash.setAttributeNS(null, "d", slashPath);
+        GuiElements.update.stroke(slash, S.barColor, 3);
+        GuiElements.update.opacity(icon.pathE, 0.3)
+      }
+      break;
+    case "sensor":
+      const iconP = option
+      const iH = 23
+      const iW = VectorIcon.computeWidth(iconP, iH)
+      const sensorIconX = x - iW / 2 + tickW / 2
+      const sensorIconY = y - iH - S.optionMargin
+      let sensorIcon = new VectorIcon(sensorIconX, sensorIconY, iconP, Colors.bbtDarkGray, iH, this.group)
       break;
     case "percent":
     case "distance":
-    case "angle_left":
-    case "angle_right":
+    case "angle":
     case "time":
       let width = GuiElements.measure.stringWidth(option, font);
       let textX = x - width / 2 + tickW / 2;
@@ -16973,9 +17034,17 @@ InputWidget.Slider.prototype.updateLabel = function() {
     textY += (this.cR ? this.cR + S.font.charHeight / 2 : 0)
     GuiElements.move.text(this.textE, textX, textY);
   } else if (this.labelIcon != null) {
+    if (this.type == "sensor") {
+      this.labelIcon.remove()
+      let labelIconP = this.value
+      this.labelIcon = new VectorIcon(0, 0, labelIconP, Colors.bbtDarkGray, this.labelIconH, this.group);
+    }
     const iconX = this.width - S.hMargin - this.sideSpaceR - this.labelIconW / 2;
     const iconY = this.height / 2 - this.labelIconH / 2;
     this.labelIcon.move(iconX, iconY);
+    if (this.type.startsWith('hatchling')) {
+      this.labelIcon.setColor(this.value)
+    }
   }
   if (this.imageG != null) {
     this.imageG.remove();
@@ -17721,16 +17790,17 @@ FBBubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHe
   GuiElements.move.group(this.innerGroup, this.margin, this.margin);
 
   //Determine whether the overlay should go on the bottom or top
+  const preferBottom = (this.block == null) || (y1 > (this.block.y + (this.block.stack ? this.block.stack.y : 0)))
   const longH = height + BO.triangleH;
   const attemptB = Math.max(0, y2 + longH - GuiElements.height);
   const attemptT = Math.max(0, longH - y1);
   const triangleX = (x1 + x2) / 2;
   let triangleY = NaN;
   let triangleDir = 1;
-  if (attemptB <= attemptT) {
+  if ((attemptB <= attemptT && preferBottom) || attemptB < attemptT) { //place beneath block part
     this.y = y2 + BO.triangleH - overlap;
     triangleY = y2 - overlap;
-  } else {
+  } else { //place above block part
     this.y = y1 - longH;
     triangleY = y1;
     triangleDir = -1;
@@ -20614,6 +20684,14 @@ CodeManager.updateAvailableSensors = function() {
   TabManager.passRecursivelyDown("updateAvailableSensors");
   BlockPalette.passRecursivelyDown("updateAvailableSensors");
 };
+
+/**
+ * Recursively tells Blocks to become active/inactive based on the accessory
+ * that is plugged in to the specified port. Hatchling only.
+ */
+CodeManager.updateAvailablePorts = function(port) {
+  CodeManager.passRecursivelyDown("updateAvailablePorts", false, port);
+}
 
 /**
  * Recursively tells Blocks to become active/inactive based on the devices that are connected
@@ -28125,7 +28203,6 @@ function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Comm
   this.category = category;
   this.isGlowing = false;
   this.active = this.checkActive(); //Indicates if the Block is full color or grayed out (as a result of a missing sensor/robot)
-  console.log("new block made active? " + this.active)
 
   this.stack = null; //It has no Stack yet.
   this.path = this.generatePath(); //This path is the main visual part of the Block. It is colored based on category.
@@ -28155,6 +28232,7 @@ function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Comm
   }
   //For FinchBlox. Keep a reference to a blockButton if there is one for saving.
   this.blockButton = null;
+  if (Hatchling) { this.blockButtons = [] }
 
   this.comment = null;
   this.id = Block.count;
@@ -28239,7 +28317,6 @@ Block.prototype.getAbsY = function() {
  * @return {Node} - The main SVG path element for the Block.
  */
 Block.prototype.generatePath = function() {
-  console.log("generatePath for active = " + this.active)
   const pathE = BlockGraphics.create.block(this.category, this.group, this.returnsValue, this.active);
   TouchReceiver.addListenersChild(pathE, this);
   return pathE;
@@ -28479,6 +28556,8 @@ Block.prototype.changeStack = function(stack) {
   if (this.blockSlot2 != null) {
     this.blockSlot2.changeStack(stack); //If it has a second BlockSlot, move it too.
   }
+  //Hatchling blocks are always active when in display stack
+  if (this.stack != null && this.stack.isDisplayStack) { this.updateActive(); }
 };
 
 /**
@@ -29046,7 +29125,6 @@ Block.prototype.addWidths = function() {
  * @return {Block} - This Block's copy.
  */
 Block.prototype.duplicate = function(x, y) {
-  console.log("duplicate " + this.stack.isDisplayStack)
   let myCopy = null;
   // First we use this Block's constructor to create a new block of the same type
   // If this Block is a list or variable Block, we must pass that data to the constructor
@@ -29214,7 +29292,6 @@ Block.prototype.stopGlow = function() {
  * robots that are not connected
  */
 Block.prototype.makeInactive = function() {
-  console.log("makeInactive " + this.active)
   if (this.active) {
     this.active = false;
     BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active, this.isGlowing);
@@ -29228,7 +29305,6 @@ Block.prototype.makeInactive = function() {
  * Undoes the visual changes of makeInactive.  Calls makeActive on all Slots
  */
 Block.prototype.makeActive = function() {
-  console.log("makeActive " + this.active)
   if (!this.active) {
     this.active = true;
     BlockGraphics.update.blockActive(this.path, this.category, this.returnsValue, this.active, this.isGlowing);
@@ -29262,7 +29338,6 @@ Block.prototype.checkActive = function() {
  * Uses checkActive and setActive to update the Blocks appearance
  */
 Block.prototype.updateActive = function() {
-  console.log("updateActive")
   this.setActive(this.checkActive());
 };
 
@@ -29306,6 +29381,13 @@ Block.prototype.createXml = function(xmlDoc) {
   //FinchBlox. Only one blockButton currently allowed.
   if (this.blockButton != null) {
     block.appendChild(this.blockButton.createXml(xmlDoc));
+  }
+  if (Hatchling) {
+    let blockButtons = XmlWriter.createElement(xmlDoc, "blockButtons");
+    for (let i = 0; i < this.blockButtons.length; i++) {
+      blockButtons.appendChild(this.blockButtons[i].createXml(xmlDoc));
+    }
+    block.appendChild(blockButtons);
   }
   return block;
 };
@@ -29372,6 +29454,13 @@ Block.prototype.copyFromXml = function(blockNode) {
   let blockButtonNodes = XmlWriter.findSubElements(blockNode, "blockButton");
   if (this.blockButton != null) {
     this.blockButton.importXml(blockButtonNodes[0]);
+  }
+  if (Hatchling) {
+    let blockButtonsNode = XmlWriter.findSubElement(blockNode, "blockButtons")
+    blockButtonNodes = XmlWriter.findSubElements(blockButtonsNode, "blockButton")
+    for (let i=0; i < blockButtonNodes.length; i++) {
+      this.blockButtons[i].importXml(blockButtonNodes[i])
+    }
   }
 };
 
@@ -29523,6 +29612,16 @@ Block.prototype.updateAvailableSensors = function() {
 };
 
 /**
+ * Hatchling only - called when port types change.
+ */
+Block.prototype.updateAvailablePorts = function(port) {
+  console.log("updateAvailablePorts " + port)
+  if (this.hlButton != null && port == this.port) {
+    this.updateActive()
+  }
+}
+
+/**
  * Calls a function on all the Block's slots.  All parameters after the functionName are passed to the function
  * as arguments
  * @param functionName - The name of the function to call on each child
@@ -29550,13 +29649,23 @@ Block.prototype.passRecursively = function(functionName) {
  * @param {string} message - Possibly the name of the function to call to send the message
  */
 Block.prototype.passRecursivelyDown = function(message) {
-  const myMessage = message;
+  /*const myMessage = message;
   let funArgs = Array.prototype.slice.call(arguments, 1);
   // If the message implemented by this Block...
 
   if (myMessage === "updateAvailableSensors" && this.updateAvailableSensors != null) {
     // Implemented by all Blocks, used by Tablet Blocks
     this.updateAvailableSensors.apply(this, funArgs);
+  }
+
+  if (myMessage === "updateAvailablePorts") {
+    //this.updateAvailablePorts.apply(this, funArgs)
+    this.updateAvailablePorts(funArgs)
+  }*/
+
+  //If this block implements message...
+  if (this[message] != null) {
+    this[message](Array.prototype.slice.call(arguments, 1))
   }
 
   // Add "passRecursivelyDown" as the first argument
@@ -33310,6 +33419,7 @@ function BlockButton(parent, width) {
 
   this.isSlot = false;
   parent.blockButton = this;
+  if (Hatchling) { parent.blockButtons.push(this) }
 };
 BlockButton.prototype = Object.create(BlockPart.prototype);
 BlockButton.prototype.constructor = BlockButton;
@@ -33420,21 +33530,20 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
       const iY = (i + 1) * this.button.height / (this.widgets.length + 1) - image.width / 2;
       GuiElements.move.group(image.group, iX, iY);
       this.ledArrayImage = image;
-    } else if (this.widgets[i].type == "hatchling") {
+    } else if (this.widgets[i].type.startsWith("hatchling")) {
       this.button.updateBgColor(this.values[i]);
-
-      /*if (this.colorIcon != null) {
-        this.colorIcon.remove()
+    } else if (this.widgets[i].type == "sensor") {
+      if (this.sensorIcon != null) {
+        this.sensorIcon.remove()
       }
 
-      const iconPath = VectorPaths.faLightbulb
+      const iconPath = this.values[i]
       const iconH = 11
       const iconW = VectorIcon.computeWidth(iconPath, iconH)
       const iconX = this.button.width / 2 - iconW / 2
       const iconY = this.button.height / 2 - iconH / 2
-      this.colorIcon = new VectorIcon(iconX, iconY, iconPath, this.values[i], iconH, this.button.group)
-      TouchReceiver.addListenersBN(this.colorIcon.group, this.button);*/
-
+      this.sensorIcon = new VectorIcon(iconX, iconY, iconPath, Colors.bbtDarkGray, iconH, this.button.group)
+      TouchReceiver.addListenersBN(this.sensorIcon.group, this.button);
     } else {
       text[i] = this.values[i].toString() + this.displaySuffixes[i];
     }
@@ -37057,6 +37166,8 @@ B_FBStartWhen.prototype.updateAction = function() {
         } else {
           return new ExecutionStatusRunning();
         }
+      } else if (this.sensor == "distance" && Hatchling) {
+        device.readSensor(status, "distance", this.port);
       } else {
         device.readSensor(status, "light", "left");
       }
@@ -37137,6 +37248,9 @@ B_StartWhenDistance.prototype.updateValues = function() {
   if (this.distanceBN != null) {
     this.distance = this.distanceBN.values[0]
   }
+}
+B_StartWhenDistance.prototype.checkActive = function() {
+  return HL_Utils.checkActive(this)
 }
 
 /* This file contains the implementations for sensing Blocks, which have been moved to the tablet category
@@ -38942,14 +39056,16 @@ B_ListContainsItem.prototype.checkListContainsItem = function(listData, itemD) {
 
 const HL_Utils = {}
 HL_Utils.portColors = ["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
-HL_Utils.addHLButton = function(block) {
+HL_Utils.addHLButton = function(block, portType) {
   block.port = -1 //unknown
   block.hlButton = new BlockButton(block, 20);
-  block.hlButton.addSlider("hatchling", Colors.bbtDarkGray, HL_Utils.portColors)
+  block.hlButton.addSlider("hatchling_" + portType, Colors.bbtDarkGray, HL_Utils.portColors)
 }
 HL_Utils.updatePort = function(block) {
   if (block.hlButton != null) {
     block.port = HL_Utils.portColors.indexOf(block.hlButton.values[0])
+    console.log("update port for " + block.constructor.name + " to " + block.port)
+    block.updateActive()
   }
 }
 HL_Utils.findPorts = function(block) {
@@ -38964,6 +39080,32 @@ HL_Utils.findPorts = function(block) {
       block.port = ports[0]
     }
   }
+}
+HL_Utils.checkActive = function(block) {
+  //console.log("checkActive " + block.constructor.name)
+  //Always active in blockPalette
+  if (block.stack != null && block.stack.isDisplayStack) {
+    //console.log("found display stack - returning true")
+    return true
+  }
+  //Not active if no port selected
+  if (block.port == -1) { return false }
+
+  //Active if correct accessory is plugged in to selected port.
+  let device = DeviceHatchling.getManager().getDevice(0);
+  if (device != null) {
+    let ports = device.getPortsByType(block.portType)
+    if (ports.indexOf(block.port) != -1) {
+      //console.log("found port " + block.port + " within " + ports + " - returning true")
+      return true
+    }
+  }
+  //console.log("found nothing - returning false")
+  return false
+
+  //let portFound = HL_Utils.findPorts(this)
+  //console.log(this.constructor.name + " " + portFound + " " + (this.stack == null ? "no stack" : this.stack.isDisplayStack))
+  //return portFound
 }
 HL_Utils.setupAction = function(block) {
   let mem = block.runMem;
@@ -38982,11 +39124,12 @@ HL_Utils.setupAction = function(block) {
 }
 
 
-function B_HLOutputBase(x, y, category, outputType) {
+function B_HLOutputBase(x, y, category, outputType, portType) {
   this.outputType = outputType
+  this.portType = portType
   CommandBlock.call(this, x, y, category);
 
-  HL_Utils.addHLButton(this)
+  HL_Utils.addHLButton(this, portType)
 }
 B_HLOutputBase.prototype = Object.create(CommandBlock.prototype);
 B_HLOutputBase.prototype.constructor = B_HLOutputBase;
@@ -39030,7 +39173,6 @@ B_HLOutputBase.prototype.updateValues = function() {
     this.updateColor();
   }
   if (this.portType == 10 && this.colorButtons.length == 4) { //neopixel strip
-    console.log(this.colorButtons)
     this.value = ""
     for (let i = 0; i < this.colorButtons.length; i++) {
       this.value = this.value + this.colorButtons[i].values[0].r*2.55 + ","
@@ -39050,32 +39192,13 @@ B_HLOutputBase.prototype.updateAction = function() {
   }
 };
 B_HLOutputBase.prototype.checkActive = function() {
-  console.log("checkActive " + this.constructor.name)
-  if (this.stack != null && this.stack.isDisplayStack) {
-    console.log("found display stack - returning true")
-    return true
-  }
-  let device = DeviceHatchling.getManager().getDevice(0);
-  if (device != null) {
-    let ports = device.getPortsByType(this.portType)
-    if (ports.indexOf(this.port) != -1) {
-      console.log("found port " + this.port + " within " + ports + " - returning true")
-      return true
-    }
-  }
-  console.log("found nothing - returning false")
-  return false
-
-  //let portFound = HL_Utils.findPorts(this)
-  //console.log(this.constructor.name + " " + portFound + " " + (this.stack == null ? "no stack" : this.stack.isDisplayStack))
-  //return portFound
+  return HL_Utils.checkActive(this)
 }
 
 function B_HLPositionServo(x, y) {
   this.value = 90; //defaultAngle
   this.valueKey = "angle"
-  this.portType = 3
-  B_HLOutputBase.call(this, x, y, "motion_3", "positionServo");
+  B_HLOutputBase.call(this, x, y, "motion_3", "positionServo", 3);
 
   const icon = VectorPaths["faCompassDrafting"];
   let blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 27);
@@ -39093,9 +39216,8 @@ function B_HLRotationServo(x, y, flip) {
   this.value = 255 //off signal
   this.defaultSpeed = 50;
   this.valueKey = "percent"
-  this.portType = 1
   this.flip = flip
-  B_HLOutputBase.call(this, x, y, "motion_3", "rotationServo");
+  B_HLOutputBase.call(this, x, y, "motion_3", "rotationServo", 1);
 
   const icon = flip ? VectorPaths["mjTurnLeft"] : VectorPaths["faArrowsSpin"];
   let blockIcon = new BlockIcon(this, icon, Colors.white, "rServo", 27, null, true);
@@ -39119,11 +39241,10 @@ B_HLccRotationServo.prototype.constructor = B_HLccRotationServo;
 function B_HLSingleNeopix(x, y) {
   this.value = ""
   this.valueKey = "color"
-  this.portType = 9
   this.red = 100;
   this.green = 100;
   this.blue = 100;
-  B_HLOutputBase.call(this, x, y, "color_3", "singleNeopix");
+  B_HLOutputBase.call(this, x, y, "color_3", "singleNeopix", 9);
 
   const icon = VectorPaths["faLightbulb"];
   this.blockIcon = new BlockIcon(this, icon, Colors.white, "sNeopix", 27);
@@ -39145,13 +39266,12 @@ B_HLSingleNeopix.prototype.updateColor = function() {
 function B_HLNeopixStrip(x, y) {
   this.value = ""
   this.valueKey = "colors"
-  this.portType = 10
   this.red = 100;
   this.green = 100;
   this.blue = 100;
   this.colorButtons = []
 
-  B_HLOutputBase.call(this, x, y, "color_3", "neopixStrip");
+  B_HLOutputBase.call(this, x, y, "color_3", "neopixStrip", 10);
 
   const icon = VectorPaths["faLightbulb"];
   this.blockIcon1 = new BlockIcon(this, icon, Colors.white, "neopix1", 27);
@@ -39181,4 +39301,84 @@ function B_HLNeopixStrip(x, y) {
 }
 B_HLNeopixStrip.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLNeopixStrip.prototype.constructor = B_HLNeopixStrip;
+
+// Wait until sensor reaches threshold
+function B_HLWaitUntil(x, y) {
+  CommandBlock.call(this, x, y, "sensor_3");
+  const blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 35);
+  blockIcon.isEndOfLine = true;
+  this.addPart(blockIcon);
+  //clap, light, distance, shake
+  this.sensorPaths = [VectorPaths.clap, VectorPaths.mjSun, VectorPaths.language, VectorPaths.share]
+  this.sensorTypes = ["clap", "light", "distance", "shake"]
+  this.sensorSelection = this.sensorPaths[1]
+  this.sensorBN = new BlockButton(this);
+  this.sensorBN.addSlider("sensor", this.sensorSelection, this.sensorPaths);
+  this.addPart(this.sensorBN);
+}
+B_HLWaitUntil.prototype = Object.create(CommandBlock.prototype);
+B_HLWaitUntil.prototype.constructor = B_HLWaitUntil;
+
+B_HLWaitUntil.prototype.startAction = function() {
+  let device = HL_Utils.setupAction(this)
+  if (device == null) { return new ExecutionStatusError(); }
+
+  this.blankRequestStatus = {};
+  this.blankRequestStatus.finished = false;
+  this.blankRequestStatus.error = false;
+  this.blankRequestStatus.result = null;
+  this.blankRequestStatus.requestSent = false;
+
+  this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+
+  return new ExecutionStatusRunning();
+}
+B_HLWaitUntil.prototype.updateAction = function() {
+  const status = this.runMem.requestStatus;
+  if (status.requestSent) {
+    if (status.finished) {
+      if (!status.error) {
+        const result = new StringData(status.result);
+        const num = (result.asNum().getValue());
+        if ((num > this.threshold) || (this.useLessThan && num < this.threshold)) {
+          return new ExecutionStatusDone();
+        }
+      }
+      //If there's an error or if the condition hasn't been met, start over.
+      this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+    }
+  } else {
+    let device = DeviceHatchling.getManager().getDevice(0)
+    if (device == null) { return new ExecutionStatusError(); }
+
+    let sensor = this.sensorTypes[this.sensorPaths.indexOf(this.sensorSelection)]
+    let port = null
+    this.useLessThan = false
+    switch(sensor) {
+      case "clap":
+        if (!device.hasV2Microbit) { return new ExecutionStatusError(); }
+        this.threshold = 50
+        sensor = "V2sound"
+        break;
+      case "light":
+        this.threshold = 5
+        port = "left"
+        break;
+      case "distance": //TODO: add port button when this sensor is working
+        this.threshold = 10
+        //port = this.port
+        break;
+      case "shake": //TODO: shake not working. Also, consider using buttons?
+        break;
+    }//TODO: since we keep a copy of the sensor data in the Hatchling device, maybe we can skip all this?
+    device.readSensor(status, sensor, port)
+    status.requestSent = true;
+  }
+  return new ExecutionStatusRunning();
+}
+B_HLWaitUntil.prototype.updateValues = function() {
+  if (this.sensorBN != null) {
+    this.sensorSelection = this.sensorBN.values[0];
+  }
+}
 

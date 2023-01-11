@@ -68,16 +68,17 @@ FBBubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHe
   GuiElements.move.group(this.innerGroup, this.margin, this.margin);
 
   //Determine whether the overlay should go on the bottom or top
+  const preferBottom = (this.block == null) || (y1 > (this.block.y + (this.block.stack ? this.block.stack.y : 0)))
   const longH = height + BO.triangleH;
   const attemptB = Math.max(0, y2 + longH - GuiElements.height);
   const attemptT = Math.max(0, longH - y1);
   const triangleX = (x1 + x2) / 2;
   let triangleY = NaN;
   let triangleDir = 1;
-  if (attemptB <= attemptT) {
+  if ((attemptB <= attemptT && preferBottom) || attemptB < attemptT) { //place beneath block part
     this.y = y2 + BO.triangleH - overlap;
     triangleY = y2 - overlap;
-  } else {
+  } else { //place above block part
     this.y = y1 - longH;
     triangleY = y1;
     triangleDir = -1;

@@ -44,6 +44,7 @@ function BlockButton(parent, width) {
 
   this.isSlot = false;
   parent.blockButton = this;
+  if (Hatchling) { parent.blockButtons.push(this) }
 };
 BlockButton.prototype = Object.create(BlockPart.prototype);
 BlockButton.prototype.constructor = BlockButton;
@@ -154,21 +155,20 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
       const iY = (i + 1) * this.button.height / (this.widgets.length + 1) - image.width / 2;
       GuiElements.move.group(image.group, iX, iY);
       this.ledArrayImage = image;
-    } else if (this.widgets[i].type == "hatchling") {
+    } else if (this.widgets[i].type.startsWith("hatchling")) {
       this.button.updateBgColor(this.values[i]);
-
-      /*if (this.colorIcon != null) {
-        this.colorIcon.remove()
+    } else if (this.widgets[i].type == "sensor") {
+      if (this.sensorIcon != null) {
+        this.sensorIcon.remove()
       }
 
-      const iconPath = VectorPaths.faLightbulb
+      const iconPath = this.values[i]
       const iconH = 11
       const iconW = VectorIcon.computeWidth(iconPath, iconH)
       const iconX = this.button.width / 2 - iconW / 2
       const iconY = this.button.height / 2 - iconH / 2
-      this.colorIcon = new VectorIcon(iconX, iconY, iconPath, this.values[i], iconH, this.button.group)
-      TouchReceiver.addListenersBN(this.colorIcon.group, this.button);*/
-
+      this.sensorIcon = new VectorIcon(iconX, iconY, iconPath, Colors.bbtDarkGray, iconH, this.button.group)
+      TouchReceiver.addListenersBN(this.sensorIcon.group, this.button);
     } else {
       text[i] = this.values[i].toString() + this.displaySuffixes[i];
     }
