@@ -412,6 +412,8 @@ BlockStack.prototype.snap = function(block) {
 
   this.updateDim();
   this.startRunIfAutoExec();
+
+  if (Hatchling) { HL_Utils.showPortsPopup(block) }
 };
 
 /**
@@ -479,6 +481,8 @@ BlockStack.prototype.land = function() {
   // Move to ensure that position on screen does not change.
   this.move(this.tab.absToRelX(absX), this.tab.absToRelY(absY));
   this.tab.updateArrows();
+
+  if (Hatchling) { HL_Utils.showPortsPopup(this.firstBlock) }
 };
 
 /**

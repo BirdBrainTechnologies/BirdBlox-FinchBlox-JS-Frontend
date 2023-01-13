@@ -24,9 +24,13 @@ HL_Utils.findPorts = function(block) {
     let ports = device.getPortsByType(block.portType)
     //console.log("findPorts found:")
     //console.log(ports)
-    if (ports.length == 1) {
+    if (ports.length >= 1) {
       block.hlButton.updateValue(HL_Utils.portColors[ports[0]], 0)
-      block.port = ports[0]
+      //block.port = ports[0]
+      if (ports.length > 1) {
+        //block.hlButton.callbackFunction()
+        block.shouldShowPortsPopup = true
+      }
     }
   }
 }
@@ -70,6 +74,15 @@ HL_Utils.setupAction = function(block) {
     TitleBar.flashFinchButton();
   }
   return device;
+}
+HL_Utils.showPortsPopup = function(block) {
+  if (block.shouldShowPortsPopup) {
+    block.shouldShowPortsPopup = false
+    setTimeout(function() {
+      block.hlButton.button.press()
+      block.hlButton.button.release()
+    }, 100);
+  }
 }
 
 

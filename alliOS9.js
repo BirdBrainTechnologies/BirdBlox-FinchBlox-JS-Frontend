@@ -25568,6 +25568,8 @@ BlockStack.prototype.snap = function(block) {
 
   this.updateDim();
   this.startRunIfAutoExec();
+
+  if (Hatchling) { HL_Utils.showPortsPopup(block) }
 };
 
 /**
@@ -25635,6 +25637,8 @@ BlockStack.prototype.land = function() {
   // Move to ensure that position on screen does not change.
   this.move(this.tab.absToRelX(absX), this.tab.absToRelY(absY));
   this.tab.updateArrows();
+
+  if (Hatchling) { HL_Utils.showPortsPopup(this.firstBlock) }
 };
 
 /**
@@ -29042,6 +29046,8 @@ Block.prototype.snap = function(block) {
     //Update the arros on the sides of the screen in case the new block now extends beyond the edge
     this.stack.tab.updateArrows();
   }
+
+  if (Hatchling) { HL_Utils.showPortsPopup(block) }
 };
 
 /**
@@ -39074,9 +39080,13 @@ HL_Utils.findPorts = function(block) {
     var ports = device.getPortsByType(block.portType)
     //console.log("findPorts found:")
     //console.log(ports)
-    if (ports.length == 1) {
+    if (ports.length >= 1) {
       block.hlButton.updateValue(HL_Utils.portColors[ports[0]], 0)
-      block.port = ports[0]
+      //block.port = ports[0]
+      if (ports.length > 1) {
+        //block.hlButton.callbackFunction()
+        block.shouldShowPortsPopup = true
+      }
     }
   }
 }
@@ -39120,6 +39130,15 @@ HL_Utils.setupAction = function(block) {
     TitleBar.flashFinchButton();
   }
   return device;
+}
+HL_Utils.showPortsPopup = function(block) {
+  if (block.shouldShowPortsPopup) {
+    block.shouldShowPortsPopup = false
+    setTimeout(function() {
+      block.hlButton.button.press()
+      block.hlButton.button.release()
+    }, 100);
+  }
 }
 
 
