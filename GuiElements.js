@@ -810,6 +810,38 @@ GuiElements.draw.wedge = function(x, y, r, a, color) {
   return wedge; //Return the finished wedge shape.
 }
 
+GuiElements.draw.hatchlingPattern = function(parentGroup, h, colors) {
+  let group = GuiElements.create.group(0, 0, parentGroup);
+  let r = h/9
+  let cx = r
+  let cy = 3*r
+  for (let i = 0; i < 6; i++) {
+    switch (i) {
+      case 0:
+      case 2:
+        cy = 3*r
+        break;
+      case 1:
+        cy = 2*r
+        break;
+      case 3:
+      case 5:
+        cy = 6*r
+        break;
+      case 4:
+        cy = 7*r
+        break;
+    }
+    let circle = GuiElements.draw.circle(cx, cy, r, colors[i], group)
+    if (i < 2) {
+      cx = cx + 3*r
+    } else if (i > 2) {
+      cx = cx - 3*r
+    }
+  }
+  return group
+}
+
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
  * They do not return anything. */
 GuiElements.update = {};

@@ -4,7 +4,7 @@
  */
 
 const HL_Utils = {}
-HL_Utils.portColors = ["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
+HL_Utils.portColors = ["#00f", "#ff0", "#0f0", "#f0f", "#0ff", "#f80"]//["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
 HL_Utils.addHLButton = function(block, portType) {
   block.port = -1 //unknown
   block.hlButton = new BlockButton(block, 20);
@@ -121,7 +121,7 @@ B_HLOutputBase.prototype.updateValues = function() {
       } else if (percent < -100) {
         this.value = 0
       } else {
-        this.value = ( (percent * 23) / 100 ) + 122  //from bambi
+        this.value = Math.round(( (percent * 23) / 100 ) + 122)  //from bambi
       }
     } else {
       this.value = this.valueBN.values[0]
@@ -131,15 +131,16 @@ B_HLOutputBase.prototype.updateValues = function() {
     this.red = this.colorButton.values[0].r;
     this.green = this.colorButton.values[0].g;
     this.blue = this.colorButton.values[0].b;
-    this.value = this.red*2.55 + ":" + this.green*2.55 + ":" + this.blue*2.55
+    this.value = Math.round(this.red*2.55) + ":" +
+      Math.round(this.green*2.55) + ":" + Math.round(this.blue*2.55)
     this.updateColor();
   }
   if (this.portType == 10 && this.colorButtons.length == 4) { //neopixel strip
     this.value = ""
     for (let i = 0; i < this.colorButtons.length; i++) {
-      this.value = this.value + this.colorButtons[i].values[0].r*2.55 + ","
-      this.value = this.value + this.colorButtons[i].values[0].g*2.55 + ","
-      this.value = this.value + this.colorButtons[i].values[0].b*2.55 + ","
+      this.value = this.value + Math.round(this.colorButtons[i].values[0].r*2.55) + ","
+      this.value = this.value + Math.round(this.colorButtons[i].values[0].g*2.55) + ","
+      this.value = this.value + Math.round(this.colorButtons[i].values[0].b*2.55) + ","
     }
   }
 }
@@ -177,7 +178,7 @@ B_HLPositionServo.prototype.constructor = B_HLPositionServo;
 function B_HLRotationServo(x, y, flip) {
   this.value = 255 //off signal
   this.defaultSpeed = 50;
-  this.valueKey = "percent"
+  this.valueKey = "value"
   this.flip = flip
   B_HLOutputBase.call(this, x, y, "motion_3", "rotationServo", 1);
 

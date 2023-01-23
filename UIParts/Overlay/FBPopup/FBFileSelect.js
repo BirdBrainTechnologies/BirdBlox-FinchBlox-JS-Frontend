@@ -44,7 +44,11 @@ FBFileSelect.prototype.show = function() {
   this.newFileBn.addIcon(VectorPaths.faPlus, iconH);
   this.newFileBn.setCallbackFunction(function() {
     this.close();
-    (new LevelDialog()).show();
+    if (Hatchling) {
+      LevelManager.loadLevelSavePoint();
+    } else {
+      (new LevelDialog()).show();
+    }
   }.bind(this), true);
   this.newFileBn.partOfOverlay = this.bubbleOverlay;
 
@@ -110,22 +114,24 @@ FBFileSelect.prototype.createRow = function(index, y, width, contentGroup) {
   //trashBn.partOfOverlay = this.bubbleOverlay;
 
   //Add level number
-  const levelFont = Font.uiFont(18)
-  const levelRectH = levelFont.charHeight * 3 / 2;
-  const levelRectW = levelRectH * 8 / 7;
-  const levelRectY = (button.height - levelRectH) / 2;
-  const levelRectX = trashX - 2 * FBPopup.bubbleMargin - levelRectW;
-  const lr = 4; //corner rounding of level label
-  const levelRect = GuiElements.draw.rect(levelRectX, levelRectY, levelRectW, levelRectH, Colors.seance, lr, lr);
-  button.group.appendChild(levelRect);
-  TouchReceiver.addListenersBN(levelRect, button);
-  const levelE = GuiElements.draw.text(0, 0, fileLevel, levelFont, Colors.white);
-  const levelW = GuiElements.measure.textWidth(levelE);
-  const levelX = levelRectX + (levelRectW - levelW) / 2; //trashX - FBPopup.bubbleMargin - levelW;
-  const levelY = textY;
-  GuiElements.move.text(levelE, levelX, levelY);
-  button.group.appendChild(levelE);
-  TouchReceiver.addListenersBN(levelE, button);
+  if (!Hatchling) {
+    const levelFont = Font.uiFont(18)
+    const levelRectH = levelFont.charHeight * 3 / 2;
+    const levelRectW = levelRectH * 8 / 7;
+    const levelRectY = (button.height - levelRectH) / 2;
+    const levelRectX = trashX - 2 * FBPopup.bubbleMargin - levelRectW;
+    const lr = 4; //corner rounding of level label
+    const levelRect = GuiElements.draw.rect(levelRectX, levelRectY, levelRectW, levelRectH, Colors.seance, lr, lr);
+    button.group.appendChild(levelRect);
+    TouchReceiver.addListenersBN(levelRect, button);
+    const levelE = GuiElements.draw.text(0, 0, fileLevel, levelFont, Colors.white);
+    const levelW = GuiElements.measure.textWidth(levelE);
+    const levelX = levelRectX + (levelRectW - levelW) / 2; //trashX - FBPopup.bubbleMargin - levelW;
+    const levelY = textY;
+    GuiElements.move.text(levelE, levelX, levelY);
+    button.group.appendChild(levelE);
+    TouchReceiver.addListenersBN(levelE, button);
+  }
 
 
   button.setCallbackFunction(function() {

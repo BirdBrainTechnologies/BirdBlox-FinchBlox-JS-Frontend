@@ -304,7 +304,13 @@ Button.prototype.addDeviceInfo = function(device) {
   const textX = textY;
   this.removeContent();
 
-  this.textE = GuiElements.draw.text(textX, textY, device.shortName, font, color);
+  if (Hatchling) {
+    this.hatchGroup = GuiElements.create.group(textX, iconY, this.group)
+    this.hatchIcon = GuiElements.draw.hatchlingPattern(this.hatchGroup, iconH, device.getHatchlingCode())
+    this.textE = GuiElements.draw.text(textX*2, textY, device.shortName, font, color);
+  } else {
+    this.textE = GuiElements.draw.text(textX, textY, device.shortName, font, color);
+  }
   this.group.appendChild(this.textE);
   //let shortW = GuiElements.measure.textWidth(this.textE);
 
@@ -377,13 +383,13 @@ Button.prototype.addFinchBnIcons = function() {
   const finchH = TitleBar.bnIconH * 1.65; //the long dimension of the finch since we will rotate it
   const battH = TitleBar.bnIconH * 0.75;
   const xH = TitleBar.bnIconH * 0.6;
-  const finchW = VectorIcon.computeWidth(finchPathId, finchH);
+  this.finchW = VectorIcon.computeWidth(finchPathId, finchH);
   const battW = VectorIcon.computeWidth(battPathId, battH);
   const xW = VectorIcon.computeWidth(xPathId, xH);
-  this.finchX = (this.width - finchW) / 2;
+  this.finchX = (this.width - this.finchW) / 2;
   //const battX = finchH + 1.5*finchX;
   const m = 10; //Margin between finch icon and battery icon.
-  this.finchConnectedX = (this.width - finchW - battW - m) / 2;
+  this.finchConnectedX = (this.width - this.finchW - battW - m) / 2;
   const battX = (this.width + finchH + m - battW) / 2;
   const textX = (this.width - finchH - battW - m) / 2 + m;
 
@@ -404,6 +410,10 @@ Button.prototype.addFinchBnIcons = function() {
   this.textE = GuiElements.draw.text(textX, textY, "", font, Colors.flagGreen);
   this.group.appendChild(this.textE);
   this.xIcon = new VectorIcon(xX, xY, xPathId, Colors.stopRed, xH, this.group);
+  if (Hatchling) {
+    const hY = (this.height - this.finchW) / 2
+    this.hatchGroup = GuiElements.create.group(this.finchConnectedX, hY, this.group)
+  }
 
   TouchReceiver.addListenersBN(this.icon.pathE, this);
   TouchReceiver.addListenersBN(this.battIcon.pathE, this);

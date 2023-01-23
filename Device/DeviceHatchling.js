@@ -4,7 +4,7 @@
  * @param {string} id
  * @constructor
  */
-function DeviceHatchling(name, id, RSSI, device) {
+function DeviceHatchling(name, id, RSSI, device, advertisedName) {
   DeviceWithPorts.call(this, name, id, RSSI, device);
   this.hlState = []
   // Code for what is connected to each of the 6 ports (A-F). Current options:
@@ -15,6 +15,7 @@ function DeviceHatchling(name, id, RSSI, device) {
   // * 10 = Strip of 4 Neopixels
   // * 14 = Distance Sensor
   this.portStates = [0, 0, 0, 0, 0, 0]
+  this.advertisedName = advertisedName
 }
 DeviceHatchling.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHatchling.prototype.constructor = DeviceHatchling;
@@ -32,17 +33,12 @@ DeviceHatchling.prototype.setHatchlingState = function(state) {
   newPortVals[5] = ((state[15] >> 5) << 3) | (state[16] >> 5) //port F
 
   for (let i = 0; i < this.portStates.length; i++) {
-
-    //TODO: REMOVE! Once port 4 stops changing its value all the time...
-    if(i != 4) {
-
-      if (this.portStates[i] != newPortVals[i]) {
-        console.log("New value for port " + i + ": " + newPortVals[i])
-        this.portStates[i] = newPortVals[i]
-        //TODO: trigger enable/disable appropriate blocks
-        //CodeManager.updateAvailableSensors();
-        CodeManager.updateAvailablePorts(i);
-      }
+    if (this.portStates[i] != newPortVals[i]) {
+      console.log("New value for port " + i + ": " + newPortVals[i])
+      this.portStates[i] = newPortVals[i]
+      //TODO: trigger enable/disable appropriate blocks
+      //CodeManager.updateAvailableSensors();
+      CodeManager.updateAvailablePorts(i);
     }
   }
 }
@@ -77,4 +73,54 @@ DeviceHatchling.prototype.readSensor = function(status, sensor, port) {
     request.addParam("port", port);
   }
   HtmlServer.sendRequest(request.toString(), status, true);
+}
+
+/**
+ * getHatchlingCode - calculate the color code displayed on the hatchling
+ * @param {string} devName Advertised name of the robot
+ * @return {[string]} hex values of the 6 colors displayed.
+ */
+DeviceHatchling.prototype.getHatchlingCode = function() {
+  let digits = this.advertisedName.substr(this.advertisedName.length - 5)
+  let colorArray = []
+  let total = 0
+  for (let i = 0; i < digits.length; i++) {
+    let hex = parseInt(digits[i], 16)
+    total = total + hex
+    colorArray.push(this.getColor(hex))
+  }
+  colorArray.push(this.getColor(total%16))
+
+  return colorArray
+}
+
+DeviceHatchling.prototype.getColor = function(number) {
+  switch (number) {
+    case 0:
+    case 1:
+      return "#f00"
+    case 2:
+    case 3:
+      return "#f60"
+    case 4:
+    case 5:
+      return "#ff0"
+    case 6:
+    case 7:
+      return "#0f0"
+    case 8:
+    case 9:
+      return "#0ff"
+    case 10:
+    case 11:
+      return "#00f"
+    case 12:
+    case 13:
+      return "#f0f"
+    case 14:
+    case 15:
+      return "#fff"
+    default:
+      return "#000"
+  }
 }

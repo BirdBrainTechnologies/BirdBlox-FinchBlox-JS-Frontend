@@ -182,7 +182,7 @@ TitleBar.makeButtons = function() {
     }
 
     TB.updateStatus = function(status) {
-      GuiElements.alert("TitleBar update status to " + status);
+      //GuiElements.alert("TitleBar update status to " + status);
       const finchBn = TitleBar.finchButton;
       let color = Colors.stopRed;
       let outlineColor = Colors.darkenColor(Colors.stopRed, 0.5);
@@ -192,7 +192,10 @@ TitleBar.makeButtons = function() {
         outlineColor = Colors.flagGreen;
         let sn = null
         if (Hatchling) {
-          sn = DeviceHatchling.getManager().connectedDevices[0].shortName;
+          //sn = DeviceHatchling.getManager().connectedDevices[0].shortName;
+          let hc = DeviceHatchling.getManager().connectedDevices[0].getHatchlingCode()
+          let icon = GuiElements.draw.hatchlingPattern(finchBn.hatchGroup, finchBn.finchW, hc)
+          finchBn.hatchGroup.appendChild(icon)
         } else {
           sn = DeviceFinch.getManager().connectedDevices[0].shortName;
         }
@@ -207,6 +210,9 @@ TitleBar.makeButtons = function() {
         finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
         finchBn.battIcon.pathE.remove();
         finchBn.icon.move(finchBn.finchX, finchBn.finchY);
+        if (Hatchling && finchBn.hatchGroup.children.length > 0) {
+          finchBn.hatchGroup.removeChild(finchBn.hatchGroup.children[0])
+        }
       }
       finchBn.updateBgColor(color);
       GuiElements.update.stroke(finchBn.icon.pathE, outlineColor, 4);

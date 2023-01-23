@@ -280,6 +280,9 @@ CallbackManager.robot.stopDiscover = function() {
 CallbackManager.robot.setHLState = function(state) {
   let device = DeviceHatchling.getManager().getDevice(0);
   if (device != null) {
+    if (typeof state == "string") {
+      state = state.split(',').map(Number)
+    }
     device.setHatchlingState(state)
   }
 }

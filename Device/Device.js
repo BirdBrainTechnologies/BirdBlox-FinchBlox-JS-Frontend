@@ -294,7 +294,7 @@ Device.fromJson = function(json) {
   } else if (json.device === "Finch") {
     return new DeviceFinch(json.name, json.id, json.RSSI, json.device);
   } else if (json.device === "Hatch") {
-    return new DeviceHatchling(json.name, json.id, json.RSSI, json.device);
+    return new DeviceHatchling(json.name, json.id, json.RSSI, json.device, json.advertisedName);
   } else {
     return null;
   }

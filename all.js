@@ -5138,7 +5138,7 @@ Device.fromJson = function(json) {
   } else if (json.device === "Finch") {
     return new DeviceFinch(json.name, json.id, json.RSSI, json.device);
   } else if (json.device === "Hatch") {
-    return new DeviceHatchling(json.name, json.id, json.RSSI, json.device);
+    return new DeviceHatchling(json.name, json.id, json.RSSI, json.device, json.advertisedName);
   } else {
     return null;
   }
@@ -6308,7 +6308,7 @@ DeviceFinch.prototype.readSensor = function(status, sensor, position) {
  * @param {string} id
  * @constructor
  */
-function DeviceHatchling(name, id, RSSI, device) {
+function DeviceHatchling(name, id, RSSI, device, advertisedName) {
   DeviceWithPorts.call(this, name, id, RSSI, device);
   this.hlState = []
   // Code for what is connected to each of the 6 ports (A-F). Current options:
@@ -6319,6 +6319,7 @@ function DeviceHatchling(name, id, RSSI, device) {
   // * 10 = Strip of 4 Neopixels
   // * 14 = Distance Sensor
   this.portStates = [0, 0, 0, 0, 0, 0]
+  this.advertisedName = advertisedName
 }
 DeviceHatchling.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHatchling.prototype.constructor = DeviceHatchling;
@@ -6336,17 +6337,12 @@ DeviceHatchling.prototype.setHatchlingState = function(state) {
   newPortVals[5] = ((state[15] >> 5) << 3) | (state[16] >> 5) //port F
 
   for (let i = 0; i < this.portStates.length; i++) {
-
-    //TODO: REMOVE! Once port 4 stops changing its value all the time...
-    if(i != 4) {
-
-      if (this.portStates[i] != newPortVals[i]) {
-        console.log("New value for port " + i + ": " + newPortVals[i])
-        this.portStates[i] = newPortVals[i]
-        //TODO: trigger enable/disable appropriate blocks
-        //CodeManager.updateAvailableSensors();
-        CodeManager.updateAvailablePorts(i);
-      }
+    if (this.portStates[i] != newPortVals[i]) {
+      console.log("New value for port " + i + ": " + newPortVals[i])
+      this.portStates[i] = newPortVals[i]
+      //TODO: trigger enable/disable appropriate blocks
+      //CodeManager.updateAvailableSensors();
+      CodeManager.updateAvailablePorts(i);
     }
   }
 }
@@ -6381,6 +6377,56 @@ DeviceHatchling.prototype.readSensor = function(status, sensor, port) {
     request.addParam("port", port);
   }
   HtmlServer.sendRequest(request.toString(), status, true);
+}
+
+/**
+ * getHatchlingCode - calculate the color code displayed on the hatchling
+ * @param {string} devName Advertised name of the robot
+ * @return {[string]} hex values of the 6 colors displayed.
+ */
+DeviceHatchling.prototype.getHatchlingCode = function() {
+  let digits = this.advertisedName.substr(this.advertisedName.length - 5)
+  let colorArray = []
+  let total = 0
+  for (let i = 0; i < digits.length; i++) {
+    let hex = parseInt(digits[i], 16)
+    total = total + hex
+    colorArray.push(this.getColor(hex))
+  }
+  colorArray.push(this.getColor(total%16))
+
+  return colorArray
+}
+
+DeviceHatchling.prototype.getColor = function(number) {
+  switch (number) {
+    case 0:
+    case 1:
+      return "#f00"
+    case 2:
+    case 3:
+      return "#f60"
+    case 4:
+    case 5:
+      return "#ff0"
+    case 6:
+    case 7:
+      return "#0f0"
+    case 8:
+    case 9:
+      return "#0ff"
+    case 10:
+    case 11:
+      return "#00f"
+    case 12:
+    case 13:
+      return "#f0f"
+    case 14:
+    case 15:
+      return "#fff"
+    default:
+      return "#000"
+  }
 }
 
 /**
@@ -7272,6 +7318,38 @@ GuiElements.draw.wedge = function(x, y, r, a, color) {
   GuiElements.update.wedge(wedge, x, y, r, a); //Set its path description (points).
   wedge.setAttributeNS(null, "fill", color); //Set the fill.
   return wedge; //Return the finished wedge shape.
+}
+
+GuiElements.draw.hatchlingPattern = function(parentGroup, h, colors) {
+  let group = GuiElements.create.group(0, 0, parentGroup);
+  let r = h/9
+  let cx = r
+  let cy = 3*r
+  for (let i = 0; i < 6; i++) {
+    switch (i) {
+      case 0:
+      case 2:
+        cy = 3*r
+        break;
+      case 1:
+        cy = 2*r
+        break;
+      case 3:
+      case 5:
+        cy = 6*r
+        break;
+      case 4:
+        cy = 7*r
+        break;
+    }
+    let circle = GuiElements.draw.circle(cx, cy, r, colors[i], group)
+    if (i < 2) {
+      cx = cx + 3*r
+    } else if (i > 2) {
+      cx = cx - 3*r
+    }
+  }
+  return group
 }
 
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
@@ -11836,7 +11914,7 @@ TitleBar.makeButtons = function() {
     }
 
     TB.updateStatus = function(status) {
-      GuiElements.alert("TitleBar update status to " + status);
+      //GuiElements.alert("TitleBar update status to " + status);
       const finchBn = TitleBar.finchButton;
       let color = Colors.stopRed;
       let outlineColor = Colors.darkenColor(Colors.stopRed, 0.5);
@@ -11846,7 +11924,10 @@ TitleBar.makeButtons = function() {
         outlineColor = Colors.flagGreen;
         let sn = null
         if (Hatchling) {
-          sn = DeviceHatchling.getManager().connectedDevices[0].shortName;
+          //sn = DeviceHatchling.getManager().connectedDevices[0].shortName;
+          let hc = DeviceHatchling.getManager().connectedDevices[0].getHatchlingCode()
+          let icon = GuiElements.draw.hatchlingPattern(finchBn.hatchGroup, finchBn.finchW, hc)
+          finchBn.hatchGroup.appendChild(icon)
         } else {
           sn = DeviceFinch.getManager().connectedDevices[0].shortName;
         }
@@ -11861,6 +11942,9 @@ TitleBar.makeButtons = function() {
         finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
         finchBn.battIcon.pathE.remove();
         finchBn.icon.move(finchBn.finchX, finchBn.finchY);
+        if (Hatchling && finchBn.hatchGroup.children.length > 0) {
+          finchBn.hatchGroup.removeChild(finchBn.hatchGroup.children[0])
+        }
       }
       finchBn.updateBgColor(color);
       GuiElements.update.stroke(finchBn.icon.pathE, outlineColor, 4);
@@ -14139,7 +14223,13 @@ Button.prototype.addDeviceInfo = function(device) {
   const textX = textY;
   this.removeContent();
 
-  this.textE = GuiElements.draw.text(textX, textY, device.shortName, font, color);
+  if (Hatchling) {
+    this.hatchGroup = GuiElements.create.group(textX, iconY, this.group)
+    this.hatchIcon = GuiElements.draw.hatchlingPattern(this.hatchGroup, iconH, device.getHatchlingCode())
+    this.textE = GuiElements.draw.text(textX*2, textY, device.shortName, font, color);
+  } else {
+    this.textE = GuiElements.draw.text(textX, textY, device.shortName, font, color);
+  }
   this.group.appendChild(this.textE);
   //let shortW = GuiElements.measure.textWidth(this.textE);
 
@@ -14212,13 +14302,13 @@ Button.prototype.addFinchBnIcons = function() {
   const finchH = TitleBar.bnIconH * 1.65; //the long dimension of the finch since we will rotate it
   const battH = TitleBar.bnIconH * 0.75;
   const xH = TitleBar.bnIconH * 0.6;
-  const finchW = VectorIcon.computeWidth(finchPathId, finchH);
+  this.finchW = VectorIcon.computeWidth(finchPathId, finchH);
   const battW = VectorIcon.computeWidth(battPathId, battH);
   const xW = VectorIcon.computeWidth(xPathId, xH);
-  this.finchX = (this.width - finchW) / 2;
+  this.finchX = (this.width - this.finchW) / 2;
   //const battX = finchH + 1.5*finchX;
   const m = 10; //Margin between finch icon and battery icon.
-  this.finchConnectedX = (this.width - finchW - battW - m) / 2;
+  this.finchConnectedX = (this.width - this.finchW - battW - m) / 2;
   const battX = (this.width + finchH + m - battW) / 2;
   const textX = (this.width - finchH - battW - m) / 2 + m;
 
@@ -14239,6 +14329,10 @@ Button.prototype.addFinchBnIcons = function() {
   this.textE = GuiElements.draw.text(textX, textY, "", font, Colors.flagGreen);
   this.group.appendChild(this.textE);
   this.xIcon = new VectorIcon(xX, xY, xPathId, Colors.stopRed, xH, this.group);
+  if (Hatchling) {
+    const hY = (this.height - this.finchW) / 2
+    this.hatchGroup = GuiElements.create.group(this.finchConnectedX, hY, this.group)
+  }
 
   TouchReceiver.addListenersBN(this.icon.pathE, this);
   TouchReceiver.addListenersBN(this.battIcon.pathE, this);
@@ -17957,7 +18051,11 @@ FBFileSelect.prototype.show = function() {
   this.newFileBn.addIcon(VectorPaths.faPlus, iconH);
   this.newFileBn.setCallbackFunction(function() {
     this.close();
-    (new LevelDialog()).show();
+    if (Hatchling) {
+      LevelManager.loadLevelSavePoint();
+    } else {
+      (new LevelDialog()).show();
+    }
   }.bind(this), true);
   this.newFileBn.partOfOverlay = this.bubbleOverlay;
 
@@ -18023,22 +18121,24 @@ FBFileSelect.prototype.createRow = function(index, y, width, contentGroup) {
   //trashBn.partOfOverlay = this.bubbleOverlay;
 
   //Add level number
-  const levelFont = Font.uiFont(18)
-  const levelRectH = levelFont.charHeight * 3 / 2;
-  const levelRectW = levelRectH * 8 / 7;
-  const levelRectY = (button.height - levelRectH) / 2;
-  const levelRectX = trashX - 2 * FBPopup.bubbleMargin - levelRectW;
-  const lr = 4; //corner rounding of level label
-  const levelRect = GuiElements.draw.rect(levelRectX, levelRectY, levelRectW, levelRectH, Colors.seance, lr, lr);
-  button.group.appendChild(levelRect);
-  TouchReceiver.addListenersBN(levelRect, button);
-  const levelE = GuiElements.draw.text(0, 0, fileLevel, levelFont, Colors.white);
-  const levelW = GuiElements.measure.textWidth(levelE);
-  const levelX = levelRectX + (levelRectW - levelW) / 2; //trashX - FBPopup.bubbleMargin - levelW;
-  const levelY = textY;
-  GuiElements.move.text(levelE, levelX, levelY);
-  button.group.appendChild(levelE);
-  TouchReceiver.addListenersBN(levelE, button);
+  if (!Hatchling) {
+    const levelFont = Font.uiFont(18)
+    const levelRectH = levelFont.charHeight * 3 / 2;
+    const levelRectW = levelRectH * 8 / 7;
+    const levelRectY = (button.height - levelRectH) / 2;
+    const levelRectX = trashX - 2 * FBPopup.bubbleMargin - levelRectW;
+    const lr = 4; //corner rounding of level label
+    const levelRect = GuiElements.draw.rect(levelRectX, levelRectY, levelRectW, levelRectH, Colors.seance, lr, lr);
+    button.group.appendChild(levelRect);
+    TouchReceiver.addListenersBN(levelRect, button);
+    const levelE = GuiElements.draw.text(0, 0, fileLevel, levelFont, Colors.white);
+    const levelW = GuiElements.measure.textWidth(levelE);
+    const levelX = levelRectX + (levelRectW - levelW) / 2; //trashX - FBPopup.bubbleMargin - levelW;
+    const levelY = textY;
+    GuiElements.move.text(levelE, levelX, levelY);
+    button.group.appendChild(levelE);
+    TouchReceiver.addListenersBN(levelE, button);
+  }
 
 
   button.setCallbackFunction(function() {
@@ -26936,6 +27036,9 @@ CallbackManager.robot.stopDiscover = function() {
 CallbackManager.robot.setHLState = function(state) {
   let device = DeviceHatchling.getManager().getDevice(0);
   if (device != null) {
+    if (typeof state == "string") {
+      state = state.split(',').map(Number)
+    }
     device.setHatchlingState(state)
   }
 }
@@ -39061,7 +39164,7 @@ B_ListContainsItem.prototype.checkListContainsItem = function(listData, itemD) {
  */
 
 const HL_Utils = {}
-HL_Utils.portColors = ["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
+HL_Utils.portColors = ["#00f", "#ff0", "#0f0", "#f0f", "#0ff", "#f80"]//["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
 HL_Utils.addHLButton = function(block, portType) {
   block.port = -1 //unknown
   block.hlButton = new BlockButton(block, 20);
@@ -39178,7 +39281,7 @@ B_HLOutputBase.prototype.updateValues = function() {
       } else if (percent < -100) {
         this.value = 0
       } else {
-        this.value = ( (percent * 23) / 100 ) + 122  //from bambi
+        this.value = Math.round(( (percent * 23) / 100 ) + 122)  //from bambi
       }
     } else {
       this.value = this.valueBN.values[0]
@@ -39188,15 +39291,16 @@ B_HLOutputBase.prototype.updateValues = function() {
     this.red = this.colorButton.values[0].r;
     this.green = this.colorButton.values[0].g;
     this.blue = this.colorButton.values[0].b;
-    this.value = this.red*2.55 + ":" + this.green*2.55 + ":" + this.blue*2.55
+    this.value = Math.round(this.red*2.55) + ":" +
+      Math.round(this.green*2.55) + ":" + Math.round(this.blue*2.55)
     this.updateColor();
   }
   if (this.portType == 10 && this.colorButtons.length == 4) { //neopixel strip
     this.value = ""
     for (let i = 0; i < this.colorButtons.length; i++) {
-      this.value = this.value + this.colorButtons[i].values[0].r*2.55 + ","
-      this.value = this.value + this.colorButtons[i].values[0].g*2.55 + ","
-      this.value = this.value + this.colorButtons[i].values[0].b*2.55 + ","
+      this.value = this.value + Math.round(this.colorButtons[i].values[0].r*2.55) + ","
+      this.value = this.value + Math.round(this.colorButtons[i].values[0].g*2.55) + ","
+      this.value = this.value + Math.round(this.colorButtons[i].values[0].b*2.55) + ","
     }
   }
 }
@@ -39234,7 +39338,7 @@ B_HLPositionServo.prototype.constructor = B_HLPositionServo;
 function B_HLRotationServo(x, y, flip) {
   this.value = 255 //off signal
   this.defaultSpeed = 50;
-  this.valueKey = "percent"
+  this.valueKey = "value"
   this.flip = flip
   B_HLOutputBase.call(this, x, y, "motion_3", "rotationServo", 1);
 
