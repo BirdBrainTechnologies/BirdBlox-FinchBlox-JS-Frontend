@@ -325,6 +325,14 @@ function B_HLFairyLights(x, y) {
 B_HLFairyLights.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLFairyLights.prototype.constructor = B_HLFairyLights;
 
+function B_HLAlphabet(x, y) {
+  this.useAlphabet = true
+
+  B_FBLedArrayL2.call(this, x, y)
+}
+B_HLAlphabet.prototype = Object.create(B_FBLedArrayL2.prototype);
+B_HLAlphabet.prototype.constructor = B_HLAlphabet;
+
 // Wait until sensor reaches threshold
 function B_HLWaitUntil(x, y) {
   CommandBlock.call(this, x, y, "sensor_3");

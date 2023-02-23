@@ -140,6 +140,7 @@ BlockList.populateCat_color_3 = function(category) {
     category.addBlockByName("B_HLSingleNeopix")
     category.addBlockByName("B_HLNeopixStrip")
     category.addBlockByName("B_FBLedArrayL2")
+    category.addBlockByName("B_HLAlphabet")
   } else {
     category.addBlockByName("B_FBBeakL3");
     category.addBlockByName("B_FBTailL3");

@@ -8261,6 +8261,7 @@ BlockList.populateCat_color_3 = function(category) {
     category.addBlockByName("B_HLSingleNeopix")
     category.addBlockByName("B_HLNeopixStrip")
     category.addBlockByName("B_FBLedArrayL2")
+    category.addBlockByName("B_HLAlphabet")
   } else {
     category.addBlockByName("B_FBBeakL3");
     category.addBlockByName("B_FBTailL3");
@@ -36064,8 +36065,40 @@ B_FBColor.prototype.addL2Button = function() {
       "0101011111111110111000100", //heart
       "0010001010100010101000100"
     ] //diamond
+    let defaultVal = options[3]
+    if (this.useAlphabet) {
+      options = ["0110010010111101001010010", // A
+        "1110010010111001001011100", // B
+        "0111010000100001000001110", // C
+        "1110010010100101001011100", // D
+        "1111010000111001000011110", // E
+        "1111010000111001000010000", // F
+        "0111010000100111000101110", // G
+        "1001010010111101001010010", // H
+        "1110001000010000100011100", // I
+        "0111000100001001010001100", // J - mod
+        "1001010100110001010010010", // K
+        "1000010000100001000011110", // L
+        "1000111011101011000110001", // M
+        "1000111001101011001110001", // N
+        "0110010010100101001001100", // O
+        "1110010010111001000010000", // P
+        "0110010010101101001001101", // Q - mod
+        "1110010010111001010010010", // R
+        "0110010000011000001011100", // S
+        "1111100100001000010000100", // T
+        "1000110001100011000101110", // U
+        "1000110001100010101000100", // V
+        "1000110001101011101110001", // W
+        "1000101010001000101010001", // X - mod
+        "1000101010001000010000100", // Y
+        "1111100010001000100011111"  // Z
+      ]
+      console.log(options)
+      defaultVal = options[0]
+    }
     this.colorButton = new BlockButton(this);
-    this.colorButton.addSlider("ledArray", options[3], options);
+    this.colorButton.addSlider("ledArray", defaultVal, options);
   } else {
     this.blue = 100;
     const color = {
@@ -39567,6 +39600,14 @@ function B_HLFairyLights(x, y) {
 }
 B_HLFairyLights.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLFairyLights.prototype.constructor = B_HLFairyLights;
+
+function B_HLAlphabet(x, y) {
+  this.useAlphabet = true
+
+  B_FBLedArrayL2.call(this, x, y)
+}
+B_HLAlphabet.prototype = Object.create(B_FBLedArrayL2.prototype);
+B_HLAlphabet.prototype.constructor = B_HLAlphabet;
 
 // Wait until sensor reaches threshold
 function B_HLWaitUntil(x, y) {
