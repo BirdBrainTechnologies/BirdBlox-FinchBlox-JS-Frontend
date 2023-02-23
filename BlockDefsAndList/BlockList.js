@@ -136,9 +136,10 @@ BlockList.populateCat_motion_3 = function(category) {
 }
 BlockList.populateCat_color_3 = function(category) {
   if (Hatchling) {
+    category.addBlockByName("B_HLFairyLights")
     category.addBlockByName("B_HLSingleNeopix")
     category.addBlockByName("B_HLNeopixStrip")
-    category.addBlockByName("B_FBLedArrayL2");
+    category.addBlockByName("B_FBLedArrayL2")
   } else {
     category.addBlockByName("B_FBBeakL3");
     category.addBlockByName("B_FBTailL3");

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script type="text/javascript" src="VectorPaths.js"></script>
+	</head>
+	<body>
+		<svg id="svg" xmlns:xlink="http://www.w3.org/2000/xlink" viewBox="0 0 1500 1500">
+		</svg>
+		<script type="text/javascript">
+			//This html file can be used to take a look at all the icons available in VectorPaths
+			VectorPaths()
+
+			const svg = document.getElementById("svg");
+			const group = document.createElementNS("http://www.w3.org/2000/svg", 'g'); //Make the group.
+			svg.appendChild(group)
+			const offset = 150
+			const iconH = 100
+			const margin = 20
+			const color = "#888"
+			let x = 0
+			let y = 0
+			
+			for (var icon in VectorPaths) {
+				if (icon == "categoryIcons") { continue }
+
+				let pathId = VectorPaths[icon]
+				let scaleX = iconH / pathId.height;
+				if (pathId.width > pathId.height) { scaleX = iconH / pathId.width }
+				let scaleY = scaleX;
+
+				let containerGroup = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+				containerGroup.setAttributeNS(null, "transform", "translate(" + x + "," + y + ")")
+				group.appendChild(containerGroup)
+				let iconGroup = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+				iconGroup.setAttributeNS(null, "transform", "scale(" + scaleX + ", " + scaleY + ")"); //
+				containerGroup.appendChild(iconGroup)
+
+				let pathE = document.createElementNS("http://www.w3.org/2000/svg", 'path'); 
+				iconGroup.appendChild(pathE)
+				pathE.setAttributeNS(null, "d", pathId.path);
+				pathE.setAttributeNS(null, "fill", color);
+			  	if (pathId.transform != null) {
+			    	pathE.setAttributeNS(null, "transform", pathId.transform);
+			  	}
+
+			  	var label = document.createElementNS("http://www.w3.org/2000/svg", 'text');
+			  	label.innerHTML = icon
+			  	label.setAttributeNS(null, "transform", "translate(0," + (iconH+margin) + ")")
+			  	containerGroup.appendChild(label)
+
+				//new VectorIcon(x, y, pathId, "#888", 50, group, false);
+				x = x + offset
+				if (x > 1200) {
+					x = 0 
+					y = y + offset
+				}
+			}
+		</script>
+	</body>
+</html>

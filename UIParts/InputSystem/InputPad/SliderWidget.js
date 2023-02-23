@@ -47,6 +47,12 @@ InputWidget.Slider.setConstants = function() {
   S.textColor = Colors.bbtDarkGray;
 
   GuiElements.create.spectrum();
+
+  if (Hatchling) {
+    GuiElements.create.gradient("gradient_red", Colors.black, Colors.red, true)
+    GuiElements.create.gradient("gradient_green", Colors.black, Colors.green, true)
+    GuiElements.create.gradient("gradient_blue", Colors.black, Colors.blue, true)
+  }
 };
 
 /**
@@ -86,6 +92,8 @@ InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotSha
     this.moveToOption(valueIndex);
   } else if (this.type == "color") {
     this.moveToPosition(InputWidget.Slider.colorToPercent(this.value));
+  } else if (this.type.startsWith("color_")) {
+    this.moveToPosition(this.value / 100)
   } else {
     this.moveToValue();
   }
@@ -99,6 +107,7 @@ InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotSha
 InputWidget.Slider.prototype.updateDim = function(x, y) {
   const S = InputWidget.Slider;
   this.height = S.height;
+  if (this.type.startsWith("color_")) { this.height = S.height / 2; }
   this.width = S.width;
 }
 
@@ -111,13 +120,13 @@ InputWidget.Slider.prototype.makeSlider = function() {
   this.range = 100;
 
   this.barX = S.hMargin;
-  this.barY = (S.height - S.barHeight) / 2;
+  this.barY = (this.height - S.barHeight) / 2;
   this.barW = S.width - 2 * S.hMargin;
   let barColor = S.barColor;
 
   this.sliderH = 35; //30;//10
   this.sliderW = VectorIcon.computeWidth(S.sliderIconPath, this.sliderH);
-  this.sliderY = (S.height - this.sliderH) / 2;
+  this.sliderY = (this.height - this.sliderH) / 2;
   this.sliderX = this.barX + (this.position / (this.range)) * (this.barW - this.sliderW);
 
   //Add a color spectrum behind a color slider
@@ -129,6 +138,17 @@ InputWidget.Slider.prototype.makeSlider = function() {
     const colorRect = GuiElements.draw.rect(this.barX, specY, this.barW, specH, spectrum, 4, 4);
     this.group.appendChild(colorRect);
     TouchReceiver.addListenersSlider(colorRect, this);
+
+  //Add a group of 3 sliders to represent rgb values
+  } else if (this.type.startsWith("color_")) {
+    barColor = Colors.white;
+    const specH = S.barHeight * 10;
+    const specY = this.barY - specH / 2 + S.barHeight / 2;
+    const gradient = "url(#gradient_" + this.type.split("_")[1] + ")"
+    const colorRect = GuiElements.draw.rect(this.barX, specY, this.barW, specH, gradient, 4, 4);
+    this.group.appendChild(colorRect);
+    TouchReceiver.addListenersSlider(colorRect, this);
+
 
     //All other sliders have tick marks with options above
   } else {
@@ -201,7 +221,7 @@ InputWidget.Slider.prototype.makeSlider = function() {
   if (this.type == 'ledArray') {
     //Add an image at the bottom to show your selection
     this.imageG = GuiElements.create.group(0, 0, this.group);
-  } else if (this.type != 'color' && !this.type.startsWith('hatchling') && this.type != 'sensor') {
+  } else if (!this.type.startsWith('color') && !this.type.startsWith('hatchling') && this.type != 'sensor') {
     //Add a label at the bottom to show your selection
     this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
     this.group.appendChild(this.textE);
@@ -215,6 +235,9 @@ InputWidget.Slider.prototype.makeSlider = function() {
 
     this.labelIconW = VectorIcon.computeWidth(labelIconP, this.labelIconH);
     this.labelIcon = new VectorIcon(0, 0, labelIconP, Colors.bbtDarkGray, this.labelIconH, this.group);
+    if (this.type.startsWith('hatchling')) { 
+      GuiElements.update.stroke(this.labelIcon.pathE, Colors.bbtDarkGray, 3);
+    }
   }
 }
 
@@ -263,6 +286,7 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
       const iconX = x - iconW / 2 + tickW / 2
       const iconY = y - iconH - S.optionMargin
       let icon = new VectorIcon(iconX, iconY, iconPath, option, iconH, this.group)
+      GuiElements.update.stroke(icon.pathE, Colors.bbtDarkGray, 3);
 
       if (isDisabled) {
         const slashG = GuiElements.create.group(0, 0, this.group);

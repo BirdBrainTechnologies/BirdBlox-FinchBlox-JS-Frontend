@@ -557,6 +557,7 @@ B_FBStartWhen.prototype.startAction = function() {
   return new ExecutionStatusRunning();
 };
 B_FBStartWhen.prototype.updateAction = function() {
+  if (!this.active) { return new ExecutionStatusRunning() }
   const status = this.runMem.requestStatus;
   if (status.requestSent) {
     if (status.finished) {
@@ -564,7 +565,8 @@ B_FBStartWhen.prototype.updateAction = function() {
         const result = new StringData(status.result);
         const num = (result.asNum().getValue());
         if ((this.sensor == "clap" && num > 50) ||
-          (this.sensor == "dark" && num < 5)) {
+          (this.sensor == "dark" && num < 5) ||
+          (this.sensor == "distance" && num < this.distance)) {
           return new ExecutionStatusDone();
         }
       }
@@ -641,13 +643,14 @@ B_StartWhenClap.prototype.checkActive = function() {
 
 //Hatchling only
 function B_StartWhenDistance(x, y) {
+  this.portType = 14
   this.defaultDistance = 10;
   this.distance = this.defaultDistance
   B_FBStartWhen.call(this, x, y, "distance")
 
-  HL_Utils.addHLButton(this)
+  HL_Utils.addHLButton(this, this.portType)
 
-  const blockIcon = new BlockIcon(this, VectorPaths.language, Colors.white, "dist", 35);
+  const blockIcon = new BlockIcon(this, VectorPaths.faRuler, Colors.white, "dist", 35);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 

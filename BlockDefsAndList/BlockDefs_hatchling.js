@@ -4,7 +4,8 @@
  */
 
 const HL_Utils = {}
-HL_Utils.portColors = ["#00f", "#ff0", "#0f0", "#f0f", "#0ff", "#f80"]//["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
+//                      blue         yellow       sea-green    magenta      white        orange
+HL_Utils.portColors = ["#0000FF", "#FFFF00", "#00FF88", "#FF00FF", "#FFFFFF", "#FF4400"]//["#00f", "#ff0", "#0f0", "#f0f", "#0ff", "#f80"]//["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
 HL_Utils.addHLButton = function(block, portType) {
   block.port = -1 //unknown
   block.hlButton = new BlockButton(block, 20);
@@ -98,7 +99,7 @@ B_HLOutputBase.prototype.constructor = B_HLOutputBase;
 
 B_HLOutputBase.prototype.startAction = function() {
   let device = HL_Utils.setupAction(this);
-  if (device == null) {
+  if (device == null || !this.active) {
     return new ExecutionStatusError();
   }
   if (this.port == -1 || this.port >= HL_Utils.portColors.length) {
@@ -114,23 +115,44 @@ B_HLOutputBase.prototype.updateValues = function() {
     if (this.portType == 1) { //rotation servo
       let percent = this.valueBN.values[0]
       if (this.flip) { percent = -percent } //rotate counter clockwise
-      if (percent >= -10 && percent <= 10) {
-        this.value = 255 //off signal
+      if (percent == 0) {
+        this.value = 89 //off signal
       } else if (percent > 100) {
-        this.value = 254
+        this.value = 174
       } else if (percent < -100) {
+        this.value = 2
+      } else if (percent > 0) {
+        this.value = Math.round( (percent * 75/100) + 98 ) 
+      } else if (percent < 0) {
+        this.value = Math.round( 78 + (percent * 75/100) )
+      }
+    } else if (this.portType == 8) { //fairy lights
+      let percent = this.valueBN.values[0]
+      if (percent > 100) {
+        this.value = 254
+      } else if (percent < 0) {
         this.value = 0
       } else {
-        this.value = Math.round(( (percent * 23) / 100 ) + 122)  //from bambi
+        this.value = Math.round(percent * 254/100)
       }
+    } else if (this.portType == 3) { //position servo
+      this.value = Math.round(this.valueBN.values[0] / 1.5) + 2
+      //this.value = this.valueBN.values[0] + 5
     } else {
       this.value = this.valueBN.values[0]
     }
   }
   if (this.colorButton != null) {
-    this.red = this.colorButton.values[0].r;
+    if (this.colorButton.widgets.length == 3) {
+      this.red = this.colorButton.values[0];
+      this.green = this.colorButton.values[1];
+      this.blue = this.colorButton.values[2];
+    }
+
+    /*this.red = this.colorButton.values[0].r;
     this.green = this.colorButton.values[0].g;
-    this.blue = this.colorButton.values[0].b;
+    this.blue = this.colorButton.values[0].b;*/
+    
     this.value = Math.round(this.red*2.55) + ":" +
       Math.round(this.green*2.55) + ":" + Math.round(this.blue*2.55)
     this.updateColor();
@@ -138,9 +160,12 @@ B_HLOutputBase.prototype.updateValues = function() {
   if (this.portType == 10 && this.colorButtons.length == 4) { //neopixel strip
     this.value = ""
     for (let i = 0; i < this.colorButtons.length; i++) {
-      this.value = this.value + Math.round(this.colorButtons[i].values[0].r*2.55) + ","
+      /*this.value = this.value + Math.round(this.colorButtons[i].values[0].r*2.55) + ","
       this.value = this.value + Math.round(this.colorButtons[i].values[0].g*2.55) + ","
-      this.value = this.value + Math.round(this.colorButtons[i].values[0].b*2.55) + ","
+      this.value = this.value + Math.round(this.colorButtons[i].values[0].b*2.55) + ","*/
+      this.value = this.value + Math.round(this.colorButtons[i].values[0]*2.55) + ","
+      this.value = this.value + Math.round(this.colorButtons[i].values[1]*2.55) + ","
+      this.value = this.value + Math.round(this.colorButtons[i].values[2]*2.55) + ","
     }
   }
 }
@@ -163,13 +188,13 @@ function B_HLPositionServo(x, y) {
   this.valueKey = "angle"
   B_HLOutputBase.call(this, x, y, "motion_3", "positionServo", 3);
 
-  const icon = VectorPaths["faCompassDrafting"];
+  const icon = VectorPaths["bsSpeedometer2"];
   let blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 27);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 
   this.valueBN = new BlockButton(this);
-  this.valueBN.addSlider("angle_right", this.value, [0, 30, 60, 90, 120, 150, 180]);
+  this.valueBN.addSlider("angle_right", this.value, [0, 30, 60, 90, 120, 150, 180, 210, 240, 270]);
   this.addPart(this.valueBN);
 }
 B_HLPositionServo.prototype = Object.create(B_HLOutputBase.prototype);
@@ -182,8 +207,8 @@ function B_HLRotationServo(x, y, flip) {
   this.flip = flip
   B_HLOutputBase.call(this, x, y, "motion_3", "rotationServo", 1);
 
-  const icon = flip ? VectorPaths["mjTurnLeft"] : VectorPaths["faArrowsSpin"];
-  let blockIcon = new BlockIcon(this, icon, Colors.white, "rServo", 27, null, true);
+  const icon = flip ? VectorPaths["bsArrowClockwise"] : VectorPaths["bsArrowCounterClockwise"];
+  let blockIcon = new BlockIcon(this, icon, Colors.white, "rServo", 30, null, true);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 
@@ -215,7 +240,10 @@ function B_HLSingleNeopix(x, y) {
   this.addPart(this.blockIcon);
 
   this.colorButton = new BlockButton(this);
-  this.colorButton.addSlider("color", { r: this.red, g: this.green, b: this.blue });
+  //this.colorButton.addSlider("color", { r: this.red, g: this.green, b: this.blue });
+  this.colorButton.addSlider("color_red", this.red)
+  this.colorButton.addSlider("color_green", this.green)
+  this.colorButton.addSlider("color_blue", this.blue)
   this.addPart(this.colorButton);
 }
 B_HLSingleNeopix.prototype = Object.create(B_HLOutputBase.prototype);
@@ -232,12 +260,13 @@ function B_HLNeopixStrip(x, y) {
   this.red = 100;
   this.green = 100;
   this.blue = 100;
+  this.blockIcons = []
   this.colorButtons = []
 
   B_HLOutputBase.call(this, x, y, "color_3", "neopixStrip", 10);
 
   const icon = VectorPaths["faLightbulb"];
-  this.blockIcon1 = new BlockIcon(this, icon, Colors.white, "neopix1", 27);
+  /*this.blockIcon1 = new BlockIcon(this, icon, Colors.white, "neopix1", 27);
   this.addPart(this.blockIcon1);
   this.blockIcon2 = new BlockIcon(this, icon, Colors.white, "neopix2", 27);
   this.addPart(this.blockIcon2);
@@ -258,12 +287,43 @@ function B_HLNeopixStrip(x, y) {
   this.addPart(this.colorButtons[2]);
   this.colorButtons[3] = new BlockButton(this, 25);
   this.colorButtons[3].addSlider("color", { r: this.red, g: this.green, b: this.blue });
-  this.addPart(this.colorButtons[3]);
+  this.addPart(this.colorButtons[3]);*/
 
+  for (let i = 0; i < 4; i++) {
+    this.blockIcons[i] = new BlockIcon(this, icon, Colors.white, "neopix"+i, 27);
+    this.addPart(this.blockIcons[i]);
+  }
+  this.blockIcons[3].isEndOfLine = true
+
+  for (let i = 0; i < 4; i++) {
+    this.colorButtons[i] = new BlockButton(this, 25);
+    this.colorButtons[i].addSlider("color_red", this.red)
+    this.colorButtons[i].addSlider("color_green", this.green)
+    this.colorButtons[i].addSlider("color_blue", this.blue)
+    this.addPart(this.colorButtons[i]);
+  }
 
 }
 B_HLNeopixStrip.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLNeopixStrip.prototype.constructor = B_HLNeopixStrip;
+
+function B_HLFairyLights(x, y) {
+  this.value = ""
+  this.defaultIntensity = 50
+
+  B_HLOutputBase.call(this, x, y, "color_3", "fairyLights", 8);
+
+  const icon = VectorPaths["bsStars"];
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "fairyLights", 27);
+  this.blockIcon.isEndOfLine = true;
+  this.addPart(this.blockIcon);
+
+  this.valueBN = new BlockButton(this);
+  this.valueBN.addSlider("percent", this.defaultIntensity, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  this.addPart(this.valueBN);
+}
+B_HLFairyLights.prototype = Object.create(B_HLOutputBase.prototype);
+B_HLFairyLights.prototype.constructor = B_HLFairyLights;
 
 // Wait until sensor reaches threshold
 function B_HLWaitUntil(x, y) {
@@ -272,7 +332,7 @@ function B_HLWaitUntil(x, y) {
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
   //clap, light, distance, shake
-  this.sensorPaths = [VectorPaths.clap, VectorPaths.mjSun, VectorPaths.language, VectorPaths.share]
+  this.sensorPaths = [VectorPaths.clap, VectorPaths.mjSun, VectorPaths.faRuler, VectorPaths.share]
   this.sensorTypes = ["clap", "light", "distance", "shake"]
   this.sensorSelection = this.sensorPaths[1]
   this.sensorBN = new BlockButton(this);

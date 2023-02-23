@@ -6314,6 +6314,7 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
   // * 0  = Empty Port
   // * 1  = Rotation Servo
   // * 3  = Position Servo
+  // * 8  = Fairy Lights
   // * 9  = Single Neopixel
   // * 10 = Strip of 4 Neopixels
   // * 14 = Distance Sensor
@@ -6332,8 +6333,8 @@ DeviceHatchling.prototype.setHatchlingState = function(state) {
   newPortVals[1] = state[11] & 0x1F //port B
   newPortVals[2] = state[12] & 0x1F //port C
   newPortVals[3] = state[13] & 0x1F //port D
-  newPortVals[4] = ((state[13] >> 5) << 3) | (state[14] >> 5) //port E
-  newPortVals[5] = ((state[15] >> 5) << 3) | (state[16] >> 5) //port F
+  newPortVals[4] = ((state[10] >> 5) << 3) | (state[11] >> 5) //port E
+  newPortVals[5] = ((state[12] >> 5) << 3) | (state[13] >> 5) //port F
 
   for (var i = 0; i < this.portStates.length; i++) {
     if (this.portStates[i] != newPortVals[i]) {
@@ -6835,8 +6836,9 @@ GuiElements.create.layer = function(depth) {
  * @param {string} id - The id of the gradient (needed to reference it later).
  * @param {string} color1 - color in form "#fff" of the top of the gradient.
  * @param {string} color2 - color in form "#fff" of the bottom of the gradient.
+ * @param {boolean} horizontal - true if gradiant should be horizontal. vertical by default.
  */
-GuiElements.create.gradient = function(id, color1, color2) { //Creates a gradient and adds to the defs
+GuiElements.create.gradient = function(id, color1, color2, horizontal) { //Creates a gradient and adds to the defs
   DebugOptions.validateNonNull(color1, color2);
   var gradient = document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient');
   gradient.setAttributeNS(null, "id", id); //Set attributes.
@@ -6844,6 +6846,10 @@ GuiElements.create.gradient = function(id, color1, color2) { //Creates a gradien
   gradient.setAttributeNS(null, "x2", "0%");
   gradient.setAttributeNS(null, "y1", "0%");
   gradient.setAttributeNS(null, "y2", "100%");
+  if (horizontal) {
+    gradient.setAttributeNS(null, "x2", "100%");
+    gradient.setAttributeNS(null, "y2", "0%");
+  }
   GuiElements.defs.appendChild(gradient); //Add it to the SVG's defs
   var stop1 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 1.
   stop1.setAttributeNS(null, "offset", "0%");
@@ -8250,9 +8256,10 @@ BlockList.populateCat_motion_3 = function(category) {
 }
 BlockList.populateCat_color_3 = function(category) {
   if (Hatchling) {
+    category.addBlockByName("B_HLFairyLights")
     category.addBlockByName("B_HLSingleNeopix")
     category.addBlockByName("B_HLNeopixStrip")
-    category.addBlockByName("B_FBLedArrayL2");
+    category.addBlockByName("B_FBLedArrayL2")
   } else {
     category.addBlockByName("B_FBBeakL3");
     category.addBlockByName("B_FBTailL3");
@@ -8897,6 +8904,11 @@ Font.secondaryUiFont = function(fontSize) {
  * Another option is to get svg icons from Font Awesome. Icons from this source
  * should have names starting with fa and are available under the following
  * license: https://fontawesome.com/license
+ * 
+ * Another source - Bootstrap Icons (https://icons.getbootstrap.com). Icons from
+ * this source start with bs.
+ * 
+ * Find more icon sources at https://shoelace.style/components/icon
  *
  * Icons with names starting with mv come from Michael Verner
  * Icons with names starting with mj come from Molly Johnson
@@ -8904,6 +8916,26 @@ Font.secondaryUiFont = function(fontSize) {
  */
 function VectorPaths(){
 	var VP=VectorPaths;
+  VP.bsStars={};
+  VP.bsStars.path="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.734 1.734 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.734 1.734 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.734 1.734 0 0 0 3.407 2.31l.387-1.162zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.156 1.156 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.156 1.156 0 0 0-.732-.732L9.1 2.137a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732L10.863.1z"
+  VP.bsStars.width=16
+  VP.bsStars.height=16
+  VP.bsSpeedometer2={};
+  VP.bsSpeedometer2.path="M8 4a.5.5 0 0 1 .5.5V6a.5.5 0 0 1-1 0V4.5A.5.5 0 0 1 8 4zM3.732 5.732a.5.5 0 0 1 .707 0l.915.914a.5.5 0 1 1-.708.708l-.914-.915a.5.5 0 0 1 0-.707zM2 10a.5.5 0 0 1 .5-.5h1.586a.5.5 0 0 1 0 1H2.5A.5.5 0 0 1 2 10zm9.5 0a.5.5 0 0 1 .5-.5h1.5a.5.5 0 0 1 0 1H12a.5.5 0 0 1-.5-.5zm.754-4.246a.389.389 0 0 0-.527-.02L7.547 9.31a.91.91 0 1 0 1.302 1.258l3.434-4.297a.389.389 0 0 0-.029-.518z M0 10a8 8 0 1 1 15.547 2.661c-.442 1.253-1.845 1.602-2.932 1.25C11.309 13.488 9.475 13 8 13c-1.474 0-3.31.488-4.615.911-1.087.352-2.49.003-2.932-1.25A7.988 7.988 0 0 1 0 10zm8-7a7 7 0 0 0-6.603 9.329c.203.575.923.876 1.68.63C4.397 12.533 6.358 12 8 12s3.604.532 4.923.96c.757.245 1.477-.056 1.68-.631A7 7 0 0 0 8 3z"
+  VP.bsSpeedometer2.width=16
+  VP.bsSpeedometer2.height=16
+  VP.bsBroadcast={};
+  VP.bsBroadcast.path="M3.05 3.05a7 7 0 0 0 0 9.9.5.5 0 0 1-.707.707 8 8 0 0 1 0-11.314.5.5 0 0 1 .707.707zm2.122 2.122a4 4 0 0 0 0 5.656.5.5 0 1 1-.708.708 5 5 0 0 1 0-7.072.5.5 0 0 1 .708.708zm5.656-.708a.5.5 0 0 1 .708 0 5 5 0 0 1 0 7.072.5.5 0 1 1-.708-.708 4 4 0 0 0 0-5.656.5.5 0 0 1 0-.708zm2.122-2.12a.5.5 0 0 1 .707 0 8 8 0 0 1 0 11.313.5.5 0 0 1-.707-.707 7 7 0 0 0 0-9.9.5.5 0 0 1 0-.707zM10 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"
+  VP.bsBroadcast.width=16
+  VP.bsBroadcast.height=16
+  VP.bsArrowClockwise={};
+  VP.bsArrowClockwise.path="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"
+  VP.bsArrowClockwise.width=16;
+  VP.bsArrowClockwise.height=16;
+  VP.bsArrowCounterClockwise={};
+  VP.bsArrowCounterClockwise.path="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"
+  VP.bsArrowCounterClockwise.width=16;
+  VP.bsArrowCounterClockwise.height=16;
   VP.clap={}; //clap by Berkah Icon from the Noun Project https://thenounproject.com/term/clap/2345410/
   VP.clap.path="M53.569,27.147a4.2,4.2,0,0,0-5.839-1.73l-1.191.687a4.016,4.016,0,0,0-.882-1.653,4.167,4.167,0,0,0-2.149-1.281l.358-.358a4.294,4.294,0,0,0,.282-5.906,4.2,4.2,0,0,0-6.1-.163l-2,2.005a4.2,4.2,0,0,0-4.082-3.231h-.006A4.162,4.162,0,0,0,29,16.745l-6.861,6.86-.012.012-.766.766a5.221,5.221,0,0,0-1.631-3.233,3.123,3.123,0,0,0-4.309.12L8.2,28.5A17.213,17.213,0,0,0,7.31,52.268a17.051,17.051,0,0,0,4.278,3.388c.331.353.69.707,1.078,1.054A16.98,16.98,0,0,0,32.46,58.719l16.632-9.6a4.3,4.3,0,0,0,1.8-5.629,4.183,4.183,0,0,0-1.754-1.8l2.127-1.227a4.3,4.3,0,0,0,1.819-5.629l0,0a4.159,4.159,0,0,0-1.743-1.791l.433-.25A4.306,4.306,0,0,0,53.569,27.147ZM8.788,50.921a15.218,15.218,0,0,1,.821-21.012l7.225-7.224a1.1,1.1,0,0,1,1.526-.076,3.266,3.266,0,0,1,.083,4.691l-.005,0-6.79,6.79a1,1,0,0,0,1.415,1.414l6.778-6.779h0l0,0,0,0h0l0,0h0l0,0,10.56-10.56a2.176,2.176,0,0,1,1.549-.642h0a2.2,2.2,0,0,1,1.557,3.759L22.21,32.586A1,1,0,1,0,23.624,34L34.935,22.69l4.532-4.532a2.2,2.2,0,0,1,3.2.087,2.326,2.326,0,0,1-.21,3.153l-2.884,2.884,0,.006L26.736,37.113a1,1,0,1,0,1.414,1.414L40.977,25.7a2.06,2.06,0,0,1,1.614-.644,2.183,2.183,0,0,1,1.58.731,2.143,2.143,0,0,1,.473,1.832v0a2.365,2.365,0,0,1-.075.3c-.014.043-.028.085-.044.127-.028.074-.058.146-.092.217a2.243,2.243,0,0,1-.114.2c-.028.047-.054.094-.085.139a2.536,2.536,0,0,1-.272.327L39.7,33.207l-.006.006L31.264,41.64a1,1,0,1,0,1.414,1.414l8.412-8.413s.012-.006.017-.011a2.085,2.085,0,0,1,2.713-.306c.048.03.1.052.145.086s.095.088.144.131a2.4,2.4,0,0,1,.191.174.231.231,0,0,0,.014.019,2.314,2.314,0,0,1,.4.723,2.149,2.149,0,0,1,.091.571q0,.056,0,.111a2.492,2.492,0,0,1-.29,1.128c-.022.042-.045.084-.07.126a2.409,2.409,0,0,1-.331.436c-.011.012-.019.026-.031.038l-13.58,13.58c-.3.3-.6.575-.916.842A15.013,15.013,0,0,1,14.26,54.746q-.546-.222-1.081-.489A15.016,15.016,0,0,1,8.788,50.921Zm39.3-3.534-16.63,9.6a14.977,14.977,0,0,1-13.549.745,16.434,16.434,0,0,0,3.749.021c.1-.01.193-.031.291-.042.5-.061.988-.139,1.477-.243.173-.036.342-.085.514-.127.411-.1.818-.212,1.221-.344.192-.062.38-.132.57-.2.379-.139.752-.29,1.121-.456.191-.086.381-.173.57-.267.362-.179.716-.375,1.067-.581.179-.1.36-.206.536-.319.361-.23.709-.481,1.054-.741.151-.112.306-.216.454-.334q.649-.522,1.254-1.116c.045-.043.094-.078.138-.122l3.287-3.288.011,0a1,1,0,0,0,.5-.134l10.32-5.959.011-.009a2.207,2.207,0,0,1,3.055.927A2.325,2.325,0,0,1,48.09,47.387Zm2.18-8.66-5.23,3.02c-.006,0-.009.01-.015.013L40.3,44.49l5.21-5.21a4.409,4.409,0,0,0,.483-.586c.047-.066.088-.132.131-.2a4.451,4.451,0,0,0,.234-.421c.045-.091.093-.18.131-.273a4.72,4.72,0,0,0,.269-.982c.016-.1.032-.193.041-.29.013-.133.019-.265.019-.4,0-.1-.007-.2-.014-.3,0-.057,0-.113-.007-.169l1.436-.83h0a2.206,2.206,0,0,1,3.066.906A2.33,2.33,0,0,1,50.27,38.727Zm.5-7.67L47.233,33.1h0l-1.159.669a4.113,4.113,0,0,0-.286-.391,4.421,4.421,0,0,0-.42-.4c-.016-.013-.029-.03-.045-.043-.084-.069-.176-.124-.265-.186s-.164-.125-.252-.178a4.147,4.147,0,0,0-1.163-.47l1.744-1.743a4.66,4.66,0,0,0,.46-.562c.054-.075.1-.15.152-.227.073-.116.137-.235.2-.356a4.4,4.4,0,0,0,.283-.689c.01-.03.023-.058.032-.088l2.22-1.282a2.2,2.2,0,0,1,3.06.908A2.337,2.337,0,0,1,50.771,31.057Z    M52.793,14.207a1,1,0,0,0,1.414,0l6.5-6.5a1,1,0,1,0-1.414-1.414l-6.5,6.5A1,1,0,0,0,52.793,14.207Z   M59.485,14.143l-5,3a1,1,0,1,0,1.03,1.714l5-3a1,1,0,1,0-1.03-1.714Z    M48.553,13.9a1,1,0,0,0,1.342-.448l3-6a1,1,0,1,0-1.79-.894l-3,6A1,1,0,0,0,48.553,13.9Z    M25.081,11.394a1,1,0,0,0,1.838-.788l-3-7a1,1,0,0,0-1.838.788Z M30,12a1,1,0,0,0,1-1V5a1,1,0,0,0-2,0v6A1,1,0,0,0,30,12Z    M21.219,13.625a1,1,0,0,0,1.562-1.25l-4-5a1,1,0,0,0-1.562,1.25Z";
   VP.clap.width=64;
@@ -8983,6 +9015,10 @@ function VectorPaths(){
   VP.mvArrow.width=83;
   VP.mvArrow.height=83;
   VP.mvArrow.transform="matrix(8.76256e-17,-1.43103,1.43103,8.76256e-17,-721.241,439.328)";
+  VP.faRuler={};
+  VP.faRuler.path="M174.9 494.1c-18.7 18.7-49.1 18.7-67.9 0L14.9 401.9c-18.7-18.7-18.7-49.1 0-67.9l50.7-50.7 48 48c6.2 6.2 16.4 6.2 22.6 0s6.2-16.4 0-22.6l-48-48 41.4-41.4 48 48c6.2 6.2 16.4 6.2 22.6 0s6.2-16.4 0-22.6l-48-48 41.4-41.4 48 48c6.2 6.2 16.4 6.2 22.6 0s6.2-16.4 0-22.6l-48-48 41.4-41.4 48 48c6.2 6.2 16.4 6.2 22.6 0s6.2-16.4 0-22.6l-48-48 50.7-50.7c18.7-18.7 49.1-18.7 67.9 0l92.1 92.1c18.7 18.7 18.7 49.1 0 67.9L174.9 494.1z"
+  VP.faRuler.width=512;
+  VP.faRuler.height=512;
   VP.faTowerBroadcast={};
   VP.faTowerBroadcast.path="M80.3 44C69.8 69.9 64 98.2 64 128s5.8 58.1 16.3 84c6.6 16.4-1.3 35-17.7 41.7s-35-1.3-41.7-17.7C7.4 202.6 0 166.1 0 128S7.4 53.4 20.9 20C27.6 3.6 46.2-4.3 62.6 2.3S86.9 27.6 80.3 44zM555.1 20C568.6 53.4 576 89.9 576 128s-7.4 74.6-20.9 108c-6.6 16.4-25.3 24.3-41.7 17.7S489.1 228.4 495.7 212c10.5-25.9 16.3-54.2 16.3-84s-5.8-58.1-16.3-84C489.1 27.6 497 9 513.4 2.3s35 1.3 41.7 17.7zM352 128c0 23.7-12.9 44.4-32 55.4V480c0 17.7-14.3 32-32 32s-32-14.3-32-32V183.4c-19.1-11.1-32-31.7-32-55.4c0-35.3 28.7-64 64-64s64 28.7 64 64zM170.6 76.8C163.8 92.4 160 109.7 160 128s3.8 35.6 10.6 51.2c7.1 16.2-.3 35.1-16.5 42.1s-35.1-.3-42.1-16.5c-10.3-23.6-16-49.6-16-76.8s5.7-53.2 16-76.8c7.1-16.2 25.9-23.6 42.1-16.5s23.6 25.9 16.5 42.1zM464 51.2c10.3 23.6 16 49.6 16 76.8s-5.7 53.2-16 76.8c-7.1 16.2-25.9 23.6-42.1 16.5s-23.6-25.9-16.5-42.1c6.8-15.6 10.6-32.9 10.6-51.2s-3.8-35.6-10.6-51.2c-7.1-16.2 .3-35.1 16.5-42.1s35.1 .3 42.1 16.5z"
   VP.faTowerBroadcast.width=576;
@@ -9229,7 +9265,7 @@ function VectorPaths(){
 		"color_3": VP.faLightbulb,
 		"sound_3": VP.faMusic,
 		"control_3": VP.faHandPointRight,
-		"sensor_3": VP.faTowerBroadcast //VP.language
+		"sensor_3": VP.bsBroadcast //VP.faTowerBroadcast //VP.language
   };
 
 }
@@ -11941,8 +11977,10 @@ TitleBar.makeButtons = function() {
         finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
         finchBn.battIcon.pathE.remove();
         finchBn.icon.move(finchBn.finchX, finchBn.finchY);
-        if (Hatchling && finchBn.hatchGroup.children.length > 0) {
-          finchBn.hatchGroup.removeChild(finchBn.hatchGroup.children[0])
+        if (Hatchling && finchBn.hatchGroup) {
+          while (finchBn.hatchGroup.firstChild) {
+            finchBn.hatchGroup.removeChild(finchBn.hatchGroup.firstChild)
+          }
         }
       }
       finchBn.updateBgColor(color);
@@ -14224,6 +14262,7 @@ Button.prototype.addDeviceInfo = function(device) {
 
   if (Hatchling) {
     this.hatchGroup = GuiElements.create.group(textX, iconY, this.group)
+    this.eggIcon = new VectorIcon(0, 0, VectorPaths.faEgg, Colors.iron, iconH, this.hatchGroup, null, 90);
     this.hatchIcon = GuiElements.draw.hatchlingPattern(this.hatchGroup, iconH, device.getHatchlingCode())
     this.textE = GuiElements.draw.text(textX*2, textY, device.shortName, font, color);
   } else {
@@ -14293,7 +14332,12 @@ Button.prototype.addSecondIcon = function(pathId, height, color, rotation) {
  */
 Button.prototype.addFinchBnIcons = function() {
   var finchPathId = VectorPaths.mvFinch;
-  if (Hatchling) { finchPathId = VectorPaths.faEgg; }
+  var finchColor = Colors.white
+  if (Hatchling) { 
+    finchPathId = VectorPaths.faEgg; 
+    finchColor = Colors.iron;
+    this.iconColor = finchColor
+  }
   var battPathId = VectorPaths.battery;
   var xPathId = VectorPaths.faTimesCircle;
   var font = Font.uiFont(18);
@@ -14322,7 +14366,7 @@ Button.prototype.addFinchBnIcons = function() {
   this.iconInverts = false;
   this.hasText = true;
 
-  this.icon = new VectorIcon(this.finchX, this.finchY, finchPathId, Colors.white, finchH, this.group, null, 90);
+  this.icon = new VectorIcon(this.finchX, this.finchY, finchPathId, finchColor, finchH, this.group, null, 90);
   GuiElements.update.stroke(this.icon.pathE, Colors.iron, 2);
   this.battIcon = new VectorIcon(battX, battY, battPathId, Colors.iron, battH, this.group);
   this.textE = GuiElements.draw.text(textX, textY, "", font, Colors.flagGreen);
@@ -14331,6 +14375,8 @@ Button.prototype.addFinchBnIcons = function() {
   if (Hatchling) {
     var hY = (this.height - this.finchW) / 2
     this.hatchGroup = GuiElements.create.group(this.finchConnectedX, hY, this.group)
+    //TODO: the elements placed inside this group probably need listeners too...
+    TouchReceiver.addListenersBN(this.hatchGroup, this);
   }
 
   TouchReceiver.addListenersBN(this.icon.pathE, this);
@@ -16618,6 +16664,12 @@ InputWidget.Slider.setConstants = function() {
   S.textColor = Colors.bbtDarkGray;
 
   GuiElements.create.spectrum();
+
+  if (Hatchling) {
+    GuiElements.create.gradient("gradient_red", Colors.black, Colors.red, true)
+    GuiElements.create.gradient("gradient_green", Colors.black, Colors.green, true)
+    GuiElements.create.gradient("gradient_blue", Colors.black, Colors.blue, true)
+  }
 };
 
 /**
@@ -16657,6 +16709,8 @@ InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotSha
     this.moveToOption(valueIndex);
   } else if (this.type == "color") {
     this.moveToPosition(InputWidget.Slider.colorToPercent(this.value));
+  } else if (this.type.startsWith("color_")) {
+    this.moveToPosition(this.value / 100)
   } else {
     this.moveToValue();
   }
@@ -16670,6 +16724,7 @@ InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotSha
 InputWidget.Slider.prototype.updateDim = function(x, y) {
   var S = InputWidget.Slider;
   this.height = S.height;
+  if (this.type.startsWith("color_")) { this.height = S.height / 2; }
   this.width = S.width;
 }
 
@@ -16682,13 +16737,13 @@ InputWidget.Slider.prototype.makeSlider = function() {
   this.range = 100;
 
   this.barX = S.hMargin;
-  this.barY = (S.height - S.barHeight) / 2;
+  this.barY = (this.height - S.barHeight) / 2;
   this.barW = S.width - 2 * S.hMargin;
   var barColor = S.barColor;
 
   this.sliderH = 35; //30;//10
   this.sliderW = VectorIcon.computeWidth(S.sliderIconPath, this.sliderH);
-  this.sliderY = (S.height - this.sliderH) / 2;
+  this.sliderY = (this.height - this.sliderH) / 2;
   this.sliderX = this.barX + (this.position / (this.range)) * (this.barW - this.sliderW);
 
   //Add a color spectrum behind a color slider
@@ -16700,6 +16755,17 @@ InputWidget.Slider.prototype.makeSlider = function() {
     var colorRect = GuiElements.draw.rect(this.barX, specY, this.barW, specH, spectrum, 4, 4);
     this.group.appendChild(colorRect);
     TouchReceiver.addListenersSlider(colorRect, this);
+
+  //Add a group of 3 sliders to represent rgb values
+  } else if (this.type.startsWith("color_")) {
+    barColor = Colors.white;
+    var specH = S.barHeight * 10;
+    var specY = this.barY - specH / 2 + S.barHeight / 2;
+    var gradient = "url(#gradient_" + this.type.split("_")[1] + ")"
+    var colorRect = GuiElements.draw.rect(this.barX, specY, this.barW, specH, gradient, 4, 4);
+    this.group.appendChild(colorRect);
+    TouchReceiver.addListenersSlider(colorRect, this);
+
 
     //All other sliders have tick marks with options above
   } else {
@@ -16772,7 +16838,7 @@ InputWidget.Slider.prototype.makeSlider = function() {
   if (this.type == 'ledArray') {
     //Add an image at the bottom to show your selection
     this.imageG = GuiElements.create.group(0, 0, this.group);
-  } else if (this.type != 'color' && !this.type.startsWith('hatchling') && this.type != 'sensor') {
+  } else if (!this.type.startsWith('color') && !this.type.startsWith('hatchling') && this.type != 'sensor') {
     //Add a label at the bottom to show your selection
     this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
     this.group.appendChild(this.textE);
@@ -16786,6 +16852,9 @@ InputWidget.Slider.prototype.makeSlider = function() {
 
     this.labelIconW = VectorIcon.computeWidth(labelIconP, this.labelIconH);
     this.labelIcon = new VectorIcon(0, 0, labelIconP, Colors.bbtDarkGray, this.labelIconH, this.group);
+    if (this.type.startsWith('hatchling')) { 
+      GuiElements.update.stroke(this.labelIcon.pathE, Colors.bbtDarkGray, 3);
+    }
   }
 }
 
@@ -16834,6 +16903,7 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
       var iconX = x - iconW / 2 + tickW / 2
       var iconY = y - iconH - S.optionMargin
       var icon = new VectorIcon(iconX, iconY, iconPath, option, iconH, this.group)
+      GuiElements.update.stroke(icon.pathE, Colors.bbtDarkGray, 3);
 
       if (isDisabled) {
         var slashG = GuiElements.create.group(0, 0, this.group);
@@ -33626,6 +33696,13 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
         GuiElements.update.color(this.button.bgRect, "none");
         this.button.group.appendChild(this.button.bgRect);
       }
+    } else if (this.widgets[i].type.startsWith("color_")) {
+      if (this.widgets.length == 3 && this.values[0] != null && this.values[1] != null && this.values[2] != null) {
+        var s = 255 / 100;
+        var color = Colors.rgbToHex(this.values[0] * s, this.values[1] * s, this.values[2] * s);
+        this.button.updateBgColor(color);
+      }
+
     } else if (this.widgets[i].type == "piano") {
       text[i] = InputWidget.Piano.noteStrings[this.values[i]];
     } else if (this.widgets[i].type == "ledArray") {
@@ -33740,6 +33817,9 @@ BlockButton.prototype.addWidget = function(widget, suffix, startingValue) {
   this.displaySuffixes.push(suffix);
   this.values.push(startingValue);
   this.height = this.buttonMargin + this.lineHeight * this.widgets.length;
+  if (this.widgets[0].type.startsWith("color_")) {
+    this.height = this.buttonMargin + this.lineHeight;
+  }
   this.draw();
   var index = this.widgets.length - 1;
   this.updateValue(this.values[index], index);
@@ -37250,6 +37330,7 @@ B_FBStartWhen.prototype.startAction = function() {
   return new ExecutionStatusRunning();
 };
 B_FBStartWhen.prototype.updateAction = function() {
+  if (!this.active) { return new ExecutionStatusRunning() }
   var status = this.runMem.requestStatus;
   if (status.requestSent) {
     if (status.finished) {
@@ -37257,7 +37338,8 @@ B_FBStartWhen.prototype.updateAction = function() {
         var result = new StringData(status.result);
         var num = (result.asNum().getValue());
         if ((this.sensor == "clap" && num > 50) ||
-          (this.sensor == "dark" && num < 5)) {
+          (this.sensor == "dark" && num < 5) ||
+          (this.sensor == "distance" && num < this.distance)) {
           return new ExecutionStatusDone();
         }
       }
@@ -37334,13 +37416,14 @@ B_StartWhenClap.prototype.checkActive = function() {
 
 //Hatchling only
 function B_StartWhenDistance(x, y) {
+  this.portType = 14
   this.defaultDistance = 10;
   this.distance = this.defaultDistance
   B_FBStartWhen.call(this, x, y, "distance")
 
-  HL_Utils.addHLButton(this)
+  HL_Utils.addHLButton(this, this.portType)
 
-  var blockIcon = new BlockIcon(this, VectorPaths.language, Colors.white, "dist", 35);
+  var blockIcon = new BlockIcon(this, VectorPaths.faRuler, Colors.white, "dist", 35);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 
@@ -39163,7 +39246,8 @@ B_ListContainsItem.prototype.checkListContainsItem = function(listData, itemD) {
  */
 
 var HL_Utils = {}
-HL_Utils.portColors = ["#00f", "#ff0", "#0f0", "#f0f", "#0ff", "#f80"]//["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
+//                      blue         yellow       sea-green    magenta      white        orange
+HL_Utils.portColors = ["#0000FF", "#FFFF00", "#00FF88", "#FF00FF", "#FFFFFF", "#FF4400"]//["#00f", "#ff0", "#0f0", "#f0f", "#0ff", "#f80"]//["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
 HL_Utils.addHLButton = function(block, portType) {
   block.port = -1 //unknown
   block.hlButton = new BlockButton(block, 20);
@@ -39257,7 +39341,7 @@ B_HLOutputBase.prototype.constructor = B_HLOutputBase;
 
 B_HLOutputBase.prototype.startAction = function() {
   var device = HL_Utils.setupAction(this);
-  if (device == null) {
+  if (device == null || !this.active) {
     return new ExecutionStatusError();
   }
   if (this.port == -1 || this.port >= HL_Utils.portColors.length) {
@@ -39273,23 +39357,44 @@ B_HLOutputBase.prototype.updateValues = function() {
     if (this.portType == 1) { //rotation servo
       var percent = this.valueBN.values[0]
       if (this.flip) { percent = -percent } //rotate counter clockwise
-      if (percent >= -10 && percent <= 10) {
-        this.value = 255 //off signal
+      if (percent == 0) {
+        this.value = 89 //off signal
       } else if (percent > 100) {
-        this.value = 254
+        this.value = 174
       } else if (percent < -100) {
+        this.value = 2
+      } else if (percent > 0) {
+        this.value = Math.round( (percent * 75/100) + 98 ) 
+      } else if (percent < 0) {
+        this.value = Math.round( 78 + (percent * 75/100) )
+      }
+    } else if (this.portType == 8) { //fairy lights
+      var percent = this.valueBN.values[0]
+      if (percent > 100) {
+        this.value = 254
+      } else if (percent < 0) {
         this.value = 0
       } else {
-        this.value = Math.round(( (percent * 23) / 100 ) + 122)  //from bambi
+        this.value = Math.round(percent * 254/100)
       }
+    } else if (this.portType == 3) { //position servo
+      this.value = Math.round(this.valueBN.values[0] / 1.5) + 2
+      //this.value = this.valueBN.values[0] + 5
     } else {
       this.value = this.valueBN.values[0]
     }
   }
   if (this.colorButton != null) {
-    this.red = this.colorButton.values[0].r;
+    if (this.colorButton.widgets.length == 3) {
+      this.red = this.colorButton.values[0];
+      this.green = this.colorButton.values[1];
+      this.blue = this.colorButton.values[2];
+    }
+
+    /*this.red = this.colorButton.values[0].r;
     this.green = this.colorButton.values[0].g;
-    this.blue = this.colorButton.values[0].b;
+    this.blue = this.colorButton.values[0].b;*/
+    
     this.value = Math.round(this.red*2.55) + ":" +
       Math.round(this.green*2.55) + ":" + Math.round(this.blue*2.55)
     this.updateColor();
@@ -39297,9 +39402,12 @@ B_HLOutputBase.prototype.updateValues = function() {
   if (this.portType == 10 && this.colorButtons.length == 4) { //neopixel strip
     this.value = ""
     for (var i = 0; i < this.colorButtons.length; i++) {
-      this.value = this.value + Math.round(this.colorButtons[i].values[0].r*2.55) + ","
+      /*this.value = this.value + Math.round(this.colorButtons[i].values[0].r*2.55) + ","
       this.value = this.value + Math.round(this.colorButtons[i].values[0].g*2.55) + ","
-      this.value = this.value + Math.round(this.colorButtons[i].values[0].b*2.55) + ","
+      this.value = this.value + Math.round(this.colorButtons[i].values[0].b*2.55) + ","*/
+      this.value = this.value + Math.round(this.colorButtons[i].values[0]*2.55) + ","
+      this.value = this.value + Math.round(this.colorButtons[i].values[1]*2.55) + ","
+      this.value = this.value + Math.round(this.colorButtons[i].values[2]*2.55) + ","
     }
   }
 }
@@ -39322,13 +39430,13 @@ function B_HLPositionServo(x, y) {
   this.valueKey = "angle"
   B_HLOutputBase.call(this, x, y, "motion_3", "positionServo", 3);
 
-  var icon = VectorPaths["faCompassDrafting"];
+  var icon = VectorPaths["bsSpeedometer2"];
   var blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 27);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 
   this.valueBN = new BlockButton(this);
-  this.valueBN.addSlider("angle_right", this.value, [0, 30, 60, 90, 120, 150, 180]);
+  this.valueBN.addSlider("angle_right", this.value, [0, 30, 60, 90, 120, 150, 180, 210, 240, 270]);
   this.addPart(this.valueBN);
 }
 B_HLPositionServo.prototype = Object.create(B_HLOutputBase.prototype);
@@ -39341,8 +39449,8 @@ function B_HLRotationServo(x, y, flip) {
   this.flip = flip
   B_HLOutputBase.call(this, x, y, "motion_3", "rotationServo", 1);
 
-  var icon = flip ? VectorPaths["mjTurnLeft"] : VectorPaths["faArrowsSpin"];
-  var blockIcon = new BlockIcon(this, icon, Colors.white, "rServo", 27, null, true);
+  var icon = flip ? VectorPaths["bsArrowClockwise"] : VectorPaths["bsArrowCounterClockwise"];
+  var blockIcon = new BlockIcon(this, icon, Colors.white, "rServo", 30, null, true);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 
@@ -39374,7 +39482,10 @@ function B_HLSingleNeopix(x, y) {
   this.addPart(this.blockIcon);
 
   this.colorButton = new BlockButton(this);
-  this.colorButton.addSlider("color", { r: this.red, g: this.green, b: this.blue });
+  //this.colorButton.addSlider("color", { r: this.red, g: this.green, b: this.blue });
+  this.colorButton.addSlider("color_red", this.red)
+  this.colorButton.addSlider("color_green", this.green)
+  this.colorButton.addSlider("color_blue", this.blue)
   this.addPart(this.colorButton);
 }
 B_HLSingleNeopix.prototype = Object.create(B_HLOutputBase.prototype);
@@ -39391,12 +39502,13 @@ function B_HLNeopixStrip(x, y) {
   this.red = 100;
   this.green = 100;
   this.blue = 100;
+  this.blockIcons = []
   this.colorButtons = []
 
   B_HLOutputBase.call(this, x, y, "color_3", "neopixStrip", 10);
 
   var icon = VectorPaths["faLightbulb"];
-  this.blockIcon1 = new BlockIcon(this, icon, Colors.white, "neopix1", 27);
+  /*this.blockIcon1 = new BlockIcon(this, icon, Colors.white, "neopix1", 27);
   this.addPart(this.blockIcon1);
   this.blockIcon2 = new BlockIcon(this, icon, Colors.white, "neopix2", 27);
   this.addPart(this.blockIcon2);
@@ -39417,12 +39529,43 @@ function B_HLNeopixStrip(x, y) {
   this.addPart(this.colorButtons[2]);
   this.colorButtons[3] = new BlockButton(this, 25);
   this.colorButtons[3].addSlider("color", { r: this.red, g: this.green, b: this.blue });
-  this.addPart(this.colorButtons[3]);
+  this.addPart(this.colorButtons[3]);*/
 
+  for (var i = 0; i < 4; i++) {
+    this.blockIcons[i] = new BlockIcon(this, icon, Colors.white, "neopix"+i, 27);
+    this.addPart(this.blockIcons[i]);
+  }
+  this.blockIcons[3].isEndOfLine = true
+
+  for (var i = 0; i < 4; i++) {
+    this.colorButtons[i] = new BlockButton(this, 25);
+    this.colorButtons[i].addSlider("color_red", this.red)
+    this.colorButtons[i].addSlider("color_green", this.green)
+    this.colorButtons[i].addSlider("color_blue", this.blue)
+    this.addPart(this.colorButtons[i]);
+  }
 
 }
 B_HLNeopixStrip.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLNeopixStrip.prototype.constructor = B_HLNeopixStrip;
+
+function B_HLFairyLights(x, y) {
+  this.value = ""
+  this.defaultIntensity = 50
+
+  B_HLOutputBase.call(this, x, y, "color_3", "fairyLights", 8);
+
+  var icon = VectorPaths["bsStars"];
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "fairyLights", 27);
+  this.blockIcon.isEndOfLine = true;
+  this.addPart(this.blockIcon);
+
+  this.valueBN = new BlockButton(this);
+  this.valueBN.addSlider("percent", this.defaultIntensity, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  this.addPart(this.valueBN);
+}
+B_HLFairyLights.prototype = Object.create(B_HLOutputBase.prototype);
+B_HLFairyLights.prototype.constructor = B_HLFairyLights;
 
 // Wait until sensor reaches threshold
 function B_HLWaitUntil(x, y) {
@@ -39431,7 +39574,7 @@ function B_HLWaitUntil(x, y) {
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
   //clap, light, distance, shake
-  this.sensorPaths = [VectorPaths.clap, VectorPaths.mjSun, VectorPaths.language, VectorPaths.share]
+  this.sensorPaths = [VectorPaths.clap, VectorPaths.mjSun, VectorPaths.faRuler, VectorPaths.share]
   this.sensorTypes = ["clap", "light", "distance", "shake"]
   this.sensorSelection = this.sensorPaths[1]
   this.sensorBN = new BlockButton(this);

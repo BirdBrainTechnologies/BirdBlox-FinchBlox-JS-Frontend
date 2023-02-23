@@ -143,6 +143,13 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
         GuiElements.update.color(this.button.bgRect, "none");
         this.button.group.appendChild(this.button.bgRect);
       }
+    } else if (this.widgets[i].type.startsWith("color_")) {
+      if (this.widgets.length == 3 && this.values[0] != null && this.values[1] != null && this.values[2] != null) {
+        const s = 255 / 100;
+        const color = Colors.rgbToHex(this.values[0] * s, this.values[1] * s, this.values[2] * s);
+        this.button.updateBgColor(color);
+      }
+
     } else if (this.widgets[i].type == "piano") {
       text[i] = InputWidget.Piano.noteStrings[this.values[i]];
     } else if (this.widgets[i].type == "ledArray") {
@@ -257,6 +264,9 @@ BlockButton.prototype.addWidget = function(widget, suffix, startingValue) {
   this.displaySuffixes.push(suffix);
   this.values.push(startingValue);
   this.height = this.buttonMargin + this.lineHeight * this.widgets.length;
+  if (this.widgets[0].type.startsWith("color_")) {
+    this.height = this.buttonMargin + this.lineHeight;
+  }
   this.draw();
   const index = this.widgets.length - 1;
   this.updateValue(this.values[index], index);

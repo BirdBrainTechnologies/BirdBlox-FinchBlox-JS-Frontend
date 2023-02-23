@@ -11,6 +11,7 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
   // * 0  = Empty Port
   // * 1  = Rotation Servo
   // * 3  = Position Servo
+  // * 8  = Fairy Lights
   // * 9  = Single Neopixel
   // * 10 = Strip of 4 Neopixels
   // * 14 = Distance Sensor
@@ -29,8 +30,8 @@ DeviceHatchling.prototype.setHatchlingState = function(state) {
   newPortVals[1] = state[11] & 0x1F //port B
   newPortVals[2] = state[12] & 0x1F //port C
   newPortVals[3] = state[13] & 0x1F //port D
-  newPortVals[4] = ((state[13] >> 5) << 3) | (state[14] >> 5) //port E
-  newPortVals[5] = ((state[15] >> 5) << 3) | (state[16] >> 5) //port F
+  newPortVals[4] = ((state[10] >> 5) << 3) | (state[11] >> 5) //port E
+  newPortVals[5] = ((state[12] >> 5) << 3) | (state[13] >> 5) //port F
 
   for (let i = 0; i < this.portStates.length; i++) {
     if (this.portStates[i] != newPortVals[i]) {

@@ -326,8 +326,9 @@ GuiElements.create.layer = function(depth) {
  * @param {string} id - The id of the gradient (needed to reference it later).
  * @param {string} color1 - color in form "#fff" of the top of the gradient.
  * @param {string} color2 - color in form "#fff" of the bottom of the gradient.
+ * @param {boolean} horizontal - true if gradiant should be horizontal. vertical by default.
  */
-GuiElements.create.gradient = function(id, color1, color2) { //Creates a gradient and adds to the defs
+GuiElements.create.gradient = function(id, color1, color2, horizontal) { //Creates a gradient and adds to the defs
   DebugOptions.validateNonNull(color1, color2);
   const gradient = document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient');
   gradient.setAttributeNS(null, "id", id); //Set attributes.
@@ -335,6 +336,10 @@ GuiElements.create.gradient = function(id, color1, color2) { //Creates a gradien
   gradient.setAttributeNS(null, "x2", "0%");
   gradient.setAttributeNS(null, "y1", "0%");
   gradient.setAttributeNS(null, "y2", "100%");
+  if (horizontal) {
+    gradient.setAttributeNS(null, "x2", "100%");
+    gradient.setAttributeNS(null, "y2", "0%");
+  }
   GuiElements.defs.appendChild(gradient); //Add it to the SVG's defs
   const stop1 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 1.
   stop1.setAttributeNS(null, "offset", "0%");

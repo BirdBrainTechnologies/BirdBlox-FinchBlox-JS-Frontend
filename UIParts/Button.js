@@ -306,6 +306,7 @@ Button.prototype.addDeviceInfo = function(device) {
 
   if (Hatchling) {
     this.hatchGroup = GuiElements.create.group(textX, iconY, this.group)
+    this.eggIcon = new VectorIcon(0, 0, VectorPaths.faEgg, Colors.iron, iconH, this.hatchGroup, null, 90);
     this.hatchIcon = GuiElements.draw.hatchlingPattern(this.hatchGroup, iconH, device.getHatchlingCode())
     this.textE = GuiElements.draw.text(textX*2, textY, device.shortName, font, color);
   } else {
@@ -375,7 +376,12 @@ Button.prototype.addSecondIcon = function(pathId, height, color, rotation) {
  */
 Button.prototype.addFinchBnIcons = function() {
   let finchPathId = VectorPaths.mvFinch;
-  if (Hatchling) { finchPathId = VectorPaths.faEgg; }
+  let finchColor = Colors.white
+  if (Hatchling) { 
+    finchPathId = VectorPaths.faEgg; 
+    finchColor = Colors.iron;
+    this.iconColor = finchColor
+  }
   const battPathId = VectorPaths.battery;
   const xPathId = VectorPaths.faTimesCircle;
   const font = Font.uiFont(18);
@@ -404,7 +410,7 @@ Button.prototype.addFinchBnIcons = function() {
   this.iconInverts = false;
   this.hasText = true;
 
-  this.icon = new VectorIcon(this.finchX, this.finchY, finchPathId, Colors.white, finchH, this.group, null, 90);
+  this.icon = new VectorIcon(this.finchX, this.finchY, finchPathId, finchColor, finchH, this.group, null, 90);
   GuiElements.update.stroke(this.icon.pathE, Colors.iron, 2);
   this.battIcon = new VectorIcon(battX, battY, battPathId, Colors.iron, battH, this.group);
   this.textE = GuiElements.draw.text(textX, textY, "", font, Colors.flagGreen);
@@ -413,6 +419,8 @@ Button.prototype.addFinchBnIcons = function() {
   if (Hatchling) {
     const hY = (this.height - this.finchW) / 2
     this.hatchGroup = GuiElements.create.group(this.finchConnectedX, hY, this.group)
+    //TODO: the elements placed inside this group probably need listeners too...
+    TouchReceiver.addListenersBN(this.hatchGroup, this);
   }
 
   TouchReceiver.addListenersBN(this.icon.pathE, this);

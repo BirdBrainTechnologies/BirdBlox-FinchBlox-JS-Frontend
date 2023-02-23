@@ -210,8 +210,10 @@ TitleBar.makeButtons = function() {
         finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
         finchBn.battIcon.pathE.remove();
         finchBn.icon.move(finchBn.finchX, finchBn.finchY);
-        if (Hatchling && finchBn.hatchGroup.children.length > 0) {
-          finchBn.hatchGroup.removeChild(finchBn.hatchGroup.children[0])
+        if (Hatchling && finchBn.hatchGroup) {
+          while (finchBn.hatchGroup.firstChild) {
+            finchBn.hatchGroup.removeChild(finchBn.hatchGroup.firstChild)
+          }
         }
       }
       finchBn.updateBgColor(color);
