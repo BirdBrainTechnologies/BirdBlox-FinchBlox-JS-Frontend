@@ -201,7 +201,6 @@ B_FBColor.prototype.addL2Button = function() {
         "1000101010001000010000100", // Y
         "1111100010001000100011111"  // Z
       ]
-      console.log(options)
       defaultVal = options[0]
     }
     this.colorButton = new BlockButton(this);

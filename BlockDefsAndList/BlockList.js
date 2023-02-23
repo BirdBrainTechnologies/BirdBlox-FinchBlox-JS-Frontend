@@ -159,6 +159,7 @@ BlockList.populateCat_sensor_3 = function(category) {
   category.addBlockByName("B_StartWhenClap");
   category.addBlockByName("B_StartWhenDistance");
   category.addBlockByName("B_HLWaitUntil");
+  category.addBlockByName("B_HLWaitUntilPort");
   category.trimBottom();
   category.centerBlocks();
 }

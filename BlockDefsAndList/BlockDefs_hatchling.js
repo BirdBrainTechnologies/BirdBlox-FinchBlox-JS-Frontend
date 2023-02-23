@@ -334,18 +334,33 @@ B_HLAlphabet.prototype = Object.create(B_FBLedArrayL2.prototype);
 B_HLAlphabet.prototype.constructor = B_HLAlphabet;
 
 // Wait until sensor reaches threshold
-function B_HLWaitUntil(x, y) {
+function B_HLWaitUntil(x, y, usePort) {
   CommandBlock.call(this, x, y, "sensor_3");
-  const blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 35);
-  blockIcon.isEndOfLine = true;
-  this.addPart(blockIcon);
-  //clap, light, distance, shake
-  this.sensorPaths = [VectorPaths.clap, VectorPaths.mjSun, VectorPaths.faRuler, VectorPaths.share]
-  this.sensorTypes = ["clap", "light", "distance", "shake"]
-  this.sensorSelection = this.sensorPaths[1]
-  this.sensorBN = new BlockButton(this);
-  this.sensorBN.addSlider("sensor", this.sensorSelection, this.sensorPaths);
-  this.addPart(this.sensorBN);
+  this.usePort = usePort
+
+  if (usePort) {
+    HL_Utils.addHLButton(this, this.portType)
+    const blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 20);
+    this.addPart(blockIcon);
+    const blockIcon2 = new BlockIcon(this, VectorPaths.faRuler, Colors.white, "ruler", 20);
+    blockIcon2.isEndOfLine = true;
+    this.addPart(blockIcon2);
+    //distance only
+
+  } else {
+    const blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 35);
+    blockIcon.isEndOfLine = true;
+    this.addPart(blockIcon);
+    //clap, light, shake
+    this.sensorPaths = [VectorPaths.clap, VectorPaths.mjSun, VectorPaths.share]
+    this.sensorTypes = ["clap", "light", "shake"]
+    this.sensorSelection = this.sensorPaths[1]
+    this.sensorBN = new BlockButton(this);
+    this.sensorBN.addSlider("sensor", this.sensorSelection, this.sensorPaths);
+    this.addPart(this.sensorBN);
+  }
+  
+  
 }
 B_HLWaitUntil.prototype = Object.create(CommandBlock.prototype);
 B_HLWaitUntil.prototype.constructor = B_HLWaitUntil;
@@ -371,7 +386,8 @@ B_HLWaitUntil.prototype.updateAction = function() {
       if (!status.error) {
         const result = new StringData(status.result);
         const num = (result.asNum().getValue());
-        if ((num > this.threshold) || (this.useLessThan && num < this.threshold)) {
+        console.log(num)
+        if ((!this.useLessThan && num > this.threshold) || (this.useLessThan && num < this.threshold)) {
           return new ExecutionStatusDone();
         }
       }
@@ -382,7 +398,11 @@ B_HLWaitUntil.prototype.updateAction = function() {
     let device = DeviceHatchling.getManager().getDevice(0)
     if (device == null) { return new ExecutionStatusError(); }
 
-    let sensor = this.sensorTypes[this.sensorPaths.indexOf(this.sensorSelection)]
+    let sensor = "distance"
+    if(!this.usePort) {
+      sensor = this.sensorTypes[this.sensorPaths.indexOf(this.sensorSelection)]
+    }
+    
     let port = null
     this.useLessThan = false
     switch(sensor) {
@@ -395,13 +415,15 @@ B_HLWaitUntil.prototype.updateAction = function() {
         this.threshold = 5
         port = "left"
         break;
-      case "distance": //TODO: add port button when this sensor is working
-        this.threshold = 10
-        //port = this.port
+      case "distance": 
+        this.threshold = this.distance
+        this.useLessThan = true
+        port = this.port
         break;
       case "shake": //TODO: shake not working. Also, consider using buttons?
         break;
     }//TODO: since we keep a copy of the sensor data in the Hatchling device, maybe we can skip all this?
+    console.log("checking " + sensor + " at port " + port)
     device.readSensor(status, sensor, port)
     status.requestSent = true;
   }
@@ -412,3 +434,29 @@ B_HLWaitUntil.prototype.updateValues = function() {
     this.sensorSelection = this.sensorBN.values[0];
   }
 }
+
+//Wait until for port connected sensors
+function B_HLWaitUntilPort(x, y) {
+  this.portType = 14 // just for distance sensor for now.
+  this.distance = 10
+
+  B_HLWaitUntil.call(this, x, y, true)
+
+  this.distanceBN = new BlockButton(this);
+  this.distanceBN.addSlider("distance", this.distance, [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  this.addPart(this.distanceBN);
+}
+B_HLWaitUntilPort.prototype = Object.create(B_HLWaitUntil.prototype);
+B_HLWaitUntilPort.prototype.constructor = B_HLWaitUntilPort;
+
+B_HLWaitUntilPort.prototype.updateValues = function() {
+  HL_Utils.updatePort(this)
+  if (this.distanceBN != null) {
+    this.distance = this.distanceBN.values[0]
+  }
+}
+B_HLWaitUntilPort.prototype.checkActive = function() {
+  return HL_Utils.checkActive(this)
+}
+
+
