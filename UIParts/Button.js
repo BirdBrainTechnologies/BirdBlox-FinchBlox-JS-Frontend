@@ -306,7 +306,7 @@ Button.prototype.addDeviceInfo = function(device) {
 
   if (Hatchling) {
     this.hatchGroup = GuiElements.create.group(textX, iconY, this.group)
-    this.eggIcon = new VectorIcon(0, 0, VectorPaths.faEgg, Colors.iron, iconH, this.hatchGroup, null, 90);
+    this.eggIcon = new VectorIcon(0, -this.height*0.1, VectorPaths.faEgg, Colors.iron, this.height*0.8, this.hatchGroup, null, 90);
     this.hatchIcon = GuiElements.draw.hatchlingPattern(this.hatchGroup, iconH, device.getHatchlingCode())
     this.textE = GuiElements.draw.text(textX*2, textY, device.shortName, font, color);
   } else {

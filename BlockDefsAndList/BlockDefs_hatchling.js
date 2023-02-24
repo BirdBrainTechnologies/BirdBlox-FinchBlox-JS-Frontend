@@ -309,6 +309,7 @@ B_HLNeopixStrip.prototype.constructor = B_HLNeopixStrip;
 
 function B_HLFairyLights(x, y) {
   this.value = ""
+  this.valueKey = "value"
   this.defaultIntensity = 50
 
   B_HLOutputBase.call(this, x, y, "color_3", "fairyLights", 8);
