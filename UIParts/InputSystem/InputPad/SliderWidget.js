@@ -48,11 +48,12 @@ InputWidget.Slider.setConstants = function() {
 
   GuiElements.create.spectrum();
 
+/* rgb gradient sliders
   if (Hatchling) {
     GuiElements.create.gradient("gradient_red", Colors.black, Colors.red, true)
     GuiElements.create.gradient("gradient_green", Colors.black, Colors.green, true)
     GuiElements.create.gradient("gradient_blue", Colors.black, Colors.blue, true)
-  }
+  } */
 };
 
 /**
@@ -141,13 +142,23 @@ InputWidget.Slider.prototype.makeSlider = function() {
 
   //Add a group of 3 sliders to represent rgb values
   } else if (this.type.startsWith("color_")) {
+    /* rgb gradient sliders
     barColor = Colors.white;
     const specH = S.barHeight * 10;
     const specY = this.barY - specH / 2 + S.barHeight / 2;
     const gradient = "url(#gradient_" + this.type.split("_")[1] + ")"
     const colorRect = GuiElements.draw.rect(this.barX, specY, this.barW, specH, gradient, 4, 4);
     this.group.appendChild(colorRect);
-    TouchReceiver.addListenersSlider(colorRect, this);
+    TouchReceiver.addListenersSlider(colorRect, this); */
+
+    const triH = S.barHeight * 10;
+    const offset = triH/2 - S.barHeight
+    this.barY += offset
+    this.sliderY += offset
+    const color = this.type.split("_")[1]
+    const colorTri = GuiElements.draw.rightTriangle(this.barX, this.barY, this.barW, triH, Colors[color])   
+    this.group.appendChild(colorTri);
+    TouchReceiver.addListenersSlider(colorTri, this);
 
 
     //All other sliders have tick marks with options above

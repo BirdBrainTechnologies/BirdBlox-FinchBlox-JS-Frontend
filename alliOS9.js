@@ -7115,6 +7115,23 @@ GuiElements.draw.triangle = function(x, y, width, height, color) {
   return triangle; //Return the finished triangle.
 };
 /**
+ * Creates a filled, SVG path element that is a right triangle with specified dimensions and returns it.
+ * @param {number} x - The path's x coord.
+ * @param {number} y - The path's y coord.
+ * @param {number} width - The path's width. (it is a right triangle with right angle on the right)
+ * @param {number} height - The path's height. (negative will make it point down)
+ * @param {string} color - The path's fill color in the form "#fff".
+ * @return {Element} - The path which was created.
+ */
+GuiElements.draw.rightTriangle = function(x, y, width, height, color) {
+  DebugOptions.validateNonNull(color);
+  DebugOptions.validateNumbers(x, y, width, height);
+  var triangle = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
+  GuiElements.update.rightTriangle(triangle, x, y, width, height); //Set its path description (points).
+  triangle.setAttributeNS(null, "fill", color); //Set the fill.
+  return triangle; //Return the finished triangle.
+};
+/**
  * Creates a triangle with its point at the indicated coords
  * @param {number} x
  * @param {number} y
@@ -7447,6 +7464,23 @@ GuiElements.update.triangle = function(pathE, x, y, width, height) {
   path += "m " + x + "," + y; //Draws bottom-left point.
   path += " " + xshift + "," + (0 - height); //Draws top-middle point.
   path += " " + xshift + "," + (height); //Draws bottom-right point.
+  path += " z"; //Closes path.
+  pathE.setAttributeNS(null, "d", path); //Sets path description.
+};
+/**
+ * Changes the path description of an SVG path object to make it a right triangle.
+ * @param {Element} pathE - The path element to be modified.
+ * @param {number} x - The path's new x coord.
+ * @param {number} y - The path's new y coord.
+ * @param {number} width - The path's new width. (it is a right triangle)
+ * @param {number} height - The path's new height. (negative will make it point down)
+ */
+GuiElements.update.rightTriangle = function(pathE, x, y, width, height) {
+  DebugOptions.validateNumbers(x, y, width, height);
+  var path = "";
+  path += "m " + x + "," + y; //Draws bottom-left point.
+  path += " " + width + "," + 0; //Draws the bottom-right point.
+  path += " " + 0 + "," + (0 - height); //Draws the top-right point.
   path += " z"; //Closes path.
   pathE.setAttributeNS(null, "d", path); //Sets path description.
 };
@@ -16667,11 +16701,12 @@ InputWidget.Slider.setConstants = function() {
 
   GuiElements.create.spectrum();
 
+/* rgb gradient sliders
   if (Hatchling) {
     GuiElements.create.gradient("gradient_red", Colors.black, Colors.red, true)
     GuiElements.create.gradient("gradient_green", Colors.black, Colors.green, true)
     GuiElements.create.gradient("gradient_blue", Colors.black, Colors.blue, true)
-  }
+  } */
 };
 
 /**
@@ -16760,13 +16795,23 @@ InputWidget.Slider.prototype.makeSlider = function() {
 
   //Add a group of 3 sliders to represent rgb values
   } else if (this.type.startsWith("color_")) {
+    /* rgb gradient sliders
     barColor = Colors.white;
     var specH = S.barHeight * 10;
     var specY = this.barY - specH / 2 + S.barHeight / 2;
     var gradient = "url(#gradient_" + this.type.split("_")[1] + ")"
     var colorRect = GuiElements.draw.rect(this.barX, specY, this.barW, specH, gradient, 4, 4);
     this.group.appendChild(colorRect);
-    TouchReceiver.addListenersSlider(colorRect, this);
+    TouchReceiver.addListenersSlider(colorRect, this); */
+
+    var triH = S.barHeight * 10;
+    var offset = triH/2 - S.barHeight
+    this.barY += offset
+    this.sliderY += offset
+    var color = this.type.split("_")[1]
+    var colorTri = GuiElements.draw.rightTriangle(this.barX, this.barY, this.barW, triH, Colors[color])   
+    this.group.appendChild(colorTri);
+    TouchReceiver.addListenersSlider(colorTri, this);
 
 
     //All other sliders have tick marks with options above
