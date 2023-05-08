@@ -1505,8 +1505,6 @@ Language.ar = {
   "block_set_variable":"(Slot 2) لـــ (Slot 1) ضبط",
   "Create_Variable":"تصميم  تنوع",
   "block_change_variable":"(Slot 2) بواسطة (Slot 1) تغيير",
-  "Rename":"تغيير الاسم",
-  "Delete":"مسح",
   "block_add_to_list":"(Slot 2) لـ (Slot 1 =  شيء) إضافة",
   "Create_List":"إنشاء قائمة",
   "block_delete_from_list":"(Slot 2) من (Slot 1) مسح",
@@ -1724,8 +1722,6 @@ Language.ca = {
   "block_set_variable":"fixa (Slot 1) a (Slot 2)",
   "Create_Variable":"Crea una variable",
   "block_change_variable":"canvia (Slot 1) en (Slot 2)",
-  "Rename":"Reanomena",
-  "Delete":"Elimina",
   "block_add_to_list":"afegeix (Slot 1 = cosa) a (Slot 2)",
   "Create_List":"Crea una llista",
   "block_delete_from_list":"elimina (Slot 1) de (Slot 2)",
@@ -2175,8 +2171,6 @@ Language.de = {
   "block_set_variable":"setze (Slot 1) auf (Slot 2)",
   "Create_Variable":"Neue Variable",
   "block_change_variable":"ändere (Slot 1) um (Slot 2)",
-  "Rename":"Umbenennen",
-  "Delete":"Löschen",
   "block_add_to_list":"füge (Slot 1 = etwas) zu (Slot 2) hinzu",
   "Create_List":"Erstelle Liste",
   "block_delete_from_list":"entferne (Slot 1) aus (Slot 2)",
@@ -2649,8 +2643,6 @@ Language.es = {
   "block_set_variable":"configurar (Slot 1) a (Slot 2)",
   "Create_Variable":"Crear Variable",
   "block_change_variable":"cambiar (Slot 1) en (Slot 2)",
-  "Rename":"Cambiar nombre",
-  "Delete":"Borrar",
   "block_add_to_list":"agregar (Slot 1 = objeto) a (Slot 2)",
   "Create_List":"Crear Lista",
   "block_delete_from_list":"borrar (Slot 1) de (Slot 2) ",
@@ -2883,8 +2875,6 @@ Language.fi = {
   "block_set_variable":"aseta (Slot 1) arvoon (Slot 2)",
   "Create_Variable":"Luo Muuttuja",
   "block_change_variable":"muuta (Slot 1) (Slot 2)",
-  "Rename":"Nimeä uudelleen",
-  "Delete":"Poista",
   "block_add_to_list":"lisää (Slot 1 = thing) listaan (Slot 2)",
   "Create_List":"Luo lista",
   "block_delete_from_list":"poista (Slot 1) listasta (Slot 2)",
@@ -3102,8 +3092,6 @@ Language.fr = {
 "block_set_variable":"fixez (Slot 1) à (Slot 2)",
 "Create_Variable":"Crée une variable",
 "block_change_variable":"changez (Slot 1) avec (Slot 2)",
-"Rename":"Renommez",
-"Delete":"Supprimez",
 "block_add_to_list":"ajoutez (Slot 1 = chose) à (Slot 2)",
 "Create_List":"Créez une liste",
 "block_delete_from_list":"supprimez (Slot 1) de (Slot 2)",
@@ -3803,8 +3791,6 @@ Language.nl = {
   "block_set_variable":"maak (Slot 1) (Slot 2)",
   "Create_Variable":"Maak een Variabele",
   "block_change_variable":"verander (Slot 1) met (Slot 2)",
-  "Rename":"Hernoemen",
-  "Delete":"Verwijder",
   "block_add_to_list":"voeg (Slot 1 = ding) toe aan (Slot 2)",
   "Create_List":"Maak een Lijst",
   "block_delete_from_list":"verwijder (Slot 1) van (Slot 2)",
@@ -4038,8 +4024,6 @@ Language.pt = {
   "block_set_variable":"adcione (Slot 1) para (Slot 2)",
   "Create_Variable":"Criar uma variável",
   "block_change_variable":"mude (Slot 1) por (Slot 2)",
-  "Rename":"Renomear",
-  "Delete":"Apagar",
   "block_add_to_list":"adicionar (Slot 1 = objeto) para (Slot 2)",
   "Create_List":"Criar uma lista",
   "block_delete_from_list":"apague (Slot 1) de (Slot 2)",
@@ -4272,8 +4256,6 @@ Language.sv = {
   "block_set_variable":"sätt (Slot 1) till (Slot 2)",
   "Create_Variable":"Skapa variabel",
   "block_change_variable":"ändra (Slot 1) med (Slot 2)",
-  "Rename":"Byt namn",
-  "Delete":"Radera",
   "block_add_to_list":"lägg till (Slot 1 = objekt) till (Slot 2)",
   "Create_List":"Skapa lista",
   "block_delete_from_list":"ta bort (Slot 1) av  (Slot 2)",
@@ -4491,7 +4473,6 @@ Language.zhs = {
 "block_set_variable":"设置 (Slot 1) 到 (Slot 2)",
 "Create_Variable":"创建变数",
 "block_change_variable":"(Slot 1) 改变 (Slot 2)",
-"Rename":"改名",
 "Delete":"删除",
 "block_add_to_list":"添加 (Slot 1 = 物件) 到 (Slot 2)",
 "Create_List":"创建列表",
@@ -4725,8 +4706,6 @@ Language.zht = {
   "block_set_variable":"設置 (Slot 1) 到 (Slot 2)",
   "Create_Variable":"創建變數",
   "block_change_variable":"(Slot 1) 改變 (Slot 2)",
-  "Rename":"改名",
-  "Delete":"刪除",
   "block_add_to_list":"添加 (Slot 1 = thing) 到 (Slot 2)",
   "Create_List":"創建列表",
   "block_delete_from_list":"從 (Slot 2) 刪除 (Slot 1)",
@@ -4882,7 +4861,7 @@ function Device(name, id, RSSI, device) {
    * configure these fields so they can update when the status changes */
   this.statusListener = null;
   this.firmwareStatusListener = null;
-  this.hasV2Microbit;
+  this.hasV2Microbit = null;
 }
 
 
@@ -4935,14 +4914,14 @@ Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName
    * @return {string}
    */
   deviceClass.getNotConnectedMessage = function(errorCode, errorResult) {
-    if (errorResult == null || true) {
+  //  if (errorResult == null || true) {
       //return typeName + " " + Language.getStr("not_connected");
       var translatedText = Language.getStr("not_connected");
       var returnText = translatedText.replace("(Device)", typeName);
       return returnText;
-    } else {
-      return errorResult;
-    }
+  //  } else {
+  //    return errorResult;
+  //  }
   };
 
   var manager = new DeviceManager(deviceClass);
@@ -6377,6 +6356,14 @@ DeviceHatchling.prototype.readSensor = function(status, sensor, port) {
     request.addParam("port", port);
   }
   HtmlServer.sendRequest(request.toString(), status, true);
+}
+
+/**
+ * Retrieves the sensor value for the given port from the locally stored array
+ * @param {number} port - The port to return the value for
+ */
+DeviceHatchling.prototype.getSensorValue = function(port) {
+  return this.hlState[ port + 14 ]
 }
 
 /**
@@ -8164,7 +8151,7 @@ function BlockList() {
   // List only includes categories that will appear in the BlockPalette in order.
   // Category names should be capitalized in the way they should be displayed on screen.
   if (FinchBlox) {
-    if (!Hatchling) {
+    /*if (!Hatchling) {
       cat.push("Motion_1");
       cat.push("Color_1");
       cat.push("Sound_1");
@@ -8176,7 +8163,24 @@ function BlockList() {
     cat.push("Color_3");
     cat.push("Sound_3");
     if (Hatchling) { cat.push("Sensor_3") }
-    cat.push("Control_3");
+    cat.push("Control_3");*/
+    if (Hatchling) {
+      cat.push("PortBlocks")
+      cat.push("OldBlocks")
+      cat.push("MicrobitBlocks")
+      cat.push("Control_3")
+    } else {
+      cat.push("Motion_1");
+      cat.push("Color_1");
+      cat.push("Sound_1");
+      cat.push("Motion_2");
+      cat.push("Color_2");
+      cat.push("Sound_2");
+      cat.push("Motion_3");
+      cat.push("Color_3");
+      cat.push("Sound_3");
+      cat.push("Control_3");
+    }
   } else {
     cat.push("Robots");
     cat.push("Operators");
@@ -8308,7 +8312,7 @@ BlockList.populateCat_sound_3 = function(category) {
   category.trimBottom();
   category.centerBlocks();
 }
-BlockList.populateCat_sensor_3 = function(category) {
+/*BlockList.populateCat_sensor_3 = function(category) {
   category.addBlockByName("B_StartWhenDark");
   category.addBlockByName("B_StartWhenClap");
   category.addBlockByName("B_StartWhenDistance");
@@ -8316,7 +8320,7 @@ BlockList.populateCat_sensor_3 = function(category) {
   category.addBlockByName("B_HLWaitUntilPort");
   category.trimBottom();
   category.centerBlocks();
-}
+}*/
 BlockList.populateCat_control_3 = function(category) {
   category.addBlockByName("B_WhenFlagTapped");
   category.addBlockByName("B_Wait");
@@ -8326,6 +8330,40 @@ BlockList.populateCat_control_3 = function(category) {
     category.addBlockByName("B_StartWhenDark");
     category.addBlockByName("B_StartWhenClap");
   }
+  category.trimBottom();
+  category.centerBlocks();
+}
+
+//HATCHLING CATEGORIES
+BlockList.populateCat_portblocks = function(category) {
+  category.addBlockByName("B_HLPortA");
+  category.addBlockByName("B_HLPortB");
+  category.addBlockByName("B_HLPortC");
+  category.addBlockByName("B_HLPortD");
+  category.addBlockByName("B_HLPortE");
+  category.addBlockByName("B_HLPortF");
+  category.trimBottom();
+  category.centerBlocks();
+}
+BlockList.populateCat_oldblocks = function(category) {
+  category.addBlockByName("B_HLPositionServo")
+  category.addBlockByName("B_HLRotationServo")
+  category.addBlockByName("B_HLccRotationServo")
+  category.addBlockByName("B_HLFairyLights")
+  category.addBlockByName("B_HLSingleNeopix")
+  category.addBlockByName("B_HLNeopixStrip")
+  category.addBlockByName("B_StartWhenDistance");
+  category.addBlockByName("B_HLWaitUntilPort");
+  category.trimBottom();
+  category.centerBlocks();
+}
+BlockList.populateCat_microbitblocks = function(category) {
+  category.addBlockByName("B_FBSoundL3");
+  category.addBlockByName("B_FBLedArrayL2")
+  category.addBlockByName("B_HLAlphabet")
+  category.addBlockByName("B_StartWhenDark");
+  category.addBlockByName("B_StartWhenClap");
+  category.addBlockByName("B_HLWaitUntil");
   category.trimBottom();
   category.centerBlocks();
 }
@@ -8725,7 +8763,10 @@ Colors.setCategory = function() {
     "color_3": Colors.neonCarrot,
     "sound_3": Colors.seance,
     "control_3": Colors.fbYellow,
-    "sensor_3": Colors.finchGreen//Colors.flagGreen//Colors.finchGreen
+    "sensor_3": Colors.finchGreen,//Colors.flagGreen//Colors.finchGreen
+    "portblocks": Colors.easternBlue,
+    "oldblocks": Colors.neonCarrot,
+    "microbitblocks": Colors.seance
   };
   //In FinchBlox, the block palette changes colors per category
   Colors.blockPalette = {
@@ -8739,7 +8780,10 @@ Colors.setCategory = function() {
     "color_3": Colors.blockPaletteColor,
     "sound_3": Colors.blockPaletteSound,
     "control_3": Colors.blockPaletteControl,
-    "sensor_3": Colors.finchGreen
+    "sensor_3": Colors.finchGreen,
+    "portblocks": Colors.blockPaletteMotion,
+    "oldblocks": Colors.blockPaletteColor,
+    "microbitblocks": Colors.blockPaletteSound
   };
   //In FinchBlox, each block is outlined with a darker color
   Colors.blockOutline = {
@@ -8754,7 +8798,10 @@ Colors.setCategory = function() {
     "sound_3": Colors.fbPurpleBorder,
     "control_3": Colors.fbYellowBorder,
     "sensor_3": Colors.fbDarkGreen, //Colors.finchGreen,
-    "inactive": Colors.iron
+    "inactive": Colors.iron,
+    "portblocks": Colors.fbBlueBorder,
+    "oldblocks": Colors.fbOrangeBorder,
+    "microbitblocks": Colors.fbPurpleBorder
   }
 };
 
@@ -9292,16 +9339,19 @@ function VectorPaths(){
   //In FinchBlox, each category has an icon rather than displaying a text name.
   VP.categoryIcons = {
     "motion_1": VP.faArrowsAlt,
-		"color_1": VP.faLightbulb,
-		"sound_1": VP.faMusic,
-		"motion_2": VP.faArrowsAlt,
-		"color_2": VP.faLightbulb,
-		"sound_2": VP.faMusic,
-		"motion_3": VP.faArrowsAlt,
-		"color_3": VP.faLightbulb,
-		"sound_3": VP.faMusic,
-		"control_3": VP.faHandPointRight,
-		"sensor_3": VP.bsBroadcast //VP.faTowerBroadcast //VP.language
+	"color_1": VP.faLightbulb,
+	"sound_1": VP.faMusic,
+	"motion_2": VP.faArrowsAlt,
+	"color_2": VP.faLightbulb,
+	"sound_2": VP.faMusic,
+	"motion_3": VP.faArrowsAlt,
+	"color_3": VP.faLightbulb,
+	"sound_3": VP.faMusic,
+	"control_3": VP.faHandPointRight,
+	"sensor_3": VP.bsBroadcast, //VP.faTowerBroadcast //VP.language
+    "portblocks": VP.faCheck,
+    "oldblocks": VP.undo,
+    "microbitblocks": VP.microbit
   };
 
 }
@@ -9501,6 +9551,7 @@ BlockGraphics.SetLoop = function() {
 BlockGraphics.SetLabelText = function() {
   BlockGraphics.labelText = {};
   BlockGraphics.labelText.font = Font.uiFont(12).bold();
+  if (Hatchling) { BlockGraphics.labelText.font = Font.uiFont(30).bold(); }
   BlockGraphics.labelText.fill = Colors.white;
   BlockGraphics.labelText.disabledFill = Colors.labelTextDisabled;
 };
@@ -11426,9 +11477,9 @@ TouchReceiver.touchend = function(e) {
       TR.targetType = "tabSpace";
       TR.target = null;
       TabManager.startScroll(TR.getX(e), TR.getY(e));
-    } else if (e.touches.length > 1) {
+    } //else if (e.touches.length > 1) {
       // No action necessary
-    }
+    //}
   } else if (TR.touchDown && !TR.longTouch) { // Prevents multitouch problems.
     TR.touchDown = false;
     TR.dragging = false;
@@ -12451,8 +12502,8 @@ BlockPalette.createCategories = function() {
     var currentY = 0;
     var currentX = BlockPalette.catW / 2 - 1.5 * CategoryBN.width - CategoryBN.hMargin;
     if (Hatchling) {
-      //currentX = BlockPalette.catW / 2 - 2 * CategoryBN.width - 1.5 * CategoryBN.hMargin;
-      currentX = BlockPalette.catW / 2 - 2.5 * CategoryBN.width - 2 * CategoryBN.hMargin;
+      currentX = BlockPalette.catW / 2 - 2 * CategoryBN.width - 1.5 * CategoryBN.hMargin;  // 4 categories
+      //currentX = BlockPalette.catW / 2 - 2.5 * CategoryBN.width - 2 * CategoryBN.hMargin; // 5 categories
     }
     for (var i = 0; i < catCount; i++) {
       var currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
@@ -12841,6 +12892,10 @@ DisplayStack.prototype.duplicate = function(x, y) {
   var stack = new BlockStack(firstCopyBlock, tab);
   if (Hatchling) {
     HL_Utils.findPorts(firstCopyBlock)
+    if (firstCopyBlock.updateBlockType) { 
+      firstCopyBlock.updateBlockType(this.firstBlock.portType) 
+      firstCopyBlock.updateActive()
+    }
   }
   return stack
 };
@@ -12911,7 +12966,7 @@ function CategoryBN(x, y, category) {
     this.fill = Colors.getGradient(this.catId);
   }
   this.buildGraphics();
-  if (FinchBlox) {
+  if (FinchBlox && !Hatchling) {
     this.setHidden();
   }
 }
@@ -12968,6 +13023,10 @@ CategoryBN.prototype.buildGraphics = function() {
     var iconX = (CBN.width - iconW) / 2;
     var iconY = (CBN.height - iconH) / 2;
     this.icon = new VectorIcon(iconX, iconY, iconPath, Button.foreground, iconH, this.group, false);
+    if (iconPath == VectorPaths.microbit) { 
+      this.icon.setColor(Colors.bbtDarkGray)
+      this.icon.addBackgroundRect() 
+    }
     this.label = this.icon.pathE;
   } else {
     this.colorRect = GuiElements.draw.rect(0, 0, CBN.colorW, CBN.height, this.fill);
@@ -13033,6 +13092,8 @@ CategoryBN.prototype.addListeners = function() {
   TouchReceiver.addListenersCat(this.bgRect, cat);
   if (!FinchBlox) {
     TouchReceiver.addListenersCat(this.colorRect, cat);
+  } else if (this.icon.bgRect) {
+    TouchReceiver.addListenersCat(this.icon.bgRect, cat);
   }
   TouchReceiver.addListenersCat(this.label, cat);
 };
@@ -20906,7 +20967,7 @@ CodeManager.updateAvailableSensors = function() {
  * that is plugged in to the specified port. Hatchling only.
  */
 CodeManager.updateAvailablePorts = function(port) {
-  CodeManager.passRecursivelyDown("updateAvailablePorts", false, port);
+  CodeManager.passRecursivelyDown("updateAvailablePorts", true, port);
 }
 
 /**
@@ -26394,9 +26455,9 @@ HtmlServer.getIosHandler = function() {
 
 HtmlServer.createFakeIosHandler = function() {
   return "test";
-  return function(object) {
+  /*return function(object) {
     console.log("request: " + object.request + ",  body: " + object.body + ", id: " + object.id);
-  }
+  }*/
 };
 
 /**
@@ -26462,12 +26523,12 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
     // If we're testing on a device without a backend, we reply with a fake response
     setTimeout(function() {
       HtmlServer.unansweredCount--;
-      if (false) {
+      /*if (false) {
         // We can respond with a fake error
         if (callbackErr != null) {
           callbackErr(418, "I'm a teapot");
         }
-      } else {
+      } else {*/
         // Or with fake data
         if (callbackFn != null) {
           //callbackFn('Started');
@@ -26476,7 +26537,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
           //callbackFn('[{"name":"hi","id":"there"}]');
           //callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true,"files":["project1","project2"]}');
         }
-      }
+      //}
     }, 20);
     HtmlServer.unansweredCount++;
     return;
@@ -28624,6 +28685,18 @@ Block.prototype.addPart = function(part) {
 };
 
 /**
+ * Remove all parts for a fresh start (only used in Hatchling)
+ */
+Block.prototype.removeParts = function() {
+  for (var i = 0; i < this.parts.length; i++) {
+    if (this.parts[i].remove) { this.parts[i].remove() }
+  }
+  this.parts = []
+  this.slots = []
+  this.blockButtons = []
+}
+
+/**
  * Moves the Block and sets its this.x and this.y values.
  * @param {number} x - New x coord.
  * @param {number} y - New y coord.
@@ -29840,10 +29913,9 @@ Block.prototype.updateAvailableSensors = function() {
  * Hatchling only - called when port types change.
  */
 Block.prototype.updateAvailablePorts = function(port) {
-  console.log("updateAvailablePorts " + port)
-  if (this.hlButton != null && port == this.port) {
+  if (port == this.port && (this.hlButton != null || this.updateBlockType)) {
     this.updateActive()
-  }
+  } 
 }
 
 /**
@@ -30256,7 +30328,7 @@ EditableSlotShape.prototype.buildSlot = function() {
  * Create the element representing the background
  */
 EditableSlotShape.prototype.buildBackground = function() {
-  GuiElements.markAbstract();
+  DebugOptions.markAbstract();
 };
 
 /**
@@ -30938,10 +31010,9 @@ Slot.prototype.getData = function() {
 
 /**
  * Returns the result if the slot has no child
- * @abstract
  */
 Slot.prototype.getDataNotFromChild = function() {
-  GuiElements.markAbstract();
+  DebugOptions.markAbstract();
 };
 
 /** Recursively updates the dimensions of the BlockStack. */
@@ -31313,7 +31384,6 @@ Slot.prototype.getKey = function() {
 
 /**
  * Draws a white border around the slot to indicate that the blocks being dragged will snap to it if released.
- * @abstract
  */
 Slot.prototype.highlight = function() {
   DebugOptions.markAbstract();
@@ -31322,7 +31392,6 @@ Slot.prototype.highlight = function() {
 /**
  * Creates a string representing the slot and its content
  * @return {string}
- * @abstract
  */
 Slot.prototype.textSummary = function() {
   DebugOptions.markAbstract();
@@ -33293,7 +33362,7 @@ BlockSlot.prototype.passRecursively = function(functionName) {
  * @param {string} text - The text to display
  * @constructor
  */
-function LabelText(parent, text) {
+function LabelText(parent, text, disabledColor) {
   DebugOptions.validateNonNull(parent, text);
   this.text = text;
   this.width = 0; // Computed later with updateDim
@@ -33304,6 +33373,7 @@ function LabelText(parent, text) {
   this.textE = this.generateText(text);
   this.isSlot = false; // All BlockParts have this property
   this.visible = true;
+  this.disabledColor = disabledColor
 }
 LabelText.prototype = Object.create(BlockPart.prototype);
 LabelText.prototype.constructor = LabelText;
@@ -33393,7 +33463,11 @@ LabelText.prototype.makeActive = function() {
 };
 
 LabelText.prototype.makeInactive = function() {
-  GuiElements.update.color(this.textE, BlockGraphics.labelText.disabledFill);
+  if (this.disabledColor != null) {
+    GuiElements.update.color(this.textE, this.disabledColor);
+  } else {
+    GuiElements.update.color(this.textE, BlockGraphics.labelText.disabledFill);
+  }
 };
 
 /**
@@ -33596,6 +33670,13 @@ BlockIcon.prototype.addObstacle = function(color) {
   this.obstacle = GuiElements.draw.rect((-o), 0, w + 2 * o, h, color, r, r);
   this.parent.group.appendChild(this.obstacle);
   TouchReceiver.addListenersChild(this.obstacle, this.parent);
+}
+
+/**
+ * Remove the BlockIcon from the parent (used in Hatchling)
+ */
+BlockIcon.prototype.remove = function() {
+  this.icon.group.remove()
 }
 
 /**
@@ -33970,6 +34051,13 @@ BlockButton.prototype.importXml = function(blockButtonNode) {
     i++;
     valueString = XmlWriter.getAttribute(blockButtonNode, "value_" + i);
   }
+}
+
+/**
+ * Remove the BlockButton from the parent (used in Hatchling)
+ */
+BlockButton.prototype.remove = function() {
+  this.button.remove()
 }
 
 /* This file contains templates for Blocks that control robots.  Each robot has its own BlockDefs file, but many
@@ -39780,6 +39868,248 @@ B_HLWaitUntilPort.prototype.updateValues = function() {
 B_HLWaitUntilPort.prototype.checkActive = function() {
   return HL_Utils.checkActive(this)
 }
+
+
+function B_HLPortBlock(x, y, port) {
+  this.port = port 
+  CommandBlock.call(this, x, y, "portblocks");
+
+  this.updateBlockType(0)
+  this.updateActive()
+}
+B_HLPortBlock.prototype = Object.create(CommandBlock.prototype)
+B_HLPortBlock.prototype.constructor = B_HLPortBlock
+B_HLPortBlock.prototype.updateConnectionStatus = function() {
+  this.updateActive()
+}
+B_HLPortBlock.prototype.checkActive = function() {
+  var device = DeviceHatchling.getManager().getDevice(0);
+  if (device != null) {
+    var currentState = device.portStates[this.port]
+
+    /*// Update blocks on the canvas and in block palette
+    if (this.portType != currentState) {
+        this.updateBlockType(currentState)
+    }
+    return (currentState != 0)*/
+
+
+    //just update the block if it is in the block palette
+    if (this.stack != null && this.stack.isDisplayStack) {
+      if (this.portType != currentState) {
+        this.updateBlockType(currentState)
+      }
+      return (currentState != 0)  //Nothing attached to port for type == 0
+    } else {
+      return (currentState != 0) && (this.portType == currentState)
+    }
+
+  }
+  return false
+}
+B_HLPortBlock.prototype.updateBlockType = function(newPortType) {
+  this.portType = newPortType
+  this.outputType = null
+  this.sensorType = null
+  this.removeParts()
+  if (this.portType == 0) { //Nothing attached, at port name label
+    var labels = ["A", "B", "C", "D", "E", "F"]
+    this.icon = new LabelText(this, labels[this.port], HL_Utils.portColors[this.port])
+  } else {
+    var iconName = null
+    var iconH = 0
+    switch(this.portType) {
+    case 1: iconName = "bsArrowClockwise"; iconH = 30; break; //rotation servo
+    case 3: iconName = "bsSpeedometer2"; iconH = 27; break; //position servo
+    case 8: iconName = "bsStars"; iconH = 27; break; //fairy lights
+    case 9: iconName = "faLightbulb"; iconH = 27; break; //single neopixel
+    case 10: iconName = "faLightbulb"; iconH = 25; break; //4 neopixel strip
+    case 14: iconName = "faRuler"; iconH = 20; break; //distance sensor
+    default:
+      console.error("PortBlock unsupported port type " + this.portType)
+      return
+    }
+    this.icon = new BlockIcon(this, VectorPaths[iconName], HL_Utils.portColors[this.port], iconName, iconH)
+  }
+  this.icon.isEndOfLine = true
+  this.addPart(this.icon)
+
+  if (this.portType != 0) {
+    this.button = new BlockButton(this)
+    switch(this.portType) {
+    case 1:
+      this.outputType = "rotationServo"
+      this.value = 255 //off signal
+      this.valueKey = "value"
+      this.button.addSlider("percent", 0, [-100, -80, -60, -40, -20, 0, 20, 40, 60, 80, 100])
+      break;
+    case 3:
+      this.outputType = "positionServo"
+      this.value = 90; //defaultAngle
+      this.valueKey = "angle"
+      this.button.addSlider("angle_right", 90, [0, 30, 60, 90, 120, 150, 180, 210, 240, 270])
+      break;
+    case 8:
+      this.outputType = "fairyLights"
+      this.value = ""
+      this.valueKey = "value"
+      this.button.addSlider("percent", 50, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
+      break;
+    case 9:
+      this.outputType = "singleNeopix"
+      this.value = ""
+      this.valueKey = "color"
+      this.button.addSlider("color_red", 100)
+      this.button.addSlider("color_green", 100)
+      this.button.addSlider("color_blue", 100)
+      break;
+    case 10:
+      this.outputType = "neopixStrip"
+      this.value = ""
+      this.valueKey = "colors"
+      this.button.addSlider("color_red", 100)
+      this.button.addSlider("color_green", 100)
+      this.button.addSlider("color_blue", 100)
+      break;
+    case 14:
+      this.sensorType = "distance"
+      this.value = 10
+      this.useLessThan = true
+      this.button.addSlider("distance", 10, [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
+      break;
+    }
+    this.addPart(this.button)
+  }
+  if (this.stack != null) {
+    this.stack.updateDim()
+  }
+}
+B_HLPortBlock.prototype.updateValues = function() {
+  var percent = null
+  switch(this.portType) {
+  case 1:
+    percent = this.button.values[0]
+    if (percent == 0) {
+      this.value = 89 //off signal
+    } else if (percent > 100) {
+      this.value = 174
+    } else if (percent < -100) {
+      this.value = 2
+    } else if (percent > 0) {
+      this.value = Math.round( (percent * 75/100) + 98 ) 
+    } else if (percent < 0) {
+      this.value = Math.round( 78 + (percent * 75/100) )
+    }
+    break;
+  case 3:
+    this.value = Math.round(this.button.values[0] / 1.5) + 2
+    break;
+  case 8:
+    percent = this.button.values[0]
+    if (percent > 100) {
+      this.value = 254
+    } else if (percent < 0) {
+      this.value = 0
+    } else {
+      this.value = Math.round(percent * 254/100)
+    }
+    break;
+  case 9:
+    if (this.button.widgets.length == 3) {
+      var red = this.button.values[0];
+      var green = this.button.values[1];
+      var blue = this.button.values[2];
+      this.value = Math.round(red*2.55) + ":" + Math.round(green*2.55) + ":" + Math.round(blue*2.55)
+    }
+    break;
+  case 10:
+    //TODO
+    break;
+  case 14:
+    this.value = this.button.values[0]
+    break;
+  default:
+    console.error("cannot update values for unsupported port type " + this.portType)
+    break;
+  }
+}
+
+B_HLPortBlock.prototype.startAction = function() {
+  if (this.portType == 0) {
+    return new ExecutionStatusDone();
+  }
+
+  var device = HL_Utils.setupAction(this)
+  if (device == null || !this.active) {
+    return new ExecutionStatusError();
+  }
+
+  if (this.portType != 14) { //Not a sensor type
+    device.setOutput(this.runMem.requestStatus, this.outputType, this.port, this.value, this.valueKey)
+  }
+
+  return new ExecutionStatusRunning();
+}
+B_HLPortBlock.prototype.updateAction = function() {
+  if (this.portType == 14) { //Sensors
+    var device = DeviceHatchling.getManager().getDevice(0)
+    if (device == null) { return new ExecutionStatusError(); }
+      
+    var num = device.getSensorValue(this.port)
+    console.log(num)
+    if ((!this.useLessThan && num > this.value) || (this.useLessThan && num < this.value)) {
+      return new ExecutionStatusDone();
+    }
+
+    return new ExecutionStatusRunning();
+  } else {
+    if (this.runMem.requestStatus.finished) {
+      if (this.runMem.requestStatus.error) {
+        return new ExecutionStatusError();
+      }
+      return new ExecutionStatusDone();
+    } else {
+      return new ExecutionStatusRunning();
+    }
+  }
+
+}
+
+function B_HLPortA(x, y) {
+  B_HLPortBlock.call(this, x, y, 0)
+}
+B_HLPortA.prototype = Object.create(B_HLPortBlock.prototype)
+B_HLPortA.prototype.constructor = B_HLPortA
+
+function B_HLPortB(x, y) {
+  B_HLPortBlock.call(this, x, y, 1)
+}
+B_HLPortB.prototype = Object.create(B_HLPortBlock.prototype)
+B_HLPortB.prototype.constructor = B_HLPortB
+
+function B_HLPortC(x, y) {
+  B_HLPortBlock.call(this, x, y, 2)
+}
+B_HLPortC.prototype = Object.create(B_HLPortBlock.prototype)
+B_HLPortC.prototype.constructor = B_HLPortC
+
+function B_HLPortD(x, y) {
+  B_HLPortBlock.call(this, x, y, 3)
+}
+B_HLPortD.prototype = Object.create(B_HLPortBlock.prototype)
+B_HLPortD.prototype.constructor = B_HLPortD
+
+function B_HLPortE(x, y) {
+  B_HLPortBlock.call(this, x, y, 4)
+}
+B_HLPortE.prototype = Object.create(B_HLPortBlock.prototype)
+B_HLPortE.prototype.constructor = B_HLPortE
+
+function B_HLPortF(x, y) {
+  B_HLPortBlock.call(this, x, y, 5)
+}
+B_HLPortF.prototype = Object.create(B_HLPortBlock.prototype)
+B_HLPortF.prototype.constructor = B_HLPortF
 
 
 

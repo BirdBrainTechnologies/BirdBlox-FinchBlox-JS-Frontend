@@ -94,7 +94,10 @@ Colors.setCategory = function() {
     "color_3": Colors.neonCarrot,
     "sound_3": Colors.seance,
     "control_3": Colors.fbYellow,
-    "sensor_3": Colors.finchGreen//Colors.flagGreen//Colors.finchGreen
+    "sensor_3": Colors.finchGreen,//Colors.flagGreen//Colors.finchGreen
+    "portblocks": Colors.easternBlue,
+    "oldblocks": Colors.neonCarrot,
+    "microbitblocks": Colors.seance
   };
   //In FinchBlox, the block palette changes colors per category
   Colors.blockPalette = {
@@ -108,7 +111,10 @@ Colors.setCategory = function() {
     "color_3": Colors.blockPaletteColor,
     "sound_3": Colors.blockPaletteSound,
     "control_3": Colors.blockPaletteControl,
-    "sensor_3": Colors.finchGreen
+    "sensor_3": Colors.finchGreen,
+    "portblocks": Colors.blockPaletteMotion,
+    "oldblocks": Colors.blockPaletteColor,
+    "microbitblocks": Colors.blockPaletteSound
   };
   //In FinchBlox, each block is outlined with a darker color
   Colors.blockOutline = {
@@ -123,7 +129,10 @@ Colors.setCategory = function() {
     "sound_3": Colors.fbPurpleBorder,
     "control_3": Colors.fbYellowBorder,
     "sensor_3": Colors.fbDarkGreen, //Colors.finchGreen,
-    "inactive": Colors.iron
+    "inactive": Colors.iron,
+    "portblocks": Colors.fbBlueBorder,
+    "oldblocks": Colors.fbOrangeBorder,
+    "microbitblocks": Colors.fbPurpleBorder
   }
 };
 

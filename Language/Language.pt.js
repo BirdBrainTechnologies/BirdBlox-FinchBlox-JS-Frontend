@@ -117,8 +117,6 @@ Language.pt = {
   "block_set_variable":"adcione (Slot 1) para (Slot 2)",
   "Create_Variable":"Criar uma variável",
   "block_change_variable":"mude (Slot 1) por (Slot 2)",
-  "Rename":"Renomear",
-  "Delete":"Apagar",
   "block_add_to_list":"adicionar (Slot 1 = objeto) para (Slot 2)",
   "Create_List":"Criar uma lista",
   "block_delete_from_list":"apague (Slot 1) de (Slot 2)",

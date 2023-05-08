@@ -116,8 +116,6 @@ Language.fi = {
   "block_set_variable":"aseta (Slot 1) arvoon (Slot 2)",
   "Create_Variable":"Luo Muuttuja",
   "block_change_variable":"muuta (Slot 1) (Slot 2)",
-  "Rename":"Nimeä uudelleen",
-  "Delete":"Poista",
   "block_add_to_list":"lisää (Slot 1 = thing) listaan (Slot 2)",
   "Create_List":"Luo lista",
   "block_delete_from_list":"poista (Slot 1) listasta (Slot 2)",

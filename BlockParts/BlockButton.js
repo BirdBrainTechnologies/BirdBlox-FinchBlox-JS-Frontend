@@ -371,3 +371,10 @@ BlockButton.prototype.importXml = function(blockButtonNode) {
     valueString = XmlWriter.getAttribute(blockButtonNode, "value_" + i);
   }
 }
+
+/**
+ * Remove the BlockButton from the parent (used in Hatchling)
+ */
+BlockButton.prototype.remove = function() {
+  this.button.remove()
+}

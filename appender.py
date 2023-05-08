@@ -7,6 +7,7 @@
 
 import re
 import os
+import subprocess
 
 my_path = os.path.dirname(os.path.realpath(__file__))
 path_prefix = my_path + "/"
@@ -36,7 +37,7 @@ def get_lines_from_html(html_path):
 def concat_js():
     lines = get_lines_from_html(path_prefix + "HummingbirdDragAndDrop2.html")
     paths = get_paths_from_lines(lines)
-    all_path = path_prefix + "all.js"
+    all_path = path_prefix + "all_MAX.js"
     if os.path.exists(all_path):
         os.remove(all_path)
     target = open(all_path, 'w')
@@ -68,3 +69,9 @@ def clean_file_iOS9(file):
     return file
 
 concat_js()
+
+
+# Minify using closure-compiler. Change the jar file name to the version you have downloaded.
+# See https://developers.google.com/closure/compiler/docs/gettingstarted_app
+cmd_str = "java -jar closure-compiler-v20230411.jar  --js all_MAX.js --js_output_file all.js"
+subprocess.run(cmd_str, shell=True)

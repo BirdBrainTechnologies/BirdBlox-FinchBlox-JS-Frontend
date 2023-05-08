@@ -252,7 +252,7 @@ TouchReceiver.checkStartZoom = function(e) {
  */
 TouchReceiver.wheelZoom = function(e) {
   const zoomIn = e.deltaY < 0
-  const x = e.pageX / GuiElements.zoomFactor
+  let x = e.pageX / GuiElements.zoomFactor
   if (Language.isRTL) {
     x = GuiElements.width - x;
   }
@@ -834,9 +834,9 @@ TouchReceiver.touchend = function(e) {
       TR.targetType = "tabSpace";
       TR.target = null;
       TabManager.startScroll(TR.getX(e), TR.getY(e));
-    } else if (e.touches.length > 1) {
+    } //else if (e.touches.length > 1) {
       // No action necessary
-    }
+    //}
   } else if (TR.touchDown && !TR.longTouch) { // Prevents multitouch problems.
     TR.touchDown = false;
     TR.dragging = false;

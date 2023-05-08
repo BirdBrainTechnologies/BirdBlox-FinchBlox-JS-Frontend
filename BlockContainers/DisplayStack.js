@@ -214,6 +214,10 @@ DisplayStack.prototype.duplicate = function(x, y) {
   let stack = new BlockStack(firstCopyBlock, tab);
   if (Hatchling) {
     HL_Utils.findPorts(firstCopyBlock)
+    if (firstCopyBlock.updateBlockType) { 
+      firstCopyBlock.updateBlockType(this.firstBlock.portType) 
+      firstCopyBlock.updateActive()
+    }
   }
   return stack
 };

@@ -180,6 +180,7 @@ BlockGraphics.SetLoop = function() {
 BlockGraphics.SetLabelText = function() {
   BlockGraphics.labelText = {};
   BlockGraphics.labelText.font = Font.uiFont(12).bold();
+  if (Hatchling) { BlockGraphics.labelText.font = Font.uiFont(30).bold(); }
   BlockGraphics.labelText.fill = Colors.white;
   BlockGraphics.labelText.disabledFill = Colors.labelTextDisabled;
 };

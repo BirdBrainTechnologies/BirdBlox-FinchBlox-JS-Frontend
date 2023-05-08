@@ -233,6 +233,18 @@ Block.prototype.addPart = function(part) {
 };
 
 /**
+ * Remove all parts for a fresh start (only used in Hatchling)
+ */
+Block.prototype.removeParts = function() {
+  for (let i = 0; i < this.parts.length; i++) {
+    if (this.parts[i].remove) { this.parts[i].remove() }
+  }
+  this.parts = []
+  this.slots = []
+  this.blockButtons = []
+}
+
+/**
  * Moves the Block and sets its this.x and this.y values.
  * @param {number} x - New x coord.
  * @param {number} y - New y coord.
@@ -1449,10 +1461,9 @@ Block.prototype.updateAvailableSensors = function() {
  * Hatchling only - called when port types change.
  */
 Block.prototype.updateAvailablePorts = function(port) {
-  console.log("updateAvailablePorts " + port)
-  if (this.hlButton != null && port == this.port) {
+  if (port == this.port && (this.hlButton != null || this.updateBlockType)) {
     this.updateActive()
-  }
+  } 
 }
 
 /**

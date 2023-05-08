@@ -39,7 +39,7 @@ function Device(name, id, RSSI, device) {
    * configure these fields so they can update when the status changes */
   this.statusListener = null;
   this.firmwareStatusListener = null;
-  this.hasV2Microbit;
+  this.hasV2Microbit = null;
 }
 
 
@@ -92,14 +92,14 @@ Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName
    * @return {string}
    */
   deviceClass.getNotConnectedMessage = function(errorCode, errorResult) {
-    if (errorResult == null || true) {
+  //  if (errorResult == null || true) {
       //return typeName + " " + Language.getStr("not_connected");
       const translatedText = Language.getStr("not_connected");
       const returnText = translatedText.replace("(Device)", typeName);
       return returnText;
-    } else {
-      return errorResult;
-    }
+  //  } else {
+  //    return errorResult;
+  //  }
   };
 
   const manager = new DeviceManager(deviceClass);

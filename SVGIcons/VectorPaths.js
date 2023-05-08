@@ -369,16 +369,19 @@ function VectorPaths(){
   //In FinchBlox, each category has an icon rather than displaying a text name.
   VP.categoryIcons = {
     "motion_1": VP.faArrowsAlt,
-		"color_1": VP.faLightbulb,
-		"sound_1": VP.faMusic,
-		"motion_2": VP.faArrowsAlt,
-		"color_2": VP.faLightbulb,
-		"sound_2": VP.faMusic,
-		"motion_3": VP.faArrowsAlt,
-		"color_3": VP.faLightbulb,
-		"sound_3": VP.faMusic,
-		"control_3": VP.faHandPointRight,
-		"sensor_3": VP.bsBroadcast //VP.faTowerBroadcast //VP.language
+	"color_1": VP.faLightbulb,
+	"sound_1": VP.faMusic,
+	"motion_2": VP.faArrowsAlt,
+	"color_2": VP.faLightbulb,
+	"sound_2": VP.faMusic,
+	"motion_3": VP.faArrowsAlt,
+	"color_3": VP.faLightbulb,
+	"sound_3": VP.faMusic,
+	"control_3": VP.faHandPointRight,
+	"sensor_3": VP.bsBroadcast, //VP.faTowerBroadcast //VP.language
+    "portblocks": VP.faCheck,
+    "oldblocks": VP.undo,
+    "microbitblocks": VP.microbit
   };
 
 }

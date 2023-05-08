@@ -117,7 +117,6 @@ Language.zhs = {
 "block_set_variable":"设置 (Slot 1) 到 (Slot 2)",
 "Create_Variable":"创建变数",
 "block_change_variable":"(Slot 1) 改变 (Slot 2)",
-"Rename":"改名",
 "Delete":"删除",
 "block_add_to_list":"添加 (Slot 1 = 物件) 到 (Slot 2)",
 "Create_List":"创建列表",

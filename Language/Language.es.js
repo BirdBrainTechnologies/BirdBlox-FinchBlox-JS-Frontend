@@ -117,8 +117,6 @@ Language.es = {
   "block_set_variable":"configurar (Slot 1) a (Slot 2)",
   "Create_Variable":"Crear Variable",
   "block_change_variable":"cambiar (Slot 1) en (Slot 2)",
-  "Rename":"Cambiar nombre",
-  "Delete":"Borrar",
   "block_add_to_list":"agregar (Slot 1 = objeto) a (Slot 2)",
   "Create_List":"Crear Lista",
   "block_delete_from_list":"borrar (Slot 1) de (Slot 2) ",

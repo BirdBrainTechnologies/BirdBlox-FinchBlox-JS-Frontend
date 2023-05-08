@@ -4,7 +4,7 @@
  * @param {string} text - The text to display
  * @constructor
  */
-function LabelText(parent, text) {
+function LabelText(parent, text, disabledColor) {
   DebugOptions.validateNonNull(parent, text);
   this.text = text;
   this.width = 0; // Computed later with updateDim
@@ -15,6 +15,7 @@ function LabelText(parent, text) {
   this.textE = this.generateText(text);
   this.isSlot = false; // All BlockParts have this property
   this.visible = true;
+  this.disabledColor = disabledColor
 }
 LabelText.prototype = Object.create(BlockPart.prototype);
 LabelText.prototype.constructor = LabelText;
@@ -104,5 +105,9 @@ LabelText.prototype.makeActive = function() {
 };
 
 LabelText.prototype.makeInactive = function() {
-  GuiElements.update.color(this.textE, BlockGraphics.labelText.disabledFill);
+  if (this.disabledColor != null) {
+    GuiElements.update.color(this.textE, this.disabledColor);
+  } else {
+    GuiElements.update.color(this.textE, BlockGraphics.labelText.disabledFill);
+  }
 };

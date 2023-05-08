@@ -47,7 +47,7 @@ EditableSlotShape.prototype.buildSlot = function() {
  * Create the element representing the background
  */
 EditableSlotShape.prototype.buildBackground = function() {
-  GuiElements.markAbstract();
+  DebugOptions.markAbstract();
 };
 
 /**

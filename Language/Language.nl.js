@@ -117,8 +117,6 @@ Language.nl = {
   "block_set_variable":"maak (Slot 1) (Slot 2)",
   "Create_Variable":"Maak een Variabele",
   "block_change_variable":"verander (Slot 1) met (Slot 2)",
-  "Rename":"Hernoemen",
-  "Delete":"Verwijder",
   "block_add_to_list":"voeg (Slot 1 = ding) toe aan (Slot 2)",
   "Create_List":"Maak een Lijst",
   "block_delete_from_list":"verwijder (Slot 1) van (Slot 2)",

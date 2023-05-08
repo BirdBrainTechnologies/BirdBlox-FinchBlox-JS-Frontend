@@ -199,3 +199,10 @@ BlockIcon.prototype.addObstacle = function(color) {
   this.parent.group.appendChild(this.obstacle);
   TouchReceiver.addListenersChild(this.obstacle, this.parent);
 }
+
+/**
+ * Remove the BlockIcon from the parent (used in Hatchling)
+ */
+BlockIcon.prototype.remove = function() {
+  this.icon.group.remove()
+}

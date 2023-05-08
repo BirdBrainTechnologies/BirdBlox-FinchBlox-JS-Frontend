@@ -17,7 +17,7 @@ function CategoryBN(x, y, category) {
     this.fill = Colors.getGradient(this.catId);
   }
   this.buildGraphics();
-  if (FinchBlox) {
+  if (FinchBlox && !Hatchling) {
     this.setHidden();
   }
 }
@@ -74,6 +74,10 @@ CategoryBN.prototype.buildGraphics = function() {
     let iconX = (CBN.width - iconW) / 2;
     let iconY = (CBN.height - iconH) / 2;
     this.icon = new VectorIcon(iconX, iconY, iconPath, Button.foreground, iconH, this.group, false);
+    if (iconPath == VectorPaths.microbit) { 
+      this.icon.setColor(Colors.bbtDarkGray)
+      this.icon.addBackgroundRect() 
+    }
     this.label = this.icon.pathE;
   } else {
     this.colorRect = GuiElements.draw.rect(0, 0, CBN.colorW, CBN.height, this.fill);
@@ -139,6 +143,8 @@ CategoryBN.prototype.addListeners = function() {
   TouchReceiver.addListenersCat(this.bgRect, cat);
   if (!FinchBlox) {
     TouchReceiver.addListenersCat(this.colorRect, cat);
+  } else if (this.icon.bgRect) {
+    TouchReceiver.addListenersCat(this.icon.bgRect, cat);
   }
   TouchReceiver.addListenersCat(this.label, cat);
 };

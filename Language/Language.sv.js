@@ -116,8 +116,6 @@ Language.sv = {
   "block_set_variable":"sätt (Slot 1) till (Slot 2)",
   "Create_Variable":"Skapa variabel",
   "block_change_variable":"ändra (Slot 1) med (Slot 2)",
-  "Rename":"Byt namn",
-  "Delete":"Radera",
   "block_add_to_list":"lägg till (Slot 1 = objekt) till (Slot 2)",
   "Create_List":"Skapa lista",
   "block_delete_from_list":"ta bort (Slot 1) av  (Slot 2)",

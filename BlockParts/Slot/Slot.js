@@ -198,10 +198,9 @@ Slot.prototype.getData = function() {
 
 /**
  * Returns the result if the slot has no child
- * @abstract
  */
 Slot.prototype.getDataNotFromChild = function() {
-  GuiElements.markAbstract();
+  DebugOptions.markAbstract();
 };
 
 /** Recursively updates the dimensions of the BlockStack. */
@@ -573,7 +572,6 @@ Slot.prototype.getKey = function() {
 
 /**
  * Draws a white border around the slot to indicate that the blocks being dragged will snap to it if released.
- * @abstract
  */
 Slot.prototype.highlight = function() {
   DebugOptions.markAbstract();
@@ -582,7 +580,6 @@ Slot.prototype.highlight = function() {
 /**
  * Creates a string representing the slot and its content
  * @return {string}
- * @abstract
  */
 Slot.prototype.textSummary = function() {
   DebugOptions.markAbstract();

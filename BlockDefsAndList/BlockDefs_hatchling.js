@@ -461,3 +461,245 @@ B_HLWaitUntilPort.prototype.checkActive = function() {
 }
 
 
+function B_HLPortBlock(x, y, port) {
+  this.port = port 
+  CommandBlock.call(this, x, y, "portblocks");
+
+  this.updateBlockType(0)
+  this.updateActive()
+}
+B_HLPortBlock.prototype = Object.create(CommandBlock.prototype)
+B_HLPortBlock.prototype.constructor = B_HLPortBlock
+B_HLPortBlock.prototype.updateConnectionStatus = function() {
+  this.updateActive()
+}
+B_HLPortBlock.prototype.checkActive = function() {
+  let device = DeviceHatchling.getManager().getDevice(0);
+  if (device != null) {
+    const currentState = device.portStates[this.port]
+
+    /*// Update blocks on the canvas and in block palette
+    if (this.portType != currentState) {
+        this.updateBlockType(currentState)
+    }
+    return (currentState != 0)*/
+
+
+    //just update the block if it is in the block palette
+    if (this.stack != null && this.stack.isDisplayStack) {
+      if (this.portType != currentState) {
+        this.updateBlockType(currentState)
+      }
+      return (currentState != 0)  //Nothing attached to port for type == 0
+    } else {
+      return (currentState != 0) && (this.portType == currentState)
+    }
+
+  }
+  return false
+}
+B_HLPortBlock.prototype.updateBlockType = function(newPortType) {
+  this.portType = newPortType
+  this.outputType = null
+  this.sensorType = null
+  this.removeParts()
+  if (this.portType == 0) { //Nothing attached, at port name label
+    const labels = ["A", "B", "C", "D", "E", "F"]
+    this.icon = new LabelText(this, labels[this.port], HL_Utils.portColors[this.port])
+  } else {
+    let iconName = null
+    let iconH = 0
+    switch(this.portType) {
+    case 1: iconName = "bsArrowClockwise"; iconH = 30; break; //rotation servo
+    case 3: iconName = "bsSpeedometer2"; iconH = 27; break; //position servo
+    case 8: iconName = "bsStars"; iconH = 27; break; //fairy lights
+    case 9: iconName = "faLightbulb"; iconH = 27; break; //single neopixel
+    case 10: iconName = "faLightbulb"; iconH = 25; break; //4 neopixel strip
+    case 14: iconName = "faRuler"; iconH = 20; break; //distance sensor
+    default:
+      console.error("PortBlock unsupported port type " + this.portType)
+      return
+    }
+    this.icon = new BlockIcon(this, VectorPaths[iconName], HL_Utils.portColors[this.port], iconName, iconH)
+  }
+  this.icon.isEndOfLine = true
+  this.addPart(this.icon)
+
+  if (this.portType != 0) {
+    this.button = new BlockButton(this)
+    switch(this.portType) {
+    case 1:
+      this.outputType = "rotationServo"
+      this.value = 255 //off signal
+      this.valueKey = "value"
+      this.button.addSlider("percent", 0, [-100, -80, -60, -40, -20, 0, 20, 40, 60, 80, 100])
+      break;
+    case 3:
+      this.outputType = "positionServo"
+      this.value = 90; //defaultAngle
+      this.valueKey = "angle"
+      this.button.addSlider("angle_right", 90, [0, 30, 60, 90, 120, 150, 180, 210, 240, 270])
+      break;
+    case 8:
+      this.outputType = "fairyLights"
+      this.value = ""
+      this.valueKey = "value"
+      this.button.addSlider("percent", 50, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
+      break;
+    case 9:
+      this.outputType = "singleNeopix"
+      this.value = ""
+      this.valueKey = "color"
+      this.button.addSlider("color_red", 100)
+      this.button.addSlider("color_green", 100)
+      this.button.addSlider("color_blue", 100)
+      break;
+    case 10:
+      this.outputType = "neopixStrip"
+      this.value = ""
+      this.valueKey = "colors"
+      this.button.addSlider("color_red", 100)
+      this.button.addSlider("color_green", 100)
+      this.button.addSlider("color_blue", 100)
+      break;
+    case 14:
+      this.sensorType = "distance"
+      this.value = 10
+      this.useLessThan = true
+      this.button.addSlider("distance", 10, [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
+      break;
+    }
+    this.addPart(this.button)
+  }
+  if (this.stack != null) {
+    this.stack.updateDim()
+  }
+}
+B_HLPortBlock.prototype.updateValues = function() {
+  let percent = null
+  switch(this.portType) {
+  case 1:
+    percent = this.button.values[0]
+    if (percent == 0) {
+      this.value = 89 //off signal
+    } else if (percent > 100) {
+      this.value = 174
+    } else if (percent < -100) {
+      this.value = 2
+    } else if (percent > 0) {
+      this.value = Math.round( (percent * 75/100) + 98 ) 
+    } else if (percent < 0) {
+      this.value = Math.round( 78 + (percent * 75/100) )
+    }
+    break;
+  case 3:
+    this.value = Math.round(this.button.values[0] / 1.5) + 2
+    break;
+  case 8:
+    percent = this.button.values[0]
+    if (percent > 100) {
+      this.value = 254
+    } else if (percent < 0) {
+      this.value = 0
+    } else {
+      this.value = Math.round(percent * 254/100)
+    }
+    break;
+  case 9:
+    if (this.button.widgets.length == 3) {
+      const red = this.button.values[0];
+      const green = this.button.values[1];
+      const blue = this.button.values[2];
+      this.value = Math.round(red*2.55) + ":" + Math.round(green*2.55) + ":" + Math.round(blue*2.55)
+    }
+    break;
+  case 10:
+    //TODO
+    break;
+  case 14:
+    this.value = this.button.values[0]
+    break;
+  default:
+    console.error("cannot update values for unsupported port type " + this.portType)
+    break;
+  }
+}
+
+B_HLPortBlock.prototype.startAction = function() {
+  if (this.portType == 0) {
+    return new ExecutionStatusDone();
+  }
+
+  let device = HL_Utils.setupAction(this)
+  if (device == null || !this.active) {
+    return new ExecutionStatusError();
+  }
+
+  if (this.portType != 14) { //Not a sensor type
+    device.setOutput(this.runMem.requestStatus, this.outputType, this.port, this.value, this.valueKey)
+  }
+
+  return new ExecutionStatusRunning();
+}
+B_HLPortBlock.prototype.updateAction = function() {
+  if (this.portType == 14) { //Sensors
+    let device = DeviceHatchling.getManager().getDevice(0)
+    if (device == null) { return new ExecutionStatusError(); }
+      
+    const num = device.getSensorValue(this.port)
+    console.log(num)
+    if ((!this.useLessThan && num > this.value) || (this.useLessThan && num < this.value)) {
+      return new ExecutionStatusDone();
+    }
+
+    return new ExecutionStatusRunning();
+  } else {
+    if (this.runMem.requestStatus.finished) {
+      if (this.runMem.requestStatus.error) {
+        return new ExecutionStatusError();
+      }
+      return new ExecutionStatusDone();
+    } else {
+      return new ExecutionStatusRunning();
+    }
+  }
+
+}
+
+function B_HLPortA(x, y) {
+  B_HLPortBlock.call(this, x, y, 0)
+}
+B_HLPortA.prototype = Object.create(B_HLPortBlock.prototype)
+B_HLPortA.prototype.constructor = B_HLPortA
+
+function B_HLPortB(x, y) {
+  B_HLPortBlock.call(this, x, y, 1)
+}
+B_HLPortB.prototype = Object.create(B_HLPortBlock.prototype)
+B_HLPortB.prototype.constructor = B_HLPortB
+
+function B_HLPortC(x, y) {
+  B_HLPortBlock.call(this, x, y, 2)
+}
+B_HLPortC.prototype = Object.create(B_HLPortBlock.prototype)
+B_HLPortC.prototype.constructor = B_HLPortC
+
+function B_HLPortD(x, y) {
+  B_HLPortBlock.call(this, x, y, 3)
+}
+B_HLPortD.prototype = Object.create(B_HLPortBlock.prototype)
+B_HLPortD.prototype.constructor = B_HLPortD
+
+function B_HLPortE(x, y) {
+  B_HLPortBlock.call(this, x, y, 4)
+}
+B_HLPortE.prototype = Object.create(B_HLPortBlock.prototype)
+B_HLPortE.prototype.constructor = B_HLPortE
+
+function B_HLPortF(x, y) {
+  B_HLPortBlock.call(this, x, y, 5)
+}
+B_HLPortF.prototype = Object.create(B_HLPortBlock.prototype)
+B_HLPortF.prototype.constructor = B_HLPortF
+
+

@@ -10,7 +10,7 @@ function BlockList() {
   // List only includes categories that will appear in the BlockPalette in order.
   // Category names should be capitalized in the way they should be displayed on screen.
   if (FinchBlox) {
-    if (!Hatchling) {
+    /*if (!Hatchling) {
       cat.push("Motion_1");
       cat.push("Color_1");
       cat.push("Sound_1");
@@ -22,7 +22,24 @@ function BlockList() {
     cat.push("Color_3");
     cat.push("Sound_3");
     if (Hatchling) { cat.push("Sensor_3") }
-    cat.push("Control_3");
+    cat.push("Control_3");*/
+    if (Hatchling) {
+      cat.push("PortBlocks")
+      cat.push("OldBlocks")
+      cat.push("MicrobitBlocks")
+      cat.push("Control_3")
+    } else {
+      cat.push("Motion_1");
+      cat.push("Color_1");
+      cat.push("Sound_1");
+      cat.push("Motion_2");
+      cat.push("Color_2");
+      cat.push("Sound_2");
+      cat.push("Motion_3");
+      cat.push("Color_3");
+      cat.push("Sound_3");
+      cat.push("Control_3");
+    }
   } else {
     cat.push("Robots");
     cat.push("Operators");
@@ -154,7 +171,7 @@ BlockList.populateCat_sound_3 = function(category) {
   category.trimBottom();
   category.centerBlocks();
 }
-BlockList.populateCat_sensor_3 = function(category) {
+/*BlockList.populateCat_sensor_3 = function(category) {
   category.addBlockByName("B_StartWhenDark");
   category.addBlockByName("B_StartWhenClap");
   category.addBlockByName("B_StartWhenDistance");
@@ -162,7 +179,7 @@ BlockList.populateCat_sensor_3 = function(category) {
   category.addBlockByName("B_HLWaitUntilPort");
   category.trimBottom();
   category.centerBlocks();
-}
+}*/
 BlockList.populateCat_control_3 = function(category) {
   category.addBlockByName("B_WhenFlagTapped");
   category.addBlockByName("B_Wait");
@@ -172,6 +189,40 @@ BlockList.populateCat_control_3 = function(category) {
     category.addBlockByName("B_StartWhenDark");
     category.addBlockByName("B_StartWhenClap");
   }
+  category.trimBottom();
+  category.centerBlocks();
+}
+
+//HATCHLING CATEGORIES
+BlockList.populateCat_portblocks = function(category) {
+  category.addBlockByName("B_HLPortA");
+  category.addBlockByName("B_HLPortB");
+  category.addBlockByName("B_HLPortC");
+  category.addBlockByName("B_HLPortD");
+  category.addBlockByName("B_HLPortE");
+  category.addBlockByName("B_HLPortF");
+  category.trimBottom();
+  category.centerBlocks();
+}
+BlockList.populateCat_oldblocks = function(category) {
+  category.addBlockByName("B_HLPositionServo")
+  category.addBlockByName("B_HLRotationServo")
+  category.addBlockByName("B_HLccRotationServo")
+  category.addBlockByName("B_HLFairyLights")
+  category.addBlockByName("B_HLSingleNeopix")
+  category.addBlockByName("B_HLNeopixStrip")
+  category.addBlockByName("B_StartWhenDistance");
+  category.addBlockByName("B_HLWaitUntilPort");
+  category.trimBottom();
+  category.centerBlocks();
+}
+BlockList.populateCat_microbitblocks = function(category) {
+  category.addBlockByName("B_FBSoundL3");
+  category.addBlockByName("B_FBLedArrayL2")
+  category.addBlockByName("B_HLAlphabet")
+  category.addBlockByName("B_StartWhenDark");
+  category.addBlockByName("B_StartWhenClap");
+  category.addBlockByName("B_HLWaitUntil");
   category.trimBottom();
   category.centerBlocks();
 }

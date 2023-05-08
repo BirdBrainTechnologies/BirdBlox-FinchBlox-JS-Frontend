@@ -77,6 +77,14 @@ DeviceHatchling.prototype.readSensor = function(status, sensor, port) {
 }
 
 /**
+ * Retrieves the sensor value for the given port from the locally stored array
+ * @param {number} port - The port to return the value for
+ */
+DeviceHatchling.prototype.getSensorValue = function(port) {
+  return this.hlState[ port + 14 ]
+}
+
+/**
  * getHatchlingCode - calculate the color code displayed on the hatchling
  * @param {string} devName Advertised name of the robot
  * @return {[string]} hex values of the 6 colors displayed.
