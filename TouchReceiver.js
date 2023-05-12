@@ -284,6 +284,8 @@ TouchReceiver.targetIsInTabSpace = function() {
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchStartBlock = function(target, e) {
+  if (target.isStatic) { return } //static blocks are just place holders in the block palette
+
   const TR = TouchReceiver;
   if (e.type.startsWith("mouse")) {
     if (!target.stack.isDisplayStack) {

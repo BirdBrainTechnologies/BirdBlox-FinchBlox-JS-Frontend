@@ -130,6 +130,26 @@ CollapsibleItem.prototype.addBlock = function(block) {
 };
 
 /**
+ * Replace a given block with a new block 
+ * @param {Block} block - block to be replaced
+ * @param {string} newBlockName - name of type of block to replace block with
+ */
+CollapsibleItem.prototype.replaceBlock = function(block, newBlockName) {
+  console.log("replace block at " + block.x + "," + block.y + "  " + block.stack.x + "," + block.stack.y + " port " + block.port + " to " + newBlockName)
+  const blockIndex = this.blocks.indexOf(block)
+  const stackIndex = this.displayStacks.indexOf(block.stack)
+
+  const newBlock = new window[newBlockName](block.stack.x, block.stack.y, block.port); //Hatchling blocks may specify port
+  const newStack = new DisplayStack(newBlock, this.innerGroup, this);
+
+  //remove the old block from the window
+  block.stack.remove()
+
+  if (blockIndex != -1) { this.blocks[blockIndex] = newBlock }
+  if (stackIndex != -1) { this.displayStacks[stackIndex] = newStack}
+}
+
+/**
  * Adds space between Blocks to denote sections
  */
 CollapsibleItem.prototype.addSpace = function() {

@@ -6,6 +6,7 @@
 const HL_Utils = {}
 //                      blue         yellow       sea-green    magenta      white        orange
 HL_Utils.portColors = ["#0000FF", "#FFFF00", "#00FF88", "#FF00FF", "#FFFFFF", "#FF4400"]//["#00f", "#ff0", "#0f0", "#f0f", "#0ff", "#f80"]//["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
+HL_Utils.portNames = ["A", "B", "C", "D", "E", "F"]
 HL_Utils.addHLButton = function(block, portType) {
   block.port = -1 //unknown
   block.hlButton = new BlockButton(block, 20);
@@ -84,6 +85,57 @@ HL_Utils.showPortsPopup = function(block) {
       block.hlButton.button.release()
     }, 100);
   }
+}
+
+HL_Utils.birdBloxCheckActive = function(block) {
+  console.log("birdBloxCheckActive for " + block.constructor.name)
+  let device = DeviceHatchling.getManager().getDevice(0);
+  if (device != null) {
+    const currentState = device.portStates[block.port]
+
+    if (block.stack != null && block.stack.isDisplayStack && block.portType != currentState) {
+      HL_Utils.replaceBlock(block, currentState)
+      return (currentState != 0)
+    } else {
+      return (block.portType == currentState && currentState != 0)
+    }
+
+  }
+  return false
+}
+//To replace the block in the palette when something new is plugged in to a port 
+HL_Utils.replaceBlock = function(block, currentState) {
+  console.log("update block for port " + block.port + " to " + currentState)
+  if (!block.stack.isDisplayStack) { return }
+
+  let blockName = ""
+  switch (currentState) {
+  case 0: 
+    blockName = "B_HLEmptyPort" + HL_Utils.portNames[block.port]
+    break;
+  case 1:
+    blockName = "B_HLBBRotationServo"
+    break;
+  case 3:
+    blockName = "B_HLBBPositionServo"
+    break;
+  case 8:
+    blockName = "B_HLBBFairyLights"
+    break;
+  case 9:
+    blockName = "B_HLBBSingleNeopix"
+    break;
+  case 10:
+    blockName = "B_HLBBNeopixStrip"
+    break;
+  case 14:
+    blockName = "B_HLBBDistance"
+    break;
+  default: //If we don't know this state, just leave things the way they are
+    return;
+  }
+
+  block.stack.category.replaceBlock(block, blockName)
 }
 
 
@@ -504,9 +556,10 @@ B_HLPortBlock.prototype.updateBlockType = function(newPortType) {
   this.sensorType = null
   this.removeParts()
   if (this.portType == 0) { //Nothing attached, at port name label
-    const labels = ["A", "B", "C", "D", "E", "F"]
-    this.icon = new LabelText(this, labels[this.port], HL_Utils.portColors[this.port])
+    this.isStatic = true //This block cannot be dragged from the block palette
+    this.icon = new LabelText(this, HL_Utils.portNames[this.port], HL_Utils.portColors[this.port])
   } else {
+    this.isStatic = false
     let iconName = null
     let iconH = 0
     switch(this.portType) {
@@ -702,4 +755,341 @@ function B_HLPortF(x, y) {
 B_HLPortF.prototype = Object.create(B_HLPortBlock.prototype)
 B_HLPortF.prototype.constructor = B_HLPortF
 
+
+/*** BirdBlox Blocks  ***/
+
+function B_HLEmptyPort(x, y, port) {
+  this.port = port 
+  this.portType = 0
+
+  ReporterBlock.call(this, x, y) //By leaving the category empty, we can make a sort of ghost block
+  this.isStatic = true //This block cannot be dragged from the block palette
+
+  const labelText = "( " + Language.getStr("port") + " " + HL_Utils.portNames[this.port] + " " + Language.getStr("is_empty") + " )"
+  const label = new LabelText(this, labelText, Colors.lightGray)
+  this.addPart(label)
+}
+B_HLEmptyPort.prototype = Object.create(ReporterBlock.prototype);
+B_HLEmptyPort.prototype.constructor = B_HLEmptyPort;
+B_HLEmptyPort.prototype.checkActive = function() {
+  console.log("Empty port block check active - port " + this.port)
+  return HL_Utils.birdBloxCheckActive(this)
+  /*let device = DeviceHatchling.getManager().getDevice(0);
+  if (device != null) {
+    const currentState = device.portStates[this.port]
+
+    if (this.portType != currentState) {
+        HL_Utils.replaceBlock(this, currentState)
+    }
+    return (currentState != 0)
+
+  }
+  return false*/
+}
+
+function B_HLEmptyPortA(x, y) {
+  B_HLEmptyPort.call(this, x, y, 0);
+}
+B_HLEmptyPortA.prototype = Object.create(B_HLEmptyPort.prototype);
+B_HLEmptyPortA.prototype.constructor = B_HLEmptyPortA;
+
+function B_HLEmptyPortB(x, y) {
+  B_HLEmptyPort.call(this, x, y, 1);
+}
+B_HLEmptyPortB.prototype = Object.create(B_HLEmptyPort.prototype);
+B_HLEmptyPortB.prototype.constructor = B_HLEmptyPortB;
+
+function B_HLEmptyPortC(x, y) {
+  B_HLEmptyPort.call(this, x, y, 2);
+}
+B_HLEmptyPortC.prototype = Object.create(B_HLEmptyPort.prototype);
+B_HLEmptyPortC.prototype.constructor = B_HLEmptyPortC;
+
+function B_HLEmptyPortD(x, y) {
+  B_HLEmptyPort.call(this, x, y, 3);
+}
+B_HLEmptyPortD.prototype = Object.create(B_HLEmptyPort.prototype);
+B_HLEmptyPortD.prototype.constructor = B_HLEmptyPortD;
+
+function B_HLEmptyPortE(x, y) {
+  B_HLEmptyPort.call(this, x, y, 4);
+}
+B_HLEmptyPortE.prototype = Object.create(B_HLEmptyPort.prototype);
+B_HLEmptyPortE.prototype.constructor = B_HLEmptyPortE;
+
+function B_HLEmptyPortF(x, y) {
+  B_HLEmptyPort.call(this, x, y, 5);
+}
+B_HLEmptyPortF.prototype = Object.create(B_HLEmptyPort.prototype);
+B_HLEmptyPortF.prototype.constructor = B_HLEmptyPortF;
+
+
+
+function B_HLBirdBloxOutput(x, y, outputType, portType, port, minVal, maxVal) {
+  this.outputType = outputType
+  this.portType = portType
+  this.port = port
+  this.minVal = minVal
+  this.maxVal = maxVal
+  this.positive = (this.minVal >= 0)
+  if (this.port == null) { console.error("Port must be specified") }
+
+  CommandBlock.call(this, x, y, DeviceHatchling.getDeviceTypeId());
+
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  this.addPart(new LabelText(this, (Language.getStr("port") + " " + HL_Utils.portNames[this.port]) ))
+}
+B_HLBirdBloxOutput.prototype = Object.create(CommandBlock.prototype);
+B_HLBirdBloxOutput.prototype.constructor = B_HLBirdBloxOutput;
+
+B_HLBirdBloxOutput.prototype.startAction = function() {
+  let device = HL_Utils.setupAction(this);
+  if (device == null || !this.active) {
+    return new ExecutionStatusError();
+  }
+  if (this.port == -1 || this.port >= HL_Utils.portColors.length) {
+    //no port chosen. Or possibly port our of bounds. Todo: pop up window if something is connected?
+    return new ExecutionStatusError();
+  }
+  let userValue = 0
+  if (this.portType != 10) { 
+    userValue = this.slots[1].getData().getValueInR(this.minVal, this.maxVal, this.positive, true); 
+  }
+  switch(this.portType) {
+  case 1:
+    if (userValue == 0) {
+      this.value = 89 //off signal
+    } else if (userValue > 0) {
+      this.value = Math.round( (userValue * 75/100) + 98 ) 
+    } else {
+      this.value = Math.round( 78 + (userValue * 75/100) )
+    }
+    break;
+  case 3:
+    this.value = Math.round(userValue / 1.5) + 2
+    break;
+  case 8:
+    this.value = Math.round(userValue * 254/100)
+    break;
+  case 9:
+    let userValue2 = this.slots[2].getData().getValueInR(this.minVal, this.maxVal, this.positive, true);
+    let userValue3 = this.slots[3].getData().getValueInR(this.minVal, this.maxVal, this.positive, true);
+    this.value = Math.round(userValue*2.55) + ":" + Math.round(userValue2*2.55) + ":" + Math.round(userValue3*2.55)
+    break;
+  case 10:
+    let place = this.slots[1].getData().getValue()
+    let r = this.slots[2].getData().getValueInR(this.minVal, this.maxVal, this.positive, true);
+    let g = this.slots[3].getData().getValueInR(this.minVal, this.maxVal, this.positive, true);
+    let b = this.slots[4].getData().getValueInR(this.minVal, this.maxVal, this.positive, true);
+    this.value = Math.round(r*2.55) + "," + Math.round(g*2.55) + "," + Math.round(b*2.55) + "," + place
+    break;
+  default:
+    this.value = userValue
+    break;
+  }
+  device.setOutput(this.runMem.requestStatus, this.outputType, this.port, this.value, this.valueKey)
+  return new ExecutionStatusRunning();
+};
+B_HLBirdBloxOutput.prototype.updateAction = function() {
+  if (this.runMem.requestStatus.finished) {
+    if (this.runMem.requestStatus.error) {
+      return new ExecutionStatusError();
+    }
+    return new ExecutionStatusDone();
+  } else {
+    return new ExecutionStatusRunning();
+  }
+};
+B_HLBirdBloxOutput.prototype.checkActive = function() {
+  return HL_Utils.birdBloxCheckActive(this)
+}
+
+function B_HLBBRotationServo(x, y, port) {
+  this.value = 255 //off signal
+  this.defaultSpeed = 50;
+  this.valueKey = "value"
+  B_HLBirdBloxOutput.call(this, x, y, "rotationServo", 1, port, -100, 100);
+
+  const numSlot = new NumSlot(this, "NumS_out", 0, false, true)
+  numSlot.addLimits(this.minVal, this.maxVal, Language.getStr("Speed"))
+  this.addPart(numSlot)
+  this.parseTranslation(Language.getStr("block_Rotation_Servo"))
+}
+B_HLBBRotationServo.prototype = Object.create(B_HLBirdBloxOutput.prototype);
+B_HLBBRotationServo.prototype.constructor = B_HLBBRotationServo;
+
+function B_HLBBPositionServo(x, y, port) {
+  this.value = 90; //defaultAngle
+  this.valueKey = "angle"
+  B_HLBirdBloxOutput.call(this, x, y, "positionServo", 3, port, 0, 270);
+
+  const numSlot = new NumSlot(this, "NumS_out", 90, true, true)
+  numSlot.addLimits(this.minVal, this.maxVal, Language.getStr("Angle"))
+  this.addPart(numSlot)
+  this.parseTranslation(Language.getStr("block_Position_Servo"))
+}
+B_HLBBPositionServo.prototype = Object.create(B_HLBirdBloxOutput.prototype);
+B_HLBBPositionServo.prototype.constructor = B_HLBBPositionServo;
+
+function B_HLBBFairyLights(x, y, port) {
+  this.value = ""
+  this.valueKey = "value"
+  this.defaultIntensity = 50
+
+  B_HLBirdBloxOutput.call(this, x, y, "fairyLights", 8, port, 0, 100);
+
+  const numSlot = new NumSlot(this, "NumS_out", 0, true, true)
+  numSlot.addLimits(this.minVal, this.maxVal, Language.getStr("Intensity"))
+  this.addPart(numSlot)
+  this.parseTranslation(Language.getStr("block_Fairy_Lights"))
+}
+B_HLBBFairyLights.prototype = Object.create(B_HLBirdBloxOutput.prototype);
+B_HLBBFairyLights.prototype.constructor = B_HLBBFairyLights;
+
+function B_HLBBSingleNeopix(x, y, port) {
+  this.value = ""
+  this.valueKey = "color"
+  this.red = 100;
+  this.green = 100;
+  this.blue = 100;
+  B_HLBirdBloxOutput.call(this, x, y, "singleNeopix", 9, port, 0, 100);
+
+  const ledSlot1 = new NumSlot(this, "NumS_r", 0, true, true); //Positive integer.
+  ledSlot1.addLimits(this.minVal, this.maxVal, Language.getStr("Intensity"));
+  this.addPart(ledSlot1);
+  const ledSlot2 = new NumSlot(this, "NumS_g", 0, true, true); //Positive integer.
+  ledSlot2.addLimits(this.minVal, this.maxVal, Language.getStr("Intensity"));
+  this.addPart(ledSlot2);
+  const ledSlot3 = new NumSlot(this, "NumS_b", 0, true, true); //Positive integer.
+  ledSlot3.addLimits(this.minVal, this.maxVal, Language.getStr("Intensity"));
+  this.addPart(ledSlot3);
+  this.parseTranslation(Language.getStr("block_Single_Neopixel"));
+}
+B_HLBBSingleNeopix.prototype = Object.create(B_HLBirdBloxOutput.prototype);
+B_HLBBSingleNeopix.prototype.constructor = B_HLBBSingleNeopix;
+
+function B_HLBBNeopixStrip(x, y, port) {
+  this.value = ""
+  this.valueKey = "colors"
+  this.red = 100;
+  this.green = 100;
+  this.blue = 100;
+
+  B_HLBirdBloxOutput.call(this, x, y, "neopixStrip", 10, port);
+
+  const ds = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("all"), "all"));
+  ds.addOption(new SelectionData("1", "1"));
+  ds.addOption(new SelectionData("2", "2"));
+  ds.addOption(new SelectionData("3", "3"));
+  ds.addOption(new SelectionData("4", "4"));
+  ds.addOption(new SelectionData(Language.getStr("all"), "all"));
+  this.addPart(ds);
+
+  const ledSlot1 = new NumSlot(this, "NumS_r", 0, true, true); //Positive integer.
+  ledSlot1.addLimits(0, 100, Language.getStr("Intensity"));
+  this.addPart(ledSlot1);
+  const ledSlot2 = new NumSlot(this, "NumS_g", 0, true, true); //Positive integer.
+  ledSlot2.addLimits(0, 100, Language.getStr("Intensity"));
+  this.addPart(ledSlot2);
+  const ledSlot3 = new NumSlot(this, "NumS_b", 0, true, true); //Positive integer.
+  ledSlot3.addLimits(0, 100, Language.getStr("Intensity"));
+  this.addPart(ledSlot3);
+
+  this.parseTranslation(Language.getStr("block_Neopixel_Strip"));
+}
+B_HLBBNeopixStrip.prototype = Object.create(B_HLBirdBloxOutput.prototype);
+B_HLBBNeopixStrip.prototype.constructor = B_HLBBNeopixStrip;
+
+
+
+function B_HLBirdBloxSensor(x, y, portType, port) {
+  this.portType = portType
+  this.port = port
+  if (this.port == null) { console.error("Port must be specified") }
+  ReporterBlock.call(this, x, y, DeviceHatchling.getDeviceTypeId());
+
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  this.addPart(new LabelText(this, (Language.getStr("port") + " " + HL_Utils.portNames[this.port]) ))
+}
+B_HLBirdBloxSensor.prototype = Object.create(ReporterBlock.prototype);
+B_HLBirdBloxSensor.prototype.constructor = B_HLBirdBloxSensor
+B_HLBirdBloxSensor.prototype.startAction = function() {
+  let device = DeviceHatchling.getManager().getDevice(0)
+  if (device == null) { return new ExecutionStatusError(); }
+      
+  const num = device.getSensorValue(this.port)
+  console.log(num)
+  return new ExecutionStatusResult(new NumData(num));
+};
+B_HLBirdBloxSensor.prototype.checkActive = function() {
+  return HL_Utils.birdBloxCheckActive(this)
+}
+
+function B_HLBBDistance(x, y, port) {
+  B_HLBirdBloxSensor.call(this, x, y, 14, port)
+
+  this.addPart(new LabelText(this, Language.getStr("Distance")))
+}
+B_HLBBDistance.prototype = Object.create(B_HLBirdBloxSensor.prototype);
+B_HLBBDistance.prototype.constructor = B_HLBBDistance
+
+
+
+//MARK: micro:bit outputs
+
+function B_HLLedArray(x, y) {
+  B_MicroBitLedArray.call(this, x, y, DeviceHatchling);
+}
+B_HLLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
+B_HLLedArray.prototype.constructor = B_HLLedArray;
+
+
+function B_HLPrint(x, y) {
+  B_MicroBitPrint.call(this, x, y, DeviceHatchling);
+}
+B_HLPrint.prototype = Object.create(B_MicroBitPrint.prototype);
+B_HLPrint.prototype.constructor = B_HLPrint;
+
+
+function B_HLBuzzer(x, y) {
+  B_DeviceWithPortsBuzzer.call(this, x, y, DeviceHatchling);
+};
+B_HLBuzzer.prototype = Object.create(B_DeviceWithPortsBuzzer.prototype);
+B_HLBuzzer.prototype.constructor = B_HLBuzzer;
+
+
+//MARK: micro:bit inputs
+
+function B_HLButton(x, y) {
+  B_MicroBitButton.call(this, x, y, DeviceHatchling);
+};
+B_HLButton.prototype = Object.create(B_MicroBitButton.prototype);
+B_HLButton.prototype.constructor = B_HLButton;
+
+
+function B_HLOrientation(x, y) {
+  B_MicroBitOrientation.call(this, x, y, DeviceHatchling);
+};
+B_HLOrientation.prototype = Object.create(B_MicroBitOrientation.prototype);
+B_HLOrientation.prototype.constructor = B_HLOrientation;
+
+
+function B_HLMagnetometer(x, y) {
+  B_MicroBitMagnetometer.call(this, x, y, DeviceHatchling);
+}
+B_HLMagnetometer.prototype = Object.create(B_MicroBitMagnetometer.prototype);
+B_HLMagnetometer.prototype.constructor = B_HLMagnetometer;
+
+
+function B_HLCompass(x, y) {
+  B_MicroBitCompass.call(this, x, y, DeviceHatchling);
+}
+B_HLCompass.prototype = Object.create(B_MicroBitCompass.prototype);
+B_HLCompass.prototype.constructor = B_HLCompass;
+
+function B_HLV2Sensor(x, y) {
+  B_MicroBitV2Sensor.call(this, x, y, DeviceHatchling);
+}
+B_HLV2Sensor.prototype = Object.create(B_MicroBitV2Sensor.prototype);
+B_HLV2Sensor.prototype.constructor = B_HLV2Sensor;
 

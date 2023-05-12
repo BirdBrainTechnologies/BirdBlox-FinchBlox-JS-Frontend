@@ -1,5 +1,5 @@
 /**
- * Child of Block. The CommandBlock is for Blocks that return booleans.
+ * Child of Block. The PredicateBlock is for Blocks that return booleans.
  * @constructor
  * @param {number} x - The x coord for the Block.
  * @param {number} y - The y coord for the Block.

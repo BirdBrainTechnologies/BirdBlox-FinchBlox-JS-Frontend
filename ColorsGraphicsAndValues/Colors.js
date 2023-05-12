@@ -77,6 +77,7 @@ Colors.setCategory = function() {
     "microbit": Colors.bbt,
     "flutter": Colors.bbt,
     "finch": Colors.bbt,
+    "hatchling": Colors.bbt,
     "tablet": Colors.tabletOrange,
     "operators": Colors.operatorsGreen,
     "sound": Colors.soundPurple,

@@ -739,9 +739,13 @@ BlockGraphics.create = {};
  * @return {Element} - SVG path element for the background of the Block
  */
 BlockGraphics.create.block = function(category, group, returnsValue, active) {
-  if (!active) category = "inactive";
-
   const path = GuiElements.create.path(group);
+  if (category == null) {
+    path.setAttributeNS(null, "fill", BlockPalette.bg);
+    return path
+  }
+
+  if (!active) category = "inactive";
   var fill = Colors.getGradient(category);
   if (FinchBlox) {
     fill = Colors.getColor(category)

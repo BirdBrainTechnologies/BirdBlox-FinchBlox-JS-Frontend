@@ -508,6 +508,30 @@ BlockList.populateItem_finch = function(collapsibleItem) {
 /**
  * @param {CollapsibleItem} collapsibleItem
  */
+BlockList.populateItem_hatchling = function(collapsibleItem) {
+  collapsibleItem.addBlockByName("B_HLEmptyPortA");
+  collapsibleItem.addBlockByName("B_HLEmptyPortB");
+  collapsibleItem.addBlockByName("B_HLEmptyPortC");
+  collapsibleItem.addBlockByName("B_HLEmptyPortD");
+  collapsibleItem.addBlockByName("B_HLEmptyPortE");
+  collapsibleItem.addBlockByName("B_HLEmptyPortF");
+  collapsibleItem.addSpace();
+  collapsibleItem.addBlockByName("B_HLLedArray");
+  collapsibleItem.addBlockByName("B_HLPrint");
+  collapsibleItem.addBlockByName("B_HLBuzzer");
+  collapsibleItem.addSpace();
+  collapsibleItem.addBlockByName("B_HLMagnetometer");
+  collapsibleItem.addBlockByName("B_HLButton");
+  collapsibleItem.addBlockByName("B_HLOrientation");
+  collapsibleItem.addBlockByName("B_HLCompass");
+  collapsibleItem.addBlockByName("B_HLV2Sensor");
+  collapsibleItem.trimBottom();
+  collapsibleItem.finalize();
+}
+
+/**
+ * @param {CollapsibleItem} collapsibleItem
+ */
 /*
 BlockList.populateItem_flutter = function(collapsibleItem) {
 	collapsibleItem.addBlockByName("B_FlutterServo");

@@ -173,6 +173,9 @@ Block.prototype.parseTranslation = function(text) {
       newParts.push(this.parts[0]);
       slotOffset += 1;
       slotsInserted.push(0);
+      if (this.parts[1] != null && this.parts[1].constructor === LabelText) {
+        newParts.push(this.parts[1]) //Hatchling port label
+      }
     }
   }
   for (var i = 0; i < pieces.length; i++) {
@@ -978,6 +981,8 @@ Block.prototype.duplicate = function(x, y) {
     myCopy = new this.constructor(x, y, this.variable);
   } else if (this.list != null) {
     myCopy = new this.constructor(x, y, this.list);
+  } else if (this.port != null) { //Hatchling blocks
+    myCopy = new this.constructor(x, y, this.port)
   } else {
     myCopy = new this.constructor(x, y);
   }
@@ -1461,7 +1466,7 @@ Block.prototype.updateAvailableSensors = function() {
  * Hatchling only - called when port types change.
  */
 Block.prototype.updateAvailablePorts = function(port) {
-  if (port == this.port && (this.hlButton != null || this.updateBlockType)) {
+  if (port == this.port) { //&& (this.hlButton != null || this.updateBlockType)) {
     this.updateActive()
   } 
 }

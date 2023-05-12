@@ -20,7 +20,7 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
 }
 DeviceHatchling.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHatchling.prototype.constructor = DeviceHatchling;
-Device.setDeviceTypeName(DeviceHatchling, "hatchling", "Hatchling", "Hatch");
+Device.setDeviceTypeName(DeviceHatchling, "hatchling", "Hatchling", "Hatchling");
 
 DeviceHatchling.prototype.setHatchlingState = function(state) {
   this.hlState = state
