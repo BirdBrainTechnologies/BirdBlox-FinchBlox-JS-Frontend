@@ -15,6 +15,7 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
   // * 9  = Single Neopixel
   // * 10 = Strip of 4 Neopixels
   // * 14 = Distance Sensor
+  this.supportedStates = [0, 1, 3, 8, 9, 10, 14]
   this.portStates = [0, 0, 0, 0, 0, 0]
   this.advertisedName = advertisedName
 }
@@ -35,11 +36,14 @@ DeviceHatchling.prototype.setHatchlingState = function(state) {
 
   for (let i = 0; i < this.portStates.length; i++) {
     if (this.portStates[i] != newPortVals[i]) {
-      console.log("New value for port " + i + ": " + newPortVals[i])
-      this.portStates[i] = newPortVals[i]
-      //TODO: trigger enable/disable appropriate blocks
-      //CodeManager.updateAvailableSensors();
-      CodeManager.updateAvailablePorts(i);
+      if (this.supportedStates.includes(newPortVals[i])) {
+        console.log("New value for port " + i + ": " + newPortVals[i])
+        this.setOutput(null, "portOff", i, 0, "offValue")
+        this.portStates[i] = newPortVals[i]
+        CodeManager.updateAvailablePorts(i);
+      } else {
+        console.log("Unsupported type " + newPortVals[i] + " at port " + i)
+      }
     }
   }
 }

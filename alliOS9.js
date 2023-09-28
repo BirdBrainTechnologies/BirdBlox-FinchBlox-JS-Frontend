@@ -6301,6 +6301,7 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
   // * 9  = Single Neopixel
   // * 10 = Strip of 4 Neopixels
   // * 14 = Distance Sensor
+  this.supportedStates = [0, 1, 3, 8, 9, 10, 14]
   this.portStates = [0, 0, 0, 0, 0, 0]
   this.advertisedName = advertisedName
 }
@@ -6321,11 +6322,14 @@ DeviceHatchling.prototype.setHatchlingState = function(state) {
 
   for (var i = 0; i < this.portStates.length; i++) {
     if (this.portStates[i] != newPortVals[i]) {
-      console.log("New value for port " + i + ": " + newPortVals[i])
-      this.portStates[i] = newPortVals[i]
-      //TODO: trigger enable/disable appropriate blocks
-      //CodeManager.updateAvailableSensors();
-      CodeManager.updateAvailablePorts(i);
+      if (this.supportedStates.includes(newPortVals[i])) {
+        console.log("New value for port " + i + ": " + newPortVals[i])
+        this.setOutput(null, "portOff", i, 0, "offValue")
+        this.portStates[i] = newPortVals[i]
+        CodeManager.updateAvailablePorts(i);
+      } else {
+        console.log("Unsupported type " + newPortVals[i] + " at port " + i)
+      }
     }
   }
 }
@@ -10342,6 +10346,10 @@ BlockGraphics.update.hexSlotGradient = function(path, category, active) {
  * @param {boolean} glowing
  */
 BlockGraphics.update.blockActive = function(path, category, returnsValue, active, glowing) {
+  if (category == null) {
+    path.setAttributeNS(null, "fill", BlockPalette.bg);
+    return path
+  }
   if (!active) category = "inactive";
   var fill = Colors.getGradient(category);
   if (FinchBlox) {
@@ -39606,6 +39614,18 @@ HL_Utils.replaceBlock = function(block, currentState) {
 
   block.stack.category.replaceBlock(block, blockName)
 }
+HL_Utils.createXml = function(block, xmlDoc) {
+  var blockXml = Block.prototype.createXml.call(block, xmlDoc)
+  XmlWriter.setAttribute(blockXml, "port", block.port)
+  return blockXml
+}
+HL_Utils.importXml = function(blockNode) {
+  var type = XmlWriter.getAttribute(blockNode, "type");
+  var port = XmlWriter.getAttribute(blockNode, "port")
+  var block = new window[type](0, 0, port)
+  block.copyFromXml(blockNode)
+  return block
+}
 
 
 function B_HLOutputBase(x, y, category, outputType, portType) {
@@ -40241,19 +40261,7 @@ function B_HLEmptyPort(x, y, port) {
 B_HLEmptyPort.prototype = Object.create(ReporterBlock.prototype);
 B_HLEmptyPort.prototype.constructor = B_HLEmptyPort;
 B_HLEmptyPort.prototype.checkActive = function() {
-  console.log("Empty port block check active - port " + this.port)
   return HL_Utils.birdBloxCheckActive(this)
-  /*var device = DeviceHatchling.getManager().getDevice(0);
-  if (device != null) {
-    var currentState = device.portStates[this.port]
-
-    if (this.portType != currentState) {
-        HL_Utils.replaceBlock(this, currentState)
-    }
-    return (currentState != 0)
-
-  }
-  return false*/
 }
 
 function B_HLEmptyPortA(x, y) {
@@ -40372,6 +40380,10 @@ B_HLBirdBloxOutput.prototype.updateAction = function() {
 B_HLBirdBloxOutput.prototype.checkActive = function() {
   return HL_Utils.birdBloxCheckActive(this)
 }
+B_HLBirdBloxOutput.prototype.createXml = function(xmlDoc) {
+  return HL_Utils.createXml(this, xmlDoc)
+}
+
 
 function B_HLBBRotationServo(x, y, port) {
   this.value = 255 //off signal
@@ -40386,6 +40398,7 @@ function B_HLBBRotationServo(x, y, port) {
 }
 B_HLBBRotationServo.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBRotationServo.prototype.constructor = B_HLBBRotationServo;
+B_HLBBRotationServo.importXml = HL_Utils.importXml
 
 function B_HLBBPositionServo(x, y, port) {
   this.value = 90; //defaultAngle
@@ -40399,6 +40412,7 @@ function B_HLBBPositionServo(x, y, port) {
 }
 B_HLBBPositionServo.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBPositionServo.prototype.constructor = B_HLBBPositionServo;
+B_HLBBPositionServo.importXml = HL_Utils.importXml
 
 function B_HLBBFairyLights(x, y, port) {
   this.value = ""
@@ -40414,6 +40428,7 @@ function B_HLBBFairyLights(x, y, port) {
 }
 B_HLBBFairyLights.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBFairyLights.prototype.constructor = B_HLBBFairyLights;
+B_HLBBFairyLights.importXml = HL_Utils.importXml
 
 function B_HLBBSingleNeopix(x, y, port) {
   this.value = ""
@@ -40436,6 +40451,7 @@ function B_HLBBSingleNeopix(x, y, port) {
 }
 B_HLBBSingleNeopix.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBSingleNeopix.prototype.constructor = B_HLBBSingleNeopix;
+B_HLBBSingleNeopix.importXml = HL_Utils.importXml
 
 function B_HLBBNeopixStrip(x, y, port) {
   this.value = ""
@@ -40468,6 +40484,7 @@ function B_HLBBNeopixStrip(x, y, port) {
 }
 B_HLBBNeopixStrip.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBNeopixStrip.prototype.constructor = B_HLBBNeopixStrip;
+B_HLBBNeopixStrip.importXml = HL_Utils.importXml
 
 
 
@@ -40493,6 +40510,9 @@ B_HLBirdBloxSensor.prototype.startAction = function() {
 B_HLBirdBloxSensor.prototype.checkActive = function() {
   return HL_Utils.birdBloxCheckActive(this)
 }
+B_HLBirdBloxSensor.prototype.createXml = function(xmlDoc) {
+  return HL_Utils.createXml(this, xmlDoc)
+}
 
 function B_HLBBDistance(x, y, port) {
   B_HLBirdBloxSensor.call(this, x, y, 14, port)
@@ -40501,6 +40521,7 @@ function B_HLBBDistance(x, y, port) {
 }
 B_HLBBDistance.prototype = Object.create(B_HLBirdBloxSensor.prototype);
 B_HLBBDistance.prototype.constructor = B_HLBBDistance
+B_HLBBDistance.importXml = HL_Utils.importXml
 
 
 

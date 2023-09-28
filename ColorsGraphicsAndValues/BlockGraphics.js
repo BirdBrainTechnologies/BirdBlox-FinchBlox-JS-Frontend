@@ -942,6 +942,10 @@ BlockGraphics.update.hexSlotGradient = function(path, category, active) {
  * @param {boolean} glowing
  */
 BlockGraphics.update.blockActive = function(path, category, returnsValue, active, glowing) {
+  if (category == null) {
+    path.setAttributeNS(null, "fill", BlockPalette.bg);
+    return path
+  }
   if (!active) category = "inactive";
   let fill = Colors.getGradient(category);
   if (FinchBlox) {
