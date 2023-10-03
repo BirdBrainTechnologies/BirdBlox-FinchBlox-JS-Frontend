@@ -1,32 +1,27 @@
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+/**
+ * 
+ */
 
-// Copyright 2019 John Maloney, Bernat Romagosa, and Jens Mönig
+function MicroBlocksRuntime () {
+	this.chunkIDs = {}
+	this.readFromBoard = false
+	this.port = null
+	this.recompileAll = false 
 
-// MicroBlocksRuntime.gp - Runtime support for MicroBlocks
-// John Maloney, April, 2017
-
-to smallRuntime aScripter {
-	if (isNil (global 'smallRuntime')) {
-		setGlobal 'smallRuntime' (initialize (new 'SmallRuntime') aScripter)
-	}
-	return (global 'smallRuntime')
+	this.loggedData = []
+	this.loggedDataNext = 1
+	this.loggedDataCount = 0
 }
 
-defineClass SmallRuntime ideVersion latestVMVersion scripter chunkIDs chunkRunning chunkStopping msgDict portName port connectionStartTime lastScanMSecs pingSentMSecs lastPingRecvMSecs recvBuf oldVarNames vmVersion boardType lastBoardDrives loggedData loggedDataNext loggedDataCount vmInstallMSecs disconnected crcDict lastRcvMSecs readFromBoard decompiler decompilerStatus blockForResultImage fileTransferMsgs fileTransferProgress fileTransfer firmwareInstallTimer recompileAll
-
-method scripter SmallRuntime { return scripter }
-method serialPortOpen SmallRuntime { return (notNil port) }
-method recompileNeeded SmallRuntime { recompileAll = true }
-
-method initialize SmallRuntime aScripter {
-	scripter = aScripter
-	chunkIDs = (dictionary)
-	readFromBoard = false
-	clearLoggedData this
-	return this
+MicroBlocksRuntime.prototype.serialPortOpen = function() {
+	return (this.port != null)
 }
+MicroBlocksRuntime.prototype.recompileNeeded = function() {
+	this.recompileAll = true
+}
+
+
+/*
 
 method evalOnBoard SmallRuntime aBlock showBytes {
 	if (isNil showBytes) { showBytes = false }
@@ -78,120 +73,131 @@ method chunkTypeFor SmallRuntime aBlockOrFunction {
 
 	error 'Unexpected argument to chunkTypeFor'
 }
+*/
 
-method chunkBytesFor SmallRuntime aBlockOrFunction {
-	if (isClass aBlockOrFunction 'String') { // look up function by name
+
+
+MicroBlocksRuntime.prototype.chunkBytesFor = function(aBlockOrFunction) {
+	/*if (isClass aBlockOrFunction 'String') { // look up function by name
 		aBlockOrFunction = (functionNamed (project scripter) aBlockOrFunction)
 		if (isNil aBlockOrFunction) { return (list) } // unknown function
-	}
-	compiler = (initialize (new 'SmallCompiler'))
-	code = (instructionsFor compiler aBlockOrFunction)
-	bytes = (list)
-	for item code {
-		if (isClass item 'Array') {
-			addBytesForInstructionTo compiler item bytes
-		} (isClass item 'Integer') {
-			addBytesForIntegerLiteralTo compiler item bytes
-		} (isClass item 'String') {
-			addBytesForStringLiteral compiler item bytes
+	}*/
+	let compiler = new MicroBlocksCompiler()
+	let code = compiler.instructionsFor(aBlockOrFunction)
+	let bytes = [] // result will be a Uint8Array
+	for (let i = 0; i < code.length; i++) {
+		let item = code[i]
+		if (item instanceof Array) {
+			bytes = compiler.addBytesForInstructionTo(item, bytes)
+		} else if (typeof item === "number") {
+			bytes = compiler.addBytesForIntegerLiteralTo(item, bytes)
+		} else if (typeof item === "string") {
+			bytes = compiler.addBytesForStringLiteral(item, bytes)
 		} else {
-			error 'Instruction must be an Array or String:' item
+			console.error('Instruction must be an Array or String: ' + item)
 		}
 	}
 	return bytes
 }
 
-method showInstructions SmallRuntime aBlock {
+MicroBlocksRuntime.prototype.showInstructions = function(aBlock) {
 	// Display the instructions for the given stack.
 
-	compiler = (initialize (new 'SmallCompiler'))
-	code = (instructionsFor compiler (topBlock aBlock))
-	result = (list)
-	firstString = true
-	for item code {
-		if (not (isClass item 'Array')) {
-			if firstString {
-				add result '--------'
+	let compiler = new MicroBlocksCompiler()
+	let code = compiler.instructionsFor(aBlock.stack.firstBlock)
+	let result = []//(list)
+	let firstString = true
+	for (let i = 0; i < code.length; i++) {
+		let item = code[i]
+		if (!(item instanceof Array)) {
+			if (firstString) {
+				result.push( '--------' )
 				firstString = false
 			}
-			add result (toString item) // string literal
-		} ('metadata' == (first item)) {
-			if ((count (last code)) > 0) {
-				add result '--------'
+			result.push (item.toString()) // string literal
+		} else if ('metadata' == (item[0])) {
+			if ((code[code.length-1]).length > 0) {
+				result.push( '--------' )
 			}
-		} ('pushLiteral' == (first item)) {
-			instr = (join (at item 1) ' ' (at item 2) ' ("' (at item 3) '")')
-			addWithLineNum this result instr
-		} ('pushImmediate' == (first item)) {
-			arg = (at item 2)
+		} else if ('pushLiteral' == (item[0])) {
+			let instr = (item[0] + ' ' + item[1] + ' ("' + item[2] + '")')
+			this.addWithLineNum(result, instr)
+		} else if ('pushImmediate' == (item[0])) {
+			let arg = item[1]
 			if (1 == (arg & 1)) {
 				arg = (arg >> 1) // decode integer
 				if (arg >= 4194304) { arg = (arg - 8388608) }
-			} (0 == arg) {
+			} else if (0 == arg) {
 				arg = false
-			} (4 == arg) {
+			} else if (4 == arg) {
 				arg = true
 			}
-			addWithLineNum this result (join 'pushImmediate ' arg)
-		} ('pushBigImmediate' == (first item)) {
-			addWithLineNum this result 'pushBigImmediate' // don't show arg count; could be confusing
-		} ('callFunction' == (first item)) {
-			arg = (at item 2)
-			calledChunkID = ((arg >> 8) & 255)
-			argCount = (arg & 255)
-			addWithLineNum this result (join 'callFunction ' calledChunkID ' ' argCount)
-		} (not (isLetter (at (first item) 1))) { // operator; don't show arg count
-			addWithLineNum this result (toString (first item))
+			this.addWithLineNum(result, ('pushImmediate ' + arg))
+		} else if ('pushBigImmediate' == (item[0])) {
+			this.addWithLineNum(result, 'pushBigImmediate') // don't show arg count; could be confusing
+		} else if ('callFunction' == (item[0])) {
+			let arg = item[1]
+			let calledChunkID = ((arg >> 8) & 255)
+			let argCount = (arg & 255)
+			this.addWithLineNum(result, ('callFunction ' + calledChunkID + ' ' + argCount))
+		/*} else if (!(isLetter ((item[0])[0]))) { // operator; don't show arg count
+			this.addWithLineNum(result, item[0].toString())*/
 		} else {
 			// instruction (an array of form <cmd> <args...>)
-			instr = ''
-			for s item { instr = (join instr s ' ') }
-			addWithLineNum this result instr item
+			let instr = ''
+			for (let s = 0; s < item.length; s++) { instr = (instr + item[s] + ' ') }
+			this.addWithLineNum(result, instr, item)
 		}
 	}
-	ws = (openWorkspace (global 'page') (joinStrings result (newline)))
+	/*ws = (openWorkspace (global 'page') (joinStrings result (newline)))
 	setTitle ws 'Instructions'
 	setFont ws 'Arial' (16 * (global 'scale'))
 	setExtent (morph ws) (220 * (global 'scale')) (400 * (global 'scale'))
-	fixLayout ws
-}
-
-method addWithLineNum SmallRuntime aList instruction items {
-	currentLine = ((count aList) + 1)
-	targetLine = ''
-	if (and
-		(notNil items)
-		(isOneOf (first items)
-			'pushLiteral' 'jmp' 'jmpTrue' 'jmpFalse'
-			'decrementAndJmp' 'callFunction' 'forLoop')) {
-		offset = (toInteger (last items))
-		targetLine = (join ' (line ' (+ currentLine 1 offset) ')')
+	fixLayout ws*/
+	console.log("Instructions: ")
+	let resultString = ""
+	for (let i = 0; i < result.length; i++) {
+		resultString += result[i] + "\n"
 	}
-	add aList (join '' currentLine ' ' instruction targetLine)
+	console.log(resultString)
 }
 
-method showCompiledBytes SmallRuntime aBlock {
+MicroBlocksRuntime.prototype.addWithLineNum = function(aList, instruction, items) {
+	let currentLine = aList.length + 1
+	let targetLine = ''
+	if ((items != null) && (['pushLiteral', 'jmp', 'jmpTrue', 'jmpFalse', 
+		'decrementAndJmp', 'callFunction', 'forLoop'].includes(items[0]))) {
+		let offset = parseInt(items[items.length-1])
+		targetLine = ' (line ' + (currentLine + 1 + offset) + ')'
+	}
+	aList.push('' + currentLine + ' ' + instruction + targetLine)
+}
+
+MicroBlocksRuntime.prototype.showCompiledBytes = function(aBlock) {
 	// Display the instruction bytes for the given stack.
 
-	bytes = (chunkBytesFor this (topBlock aBlock))
-	result = (list)
-	add result (join '[' (count bytes) ' bytes]' (newline))
-	for i (count bytes) {
-		add result (toString (at bytes i))
-		if (0 == (i % 4)) {
-			add result (newline)
+	let bytes = this.chunkBytesFor(aBlock.stack.firstBlock)
+	let result = ''
+	result += ('[' + (bytes.length) + ' bytes]\n') //(newline))
+	for (let i = 0; i < bytes.length; i++) {
+		result += bytes[i].toString()
+		if (0 == ((i+1) % 4)) {
+			result += '\n'
 		} else {
-			add result ' '
+			result += ' '
 		}
 	}
-	if (and ((count result) > 0) ((newline) == (last result))) { removeLast result }
+	/*if (and ((count result) > 0) ((newline) == (last result))) { removeLast result }
 	ws = (openWorkspace (global 'page') (joinStrings result))
 	setTitle ws 'Instruction Bytes'
 	setFont ws 'Arial' (16 * (global 'scale'))
 	setExtent (morph ws) (220 * (global 'scale')) (400 * (global 'scale'))
-	fixLayout ws
+	fixLayout ws*/
+	console.log("Compiled Bytes:")
+	console.log(result)
 }
 
+/*
 method showCallTree SmallRuntime aBlock {
 	proto = (editedPrototype aBlock)
 	if (notNil proto) {
@@ -2940,3 +2946,4 @@ method loggedData SmallRuntime howMany {
 	}
 	return result
 }
+*/

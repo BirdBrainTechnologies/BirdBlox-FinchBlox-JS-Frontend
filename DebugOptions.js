@@ -51,7 +51,7 @@ DebugOptions.applyConstants = function() {
     for (var j = 0; j < englishKeys.length; j++) {
       let translation = eval("Language." + lang + "." + englishKeys[j]);
       if (translation == null) {
-        console.log(lang + " is missing the key " + englishKeys[j]);
+        //console.log(lang + " is missing the key " + englishKeys[j]);
         missingCount++;
       }
     }

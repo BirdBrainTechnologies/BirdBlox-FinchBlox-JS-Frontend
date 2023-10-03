@@ -55,6 +55,12 @@ function B_FBColor(x, y, level, type) {
 B_FBColor.prototype = Object.create(CommandBlock.prototype);
 B_FBColor.prototype.constructor = B_FBColor;
 
+//MicroBlocks functions
+B_FBColor.prototype.primName = function() { return "[display:mbDisplay]" }
+B_FBColor.prototype.argList = function() {
+  return [parseInt(this.ledStatusString.split("").reverse().join(""), 2)]
+}
+
 B_FBColor.prototype.startAction = function() {
   const mem = this.runMem;
   mem.timerStarted = false;
@@ -66,7 +72,12 @@ B_FBColor.prototype.startAction = function() {
   mem.requestStatus.result = null;
 
   let device = DeviceFinch.getManager().getDevice(0);
-  if (Hatchling) { device = DeviceHatchling.getManager().getDevice(0) }
+  if (Hatchling) { 
+    let runtime = new MicroBlocksRuntime()
+    runtime.showInstructions(this)
+    runtime.showCompiledBytes(this)
+    device = DeviceHatchling.getManager().getDevice(0) 
+  }
   if (device != null) {
     if (this.isBeak) {
       device.setBeak(mem.requestStatus, this.red, this.green, this.blue);
@@ -171,6 +182,9 @@ B_FBColor.prototype.addL2Button = function() {
       "0101011111111110111000100", //heart
       "0010001010100010101000100"
     ] //diamond
+    if (Hatchling) {
+      options.push("0000000000000000000000000") //off
+    }
     let defaultVal = options[3]
     if (this.useAlphabet) {
       //Same letters as micro:bit print command unless noted.
