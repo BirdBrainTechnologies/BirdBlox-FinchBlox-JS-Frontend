@@ -338,9 +338,9 @@ MicroBlocksCompiler.prototype.instructionsForCmd = function(cmd) {
 		if ('callCustomCommand' == op) {
 			add result (array 'pop' 1) // discard the return value
 		}
-		return result
-	} (isFunctionCall this op) {
-		return (instructionsForFunctionCall this op args true)*/
+		return result */
+	} else if (this.isFunctionCall(op)) {
+		return (this.instructionsForFunctionCall(op, args, true))
 	} else {
 		return this.primitive(op, args, true)
 	}
@@ -467,11 +467,11 @@ MicroBlocksCompiler.prototype.instructionsForExpression = function(expr) {
 		return (instructionsForAnd this args)
 	} else if ('or' == op) {
 		return (instructionsForOr this args)
-	} else if (isFunctionCall this op) {
-		return (instructionsForFunctionCall this op args false)
-	} else {*/
+	} else*/ if (this.isFunctionCall(op)) {
+		return this.instructionsForFunctionCall(op, args, false)
+	} else {
 		return this.primitive(op, args, false)
-	//}
+	}
 }
 
 /*method instructionsForAnd SmallCompiler args {
@@ -630,20 +630,23 @@ method globalVarIndex SmallCompiler varName {
 
 // function calls
 
-/*method isFunctionCall SmallCompiler op {
-	return (notNil (lookupChunkID (smallRuntime) op))
+MicroBlocksCompiler.prototype.isFunctionCall = function(op) {
+	let runtime = new MicroBlocksRuntime()
+	return (runtime.lookupChunkID(op) != null) 
 }
 
-method instructionsForFunctionCall SmallCompiler op args isCmd {
-	result = (list)
-	callee = (lookupChunkID (smallRuntime) op)
-	for arg args {
-		addAll result (instructionsForExpression this arg)
+MicroBlocksCompiler.prototype.instructionsForFunctionCall =function(op, args, isCmd) {
+	let result = []
+	let runtime = new MicroBlocksRuntime()
+	let callee = runtime.lookupChunkID(op)
+	for (let i = 0; i < args.length; i++) {
+		let arg = args[i]
+		result.push.apply(result, this.instructionsForExpression(arg))
 	}
-	add result (array 'callFunction' (((callee & 255) << 8) | ((count args) & 255)))
-	if isCmd { add result (array 'pop' 1) } // discard the return value
+	result.push(['callFunction', (((callee & 255) << 8) | ((args.length) & 255))])
+	if (isCmd) { result.push(['pop', 1]) } // discard the return value
 	return result
-}*/
+}
 
 // literal values (strings and large integers )
 

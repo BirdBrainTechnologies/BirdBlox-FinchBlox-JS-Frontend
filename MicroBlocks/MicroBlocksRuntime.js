@@ -3,7 +3,11 @@
  */
 
 function MicroBlocksRuntime () {
-	this.chunkIDs = {}
+	//Hardcode the function ids we need for now...
+	this.chunkIDs = {
+		'playMIDIkey': [12]
+	}
+
 	this.readFromBoard = false
 	this.port = null
 	this.recompileAll = false 
@@ -509,16 +513,16 @@ method syncScripts SmallRuntime {
 
 	saveAllChunks this
 }
-
-method lookupChunkID SmallRuntime key {
+*/
+MicroBlocksRuntime.prototype.lookupChunkID = function(key) {
 	// If the given block or function name has been assigned a chunkID, return it.
 	// Otherwise, return nil.
 
-	entry = (at chunkIDs key nil)
-	if (isNil entry) { return nil }
-	return (first entry)
+	let entry = this.chunkIDs[key]
+	if (entry == null) { return null }
+	return (entry[0])
 }
-
+/*
 method removeObsoleteChunks SmallRuntime {
 	// Remove obsolete chunks. Chunks become obsolete when they are deleted or inserted into
 	// a script so they are no longer a stand-alone chunk. Functions become obsolete when

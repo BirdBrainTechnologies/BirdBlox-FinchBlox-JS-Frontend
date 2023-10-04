@@ -20,7 +20,11 @@ function B_FBSound(x, y, level) {
 }
 B_FBSound.prototype = Object.create(CommandBlock.prototype);
 B_FBSound.prototype.constructor = B_FBSound;
-
+//MicroBlocks functions
+B_FBSound.prototype.primName = function() { return "playMIDIkey" }
+B_FBSound.prototype.argList = function() { 
+  return [this.midiNote, (100 * this.beats)] 
+}
 B_FBSound.prototype.startAction = function() {
   const mem = this.runMem;
   mem.timerStarted = false;

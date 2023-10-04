@@ -81,6 +81,11 @@ function B_Wait(x, y) {
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
 B_Wait.prototype.constructor = B_Wait;
+//MicroBlocks functions
+B_Wait.prototype.primName = function() { return "waitMillis" }
+B_Wait.prototype.argList = function() {
+  return [(this.timeSelection * 100)]
+}
 /* Records current time. */
 B_Wait.prototype.startAction = function() {
   // Each Block has runMem to store information for that execution
@@ -145,6 +150,9 @@ function B_Forever(x, y) {
 }
 B_Forever.prototype = Object.create(LoopBlock.prototype);
 B_Forever.prototype.constructor = B_Forever;
+//MicroBlocks functions
+B_Forever.prototype.primName = function() { return "forever" }
+B_Forever.prototype.argList = function() { return [this.blockSlot1.child] }
 /* Begins executing contents. */
 B_Forever.prototype.startAction = function() {
   this.blockSlot1.startRun();
@@ -188,6 +196,11 @@ function B_Repeat(x, y) {
 }
 B_Repeat.prototype = Object.create(LoopBlock.prototype);
 B_Repeat.prototype.constructor = B_Repeat;
+//MicroBlocks functions
+B_Repeat.prototype.primName = function() { return "repeat" }
+B_Repeat.prototype.argList = function() { 
+  return [this.countSelection, this.blockSlot1.child] 
+}
 /* Prepares counter and begins executing contents. */
 B_Repeat.prototype.startAction = function() {
   const mem = this.runMem;

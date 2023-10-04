@@ -308,6 +308,11 @@ BlockStack.prototype.startRun = function(startBlock, broadcastMessage) {
     this.firstBlock.glow();
     this.tab.startRun(); // Starts Tab if it is not already running.
   }
+  if (Hatchling) {
+    let runtime = new MicroBlocksRuntime()
+    runtime.showInstructions(startBlock)
+    runtime.showCompiledBytes(startBlock)
+  }
 };
 
 /**
