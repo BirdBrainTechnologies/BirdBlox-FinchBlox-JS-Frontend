@@ -160,3 +160,15 @@ DeviceWithPorts.prototype.calibrateCompass = function(status) {
   request.addParam("id", this.id);
   HtmlServer.sendRequest(request.toString(), status, true);
 };
+
+/**
+ * Issues a request to send MicroBlocks data. For use with MicroBlocks vm.
+ * @param {Uint8Array} data - The data to send
+ */
+DeviceWithPorts.prototype.sendMicroBlocksData = function(data) {
+  const request = new HttpRequestBuilder("robot/out/microblocks");
+  request.addParam("type", this.getDeviceTypeId());
+  request.addParam("id", this.id);
+  request.addParam("data", data);
+  HtmlServer.sendRequest(request.toString(), status, true);
+}

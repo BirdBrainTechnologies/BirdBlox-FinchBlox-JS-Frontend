@@ -3,7 +3,7 @@
  */
 
 function MicroBlocksRuntime () {
-	//Hardcode the function ids we need for now...
+	//Hardcode the function ids we need for now... these numbers are added as you add libraries, so will vary.
 	this.chunkIDs = {
 		'playMIDIkey': [12]
 	}
@@ -23,7 +23,12 @@ MicroBlocksRuntime.prototype.serialPortOpen = function() {
 MicroBlocksRuntime.prototype.recompileNeeded = function() {
 	this.recompileAll = true
 }
-
+MicroBlocksRuntime.prototype.nextChunkID = function() {
+	if (MicroBlocksRuntime.nextChunkID == null) { MicroBlocksRuntime.nextChunkID = 10 }
+	MicroBlocksRuntime.nextChunkID += 1 
+	console.log("MicroBlocksRuntime.nextChunkID = " + MicroBlocksRuntime.nextChunkID)
+	return MicroBlocksRuntime.nextChunkID
+}
 
 /*
 
@@ -52,34 +57,34 @@ method stopRunningBlock SmallRuntime aBlock {
 		stopRunningChunk this (lookupChunkID this aBlock)
 	}
 }
+*/
 
-method chunkTypeFor SmallRuntime aBlockOrFunction {
-	if (isClass aBlockOrFunction 'Function') { return 3 }
-	if (and
+
+MicroBlocksRuntime.prototype.chunkTypeFor = function(aBlockOrFunction) {
+	//if (isClass aBlockOrFunction 'Function') { return 3 }
+	/*if (and
 		(isClass aBlockOrFunction 'Block')
 		(isPrototypeHat aBlockOrFunction)) {
 			return 3
-	}
+	}*/
 
-	expr = (expression aBlockOrFunction)
-	op = (primName expr)
+	//We aren't going to bother with expressions for now...
+	let expr = aBlockOrFunction //(expression aBlockOrFunction) 
+	let op = expr.primName()
 	if ('whenStarted' == op) { return 4 }
 	if ('whenCondition' == op) { return 5 }
 	if ('whenBroadcastReceived' == op) { return 6 }
 	if ('whenButtonPressed' == op) {
-		button = (first (argList expr))
+		let button = expr.argList[0]
 		if ('A' == button) { return 7 }
 		if ('B' == button) { return 8 }
 		return 9 // A+B
 	}
-	if (isClass expr 'Command') { return 1 }
-	if (isClass expr 'Reporter') { return 2 }
+	if (expr instanceof CommandBlock) { return 1 }
+	if (expr instanceof ReporterBlock) { return 2 }
 
-	error 'Unexpected argument to chunkTypeFor'
+	console.error('Unexpected argument to chunkTypeFor: ' + aBlockOrFunction)
 }
-*/
-
-
 
 MicroBlocksRuntime.prototype.chunkBytesFor = function(aBlockOrFunction) {
 	/*if (isClass aBlockOrFunction 'String') { // look up function by name

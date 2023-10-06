@@ -225,7 +225,7 @@ MicroBlocksCompiler.prototype.instructionsFor = function(aBlockOrFunction) {
 	}*/
 
 	let result = [['initLocals', 0]] //just to match microblocks. we have no local variables for now
-	if (aBlockOrFunction instanceof B_WhenFlagTapped) {
+	if (aBlockOrFunction instanceof B_WhenFlagTapped) { //whenStarted
 		result = result.concat(this.instructionsForCmdList(aBlockOrFunction.nextBlock))
 		result.push(['halt', 0])
 	} else if (aBlockOrFunction instanceof CommandBlock) {
@@ -340,7 +340,7 @@ MicroBlocksCompiler.prototype.instructionsForCmd = function(cmd) {
 		}
 		return result */
 	} else if (this.isFunctionCall(op)) {
-		return (this.instructionsForFunctionCall(op, args, true))
+		return this.instructionsForFunctionCall(op, args, true)
 	} else {
 		return this.primitive(op, args, true)
 	}
@@ -429,9 +429,9 @@ MicroBlocksCompiler.prototype.instructionsForWaitUntil = function(args) {
 
 MicroBlocksCompiler.prototype.instructionsForExpression = function(expr) {
 	// immediate values
-	if (true == expr) {
+	if (true === expr) {
 		return [[ 'pushImmediate', this.trueObj ]]
-	} else if (false == expr) {
+	} else if (false === expr) {
 		return [[ 'pushImmediate', this.falseObj ]]
 	} else if (expr == null) {
 		return [[ 'pushImmediate', this.zeroObj ]]

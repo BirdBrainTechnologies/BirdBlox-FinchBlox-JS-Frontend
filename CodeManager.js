@@ -579,6 +579,14 @@ CodeManager.checkBroadcastRunning = function(message) {
  */
 CodeManager.eventFlagClicked = function() {
   TabManager.eventFlagClicked();
+  if (Hatchling) {
+    let device = DeviceHatchling.getManager().getDevice(0)
+    if (device != null) {
+      let bytes = new Uint8Array([0xFA,5,0])
+      console.log("sending microblocks data: " + bytes)
+      device.sendMicroBlocksData(bytes)
+    }
+  }
 };
 
 /**

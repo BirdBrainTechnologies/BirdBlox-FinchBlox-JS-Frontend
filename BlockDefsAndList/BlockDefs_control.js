@@ -16,6 +16,9 @@ function B_WhenFlagTapped(x, y) {
 }
 B_WhenFlagTapped.prototype = Object.create(HatBlock.prototype);
 B_WhenFlagTapped.prototype.constructor = B_WhenFlagTapped;
+//MicroBlocks functions
+B_WhenFlagTapped.prototype.primName = function() { return "whenStarted" }
+B_WhenFlagTapped.prototype.argList = function() { return [] }
 /* Triggers stack to start running. */
 B_WhenFlagTapped.prototype.eventFlagClicked = function() {
   this.stack.startRun();
