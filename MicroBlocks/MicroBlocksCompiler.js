@@ -224,10 +224,13 @@ MicroBlocksCompiler.prototype.instructionsFor = function(aBlockOrFunction) {
 		addAll result (instructionsForCmdList this (newReporter 'return' cmdOrReporter))
 	}*/
 
+	let op = aBlockOrFunction.primName()
 	let result = [['initLocals', 0]] //just to match microblocks. we have no local variables for now
-	if (aBlockOrFunction instanceof B_WhenFlagTapped) { //whenStarted
-		result = result.concat(this.instructionsForCmdList(aBlockOrFunction.nextBlock))
+	if ('whenStarted' == op) {//aBlockOrFunction instanceof B_WhenFlagTapped) { //whenStarted
+		result.push.apply(result, this.instructionsForCmdList(aBlockOrFunction.nextBlock))
 		result.push(['halt', 0])
+	} else if ('whenCondition' == op) {
+		result.push.apply(result, this.instructionsForWhenCondition(aBlockOrFunction))
 	} else if (aBlockOrFunction instanceof CommandBlock) {
 		result.push.apply(result, this.instructionsForCmdList(aBlockOrFunction))
 		result.push(['halt', 0])
@@ -250,7 +253,7 @@ MicroBlocksCompiler.prototype.instructionsFor = function(aBlockOrFunction) {
 // instruction generation: when hat block
 
 MicroBlocksCompiler.prototype.instructionsForWhenCondition = function(cmdOrReporter) {
-	let condition = this.instructionsForExpression(cmdOrReporter.argList[0])
+	let condition = this.instructionsForExpression(cmdOrReporter.argList()[0])
 	let body = this.instructionsForCmdList(cmdOrReporter.nextBlock)
 	let result = []
 

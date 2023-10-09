@@ -37703,6 +37703,17 @@ function B_StartWhenDark(x, y) {
 }
 B_StartWhenDark.prototype = Object.create(B_FBStartWhen.prototype);
 B_StartWhenDark.prototype.constructor = B_StartWhenDark;
+//MicroBlocks functions
+B_StartWhenDark.prototype.primName = function() { return "whenCondition" }
+B_StartWhenDark.prototype.argList = function() { 
+  return [{
+    primName: function() { return "<" },
+    argList: function() { return [{
+      primName: function() { return "[display:lightLevel]"},
+      argList: function () { return [] }
+    }, 150]}
+  }] 
+}
 
 function B_StartWhenClap(x, y) {
   B_FBStartWhen.call(this, x, y, "clap")
@@ -39819,6 +39830,9 @@ function B_HLPositionServo(x, y) {
 }
 B_HLPositionServo.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLPositionServo.prototype.constructor = B_HLPositionServo;
+//MicroBlocks functions
+B_HLPositionServo.prototype.primName = function() { return "[hatchling:setServos]" }
+B_HLPositionServo.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
 
 function B_HLRotationServo(x, y, flip) {
   this.value = 255 //off signal
@@ -39838,6 +39852,9 @@ function B_HLRotationServo(x, y, flip) {
 }
 B_HLRotationServo.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLRotationServo.prototype.constructor = B_HLRotationServo;
+//MicroBlocks functions
+B_HLRotationServo.prototype.primName = function() { return "[hatchling:setServos]" }
+B_HLRotationServo.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
 
 //To rotate the servo counter clockwise.
 function B_HLccRotationServo(x, y) {
@@ -39868,6 +39885,10 @@ function B_HLSingleNeopix(x, y) {
 }
 B_HLSingleNeopix.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLSingleNeopix.prototype.constructor = B_HLSingleNeopix;
+//MicroBlocks functions
+B_HLSingleNeopix.prototype.primName = function() { return "[hatchling:setNeopixel]" }
+B_HLSingleNeopix.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.red, this.green, this.blue] }
+//
 B_HLSingleNeopix.prototype.updateColor = function() {
   var s = 255 / 100;
   this.colorHex = Colors.rgbToHex(this.red * s, this.green * s, this.blue * s);
@@ -39926,6 +39947,9 @@ function B_HLNeopixStrip(x, y) {
 }
 B_HLNeopixStrip.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLNeopixStrip.prototype.constructor = B_HLNeopixStrip;
+//MicroBlocks functions
+B_HLNeopixStrip.prototype.primName = function() { return "[hatchling:setNeopixelStrip]" }
+B_HLNeopixStrip.prototype.argList = function() { return [HL_Utils.portNames[this.port], 'all', this.red, this.green, this.blue] }
 
 function B_HLFairyLights(x, y) {
   this.value = ""
@@ -39945,6 +39969,9 @@ function B_HLFairyLights(x, y) {
 }
 B_HLFairyLights.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLFairyLights.prototype.constructor = B_HLFairyLights;
+//MicroBlocks functions
+B_HLFairyLights.prototype.primName = function() { return "[hatchling:setFairyLights]" }
+B_HLFairyLights.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
 
 function B_HLAlphabet(x, y) {
   this.useAlphabet = true
@@ -40889,10 +40916,13 @@ MicroBlocksCompiler.prototype.instructionsFor = function(aBlockOrFunction) {
 		addAll result (instructionsForCmdList this (newReporter 'return' cmdOrReporter))
 	}*/
 
+	var op = aBlockOrFunction.primName()
 	var result = [['initLocals', 0]] //just to match microblocks. we have no local variables for now
-	if (aBlockOrFunction instanceof B_WhenFlagTapped) { //whenStarted
-		result = result.concat(this.instructionsForCmdList(aBlockOrFunction.nextBlock))
+	if ('whenStarted' == op) {//aBlockOrFunction instanceof B_WhenFlagTapped) { //whenStarted
+		result.push.apply(result, this.instructionsForCmdList(aBlockOrFunction.nextBlock))
 		result.push(['halt', 0])
+	} else if ('whenCondition' == op) {
+		result.push.apply(result, this.instructionsForWhenCondition(aBlockOrFunction))
 	} else if (aBlockOrFunction instanceof CommandBlock) {
 		result.push.apply(result, this.instructionsForCmdList(aBlockOrFunction))
 		result.push(['halt', 0])
@@ -40915,7 +40945,7 @@ MicroBlocksCompiler.prototype.instructionsFor = function(aBlockOrFunction) {
 // instruction generation: when hat block
 
 MicroBlocksCompiler.prototype.instructionsForWhenCondition = function(cmdOrReporter) {
-	var condition = this.instructionsForExpression(cmdOrReporter.argList[0])
+	var condition = this.instructionsForExpression(cmdOrReporter.argList()[0])
 	var body = this.instructionsForCmdList(cmdOrReporter.nextBlock)
 	var result = []
 
@@ -41093,6 +41123,8 @@ MicroBlocksCompiler.prototype.instructionsForWaitUntil = function(args) {
 // instruction generation: expressions
 
 MicroBlocksCompiler.prototype.instructionsForExpression = function(expr) {
+	console.log("instructionsForExpression")
+	console.log(expr)
 	// immediate values
 	if (true === expr) {
 		return [[ 'pushImmediate', this.trueObj ]]

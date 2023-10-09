@@ -632,6 +632,17 @@ function B_StartWhenDark(x, y) {
 }
 B_StartWhenDark.prototype = Object.create(B_FBStartWhen.prototype);
 B_StartWhenDark.prototype.constructor = B_StartWhenDark;
+//MicroBlocks functions
+B_StartWhenDark.prototype.primName = function() { return "whenCondition" }
+B_StartWhenDark.prototype.argList = function() { 
+  return [{
+    primName: function() { return "<" },
+    argList: function() { return [{
+      primName: function() { return "[display:lightLevel]"},
+      argList: function () { return [] }
+    }, 150]}
+  }] 
+}
 
 function B_StartWhenClap(x, y) {
   B_FBStartWhen.call(this, x, y, "clap")
