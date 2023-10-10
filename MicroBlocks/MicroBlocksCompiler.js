@@ -5,6 +5,7 @@
 function MicroBlocksCompiler () {
 	// Initialize the opcode dictionary. Note: This must match the opcode table in interp.c!
 
+	//24 unused in vm, 36 here not counting mbDisplay which I added
 	let opcodeDefinitions = `
 		halt 0
 		noop 1
@@ -106,7 +107,7 @@ function MicroBlocksCompiler () {
 	RESERVED 97
 	RESERVED 98
 	RESERVED 99
-	RESERVED 100
+		mbDisplay 100
 	RESERVED 101
 	RESERVED 102
 	RESERVED 103

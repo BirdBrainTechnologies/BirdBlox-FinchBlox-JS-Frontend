@@ -56,7 +56,7 @@ B_FBColor.prototype = Object.create(CommandBlock.prototype);
 B_FBColor.prototype.constructor = B_FBColor;
 
 //MicroBlocks functions
-B_FBColor.prototype.primName = function() { return "[display:mbDisplay]" }
+B_FBColor.prototype.primName = function() { return "mbDisplay" } //"[display:mbDisplay]" }
 B_FBColor.prototype.argList = function() {
   return [parseInt(this.ledStatusString.split("").reverse().join(""), 2)]
 }

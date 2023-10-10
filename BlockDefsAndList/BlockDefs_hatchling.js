@@ -445,6 +445,40 @@ function B_HLWaitUntil(x, y, usePort) {
 }
 B_HLWaitUntil.prototype = Object.create(CommandBlock.prototype);
 B_HLWaitUntil.prototype.constructor = B_HLWaitUntil;
+//MicroBlocks functions
+B_HLWaitUntil.prototype.primName = function() { return "waitUntil" }
+B_HLWaitUntil.prototype.argList = function() { 
+  let sensor = "distance"
+  let args = []
+  if(!this.usePort) {
+    sensor = this.sensorTypes[this.sensorPaths.indexOf(this.sensorSelection)]
+  } else {
+    args = [HL_Utils.portNames[this.port]]
+  }
+  let prim = null
+  let threshold = 0
+  switch (sensor) {
+  case "distance":
+    prim = "[hatchling:getDistanceSensor]"
+    threshold = 20
+    break;
+  case "light":
+    prim = "[display:lightLevel]"
+    threshold = 150
+    break;
+  case "clap":
+    break;
+  }
+  if (prim == null) { return [] }
+
+  return [{
+    primName: function() { return "<" },
+    argList: function() { return [{
+      primName: function() { return prim },
+      argList: function () { return args }
+    }, threshold]}
+  }] 
+}
 
 B_HLWaitUntil.prototype.startAction = function() {
   let device = HL_Utils.setupAction(this)

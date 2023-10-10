@@ -36201,7 +36201,7 @@ B_FBColor.prototype = Object.create(CommandBlock.prototype);
 B_FBColor.prototype.constructor = B_FBColor;
 
 //MicroBlocks functions
-B_FBColor.prototype.primName = function() { return "[display:mbDisplay]" }
+B_FBColor.prototype.primName = function() { return "mbDisplay" } //"[display:mbDisplay]" }
 B_FBColor.prototype.argList = function() {
   return [parseInt(this.ledStatusString.split("").reverse().join(""), 2)]
 }
@@ -37758,6 +37758,18 @@ function B_StartWhenDistance(x, y) {
 }
 B_StartWhenDistance.prototype = Object.create(B_FBStartWhen.prototype);
 B_StartWhenDistance.prototype.constructor = B_StartWhenDistance;
+//MicroBlocks functions
+B_StartWhenDistance.prototype.primName = function() { return "whenCondition" }
+B_StartWhenDistance.prototype.argList = function() { 
+  var portName = HL_Utils.portNames[this.port]
+  return [{
+    primName: function() { return "<" },
+    argList: function() { return [{
+      primName: function() { return "[hatchling:getDistanceSensor]" },
+      argList: function () { return [portName] }
+    }, 20]}
+  }] 
+}
 
 B_StartWhenDistance.prototype.updateValues = function() {
   HL_Utils.updatePort(this)
@@ -40012,6 +40024,40 @@ function B_HLWaitUntil(x, y, usePort) {
 }
 B_HLWaitUntil.prototype = Object.create(CommandBlock.prototype);
 B_HLWaitUntil.prototype.constructor = B_HLWaitUntil;
+//MicroBlocks functions
+B_HLWaitUntil.prototype.primName = function() { return "waitUntil" }
+B_HLWaitUntil.prototype.argList = function() { 
+  var sensor = "distance"
+  var args = []
+  if(!this.usePort) {
+    sensor = this.sensorTypes[this.sensorPaths.indexOf(this.sensorSelection)]
+  } else {
+    args = [HL_Utils.portNames[this.port]]
+  }
+  var prim = null
+  var threshold = 0
+  switch (sensor) {
+  case "distance":
+    prim = "[hatchling:getDistanceSensor]"
+    threshold = 20
+    break;
+  case "light":
+    prim = "[display:lightLevel]"
+    threshold = 150
+    break;
+  case "clap":
+    break;
+  }
+  if (prim == null) { return [] }
+
+  return [{
+    primName: function() { return "<" },
+    argList: function() { return [{
+      primName: function() { return prim },
+      argList: function () { return args }
+    }, threshold]}
+  }] 
+}
 
 B_HLWaitUntil.prototype.startAction = function() {
   var device = HL_Utils.setupAction(this)
@@ -40697,6 +40743,7 @@ B_HLV2Sensor.prototype.constructor = B_HLV2Sensor;
 function MicroBlocksCompiler () {
 	// Initialize the opcode dictionary. Note: This must match the opcode table in interp.c!
 
+	//24 unused in vm, 36 here not counting mbDisplay which I added
 	var opcodeDefinitions = `
 		halt 0
 		noop 1
@@ -40798,7 +40845,7 @@ function MicroBlocksCompiler () {
 	RESERVED 97
 	RESERVED 98
 	RESERVED 99
-	RESERVED 100
+		mbDisplay 100
 	RESERVED 101
 	RESERVED 102
 	RESERVED 103
@@ -41123,8 +41170,6 @@ MicroBlocksCompiler.prototype.instructionsForWaitUntil = function(args) {
 // instruction generation: expressions
 
 MicroBlocksCompiler.prototype.instructionsForExpression = function(expr) {
-	console.log("instructionsForExpression")
-	console.log(expr)
 	// immediate values
 	if (true === expr) {
 		return [[ 'pushImmediate', this.trueObj ]]
@@ -41214,6 +41259,7 @@ method instructionsForOr SmallCompiler args {
 // instruction generation utility methods
 
 MicroBlocksCompiler.prototype.primitive = function(op, args, isCommand) {
+	console.log("primitive " + op + " [" + args + "]")
 	var result = []
 	//if ('print' == op) { op = 'printIt' }
 	if (this.opcodes[op] != null) {

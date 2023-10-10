@@ -687,6 +687,18 @@ function B_StartWhenDistance(x, y) {
 }
 B_StartWhenDistance.prototype = Object.create(B_FBStartWhen.prototype);
 B_StartWhenDistance.prototype.constructor = B_StartWhenDistance;
+//MicroBlocks functions
+B_StartWhenDistance.prototype.primName = function() { return "whenCondition" }
+B_StartWhenDistance.prototype.argList = function() { 
+  let portName = HL_Utils.portNames[this.port]
+  return [{
+    primName: function() { return "<" },
+    argList: function() { return [{
+      primName: function() { return "[hatchling:getDistanceSensor]" },
+      argList: function () { return [portName] }
+    }, 20]}
+  }] 
+}
 
 B_StartWhenDistance.prototype.updateValues = function() {
   HL_Utils.updatePort(this)
