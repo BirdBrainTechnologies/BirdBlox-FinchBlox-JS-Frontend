@@ -32,6 +32,12 @@ function DisplayStack(firstBlock, group, category) {
   this.move(this.x, this.y);
 
   this.updateTimer = null;
+
+  if (Hatchling) {
+    if (DisplayStack.count == null) { DisplayStack.count = 0 }
+    this.mbId = "ds" + DisplayStack.count
+    DisplayStack.count++
+  }
 }
 
 /**

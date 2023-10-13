@@ -1,12 +1,10 @@
 /**
- * 
+ * Runtime support for MicroBlocks vm
  */
 
 function MicroBlocksRuntime () {
-	//Hardcode the function ids we need for now... these numbers are added as you add libraries, so will vary.
-	this.chunkIDs = {
-		'playMIDIkey': [12]
-	}
+	this.chunkIDs = {}
+	this.chunkRunning = Array(256).fill(false)
 
 	this.readFromBoard = false
 	this.port = null
@@ -15,19 +13,29 @@ function MicroBlocksRuntime () {
 	this.loggedData = []
 	this.loggedDataNext = 1
 	this.loggedDataCount = 0
+
+	this.scripter = new MicroBlocksScripter()
+}
+MicroBlocksRuntime.init = function() {
+	window.mbRuntime = new MicroBlocksRuntime()
 }
 
 MicroBlocksRuntime.prototype.serialPortOpen = function() {
 	return (this.port != null)
 }
+MicroBlocksRuntime.prototype.bleDevice = function() {
+	return DeviceHatchling.getManager().getDevice(0)
+}
+MicroBlocksRuntime.prototype.noBleConnection = function() {
+	return (this.bleDevice() == null)
+}
 MicroBlocksRuntime.prototype.recompileNeeded = function() {
 	this.recompileAll = true
 }
-MicroBlocksRuntime.prototype.nextChunkID = function() {
-	if (MicroBlocksRuntime.nextChunkID == null) { MicroBlocksRuntime.nextChunkID = 10 }
-	MicroBlocksRuntime.nextChunkID += 1 
-	console.log("MicroBlocksRuntime.nextChunkID = " + MicroBlocksRuntime.nextChunkID)
-	return MicroBlocksRuntime.nextChunkID
+
+//Utility function
+const delay = async function(ms) { 
+	return new Promise(res => setTimeout(res, ms)) 
 }
 
 /*
@@ -494,18 +502,19 @@ method readVarsFromBoard SmallRuntime client {
 	// clear decompiler
 	decompiler = nil
 }
-
+*/
 
 // chunk management
 
-method syncScripts SmallRuntime {
+MicroBlocksRuntime.prototype.syncScripts = async function() {
 	// Called by scripter when anything changes.
 
-	if (isNil port) { return }
-	if (notNil decompiler) { return }
+	//if (isNil port) { return }
+	if (this.noBleConnection()) { return }
+	//if (notNil decompiler) { return }
 
 	// force re-save of any functions in the scripting area
-	for aBlock (sortedScripts (scriptEditor scripter)) {
+	/*for aBlock (sortedScripts (scriptEditor scripter)) {
 		if (isPrototypeHat aBlock) {
 			fName = (functionName (function (editedPrototype aBlock)))
 			entry = (at chunkIDs fName nil)
@@ -514,27 +523,32 @@ method syncScripts SmallRuntime {
 				atPut entry 5 true
 			}
 		}
-	}
+	}*/
 
-	saveAllChunks this
+	await this.saveAllChunks()
 }
-*/
-MicroBlocksRuntime.prototype.lookupChunkID = function(key) {
+
+MicroBlocksRuntime.prototype.lookupChunkID = function(aBlock) {
 	// If the given block or function name has been assigned a chunkID, return it.
 	// Otherwise, return nil.
+	
+	let key = aBlock.stack.mbId
 
 	let entry = this.chunkIDs[key]
 	if (entry == null) { return null }
 	return (entry[0])
 }
-/*
-method removeObsoleteChunks SmallRuntime {
+
+MicroBlocksRuntime.prototype.removeObsoleteChunks = function() {
 	// Remove obsolete chunks. Chunks become obsolete when they are deleted or inserted into
 	// a script so they are no longer a stand-alone chunk. Functions become obsolete when
 	// they are deleted or the library containing them is deleted.
 
-	for k (keys chunkIDs) {
-		isObsolete = false
+	let keys = Object.keys(this.chunkIDs)
+	let stacks = TabManager.activeTab.stackList
+	for (let i = 0; i < keys.length; i++) {
+		let k = keys[i]
+		/*isObsolete = false
 		if (isClass k 'Block') {
 			owner = (owner (morph k))
 			isObsolete = (or
@@ -544,39 +558,50 @@ method removeObsoleteChunks SmallRuntime {
 		} (isClass k 'String') {
 			isObsolete = (isNil (functionNamed (project scripter) k))
 		}
-		if isObsolete {
-			deleteChunkFor this k
+		if isObsolete {*/
+
+		let stackFound = false
+		for (let j = 0; j < stacks.length; j++) {
+			if (stacks[j].mbId == k) { stackFound = true }
+		}
+		if (!stackFound) {
+			this.deleteChunkFor(k)
 		}
 	}
 }
 
-method unusedChunkID SmallRuntime {
+MicroBlocksRuntime.prototype.unusedChunkID = function() {
 	// Return an unused chunkID.
 
-	inUse = (dictionary)
-	for entry (values chunkIDs) {
-		add inUse (first entry) // the chunk ID is first element of entry
+	let inUse = []
+	let values = Object.values(this.chunkIDs)
+	for (let i = 0; i < values.length; i++) {
+		let entry = values[i]
+		inUse.push(entry[0]) // the chunk ID is first element of entry
 	}
-	for i 256 {
-		id = (i - 1)
-		if (not (contains inUse id)) { return id }
+	for (let id = 0; id < 256; id++) {
+		if (!(inUse.includes(id))) { return id }
 	}
-	error 'Too many code chunks (functions and scripts). Max is 256).'
+	console.error( 'Too many code chunks (functions and scripts). Max is 256).' )
 }
 
-method ensureChunkIdFor SmallRuntime aBlock {
+MicroBlocksRuntime.prototype.ensureChunkIdFor = function(aBlock) {
 	// Return the chunkID for the given block. Functions are handled by assignFunctionIDs.
 	// If necessary, register the block in the chunkIDs dictionary.
 
-	entry = (at chunkIDs aBlock nil)
-	if (isNil entry) {
-		id = (unusedChunkID this)
-		entry = (array id nil (chunkTypeFor this aBlock) '' false)
-		atPut chunkIDs aBlock entry // block -> (<id>, <crc>, <chunkType>, <lastSrc>, <functionMayHaveChanged>)
+	//For hatchling, chunks are named by the id of the BlockStack
+	let stackID = aBlock.stack.mbId
+
+	let entry = this.chunkIDs[stackID]
+	if (entry == null) {
+		let id = this.unusedChunkID()
+		entry = [id, null, this.chunkTypeFor(aBlock), '', false]
+		this.chunkIDs[stackID] = entry // block -> (<id>, <crc>, <chunkType>, <lastSrc>, <functionMayHaveChanged>)
 	}
-	return (first entry)
+	return entry[0]
 }
 
+/*
 method assignFunctionIDs SmallRuntime {
 	// Ensure that there is a chunk ID for every user-defined function.
 	// This must be done before generating any code to allow for recursive calls.
@@ -599,19 +624,22 @@ method functionNameForID SmallRuntime chunkID {
 	}
 	return (join 'f' chunkID)
 }
+*/
 
-method deleteChunkFor SmallRuntime key {
-	if (and (isClass key 'Block') (isPrototypeHat key)) {
+MicroBlocksRuntime.prototype.deleteChunkFor = function(key) {
+	/*if (and (isClass key 'Block') (isPrototypeHat key)) {
 		key = (functionName (function (editedPrototype key)))
-	}
-	entry = (at chunkIDs key nil)
-	if (and (notNil entry) (notNil port)) {
-		chunkID = (first entry)
-		sendMsgSync this 'deleteChunkMsg' chunkID
-		remove chunkIDs key
+	}*/
+	let entry = this.chunkIDs[key]
+	console.log("Deleting chunkID entry [" + entry + "]")
+	if ( (entry != null) && (!this.noBleConnection) ) {//(notNil port)) {
+		let chunkID = entry[0]
+		this.sendMsgSync('deleteChunkMsg', chunkID) //TODO: await?
+		delete this.chunkIDs[key]
 	}
 }
 
+/*
 method stopAndSyncScripts SmallRuntime alreadyStopped {
 	// Stop everything. Sync and verify scripts with the board using chunk CRC's.
 
@@ -1160,17 +1188,19 @@ method clearBoardIfConnected SmallRuntime doReset {
 	clearRunningHighlights this
 	chunkIDs = (dictionary)
 }
+*/
 
-method sendStopAll SmallRuntime {
-	sendMsg this 'stopAllMsg'
-	clearRunningHighlights this
+MicroBlocksRuntime.prototype.sendStopAll = function() {
+	this.sendMsg('stopAllMsg')
+	this.clearRunningHighlights()
 }
 
-method sendStartAll SmallRuntime {
-	step scripter // save script changes if needed
-	sendMsg this 'startAllMsg'
+MicroBlocksRuntime.prototype.sendStartAll = function() {
+	this.scripter.step() // save script changes if needed
+	this.sendMsg('startAllMsg')
 }
 
+/*
 // Saving and verifying
 
 method reachableFunctions SmallRuntime {
@@ -1212,47 +1242,54 @@ method reachableFunctions SmallRuntime {
 	print (count result) 'reachable functions:'
 	for fName (keys result) { print '  ' fName }
 }
+*/
 
-method suspendCodeFileUpdates SmallRuntime { sendMsgSync this 'extendedMsg' 2 (list) }
-method resumeCodeFileUpdates SmallRuntime { sendMsg this 'extendedMsg' 3 (list) }
+MicroBlocksRuntime.prototype.suspendCodeFileUpdates = async function() { await this.sendMsgSync('extendedMsg', 2, []) }
+MicroBlocksRuntime.prototype.resumeCodeFileUpdates = function() { this.sendMsg('extendedMsg', 3, []) }
 
+/*
 method saveAllChunksAfterLoad SmallRuntime {
 	suspendCodeFileUpdates this
 	saveAllChunks this
 	resumeCodeFileUpdates this
 }
+*/
 
-method saveAllChunks SmallRuntime {
+MicroBlocksRuntime.prototype.saveAllChunks = async function() {
 	// Save the code for all scripts and user-defined functions.
 
-	if (isNil port) { return }
+	//if (isNil port) { return }
+	if (this.noBleConnection()) { return }
 
-	setCursor 'wait'
+	//setCursor 'wait' //Change the mouse pointer appearance?
 
-	t = (newTimer)
-	editor = (findMicroBlocksEditor)
+	//t = (newTimer)
+	let startTime = Date.now()
+	/*editor = (findMicroBlocksEditor)
 	totalScripts = (
 		(count (allFunctions (project scripter))) +
 		(count (sortedScripts (scriptEditor scripter))))
 	progressInterval = (max 1 (floor (totalScripts / 20)))
-	processedScripts = 0
+	processedScripts = 0*/
 
-	skipHiddenFunctions = true
-	if (saveVariableNames this) { recompileAll = true }
-	if recompileAll {
+	let skipHiddenFunctions = true
+	//if (saveVariableNames this) { recompileAll = true }
+	if (this.recompileAll) {
 		// Clear the source code field of all chunk entries to force script recompilation
 		// and possible re-download since variable offsets have changed.
-		suspendCodeFileUpdates this
-		for entry (values chunkIDs) {
-			atPut entry 4 ''
-			atPut entry 5 true
+		await this.suspendCodeFileUpdates()
+		let values = Object.values(this.chunkIDs)
+		for (let i = 0; i < values.length; i++) {
+			let entry = values[i]
+			entry[3] = ''
+			entry[4] = true
 		}
 		skipHiddenFunctions = false
 	}
-	assignFunctionIDs this
-	removeObsoleteChunks this
+	//assignFunctionIDs this
+	this.removeObsoleteChunks()
 
-	functionsSaved = 0
+	/*functionsSaved = 0
 	for aFunction (allFunctions (project scripter)) {
 		if (saveChunk this aFunction skipHiddenFunctions) {
 			functionsSaved += 1
@@ -1264,8 +1301,9 @@ method saveAllChunks SmallRuntime {
 		processedScripts += 1
 	}
 	if (functionsSaved > 0) { print 'Downloaded' functionsSaved 'functions to board' (join '(' (msecSplit t) ' msecs)') }
+*/
 
-	scriptsSaved = 0
+	/*scriptsSaved = 0
 	for aBlock (sortedScripts (scriptEditor scripter)) {
 		if (not (isPrototypeHat aBlock)) { // skip function def hat; functions get saved above
 			if (saveChunk this aBlock skipHiddenFunctions) {
@@ -1279,15 +1317,27 @@ method saveAllChunks SmallRuntime {
 		processedScripts += 1
 	}
 	if (scriptsSaved > 0) { print 'Downloaded' scriptsSaved 'scripts to board' (join '(' (msecSplit t) ' msecs)') }
+*/
 
-	recompileAll = false
-	verifyCRCs this
-	resumeCodeFileUpdates this
-	showDownloadProgress editor 3 1
+	let scriptsSaved = 0
+	const stacks = TabManager.activeTab.stackList;
+	for (let i = 0; i < stacks.length; i++) {
+		if (await this.saveChunk(stacks[i].firstBlock, skipHiddenFunctions)) {
+			scriptsSaved += 1
+		}
+	}
+	if (scriptsSaved > 0) { console.log("Downloaded " + scriptsSaved + " scripts to board in " + (Date.now() - startTime) + " msecs.") }
+	
 
-	setCursor 'default'
+	this.recompileAll = false
+	await this.verifyCRCs()
+	this.resumeCodeFileUpdates()
+	//showDownloadProgress editor 3 1
+
+	//setCursor 'default'
 }
 
+/*
 method forceSaveChunk SmallRuntime aBlockOrFunction {
 	// Save the chunk for the given block or function even if it was previously saved.
 
@@ -1298,15 +1348,19 @@ method forceSaveChunk SmallRuntime aBlockOrFunction {
 	}
 	saveChunk this aBlockOrFunction false
 }
+*/
 
-method saveChunk SmallRuntime aBlockOrFunction skipHiddenFunctions {
+MicroBlocksRuntime.prototype.saveChunk = async function(aBlockOrFunction, skipHiddenFunctions) {
 	// Save the given script or function as an executable code "chunk".
 	// Also save the source code (in GP format) and the script position.
 
-	if (isNil skipHiddenFunctions) { skipHiddenFunctions = true } // optimize by default
+	if (skipHiddenFunctions == null) { skipHiddenFunctions = true } // optimize by default
 
-	pp = (new 'PrettyPrinter')
-	if (isClass aBlockOrFunction 'String') {
+	let pp = new PrettyPrinter()
+	let currentSrc = null
+	let chunkID = null 
+	let entry = null
+	/*if (isClass aBlockOrFunction 'String') {
 		aBlockOrFunction = (functionNamed (project scripter) aBlockOrFunction)
 		if (isNil aBlockOrFunction) { return false } // unknown function
 	}
@@ -1317,105 +1371,162 @@ method saveChunk SmallRuntime aBlockOrFunction skipHiddenFunctions {
 		if (and skipHiddenFunctions (not (at entry 5))) { return false } // function is not in scripting area so has not changed
 		atPut entry 5 false
 		currentSrc = (prettyPrintFunction pp aBlockOrFunction)
-	} else {
-		expr = (expression aBlockOrFunction)
-		if (isClass expr 'Reporter') {
-			currentSrc = (prettyPrint pp expr)
+	} else {*/
+		let expr = aBlockOrFunction//(expression aBlockOrFunction)
+		if (expr instanceof ReporterBlock) {
+			currentSrc = pp.prettyPrint(expr)
 		} else {
-			currentSrc = (prettyPrintList pp expr)
+			currentSrc = pp.prettyPrintList(expr)
 		}
-		chunkID = (ensureChunkIdFor this aBlockOrFunction)
-		entry = (at chunkIDs aBlockOrFunction)
-		if ((at entry 3) != (chunkTypeFor this aBlockOrFunction)) {
+		chunkID = this.ensureChunkIdFor(aBlockOrFunction)
+		// block -> (<id>, <crc>, <chunkType>, <lastSrc>, <functionMayHaveChanged>)
+		entry = this.chunkIDs[aBlockOrFunction.stack.mbId] 
+		if (entry[2] != this.chunkTypeFor(aBlockOrFunction)) {
 			// user changed A/B/A+B button hat type with menu
-			atPut entry 3 (chunkTypeFor this aBlockOrFunction)
-			atPut entry 4 '' // clear lastSrc to force save
+			entry[2] = this.chunkTypeFor(aBlockOrFunction)
+			entry[3] = '' // clear lastSrc to force save
 		}
-	}
+	//}
 
-	if (currentSrc == (at entry 4)) { return false } // source hasn't changed; save not needed
-	atPut entry 4 currentSrc // remember the source of the code we're about to save
+	console.log("saveChunk [" + entry + "] " + currentSrc)
+
+	if (currentSrc == entry[3]) { return false } // source hasn't changed; save not needed
+	entry[3] = currentSrc // remember the source of the code we're about to save
 
 	// save the binary code for the chunk
-	chunkType = (chunkTypeFor this aBlockOrFunction)
-	chunkBytes = (chunkBytesFor this aBlockOrFunction)
-	data = (list chunkType)
-	addAll data chunkBytes
-	if ((count data) > 1000) {
-		if (isClass aBlockOrFunction 'Function') {
+	let chunkType = this.chunkTypeFor(aBlockOrFunction)
+	let chunkBytes = this.chunkBytesFor(aBlockOrFunction)
+	let data = new Uint8Array(chunkBytes.length + 1)
+	data.set([chunkType], 0)
+	data.set(chunkBytes, 1)
+	if (data.length > 1000) {
+		/*if (isClass aBlockOrFunction 'Function') {
 			inform (global 'page') (join
 				(localized 'Function "') (functionName aBlockOrFunction)
 				(localized '" is too large to send to board.'))
-		} else {
-			showError (morph aBlockOrFunction) (localized 'Script is too large to send to board.')
-		}
+		} else {*/
+			//showError (morph aBlockOrFunction) (localized 'Script is too large to send to board.')
+			console.error('Script is too large to send to board.') //TODO: Add alert in UI
+		//}
 		return false
 	}
 
 	// don't save the chunk if its CRC has not changed unless is a button or broadcast
 	// hat because the CRC does not reflect changes to the button or broadcast name
-	crcOptimization = true
-	if (isClass aBlockOrFunction 'Block') {
-		op = (primName (expression aBlockOrFunction))
-		crcOptimization = (not (isOneOf op 'whenButtonPressed' 'whenBroadcastReceived'))
+	let crcOptimization = true
+	if (aBlockOrFunction instanceof Block) {
+		let op = aBlockOrFunction.primName() //(primName (expression aBlockOrFunction))
+		crcOptimization = (!(['whenButtonPressed', 'whenBroadcastReceived'].includes(op)))
 	}
-	if (and crcOptimization ((at entry 2) == (computeCRC this chunkBytes))) {
+	let newCRC = this.computeCRC(chunkBytes)
+	console.log("Computed CRC as [" + newCRC + "]. Was [" + entry[1] + "].")
+	if (crcOptimization && (entry[1] == newCRC)) {
 		return false
 	}
 
-	restartChunk = (and (isClass aBlockOrFunction 'Block') (isRunning this aBlockOrFunction))
+	let restartChunk = ((aBlockOrFunction instanceof Block) && (this.isRunning(aBlockOrFunction)))
 
+	//SERIAL
 	// Note: micro:bit v1 misses chunks if time window is over 10 or 15 msecs
-	if (((msecsSinceStart) - lastPingRecvMSecs) < 10) {
+	/*if (((msecsSinceStart) - lastPingRecvMSecs) < 10) {
 		sendMsg this 'chunkCodeMsg' chunkID data
 		sendMsg this 'pingMsg'
 	} else {
 		sendMsgSync this 'chunkCodeMsg' chunkID data
-	}
-	processMessages this
-	atPut entry 2 (computeCRC this chunkBytes) // remember the CRC of the code we just saved
+	}*/
+	//BLE
+	this.sendMsg('chunkCodeMsg', chunkID, data)
+
+	//processMessages this //I dont' think we need to do this - already doing it in DeviceHatchling
+	entry[1] = newCRC//this.computeCRC(chunkBytes) // remember the CRC of the code we just saved
 
 	// restart the chunk if it was running
-	if restartChunk {
-		stopRunningChunk this chunkID
-		waitForResponse this
-		runChunk this chunkID
-		waitForResponse this
+	if (restartChunk) {
+		this.stopRunningChunk(chunkID)
+		await this.waitForResponse()
+		this.runChunk(chunkID)
+		await this.waitForResponse()
 	}
 	return true
 }
 
-method computeCRC SmallRuntime chunkData {
+MicroBlocksRuntime.prototype.computeCRC = function(chunkData) {
 	// Return the CRC for the given compiled code.
 
-	crc = (crc (toBinaryData (toArray chunkData)))
+	let crc = this.crc(chunkData) //(crc (toBinaryData (toArray chunkData)))
 
 	// convert crc to a 4-byte array
-	result = (newArray 4)
-	for i 4 { atPut result i (digitAt crc i) }
+	let result = []//(newArray 4)
+	for (let i = 0; i < 4; i++) { result[i] = ((crc >> i*8) & 0xff) }//(digitAt crc i) }
 	return result
 }
+MicroBlocksRuntime.prototype.crc = function(data) {
+	//Copied from runtime.c in vm
+	const crcTable = [
+       0x0, 0x77073096, 0xEE0E612C, 0x990951BA,  0x76DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
+ 0xEDB8832, 0x79DCB8A4, 0xE0D5E91E, 0x97D2D988,  0x9B64C2B, 0x7EB17CBD, 0xE7B82D07, 0x90BF1D91,
+0x1DB71064, 0x6AB020F2, 0xF3B97148, 0x84BE41DE, 0x1ADAD47D, 0x6DDDE4EB, 0xF4D4B551, 0x83D385C7,
+0x136C9856, 0x646BA8C0, 0xFD62F97A, 0x8A65C9EC, 0x14015C4F, 0x63066CD9, 0xFA0F3D63, 0x8D080DF5,
+0x3B6E20C8, 0x4C69105E, 0xD56041E4, 0xA2677172, 0x3C03E4D1, 0x4B04D447, 0xD20D85FD, 0xA50AB56B,
+0x35B5A8FA, 0x42B2986C, 0xDBBBC9D6, 0xACBCF940, 0x32D86CE3, 0x45DF5C75, 0xDCD60DCF, 0xABD13D59,
+0x26D930AC, 0x51DE003A, 0xC8D75180, 0xBFD06116, 0x21B4F4B5, 0x56B3C423, 0xCFBA9599, 0xB8BDA50F,
+0x2802B89E, 0x5F058808, 0xC60CD9B2, 0xB10BE924, 0x2F6F7C87, 0x58684C11, 0xC1611DAB, 0xB6662D3D,
+0x76DC4190,  0x1DB7106, 0x98D220BC, 0xEFD5102A, 0x71B18589,  0x6B6B51F, 0x9FBFE4A5, 0xE8B8D433,
+0x7807C9A2,  0xF00F934, 0x9609A88E, 0xE10E9818, 0x7F6A0DBB,  0x86D3D2D, 0x91646C97, 0xE6635C01,
+0x6B6B51F4, 0x1C6C6162, 0x856530D8, 0xF262004E, 0x6C0695ED, 0x1B01A57B, 0x8208F4C1, 0xF50FC457,
+0x65B0D9C6, 0x12B7E950, 0x8BBEB8EA, 0xFCB9887C, 0x62DD1DDF, 0x15DA2D49, 0x8CD37CF3, 0xFBD44C65,
+0x4DB26158, 0x3AB551CE, 0xA3BC0074, 0xD4BB30E2, 0x4ADFA541, 0x3DD895D7, 0xA4D1C46D, 0xD3D6F4FB,
+0x4369E96A, 0x346ED9FC, 0xAD678846, 0xDA60B8D0, 0x44042D73, 0x33031DE5, 0xAA0A4C5F, 0xDD0D7CC9,
+0x5005713C, 0x270241AA, 0xBE0B1010, 0xC90C2086, 0x5768B525, 0x206F85B3, 0xB966D409, 0xCE61E49F,
+0x5EDEF90E, 0x29D9C998, 0xB0D09822, 0xC7D7A8B4, 0x59B33D17, 0x2EB40D81, 0xB7BD5C3B, 0xC0BA6CAD,
+0xEDB88320, 0x9ABFB3B6,  0x3B6E20C, 0x74B1D29A, 0xEAD54739, 0x9DD277AF,  0x4DB2615, 0x73DC1683,
+0xE3630B12, 0x94643B84,  0xD6D6A3E, 0x7A6A5AA8, 0xE40ECF0B, 0x9309FF9D,  0xA00AE27, 0x7D079EB1,
+0xF00F9344, 0x8708A3D2, 0x1E01F268, 0x6906C2FE, 0xF762575D, 0x806567CB, 0x196C3671, 0x6E6B06E7,
+0xFED41B76, 0x89D32BE0, 0x10DA7A5A, 0x67DD4ACC, 0xF9B9DF6F, 0x8EBEEFF9, 0x17B7BE43, 0x60B08ED5,
+0xD6D6A3E8, 0xA1D1937E, 0x38D8C2C4, 0x4FDFF252, 0xD1BB67F1, 0xA6BC5767, 0x3FB506DD, 0x48B2364B,
+0xD80D2BDA, 0xAF0A1B4C, 0x36034AF6, 0x41047A60, 0xDF60EFC3, 0xA867DF55, 0x316E8EEF, 0x4669BE79,
+0xCB61B38C, 0xBC66831A, 0x256FD2A0, 0x5268E236, 0xCC0C7795, 0xBB0B4703, 0x220216B9, 0x5505262F,
+0xC5BA3BBE, 0xB2BD0B28, 0x2BB45A92, 0x5CB36A04, 0xC2D7FFA7, 0xB5D0CF31, 0x2CD99E8B, 0x5BDEAE1D,
+0x9B64C2B0, 0xEC63F226, 0x756AA39C,  0x26D930A, 0x9C0906A9, 0xEB0E363F, 0x72076785,  0x5005713,
+0x95BF4A82, 0xE2B87A14, 0x7BB12BAE,  0xCB61B38, 0x92D28E9B, 0xE5D5BE0D, 0x7CDCEFB7,  0xBDBDF21,
+0x86D3D2D4, 0xF1D4E242, 0x68DDB3F8, 0x1FDA836E, 0x81BE16CD, 0xF6B9265B, 0x6FB077E1, 0x18B74777,
+0x88085AE6, 0xFF0F6A70, 0x66063BCA, 0x11010B5C, 0x8F659EFF, 0xF862AE69, 0x616BFFD3, 0x166CCF45,
+0xA00AE278, 0xD70DD2EE, 0x4E048354, 0x3903B3C2, 0xA7672661, 0xD06016F7, 0x4969474D, 0x3E6E77DB,
+0xAED16A4A, 0xD9D65ADC, 0x40DF0B66, 0x37D83BF0, 0xA9BCAE53, 0xDEBB9EC5, 0x47B2CF7F, 0x30B5FFE9,
+0xBDBDF21C, 0xCABAC28A, 0x53B39330, 0x24B4A3A6, 0xBAD03605, 0xCDD70693, 0x54DE5729, 0x23D967BF,
+0xB3667A2E, 0xC4614AB8, 0x5D681B02, 0x2A6F2B94, 0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D]
 
-method verifyCRCs SmallRuntime {
+
+	let crc = ~0;
+	//uint8_t *end = buf + byteCount;
+	for (let i = 0; i < data.length; i++) {
+		let p = data[i]
+		crc = (crc >> 8) ^ crcTable[(crc & 0xff) ^ p];
+	}
+	return ~crc;
+}
+
+MicroBlocksRuntime.prototype.verifyCRCs = async function() {
 	// Check that the CRCs of the chunks on the board match the ones in the IDE.
 	// Resend the code of any chunks whose CRC's do not match.
 
-	if (isNil port) { return }
+	//if (isNil port) { return }
+	if (this.noBleConnection()) { return }
 
 	// collect CRCs from the board
-	crcDict = (dictionary)
-	if (and (notNil vmVersion) (vmVersion >= 159)) {
-		collectCRCsBulk this
-	} else {
+	this.crcDict = {}
+	//if (and (notNil vmVersion) (vmVersion >= 159)) {
+		await this.collectCRCsBulk()
+	/*} else {
 		collectCRCsIndividually this
-	}
+	}*/
 
 	// build dictionaries:
 	//  ideChunks: maps chunkID -> block or functionName
 	//  crcForChunkID: maps chunkID -> CRC
-	ideChunks = (dictionary)
-	crcForChunkID = (dictionary)
-	for pair (sortedPairs chunkIDs) {
+	let ideChunks = {}
+	let crcForChunkID = {}
+	/*for pair (sortedPairs chunkIDs) {
 		id = (first (first pair))
 		key = (last pair)
 		if (and (isClass key 'String') (isNil (functionNamed (project scripter) key))) {
@@ -1424,36 +1535,53 @@ method verifyCRCs SmallRuntime {
 			atPut ideChunks id (last pair)
 			atPut crcForChunkID id (at (first pair) 2)
 		}
+	}*/
+	let keys = Object.keys(this.chunkIDs)
+	for (let i = 0; i < keys.length; i++) {
+		let key = keys[i]
+		let id = this.chunkIDs[key][0]
+
+		ideChunks[id] = key
+		crcForChunkID[id] = this.chunkIDs[key][1]
 	}
 
-	editor = (findMicroBlocksEditor)
-	totalCount = ((count crcDict) + (count ideChunks))
-	processedCount = 0
+	//editor = (findMicroBlocksEditor)
+	let totalCount = Object.keys(crcDict).length + Object.keys(ideChunks).length
+	let processedCount = 0
 
 	// process CRCs
-	for chunkID (keys crcDict) {
-		sourceItem = (at ideChunks chunkID)
-		if (and (notNil sourceItem) ((at crcDict chunkID) != (at crcForChunkID chunkID))) {
-			print 'CRC mismatch; resaving chunk:' chunkID
-			forceSaveChunk this sourceItem
-			showDownloadProgress editor 3 (processedCount / totalCount)
+	//for chunkID (keys crcDict) {
+	let crcDictKeys = Object.keys(this.crcDict)
+	for (let i = 0; i < crcDictKeys.length; i++) {
+		let chunkID = crcDictKeys[i]
+		let sourceItem = ideChunks[chunkID]
+		if ((sourceItem != null) && ((this.crcDict[chunkID]) != (crcForChunkID[chunkID]))) {
+			console.log('CRC mismatch; resaving chunk:' + chunkID)
+			this.forceSaveChunk(sourceItem)
+			//showDownloadProgress editor 3 (processedCount / totalCount)
+		} else if (sourceItem == null) {
+			console.error("crcDict contains unknown chunk " + chunkID)
 		}
 		processedCount += 1
 	}
 
 	// check for missing chunks
-	for chunkID (keys ideChunks) {
-		if (not (contains crcDict chunkID)) {
-			print 'Resaving missing chunk:' chunkID
-			sourceItem = (at ideChunks chunkID)
-			forceSaveChunk this sourceItem
-			showDownloadProgress editor 3 (processedCount / totalCount)
+	//for chunkID (keys ideChunks) {
+	let ids = Object.keys(ideChunks)
+	for (let i = 0; i < ids.length; i++) {
+		let chunkID = ids[i]
+		if (this.crcDict[chunkID] == null) {//(not (contains crcDict chunkID)) {
+			console.log('Resaving missing chunk:' + chunkID)
+			let sourceItem = ideChunks[chunkID]
+			this.forceSaveChunk(sourceItem)
+			//showDownloadProgress editor 3 (processedCount / totalCount)
 		}
 		processedCount += 1
 	}
-	showDownloadProgress editor 3 1
+	//showDownloadProgress editor 3 1
 }
 
+/*
 method boardHasSameProject SmallRuntime {
 	// Return true if the board appears to have the same project as the IDE.
 
@@ -1534,24 +1662,26 @@ method crcReceived SmallRuntime chunkID chunkCRC {
 		atPut crcDict chunkID chunkCRC
 	}
 }
+*/
 
-method collectCRCsBulk SmallRuntime {
+MicroBlocksRuntime.prototype.collectCRCsBulk = async function() {
 	// Collect the CRC's from all chunks on the board via a bulk CRC request.
 
-	crcDict = nil
+	this.crcDict = null
 
 	// request CRCs for all chunks on board
-	sendMsgSync this 'getAllCRCsMsg'
+	this.sendMsgSync('getAllCRCsMsg')
 
 	// wait until crcDict is filled in or timeout
-	startT = (msecsSinceStart)
-	while (and (isNil crcDict) (((msecsSinceStart) - startT) < 2000)) {
-		processMessages this
-		waitMSecs 5
+	let startT = Date.now() //(msecsSinceStart)
+	while ((this.crcDict == null) && ((Date.now() - startT) < 2000)) {
+		//processMessages this  //Don't need to do this?
+		await delay(5) //waitMSecs 5
 	}
-	if (isNil crcDict) { crcDict = (dictionary) } // timeout
+	if (this.crcDict == null) { this.crcDict = {} } // timeout
 }
 
+/*
 method allCRCsReceived SmallRuntime data {
 	// Received a message from baord with the CRCs of all chunks.
 	// Create crcDict and record the (possibly empty) list of CRCs.
@@ -1598,15 +1728,17 @@ method saveVariableNames SmallRuntime {
 	oldVarNames = (copy newVarNames)
 	return true
 }
+*/
 
-method runChunk SmallRuntime chunkID {
-	sendMsg this 'startChunkMsg' chunkID
+MicroBlocksRuntime.prototype.runChunk = function(chunkID) {
+	this.sendMsg('startChunkMsg', chunkID)
 }
 
-method stopRunningChunk SmallRuntime chunkID {
-	sendMsg this 'stopChunkMsg' chunkID
+MicroBlocksRuntime.prototype.stopRunningChunk = function(chunkID) {
+	this.sendMsg('stopChunkMsg', chunkID)
 }
 
+/*
 method sendBroadcastToBoard SmallRuntime msg {
 	sendMsg this 'broadcastMsg' 0 (toArray (toBinaryData msg))
 }
@@ -1679,53 +1811,53 @@ method setSerialDelay SmallRuntime newDelay {
 }
 
 // Message handling
-
-method msgNameToID SmallRuntime msgName {
-	if (isClass msgName 'Integer') { return msgName }
-	if (isNil msgDict) {
-		msgDict = (dictionary)
-		atPut msgDict 'chunkCodeMsg' 1
-		atPut msgDict 'deleteChunkMsg' 2
-		atPut msgDict 'startChunkMsg' 3
-		atPut msgDict 'stopChunkMsg' 4
-		atPut msgDict 'startAllMsg' 5
-		atPut msgDict 'stopAllMsg' 6
-		atPut msgDict 'getVarMsg' 7
-		atPut msgDict 'setVarMsg' 8
-		atPut msgDict 'getVarNamesMsg' 9
-		atPut msgDict 'clearVarsMsg' 10
-		atPut msgDict 'getChunkCRCMsg' 11
-		atPut msgDict 'getVersionMsg' 12
-		atPut msgDict 'getAllCodeMsg' 13
-		atPut msgDict 'deleteAllCodeMsg' 14
-		atPut msgDict 'systemResetMsg' 15
-		atPut msgDict 'taskStartedMsg' 16
-		atPut msgDict 'taskDoneMsg' 17
-		atPut msgDict 'taskReturnedValueMsg' 18
-		atPut msgDict 'taskErrorMsg' 19
-		atPut msgDict 'outputValueMsg' 20
-		atPut msgDict 'varValueMsg' 21
-		atPut msgDict 'versionMsg' 22
-		atPut msgDict 'chunkCRCMsg' 23
-		atPut msgDict 'pingMsg' 26
-		atPut msgDict 'broadcastMsg' 27
-		atPut msgDict 'chunkAttributeMsg' 28
-		atPut msgDict 'varNameMsg' 29
-		atPut msgDict 'extendedMsg' 30
-		atPut msgDict 'getAllCRCsMsg' 38
-		atPut msgDict 'allCRCsMsg' 39
-		atPut msgDict 'deleteFile' 200
-		atPut msgDict 'listFiles' 201
-		atPut msgDict 'fileInfo' 202
-		atPut msgDict 'startReadingFile' 203
-		atPut msgDict 'startWritingFile' 204
-		atPut msgDict 'fileChunk' 205
+*/
+MicroBlocksRuntime.prototype.msgNameToID = function(msgName) {
+	if (typeof msgName == 'number') { return msgName }
+	if (this.msgDict == null) {
+		this.msgDict = {}
+		this.msgDict['chunkCodeMsg'] = 1
+		this.msgDict['deleteChunkMsg'] = 2
+		this.msgDict['startChunkMsg'] = 3
+		this.msgDict['stopChunkMsg'] = 4
+		this.msgDict['startAllMsg'] = 5
+		this.msgDict['stopAllMsg'] = 6
+		this.msgDict['getVarMsg'] = 7
+		this.msgDict['setVarMsg'] = 8
+		this.msgDict['getVarNamesMsg'] = 9
+		this.msgDict['clearVarsMsg'] = 10
+		this.msgDict['getChunkCRCMsg'] = 11
+		this.msgDict['getVersionMsg'] = 12
+		this.msgDict['getAllCodeMsg'] = 13
+		this.msgDict['deleteAllCodeMsg'] = 14
+		this.msgDict['systemResetMsg'] = 15
+		this.msgDict['taskStartedMsg'] = 16
+		this.msgDict['taskDoneMsg'] = 17
+		this.msgDict['taskReturnedValueMsg'] = 18
+		this.msgDict['taskErrorMsg'] = 19
+		this.msgDict['outputValueMsg'] = 20
+		this.msgDict['varValueMsg'] = 21
+		this.msgDict['versionMsg'] = 22
+		this.msgDict['chunkCRCMsg'] = 23
+		this.msgDict['pingMsg'] = 26
+		this.msgDict['broadcastMsg'] = 27
+		this.msgDict['chunkAttributeMsg'] = 28
+		this.msgDict['varNameMsg'] = 29
+		this.msgDict['extendedMsg'] = 30
+		this.msgDict['getAllCRCsMsg'] = 38
+		this.msgDict['allCRCsMsg'] = 39
+		this.msgDict['deleteFile'] = 200
+		this.msgDict['listFiles'] = 201
+		this.msgDict['fileInfo'] = 202
+		this.msgDict['startReadingFile'] = 203
+		this.msgDict['startWritingFile'] = 204
+		this.msgDict['fileChunk'] = 205
 	}
-	msgType = (at msgDict msgName)
-	if (isNil msgType) { error 'Unknown message:' msgName }
+	let msgType = this.msgDict[msgName]
+	if (msgType == null) { console.error('Unknown message: ' + msgName) }
 	return msgType
 }
-
+/*
 method errorString SmallRuntime errID {
 	// Return an error string for the given errID from error definitions copied and pasted from interp.h
 
@@ -1779,29 +1911,34 @@ method errorString SmallRuntime errID {
 	}
 	return (join 'Unknown error: ' errID)
 }
+*/
 
-method sendMsg SmallRuntime msgName chunkID byteList {
-	ensurePortOpen this
-	if (isNil port) { return }
+MicroBlocksRuntime.prototype.sendMsg = function(msgName, chunkID, byteList) {
+	//ensurePortOpen this
+	//if (isNil port) { return }
+	let device = this.bleDevice()
+	if (device == null) { return }
 
-	if (isNil chunkID) { chunkID = 0 }
-	msgID = (msgNameToID this msgName)
-	if (isNil byteList) { // short message
-		msg = (list 250 msgID chunkID)
+	if (chunkID == null) { chunkID = 0 }
+	let msgID = this.msgNameToID(msgName)
+	let msg = null
+	if (byteList == null) { // short message
+		msg = [250, msgID, chunkID]
 	} else { // long message
-		byteCount = ((count byteList) + 1)
-		msg = (list 251 msgID chunkID (byteCount & 255) ((byteCount >> 8) & 255))
-		addAll msg byteList
-		add msg 254 // terminator byte (helps board detect dropped bytes)
+		let byteCount = byteList.length + 1
+		msg = [251, msgID, chunkID, (byteCount & 255), ((byteCount >> 8) & 255)]
+		msg.push.apply(msg, byteList)
+		msg.push(254) // terminator byte (helps board detect dropped bytes)
 	}
-	dataToSend = (toBinaryData (toArray msg))
+	let dataToSend = new Uint8Array(msg)
+	console.log("sendMsg sending [" + dataToSend + "]")
 
-	if ('boardie' == portName) { // send all data at once to boardie
+	/*if ('boardie' == portName) { // send all data at once to boardie
 		(writeSerialPort port dataToSend)
 		return
 	}
 
-	while ((byteCount dataToSend) > 0) {
+	while (dataToSend.length > 0) {
 		// Note: Adafruit USB-serial drivers on Mac OS locks up if >= 1024 bytes
 		// written in one call to writeSerialPort, so send smaller chunks
 		// Note: Maximum serial write in Chrome browser is only 64 bytes!
@@ -1815,25 +1952,32 @@ method sendMsg SmallRuntime msgName chunkID byteList {
 		waitMSecs 2
 		if (bytesSent < byteCount) { waitMSecs 200 } // output queue full; wait a bit
 		dataToSend = (copyFromTo dataToSend (bytesSent + 1))
+	}*/
+
+	// Note: For ble, there is a max of 20 bytes
+	let byteMax = 20
+	for (let i = 0; i < Math.ceil(dataToSend.length/byteMax); i++ ) {
+		device.sendMicroBlocksData(dataToSend.subarray(i*byteMax, (i+1)*byteMax))
 	}
 }
 
-method sendMsgSync SmallRuntime msgName chunkID byteList {
+MicroBlocksRuntime.prototype.sendMsgSync = async function(msgName, chunkID, byteList) {
 	// Send a message followed by a 'pingMsg', then a wait for a ping response from VM.
 
-	readAvailableSerialData this
-	sendMsg this msgName chunkID byteList
-	if ('boardie' == portName) { return } // don't wait for a response
+	//readAvailableSerialData this
+	this.sendMsg(msgName, chunkID, byteList)
+	//if ('boardie' == portName) { return } // don't wait for a response
 
-	ok = (waitForResponse this)
-	if (not ok) {
-		print 'Lost communication to the board in sendMsgSync'
-		closePort this
+	let ok = await this.waitForResponse()
+	if (!ok) {
+		console.log('Lost communication to the board in sendMsgSync')
+		//closePort this
 		return false
 	}
 	return true
 }
 
+/*
 method readAvailableSerialData SmallRuntime {
 	// Read any available data into recvBuf so that waitForResponse will await fresh data.
 
@@ -1843,27 +1987,33 @@ method readAvailableSerialData SmallRuntime {
 	s = (readSerialPort port true)
 	if (notNil s) { recvBuf = (join recvBuf s) }
 }
+*/
 
-method waitForResponse SmallRuntime {
+MicroBlocksRuntime.prototype.waitForResponse = async function() {
 	// Wait for some data to arrive from the board. This is taken to mean that the
 	// previous operation has completed. Return true if a response was received.
 
-	sendMsg this 'pingMsg'
-	timeout = 10000 // enough time for a long Flash compaction
-	start = (msecsSinceStart)
-	while (((msecsSinceStart) - start) < timeout) {
-		if (isNil port) { return false }
-		s = (readSerialPort port true)
+	this.sendMsg('pingMsg')
+	let timeout = 10000 // enough time for a long Flash compaction
+	let start = Date.now() //(msecsSinceStart)
+	while ((Date.now() - start) < timeout) {
+		//if (isNil port) { return false }
+		let device = this.bleDevice()
+		if (device == null) { return false }
+		/*s = (readSerialPort port true)
 		if (notNil s) {
 			recvBuf = (join recvBuf s)
 			return true
-		}
-		sendMsg this 'pingMsg'
-		waitMSecs 5
+		}*/
+		if (device.pingReceived()) { return true }
+
+		this.sendMsg('pingMsg')
+		await delay(5)
 	}
 	return false
 }
 
+/*
 method ensurePortOpen SmallRuntime {
 	if (true == disconnected) { return }
 	if (isWebSerial this) { return }
@@ -2039,13 +2189,15 @@ method updateStopping SmallRuntime {
 	}
 	if highlightChanged { updateHighlights this }
 }
+*/
 
-method isRunning SmallRuntime aBlock {
-	chunkID = (lookupChunkID this aBlock)
-	if (or (isNil chunkRunning) (isNil chunkID)) { return false }
-	return (at chunkRunning (chunkID + 1))
+MicroBlocksRuntime.prototype.isRunning =function(aBlock) {
+	let chunkID = this.lookupChunkID(aBlock)
+	if ( (this.chunkRunning == null) || (chunkID == null) ) { return false }
+	return this.chunkRunning[chunkID]
 }
 
+/*
 // File Transfer Support
 
 method boardHasFileSystem SmallRuntime {
@@ -2273,16 +2425,19 @@ method recordFileTransferMsg SmallRuntime msg {
 	if (notNil fileTransferMsgs) { add fileTransferMsgs msg }
 	lastRcvMSecs = (msecsSinceStart)
 }
+*/
 
 // Script Highlighting
 
-method clearRunningHighlights SmallRuntime {
-	chunkRunning = (newArray 256 false) // clear all running flags
-	updateHighlights this
+MicroBlocksRuntime.prototype.clearRunningHighlights = function() {
+	this.chunkRunning = Array(256).fill(false) // clear all running flags
+	this.updateHighlights()
 }
 
-method updateHighlights SmallRuntime {
-	scale = (global 'scale')
+MicroBlocksRuntime.prototype.updateHighlights = function() {
+	//TODO: we should do it here too somehow.
+
+	/*scale = (global 'scale')
 	for m (parts (morph (scriptEditor scripter))) {
 		if (isClass (handler m) 'Block') {
 			if (isRunning this (handler m)) {
@@ -2291,9 +2446,10 @@ method updateHighlights SmallRuntime {
 				removeHighlight m
 			}
 		}
-	}
+	}*/
 }
 
+/*
 method removeResultBubbles SmallRuntime {
 	for m (allMorphs (morph (global 'page'))) {
 		h = (handler m)

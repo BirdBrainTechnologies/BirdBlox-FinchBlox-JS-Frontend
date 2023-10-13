@@ -1,20 +1,26 @@
-defineClass PrettyPrinter gen offset useSemicolons
+
+function PrettyPrinter() {
+  this.gen = null
+  this.offset = null
+  this.useSemicolons = false
+}
 
 // public methods
 
-method useSemicolons PrettyPrinter { useSemicolons = true }
+PrettyPrinter.prototype.useSemicolons = function() { this.useSemicolons = true }
 
-method prettyPrint PrettyPrinter block generator {
-  gen = generator
-  offset = ((fieldNameCount (class 'Command')) + 1)
-  if (isNil gen) {
-    gen = (new 'PrettyPrinterGenerator' (list) 0 true true)
-    if (true == useSemicolons) { useSemicolons gen }
+PrettyPrinter.prototype.prettyPrint = function(block, generator) {
+  this.gen = generator
+  this.offset = 1 //((fieldNameCount (class 'Command')) + 1)
+  if (this.gen == null) {
+    this.gen = new PrettyPrinterGenerator([], 0, true, true)
+    if (true == this.useSemicolons) { this.gen.useSemicolons() }
   }
-  printCmd this block
-  return (joinStringArray (toArray (getField gen 'result')))
+  this.printCmd(block)
+  return this.gen.result.join('')//(joinStringArray (toArray (getField gen 'result')))
 }
 
+/*
 method prettyPrintFunction PrettyPrinter func generator {
   gen = generator
   offset = ((fieldNameCount (class 'Command')) + 1)
@@ -36,29 +42,31 @@ method prettyPrintMethod PrettyPrinter func generator {
   printFunction this func (className (class (classIndex func)))
   return (joinStringArray (toArray (getField gen 'result')))
 }
+*/
 
-method prettyPrintList PrettyPrinter block generator {
-  gen = generator
-  offset = ((fieldNameCount (class 'Command')) + 1)
-  if (isNil gen) {
-    gen = (new 'PrettyPrinterGenerator' (list) 0 true true)
-    if (true == useSemicolons) { useSemicolons gen }
+PrettyPrinter.prototype.prettyPrintList = function(block, generator) {
+  this.gen = generator
+  this.offset = 1 //((fieldNameCount (class 'Command')) + 1)
+  if (this.gen == null) {
+    this.gen = new PrettyPrinterGenerator([], 0, true, true)
+    if (true == this.useSemicolons) { this.gen.useSemicolons() }
   }
 
-  currentBlock = block
-  early = true
-  while (notNil currentBlock) {
-    tab gen
-    early = (printCmd this currentBlock early)
+  let currentBlock = block
+  let early = true
+  while (currentBlock != null) {
+    this.gen.tab()
+    early = this.printCmd(currentBlock, early)
     early = (early == true)
-    crIfNeeded gen
-    currentBlock = (getField currentBlock 'nextBlock')
+    this.gen.crIfNeeded()
+    currentBlock = currentBlock.nextBlock
   }
-  result = (getField gen 'result')
-  if (and ((count result) > 0) (';' == (last result))) { removeLast result }
-  return (joinStringArray (toArray result))
+  result = this.gen.result
+  if (((result.length) > 0) && (';' == result[result.length-1])) { result.pop() }
+  return result.join('')//(joinStringArray (toArray result))
 }
 
+/*
 method prettyPrintString PrettyPrinter aString {
   commands = (parse aString)
   output = (list)
@@ -110,26 +118,29 @@ method prettyPrintClass PrettyPrinter aClass withoutDefinition generator {
 method prettyPrintFileToFile PrettyPrinter aFileName newFileName {
   writeFile newFileName (prettyPrintFile this aFileName)
 }
+*/
 
 // private methods
 
-method infixOp PrettyPrinter token {
-  return (or ('=' == token) ('+=' == token)
-             ('+' == token) ('-' == token) ('*' == token) ('/' == token) ('%' == token)
-             ('<' == token) ('<=' == token) ('==' == token)
-             ('!=' == token) ('>=' == token) ('>' == token) ('===' == token)
-             ('&' == token) ('|' == token) ('^' == token)
-             ('<<' == token) ('>>' == token) ('>>>' == token)
+PrettyPrinter.prototype.infixOp = function(token) {
+  return (('=' == token) || ('+=' == token) ||
+             ('+' == token) || ('-' == token) || ('*' == token) || ('/' == token) || ('%' == token) ||
+             ('<' == token) || ('<=' == token) || ('==' == token) ||
+             ('!=' == token) || ('>=' == token) || ('>' == token) || ('===' == token) ||
+             ('&' == token) || ('|' == token) || ('^' == token) ||
+             ('<<' == token) || ('>>' == token) || ('>>>' == token) ||
              ('->' == token))
 }
 
-method allAlphaNumeric PrettyPrinter letters {
-  for c letters {
-    if (not (or (isLetter c) (isDigit c) ('_' == c))) { return false }
+PrettyPrinter.prototype.allAlphaNumeric = function(letters) {
+  for (let i = 0; i < letters.length; i++) {
+    let c = letters[i]
+    if ( !(c.match(/^[a-zA-z0-9_]/i)) ) { return false } //(not (or (isLetter c) (isDigit c) ('_' == c))) { return false }
   }
   return true
 }
 
+/*
 method quoteOp PrettyPrinter value {
   if (isClass value 'String') {
     if (or (infixOp this value) (not (isLetter value))
@@ -143,46 +154,48 @@ method quoteOp PrettyPrinter value {
     return (join '''' value '''')
   }
 }
+*/
 
-method op PrettyPrinter value {
-  if (isClass value 'String') {
-    if (or (infixOp this value) (isLetter value)) {
-      token = (toList (letters value))
-      removeLast token
-      if (allAlphaNumeric this token) { return value }
+PrettyPrinter.prototype.op = function(value) {
+  if (typeof value == 'string') {
+    if ((this.infixOp(value)) || (value.match(/^[a-zA-Z]/i))) { //if (or (infixOp this value) (isLetter value)) {
+      token = value.split("")
+      token.pop()  //TODO: should we be doing this??
+      if (this.allAlphaNumeric(token)) { return value }
     }
   }
-  return (join '''' value '''')
+  return ("''" + value + "''")
 }
 
-method printValue PrettyPrinter block {
-  if (isClass block 'Reporter') {
-    prim = (primName block)
-    if (isOneOf prim 'v' 'my') {
+PrettyPrinter.prototype.printValue = function(block) {
+  if (block instanceof ReporterBlock) {
+    let prim = block.primName()
+    /*if (isOneOf prim 'v' 'my') {
       varRef = (getField block offset)
       if (or (varMustBeQuoted varRef) ('my' == prim)) {
         varRef = (join '(' prim ' ' (printString varRef) ')')
       }
       symbol gen varRef
-    } else {
-      openParen gen
-      printCmd this block
-      closeParen gen
-    }
-  } (isClass block 'Command') {
-    printCmdList this block
-  } (isClass block 'String') {
-    const gen (printString block)
-  } (isClass block 'Float') {
-    const gen (toString block 20)
-  } (isClass block 'Color') {
+    } else {*/
+      this.gen.openParen()
+      this.printCmd(block)
+      this.gen.closeParen()
+    //}
+  } else if (block instanceof CommandBlock) {
+    this.printCmdList(block)
+  } else if (typeof block == 'string') {
+    this.gen.const(block)//(printString block)
+  } else if (typeof block == 'number') { //'Float'
+    this.gen.const(block.toString())//(toString block 20) TODO: add precision?
+  /*} (isClass block 'Color') {
     c = block
-    const gen (join '(colorSwatch ' (red c) ' ' (green c) ' ' (blue c) ' ' (alpha c) ')')
+    this.gen.const(join '(colorSwatch ' (red c) ' ' (green c) ' ' (blue c) ' ' (alpha c) ')')*/
   } else {
-    const gen (toString block)
+    this.gen.const(block.toString())
   }
 }
 
+/*
 method printFunction PrettyPrinter func aClass {
   if (isNil aClass) {
     if (notNil (functionName func)) {
@@ -207,30 +220,36 @@ method printFunction PrettyPrinter func aClass {
   }
   printCmdList this (cmdList func)
 }
+*/
 
-method printReporter PrettyPrinter block {
-  prim = (primName block)
-  if (and (infixOp this prim) ((count block) == (offset + 1))) {
+PrettyPrinter.prototype.printReporter = function(block) {
+  let prim = block.primName()
+  let args = block.argList()
+  /*if (and (infixOp this prim) ((count block) == (offset + 1))) {
     printValue this (getField block offset)
     symbol gen prim
     printValue this (getField block (offset + 1))
   } (prim == 'v') {
     symbol gen 'v'
     varName gen (getField block offset)
-  } else {
-    printOp this prim
-    for i (count block) {
-      if (i >= offset) {
-        printValue this (getField block i)
+  } else {*/
+    this.printOp(prim)
+    /*for (let i = 0; i < block.length; i++) {
+      if (i >= this.offset) {
+        this.printValue(getField block i)
       }
+    }*/
+    for (let i = 0; i < args.length; i++) {
+      this.printValue(args[i])
     }
-  }
+  //}
 }
 
-method printOp PrettyPrinter block {
-  functionName gen (op this block)
+PrettyPrinter.prototype.printOp = function(block) {
+  this.gen.functionName(this.op(block))
 }
 
+/*
 method printCmdList PrettyPrinter block inIf {
   openBrace gen
   if (useSemicolons != true) {
@@ -280,10 +299,11 @@ method printCmdListShort PrettyPrinter block {
   closeBrace gen
   crIfNeeded gen
 }
+*/
 
-method printCmd PrettyPrinter block early {
-  prim = (primName block)
-  if (prim == 'to') {
+PrettyPrinter.prototype.printCmd = function(block, early) {
+  let prim = block.primName()
+  /*if (prim == 'to') {
     op = (getField block offset)
     control gen prim
     functionName gen (quoteOp this op)
@@ -364,15 +384,22 @@ method printCmd PrettyPrinter block early {
     varName gen (getField block offset)
     symbol gen prim
     printValue this (getField block (offset + 1))
-  } else {
-    printReporter this block
-  }
+  } else {*/
+    this.printReporter(block)
+  //}
 }
 
-defineClass PrettyPrinterGenerator result tabLevel hadCr hadSpace useSemicolons
+function PrettyPrinterGenerator (result, tabLevel, hadCr, hadSpace, useSemicolons) {
+  this.result = result
+  this.tabLevel = tabLevel
+  this.hadCr = hadCr 
+  this.hadSpace = hadSpace 
+  this.useSemicolons = useSemicolons || false
+}
 
-method useSemicolons PrettyPrinterGenerator { useSemicolons = true }
+PrettyPrinterGenerator.prototype.useSemicolons = function() { this.useSemicolons = true }
 
+/*
 method closeBrace PrettyPrinterGenerator {
   if (';' == (last result)) { removeLast result }
   nextPutAll this '}'
@@ -381,34 +408,38 @@ method closeBrace PrettyPrinterGenerator {
 method addTab PrettyPrinterGenerator {
   tabLevel = (tabLevel + 1)
 }
+*/
 
-method closeParen PrettyPrinterGenerator {
-  nextPutAll this ')'
+PrettyPrinterGenerator.prototype.closeParen = function() {
+  this.nextPutAll(')')
 }
 
-method const PrettyPrinterGenerator value {
-  nextPutAllWithSpace this value
+PrettyPrinterGenerator.prototype.const = function(value) {
+  this.nextPutAllWithSpace(value)
 }
 
+/*
 method control PrettyPrinterGenerator value {
   nextPutAll this value
 }
+*/
 
-method crIfNeeded PrettyPrinterGenerator {
-  if (not hadCr) {
-    cr this
+PrettyPrinterGenerator.prototype.crIfNeeded = function() {
+  if (!this.hadCr) {
+    this.cr()
   }
 }
 
-method cr PrettyPrinterGenerator {
-  if (true == useSemicolons) {
-    nextPutAll this ';'
+PrettyPrinterGenerator.prototype.cr = function() {
+  if (true == this.useSemicolons) {
+    this.nextPutAll(';')
   } else {
-    nextPutAll this (newline)
+    this.nextPutAll('\n')
   }
-  hadCr = true
+  this.hadCr = true
 }
 
+/*
 method skipSpace PrettyPrinterGenerator {
   hadSpace = true
 }
@@ -416,55 +447,62 @@ method skipSpace PrettyPrinterGenerator {
 method decTab PrettyPrinterGenerator {
   tabLevel = (tabLevel - 1)
 }
+*/
 
-method functionName PrettyPrinterGenerator value {
-  if (not (isClass value 'String')) {
-    error 'non string'
+PrettyPrinterGenerator.prototype.functionName = function(value) {
+  if (!(typeof value == 'string')) {
+    console.error( 'non string' )
   }
-  nextPutAllWithSpace this value
+  this.nextPutAllWithSpace(value)
 }
 
+/*
 method varName PrettyPrinterGenerator value {
   if (varMustBeQuoted value) {
     value = (printString value) // enclose in quotes
   }
   nextPutAllWithSpace this value
 }
+*/
 
-method nextPutAll PrettyPrinterGenerator value {
-  add result value
-  if ((count value) > 0) {
-    last = (last (letters value))
-    hadSpace = (isOneOf last ' ' '(' '{' (newline))
-    hadCr = (isOneOf last ';' '{' (newline))
+PrettyPrinterGenerator.prototype.nextPutAll = function(value) {
+  this.result.push(value)
+  if (value.length > 0) {
+    let last = value.slice(-1)
+    this.hadSpace = [' ', '(', '{', '\n'].includes(last) //(isOneOf last ' ' '(' '{' (newline))
+    this.hadCr = [';', '{', '\n'].includes(last)//(isOneOf last ';' '{' (newline))
   }
 }
 
-method nextPutAllWithSpace PrettyPrinterGenerator value {
-  if (not hadSpace) {
-    nextPutAll this ' '
+PrettyPrinterGenerator.prototype.nextPutAllWithSpace = function(value) {
+  if (!this.hadSpace) {
+    this.nextPutAll(' ')
   }
-  nextPutAll this value
+  this.nextPutAll(value)
 }
 
+/*
 method openBrace PrettyPrinterGenerator {
   nextPutAllWithSpace this '{'
 }
+*/
 
-method openParen PrettyPrinterGenerator {
-  nextPutAllWithSpace this '('
+PrettyPrinterGenerator.prototype.openParen = function() {
+  this.nextPutAllWithSpace('(')
 }
 
+/*
 method symbol PrettyPrinterGenerator value {
   nextPutAllWithSpace this value
 }
+*/
 
-method tab PrettyPrinterGenerator {
-  useSemicolons = (useSemicolons == true)
-  if (not useSemicolons) {
-    repeat tabLevel {
-      repeat 2 {
-        nextPutAll this ' '
+PrettyPrinterGenerator.prototype.tab = function() {
+  let useSemicolons = (this.useSemicolons == true)
+  if (!useSemicolons) {
+    for (let i = 0; i < this.tabLevel; i++) {
+      for (let j = 0; j < 2; j++) {
+        this.nextPutAll(' ')
       }
     }
   }

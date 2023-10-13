@@ -43,6 +43,12 @@ function BlockStack(firstBlock, tab) {
   this.tab.updateArrows();
 
   this.startRunIfAutoExec();
+
+  if (Hatchling) {
+    if (BlockStack.count == null) { BlockStack.count = 0 }
+    this.mbId = "bs" + BlockStack.count
+    BlockStack.count++
+  }
 }
 
 /**
@@ -309,9 +315,9 @@ BlockStack.prototype.startRun = function(startBlock, broadcastMessage) {
     this.tab.startRun(); // Starts Tab if it is not already running.
   }
   if (Hatchling) {
-    let runtime = new MicroBlocksRuntime()
-    runtime.showInstructions(startBlock)
-    runtime.showCompiledBytes(startBlock)
+
+    mbRuntime.showInstructions(startBlock)
+    mbRuntime.showCompiledBytes(startBlock)
     
     let device = DeviceHatchling.getManager().getDevice(0)
     if (device != null) {
@@ -321,7 +327,7 @@ BlockStack.prototype.startRun = function(startBlock, broadcastMessage) {
       //The incoming message buffer on the board sets a practical upper limit on the data size of long messages. This sets the upper limit on the size of a single compiled chunk or source attribute. */
       //To help the board detect dropped bytes, all long messages sent to the board end with the terminator byte 0xFE. The data size field includes this terminator byte.
       //Dropped bytes in messages from the board to the IDE have not (so far) been a problem, so long messages sent from the board to the IDE do not have a termination byte.
-      let chunkBytes = runtime.chunkBytesFor(startBlock.stack.firstBlock)
+      /*let chunkBytes = runtime.chunkBytesFor(startBlock.stack.firstBlock)
       let dataSize = chunkBytes.length + 2 //Add one for termination byte and one for chunkType
       if (this.chunkID == null) {
         this.chunkID = runtime.nextChunkID()
@@ -333,7 +339,9 @@ BlockStack.prototype.startRun = function(startBlock, broadcastMessage) {
       bytes.set([0xFE], bytes.length - 1)
       console.log("BlockStack sending bytes: ")
       console.log(bytes)
-      device.sendMicroBlocksData(bytes)
+      device.sendMicroBlocksData(bytes)*/
+      
+      mbRuntime.saveChunk(this.firstBlock)
     } else {
       console.log("Bytes not sent - device not connected.")
     }

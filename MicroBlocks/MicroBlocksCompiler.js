@@ -635,21 +635,23 @@ method globalVarIndex SmallCompiler varName {
 // function calls
 
 MicroBlocksCompiler.prototype.isFunctionCall = function(op) {
-	let runtime = new MicroBlocksRuntime()
-	return (runtime.lookupChunkID(op) != null) 
+	//return (notNil (lookupChunkID (smallRuntime) op))
+	//No functions for now...
+	return false
 }
 
 MicroBlocksCompiler.prototype.instructionsForFunctionCall =function(op, args, isCmd) {
-	let result = []
-	let runtime = new MicroBlocksRuntime()
-	let callee = runtime.lookupChunkID(op)
-	for (let i = 0; i < args.length; i++) {
-		let arg = args[i]
-		result.push.apply(result, this.instructionsForExpression(arg))
+	/*result = (list)
+	callee = (lookupChunkID (smallRuntime) op)
+	for arg args {
+		addAll result (instructionsForExpression this arg)
 	}
-	result.push(['callFunction', (((callee & 255) << 8) | ((args.length) & 255))])
-	if (isCmd) { result.push(['pop', 1]) } // discard the return value
-	return result
+	add result (array 'callFunction' (((callee & 255) << 8) | ((count args) & 255)))
+	if isCmd { add result (array 'pop' 1) } // discard the return value
+	return result*/
+
+	//No functions for now...
+	return []
 }
 
 // literal values (strings and large integers )

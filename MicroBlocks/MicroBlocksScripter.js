@@ -1,13 +1,12 @@
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+/**
+ * MicroBlocks script editor
+ */
 
-// Copyright 2019 John Maloney, Bernat Romagosa, and Jens Mönig
+function MicroBlocksScripter() {
+  this.saveNeeded = true
+}
 
-// MicroBlocksScripter.gp - MicroBlocks script editor w/ built-in palette
-
-defineClass MicroBlocksScripter morph mbProject projectEditor saveNeeded categorySelector catResizer libHeader libSelector lastLibraryFolder blocksFrame blocksResizer scriptsFrame nextX nextY embeddedLibraries trashcan selection
-
+/*
 method blockPalette MicroBlocksScripter { return (contents blocksFrame) }
 method scriptEditor MicroBlocksScripter { return (contents scriptsFrame) }
 method scriptsFrame MicroBlocksScripter { return scriptsFrame }
@@ -645,20 +644,22 @@ method scriptChanged MicroBlocksScripter {
 }
 
 method functionBodyChanged  MicroBlocksScripter { saveNeeded = true }
+*/
 
-method step MicroBlocksScripter {
+MicroBlocksScripter.prototype.step = async function()  {
   // Note: Sometimes get bursts of multiple 'changed' events, but those
   // events merely set the saveNeeded flag. This method does the actual
   // saveScripts if the saveNeeded flag is true.
 
-  if saveNeeded {
-    saveScripts this
-	syncScripts (smallRuntime)
-    saveNeeded = false
+  if (this.saveNeeded) {
+    //this.saveScripts() //we are already saving?
+    await mbRuntime.syncScripts()
+    this.saveNeeded = false
   }
-  updateStopping (smallRuntime)
+  //mbRuntime.updateStopping() //this updates the block highlights - maybe we need to add our own way here?
 }
 
+/*
 method saveScripts MicroBlocksScripter oldScale {
   scale = (blockScale)
   if (notNil oldScale) { scale = oldScale }
@@ -1384,3 +1385,4 @@ method scriptsBottom MicroBlocksScripter {
   }
   return result
 }
+*/

@@ -18,12 +18,20 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
   this.supportedStates = [0, 1, 3, 8, 9, 10, 14]
   this.portStates = [0, 0, 0, 0, 0, 0]
   this.advertisedName = advertisedName
+
+  this.pingWasRecieved = false
 }
 DeviceHatchling.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHatchling.prototype.constructor = DeviceHatchling;
 Device.setDeviceTypeName(DeviceHatchling, "hatchling", "Hatchling", "Hatchling");
 
 DeviceHatchling.prototype.setHatchlingState = function(state) {
+
+  console.log("setHatchlingState [" + state + "]")
+  //with microblocks, we will need to parse the message
+  //if state = pingMessage this.pingWasRecieved = true
+  return
+
   this.hlState = state
 
   let newPortVals = []
@@ -46,6 +54,14 @@ DeviceHatchling.prototype.setHatchlingState = function(state) {
       }
     }
   }
+}
+
+DeviceHatchling.prototype.pingReceived = function() {
+  if (this.pingWasRecieved) {
+    this.pingWasRecieved = false
+    return true
+  }
+  return false
 }
 
 /**
