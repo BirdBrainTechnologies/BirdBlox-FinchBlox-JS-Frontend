@@ -194,6 +194,14 @@ DisplayStack.prototype.startRun = function() {
     this.updateTimer = self.setInterval(function() {
       this.updateRun();
     }.bind(this), CodeManager.updateInterval);
+
+    if (Hatchling) {
+      if (mbRuntime.isRunning(this.firstBlock)) {
+        mbRuntime.stopRunningChunk(mbRuntime.lookupChunkID(this.firstBlock))
+      } else {
+        mbRuntime.evalOnBoard(this.firstBlock)
+      }
+    }
   }
 };
 

@@ -21,7 +21,7 @@ B_WhenFlagTapped.prototype.primName = function() { return "whenStarted" }
 B_WhenFlagTapped.prototype.argList = function() { return [] }
 /* Triggers stack to start running. */
 B_WhenFlagTapped.prototype.eventFlagClicked = function() {
-  this.stack.startRun();
+  this.stack.startRun(null, null, true);
 };
 /* Does nothing */
 B_WhenFlagTapped.prototype.startAction = function() {
@@ -694,7 +694,7 @@ B_StartWhenDistance.prototype.argList = function() {
   return [{
     primName: function() { return "<" },
     argList: function() { return [{
-      primName: function() { return "[hatchling:getDistanceSensor]" },
+      primName: function() { return "[h:ds]" },
       argList: function () { return [portName] }
     }, 20]}
   }] 

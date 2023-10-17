@@ -299,8 +299,9 @@ BlockStack.prototype.updateRun = function() {
  * Starts execution of the BlockStack starting with the specified Block. Makes BlockStack glow, too.
  * @param {Block} [startBlock] - The first Block to execute. By default, this.firstBlock is used.
  * @param {string} [broadcastMessage] - Indicates if execution was triggered by a broadcast
+ * @param {boolean} [flagTapped] - True if this startRun was triggered by tapping the flag button
  */
-BlockStack.prototype.startRun = function(startBlock, broadcastMessage) {
+BlockStack.prototype.startRun = function(startBlock, broadcastMessage, flagTapped) {
   if (startBlock == null) {
     startBlock = this.firstBlock;
   }
@@ -342,6 +343,17 @@ BlockStack.prototype.startRun = function(startBlock, broadcastMessage) {
       device.sendMicroBlocksData(bytes)*/
       
       mbRuntime.saveChunk(this.firstBlock)
+      if (!flagTapped) {
+        // from MicroBlocksPatches.gp
+        // method clicked Block hand 
+
+        if (mbRuntime.isRunning(this.firstBlock)) {
+          mbRuntime.stopRunningChunk(mbRuntime.lookupChunkID(this.firstBlock))
+        } else {
+          mbRuntime.evalOnBoard(this.firstBlock)
+        }
+
+      }
     } else {
       console.log("Bytes not sent - device not connected.")
     }

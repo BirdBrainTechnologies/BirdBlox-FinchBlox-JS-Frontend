@@ -225,6 +225,7 @@ method printFunction PrettyPrinter func aClass {
 PrettyPrinter.prototype.printReporter = function(block) {
   let prim = block.primName()
   let args = block.argList()
+  console.log("printReporter " + prim + " [" + args + "]")
   /*if (and (infixOp this prim) ((count block) == (offset + 1))) {
     printValue this (getField block offset)
     symbol gen prim
@@ -249,30 +250,30 @@ PrettyPrinter.prototype.printOp = function(block) {
   this.gen.functionName(this.op(block))
 }
 
-/*
-method printCmdList PrettyPrinter block inIf {
-  openBrace gen
-  if (useSemicolons != true) {
-    cr gen
-    addTab gen
+PrettyPrinter.prototype.printCmdList = function(block, inIf) {
+  this.gen.openBrace()
+  if (this.useSemicolons != true) {
+    this.gen.cr()
+    this.gen.addTab()
   }
-  currentBlock = block
-  early = true
-  while (notNil currentBlock) {
-    tab gen
-    early = (printCmd this currentBlock early)
+  let currentBlock = block
+  let early = true
+  while (currentBlock != null) {
+    this.gen.tab()
+    early = this.printCmd(currentBlock, early)
     early = (early == true)
-    crIfNeeded gen
-    currentBlock = (getField currentBlock 'nextBlock')
+    this.gen.crIfNeeded()
+    currentBlock = currentBlock.nextBlock
   }
-  decTab gen
-  tab gen
-  closeBrace gen
+  this.gen.decTab()
+  this.gen.tab()
+  this.gen.closeBrace()
   if (inIf != true) {
-    crIfNeeded gen
+    this.gen.crIfNeeded()
   }
 }
 
+/*
 method printCmdListInControl PrettyPrinter block {
   if (isClass block 'Reporter') {
     printValue this block
@@ -302,7 +303,7 @@ method printCmdListShort PrettyPrinter block {
 */
 
 PrettyPrinter.prototype.printCmd = function(block, early) {
-  let prim = block.primName()
+  //let prim = block.primName()
   /*if (prim == 'to') {
     op = (getField block offset)
     control gen prim
@@ -397,18 +398,18 @@ function PrettyPrinterGenerator (result, tabLevel, hadCr, hadSpace, useSemicolon
   this.useSemicolons = useSemicolons || false
 }
 
-PrettyPrinterGenerator.prototype.useSemicolons = function() { this.useSemicolons = true }
-
-/*
-method closeBrace PrettyPrinterGenerator {
-  if (';' == (last result)) { removeLast result }
-  nextPutAll this '}'
+PrettyPrinterGenerator.prototype.useSemicolons = function() { 
+  this.useSemicolons = true 
 }
 
-method addTab PrettyPrinterGenerator {
-  tabLevel = (tabLevel + 1)
+PrettyPrinterGenerator.prototype.closeBrace = function() {
+  if (';' == this.result[this.result.length - 1]) { result.pop() }
+  this.nextPutAll('}')
 }
-*/
+
+PrettyPrinterGenerator.prototype.addTab = function() {
+  this.tabLevel = (this.tabLevel + 1)
+}
 
 PrettyPrinterGenerator.prototype.closeParen = function() {
   this.nextPutAll(')')
@@ -443,11 +444,11 @@ PrettyPrinterGenerator.prototype.cr = function() {
 method skipSpace PrettyPrinterGenerator {
   hadSpace = true
 }
-
-method decTab PrettyPrinterGenerator {
-  tabLevel = (tabLevel - 1)
-}
 */
+
+PrettyPrinterGenerator.prototype.decTab = function() {
+  this.tabLevel = (this.tabLevel - 1)
+}
 
 PrettyPrinterGenerator.prototype.functionName = function(value) {
   if (!(typeof value == 'string')) {
@@ -481,11 +482,9 @@ PrettyPrinterGenerator.prototype.nextPutAllWithSpace = function(value) {
   this.nextPutAll(value)
 }
 
-/*
-method openBrace PrettyPrinterGenerator {
-  nextPutAllWithSpace this '{'
+PrettyPrinterGenerator.prototype.openBrace = function() {
+  this.nextPutAllWithSpace('{')
 }
-*/
 
 PrettyPrinterGenerator.prototype.openParen = function() {
   this.nextPutAllWithSpace('(')

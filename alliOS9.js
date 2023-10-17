@@ -6317,49 +6317,90 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
   this.portStates = [0, 0, 0, 0, 0, 0]
   this.advertisedName = advertisedName
 
-  this.pingWasRecieved = false
+  this.messageInProgress = null
 }
 DeviceHatchling.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHatchling.prototype.constructor = DeviceHatchling;
 Device.setDeviceTypeName(DeviceHatchling, "hatchling", "Hatchling", "Hatchling");
 
 DeviceHatchling.prototype.setHatchlingState = function(state) {
+  console.log("From hatchling: [" + state + "]")
 
-  console.log("setHatchlingState [" + state + "]")
-  //with microblocks, we will need to parse the message
-  //if state = pingMessage this.pingWasRecieved = true
-  return
-
-  this.hlState = state
-
-  var newPortVals = []
-  newPortVals[0] = state[10] & 0x1F //port A
-  newPortVals[1] = state[11] & 0x1F //port B
-  newPortVals[2] = state[12] & 0x1F //port C
-  newPortVals[3] = state[13] & 0x1F //port D
-  newPortVals[4] = ((state[10] >> 5) << 3) | (state[11] >> 5) //port E
-  newPortVals[5] = ((state[12] >> 5) << 3) | (state[13] >> 5) //port F
-
-  for (var i = 0; i < this.portStates.length; i++) {
-    if (this.portStates[i] != newPortVals[i]) {
-      if (this.supportedStates.includes(newPortVals[i])) {
-        console.log("New value for port " + i + ": " + newPortVals[i])
-        this.setOutput(null, "portOff", i, 0, "offValue")
-        this.portStates[i] = newPortVals[i]
-        CodeManager.updateAvailablePorts(i);
-      } else {
-        console.log("Unsupported type " + newPortVals[i] + " at port " + i)
-      }
+  if (this.messageInProgress != null) {
+    var newLength = this.messageInProgress.data.length + state.length
+    var currentData = new Uint8Array(newLength)
+    currentData.set(this.messageInProgress.data, 0)
+    currentData.set(state, this.messageInProgress.data.length)
+    if (newLength < this.messageInProgress.length) {
+      this.messageInProgress.data = currentData
+    } else {
+      this.messageInProgress = null
+      mbRuntime.handleMessage(currentData)
     }
-  }
-}
 
-DeviceHatchling.prototype.pingReceived = function() {
-  if (this.pingWasRecieved) {
-    this.pingWasRecieved = false
-    return true
+    return
   }
-  return false
+  
+  var msgType = state[0]
+  switch(msgType) {
+    case 252:  //Hatchling state message
+
+      this.hlState = state
+
+      var newPortVals = []
+      /*newPortVals[0] = state[10] & 0x1F //port A
+      newPortVals[1] = state[11] & 0x1F //port B
+      newPortVals[2] = state[12] & 0x1F //port C
+      newPortVals[3] = state[13] & 0x1F //port D
+      newPortVals[4] = ((state[10] >> 5) << 3) | (state[11] >> 5) //port E
+      newPortVals[5] = ((state[12] >> 5) << 3) | (state[13] >> 5) //port F*/
+      newPortVals[0] = state[7] //port A
+      newPortVals[1] = state[8] //port B
+      newPortVals[2] = state[9] //port C
+      newPortVals[3] = state[10] //port D
+      newPortVals[4] = state[11] //port E
+      newPortVals[5] = state[12] //port F
+
+
+      for (var i = 0; i < this.portStates.length; i++) {
+        if (this.portStates[i] != newPortVals[i]) {
+          if (this.supportedStates.includes(newPortVals[i])) {
+            console.log("New value for port " + i + ": " + newPortVals[i])
+            this.setOutput(null, "portOff", i, 0, "offValue")
+            this.portStates[i] = newPortVals[i]
+            CodeManager.updateAvailablePorts(i);
+          } else {
+            console.log("Unsupported type " + newPortVals[i] + " at port " + i)
+          }
+        }
+      }
+
+      break;
+    case 250:
+      //Microblocks short message
+      mbRuntime.handleMessage(state)
+      if (state.length > 3) {
+        console.error("Short message length > 3.")
+        this.setHatchlingState(state.slice(3)) //TODO: REMOVE! Temporary! Can miss some packets.
+      }
+      break;
+    case 251:
+      //Microblocks long message. Data format:
+      //[0xFB, OpCode, ChunkOrVariableID, DataSize-LSB, DataSize-MSB, ...data...]
+      var messageLength = ( state[3] | (state[4] << 8) )
+      if (messageLength <= 15) { //All data fits in this packet
+        mbRuntime.handleMessage(state)
+      } else {
+        this.messageInProgress = {
+          'length': (messageLength + 5), //because we must include the header bytes, not just data
+          'data': state
+        }
+      }
+      break;
+    default:
+      console.error("Data received starts with unknown code: " + state)
+  }
+  
 }
 
 /**
@@ -12944,6 +12985,14 @@ DisplayStack.prototype.startRun = function() {
     this.updateTimer = self.setInterval(function() {
       this.updateRun();
     }.bind(this), CodeManager.updateInterval);
+
+    if (Hatchling) {
+      if (mbRuntime.isRunning(this.firstBlock)) {
+        mbRuntime.stopRunningChunk(mbRuntime.lookupChunkID(this.firstBlock))
+      } else {
+        mbRuntime.evalOnBoard(this.firstBlock)
+      }
+    }
   }
 };
 
@@ -25842,8 +25891,9 @@ BlockStack.prototype.updateRun = function() {
  * Starts execution of the BlockStack starting with the specified Block. Makes BlockStack glow, too.
  * @param {Block} [startBlock] - The first Block to execute. By default, this.firstBlock is used.
  * @param {string} [broadcastMessage] - Indicates if execution was triggered by a broadcast
+ * @param {boolean} [flagTapped] - True if this startRun was triggered by tapping the flag button
  */
-BlockStack.prototype.startRun = function(startBlock, broadcastMessage) {
+BlockStack.prototype.startRun = function(startBlock, broadcastMessage, flagTapped) {
   if (startBlock == null) {
     startBlock = this.firstBlock;
   }
@@ -25885,6 +25935,17 @@ BlockStack.prototype.startRun = function(startBlock, broadcastMessage) {
       device.sendMicroBlocksData(bytes)*/
       
       mbRuntime.saveChunk(this.firstBlock)
+      if (!flagTapped) {
+        // from MicroBlocksPatches.gp
+        // method clicked Block hand 
+
+        if (mbRuntime.isRunning(this.firstBlock)) {
+          mbRuntime.stopRunningChunk(mbRuntime.lookupChunkID(this.firstBlock))
+        } else {
+          mbRuntime.evalOnBoard(this.firstBlock)
+        }
+
+      }
     } else {
       console.log("Bytes not sent - device not connected.")
     }
@@ -37126,7 +37187,7 @@ B_WhenFlagTapped.prototype.primName = function() { return "whenStarted" }
 B_WhenFlagTapped.prototype.argList = function() { return [] }
 /* Triggers stack to start running. */
 B_WhenFlagTapped.prototype.eventFlagClicked = function() {
-  this.stack.startRun();
+  this.stack.startRun(null, null, true);
 };
 /* Does nothing */
 B_WhenFlagTapped.prototype.startAction = function() {
@@ -37799,7 +37860,7 @@ B_StartWhenDistance.prototype.argList = function() {
   return [{
     primName: function() { return "<" },
     argList: function() { return [{
-      primName: function() { return "[hatchling:getDistanceSensor]" },
+      primName: function() { return "[h:ds]" },
       argList: function () { return [portName] }
     }, 20]}
   }] 
@@ -39877,7 +39938,7 @@ function B_HLPositionServo(x, y) {
 B_HLPositionServo.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLPositionServo.prototype.constructor = B_HLPositionServo;
 //MicroBlocks functions
-B_HLPositionServo.prototype.primName = function() { return "[hatchling:setServos]" }
+B_HLPositionServo.prototype.primName = function() { return "[h:pdv]" }
 B_HLPositionServo.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
 
 function B_HLRotationServo(x, y, flip) {
@@ -39899,7 +39960,7 @@ function B_HLRotationServo(x, y, flip) {
 B_HLRotationServo.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLRotationServo.prototype.constructor = B_HLRotationServo;
 //MicroBlocks functions
-B_HLRotationServo.prototype.primName = function() { return "[hatchling:setServos]" }
+B_HLRotationServo.prototype.primName = function() { return "[h:rsv]" }
 B_HLRotationServo.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
 
 //To rotate the servo counter clockwise.
@@ -39932,7 +39993,7 @@ function B_HLSingleNeopix(x, y) {
 B_HLSingleNeopix.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLSingleNeopix.prototype.constructor = B_HLSingleNeopix;
 //MicroBlocks functions
-B_HLSingleNeopix.prototype.primName = function() { return "[hatchling:setNeopixel]" }
+B_HLSingleNeopix.prototype.primName = function() { return "[h:np]" }
 B_HLSingleNeopix.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.red, this.green, this.blue] }
 //
 B_HLSingleNeopix.prototype.updateColor = function() {
@@ -39994,7 +40055,7 @@ function B_HLNeopixStrip(x, y) {
 B_HLNeopixStrip.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLNeopixStrip.prototype.constructor = B_HLNeopixStrip;
 //MicroBlocks functions
-B_HLNeopixStrip.prototype.primName = function() { return "[hatchling:setNeopixelStrip]" }
+B_HLNeopixStrip.prototype.primName = function() { return "[h:nps]" }
 B_HLNeopixStrip.prototype.argList = function() { return [HL_Utils.portNames[this.port], 'all', this.red, this.green, this.blue] }
 
 function B_HLFairyLights(x, y) {
@@ -40016,7 +40077,7 @@ function B_HLFairyLights(x, y) {
 B_HLFairyLights.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLFairyLights.prototype.constructor = B_HLFairyLights;
 //MicroBlocks functions
-B_HLFairyLights.prototype.primName = function() { return "[hatchling:setFairyLights]" }
+B_HLFairyLights.prototype.primName = function() { return "[h:fl]" }
 B_HLFairyLights.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
 
 function B_HLAlphabet(x, y) {
@@ -40072,7 +40133,7 @@ B_HLWaitUntil.prototype.argList = function() {
   var threshold = 0
   switch (sensor) {
   case "distance":
-    prim = "[hatchling:getDistanceSensor]"
+    prim = "[h:ds]"
     threshold = 20
     break;
   case "light":
@@ -41575,6 +41636,8 @@ function MicroBlocksRuntime () {
 	this.loggedDataCount = 0
 
 	this.scripter = new MicroBlocksScripter()
+
+	this.lastPingRecvMSecs = 0
 }
 MicroBlocksRuntime.init = function() {
 	window.mbRuntime = new MicroBlocksRuntime()
@@ -41598,28 +41661,35 @@ var delay = async function(ms) {
 	return new Promise(res => setTimeout(res, ms)) 
 }
 
-/*
-
-method evalOnBoard SmallRuntime aBlock showBytes {
-	if (isNil showBytes) { showBytes = false }
-	if showBytes {
-		bytes = (chunkBytesFor this aBlock)
-		print (join 'Bytes for chunk ' id ':') bytes
-		print '----------'
+MicroBlocksRuntime.prototype.evalOnBoard = function(aBlock, showBytes) {
+	if (showBytes == null) { showBytes = false }
+	if (showBytes) {
+		var bytes = this.chunkBytesFor(aBlock)
+		console.log('Bytes for chunk ' + id + ':')
+		console.log(bytes)
+		console.log('----------')
 		return
 	}
-	if ('not connected' == (updateConnection this)) {
+	//SERIAL
+	/*if ('not connected' == (updateConnection this)) {
 		showError (morph aBlock) (localized 'Board not connected')
 		return
+	}*/
+	//BLE
+	if (this.noBleConnection()) {
+		console.error("Cannot run block - no ble connection")
+		return
 	}
-	step scripter // save script changes if needed
-	if (isNil (ownerThatIsA (morph aBlock) 'ScriptEditor')) {
+	this.scripter.step()  // save script changes if needed
+	//if (isNil (ownerThatIsA (morph aBlock) 'ScriptEditor')) {
+	if (aBlock.stack.isDisplayStack) {
 		// running a block from the palette, not included in saveAllChunks
-		saveChunk this aBlock
+		this.saveChunk(aBlock)
 	}
-	runChunk this (lookupChunkID this aBlock)
+	this.runChunk(this.lookupChunkID(aBlock))
 }
 
+/*
 method stopRunningBlock SmallRuntime aBlock {
 	if (isRunning this aBlock) {
 		stopRunningChunk this (lookupChunkID this aBlock)
@@ -42026,25 +42096,27 @@ method installDecompiledProject SmallRuntime proj {
 	cleanUp (scriptEditor scripter)
 	saveAllChunksAfterLoad this
 }
+*/
 
-method receivedChunk SmallRuntime chunkID chunkType bytecodes {
-	lastRcvMSecs = (msecsSinceStart)
-	if (isEmpty bytecodes) {
-		print 'truncated chunk!' chunkID chunkType (count bytecodes) // shouldn't happen
+MicroBlocksRuntime.prototype.receivedChunk = function(chunkID, chunkType, bytecodes) {
+	this.lastRcvMSecs = Date.now() //(msecsSinceStart)
+	if (bytecodes == null || bytecodes.length == 0) {
+		console.error('truncated chunk! ' + chunkID + " " + chunkType) // shouldn't happen
 		return
 	}
-	if (notNil decompiler) {
-		addChunk decompiler chunkID chunkType bytecodes
+	if (this.decompiler != null) {
+		this.decompiler.addChunk(chunkID, chunkType, bytecodes)
 	}
 }
 
-method receivedVarName SmallRuntime varID varName byteCount {
-	lastRcvMSecs = (msecsSinceStart)
-	if (notNil decompiler) {
-		addVar decompiler varID varName
+MicroBlocksRuntime.prototype.receivedVarName = function(varID, varName, byteCount) {
+	this.lastRcvMSecs = Date.now() //(msecsSinceStart)
+	if (this.decompiler != null) {
+		this.decompiler.addVar(varID, varName)
 	}
 }
 
+/*
 // HTTP server support
 
 method readVarsFromBoard SmallRuntime client {
@@ -42139,7 +42211,7 @@ MicroBlocksRuntime.prototype.unusedChunkID = function() {
 		var entry = values[i]
 		inUse.push(entry[0]) // the chunk ID is first element of entry
 	}
-	for (var id = 0; id < 256; id++) {
+	for (var id = 0; id < 254; id++) { //254 and 255 seem to have special significance in handlemessage
 		if (!(inUse.includes(id))) { return id }
 	}
 	console.error( 'Too many code chunks (functions and scripts). Max is 256).' )
@@ -42897,18 +42969,42 @@ MicroBlocksRuntime.prototype.saveAllChunks = async function() {
 	//setCursor 'default'
 }
 
-/*
-method forceSaveChunk SmallRuntime aBlockOrFunction {
+MicroBlocksRuntime.prototype.forceSaveChunk = function(aBlockOrFunction) {
 	// Save the chunk for the given block or function even if it was previously saved.
 
-	if (contains chunkIDs aBlockOrFunction) {
-		// clear the old CRC and source to force re-save
-		atPut (at chunkIDs aBlockOrFunction) 2 nil // clear the old CRC
-		atPut (at chunkIDs aBlockOrFunction) 4 '' // clear the old source
+	var key = aBlockOrFunction
+	if (typeof key != "string") { //argument could be mbId or a block
+		key = aBlockOrFunction.stack.mbId
+	} else {
+		//must get block to know what to save.
+		var block = null
+		for (var i = 0; i < TabManager.activeTab.stackList.length; i++) {
+			var stack = TabManager.activeTab.stackList[i]
+			if (stack.mbId == key) {
+				block = stack.firstBlock
+			}
+		}
+		if (block == null) {
+			for (var i = 0; i < BlockPalette.selectedCat.displayStacks.length; i++) {
+				var stack = BlockPalette.selectedCat.displayStacks[i]
+				if (stack.mbId == key) {
+					block = stack.firstBlock
+				}
+			}
+		}
+		aBlockOrFunction = block
 	}
-	saveChunk this aBlockOrFunction false
+	if (this.chunkIDs[key] != null) {
+		// clear the old CRC and source to force re-save
+		this.chunkIDs[key][1] = null // clear the old CRC
+		this.chunkIDs[key][3] = '' // clear the old source
+	}
+	if (aBlockOrFunction != null) {
+		this.saveChunk(aBlockOrFunction, false)
+	} else {
+		console.error("forceSaveChunk could not find the stack!")
+	}
 }
-*/
 
 MicroBlocksRuntime.prototype.saveChunk = async function(aBlockOrFunction, skipHiddenFunctions) {
 	// Save the given script or function as an executable code "chunk".
@@ -43013,14 +43109,22 @@ MicroBlocksRuntime.prototype.saveChunk = async function(aBlockOrFunction, skipHi
 MicroBlocksRuntime.prototype.computeCRC = function(chunkData) {
 	// Return the CRC for the given compiled code.
 
-	var crc = this.crc(chunkData) //(crc (toBinaryData (toArray chunkData)))
+	var crc = this.crc(chunkData) >>> 0 //(crc (toBinaryData (toArray chunkData)))
 
 	// convert crc to a 4-byte array
 	var result = []//(newArray 4)
 	for (var i = 0; i < 4; i++) { result[i] = ((crc >> i*8) & 0xff) }//(digitAt crc i) }
 	return result
 }
+/*method digitAt LargeInteger i { //From LargeInteger
+  // significant bytes are at the higher indices
+  c = (byteCount data)
+  if (i > c) { return 0 }
+  return (byteAt data ((c - i) + 1))
+}*/
 MicroBlocksRuntime.prototype.crc = function(data) {
+	console.log("crc from [" + data + "]")
+
 	//Copied from runtime.c in vm
 	var crcTable = [
        0x0, 0x77073096, 0xEE0E612C, 0x990951BA,  0x76DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
@@ -43057,13 +43161,14 @@ MicroBlocksRuntime.prototype.crc = function(data) {
 0xB3667A2E, 0xC4614AB8, 0x5D681B02, 0x2A6F2B94, 0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D]
 
 
-	var crc = ~0;
+	var crc = (~0) >>> 0;
+	console.log("start crc: " + crc.toString(2))
 	//uint8_t *end = buf + byteCount;
 	for (var i = 0; i < data.length; i++) {
-		var p = data[i]
-		crc = (crc >> 8) ^ crcTable[(crc & 0xff) ^ p];
+		var p = data[i] >>> 0
+		crc = ((crc >> 8) ^ crcTable[(crc & 0xff) ^ p]) >>> 0;
 	}
-	return ~crc;
+	return ((~crc) >>> 0);
 }
 
 MicroBlocksRuntime.prototype.verifyCRCs = async function() {
@@ -43106,7 +43211,7 @@ MicroBlocksRuntime.prototype.verifyCRCs = async function() {
 	}
 
 	//editor = (findMicroBlocksEditor)
-	var totalCount = Object.keys(crcDict).length + Object.keys(ideChunks).length
+	var totalCount = Object.keys(this.crcDict).length + Object.keys(ideChunks).length
 	var processedCount = 0
 
 	// process CRCs
@@ -43116,11 +43221,13 @@ MicroBlocksRuntime.prototype.verifyCRCs = async function() {
 		var chunkID = crcDictKeys[i]
 		var sourceItem = ideChunks[chunkID]
 		if ((sourceItem != null) && ((this.crcDict[chunkID]) != (crcForChunkID[chunkID]))) {
-			console.log('CRC mismatch; resaving chunk:' + chunkID)
+			console.log('CRC mismatch; resaving chunk: ' + chunkID + "; [" + this.crcDict[chunkID] + "] vs. [" + crcForChunkID[chunkID] + "]" )
 			this.forceSaveChunk(sourceItem)
 			//showDownloadProgress editor 3 (processedCount / totalCount)
 		} else if (sourceItem == null) {
 			console.error("crcDict contains unknown chunk " + chunkID)
+		} else {
+			console.log("CRCs match for chunkID " + chunkID + "!")
 		}
 		processedCount += 1
 	}
@@ -43212,17 +43319,17 @@ method collectCRCsIndividually SmallRuntime {
 		waitMSecs 10
 	}
 }
+*/
 
-method crcReceived SmallRuntime chunkID chunkCRC {
+MicroBlocksRuntime.prototype.crcReceived = function(chunkID, chunkCRC) {
 	// Received an individual CRC message from board.
 	// Record the CRC for the given chunkID.
 
-	lastRcvMSecs = (msecsSinceStart)
-	if (notNil crcDict) {
-		atPut crcDict chunkID chunkCRC
+	this.lastRcvMSecs = Date.now() //(msecsSinceStart)
+	if (this.crcDict != null) {
+		this.crcDict[chunkID] = chunkCRC
 	}
 }
-*/
 
 MicroBlocksRuntime.prototype.collectCRCsBulk = async function() {
 	// Collect the CRC's from all chunks on the board via a bulk CRC request.
@@ -43241,23 +43348,23 @@ MicroBlocksRuntime.prototype.collectCRCsBulk = async function() {
 	if (this.crcDict == null) { this.crcDict = {} } // timeout
 }
 
-/*
-method allCRCsReceived SmallRuntime data {
+MicroBlocksRuntime.prototype.allCRCsReceived = function(data) {
 	// Received a message from baord with the CRCs of all chunks.
 	// Create crcDict and record the (possibly empty) list of CRCs.
 	// Each CRC record is 5 bytes: <chunkID (one byte)> <CRC (four bytes)>
 
-	crcDict = (dictionary)
-	byteCount = (count data)
-	i = 1
+	this.crcDict = {}
+	var byteCount = data.length
+	var i = 0
 	while (i <= (byteCount - 4)) {
-		chunkID = (at data i)
-		chunkCRC = (copyFromTo data (i + 1) (i + 4))
-		atPut crcDict chunkID chunkCRC
+		var chunkID = data[i]
+		var chunkCRC = data.slice((i + 1), (i + 5))
+		this.crcDict[chunkID] = chunkCRC
 		i += 5
 	}
 }
 
+/*
 method saveVariableNames SmallRuntime {
 	// If the variables list has changed, save the new variable names.
 	// Return true if varibles have changed, false otherwise.
@@ -43558,14 +43665,18 @@ MicroBlocksRuntime.prototype.waitForResponse = async function() {
 	var start = Date.now() //(msecsSinceStart)
 	while ((Date.now() - start) < timeout) {
 		//if (isNil port) { return false }
-		var device = this.bleDevice()
-		if (device == null) { return false }
+		if (this.noBleConnection()) { return false }
 		/*s = (readSerialPort port true)
 		if (notNil s) {
 			recvBuf = (join recvBuf s)
 			return true
 		}*/
-		if (device.pingReceived()) { return true }
+		if (this.lastPingRecvMSecs > start) { 
+			console.log("waitForResponse done.")
+			return true 
+		} else {
+			console.log("waitForResponse start=" + start + " lastPing=" + this.lastPingRecvMSecs)
+		}
 
 		this.sendMsg('pingMsg')
 		await delay(5)
@@ -43659,78 +43770,78 @@ method skipMessage SmallRuntime discard {
 	if (true == discard) { print '    ' (toString recvBuf) }
 	recvBuf = (newBinaryData 0) // no message start found; discard entire buffer
 }
+*/
 
 // Message handling
 
-method handleMessage SmallRuntime msg {
-	lastPingRecvMSecs = (msecsSinceStart) // reset ping timer when any valid message is recevied
-	op = (byteAt msg 2)
-	if (op == (msgNameToID this 'taskStartedMsg')) {
-		updateRunning this (byteAt msg 3) true
-	} (op == (msgNameToID this 'taskDoneMsg')) {
-		updateRunning this (byteAt msg 3) false
-	} (op == (msgNameToID this 'taskReturnedValueMsg')) {
-		chunkID = (byteAt msg 3)
-		showResult this chunkID (returnedValue this msg) false true
-		updateRunning this chunkID false
-	} (op == (msgNameToID this 'taskErrorMsg')) {
-		chunkID = (byteAt msg 3)
-		showError this chunkID (errorString this (byteAt msg 6))
-		updateRunning this chunkID false
-	} (op == (msgNameToID this 'outputValueMsg')) {
-		chunkID = (byteAt msg 3)
-		if (chunkID == 255) {
+MicroBlocksRuntime.prototype.handleMessage = function(msg) {
+	this.lastPingRecvMSecs = Date.now() //(msecsSinceStart) // reset ping timer when any valid message is recevied
+	var op = msg[1]
+	var chunkID = msg[2]
+	if (op == this.msgNameToID('taskStartedMsg')) {
+		this.updateRunning(chunkID, true)
+	} else if (op == this.msgNameToID('taskDoneMsg')) {
+		this.updateRunning(chunkID, false)
+	} else if (op == this.msgNameToID('taskReturnedValueMsg')) {
+		this.showResult(chunkID, this.returnedValue(msg), false, true)
+		this.updateRunning(chunkID, false)
+	} else if (op == this.msgNameToID('taskErrorMsg')) {
+		this.showError(chunkID, this.errorString(msg[5]))
+		this.updateRunning(chunkID, false)
+	} else if (op == this.msgNameToID('outputValueMsg')) {
+		/*if (chunkID == 255) { //TODO: What is this for?
 			print (returnedValue this msg)
 		} (chunkID == 254) {
 			addLoggedData this (toString (returnedValue this msg))
-		} else {
-			showResult this chunkID (returnedValue this msg) false true
-		}
-	} (op == (msgNameToID this 'varValueMsg')) {
-		varValueReceived (httpServer scripter) (byteAt msg 3) (returnedValue this msg)
-	} (op == (msgNameToID this 'versionMsg')) {
-		versionReceived this (returnedValue this msg)
-	} (op == (msgNameToID this 'chunkCRCMsg')) {
-		crcReceived this (byteAt msg 3) (copyFromTo (toArray msg) 6)
-	} (op == (msgNameToID this 'allCRCsMsg')) {
-		allCRCsReceived this (copyFromTo (toArray msg) 6)
-	} (op == (msgNameToID this 'pingMsg')) {
-		lastPingRecvMSecs = (msecsSinceStart)
-	} (op == (msgNameToID this 'broadcastMsg')) {
-		broadcastReceived (httpServer scripter) (toString (copyFromTo msg 6))
-	} (op == (msgNameToID this 'chunkCodeMsg')) {
-		receivedChunk this (byteAt msg 3) (byteAt msg 6) (toArray (copyFromTo msg 7))
-	} (op == (msgNameToID this 'chunkAttributeMsg')) {
-		print 'chunkAttributeMsg:' (byteCount msg) 'bytes'
-	} (op == (msgNameToID this 'varNameMsg')) {
-		receivedVarName this (byteAt msg 3) (toString (copyFromTo msg 6)) ((byteCount msg) - 5)
-	} (op == (msgNameToID this 'fileInfo')) {
+		} else {*/
+			this.showResult(chunkID, this.returnedValue(msg), false, true)
+		//}
+	/*} else if (op == this.msgNameToID('varValueMsg')) {
+		varValueReceived (httpServer scripter) (byteAt msg 3) (returnedValue this msg)*/
+	/*} else if (op == this.msgNameToID('versionMsg')) {
+		this.versionReceived(this.returnedValue(msg))*/
+	} else if (op == this.msgNameToID('chunkCRCMsg')) {
+		this.crcReceived(chunkID, msg.slice(5))
+	} else if (op == this.msgNameToID('allCRCsMsg')) {
+		this.allCRCsReceived(msg.slice(5))
+	} else if (op == this.msgNameToID('pingMsg')) {
+		this.lastPingRecvMSecs = Date.now() //(msecsSinceStart)
+	/*} else if (op == this.msgNameToID('broadcastMsg')) {
+		broadcastReceived (httpServer scripter) (toString (copyFromTo msg 6))*/
+	} else if (op == this.msgNameToID('chunkCodeMsg')) {
+		this.receivedChunk(chunkID, msg[5], msg.slice(6))
+	} else if (op == this.msgNameToID('chunkAttributeMsg')) {
+		console.log('chunkAttributeMsg: ' + msg.length + ' bytes')
+	} else if (op == this.msgNameToID('varNameMsg')) {
+		this.receivedVarName(chunkID, String.fromCharCode.apply(null, msg.slice(5)), msg.length - 5) //TODO: check String.fromCharCode.apply
+	/*} else if (op == this.msgNameToID('fileInfo')) {
 		recordFileTransferMsg this (copyFromTo msg 6)
-	} (op == (msgNameToID this 'fileChunk')) {
-		recordFileTransferMsg this (copyFromTo msg 6)
+	} else if (op == this.msgNameToID('fileChunk')) {
+		recordFileTransferMsg this (copyFromTo msg 6)*/
 	} else {
-		print 'msg:' (toArray msg)
+		console.error( 'Unknown msg: ' + msg )
 	}
 }
 
-method updateRunning SmallRuntime chunkID runFlag {
-	if (isNil chunkRunning) {
-		chunkRunning = (newArray 256 false)
+MicroBlocksRuntime.prototype.updateRunning = function(chunkID, runFlag) {
+	if (this.chunkRunning == null) {
+		this.chunkRunning = []
 	}
-	if (isNil chunkStopping) {
-		chunkStopping = (dictionary)
+	if (this.chunkStopping == null) {
+		this.chunkStopping = {}
 	}
-	if runFlag {
-		atPut chunkRunning (chunkID + 1) runFlag
-		remove chunkStopping chunkID
-		updateHighlights this
+	if (runFlag) {
+		this.chunkRunning[chunkID] = runFlag
+		delete this.chunkStopping[chunkID]
+		this.updateHighlights()
 	} else {
 		// add chunkID to chunkStopping dictionary to be unhighlighted after a short pause
-		stepCount = 2 // two scripter steps, about half a second
-		atPut chunkStopping chunkID stepCount
+		var stepCount = 2 // two scripter steps, about half a second
+		this.chunkStopping[chunkID] = stepCount
 	}
 }
 
+/*
 method updateStopping SmallRuntime {
 	// Decrement the counts for chunks that are stopping.
 	// Turn off highlights for chunks whose counts reach zero.
@@ -44022,9 +44133,11 @@ method removeResultBubbles SmallRuntime {
 method showError SmallRuntime chunkID msg {
 	showResult this chunkID msg true
 }
+*/
 
-method showResult SmallRuntime chunkID value isError isResult {
-	for m (join
+MicroBlocksRuntime.prototype.showResult = function(chunkID, value, isError, isResult) {
+	console.error("Still need to implement showResult. Results: " + chunkID + ", " + value + ", " + isError + ", " + isResult)
+	/*for m (join
 			(parts (morph (scriptEditor scripter)))
 			(parts (morph (blockPalette scripter)))) {
 		h = (handler m)
@@ -44054,9 +44167,10 @@ method showResult SmallRuntime chunkID value isError isResult {
 				exportAsImageScaled h value true
 			}
 		}
-	}
+	}*/
 }
 
+/*
 method exportScriptImageWithResult SmallRuntime aBlock {
 	topBlock = (topBlock aBlock)
 	if (isPrototypeHat topBlock) { return }
@@ -44065,112 +44179,115 @@ method exportScriptImageWithResult SmallRuntime aBlock {
 		evalOnBoard this topBlock
 	}
 }
+*/
 
 // Return values
 
-method returnedValue SmallRuntime msg {
-	byteCount = (byteCount msg)
-	if (byteCount < 7) { return nil } // incomplete msg
+MicroBlocksRuntime.prototype.returnedValue = function(msg) {
+	var byteCount = msg.length
+	if (byteCount < 7) { return null } // incomplete msg
 
-	type = (byteAt msg 6)
+	var type = msg[5]
 	if (1 == type) {
-		if (byteCount < 10) { return nil } // incomplete msg
-		return (+ ((byteAt msg 10) << 24) ((byteAt msg 9) << 16) ((byteAt msg 8) << 8) (byteAt msg 7))
-	} (2 == type) {
-		return (stringFromByteRange msg 7 (byteCount msg))
-	} (3 == type) {
-		return (0 != (byteAt msg 7))
-	} (4 == type) {
-		if (byteCount < 8) { return nil } // incomplete msg
-		total = (((byteAt msg 8) << 8) | (byteAt msg 7))
+		if (byteCount < 10) { return null } // incomplete msg
+		return ( (msg[9] << 24) + (msg[8] << 16) + (msg[7] << 8) + msg[6] )
+	} else if (2 == type) {
+		return (String.fromCharCode.apply(null, msg.slice(6))) //stringFromByteRange msg 7 (byteCount msg))
+	} else if (3 == type) {
+		return (0 != msg[6])
+	} else if (4 == type) {
+		if (byteCount < 8) { return null } // incomplete msg
+		var total = ((msg[7] << 8) | (msg[6]))
 		if (total == 0) { return '[empty list]' }
-		sentItems = (readItems this msg)
-		out = (list '[')
-		for item sentItems {
-			add out (toString item)
-			add out ', '
+		var sentItems = this.readItems(msg)
+		var out = ['[']
+		for (var i = 0; i < sentItems.length; i++) {
+			var item = sentItems[i]
+			out.push(item.toString())
+			out.push(', ')
 		}
-		if ((count out) > 1) { removeLast out }
-		if (total > (count sentItems)) {
-			add out (join ' ... and ' (total - (count sentItems)) ' more')
+		if ((out.length) > 1) { out.pop() }
+		if (total > (sentItems.length)) {
+			out.push(' ... and ' + (total - sentItems.length) + ' more')
 		}
-		add out ']'
-		return (joinStrings out)
-	} (5 == type) {
-		if (byteCount < 9) { return nil } // incomplete msg
-		total = (((byteAt msg 8) << 8) | (byteAt msg 7))
+		out.push(']')
+		return (out.join(''))
+	} else if (5 == type) {
+		if (byteCount < 9) { return null } // incomplete msg
+		var total = ((msg[7] << 8) | (msg[6]))
 		if (total == 0) { return '(empty byte array)' }
-		sentCount = (byteAt msg 9)
-		sentCount = (min sentCount (byteCount - 9))
-		out = (list '(')
-		for i sentCount {
-			add out (toString (byteAt msg (9 + i)))
-			add out ', '
+		var sentCount = msg[8]
+		sentCount = Math.min(sentCount, (byteCount - 9))
+		var out = ['(']
+		for (var i = 0; i < sentCount; i++) {
+			out.push(msg[9 + i].toString())
+			out.push(', ')
 		}
-		if ((count out) > 1) { removeLast out }
+		if (out.length > 1) { out.pop() }
 		if (total > sentCount) {
-			add out (join ' ... and ' (total - sentCount) ' more bytes')
+			out.push(' ... and ' + (total - sentCount) + ' more bytes')
 		}
-		add out ')'
-		return (joinStrings out)
+		out.push(')')
+		return (out.join(''))
 	} else {
-		print 'Serial error, type: ' type
-		return nil
+		console.error('Serial error, type: ' + type)
+		return null
 	}
 }
 
-method readItems SmallRuntime msg {
+MicroBlocksRuntime.prototype.readItems = function(msg) {
 	// Read a sequence of list items from the given value message.
 
-	result = (list)
-	byteCount = (byteCount msg)
+	var result = []
+	var byteCount = msg.length
 	if (byteCount < 10) { return result } // corrupted msg
-	count = (byteAt msg 9)
-	i = 10
-	repeat count {
-		if (byteCount < (i + 1)) { return result } // corrupted msg
-		itemType = (byteAt msg i)
+	var count = msg[8]
+	var i = 9 //10
+	for (var j = 0; j < count; j++) { //repeat count {
+		if (byteCount < (i + 2)) { return result } // corrupted msg
+		var itemType = msg[i]
 		if (1 == itemType) { // integer
-			if (byteCount < (i + 4)) { return result } // corrupted msg
-			n = (+ ((byteAt msg (i + 4)) << 24) ((byteAt msg (i + 3)) << 16)
-					((byteAt msg (i + 2)) << 8) (byteAt msg (i + 1)))
-			add result n
+			if (byteCount < (i + 5)) { return result } // corrupted msg
+			var n = ((msg[i + 4] << 24) + (msg[i + 3] << 16) +
+					(msg[i + 2] << 8) + (msg[i + 1]))
+			result.push(n)
 			i += 5
-		} (2 == itemType) { // string
-			len = (byteAt msg (i + 1))
-			if (byteCount < (+ i len 1)) { return result } // corrupted msg
-			add result (toString (copyFromTo msg (i + 2) (+ i len 1)))
+		} else if (2 == itemType) { // string
+			var len = msg[i + 1]
+			if (byteCount < (i + len + 2)) { return result } // corrupted msg
+			result.push(String.fromCharCode.apply(null, msg.slice( (i + 2), (i + len + 1) ) ))
 			i += (len + 2)
-		} (3 == itemType) { // boolean
-			isTrue = ((byteAt msg (i + 1)) != 0)
-			add result isTrue
+		} else if (3 == itemType) { // boolean
+			var isTrue = (msg[i + 1] != 0)
+			result.push(isTrue)
 			i += 2
-		} (4 == itemType) { // sublist
-			if (byteCount < (i + 3)) { return result } // corrupted msg
-			n = (+ ((byteAt msg (i + 2)) << 8) (byteAt msg (i + 1)))
-			if (0 != (byteAt msg (i + 3))) {
-				print 'skipping sublist with non-zero sent items'
+		} else if (4 == itemType) { // sublist
+			if (byteCount < (i + 4)) { return result } // corrupted msg
+			var n = ((msg[i + 2] << 8) + (msg[i + 1]))
+			if (0 != msg[i + 3]) {
+				console.log('skipping sublist with non-zero sent items')
 				return result
 			}
-			add result (join '[' n ' item list]')
+			result.push('[' + n + ' item list]')
 			i += 4
-		} (5 == itemType) { // bytearray
-			if (byteCount < (i + 3)) { return result } // corrupted msg
-			n = (+ ((byteAt msg (i + 2)) << 8) (byteAt msg (i + 1)))
-			if (0 != (byteAt msg (i + 3))) {
-				print 'skipping bytearray with non-zero sent items inside a list'
+		} else if (5 == itemType) { // bytearray
+			if (byteCount < (i + 4)) { return result } // corrupted msg
+			var n = ((msg[i + 2] << 8) + (msg[i + 1]))
+			if (0 != msg[i + 3]) {
+				console.log('skipping bytearray with non-zero sent items inside a list')
 				return result
 			}
-			add result (join '(' n ' bytes)')
+			result.push('(' + n + ' bytes)')
 			i += 4
 		} else {
-			print 'unknown item type in value message:' itemType
+			console.error('unknown item type in value message: ' + itemType)
 			return result
 		}
 	}
 	return result
 }
 
+/*
 method showOutputStrings SmallRuntime {
 	// For debuggong. Just display incoming characters.
 	if (isNil port) { return }
@@ -46289,6 +46406,7 @@ method printFunction PrettyPrinter func aClass {
 PrettyPrinter.prototype.printReporter = function(block) {
   var prim = block.primName()
   var args = block.argList()
+  console.log("printReporter " + prim + " [" + args + "]")
   /*if (and (infixOp this prim) ((count block) == (offset + 1))) {
     printValue this (getField block offset)
     symbol gen prim
@@ -46313,30 +46431,30 @@ PrettyPrinter.prototype.printOp = function(block) {
   this.gen.functionName(this.op(block))
 }
 
-/*
-method printCmdList PrettyPrinter block inIf {
-  openBrace gen
-  if (useSemicolons != true) {
-    cr gen
-    addTab gen
+PrettyPrinter.prototype.printCmdList = function(block, inIf) {
+  this.gen.openBrace()
+  if (this.useSemicolons != true) {
+    this.gen.cr()
+    this.gen.addTab()
   }
-  currentBlock = block
-  early = true
-  while (notNil currentBlock) {
-    tab gen
-    early = (printCmd this currentBlock early)
+  var currentBlock = block
+  var early = true
+  while (currentBlock != null) {
+    this.gen.tab()
+    early = this.printCmd(currentBlock, early)
     early = (early == true)
-    crIfNeeded gen
-    currentBlock = (getField currentBlock 'nextBlock')
+    this.gen.crIfNeeded()
+    currentBlock = currentBlock.nextBlock
   }
-  decTab gen
-  tab gen
-  closeBrace gen
+  this.gen.decTab()
+  this.gen.tab()
+  this.gen.closeBrace()
   if (inIf != true) {
-    crIfNeeded gen
+    this.gen.crIfNeeded()
   }
 }
 
+/*
 method printCmdListInControl PrettyPrinter block {
   if (isClass block 'Reporter') {
     printValue this block
@@ -46366,7 +46484,7 @@ method printCmdListShort PrettyPrinter block {
 */
 
 PrettyPrinter.prototype.printCmd = function(block, early) {
-  var prim = block.primName()
+  //var prim = block.primName()
   /*if (prim == 'to') {
     op = (getField block offset)
     control gen prim
@@ -46461,18 +46579,18 @@ function PrettyPrinterGenerator (result, tabLevel, hadCr, hadSpace, useSemicolon
   this.useSemicolons = useSemicolons || false
 }
 
-PrettyPrinterGenerator.prototype.useSemicolons = function() { this.useSemicolons = true }
-
-/*
-method closeBrace PrettyPrinterGenerator {
-  if (';' == (last result)) { removeLast result }
-  nextPutAll this '}'
+PrettyPrinterGenerator.prototype.useSemicolons = function() { 
+  this.useSemicolons = true 
 }
 
-method addTab PrettyPrinterGenerator {
-  tabLevel = (tabLevel + 1)
+PrettyPrinterGenerator.prototype.closeBrace = function() {
+  if (';' == this.result[this.result.length - 1]) { result.pop() }
+  this.nextPutAll('}')
 }
-*/
+
+PrettyPrinterGenerator.prototype.addTab = function() {
+  this.tabLevel = (this.tabLevel + 1)
+}
 
 PrettyPrinterGenerator.prototype.closeParen = function() {
   this.nextPutAll(')')
@@ -46507,11 +46625,11 @@ PrettyPrinterGenerator.prototype.cr = function() {
 method skipSpace PrettyPrinterGenerator {
   hadSpace = true
 }
-
-method decTab PrettyPrinterGenerator {
-  tabLevel = (tabLevel - 1)
-}
 */
+
+PrettyPrinterGenerator.prototype.decTab = function() {
+  this.tabLevel = (this.tabLevel - 1)
+}
 
 PrettyPrinterGenerator.prototype.functionName = function(value) {
   if (!(typeof value == 'string')) {
@@ -46545,11 +46663,9 @@ PrettyPrinterGenerator.prototype.nextPutAllWithSpace = function(value) {
   this.nextPutAll(value)
 }
 
-/*
-method openBrace PrettyPrinterGenerator {
-  nextPutAllWithSpace this '{'
+PrettyPrinterGenerator.prototype.openBrace = function() {
+  this.nextPutAllWithSpace('{')
 }
-*/
 
 PrettyPrinterGenerator.prototype.openParen = function() {
   this.nextPutAllWithSpace('(')
