@@ -471,13 +471,15 @@ B_HLWaitUntil.prototype.argList = function() {
   }
   if (prim == null) { return [] }
 
-  return [{
+  return [new BlockArg("<", [new BlockArg(prim, args), threshold])]
+
+  /*return [{
     primName: function() { return "<" },
     argList: function() { return [{
       primName: function() { return prim },
       argList: function () { return args }
     }, threshold]}
-  }] 
+  }] */
 }
 
 B_HLWaitUntil.prototype.startAction = function() {

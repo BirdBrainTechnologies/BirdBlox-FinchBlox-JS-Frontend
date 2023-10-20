@@ -5830,6 +5830,9 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected)
     if (isConnected && !wasConnected && this.scanning) {
       this.markStoppedDiscover();
     }
+    if (Hatchling && isConnected && !wasConnected) {
+      mbRuntime.justConnected()
+    }
   }
 };
 
@@ -6313,7 +6316,8 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
   // * 9  = Single Neopixel
   // * 10 = Strip of 4 Neopixels
   // * 14 = Distance Sensor
-  this.supportedStates = [0, 1, 3, 8, 9, 10, 14]
+  // * 31 = Microbit Not Connected to Hatchling
+  this.supportedStates = [0, 1, 3, 8, 9, 10, 14, 31]
   this.portStates = [0, 0, 0, 0, 0, 0]
   this.advertisedName = advertisedName
 
@@ -6324,9 +6328,10 @@ DeviceHatchling.prototype.constructor = DeviceHatchling;
 Device.setDeviceTypeName(DeviceHatchling, "hatchling", "Hatchling", "Hatchling");
 
 DeviceHatchling.prototype.setHatchlingState = function(state) {
-  console.log("From hatchling: [" + state + "]")
+  //console.log("From hatchling: [" + state + "]")
 
   if (this.messageInProgress != null) {
+    //console.log("Message from Hatchling in progress: " + this.messageInProgress.length + ", " + this.messageInProgress.data)
     var newLength = this.messageInProgress.data.length + state.length
     var currentData = new Uint8Array(newLength)
     currentData.set(this.messageInProgress.data, 0)
@@ -6335,6 +6340,7 @@ DeviceHatchling.prototype.setHatchlingState = function(state) {
       this.messageInProgress.data = currentData
     } else {
       this.messageInProgress = null
+      //console.log("Long msg from hatchling: [" + currentData + "]")
       mbRuntime.handleMessage(currentData)
     }
 
@@ -6368,6 +6374,7 @@ DeviceHatchling.prototype.setHatchlingState = function(state) {
             console.log("New value for port " + i + ": " + newPortVals[i])
             this.setOutput(null, "portOff", i, 0, "offValue")
             this.portStates[i] = newPortVals[i]
+            if (this.portStates[i] == 31) { this.portStates[i] = 0 } //31 is basically also port empty
             CodeManager.updateAvailablePorts(i);
           } else {
             console.log("Unsupported type " + newPortVals[i] + " at port " + i)
@@ -6432,7 +6439,7 @@ DeviceHatchling.prototype.readSensor = function(status, sensor, port) {
   if (port != null) {
     request.addParam("port", port);
   }
-  HtmlServer.sendRequest(request.toString(), status, true);
+  //HtmlServer.sendRequest(request.toString(), status, true);
 }
 
 /**
@@ -6492,6 +6499,24 @@ DeviceHatchling.prototype.getColor = function(number) {
       return "#000"
   }
 }
+
+/** Temporarily override functions to make sure we don't send any regular requests 
+ * now that we are using the MicroBlocks VM
+ */
+
+DeviceHatchling.prototype.setOutput = function(status, outputType, port, value, valueKey) {
+}
+
+DeviceHatchling.prototype.setTriLed = function(status, port, red, green, blue) {
+}
+
+DeviceHatchling.prototype.setBuzzer = function(status, note, duration) {
+}
+
+DeviceHatchling.prototype.setLedArray = function(status, ledStatusString) {
+}
+
+
 
 /**
  * Static class keeps track of which sensors are available on the device
@@ -37801,13 +37826,14 @@ B_StartWhenDark.prototype.constructor = B_StartWhenDark;
 //MicroBlocks functions
 B_StartWhenDark.prototype.primName = function() { return "whenCondition" }
 B_StartWhenDark.prototype.argList = function() { 
-  return [{
+  return [ new BlockArg("<", [ new BlockArg("[display:lightLevel]", []), 150 ]) ]
+  /*return [{
     primName: function() { return "<" },
     argList: function() { return [{
       primName: function() { return "[display:lightLevel]"},
       argList: function () { return [] }
     }, 150]}
-  }] 
+  }] */
 }
 
 function B_StartWhenClap(x, y) {
@@ -37855,16 +37881,22 @@ B_StartWhenDistance.prototype = Object.create(B_FBStartWhen.prototype);
 B_StartWhenDistance.prototype.constructor = B_StartWhenDistance;
 //MicroBlocks functions
 B_StartWhenDistance.prototype.primName = function() { return "whenCondition" }
-B_StartWhenDistance.prototype.argList = function() { 
+B_StartWhenDistance.prototype.argList = function() {
   var portName = HL_Utils.portNames[this.port]
+  var threshold = this.distance
+  return [new BlockArg( "<", [new BlockArg("[h:ds]", [portName]), threshold] )]
+}
+/*function() { 
+  var portName = HL_Utils.portNames[this.port]
+  var threshold = this.distance
   return [{
     primName: function() { return "<" },
     argList: function() { return [{
       primName: function() { return "[h:ds]" },
       argList: function () { return [portName] }
-    }, 20]}
+    }, threshold]}
   }] 
-}
+}*/
 
 B_StartWhenDistance.prototype.updateValues = function() {
   HL_Utils.updatePort(this)
@@ -40145,13 +40177,15 @@ B_HLWaitUntil.prototype.argList = function() {
   }
   if (prim == null) { return [] }
 
-  return [{
+  return [new BlockArg("<", [new BlockArg(prim, args), threshold])]
+
+  /*return [{
     primName: function() { return "<" },
     argList: function() { return [{
       primName: function() { return prim },
       argList: function () { return args }
     }, threshold]}
-  }] 
+  }] */
 }
 
 B_HLWaitUntil.prototype.startAction = function() {
@@ -41655,6 +41689,14 @@ MicroBlocksRuntime.prototype.noBleConnection = function() {
 MicroBlocksRuntime.prototype.recompileNeeded = function() {
 	this.recompileAll = true
 }
+MicroBlocksRuntime.prototype.chunkIDsIsEmpty = function() {
+	for (var prop in this.chunkIDs) {
+    	if (Object.prototype.hasOwnProperty.call(this.chunkIDs, prop)) {
+      		return false;
+    	}
+  	}
+	return true
+}
 
 //Utility function
 var delay = async function(ms) { 
@@ -42059,6 +42101,7 @@ print 'Read' (count (getField decompiler 'vars')) 'vars' (count (getField decomp
 	decompiler = nil
 }
 
+/*
 method decompilerDone SmallRuntime { return (and (isNil decompiler) (not readFromBoard)) }
 method decompilerStatus SmallRuntime { return decompilerStatus }
 
@@ -42271,32 +42314,34 @@ MicroBlocksRuntime.prototype.deleteChunkFor = function(key) {
 	}
 }
 
-/*
-method stopAndSyncScripts SmallRuntime alreadyStopped {
+MicroBlocksRuntime.prototype.stopAndSyncScripts = async function(alreadyStopped) {
 	// Stop everything. Sync and verify scripts with the board using chunk CRC's.
 
-	removeHint (global 'page')
-	if (and (notNil port) (true != alreadyStopped)) {
-		sendStopAll this
-		softReset this
+	//removeHint (global 'page')
+	//if (and (notNil port) (true != alreadyStopped)) {
+	if ( (!this.noBleConnection) && (true != alreadyStopped)) {
+		this.sendStopAll()
+		this.softReset()
 	}
-	clearRunningHighlights this
-	doOneCycle (global 'page')
+	this.clearRunningHighlights()
+	//doOneCycle (global 'page')
 
-	if (shiftKeyDown (keyboard (global 'page'))) {
+	/*if (shiftKeyDown (keyboard (global 'page'))) {
 		recompileAll = true
-	}
-	suspendCodeFileUpdates this
-	saveAllChunks this
-	resumeCodeFileUpdates this
+	}*/
+	await this.suspendCodeFileUpdates()
+	await this.saveAllChunks()
+	this.resumeCodeFileUpdates()
 }
 
-method softReset SmallRuntime {
+
+MicroBlocksRuntime.prototype.softReset = function() {
 	// Stop everyting, clear memory, and reset the I/O pins.
 
-	sendMsg this 'systemResetMsg' // send the reset message
+	this.sendMsg('systemResetMsg') // send the reset message
 }
 
+/*
 method isWebSerial SmallRuntime {
 	return (and ('Browser' == (platform)) (browserHasWebSerial))
 }
@@ -42552,36 +42597,38 @@ method updateConnection SmallRuntime {
 		return 'not connected'
 	}
 }
+*/
 
-method justConnected SmallRuntime {
+MicroBlocksRuntime.prototype.justConnected = async function() {
 	// Called when a board has just connected (browser or stand-alone).
 
-	print 'Connected to' portName
-	connectionStartTime = nil
-	vmVersion = nil
-	sendMsgSync this 'getVersionMsg'
-	sendStopAll this
-	clearRunningHighlights this
-	setDefaultSerialDelay this
-	abortFileTransfer this
-	processMessages this // process incoming version message
+	console.log('Connected to' + this.bleDevice().name) //portName
+	this.connectionStartTime = null
+	this.vmVersion = null
+	await this.sendMsgSync('getVersionMsg')
+	this.sendStopAll()
+	this.clearRunningHighlights()
+	//setDefaultSerialDelay this
+	//abortFileTransfer this
+	/*processMessages this // process incoming version message
 	if readFromBoard {
 		readFromBoard = false
 		readCodeFromBoard this
-	} else {
-		codeReuseDisabled = false // set this to false to attempt to reuse code on board
-		if (or codeReuseDisabled (isEmpty chunkIDs) (not (boardHasSameProject this))) {
-			if (not codeReuseDisabled) { print 'Full download' }
-			clearBoardIfConnected this
+	} else {*/
+		var codeReuseDisabled = true //false // set this to false to attempt to reuse code on board
+		if (codeReuseDisabled || (this.chunkIDsIsEmpty()) || (!(await this.boardHasSameProject()))) {
+			if (!codeReuseDisabled) { console.log('Full download') }
+			this.clearBoardIfConnected()
 		} else {
-			print 'Incremental download' vmVersion boardType
+			console.log('Incremental download ' + this.vmVersion + this.boardType)
 		}
-		recompileAll = true
-		stopAndSyncScripts this true
-		softReset this
-	}
+		this.recompileAll = true
+		await this.stopAndSyncScripts(true)
+		this.softReset()
+	//}
 }
 
+/*
 method tryToConnect SmallRuntime {
 	// Called when connectionStartTime is not nil, indicating that we are trying
 	// to establish a connection to a board the current serial port.
@@ -42716,56 +42763,64 @@ method checkBoardType SmallRuntime {
 method getVersion SmallRuntime {
 	sendMsg this 'getVersionMsg'
 }
+*/
 
-method extractVersionNumber SmallRuntime versionString {
+MicroBlocksRuntime.prototype.extractVersionNumber = function(versionString) {
 	// Return the version number from the versionString.
 	// Version string format: vNNN, where NNN is one or more decimal digits,
 	// followed by non-digits characters that are ignored. Ex: 'v052a micro:bit'
 
-	words = (words (substring versionString 2))
-	if (isEmpty words) { return -1 }
-	result = 0
-	for ch (letters (first words)) {
-		if (not (isDigit ch)) { return result }
-		digit = ((byteAt ch 1) - (byteAt '0' 1))
+	var words = versionString.slice(1).split(' ') //(words (substring versionString 2))
+	if (words == null || words.length == 0) { return -1 }
+	var result = 0
+	//for ch (letters (first words)) {
+	for (var i = 0; i < words[0].length; i++) {
+		var ch = words[0][i]
+		if (!(ch.match(/^[0-9]/))) { return result } //(not (isDigit ch)) { return result }
+		var digit = parseInt(ch) //((byteAt ch 1) - (byteAt '0' 1))
 		result = ((10 * result) + digit)
 	}
 	return result
 }
 
-method extractBoardType SmallRuntime versionString {
+MicroBlocksRuntime.prototype.extractBoardType = function(versionString) {
 	// Return the board type from the versionString.
 	// Version string format: vNNN [boardType]
 
-	words = (words (substring versionString 2))
-	if (isEmpty words) { return -1 }
-	return (joinStrings (copyWithout words (at words 1)) ' ')
+	var words = versionString.slice(1).split(' ') //(words (substring versionString 2))
+	if (words == null || words.length == 0) { return -1 }
+	return words.slice(1).join(' ') //(joinStrings (copyWithout words (at words 1)) ' ')
 }
 
-method versionReceived SmallRuntime versionString {
-	if (isNil versionString) { return } // bad version message
-	if (isNil vmVersion) { // first time: record and check the version number
-		vmVersion = (extractVersionNumber this versionString)
-		boardType = (extractBoardType this versionString)
-		checkVmVersion this
-		installBoardSpecificBlocks this
+MicroBlocksRuntime.prototype.versionReceived =function(versionString) {
+	console.log("versionReceived: " + versionString)
+	if (versionString == null) { return } // bad version message
+	if (this.vmVersion == null) { // first time: record and check the version number
+		this.vmVersion = this.extractVersionNumber(versionString)
+		this.boardType = this.extractBoardType(versionString)
+		this.checkVmVersion()
+		//installBoardSpecificBlocks this
+		console.log("Set vmVersion=" + this.vmVersion + ", boardType='" + this.boardType + "'")
 	} else { // not first time: show the version number
-		inform (global 'page') (join 'MicroBlocks Virtual Machine ' versionString) 'Firmware version'
+		//inform (global 'page') (join 'MicroBlocks Virtual Machine ' versionString) 'Firmware version'
+		console.log('MicroBlocks Virtual Machine ' + versionString + ' Firmware version')
 	}
 }
 
-method checkVmVersion SmallRuntime {
+MicroBlocksRuntime.prototype.checkVmVersion = function() {
 	// prevent version check from running while the decompiler is working
-	if (not readFromBoard) { return }
-	if ((latestVmVersion this) > vmVersion) {
-		ok = (confirm (global 'page') nil (join
+	if (!this.readFromBoard) { return }
+	if (this.latestVmVersion > this.vmVersion) {
+		/*ok = (confirm (global 'page') nil (join
 			(localized 'The MicroBlocks in your board is not current')
 			' (v' vmVersion ' vs. v' (latestVmVersion this) ').' (newline)
 			(localized 'Try to update MicroBlocks on the board?')))
-		if ok { installVM this }
+		if ok { installVM this }*/
+		console.error("Outdated VM version detected (" + this.vmVersion + " < " + this.latestVmVersion + "). Firmware must be updated manually.")
 	}
 }
 
+/*
 method installBoardSpecificBlocks SmallRuntime {
 	// installs default blocks libraries for each type of board.
 
@@ -42809,18 +42864,19 @@ method installBoardSpecificBlocks SmallRuntime {
 		importEmbeddedLibrary scripter 'Databot'
 	}
 }
-
-method clearBoardIfConnected SmallRuntime doReset {
-	if (notNil port) {
-		sendStopAll this
-		if doReset { softReset this }
-		sendMsgSync this 'deleteAllCodeMsg' // delete all code from board
-	}
-	clearVariableNames this
-	clearRunningHighlights this
-	chunkIDs = (dictionary)
-}
 */
+
+MicroBlocksRuntime.prototype.clearBoardIfConnected = function(doReset) {
+	//if (notNil port) {
+	if (!this.noBleConnection()) {
+		this.sendStopAll()
+		if (doReset) { this.softReset() }
+		this.sendMsgSync('deleteAllCodeMsg') // delete all code from board
+	}
+	//clearVariableNames this
+	this.clearRunningHighlights()
+	this.chunkIDs = {}
+}
 
 MicroBlocksRuntime.prototype.sendStopAll = function() {
 	this.sendMsg('stopAllMsg')
@@ -43044,7 +43100,7 @@ MicroBlocksRuntime.prototype.saveChunk = async function(aBlockOrFunction, skipHi
 		}
 	//}
 
-	console.log("saveChunk [" + entry + "] " + currentSrc)
+	console.log("saveChunk [" + entry + "] \nCurrent src:\n" + currentSrc)
 
 	if (currentSrc == entry[3]) { return false } // source hasn't changed; save not needed
 	entry[3] = currentSrc // remember the source of the code we're about to save
@@ -43075,7 +43131,7 @@ MicroBlocksRuntime.prototype.saveChunk = async function(aBlockOrFunction, skipHi
 		crcOptimization = (!(['whenButtonPressed', 'whenBroadcastReceived'].includes(op)))
 	}
 	var newCRC = this.computeCRC(chunkBytes)
-	console.log("Computed CRC as [" + newCRC + "]. Was [" + entry[1] + "].")
+	//console.log("Computed CRC as [" + newCRC + "]. Was [" + entry[1] + "].")
 	if (crcOptimization && (entry[1] == newCRC)) {
 		return false
 	}
@@ -43116,14 +43172,19 @@ MicroBlocksRuntime.prototype.computeCRC = function(chunkData) {
 	for (var i = 0; i < 4; i++) { result[i] = ((crc >> i*8) & 0xff) }//(digitAt crc i) }
 	return result
 }
-/*method digitAt LargeInteger i { //From LargeInteger
-  // significant bytes are at the higher indices
-  c = (byteCount data)
-  if (i > c) { return 0 }
-  return (byteAt data ((c - i) + 1))
-}*/
+
+MicroBlocksRuntime.prototype.crcsEqual = function(crc1, crc2) {
+	if (crc1 == null | crc2 == null | crc1.length != 4 | crc2.length != 4) {
+		return false //These are not properly formed CRCs anyway.
+	}
+	for (var i = 0; i < 4; i++) {
+		if (crc1[i] != crc2[i]) { return false }
+	}
+	return true
+}
+
 MicroBlocksRuntime.prototype.crc = function(data) {
-	console.log("crc from [" + data + "]")
+	//console.log("crc from [" + data + "]")
 
 	//Copied from runtime.c in vm
 	var crcTable = [
@@ -43161,14 +43222,12 @@ MicroBlocksRuntime.prototype.crc = function(data) {
 0xB3667A2E, 0xC4614AB8, 0x5D681B02, 0x2A6F2B94, 0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D]
 
 
-	var crc = (~0) >>> 0;
-	console.log("start crc: " + crc.toString(2))
-	//uint8_t *end = buf + byteCount;
+	var crc = (~0)
 	for (var i = 0; i < data.length; i++) {
-		var p = data[i] >>> 0
-		crc = ((crc >> 8) ^ crcTable[(crc & 0xff) ^ p]) >>> 0;
+		var p = data[i]
+		crc = ((crc >>> 8) ^ crcTable[(crc & 0xff) ^ p])
 	}
-	return ((~crc) >>> 0);
+	return (~crc)
 }
 
 MicroBlocksRuntime.prototype.verifyCRCs = async function() {
@@ -43220,7 +43279,7 @@ MicroBlocksRuntime.prototype.verifyCRCs = async function() {
 	for (var i = 0; i < crcDictKeys.length; i++) {
 		var chunkID = crcDictKeys[i]
 		var sourceItem = ideChunks[chunkID]
-		if ((sourceItem != null) && ((this.crcDict[chunkID]) != (crcForChunkID[chunkID]))) {
+		if ((sourceItem != null) && (!this.crcsEqual(this.crcDict[chunkID], crcForChunkID[chunkID]))) {
 			console.log('CRC mismatch; resaving chunk: ' + chunkID + "; [" + this.crcDict[chunkID] + "] vs. [" + crcForChunkID[chunkID] + "]" )
 			this.forceSaveChunk(sourceItem)
 			//showDownloadProgress editor 3 (processedCount / totalCount)
@@ -43248,50 +43307,61 @@ MicroBlocksRuntime.prototype.verifyCRCs = async function() {
 	//showDownloadProgress editor 3 1
 }
 
-/*
-method boardHasSameProject SmallRuntime {
+MicroBlocksRuntime.prototype.boardHasSameProject = async function() {
 	// Return true if the board appears to have the same project as the IDE.
 
-	if (isNil port) { return false }
+	//if (isNil port) { return false }
+	if (this.noBleConnection()) { return false }
 
 	// update chunkIDs dictionary for script/function additions or removals while disconnected
-	assignFunctionIDs this
-	for aBlock (sortedScripts (scriptEditor scripter)) {
+	//assignFunctionIDs this
+	/*for aBlock (sortedScripts (scriptEditor scripter)) {
 		if (not (isPrototypeHat aBlock)) { // skip function def hat; functions get IDs above
 			ensureChunkIdFor this aBlock
 		}
+	}*/
+	var stacks = TabManager.activeTab.stackList
+	for (var i = 0; i < stack.length; i++) {
+		this.ensureChunkIdFor(stacks[i].firstBlock)
 	}
 
 	// collect CRCs from the board
-	crcDict = (dictionary)
-	collectCRCsBulk this
+	this.crcDict = {}
+	await this.collectCRCsBulk()
 
 	// build dictionaries:
 	//  ideChunks: chunkID -> block or functionName
 	//  crcForChunkID: chunkID -> CRC
-	ideChunks = (dictionary)
-	crcForChunkID = (dictionary)
-	for pair (sortedPairs chunkIDs) {
-		key = (last pair)
-		chunkID = (at (first pair) 1)
-		crc = (at (first pair) 2)
-		atPut ideChunks chunkID key
-		atPut crcForChunkID chunkID crc
+	var ideChunks = {}
+	var crcForChunkID = {}
+	//for pair (sortedPairs chunkIDs) {
+	var keys = Object.keys(this.chunkIDs)
+	for (var i = 0; i < keys.length; i++) {
+		var key = keys[i]
+		var entry = this.chunkIDs[key]
+		var chunkID = entry[0]
+		var crc = entry[1]
+		ideChunks[chunkID] = key
+		crcForChunkID[chunkID] = crc
 	}
 
 	// count matching chunks
-	matchCount = 0
-	for chunkID (keys crcDict) {
-		entry = (at ideChunks chunkID)
-		if (and (notNil entry) ((at crcDict chunkID) == (at crcForChunkID chunkID))) {
+	var matchCount = 0
+	var crcKeys = Object.keys(this.crcDict)
+	for (var i = 0; i < crcKeys.length; i++) {
+		var chunkID = crcKeys[i]
+		var entry = ideChunks[chunkID]
+		if ((entry != null) && (this.crcDict[chunkID] == crcForChunkID[chunkID])) {
 			matchCount += 1
 		}
 	}
 
 	// count chunks missing from the board
-	missingCount = 0
-	for chunkID (keys ideChunks) {
-		if (not (contains crcDict chunkID)) {
+	var missingCount = 0
+	var ideKeys = Object.keys(ideChunks)
+	for (var i = 0; i < ideKeys.length; i++) {
+		var chunkID = ideKeys[i]
+		if (!(this.crcDict.hasOwnProperty(chunkID))) {
 			missingCount += 1
 		}
 	}
@@ -43299,6 +43369,7 @@ method boardHasSameProject SmallRuntime {
 	return (matchCount >= missingCount)
 }
 
+/*
 method collectCRCsIndividually SmallRuntime {
 	// Collect the CRC's from all chunks on the board by requesting them individually
 
@@ -43524,11 +43595,11 @@ MicroBlocksRuntime.prototype.msgNameToID = function(msgName) {
 	if (msgType == null) { console.error('Unknown message: ' + msgName) }
 	return msgType
 }
-/*
-method errorString SmallRuntime errID {
+
+MicroBlocksRuntime.prototype.errorString = function(errID) {
 	// Return an error string for the given errID from error definitions copied and pasted from interp.h
 
-	defsFromHeaderFile = '
+	/* defsFromHeaderFile = '
 #define noError					0	// No error
 #define unspecifiedError		1	// Unknown error
 #define badChunkIndexError		2	// Unknown chunk index
@@ -43576,9 +43647,56 @@ method errorString SmallRuntime errID {
 			}
 		}
 	}
-	return (join 'Unknown error: ' errID)
+	return (join 'Unknown error: ' errID)*/
+
+	if (this.errorArray == null) {
+		this.errorArray = []
+		this.errorArray[0] = "No error"
+		this.errorArray[1] = "Unknown error"
+		this.errorArray[2] = "Unknown chunk index"
+
+		this.errorArray[10] = "Insufficient memory to allocate object"
+		this.errorArray[11] = "Needs a list"
+		this.errorArray[12] = "Needs a boolean"
+		this.errorArray[13] = "Needs an integer"
+		this.errorArray[14] = "Needs a string"
+		this.errorArray[15] = "Those objects cannot be compared for equality"
+		this.errorArray[16] = "List size must be a non-negative integer"
+		this.errorArray[17] = "List or string index must be an integer"
+		this.errorArray[18] = "List or string index out of range"
+		this.errorArray[19] = "A ByteArray can only store integer values between 0 and 255"
+		this.errorArray[20] = "Hexadecimal input must between between -1FFFFFFF and 1FFFFFFF"
+		this.errorArray[21] = "I2C device ID must be between 0 and 127"
+		this.errorArray[22] = "I2C register must be between 0 and 255"
+		this.errorArray[23] = "I2C value must be between 0 and 255"
+		this.errorArray[24] = "Attempt to access an argument outside of a function"
+		this.errorArray[25] = "for-loop argument must be a positive integer or list"
+		this.errorArray[26] = "Insufficient stack space"
+		this.errorArray[27] = "Primitive not implemented in this virtual machine"
+		this.errorArray[28] = "Not enough arguments passed to primitive"
+		this.errorArray[29] = "The maximum wait time is 3600000 milliseconds (one hour)"
+		this.errorArray[30] = "This board does not support WiFi"
+		this.errorArray[31] = "Division (or modulo) by zero is not defined"
+		this.errorArray[32] = "Argument index out of range"
+		this.errorArray[33] = "Needs an indexable type such as a string or list"
+		this.errorArray[34] = "All arguments to join must be the same type (e.g. lists)"
+		this.errorArray[35] = "I2C transfer failed"
+		this.errorArray[36] = "Needs a byte array"
+		this.errorArray[37] = "Serial port not open"
+		this.errorArray[38] = "Serial port write is limited to 128 bytes"
+		this.errorArray[39] = "Needs a list of integers"
+		this.errorArray[40] = "Needs a value between 0 and 255"
+		this.errorArray[41] = "Range increment must be a positive integer"
+		this.errorArray[42] = "Needs an integer or a list of integers"
+	}
+
+	if (this.errorArray[errID] == null) {
+		return ("No error defined for code " + errID)
+	} else {
+		return ("Error: " + this.errorArray[errID])
+	}
+
 }
-*/
 
 MicroBlocksRuntime.prototype.sendMsg = function(msgName, chunkID, byteList) {
 	//ensurePortOpen this
@@ -43775,6 +43893,7 @@ method skipMessage SmallRuntime discard {
 // Message handling
 
 MicroBlocksRuntime.prototype.handleMessage = function(msg) {
+	console.log("handleMessage: [" + msg + "]")
 	this.lastPingRecvMSecs = Date.now() //(msecsSinceStart) // reset ping timer when any valid message is recevied
 	var op = msg[1]
 	var chunkID = msg[2]
@@ -43789,17 +43908,17 @@ MicroBlocksRuntime.prototype.handleMessage = function(msg) {
 		this.showError(chunkID, this.errorString(msg[5]))
 		this.updateRunning(chunkID, false)
 	} else if (op == this.msgNameToID('outputValueMsg')) {
-		/*if (chunkID == 255) { //TODO: What is this for?
-			print (returnedValue this msg)
-		} (chunkID == 254) {
-			addLoggedData this (toString (returnedValue this msg))
-		} else {*/
+		if (chunkID == 255) { //TODO: What is this for?
+			console.log(this.bleDevice().name + " Says: " + this.returnedValue(msg))
+		/*} (chunkID == 254) { //For making graphs
+			this.addLoggedData(this.returnedValue(msg).toString())*/
+		} else {
 			this.showResult(chunkID, this.returnedValue(msg), false, true)
-		//}
+		}
 	/*} else if (op == this.msgNameToID('varValueMsg')) {
 		varValueReceived (httpServer scripter) (byteAt msg 3) (returnedValue this msg)*/
-	/*} else if (op == this.msgNameToID('versionMsg')) {
-		this.versionReceived(this.returnedValue(msg))*/
+	} else if (op == this.msgNameToID('versionMsg')) {
+		this.versionReceived(this.returnedValue(msg))
 	} else if (op == this.msgNameToID('chunkCRCMsg')) {
 		this.crcReceived(chunkID, msg.slice(5))
 	} else if (op == this.msgNameToID('allCRCsMsg')) {
@@ -44129,11 +44248,11 @@ method removeResultBubbles SmallRuntime {
 		}
 	}
 }
-
-method showError SmallRuntime chunkID msg {
-	showResult this chunkID msg true
-}
 */
+
+MicroBlocksRuntime.prototype.showError = function(chunkID, msg) {
+	this.showResult(chunkID, msg, true)
+}
 
 MicroBlocksRuntime.prototype.showResult = function(chunkID, value, isError, isResult) {
 	console.error("Still need to implement showResult. Results: " + chunkID + ", " + value + ", " + isError + ", " + isResult)
@@ -44796,6 +44915,11 @@ method loggedData SmallRuntime howMany {
 
 function MicroBlocksScripter() {
   this.saveNeeded = true
+}
+
+function BlockArg(prim, argList) {
+  this.primName = function() { return prim }
+  this.argList = function() { return argList }
 }
 
 /*
@@ -46349,7 +46473,8 @@ PrettyPrinter.prototype.op = function(value) {
 }
 
 PrettyPrinter.prototype.printValue = function(block) {
-  if (block instanceof ReporterBlock) {
+  //console.log("printValue ", block)
+  if (block instanceof ReporterBlock || block instanceof BlockArg) {
     var prim = block.primName()
     /*if (isOneOf prim 'v' 'my') {
       varRef = (getField block offset)
@@ -46371,8 +46496,13 @@ PrettyPrinter.prototype.printValue = function(block) {
   /*} (isClass block 'Color') {
     c = block
     this.gen.const(join '(colorSwatch ' (red c) ' ' (green c) ' ' (blue c) ' ' (alpha c) ')')*/
+  /*} else if (block instanceof Object) {
+    console.log("printValue of Object:")
+    console.log(block)
+    this.gen.const(JSON.stringify(block))*/
   } else {
-    this.gen.const(block.toString())
+    //this.gen.const(block.toString())
+    console.error("printValue unhandled type " + typeof block, block)
   }
 }
 
@@ -46406,7 +46536,7 @@ method printFunction PrettyPrinter func aClass {
 PrettyPrinter.prototype.printReporter = function(block) {
   var prim = block.primName()
   var args = block.argList()
-  console.log("printReporter " + prim + " [" + args + "]")
+  //console.log("printReporter " + prim + " [" + args + "]")
   /*if (and (infixOp this prim) ((count block) == (offset + 1))) {
     printValue this (getField block offset)
     symbol gen prim
@@ -46422,7 +46552,7 @@ PrettyPrinter.prototype.printReporter = function(block) {
       }
     }*/
     for (var i = 0; i < args.length; i++) {
-      this.printValue(args[i])
+      if (args[i] != null) { this.printValue(args[i]) }
     }
   //}
 }

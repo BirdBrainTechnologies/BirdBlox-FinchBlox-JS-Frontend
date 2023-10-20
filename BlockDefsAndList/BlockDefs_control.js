@@ -635,13 +635,14 @@ B_StartWhenDark.prototype.constructor = B_StartWhenDark;
 //MicroBlocks functions
 B_StartWhenDark.prototype.primName = function() { return "whenCondition" }
 B_StartWhenDark.prototype.argList = function() { 
-  return [{
+  return [ new BlockArg("<", [ new BlockArg("[display:lightLevel]", []), 150 ]) ]
+  /*return [{
     primName: function() { return "<" },
     argList: function() { return [{
       primName: function() { return "[display:lightLevel]"},
       argList: function () { return [] }
     }, 150]}
-  }] 
+  }] */
 }
 
 function B_StartWhenClap(x, y) {
@@ -689,16 +690,22 @@ B_StartWhenDistance.prototype = Object.create(B_FBStartWhen.prototype);
 B_StartWhenDistance.prototype.constructor = B_StartWhenDistance;
 //MicroBlocks functions
 B_StartWhenDistance.prototype.primName = function() { return "whenCondition" }
-B_StartWhenDistance.prototype.argList = function() { 
+B_StartWhenDistance.prototype.argList = function() {
   let portName = HL_Utils.portNames[this.port]
+  let threshold = this.distance
+  return [new BlockArg( "<", [new BlockArg("[h:ds]", [portName]), threshold] )]
+}
+/*function() { 
+  let portName = HL_Utils.portNames[this.port]
+  let threshold = this.distance
   return [{
     primName: function() { return "<" },
     argList: function() { return [{
       primName: function() { return "[h:ds]" },
       argList: function () { return [portName] }
-    }, 20]}
+    }, threshold]}
   }] 
-}
+}*/
 
 B_StartWhenDistance.prototype.updateValues = function() {
   HL_Utils.updatePort(this)

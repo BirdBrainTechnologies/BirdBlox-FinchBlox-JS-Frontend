@@ -6,6 +6,11 @@ function MicroBlocksScripter() {
   this.saveNeeded = true
 }
 
+function BlockArg(prim, argList) {
+  this.primName = function() { return prim }
+  this.argList = function() { return argList }
+}
+
 /*
 method blockPalette MicroBlocksScripter { return (contents blocksFrame) }
 method scriptEditor MicroBlocksScripter { return (contents scriptsFrame) }

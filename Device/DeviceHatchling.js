@@ -15,7 +15,8 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
   // * 9  = Single Neopixel
   // * 10 = Strip of 4 Neopixels
   // * 14 = Distance Sensor
-  this.supportedStates = [0, 1, 3, 8, 9, 10, 14]
+  // * 31 = Microbit Not Connected to Hatchling
+  this.supportedStates = [0, 1, 3, 8, 9, 10, 14, 31]
   this.portStates = [0, 0, 0, 0, 0, 0]
   this.advertisedName = advertisedName
 
@@ -26,9 +27,10 @@ DeviceHatchling.prototype.constructor = DeviceHatchling;
 Device.setDeviceTypeName(DeviceHatchling, "hatchling", "Hatchling", "Hatchling");
 
 DeviceHatchling.prototype.setHatchlingState = function(state) {
-  console.log("From hatchling: [" + state + "]")
+  //console.log("From hatchling: [" + state + "]")
 
   if (this.messageInProgress != null) {
+    //console.log("Message from Hatchling in progress: " + this.messageInProgress.length + ", " + this.messageInProgress.data)
     let newLength = this.messageInProgress.data.length + state.length
     let currentData = new Uint8Array(newLength)
     currentData.set(this.messageInProgress.data, 0)
@@ -37,6 +39,7 @@ DeviceHatchling.prototype.setHatchlingState = function(state) {
       this.messageInProgress.data = currentData
     } else {
       this.messageInProgress = null
+      //console.log("Long msg from hatchling: [" + currentData + "]")
       mbRuntime.handleMessage(currentData)
     }
 
@@ -70,6 +73,7 @@ DeviceHatchling.prototype.setHatchlingState = function(state) {
             console.log("New value for port " + i + ": " + newPortVals[i])
             this.setOutput(null, "portOff", i, 0, "offValue")
             this.portStates[i] = newPortVals[i]
+            if (this.portStates[i] == 31) { this.portStates[i] = 0 } //31 is basically also port empty
             CodeManager.updateAvailablePorts(i);
           } else {
             console.log("Unsupported type " + newPortVals[i] + " at port " + i)
@@ -134,7 +138,7 @@ DeviceHatchling.prototype.readSensor = function(status, sensor, port) {
   if (port != null) {
     request.addParam("port", port);
   }
-  HtmlServer.sendRequest(request.toString(), status, true);
+  //HtmlServer.sendRequest(request.toString(), status, true);
 }
 
 /**
@@ -194,3 +198,21 @@ DeviceHatchling.prototype.getColor = function(number) {
       return "#000"
   }
 }
+
+/** Temporarily override functions to make sure we don't send any regular requests 
+ * now that we are using the MicroBlocks VM
+ */
+
+DeviceHatchling.prototype.setOutput = function(status, outputType, port, value, valueKey) {
+}
+
+DeviceHatchling.prototype.setTriLed = function(status, port, red, green, blue) {
+}
+
+DeviceHatchling.prototype.setBuzzer = function(status, note, duration) {
+}
+
+DeviceHatchling.prototype.setLedArray = function(status, ledStatusString) {
+}
+
+

@@ -168,7 +168,8 @@ PrettyPrinter.prototype.op = function(value) {
 }
 
 PrettyPrinter.prototype.printValue = function(block) {
-  if (block instanceof ReporterBlock) {
+  //console.log("printValue ", block)
+  if (block instanceof ReporterBlock || block instanceof BlockArg) {
     let prim = block.primName()
     /*if (isOneOf prim 'v' 'my') {
       varRef = (getField block offset)
@@ -190,8 +191,13 @@ PrettyPrinter.prototype.printValue = function(block) {
   /*} (isClass block 'Color') {
     c = block
     this.gen.const(join '(colorSwatch ' (red c) ' ' (green c) ' ' (blue c) ' ' (alpha c) ')')*/
+  /*} else if (block instanceof Object) {
+    console.log("printValue of Object:")
+    console.log(block)
+    this.gen.const(JSON.stringify(block))*/
   } else {
-    this.gen.const(block.toString())
+    //this.gen.const(block.toString())
+    console.error("printValue unhandled type " + typeof block, block)
   }
 }
 
@@ -225,7 +231,7 @@ method printFunction PrettyPrinter func aClass {
 PrettyPrinter.prototype.printReporter = function(block) {
   let prim = block.primName()
   let args = block.argList()
-  console.log("printReporter " + prim + " [" + args + "]")
+  //console.log("printReporter " + prim + " [" + args + "]")
   /*if (and (infixOp this prim) ((count block) == (offset + 1))) {
     printValue this (getField block offset)
     symbol gen prim
@@ -241,7 +247,7 @@ PrettyPrinter.prototype.printReporter = function(block) {
       }
     }*/
     for (let i = 0; i < args.length; i++) {
-      this.printValue(args[i])
+      if (args[i] != null) { this.printValue(args[i]) }
     }
   //}
 }
