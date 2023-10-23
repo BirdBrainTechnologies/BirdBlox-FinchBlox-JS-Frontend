@@ -450,7 +450,7 @@ B_When.prototype = Object.create(HatBlock.prototype);
 B_When.prototype.constructor = B_When;
 // The flag should trigger this block as well
 B_When.prototype.eventFlagClicked = function() {
-  this.stack.startRun();
+  this.stack.startRun(null, null, true);
 }
 /* Checks condition. If true, stops running; if false, resets Block to check again. */
 B_When.prototype.startAction = function() {
@@ -534,7 +534,7 @@ B_WhenKeyPressed.prototype = Object.create(HatBlock.prototype);
 B_WhenKeyPressed.prototype.constructor = B_WhenKeyPressed;
 // The flag should trigger this block as well
 B_WhenKeyPressed.prototype.eventFlagClicked = function() {
-  this.stack.startRun();
+  this.stack.startRun(null, null, true);
 }
 B_WhenKeyPressed.prototype.startAction = function() {
   this.selectedKeyPressed = false;
@@ -558,7 +558,7 @@ B_FBStartWhen.prototype = Object.create(HatBlock.prototype);
 B_FBStartWhen.prototype.constructor = B_FBStartWhen;
 /* Triggers stack to start running. */
 B_FBStartWhen.prototype.eventFlagClicked = function() {
-  this.stack.startRun();
+  this.stack.startRun(null, null, true);
 };
 B_FBStartWhen.prototype.startAction = function() {
 

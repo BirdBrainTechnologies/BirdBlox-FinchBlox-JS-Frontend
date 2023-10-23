@@ -197,6 +197,10 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
   }
   this.button.addMultiText(text, this.font, this.textColor);
   this.parent.updateValues();
+
+  if (Hatchling && this.parent.stack != null && !this.parent.stack.isDisplayStack) { 
+    mbRuntime.saveChunk(this.parent.stack.firstBlock) 
+  }
 };
 
 /**

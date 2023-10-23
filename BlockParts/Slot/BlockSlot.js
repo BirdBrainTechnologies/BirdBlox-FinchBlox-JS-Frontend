@@ -105,6 +105,7 @@ BlockSlot.prototype.snap = function(block) {
   if (stack != null) {
     // Update the positions of everything
     this.parent.stack.updateDim();
+    if (Hatchling) { mbRuntime.saveChunk(this.parent.stack.firstBlock) }
   }
 };
 

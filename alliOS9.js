@@ -26080,7 +26080,10 @@ BlockStack.prototype.snap = function(block) {
   this.updateDim();
   this.startRunIfAutoExec();
 
-  if (Hatchling) { HL_Utils.showPortsPopup(block) }
+  if (Hatchling) { 
+    HL_Utils.showPortsPopup(block) 
+    mbRuntime.saveChunk(this.firstBlock)
+  }
 };
 
 /**
@@ -29576,7 +29579,10 @@ Block.prototype.snap = function(block) {
     this.stack.tab.updateArrows();
   }
 
-  if (Hatchling) { HL_Utils.showPortsPopup(block) }
+  if (Hatchling) { 
+    HL_Utils.showPortsPopup(block) 
+    if (this.stack != null) { mbRuntime.saveChunk(this.stack.firstBlock) }
+  }
 };
 
 /**
@@ -29589,9 +29595,11 @@ Block.prototype.unsnap = function() {
     if (this.parent.isSlot || this.parent.isBlockSlot) { //Checks if it is attached to a Slot not another Block.
       this.parent.removeChild(); //Leave the Slot.
       this.parent.parent.stack.updateDim(); //Tell the stack the Slot belongs to to update its dimensions.
+      if (Hatchling) { mbRuntime.saveChunk(this.parent.parent.stack.firstBlock) }
     } else { //This Block is connected to another Block.
       this.parent.nextBlock = null; //Disconnect from parent Block.
       this.parent.stack.updateDim(); //Tell parent's stack to update dimensions.
+      if (Hatchling) { mbRuntime.saveChunk(this.parent.stack.firstBlock) }
     }
     this.parent = null; //Delete reference to parent Block/Slot/BlockSlot.
     //Make a new BlockStack with this Block in current Tab.  Also moves over any subsequent Blocks.
@@ -33309,6 +33317,7 @@ BlockSlot.prototype.snap = function(block) {
   if (stack != null) {
     // Update the positions of everything
     this.parent.stack.updateDim();
+    if (Hatchling) { mbRuntime.saveChunk(this.parent.stack.firstBlock) }
   }
 };
 
@@ -34116,6 +34125,10 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
   }
   this.button.addMultiText(text, this.font, this.textColor);
   this.parent.updateValues();
+
+  if (Hatchling && this.parent.stack != null && !this.parent.stack.isDisplayStack) { 
+    mbRuntime.saveChunk(this.parent.stack.firstBlock) 
+  }
 };
 
 /**
@@ -37641,7 +37654,7 @@ B_When.prototype = Object.create(HatBlock.prototype);
 B_When.prototype.constructor = B_When;
 // The flag should trigger this block as well
 B_When.prototype.eventFlagClicked = function() {
-  this.stack.startRun();
+  this.stack.startRun(null, null, true);
 }
 /* Checks condition. If true, stops running; if false, resets Block to check again. */
 B_When.prototype.startAction = function() {
@@ -37725,7 +37738,7 @@ B_WhenKeyPressed.prototype = Object.create(HatBlock.prototype);
 B_WhenKeyPressed.prototype.constructor = B_WhenKeyPressed;
 // The flag should trigger this block as well
 B_WhenKeyPressed.prototype.eventFlagClicked = function() {
-  this.stack.startRun();
+  this.stack.startRun(null, null, true);
 }
 B_WhenKeyPressed.prototype.startAction = function() {
   this.selectedKeyPressed = false;
@@ -37749,7 +37762,7 @@ B_FBStartWhen.prototype = Object.create(HatBlock.prototype);
 B_FBStartWhen.prototype.constructor = B_FBStartWhen;
 /* Triggers stack to start running. */
 B_FBStartWhen.prototype.eventFlagClicked = function() {
-  this.stack.startRun();
+  this.stack.startRun(null, null, true);
 };
 B_FBStartWhen.prototype.startAction = function() {
 

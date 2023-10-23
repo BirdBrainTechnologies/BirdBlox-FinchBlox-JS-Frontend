@@ -463,7 +463,10 @@ BlockStack.prototype.snap = function(block) {
   this.updateDim();
   this.startRunIfAutoExec();
 
-  if (Hatchling) { HL_Utils.showPortsPopup(block) }
+  if (Hatchling) { 
+    HL_Utils.showPortsPopup(block) 
+    mbRuntime.saveChunk(this.firstBlock)
+  }
 };
 
 /**

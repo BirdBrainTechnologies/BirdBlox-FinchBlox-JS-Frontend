@@ -891,7 +891,10 @@ Block.prototype.snap = function(block) {
     this.stack.tab.updateArrows();
   }
 
-  if (Hatchling) { HL_Utils.showPortsPopup(block) }
+  if (Hatchling) { 
+    HL_Utils.showPortsPopup(block) 
+    if (this.stack != null) { mbRuntime.saveChunk(this.stack.firstBlock) }
+  }
 };
 
 /**
@@ -904,9 +907,11 @@ Block.prototype.unsnap = function() {
     if (this.parent.isSlot || this.parent.isBlockSlot) { //Checks if it is attached to a Slot not another Block.
       this.parent.removeChild(); //Leave the Slot.
       this.parent.parent.stack.updateDim(); //Tell the stack the Slot belongs to to update its dimensions.
+      if (Hatchling) { mbRuntime.saveChunk(this.parent.parent.stack.firstBlock) }
     } else { //This Block is connected to another Block.
       this.parent.nextBlock = null; //Disconnect from parent Block.
       this.parent.stack.updateDim(); //Tell parent's stack to update dimensions.
+      if (Hatchling) { mbRuntime.saveChunk(this.parent.stack.firstBlock) }
     }
     this.parent = null; //Delete reference to parent Block/Slot/BlockSlot.
     //Make a new BlockStack with this Block in current Tab.  Also moves over any subsequent Blocks.
