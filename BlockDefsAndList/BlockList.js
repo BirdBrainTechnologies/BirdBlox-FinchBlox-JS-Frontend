@@ -145,6 +145,7 @@ BlockList.populateCat_motion_3 = function(category) {
     category.addBlockByName("B_FBBackwardL3");
     category.addBlockByName("B_FBRightL3");
     category.addBlockByName("B_FBLeftL3");
+    category.addBlockByName("B_FBCircleL3");
     category.addBlockByName("B_FBForwardUntilDark");
     category.addBlockByName("B_FBForwardUntilObstacle");
   }

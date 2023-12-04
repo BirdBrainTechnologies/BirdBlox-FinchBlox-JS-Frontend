@@ -1,5 +1,5 @@
 var FinchBlox = true;
-var Hatchling = true;
+var Hatchling = false;
 if (Hatchling) { FinchBlox = true; }
 var FrontendVersion = 393;
 
@@ -8389,6 +8389,7 @@ BlockList.populateCat_motion_3 = function(category) {
     category.addBlockByName("B_FBBackwardL3");
     category.addBlockByName("B_FBRightL3");
     category.addBlockByName("B_FBLeftL3");
+    category.addBlockByName("B_FBCircleL3");
     category.addBlockByName("B_FBForwardUntilDark");
     category.addBlockByName("B_FBForwardUntilObstacle");
   }
@@ -36812,7 +36813,8 @@ B_FBMotion.iconPaths = {
   "forward": "mjForward",
   "right": "mjTurnRight",
   "backward": "mjBack",
-  "left": "mjTurnLeft"
+  "left": "mjTurnLeft",
+  "circle":"bsArrowClockwise"
 }
 
 //****  Level 1 Blocks ****//
@@ -36917,6 +36919,167 @@ function B_FBLeftL3(x, y) {
 }
 B_FBLeftL3.prototype = Object.create(B_FBMotionL3.prototype);
 B_FBLeftL3.prototype.constructor = B_FBLeftL3;
+
+
+// Circle block
+
+function B_FBCircleL3(x, y) {
+  this.angle = 90
+  this.radius = 10
+  this.direction = "right" //clockwise
+
+  B_FBMotion.call(this, x, y, "circle", 3);
+
+  console.log("Adding circle button " + this.angle + " " + this.radius)
+  this.circleBN = new BlockButton(this);
+  this.circleBN.addSlider("angle_" + this.direction, this.angle, [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360]);
+  this.circleBN.addSlider("distance", this.radius, [5, 10, 15, 20])
+  this.addPart(this.circleBN);
+}
+B_FBCircleL3.prototype = Object.create(B_FBMotion.prototype);
+B_FBCircleL3.prototype.constructor = B_FBCircleL3
+
+B_FBCircleL3.prototype.updateValues = function() {
+  this.angle = this.circleBN.values[0]
+  this.radius = this.circleBN.values[1] || this.radius
+
+  //Clockwise circle
+  var rightDistance = ( 2 * Math.PI * (this.radius - 5) ) * (this.angle/360)
+  var leftDistance = ( 2 * Math.PI * (this.radius + 5) ) * (this.angle/360)
+  this.rightTicks = rightDistance * DeviceFinch.ticksPerCM
+  this.leftTicks = leftDistance * DeviceFinch.ticksPerCM
+  this.leftSpeed = 40
+  this.rightSpeed = this.leftSpeed * (rightDistance/leftDistance)
+  console.log("updateValues " + rightDistance + " " + leftDistance + " " + this.rightSpeed)
+}
+
+/*function B_FBCircleL3(x, y) {
+  this.angle = 90
+  this.radius = 10
+  this.direction = "right" //clockwise
+  //792 encoder ticks per rotation
+  this.scalingFactor = 1 / 792;
+
+  CommandBlock.call(this, x, y, "motion_3");
+
+  var blockIcon = new BlockIcon(this, VectorPaths.bsArrowClockwise, Colors.white, "circleFinch", 27);
+  blockIcon.isEndOfLine = true;
+  this.addPart(blockIcon);
+
+  this.circleBN = new BlockButton(this);
+  this.circleBN.addSlider("angle_" + this.direction, this.angle, [5, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360]);
+  this.circleBN.addSlider("distance", this.radius, [5, 10, 15, 20, 25, 30])
+  this.addPart(this.circleBN);
+      
+}
+B_FBCircleL3.prototype = Object.create(CommandBlock.prototype);
+B_FBCircleL3.prototype.constructor = B_FBCircleL3;
+
+B_FBCircleL3.prototype.startAction = function() {
+  var device = DeviceFinch.getManager().getDevice(0);
+  if (device == null) {
+    TitleBar.flashFinchButton();
+    return new ExecutionStatusError();
+  }
+
+  this.blankRequestStatus = {};
+  this.blankRequestStatus.finished = false;
+  this.blankRequestStatus.error = false;
+  this.blankRequestStatus.result = null;
+  this.blankRequestStatus.requestSent = false;
+
+  this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+  this.runMem.encoderRequestFinished = false
+  this.runMem.motorRequestFinished = false;
+
+  //(2piR) is the circumference, (angle/360) is the fraction of circle, 5*pi is the wheel circumference
+  //(2 * Math.PI * this.radius) * (this.angle/360) / (5 * Math.PI) which reduces to:
+  this.threshold = this.radius * (this.angle/180) / 5
+  this.encoderL = null
+  this.encoderR = null
+
+  console.log("about to reset encoders ")
+  device.resetEncoders(this.runMem.requestStatus)
+  this.runMem.requestStatus.requestSent = true
+
+  return new ExecutionStatusRunning();
+}
+B_FBCircleL3.prototype.updateAction = function() {
+  var device = DeviceFinch.getManager().getDevice(0)
+  if (device == null) { return new ExecutionStatusDone() }
+
+  var status = this.runMem.requestStatus;
+  console.log("updateAction ")
+  if (status.requestSent) {
+    if (status.finished) {
+      if (status.error) {
+        return new ExecutionStatusError()
+      }
+      if (!this.runMem.encoderRequestFinished) { //really need to wait for encoders to go to 0
+        this.runMem.encoderRequestFinished = true 
+        this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+        console.log("updateAction setting motors")
+        device.setMotors(this.runMem.requestStatus, this.speedL, 0, this.speedR, 0);
+        device.isMoving = true
+        this.runMem.requestStatus.requestSent = true
+        return new ExecutionStatusRunning();
+      }
+      if (this.runMem.encoderRequestFinished && !this.runMem.motorRequestFinished) {
+        console.log("updateAction motors set")
+        this.runMem.motorRequestFinished = true;
+        this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+        return new ExecutionStatusRunning();
+      }
+
+      var result = new StringData(status.result);
+      var num = (result.asNum().getValue() * this.scalingFactor);
+      console.log("updateAction received num " + num + " (" + result.asNum().getValue() + ") with " + this.encoderL + " " + this.encoderR)
+      if (this.encoderL == null) {
+        this.encoderL = num
+        this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+        console.log("updateAction read right encoder")
+        device.readSensor(this.runMem.requestStatus, "encoder", "right"); 
+        this.runMem.requestStatus.requestSent = true
+        return new ExecutionStatusRunning();
+      } else {
+        this.encoderR = num
+      }
+
+      console.log("updateAction " + this.encoderR + " " + this.encoderL + " " + this.threshold)
+      var pastThreshold = (Math.abs(this.encoderR - this.encoderL) > this.threshold);
+      
+      if (pastThreshold || !device.isMoving) {
+        if (pastThreshold) {
+          device.setMotors(this.runMem.requestStatus, 0, 0, 0, 0);
+          device.isMoving = false;
+        }
+        return new ExecutionStatusDone();
+      } else {
+        this.runMem.requestStatus = Object.assign({}, this.blankRequestStatus);
+        this.encoderL = null 
+        this.encoderR = null
+      }
+    } else {
+      console.log("status unfinished: ", status)
+    }
+  } else {
+    console.log("updateAction read left encoder")
+    device.readSensor(status, "encoder", "left"); 
+    status.requestSent = true;
+  }
+  return new ExecutionStatusRunning();
+}
+B_FBCircleL3.prototype.updateValues = function() {
+  this.angle = this.circleBN.values[0]
+  this.radius = this.circleBN.values[1] || this.radius
+
+  //Clockwise circle
+  var rightDistance = ( 2 * Math.PI * (this.radius - 5) ) * (this.angle/360)
+  var leftDistance = ( 2 * Math.PI * (this.radius + 5) ) * (this.angle/360)
+  this.speedL = 40
+  this.speedR = this.speedL * (rightDistance/leftDistance)
+  console.log("updateValues " + rightDistance + " " + leftDistance + " " + this.speedR)
+}*/
 
 
 
