@@ -40146,7 +40146,7 @@ function B_HLPositionServo(x, y) {
 B_HLPositionServo.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLPositionServo.prototype.constructor = B_HLPositionServo;
 //MicroBlocks functions
-B_HLPositionServo.prototype.primName = function() { return "[h:pdv]" }
+B_HLPositionServo.prototype.primName = function() { return "[h:psv]" }
 B_HLPositionServo.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
 
 function B_HLRotationServo(x, y, flip) {
