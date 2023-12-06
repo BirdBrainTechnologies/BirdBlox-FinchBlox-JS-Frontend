@@ -7395,7 +7395,14 @@ GuiElements.draw.tab = function(x, y, width, height, color, r, isDown) {
   tab.setAttributeNS(null, "fill", color); //Set the fill.
   return tab; //Return the finished button shape.
 };
-
+/**
+ * Create an image of the led array of a micro:bit, with leds lit in 
+ * the specified pattern. 
+ * @param {Element} parentGroup - group to add this to
+ * @param {string} arrayString - binary string representation of light pattern
+ * @param {number} dim - size of image to create
+ * @return {Object} - object representing the led array 
+ */
 GuiElements.draw.ledArray = function(parentGroup, arrayString, dim) {
   var arrayImage = {};
   var values = arrayString.split("");
@@ -7422,12 +7429,23 @@ GuiElements.draw.ledArray = function(parentGroup, arrayString, dim) {
   arrayImage.width = 5 * dim + 4 * margin;
   return arrayImage;
 };
-
-GuiElements.draw.wedge = function(x, y, r, a, color) {
+/**
+ * Create a slice of a circle. May be filled, or just the outer edge.
+ * @param {number} x - x coord of circle center
+ * @param {number} y - y coord of circle center
+ * @param {number} r - radius of circle 
+ * @param {number} a - angle of wedge
+ * @param {string} color - fill color
+ * @param {boolean} cc - true if counter clockwise 
+ * @param {boolean} arc - true if draw arc, but not fill in wedge
+ * @return {Element} - wedge element
+ */
+GuiElements.draw.wedge = function(x, y, r, a, color, cc, arc) {
   DebugOptions.validateNonNull(color);
   DebugOptions.validateNumbers(x, y, r, a);
   var wedge = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
-  GuiElements.update.wedge(wedge, x, y, r, a); //Set its path description (points).
+  GuiElements.update.wedge(wedge, x, y, r, a, cc, arc); //Set its path description (points).
+  if (arc) { color = Colors.white }
   wedge.setAttributeNS(null, "fill", color); //Set the fill.
   return wedge; //Return the finished wedge shape.
 }
@@ -7742,8 +7760,17 @@ GuiElements.update.tab = function(pathE, x, y, width, height, r, isDown) {
   path += " z"; //Closes path.
   pathE.setAttributeNS(null, "d", path); //Sets path description.
 };
-
-GuiElements.update.wedge = function(pathE, x, y, r, angle, counterClockwise) {
+/**
+ * Update the wedge path
+ * @param {Element} pathE - path element to update
+ * @param {number} x - x coord of circle center
+ * @param {number} y - y coord of circle center
+ * @param {number} r - radius of circle 
+ * @param {number} angle - angle of wedge
+ * @param {boolean} counterClockwise - true if counter clockwise 
+ * @param {boolean} arcOnly - true if draw arc, but not fill in wedge
+ */
+GuiElements.update.wedge = function(pathE, x, y, r, angle, counterClockwise, arcOnly) {
   DebugOptions.validateNumbers(x, y, r, angle);
   if (counterClockwise == null) {
     counterClockwise = false;
@@ -7780,6 +7807,11 @@ GuiElements.update.wedge = function(pathE, x, y, r, angle, counterClockwise) {
   path += " l 0," + (-r);
   path += " A " + r + " " + r + " 0 " + las + " " + sf + " " + endX + " " + endY;
   path += " z";
+
+  if (arcOnly) {
+    path = "m " + x + "," + (y-r);
+    path += " A " + r + " " + r + " 0 " + las + " " + sf + " " + endX + " " + endY;
+  }
 
   pathE.setAttributeNS(null, "d", path);
 }
@@ -14369,8 +14401,9 @@ Button.prototype.addMultiText = function(texts, font, color) {
  * @param {number} height - The height the icon should have in the button
  * @param {number} xOffset - Distance from center to place icon. Default 0.
  * @param {boolean} mirror - True if the icon should be mirrored for rtl languages
+ * @param {number} rotation - amount to rotate the icon in degrees
  */
-Button.prototype.addIcon = function(pathId, height, xOffset, mirror) {
+Button.prototype.addIcon = function(pathId, height, xOffset, mirror, rotation) {
   if (height == null) {
     height = Button.defaultIconH;
   }
@@ -14384,7 +14417,7 @@ Button.prototype.addIcon = function(pathId, height, xOffset, mirror) {
   var iconW = VectorIcon.computeWidth(pathId, height);
   var iconX = xOffset + (this.width - iconW) / 2;
   var iconY = (this.height - height) / 2;
-  this.icon = new VectorIcon(iconX, iconY, pathId, Button.foreground, height, this.group, mirror);
+  this.icon = new VectorIcon(iconX, iconY, pathId, Button.foreground, height, this.group, mirror, rotation);
   TouchReceiver.addListenersBN(this.icon.pathE, this);
 };
 
@@ -17057,31 +17090,97 @@ InputWidget.Slider.prototype.makeSlider = function() {
     this.sideSpaceR = this.height / 2
     //Add an angle diagram for an angle slider
     if (this.type.startsWith('angle')) {
+      var circle = this.type.endsWith('clockwise')
       this.cR = this.sideSpaceR - S.hMargin / 4 - S.font.charHeight / 2;
       this.cX = this.width - S.hMargin - this.sideSpaceR; //this.cR;
       this.cY = this.height / 2 - S.font.charHeight / 2;
 
-      var arrowPath = VectorPaths.mvTurnArrowRight;
-      var arrowH = this.cR * 0.67;
-      var arrowW = VectorIcon.computeWidth(arrowPath, arrowH);
-      var arrowX = this.cX;
-      var arrowY = this.cY - this.cR * 1.18;
-      if (this.type.endsWith('left')) {
-        arrowPath = VectorPaths.mvTurnArrowLeft;
-        arrowX -= arrowW
-      }
-      var arrow = new VectorIcon(arrowX, arrowY, arrowPath, S.textColor, arrowH, this.group);
+      if (!circle) {
+        var arrowPath = VectorPaths.mvTurnArrowRight;
+        var arrowH = this.cR * 0.67;
+        var arrowW = VectorIcon.computeWidth(arrowPath, arrowH);
+        var arrowX = this.cX;
+        var arrowY = this.cY - this.cR * 1.18;
+        if (this.type.endsWith('left')) {
+          arrowPath = VectorPaths.mvTurnArrowLeft;
+          arrowX -= arrowW
+        }
+        var arrow = new VectorIcon(arrowX, arrowY, arrowPath, S.textColor, arrowH, this.group);
 
-      this.angleWedge = GuiElements.draw.wedge(this.cX, this.cY, this.cR, 45, this.sliderColor);
-      this.group.appendChild(this.angleWedge);
+        this.angleWedge = GuiElements.draw.wedge(this.cX, this.cY, this.cR, 45, this.sliderColor);
+        this.group.appendChild(this.angleWedge);
+      }
 
       this.angleCircle = GuiElements.draw.circle(this.cX, this.cY, this.cR, "none", this.group);
       GuiElements.update.stroke(this.angleCircle, S.textColor, 1);
 
-      var iconH = 25; //40;
+      var iconH = circle ? 17 : 25; 
       var iconW = VectorIcon.computeWidth(S.sliderIconPath, iconH);
       var iconX = this.cX - iconW / 2;
       var iconY = this.cY - iconH / 2;
+
+      if (circle) {
+        this.angleWedge = GuiElements.draw.wedge(this.cX, this.cY, this.cR, 45, this.sliderColor, false, true);
+        GuiElements.update.stroke(this.angleWedge, this.sliderColor, 3)
+        this.group.appendChild(this.angleWedge);
+
+        var bnsY = this.cY + this.cR + iconW/2
+        var bnsS = 20
+        /*var clockwiseBn = new Button((this.cX - bnsS), bnsY, bnsS, bnsS, this.group, this.sliderColor, 2, 2)
+        clockwiseBn.addIcon(VectorPaths.bsArrowClockwise, 15)
+        var counterClockwiseBn = new Button(this.cX, bnsY, bnsS, bnsS, this.group, this.sliderColor, 2, 2)
+        counterClockwiseBn.addIcon(VectorPaths.bsArrowCounterClockwise, 15)*/
+
+
+        function mkToggleBn (x, y, s, grp, color, r, cbn, callbackFn, overlay) {
+          var button = new Button(x, y, s, s, grp, color, r, r)
+          var pathId = cbn ? VectorPaths.bsArrowClockwise : VectorPaths.bsArrowCounterClockwise
+          var rotation = cbn ? 290 : 70
+          button.addIcon(pathId, 15, null, null, rotation)
+          button.setCallbackFunction(function () { callbackFn(cbn) })
+          button.markAsOverlayPart(overlay)
+
+          return button
+        }
+
+        var callback = function(cBn) {
+          var direction = 'clockwise'
+          if (this.type == 'angle_clockwise') {
+            if (cBn) { return }
+            direction = 'counterclockwise'
+            this.clockwiseBn.enable()
+            this.counterClockwiseBn.disable()
+          } else {
+            if (!cBn) { return }
+            this.counterClockwiseBn.enable()
+            this.clockwiseBn.disable()
+          }
+
+          this.type = 'angle_' + direction
+          this.updateAngle()
+          this.updateFn(this.value, this.index)
+          
+        }.bind(this)
+        /*clockwiseBn.setCallbackFunction(function() { callback(true) })
+        counterClockwiseBn.setCallbackFunction(function() { callback(false) })
+        clockwiseBn.setUnToggleFunction(function () {})
+        counterClockwiseBn.setUnToggleFunction(function () {})
+        clockwiseBn.markAsOverlayPart(this.overlay)
+        counterClockwiseBn.markAsOverlayPart(this.overlay)*/
+        this.clockwiseBn = mkToggleBn((this.cX - bnsS), bnsY, bnsS, this.group, this.sliderColor, 2, true, callback, this.overlay)
+        this.counterClockwiseBn = mkToggleBn(this.cX, bnsY, bnsS, this.group, this.sliderColor, 2, false, callback, this.overlay)
+
+        var disableBn = (this.type.endsWith('counterclockwise')) ? this.counterClockwiseBn : this.clockwiseBn
+        disableBn.disable()
+        /*toggledBn.setColor(true)
+        toggledBn.pressed = true 
+        toggledBn.release()*/
+
+        this.circleIconX = iconX 
+        this.circleIconY = iconY
+        iconY = iconY - this.cR
+      }
+
       this.angleIcon = new VectorIcon(iconX, iconY, S.sliderIconPath, Colors.white, iconH, this.group);
       GuiElements.update.stroke(this.angleIcon.pathE, S.textColor, 6);
     }
@@ -17277,7 +17376,8 @@ InputWidget.Slider.prototype.drag = function(x) {
     }
 
     if (this.type.startsWith("angle")) {
-      this.value = Math.round(this.value / 5) * 5; //round off to the nearest 5 degrees
+      var rv = this.type.endsWith("clockwise") ? 15 : 5
+      this.value = Math.round(this.value / rv) * rv; //round off to the nearest 5 or 15 degrees
       this.updateAngle();
     }
 
@@ -17439,10 +17539,15 @@ InputWidget.Slider.prototype.moveToValue = function() {
  * For angle sliders only. Updates the angle graphic to represent the current slider value.
  */
 InputWidget.Slider.prototype.updateAngle = function() {
-  var counterClockwise = (this.type.endsWith("left"));
+  var counterClockwise = (this.type.endsWith("left") || this.type.endsWith("counterclockwise"));
+  var arcOnly = (this.type.endsWith("clockwise"));
   if (this.angleWedge != null) {
-    GuiElements.update.wedge(this.angleWedge, this.cX, this.cY, this.cR, this.value, counterClockwise);
-    if (this.value == 360) {
+    GuiElements.update.wedge(this.angleWedge, this.cX, this.cY, this.cR, this.value, counterClockwise, arcOnly);
+    if (this.value == 360 && arcOnly) {
+      GuiElements.update.stroke(this.angleCircle, this.sliderColor, 3)
+    } else if (arcOnly) {
+      GuiElements.update.stroke(this.angleCircle, InputWidget.Slider.textColor, 1)
+    } else if (this.value == 360) {
       GuiElements.update.color(this.angleCircle, Colors.easternBlue);
     } else {
       GuiElements.update.color(this.angleCircle, "none");
@@ -17452,6 +17557,30 @@ InputWidget.Slider.prototype.updateAngle = function() {
     var rotation = this.value;
     if (counterClockwise) {
       rotation = 360 - this.value;
+    }
+    if (arcOnly) {
+      //var iconX = this.cX - iconW / 2;
+      //var iconY = this.cY - iconH / 2;
+
+      //A lot of this math is the same as in GuiElements.update.wedge
+      var a = 0;
+      if (counterClockwise) {
+        a = 270 - this.value;
+        if (a < 0) {
+          a += 360;
+        }
+      } else {
+        a = this.value + 270;
+        if (a > 360) {
+          a -= 360;
+        }
+      }
+
+      var aX = this.circleIconX + this.cR * Math.cos(a * Math.PI / 180); //a*Math.PI/180 = angle in radians
+      var aY = this.circleIconY + this.cR * Math.sin(a * Math.PI / 180);
+
+      this.angleIcon.move(aX, aY)
+      rotation = counterClockwise ? rotation - 90 : rotation + 90
     }
     this.angleIcon.setRotation(rotation);
   }
@@ -17476,6 +17605,7 @@ InputWidget.Slider.prototype.updateLabel = function() {
     var textY = this.height / 2 + S.font.charHeight / 2;
     //If there is an angle display, make space for that.
     textY += (this.cR ? this.cR + S.font.charHeight / 2 : 0)
+    if (this.type.endsWith("clockwise")) { textY -= this.cR*1.5 }
     GuiElements.move.text(this.textE, textX, textY);
   } else if (this.labelIcon != null) {
     if (this.type == "sensor") {
@@ -33743,9 +33873,21 @@ function BlockIcon(parent, pathId, color, altText, height, rotation) {
   TouchReceiver.addListenersChild(this.icon.pathE, this.parent);
   this.isSlot = false;
   this.xOffset = 0;
+  this.rotation = rotation
 }
 BlockIcon.prototype = Object.create(BlockPart.prototype);
 BlockIcon.prototype.constructor = BlockIcon;
+
+/**
+ * Update this block icon with a new icon path 
+ * @param pathId - entry of VectorPaths corresponding to the icon to use
+ */
+BlockIcon.prototype.updateIcon = function(pathId) {
+  this.icon.remove()
+  this.icon = new VectorIcon(0, 0, pathId, this.color, this.height, this.parent.group, false, this.rotation);
+  TouchReceiver.addListenersChild(this.icon.pathE, this.parent);
+  this.move(this.x, this.y)
+}
 
 /**
  * @param {number} x - The x coord the icon should have relative to the Block it is in
@@ -34105,6 +34247,15 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
       var iconY = this.button.height / 2 - iconH / 2
       this.sensorIcon = new VectorIcon(iconX, iconY, iconPath, Colors.bbtDarkGray, iconH, this.button.group)
       TouchReceiver.addListenersBN(this.sensorIcon.group, this.button);
+    } else if (this.widgets[i].type.endsWith("clockwise")) { //circle block
+      text[i] = this.values[i].toString() + this.displaySuffixes[i];
+
+      var dir = this.widgets[i].type.split('_')[1]
+      if (dir != this.parent.direction) {
+        this.parent.direction = dir
+        this.parent.blockIcon.updateIcon(VectorPaths[B_FBMotion.iconPaths[dir]])
+      } 
+
     } else {
       text[i] = this.values[i].toString() + this.displaySuffixes[i];
     }
@@ -34167,6 +34318,8 @@ BlockButton.prototype.addSlider = function(type, startingValue, options) {
       break;
     case "angle_left":
     case "angle_right":
+    case "angle_clockwise":
+    case "angle_counterclockwise":
       suffix = "°";
       break;
     default:
@@ -36649,9 +36802,9 @@ function B_FBMotion(x, y, direction, level) {
   CommandBlock.call(this, x, y, "motion_" + level);
 
   var icon = VectorPaths[B_FBMotion.iconPaths[direction]];
-  var blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 27);
-  blockIcon.isEndOfLine = true;
-  this.addPart(blockIcon);
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 27);
+  this.blockIcon.isEndOfLine = true;
+  this.addPart(this.blockIcon);
 }
 B_FBMotion.prototype = Object.create(CommandBlock.prototype);
 B_FBMotion.prototype.constructor = B_FBMotion;
@@ -36814,7 +36967,8 @@ B_FBMotion.iconPaths = {
   "right": "mjTurnRight",
   "backward": "mjBack",
   "left": "mjTurnLeft",
-  "circle":"bsArrowClockwise"
+  "clockwise":"bsArrowClockwise",
+  "counterclockwise":"bsArrowCounterClockwise"
 }
 
 //****  Level 1 Blocks ****//
@@ -36926,9 +37080,8 @@ B_FBLeftL3.prototype.constructor = B_FBLeftL3;
 function B_FBCircleL3(x, y) {
   this.angle = 90
   this.radius = 10
-  this.direction = "right" //clockwise
 
-  B_FBMotion.call(this, x, y, "circle", 3);
+  B_FBMotion.call(this, x, y, "clockwise", 3);
 
   console.log("Adding circle button " + this.angle + " " + this.radius)
   this.circleBN = new BlockButton(this);
@@ -36943,14 +37096,16 @@ B_FBCircleL3.prototype.updateValues = function() {
   this.angle = this.circleBN.values[0]
   this.radius = this.circleBN.values[1] || this.radius
 
-  //Clockwise circle
-  var rightDistance = ( 2 * Math.PI * (this.radius - 5) ) * (this.angle/360)
-  var leftDistance = ( 2 * Math.PI * (this.radius + 5) ) * (this.angle/360)
-  this.rightTicks = rightDistance * DeviceFinch.ticksPerCM
-  this.leftTicks = leftDistance * DeviceFinch.ticksPerCM
-  this.leftSpeed = 40
-  this.rightSpeed = this.leftSpeed * (rightDistance/leftDistance)
-  console.log("updateValues " + rightDistance + " " + leftDistance + " " + this.rightSpeed)
+  var clockwise = (this.direction == "clockwise")
+  var innerDistance = ( 2 * Math.PI * (this.radius - 5) ) * (this.angle/360)
+  var outerDistance = ( 2 * Math.PI * (this.radius + 5) ) * (this.angle/360)
+  this.rightTicks = (clockwise ? innerDistance : outerDistance) * DeviceFinch.ticksPerCM
+  this.leftTicks = (clockwise ? outerDistance : innerDistance) * DeviceFinch.ticksPerCM
+  var outerSpeed = 40
+  var innerSpeed = outerSpeed * (innerDistance/outerDistance)
+  this.leftSpeed = clockwise ? outerSpeed : innerSpeed
+  this.rightSpeed = clockwise ? innerSpeed : outerSpeed
+  //console.log("updateValues " + rightDistance + " " + leftDistance + " " + this.rightSpeed)
 }
 
 /*function B_FBCircleL3(x, y) {
@@ -37087,7 +37242,7 @@ B_FBCircleL3.prototype.updateValues = function() {
 
 function B_FBSensorBlock(x, y, sensor) {
   this.sensor = sensor;
-  this.speed = 50;
+  this.speed = 30; //50;
   this.distanceThreshold = 30
   this.lightThreshold = 5
   this.threshold = this.distanceThreshold / DeviceFinch.cmPerDistance; //obstacle threshold of 30cm

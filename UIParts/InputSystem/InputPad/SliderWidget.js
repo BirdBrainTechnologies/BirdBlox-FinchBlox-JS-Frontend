@@ -170,31 +170,97 @@ InputWidget.Slider.prototype.makeSlider = function() {
     this.sideSpaceR = this.height / 2
     //Add an angle diagram for an angle slider
     if (this.type.startsWith('angle')) {
+      const circle = this.type.endsWith('clockwise')
       this.cR = this.sideSpaceR - S.hMargin / 4 - S.font.charHeight / 2;
       this.cX = this.width - S.hMargin - this.sideSpaceR; //this.cR;
       this.cY = this.height / 2 - S.font.charHeight / 2;
 
-      let arrowPath = VectorPaths.mvTurnArrowRight;
-      const arrowH = this.cR * 0.67;
-      const arrowW = VectorIcon.computeWidth(arrowPath, arrowH);
-      let arrowX = this.cX;
-      const arrowY = this.cY - this.cR * 1.18;
-      if (this.type.endsWith('left')) {
-        arrowPath = VectorPaths.mvTurnArrowLeft;
-        arrowX -= arrowW
-      }
-      const arrow = new VectorIcon(arrowX, arrowY, arrowPath, S.textColor, arrowH, this.group);
+      if (!circle) {
+        let arrowPath = VectorPaths.mvTurnArrowRight;
+        const arrowH = this.cR * 0.67;
+        const arrowW = VectorIcon.computeWidth(arrowPath, arrowH);
+        let arrowX = this.cX;
+        const arrowY = this.cY - this.cR * 1.18;
+        if (this.type.endsWith('left')) {
+          arrowPath = VectorPaths.mvTurnArrowLeft;
+          arrowX -= arrowW
+        }
+        const arrow = new VectorIcon(arrowX, arrowY, arrowPath, S.textColor, arrowH, this.group);
 
-      this.angleWedge = GuiElements.draw.wedge(this.cX, this.cY, this.cR, 45, this.sliderColor);
-      this.group.appendChild(this.angleWedge);
+        this.angleWedge = GuiElements.draw.wedge(this.cX, this.cY, this.cR, 45, this.sliderColor);
+        this.group.appendChild(this.angleWedge);
+      }
 
       this.angleCircle = GuiElements.draw.circle(this.cX, this.cY, this.cR, "none", this.group);
       GuiElements.update.stroke(this.angleCircle, S.textColor, 1);
 
-      const iconH = 25; //40;
+      const iconH = circle ? 17 : 25; 
       const iconW = VectorIcon.computeWidth(S.sliderIconPath, iconH);
-      const iconX = this.cX - iconW / 2;
-      const iconY = this.cY - iconH / 2;
+      let iconX = this.cX - iconW / 2;
+      let iconY = this.cY - iconH / 2;
+
+      if (circle) {
+        this.angleWedge = GuiElements.draw.wedge(this.cX, this.cY, this.cR, 45, this.sliderColor, false, true);
+        GuiElements.update.stroke(this.angleWedge, this.sliderColor, 3)
+        this.group.appendChild(this.angleWedge);
+
+        const bnsY = this.cY + this.cR + iconW/2
+        const bnsS = 20
+        /*const clockwiseBn = new Button((this.cX - bnsS), bnsY, bnsS, bnsS, this.group, this.sliderColor, 2, 2)
+        clockwiseBn.addIcon(VectorPaths.bsArrowClockwise, 15)
+        const counterClockwiseBn = new Button(this.cX, bnsY, bnsS, bnsS, this.group, this.sliderColor, 2, 2)
+        counterClockwiseBn.addIcon(VectorPaths.bsArrowCounterClockwise, 15)*/
+
+
+        function mkToggleBn (x, y, s, grp, color, r, cbn, callbackFn, overlay) {
+          let button = new Button(x, y, s, s, grp, color, r, r)
+          let pathId = cbn ? VectorPaths.bsArrowClockwise : VectorPaths.bsArrowCounterClockwise
+          let rotation = cbn ? 290 : 70
+          button.addIcon(pathId, 15, null, null, rotation)
+          button.setCallbackFunction(function () { callbackFn(cbn) })
+          button.markAsOverlayPart(overlay)
+
+          return button
+        }
+
+        const callback = function(cBn) {
+          let direction = 'clockwise'
+          if (this.type == 'angle_clockwise') {
+            if (cBn) { return }
+            direction = 'counterclockwise'
+            this.clockwiseBn.enable()
+            this.counterClockwiseBn.disable()
+          } else {
+            if (!cBn) { return }
+            this.counterClockwiseBn.enable()
+            this.clockwiseBn.disable()
+          }
+
+          this.type = 'angle_' + direction
+          this.updateAngle()
+          this.updateFn(this.value, this.index)
+          
+        }.bind(this)
+        /*clockwiseBn.setCallbackFunction(function() { callback(true) })
+        counterClockwiseBn.setCallbackFunction(function() { callback(false) })
+        clockwiseBn.setUnToggleFunction(function () {})
+        counterClockwiseBn.setUnToggleFunction(function () {})
+        clockwiseBn.markAsOverlayPart(this.overlay)
+        counterClockwiseBn.markAsOverlayPart(this.overlay)*/
+        this.clockwiseBn = mkToggleBn((this.cX - bnsS), bnsY, bnsS, this.group, this.sliderColor, 2, true, callback, this.overlay)
+        this.counterClockwiseBn = mkToggleBn(this.cX, bnsY, bnsS, this.group, this.sliderColor, 2, false, callback, this.overlay)
+
+        let disableBn = (this.type.endsWith('counterclockwise')) ? this.counterClockwiseBn : this.clockwiseBn
+        disableBn.disable()
+        /*toggledBn.setColor(true)
+        toggledBn.pressed = true 
+        toggledBn.release()*/
+
+        this.circleIconX = iconX 
+        this.circleIconY = iconY
+        iconY = iconY - this.cR
+      }
+
       this.angleIcon = new VectorIcon(iconX, iconY, S.sliderIconPath, Colors.white, iconH, this.group);
       GuiElements.update.stroke(this.angleIcon.pathE, S.textColor, 6);
     }
@@ -390,7 +456,8 @@ InputWidget.Slider.prototype.drag = function(x) {
     }
 
     if (this.type.startsWith("angle")) {
-      this.value = Math.round(this.value / 5) * 5; //round off to the nearest 5 degrees
+      let rv = this.type.endsWith("clockwise") ? 15 : 5
+      this.value = Math.round(this.value / rv) * rv; //round off to the nearest 5 or 15 degrees
       this.updateAngle();
     }
 
@@ -552,10 +619,15 @@ InputWidget.Slider.prototype.moveToValue = function() {
  * For angle sliders only. Updates the angle graphic to represent the current slider value.
  */
 InputWidget.Slider.prototype.updateAngle = function() {
-  const counterClockwise = (this.type.endsWith("left"));
+  const counterClockwise = (this.type.endsWith("left") || this.type.endsWith("counterclockwise"));
+  const arcOnly = (this.type.endsWith("clockwise"));
   if (this.angleWedge != null) {
-    GuiElements.update.wedge(this.angleWedge, this.cX, this.cY, this.cR, this.value, counterClockwise);
-    if (this.value == 360) {
+    GuiElements.update.wedge(this.angleWedge, this.cX, this.cY, this.cR, this.value, counterClockwise, arcOnly);
+    if (this.value == 360 && arcOnly) {
+      GuiElements.update.stroke(this.angleCircle, this.sliderColor, 3)
+    } else if (arcOnly) {
+      GuiElements.update.stroke(this.angleCircle, InputWidget.Slider.textColor, 1)
+    } else if (this.value == 360) {
       GuiElements.update.color(this.angleCircle, Colors.easternBlue);
     } else {
       GuiElements.update.color(this.angleCircle, "none");
@@ -565,6 +637,30 @@ InputWidget.Slider.prototype.updateAngle = function() {
     let rotation = this.value;
     if (counterClockwise) {
       rotation = 360 - this.value;
+    }
+    if (arcOnly) {
+      //let iconX = this.cX - iconW / 2;
+      //let iconY = this.cY - iconH / 2;
+
+      //A lot of this math is the same as in GuiElements.update.wedge
+      let a = 0;
+      if (counterClockwise) {
+        a = 270 - this.value;
+        if (a < 0) {
+          a += 360;
+        }
+      } else {
+        a = this.value + 270;
+        if (a > 360) {
+          a -= 360;
+        }
+      }
+
+      let aX = this.circleIconX + this.cR * Math.cos(a * Math.PI / 180); //a*Math.PI/180 = angle in radians
+      let aY = this.circleIconY + this.cR * Math.sin(a * Math.PI / 180);
+
+      this.angleIcon.move(aX, aY)
+      rotation = counterClockwise ? rotation - 90 : rotation + 90
     }
     this.angleIcon.setRotation(rotation);
   }
@@ -589,6 +685,7 @@ InputWidget.Slider.prototype.updateLabel = function() {
     let textY = this.height / 2 + S.font.charHeight / 2;
     //If there is an angle display, make space for that.
     textY += (this.cR ? this.cR + S.font.charHeight / 2 : 0)
+    if (this.type.endsWith("clockwise")) { textY -= this.cR*1.5 }
     GuiElements.move.text(this.textE, textX, textY);
   } else if (this.labelIcon != null) {
     if (this.type == "sensor") {

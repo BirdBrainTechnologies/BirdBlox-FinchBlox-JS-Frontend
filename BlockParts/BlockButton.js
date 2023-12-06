@@ -176,6 +176,15 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
       const iconY = this.button.height / 2 - iconH / 2
       this.sensorIcon = new VectorIcon(iconX, iconY, iconPath, Colors.bbtDarkGray, iconH, this.button.group)
       TouchReceiver.addListenersBN(this.sensorIcon.group, this.button);
+    } else if (this.widgets[i].type.endsWith("clockwise")) { //circle block
+      text[i] = this.values[i].toString() + this.displaySuffixes[i];
+
+      let dir = this.widgets[i].type.split('_')[1]
+      if (dir != this.parent.direction) {
+        this.parent.direction = dir
+        this.parent.blockIcon.updateIcon(VectorPaths[B_FBMotion.iconPaths[dir]])
+      } 
+
     } else {
       text[i] = this.values[i].toString() + this.displaySuffixes[i];
     }
@@ -238,6 +247,8 @@ BlockButton.prototype.addSlider = function(type, startingValue, options) {
       break;
     case "angle_left":
     case "angle_right":
+    case "angle_clockwise":
+    case "angle_counterclockwise":
       suffix = "°";
       break;
     default:

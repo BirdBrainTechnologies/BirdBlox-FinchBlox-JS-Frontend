@@ -796,7 +796,14 @@ GuiElements.draw.tab = function(x, y, width, height, color, r, isDown) {
   tab.setAttributeNS(null, "fill", color); //Set the fill.
   return tab; //Return the finished button shape.
 };
-
+/**
+ * Create an image of the led array of a micro:bit, with leds lit in 
+ * the specified pattern. 
+ * @param {Element} parentGroup - group to add this to
+ * @param {string} arrayString - binary string representation of light pattern
+ * @param {number} dim - size of image to create
+ * @return {Object} - object representing the led array 
+ */
 GuiElements.draw.ledArray = function(parentGroup, arrayString, dim) {
   let arrayImage = {};
   const values = arrayString.split("");
@@ -823,12 +830,23 @@ GuiElements.draw.ledArray = function(parentGroup, arrayString, dim) {
   arrayImage.width = 5 * dim + 4 * margin;
   return arrayImage;
 };
-
-GuiElements.draw.wedge = function(x, y, r, a, color) {
+/**
+ * Create a slice of a circle. May be filled, or just the outer edge.
+ * @param {number} x - x coord of circle center
+ * @param {number} y - y coord of circle center
+ * @param {number} r - radius of circle 
+ * @param {number} a - angle of wedge
+ * @param {string} color - fill color
+ * @param {boolean} cc - true if counter clockwise 
+ * @param {boolean} arc - true if draw arc, but not fill in wedge
+ * @return {Element} - wedge element
+ */
+GuiElements.draw.wedge = function(x, y, r, a, color, cc, arc) {
   DebugOptions.validateNonNull(color);
   DebugOptions.validateNumbers(x, y, r, a);
   const wedge = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
-  GuiElements.update.wedge(wedge, x, y, r, a); //Set its path description (points).
+  GuiElements.update.wedge(wedge, x, y, r, a, cc, arc); //Set its path description (points).
+  if (arc) { color = Colors.white }
   wedge.setAttributeNS(null, "fill", color); //Set the fill.
   return wedge; //Return the finished wedge shape.
 }
@@ -1143,8 +1161,17 @@ GuiElements.update.tab = function(pathE, x, y, width, height, r, isDown) {
   path += " z"; //Closes path.
   pathE.setAttributeNS(null, "d", path); //Sets path description.
 };
-
-GuiElements.update.wedge = function(pathE, x, y, r, angle, counterClockwise) {
+/**
+ * Update the wedge path
+ * @param {Element} pathE - path element to update
+ * @param {number} x - x coord of circle center
+ * @param {number} y - y coord of circle center
+ * @param {number} r - radius of circle 
+ * @param {number} angle - angle of wedge
+ * @param {boolean} counterClockwise - true if counter clockwise 
+ * @param {boolean} arcOnly - true if draw arc, but not fill in wedge
+ */
+GuiElements.update.wedge = function(pathE, x, y, r, angle, counterClockwise, arcOnly) {
   DebugOptions.validateNumbers(x, y, r, angle);
   if (counterClockwise == null) {
     counterClockwise = false;
@@ -1181,6 +1208,11 @@ GuiElements.update.wedge = function(pathE, x, y, r, angle, counterClockwise) {
   path += " l 0," + (-r);
   path += " A " + r + " " + r + " 0 " + las + " " + sf + " " + endX + " " + endY;
   path += " z";
+
+  if (arcOnly) {
+    path = "m " + x + "," + (y-r);
+    path += " A " + r + " " + r + " 0 " + las + " " + sf + " " + endX + " " + endY;
+  }
 
   pathE.setAttributeNS(null, "d", path);
 }

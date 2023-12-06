@@ -23,9 +23,21 @@ function BlockIcon(parent, pathId, color, altText, height, rotation) {
   TouchReceiver.addListenersChild(this.icon.pathE, this.parent);
   this.isSlot = false;
   this.xOffset = 0;
+  this.rotation = rotation
 }
 BlockIcon.prototype = Object.create(BlockPart.prototype);
 BlockIcon.prototype.constructor = BlockIcon;
+
+/**
+ * Update this block icon with a new icon path 
+ * @param pathId - entry of VectorPaths corresponding to the icon to use
+ */
+BlockIcon.prototype.updateIcon = function(pathId) {
+  this.icon.remove()
+  this.icon = new VectorIcon(0, 0, pathId, this.color, this.height, this.parent.group, false, this.rotation);
+  TouchReceiver.addListenersChild(this.icon.pathE, this.parent);
+  this.move(this.x, this.y)
+}
 
 /**
  * @param {number} x - The x coord the icon should have relative to the Block it is in

@@ -15,9 +15,9 @@ function B_FBMotion(x, y, direction, level) {
   CommandBlock.call(this, x, y, "motion_" + level);
 
   const icon = VectorPaths[B_FBMotion.iconPaths[direction]];
-  let blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 27);
-  blockIcon.isEndOfLine = true;
-  this.addPart(blockIcon);
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "moveFinch", 27);
+  this.blockIcon.isEndOfLine = true;
+  this.addPart(this.blockIcon);
 }
 B_FBMotion.prototype = Object.create(CommandBlock.prototype);
 B_FBMotion.prototype.constructor = B_FBMotion;
@@ -180,7 +180,8 @@ B_FBMotion.iconPaths = {
   "right": "mjTurnRight",
   "backward": "mjBack",
   "left": "mjTurnLeft",
-  "circle":"bsArrowClockwise"
+  "clockwise":"bsArrowClockwise",
+  "counterclockwise":"bsArrowCounterClockwise"
 }
 
 //****  Level 1 Blocks ****//
@@ -292,9 +293,8 @@ B_FBLeftL3.prototype.constructor = B_FBLeftL3;
 function B_FBCircleL3(x, y) {
   this.angle = 90
   this.radius = 10
-  this.direction = "right" //clockwise
 
-  B_FBMotion.call(this, x, y, "circle", 3);
+  B_FBMotion.call(this, x, y, "clockwise", 3);
 
   console.log("Adding circle button " + this.angle + " " + this.radius)
   this.circleBN = new BlockButton(this);
@@ -309,14 +309,16 @@ B_FBCircleL3.prototype.updateValues = function() {
   this.angle = this.circleBN.values[0]
   this.radius = this.circleBN.values[1] || this.radius
 
-  //Clockwise circle
-  let rightDistance = ( 2 * Math.PI * (this.radius - 5) ) * (this.angle/360)
-  let leftDistance = ( 2 * Math.PI * (this.radius + 5) ) * (this.angle/360)
-  this.rightTicks = rightDistance * DeviceFinch.ticksPerCM
-  this.leftTicks = leftDistance * DeviceFinch.ticksPerCM
-  this.leftSpeed = 40
-  this.rightSpeed = this.leftSpeed * (rightDistance/leftDistance)
-  console.log("updateValues " + rightDistance + " " + leftDistance + " " + this.rightSpeed)
+  let clockwise = (this.direction == "clockwise")
+  let innerDistance = ( 2 * Math.PI * (this.radius - 5) ) * (this.angle/360)
+  let outerDistance = ( 2 * Math.PI * (this.radius + 5) ) * (this.angle/360)
+  this.rightTicks = (clockwise ? innerDistance : outerDistance) * DeviceFinch.ticksPerCM
+  this.leftTicks = (clockwise ? outerDistance : innerDistance) * DeviceFinch.ticksPerCM
+  let outerSpeed = 40
+  let innerSpeed = outerSpeed * (innerDistance/outerDistance)
+  this.leftSpeed = clockwise ? outerSpeed : innerSpeed
+  this.rightSpeed = clockwise ? innerSpeed : outerSpeed
+  //console.log("updateValues " + rightDistance + " " + leftDistance + " " + this.rightSpeed)
 }
 
 /*function B_FBCircleL3(x, y) {
@@ -453,7 +455,7 @@ B_FBCircleL3.prototype.updateValues = function() {
 
 function B_FBSensorBlock(x, y, sensor) {
   this.sensor = sensor;
-  this.speed = 50;
+  this.speed = 30; //50;
   this.distanceThreshold = 30
   this.lightThreshold = 5
   this.threshold = this.distanceThreshold / DeviceFinch.cmPerDistance; //obstacle threshold of 30cm

@@ -143,8 +143,9 @@ Button.prototype.addMultiText = function(texts, font, color) {
  * @param {number} height - The height the icon should have in the button
  * @param {number} xOffset - Distance from center to place icon. Default 0.
  * @param {boolean} mirror - True if the icon should be mirrored for rtl languages
+ * @param {number} rotation - amount to rotate the icon in degrees
  */
-Button.prototype.addIcon = function(pathId, height, xOffset, mirror) {
+Button.prototype.addIcon = function(pathId, height, xOffset, mirror, rotation) {
   if (height == null) {
     height = Button.defaultIconH;
   }
@@ -158,7 +159,7 @@ Button.prototype.addIcon = function(pathId, height, xOffset, mirror) {
   const iconW = VectorIcon.computeWidth(pathId, height);
   const iconX = xOffset + (this.width - iconW) / 2;
   const iconY = (this.height - height) / 2;
-  this.icon = new VectorIcon(iconX, iconY, pathId, Button.foreground, height, this.group, mirror);
+  this.icon = new VectorIcon(iconX, iconY, pathId, Button.foreground, height, this.group, mirror, rotation);
   TouchReceiver.addListenersBN(this.icon.pathE, this);
 };
 
