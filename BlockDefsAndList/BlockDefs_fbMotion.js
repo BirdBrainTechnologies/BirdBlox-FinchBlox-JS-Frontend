@@ -181,7 +181,8 @@ B_FBMotion.iconPaths = {
   "backward": "mjBack",
   "left": "mjTurnLeft",
   "clockwise":"bsArrowClockwise",
-  "counterclockwise":"bsArrowCounterClockwise"
+  "counterclockwise":"bsArrowCounterClockwise",
+  "wheels":"bsDiscFill"
 }
 
 //****  Level 1 Blocks ****//
@@ -288,6 +289,100 @@ B_FBLeftL3.prototype = Object.create(B_FBMotionL3.prototype);
 B_FBLeftL3.prototype.constructor = B_FBLeftL3;
 
 
+// Wheels block
+
+function B_FBWheels(x, y) {
+  this.speedLR = "20 40"
+  this.duration = 10
+
+  B_FBMotion.call(this, x, y, "wheels", 3);
+
+  this.wheelsBN = new BlockButton(this);
+  this.addPart(this.wheelsBN);
+}
+B_FBWheels.prototype = Object.create(B_FBMotion.prototype);
+B_FBWheels.prototype.constructor = B_FBWheels
+
+B_FBWheels.prototype.startAction = function() {
+  this.device = this.setupAction();
+  this.runMem.duration = this.duration * 100
+
+  if (this.device == null) {
+    return new ExecutionStatusError(); // Device was invalid, exit early
+  }
+
+  let speeds = this.speedLR.split(" ")
+  let leftSpeed = parseInt(speeds[0])
+  let rightSpeed = parseInt(speeds[1])
+  console.log("SPEEDS: '" + leftSpeed + "' " + typeof leftSpeed + "; '" + rightSpeed + "' " + typeof rightSpeed)
+  this.device.setMotors(this.runMem.requestStatus, leftSpeed, 0, rightSpeed, 0);
+
+  return new ExecutionStatusRunning();    
+}
+B_FBWheels.prototype.updateAction = function() {
+  const mem = this.runMem;
+  if (!mem.timerStarted) {
+    const status = mem.requestStatus;
+    if (status.finished === true) {
+      mem.startTime = new Date().getTime();
+      mem.timerStarted = true;
+    } else {
+      return new ExecutionStatusRunning(); // Still running
+    }
+  }
+  if (new Date().getTime() >= mem.startTime + mem.duration) {
+    if (!mem.offSent) {
+      //console.log("sending led off");
+      mem.offSent = true;
+      mem.timerStarted = false;
+      mem.duration = 0;
+      mem.requestStatus.finished = false;
+      let device = DeviceFinch.getManager().getDevice(0);
+      if (device != null) {
+        this.device.setMotors(mem.requestStatus, 0, 0, 0, 0);
+      } else {
+        mem.requestStatus.finished = true;
+      }
+      return new ExecutionStatusRunning(); // Still running
+    } else {
+      return new ExecutionStatusDone(); // Done running
+    }
+  } else {
+    return new ExecutionStatusRunning(); // Still running
+  }
+}
+B_FBWheels.prototype.updateValues = function() {
+  if (this.wheelsBN != null) {
+    this.speedLR = this.wheelsBN.values[0]
+    if (this.wheelsBN.widgets.length > 1) {
+      this.duration = this.wheelsBN.values[1]
+    }
+  }
+}
+
+function B_FBWheelsL3A(x, y) {
+
+  B_FBWheels.call(this, x, y)
+
+  this.wheelsBN.addSlider("wheels_a", this.speedLR, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  this.wheelsBN.addSlider("time", this.duration, [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]);
+
+}
+B_FBWheelsL3A.prototype = Object.create(B_FBWheels.prototype);
+B_FBWheelsL3A.prototype.constructor = B_FBWheelsL3A
+
+function B_FBWheelsL3B(x, y) {
+
+  B_FBWheels.call(this, x, y)
+
+  this.wheelsBN.addSlider("wheels_b", this.speedLR, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  this.wheelsBN.addSlider("time", this.duration, [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]);
+
+}
+B_FBWheelsL3B.prototype = Object.create(B_FBWheels.prototype);
+B_FBWheelsL3B.prototype.constructor = B_FBWheelsL3B
+
+
 // Circle block
 
 function B_FBCircleL3(x, y) {
@@ -296,7 +391,7 @@ function B_FBCircleL3(x, y) {
 
   B_FBMotion.call(this, x, y, "clockwise", 3);
 
-  console.log("Adding circle button " + this.angle + " " + this.radius)
+  //console.log("Adding circle button " + this.angle + " " + this.radius)
   this.circleBN = new BlockButton(this);
   this.circleBN.addSlider("angle_" + this.direction, this.angle, [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360]);
   this.circleBN.addSlider("distance", this.radius, [5, 10, 15, 20])

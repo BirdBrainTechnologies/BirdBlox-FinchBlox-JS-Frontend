@@ -713,7 +713,7 @@ GuiElements.draw.image = function(imageName, x, y, width, height, parent) {
  * @param {string} color - The text's color in the form "#fff".
  * @param {null} [test]
  */
-GuiElements.draw.text = function(x, y, text, font, color, test) {
+GuiElements.draw.text = function(x, y, text, font, color, test, rotation) {
   DebugOptions.assert(test == null);
   DebugOptions.validateNonNull(color);
   DebugOptions.validateNumbers(x, y);
@@ -728,6 +728,9 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
   textElement.setAttributeNS(null, "font-weight", font.fontWeight);
   textElement.setAttributeNS(null, "fill", color);
   textElement.setAttributeNS(null, "class", "noselect"); //Make sure it can't be selected.
+  if (rotation != null) {
+    textElement.setAttributeNS(null, "transform", "rotate(" + rotation + ", " + x + ", " + y + ")");
+  }
   text += ""; //Make text into a string
   text = text.replace(new RegExp(" ", 'g'), String.fromCharCode(160)); //Replace space with nbsp
   const textNode = document.createTextNode(text);

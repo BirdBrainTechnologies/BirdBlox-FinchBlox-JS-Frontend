@@ -25,9 +25,64 @@ InputWidget.Slider = function(type, options, startVal, sliderColor, displaySuffi
   this.optionValues = [];
 
   this.cR = 0; //circle radius for angle display if there is one.
+
+  this.sliders = []
 };
 InputWidget.Slider.prototype = Object.create(InputWidget.prototype);
 InputWidget.Slider.prototype.constructor = InputWidget.Slider;
+
+//For any slider with more than one value, eg. wheels
+/*Object.defineProperty(InputWidget.Slider.prototype, "vals", {
+  get: function() { return this.value.split("_") }
+})*/
+
+InputWidget.Slider.Slide = function(startVal, startX, icon, parent) {
+  this.value = startVal
+  this.sliderX = startX
+  this.sliderIcon = icon
+  this.parent = parent
+  this.optionValues = parent.optionValues 
+  this.optionXs = parent.optionXs
+  this.index = parent.index
+  this.type = parent.type
+  this.sliderY = parent.sliderY 
+  this.sliderW = parent.sliderW 
+  this.sliderH = parent.sliderH 
+  this.snapToOption = parent.snapToOption
+  this.overlay = parent.overlay
+  this.barX = parent.barX 
+  this.barW = parent.barW
+  this.dragging = false
+}
+InputWidget.Slider.Slide.prototype.drag = function(x) {
+  InputWidget.Slider.prototype.drag.call(this, x)
+
+  let vals = []
+  for (let i = 0; i < this.parent.sliders.length; i++) {
+    vals.push(this.parent.sliders[i].value)
+  }
+  this.parent.value = vals.join(" ")
+}
+InputWidget.Slider.Slide.prototype.drop = function() {
+  InputWidget.Slider.prototype.drop.call(this)
+}
+InputWidget.Slider.Slide.prototype.moveToValue = function() {
+  InputWidget.Slider.prototype.moveToValue.call(this)
+}
+InputWidget.Slider.Slide.prototype.moveToOption = function(i) {
+  InputWidget.Slider.prototype.moveToOption.call(this, i)
+}
+InputWidget.Slider.Slide.prototype.updateLabel = function() {
+  this.parent.updateLabel()
+}
+InputWidget.Slider.Slide.prototype.updateFn = function(v, i) {
+  this.parent.updateFn(this.parent.value, i)
+}
+InputWidget.Slider.Slide.prototype.getValueIndex = function() {
+  return this.optionValues.indexOf(this.value)
+}
+
+
 
 InputWidget.Slider.setConstants = function() {
   const S = InputWidget.Slider;
@@ -88,15 +143,29 @@ InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotSha
 
   TouchReceiver.addListenersSlider(this.overlay.bgRect, this);
 
-  const valueIndex = this.optionValues.indexOf(this.value);
-  if (valueIndex != -1) {
-    this.moveToOption(valueIndex);
-  } else if (this.type == "color") {
-    this.moveToPosition(InputWidget.Slider.colorToPercent(this.value));
-  } else if (this.type.startsWith("color_")) {
-    this.moveToPosition(this.value / 100)
+  //for sliders with more than one value, eg. wheels
+  if(this.sliders.length > 1) {  
+    for (let i = 0; i < this.sliders.length; i++) {
+      let valueIndex = this.sliders[i].getValueIndex()
+      if (valueIndex != -1) {
+        this.sliders[i].moveToOption(valueIndex)
+      } else {
+        this.sliders[i].moveToValue()
+      }
+    }
+
   } else {
-    this.moveToValue();
+    const valueIndex = this.optionValues.indexOf(this.value);
+    if (valueIndex != -1) {
+      this.moveToOption(valueIndex);
+    } else if (this.type == "color") {
+      this.moveToPosition(InputWidget.Slider.colorToPercent(this.value));
+    } else if (this.type.startsWith("color_")) {
+      this.moveToPosition(this.value / 100)
+    } else {
+      this.moveToValue();
+    }
+
   }
 };
 
@@ -293,6 +362,23 @@ InputWidget.Slider.prototype.makeSlider = function() {
   }
   this.sliderIcon = new VectorIcon(this.sliderX, this.sliderY, S.sliderIconPath, color, this.sliderH, this.group, null, 90);
   TouchReceiver.addListenersSlider(this.sliderIcon.pathE, this);
+  if (this.type.startsWith("wheels")) {
+
+    let sliderX2 = this.barX
+    let sliderIcon2 = new VectorIcon(sliderX2, this.sliderY, S.sliderIconPath, color, this.sliderH, this.group, null, 90);
+    TouchReceiver.addListenersSlider(sliderIcon2.pathE, this);
+    let l = GuiElements.draw.text(this.sliderW*1.5, this.sliderH*1.25, "L", InputWidget.Slider.font, Colors.white, null, -90);
+    TouchReceiver.addListenersSlider(l, this)
+    this.sliderIcon.group.appendChild(l)
+    let r = GuiElements.draw.text(this.sliderW*1.5, this.sliderH*1.25, "R", InputWidget.Slider.font, Colors.white, null, -90);
+    TouchReceiver.addListenersSlider(r, this)
+    sliderIcon2.group.appendChild(r)
+
+    let vals = this.value.split(" ")
+    this.sliders = []
+    this.sliders.push(new InputWidget.Slider.Slide(parseInt(vals[0]), this.sliderX, this.sliderIcon, this))
+    this.sliders.push(new InputWidget.Slider.Slide(parseInt(vals[1]), sliderX2, sliderIcon2, this))
+  }
 
   //The following are placeholders that will be updated in updateLabel.
   if (this.type == 'ledArray') {
@@ -302,6 +388,11 @@ InputWidget.Slider.prototype.makeSlider = function() {
     //Add a label at the bottom to show your selection
     this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
     this.group.appendChild(this.textE);
+    if (this.type.startsWith("wheels")) {
+      this.group.appendChild(document.createElement("br"))
+      this.textE2 = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
+      this.group.appendChild(this.textE2)
+    }
   }
   if (this.type == 'time' || this.type.startsWith('hatchling') || this.type == 'sensor') {
     this.labelIconH = 23;
@@ -392,6 +483,7 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
     case "distance":
     case "angle":
     case "time":
+    case "wheels":
       let width = GuiElements.measure.stringWidth(option, font);
       let textX = x - width / 2 + tickW / 2;
       let textY = y - S.optionMargin; //font.charHeight/2 - S.optionMargin;
@@ -407,6 +499,29 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
  */
 InputWidget.Slider.prototype.drag = function(x) {
   let relX = x - this.overlay.x - this.overlay.margin;
+
+  if(this.sliders != null && this.sliders.length > 1) {
+    let closest = null 
+    for (let i = 0; i < this.sliders.length; i++) {
+      if (this.sliders[i].dragging) { 
+        closest = this.sliders[i] 
+      }
+    }
+
+    if (closest == null) {
+      closest = this.sliders[0]
+      for (let i = 1; i < this.sliders.length; i++) {
+        let oldDist = Math.abs(closest.sliderX + closest.sliderW/2 - relX)
+        let newDist = Math.abs(this.sliders[i].sliderX + this.sliders[i].sliderW/2 - relX)
+        if (newDist < oldDist) {
+          closest = this.sliders[i]
+        }
+      }
+    }
+    closest.dragging = true
+    closest.drag(x)
+    return
+  }
 
   const errorMargin = 10;
   const barMaxX = this.barX + this.barW;
@@ -539,6 +654,17 @@ InputWidget.Slider.colorToPercent = function(color) {
  * Called when the slider is released (no longer being dragged).
  */
 InputWidget.Slider.prototype.drop = function() {
+  //used if there is more than one slider
+  if (this.sliders != null && this.sliders.length > 1) {
+    for (let i = 0; i < this.sliders.length; i++) {
+      if (this.sliders[i].dragging) {
+        this.sliders[i].dragging = false
+        this.sliders[i].drop()
+      }
+    }
+    return
+  }
+
   const x = this.sliderX + this.sliderW / 2;
 
   if (this.snapToOption) {
@@ -672,7 +798,16 @@ InputWidget.Slider.prototype.updateAngle = function() {
 InputWidget.Slider.prototype.updateLabel = function() {
   const S = InputWidget.Slider;
   if (this.textE != null) {
-    GuiElements.update.textLimitWidth(this.textE, this.value + this.displaySuffix, 2 * this.sideSpaceR);
+    let newText = this.value + this.displaySuffix
+    if (this.type.startsWith("wheels")) {
+      let vals = this.value.split(" ")
+      newText = "L " + vals[0] + "%"
+      let newText2 = "R " + vals[1] + "%"
+      GuiElements.update.text(this.textE2, newText2);
+    }
+      
+    GuiElements.update.textLimitWidth(this.textE, newText, 2 * this.sideSpaceR);
+    
     const textW = GuiElements.measure.textWidth(this.textE);
     let iconW = 0;
     if (this.labelIcon != null) {
@@ -687,6 +822,11 @@ InputWidget.Slider.prototype.updateLabel = function() {
     textY += (this.cR ? this.cR + S.font.charHeight / 2 : 0)
     if (this.type.endsWith("clockwise")) { textY -= this.cR*1.5 }
     GuiElements.move.text(this.textE, textX, textY);
+
+    if (this.type.startsWith("wheels")) {
+      GuiElements.move.text(this.textE, textX, textY - S.font.charHeight/2);
+      GuiElements.move.text(this.textE2, textX, textY + S.font.charHeight);
+    }
   } else if (this.labelIcon != null) {
     if (this.type == "sensor") {
       this.labelIcon.remove()

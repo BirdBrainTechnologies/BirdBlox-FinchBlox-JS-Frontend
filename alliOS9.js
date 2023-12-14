@@ -7312,7 +7312,7 @@ GuiElements.draw.image = function(imageName, x, y, width, height, parent) {
  * @param {string} color - The text's color in the form "#fff".
  * @param {null} [test]
  */
-GuiElements.draw.text = function(x, y, text, font, color, test) {
+GuiElements.draw.text = function(x, y, text, font, color, test, rotation) {
   DebugOptions.assert(test == null);
   DebugOptions.validateNonNull(color);
   DebugOptions.validateNumbers(x, y);
@@ -7327,6 +7327,9 @@ GuiElements.draw.text = function(x, y, text, font, color, test) {
   textElement.setAttributeNS(null, "font-weight", font.fontWeight);
   textElement.setAttributeNS(null, "fill", color);
   textElement.setAttributeNS(null, "class", "noselect"); //Make sure it can't be selected.
+  if (rotation != null) {
+    textElement.setAttributeNS(null, "transform", "rotate(" + rotation + ", " + x + ", " + y + ")");
+  }
   text += ""; //Make text into a string
   text = text.replace(new RegExp(" ", 'g'), String.fromCharCode(160)); //Replace space with nbsp
   var textNode = document.createTextNode(text);
@@ -8421,6 +8424,8 @@ BlockList.populateCat_motion_3 = function(category) {
     category.addBlockByName("B_FBBackwardL3");
     category.addBlockByName("B_FBRightL3");
     category.addBlockByName("B_FBLeftL3");
+    category.addBlockByName("B_FBWheelsL3A");
+    //category.addBlockByName("B_FBWheelsL3B");
     category.addBlockByName("B_FBCircleL3");
     category.addBlockByName("B_FBForwardUntilDark");
     category.addBlockByName("B_FBForwardUntilObstacle");
@@ -9180,6 +9185,10 @@ function VectorPaths(){
   VP.bsArrowCounterClockwise.path="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"
   VP.bsArrowCounterClockwise.width=16;
   VP.bsArrowCounterClockwise.height=16;
+  VP.bsDiscFill={};
+  VP.bsDiscFill.path="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-6 0a2 2 0 1 0-4 0 2 2 0 0 0 4 0M4 8a4 4 0 0 1 4-4 .5.5 0 0 0 0-1 5 5 0 0 0-5 5 .5.5 0 0 0 1 0m9 0a.5.5 0 1 0-1 0 4 4 0 0 1-4 4 .5.5 0 0 0 0 1 5 5 0 0 0 5-5";
+  VP.bsDiscFill.width=16;
+  VP.bsDiscFill.height=16;
   VP.clap={}; //clap by Berkah Icon from the Noun Project https://thenounproject.com/term/clap/2345410/
   VP.clap.path="M53.569,27.147a4.2,4.2,0,0,0-5.839-1.73l-1.191.687a4.016,4.016,0,0,0-.882-1.653,4.167,4.167,0,0,0-2.149-1.281l.358-.358a4.294,4.294,0,0,0,.282-5.906,4.2,4.2,0,0,0-6.1-.163l-2,2.005a4.2,4.2,0,0,0-4.082-3.231h-.006A4.162,4.162,0,0,0,29,16.745l-6.861,6.86-.012.012-.766.766a5.221,5.221,0,0,0-1.631-3.233,3.123,3.123,0,0,0-4.309.12L8.2,28.5A17.213,17.213,0,0,0,7.31,52.268a17.051,17.051,0,0,0,4.278,3.388c.331.353.69.707,1.078,1.054A16.98,16.98,0,0,0,32.46,58.719l16.632-9.6a4.3,4.3,0,0,0,1.8-5.629,4.183,4.183,0,0,0-1.754-1.8l2.127-1.227a4.3,4.3,0,0,0,1.819-5.629l0,0a4.159,4.159,0,0,0-1.743-1.791l.433-.25A4.306,4.306,0,0,0,53.569,27.147ZM8.788,50.921a15.218,15.218,0,0,1,.821-21.012l7.225-7.224a1.1,1.1,0,0,1,1.526-.076,3.266,3.266,0,0,1,.083,4.691l-.005,0-6.79,6.79a1,1,0,0,0,1.415,1.414l6.778-6.779h0l0,0,0,0h0l0,0h0l0,0,10.56-10.56a2.176,2.176,0,0,1,1.549-.642h0a2.2,2.2,0,0,1,1.557,3.759L22.21,32.586A1,1,0,1,0,23.624,34L34.935,22.69l4.532-4.532a2.2,2.2,0,0,1,3.2.087,2.326,2.326,0,0,1-.21,3.153l-2.884,2.884,0,.006L26.736,37.113a1,1,0,1,0,1.414,1.414L40.977,25.7a2.06,2.06,0,0,1,1.614-.644,2.183,2.183,0,0,1,1.58.731,2.143,2.143,0,0,1,.473,1.832v0a2.365,2.365,0,0,1-.075.3c-.014.043-.028.085-.044.127-.028.074-.058.146-.092.217a2.243,2.243,0,0,1-.114.2c-.028.047-.054.094-.085.139a2.536,2.536,0,0,1-.272.327L39.7,33.207l-.006.006L31.264,41.64a1,1,0,1,0,1.414,1.414l8.412-8.413s.012-.006.017-.011a2.085,2.085,0,0,1,2.713-.306c.048.03.1.052.145.086s.095.088.144.131a2.4,2.4,0,0,1,.191.174.231.231,0,0,0,.014.019,2.314,2.314,0,0,1,.4.723,2.149,2.149,0,0,1,.091.571q0,.056,0,.111a2.492,2.492,0,0,1-.29,1.128c-.022.042-.045.084-.07.126a2.409,2.409,0,0,1-.331.436c-.011.012-.019.026-.031.038l-13.58,13.58c-.3.3-.6.575-.916.842A15.013,15.013,0,0,1,14.26,54.746q-.546-.222-1.081-.489A15.016,15.016,0,0,1,8.788,50.921Zm39.3-3.534-16.63,9.6a14.977,14.977,0,0,1-13.549.745,16.434,16.434,0,0,0,3.749.021c.1-.01.193-.031.291-.042.5-.061.988-.139,1.477-.243.173-.036.342-.085.514-.127.411-.1.818-.212,1.221-.344.192-.062.38-.132.57-.2.379-.139.752-.29,1.121-.456.191-.086.381-.173.57-.267.362-.179.716-.375,1.067-.581.179-.1.36-.206.536-.319.361-.23.709-.481,1.054-.741.151-.112.306-.216.454-.334q.649-.522,1.254-1.116c.045-.043.094-.078.138-.122l3.287-3.288.011,0a1,1,0,0,0,.5-.134l10.32-5.959.011-.009a2.207,2.207,0,0,1,3.055.927A2.325,2.325,0,0,1,48.09,47.387Zm2.18-8.66-5.23,3.02c-.006,0-.009.01-.015.013L40.3,44.49l5.21-5.21a4.409,4.409,0,0,0,.483-.586c.047-.066.088-.132.131-.2a4.451,4.451,0,0,0,.234-.421c.045-.091.093-.18.131-.273a4.72,4.72,0,0,0,.269-.982c.016-.1.032-.193.041-.29.013-.133.019-.265.019-.4,0-.1-.007-.2-.014-.3,0-.057,0-.113-.007-.169l1.436-.83h0a2.206,2.206,0,0,1,3.066.906A2.33,2.33,0,0,1,50.27,38.727Zm.5-7.67L47.233,33.1h0l-1.159.669a4.113,4.113,0,0,0-.286-.391,4.421,4.421,0,0,0-.42-.4c-.016-.013-.029-.03-.045-.043-.084-.069-.176-.124-.265-.186s-.164-.125-.252-.178a4.147,4.147,0,0,0-1.163-.47l1.744-1.743a4.66,4.66,0,0,0,.46-.562c.054-.075.1-.15.152-.227.073-.116.137-.235.2-.356a4.4,4.4,0,0,0,.283-.689c.01-.03.023-.058.032-.088l2.22-1.282a2.2,2.2,0,0,1,3.06.908A2.337,2.337,0,0,1,50.771,31.057Z    M52.793,14.207a1,1,0,0,0,1.414,0l6.5-6.5a1,1,0,1,0-1.414-1.414l-6.5,6.5A1,1,0,0,0,52.793,14.207Z   M59.485,14.143l-5,3a1,1,0,1,0,1.03,1.714l5-3a1,1,0,1,0-1.03-1.714Z    M48.553,13.9a1,1,0,0,0,1.342-.448l3-6a1,1,0,1,0-1.79-.894l-3,6A1,1,0,0,0,48.553,13.9Z    M25.081,11.394a1,1,0,0,0,1.838-.788l-3-7a1,1,0,0,0-1.838.788Z M30,12a1,1,0,0,0,1-1V5a1,1,0,0,0-2,0v6A1,1,0,0,0,30,12Z    M21.219,13.625a1,1,0,0,0,1.562-1.25l-4-5a1,1,0,0,0-1.562,1.25Z";
   VP.clap.width=64;
@@ -16945,9 +16954,64 @@ InputWidget.Slider = function(type, options, startVal, sliderColor, displaySuffi
   this.optionValues = [];
 
   this.cR = 0; //circle radius for angle display if there is one.
+
+  this.sliders = []
 };
 InputWidget.Slider.prototype = Object.create(InputWidget.prototype);
 InputWidget.Slider.prototype.constructor = InputWidget.Slider;
+
+//For any slider with more than one value, eg. wheels
+/*Object.defineProperty(InputWidget.Slider.prototype, "vals", {
+  get: function() { return this.value.split("_") }
+})*/
+
+InputWidget.Slider.Slide = function(startVal, startX, icon, parent) {
+  this.value = startVal
+  this.sliderX = startX
+  this.sliderIcon = icon
+  this.parent = parent
+  this.optionValues = parent.optionValues 
+  this.optionXs = parent.optionXs
+  this.index = parent.index
+  this.type = parent.type
+  this.sliderY = parent.sliderY 
+  this.sliderW = parent.sliderW 
+  this.sliderH = parent.sliderH 
+  this.snapToOption = parent.snapToOption
+  this.overlay = parent.overlay
+  this.barX = parent.barX 
+  this.barW = parent.barW
+  this.dragging = false
+}
+InputWidget.Slider.Slide.prototype.drag = function(x) {
+  InputWidget.Slider.prototype.drag.call(this, x)
+
+  var vals = []
+  for (var i = 0; i < this.parent.sliders.length; i++) {
+    vals.push(this.parent.sliders[i].value)
+  }
+  this.parent.value = vals.join(" ")
+}
+InputWidget.Slider.Slide.prototype.drop = function() {
+  InputWidget.Slider.prototype.drop.call(this)
+}
+InputWidget.Slider.Slide.prototype.moveToValue = function() {
+  InputWidget.Slider.prototype.moveToValue.call(this)
+}
+InputWidget.Slider.Slide.prototype.moveToOption = function(i) {
+  InputWidget.Slider.prototype.moveToOption.call(this, i)
+}
+InputWidget.Slider.Slide.prototype.updateLabel = function() {
+  this.parent.updateLabel()
+}
+InputWidget.Slider.Slide.prototype.updateFn = function(v, i) {
+  this.parent.updateFn(this.parent.value, i)
+}
+InputWidget.Slider.Slide.prototype.getValueIndex = function() {
+  return this.optionValues.indexOf(this.value)
+}
+
+
 
 InputWidget.Slider.setConstants = function() {
   var S = InputWidget.Slider;
@@ -17008,15 +17072,29 @@ InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotSha
 
   TouchReceiver.addListenersSlider(this.overlay.bgRect, this);
 
-  var valueIndex = this.optionValues.indexOf(this.value);
-  if (valueIndex != -1) {
-    this.moveToOption(valueIndex);
-  } else if (this.type == "color") {
-    this.moveToPosition(InputWidget.Slider.colorToPercent(this.value));
-  } else if (this.type.startsWith("color_")) {
-    this.moveToPosition(this.value / 100)
+  //for sliders with more than one value, eg. wheels
+  if(this.sliders.length > 1) {  
+    for (var i = 0; i < this.sliders.length; i++) {
+      var valueIndex = this.sliders[i].getValueIndex()
+      if (valueIndex != -1) {
+        this.sliders[i].moveToOption(valueIndex)
+      } else {
+        this.sliders[i].moveToValue()
+      }
+    }
+
   } else {
-    this.moveToValue();
+    var valueIndex = this.optionValues.indexOf(this.value);
+    if (valueIndex != -1) {
+      this.moveToOption(valueIndex);
+    } else if (this.type == "color") {
+      this.moveToPosition(InputWidget.Slider.colorToPercent(this.value));
+    } else if (this.type.startsWith("color_")) {
+      this.moveToPosition(this.value / 100)
+    } else {
+      this.moveToValue();
+    }
+
   }
 };
 
@@ -17213,6 +17291,23 @@ InputWidget.Slider.prototype.makeSlider = function() {
   }
   this.sliderIcon = new VectorIcon(this.sliderX, this.sliderY, S.sliderIconPath, color, this.sliderH, this.group, null, 90);
   TouchReceiver.addListenersSlider(this.sliderIcon.pathE, this);
+  if (this.type.startsWith("wheels")) {
+
+    var sliderX2 = this.barX
+    var sliderIcon2 = new VectorIcon(sliderX2, this.sliderY, S.sliderIconPath, color, this.sliderH, this.group, null, 90);
+    TouchReceiver.addListenersSlider(sliderIcon2.pathE, this);
+    var l = GuiElements.draw.text(this.sliderW*1.5, this.sliderH*1.25, "L", InputWidget.Slider.font, Colors.white, null, -90);
+    TouchReceiver.addListenersSlider(l, this)
+    this.sliderIcon.group.appendChild(l)
+    var r = GuiElements.draw.text(this.sliderW*1.5, this.sliderH*1.25, "R", InputWidget.Slider.font, Colors.white, null, -90);
+    TouchReceiver.addListenersSlider(r, this)
+    sliderIcon2.group.appendChild(r)
+
+    var vals = this.value.split(" ")
+    this.sliders = []
+    this.sliders.push(new InputWidget.Slider.Slide(parseInt(vals[0]), this.sliderX, this.sliderIcon, this))
+    this.sliders.push(new InputWidget.Slider.Slide(parseInt(vals[1]), sliderX2, sliderIcon2, this))
+  }
 
   //The following are placeholders that will be updated in updateLabel.
   if (this.type == 'ledArray') {
@@ -17222,6 +17317,11 @@ InputWidget.Slider.prototype.makeSlider = function() {
     //Add a label at the bottom to show your selection
     this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
     this.group.appendChild(this.textE);
+    if (this.type.startsWith("wheels")) {
+      this.group.appendChild(document.createElement("br"))
+      this.textE2 = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
+      this.group.appendChild(this.textE2)
+    }
   }
   if (this.type == 'time' || this.type.startsWith('hatchling') || this.type == 'sensor') {
     this.labelIconH = 23;
@@ -17312,6 +17412,7 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
     case "distance":
     case "angle":
     case "time":
+    case "wheels":
       var width = GuiElements.measure.stringWidth(option, font);
       var textX = x - width / 2 + tickW / 2;
       var textY = y - S.optionMargin; //font.charHeight/2 - S.optionMargin;
@@ -17327,6 +17428,29 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
  */
 InputWidget.Slider.prototype.drag = function(x) {
   var relX = x - this.overlay.x - this.overlay.margin;
+
+  if(this.sliders != null && this.sliders.length > 1) {
+    var closest = null 
+    for (var i = 0; i < this.sliders.length; i++) {
+      if (this.sliders[i].dragging) { 
+        closest = this.sliders[i] 
+      }
+    }
+
+    if (closest == null) {
+      closest = this.sliders[0]
+      for (var i = 1; i < this.sliders.length; i++) {
+        var oldDist = Math.abs(closest.sliderX + closest.sliderW/2 - relX)
+        var newDist = Math.abs(this.sliders[i].sliderX + this.sliders[i].sliderW/2 - relX)
+        if (newDist < oldDist) {
+          closest = this.sliders[i]
+        }
+      }
+    }
+    closest.dragging = true
+    closest.drag(x)
+    return
+  }
 
   var errorMargin = 10;
   var barMaxX = this.barX + this.barW;
@@ -17459,6 +17583,17 @@ InputWidget.Slider.colorToPercent = function(color) {
  * Called when the slider is released (no longer being dragged).
  */
 InputWidget.Slider.prototype.drop = function() {
+  //used if there is more than one slider
+  if (this.sliders != null && this.sliders.length > 1) {
+    for (var i = 0; i < this.sliders.length; i++) {
+      if (this.sliders[i].dragging) {
+        this.sliders[i].dragging = false
+        this.sliders[i].drop()
+      }
+    }
+    return
+  }
+
   var x = this.sliderX + this.sliderW / 2;
 
   if (this.snapToOption) {
@@ -17592,7 +17727,16 @@ InputWidget.Slider.prototype.updateAngle = function() {
 InputWidget.Slider.prototype.updateLabel = function() {
   var S = InputWidget.Slider;
   if (this.textE != null) {
-    GuiElements.update.textLimitWidth(this.textE, this.value + this.displaySuffix, 2 * this.sideSpaceR);
+    var newText = this.value + this.displaySuffix
+    if (this.type.startsWith("wheels")) {
+      var vals = this.value.split(" ")
+      newText = "L " + vals[0] + "%"
+      var newText2 = "R " + vals[1] + "%"
+      GuiElements.update.text(this.textE2, newText2);
+    }
+      
+    GuiElements.update.textLimitWidth(this.textE, newText, 2 * this.sideSpaceR);
+    
     var textW = GuiElements.measure.textWidth(this.textE);
     var iconW = 0;
     if (this.labelIcon != null) {
@@ -17607,6 +17751,11 @@ InputWidget.Slider.prototype.updateLabel = function() {
     textY += (this.cR ? this.cR + S.font.charHeight / 2 : 0)
     if (this.type.endsWith("clockwise")) { textY -= this.cR*1.5 }
     GuiElements.move.text(this.textE, textX, textY);
+
+    if (this.type.startsWith("wheels")) {
+      GuiElements.move.text(this.textE, textX, textY - S.font.charHeight/2);
+      GuiElements.move.text(this.textE2, textX, textY + S.font.charHeight);
+    }
   } else if (this.labelIcon != null) {
     if (this.type == "sensor") {
       this.labelIcon.remove()
@@ -36968,7 +37117,8 @@ B_FBMotion.iconPaths = {
   "backward": "mjBack",
   "left": "mjTurnLeft",
   "clockwise":"bsArrowClockwise",
-  "counterclockwise":"bsArrowCounterClockwise"
+  "counterclockwise":"bsArrowCounterClockwise",
+  "wheels":"bsDiscFill"
 }
 
 //****  Level 1 Blocks ****//
@@ -37075,6 +37225,100 @@ B_FBLeftL3.prototype = Object.create(B_FBMotionL3.prototype);
 B_FBLeftL3.prototype.constructor = B_FBLeftL3;
 
 
+// Wheels block
+
+function B_FBWheels(x, y) {
+  this.speedLR = "20 40"
+  this.duration = 10
+
+  B_FBMotion.call(this, x, y, "wheels", 3);
+
+  this.wheelsBN = new BlockButton(this);
+  this.addPart(this.wheelsBN);
+}
+B_FBWheels.prototype = Object.create(B_FBMotion.prototype);
+B_FBWheels.prototype.constructor = B_FBWheels
+
+B_FBWheels.prototype.startAction = function() {
+  this.device = this.setupAction();
+  this.runMem.duration = this.duration * 100
+
+  if (this.device == null) {
+    return new ExecutionStatusError(); // Device was invalid, exit early
+  }
+
+  var speeds = this.speedLR.split(" ")
+  var leftSpeed = parseInt(speeds[0])
+  var rightSpeed = parseInt(speeds[1])
+  console.log("SPEEDS: '" + leftSpeed + "' " + typeof leftSpeed + "; '" + rightSpeed + "' " + typeof rightSpeed)
+  this.device.setMotors(this.runMem.requestStatus, leftSpeed, 0, rightSpeed, 0);
+
+  return new ExecutionStatusRunning();    
+}
+B_FBWheels.prototype.updateAction = function() {
+  var mem = this.runMem;
+  if (!mem.timerStarted) {
+    var status = mem.requestStatus;
+    if (status.finished === true) {
+      mem.startTime = new Date().getTime();
+      mem.timerStarted = true;
+    } else {
+      return new ExecutionStatusRunning(); // Still running
+    }
+  }
+  if (new Date().getTime() >= mem.startTime + mem.duration) {
+    if (!mem.offSent) {
+      //console.log("sending led off");
+      mem.offSent = true;
+      mem.timerStarted = false;
+      mem.duration = 0;
+      mem.requestStatus.finished = false;
+      var device = DeviceFinch.getManager().getDevice(0);
+      if (device != null) {
+        this.device.setMotors(mem.requestStatus, 0, 0, 0, 0);
+      } else {
+        mem.requestStatus.finished = true;
+      }
+      return new ExecutionStatusRunning(); // Still running
+    } else {
+      return new ExecutionStatusDone(); // Done running
+    }
+  } else {
+    return new ExecutionStatusRunning(); // Still running
+  }
+}
+B_FBWheels.prototype.updateValues = function() {
+  if (this.wheelsBN != null) {
+    this.speedLR = this.wheelsBN.values[0]
+    if (this.wheelsBN.widgets.length > 1) {
+      this.duration = this.wheelsBN.values[1]
+    }
+  }
+}
+
+function B_FBWheelsL3A(x, y) {
+
+  B_FBWheels.call(this, x, y)
+
+  this.wheelsBN.addSlider("wheels_a", this.speedLR, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  this.wheelsBN.addSlider("time", this.duration, [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]);
+
+}
+B_FBWheelsL3A.prototype = Object.create(B_FBWheels.prototype);
+B_FBWheelsL3A.prototype.constructor = B_FBWheelsL3A
+
+function B_FBWheelsL3B(x, y) {
+
+  B_FBWheels.call(this, x, y)
+
+  this.wheelsBN.addSlider("wheels_b", this.speedLR, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  this.wheelsBN.addSlider("time", this.duration, [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]);
+
+}
+B_FBWheelsL3B.prototype = Object.create(B_FBWheels.prototype);
+B_FBWheelsL3B.prototype.constructor = B_FBWheelsL3B
+
+
 // Circle block
 
 function B_FBCircleL3(x, y) {
@@ -37083,7 +37327,7 @@ function B_FBCircleL3(x, y) {
 
   B_FBMotion.call(this, x, y, "clockwise", 3);
 
-  console.log("Adding circle button " + this.angle + " " + this.radius)
+  //console.log("Adding circle button " + this.angle + " " + this.radius)
   this.circleBN = new BlockButton(this);
   this.circleBN.addSlider("angle_" + this.direction, this.angle, [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360]);
   this.circleBN.addSlider("distance", this.radius, [5, 10, 15, 20])
