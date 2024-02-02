@@ -1,5 +1,5 @@
 var FinchBlox = true;
-var Hatchling = false;
+//var Hatchling = false;
 if (Hatchling) { FinchBlox = true; }
 var FrontendVersion = 393;
 
@@ -12,7 +12,7 @@ var FrontendVersion = 393;
  */
 function DebugOptions() {
   var DO = DebugOptions;
-  DO.enabled = true;
+  DO.enabled = false;
 
   /* Whether errors should be checked for and sent to the backend.  This is the only option that persists if
    * DO is not enabled */
@@ -5830,9 +5830,9 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected)
     if (isConnected && !wasConnected && this.scanning) {
       this.markStoppedDiscover();
     }
-    if (Hatchling && isConnected && !wasConnected) {
+    /*if (Hatchling && isConnected && !wasConnected) {
       mbRuntime.justConnected()
-    }
+    }*/
   }
 };
 
@@ -6328,85 +6328,111 @@ DeviceHatchling.prototype.constructor = DeviceHatchling;
 Device.setDeviceTypeName(DeviceHatchling, "hatchling", "Hatchling", "Hatchling");
 
 DeviceHatchling.prototype.setHatchlingState = function(state) {
-  //console.log("From hatchling: [" + state + "]")
+  console.log("From hatchling: [" + state + "]")
 
-  if (this.messageInProgress != null) {
-    //console.log("Message from Hatchling in progress: " + this.messageInProgress.length + ", " + this.messageInProgress.data)
-    var newLength = this.messageInProgress.data.length + state.length
-    var currentData = new Uint8Array(newLength)
-    currentData.set(this.messageInProgress.data, 0)
-    currentData.set(state, this.messageInProgress.data.length)
-    if (newLength < this.messageInProgress.length) {
-      this.messageInProgress.data = currentData
-    } else {
-      this.messageInProgress = null
-      //console.log("Long msg from hatchling: [" + currentData + "]")
-      mbRuntime.handleMessage(currentData)
-    }
+  this.hlState = state
 
-    return
-  }
-  
-  var msgType = state[0]
-  switch(msgType) {
-    case 252:  //Hatchling state message
+  var newPortVals = []
+  newPortVals[0] = state[10] & 0x1F //port A
+  newPortVals[1] = state[11] & 0x1F //port B
+  newPortVals[2] = state[12] & 0x1F //port C
+  newPortVals[3] = state[13] & 0x1F //port D
+  newPortVals[4] = ((state[10] >> 5) << 3) | (state[11] >> 5) //port E
+  newPortVals[5] = ((state[12] >> 5) << 3) | (state[13] >> 5) //port F
 
-      this.hlState = state
-
-      var newPortVals = []
-      /*newPortVals[0] = state[10] & 0x1F //port A
-      newPortVals[1] = state[11] & 0x1F //port B
-      newPortVals[2] = state[12] & 0x1F //port C
-      newPortVals[3] = state[13] & 0x1F //port D
-      newPortVals[4] = ((state[10] >> 5) << 3) | (state[11] >> 5) //port E
-      newPortVals[5] = ((state[12] >> 5) << 3) | (state[13] >> 5) //port F*/
-      newPortVals[0] = state[7] //port A
-      newPortVals[1] = state[8] //port B
-      newPortVals[2] = state[9] //port C
-      newPortVals[3] = state[10] //port D
-      newPortVals[4] = state[11] //port E
-      newPortVals[5] = state[12] //port F
-
-
-      for (var i = 0; i < this.portStates.length; i++) {
-        if (this.portStates[i] != newPortVals[i]) {
-          if (this.supportedStates.includes(newPortVals[i])) {
-            console.log("New value for port " + i + ": " + newPortVals[i])
-            this.setOutput(null, "portOff", i, 0, "offValue")
-            this.portStates[i] = newPortVals[i]
-            if (this.portStates[i] == 31) { this.portStates[i] = 0 } //31 is basically also port empty
-            CodeManager.updateAvailablePorts(i);
-          } else {
-            console.log("Unsupported type " + newPortVals[i] + " at port " + i)
-          }
-        }
-      }
-
-      break;
-    case 250:
-      //Microblocks short message
-      mbRuntime.handleMessage(state)
-      if (state.length > 3) {
-        console.error("Short message length > 3.")
-        this.setHatchlingState(state.slice(3)) //TODO: REMOVE! Temporary! Can miss some packets.
-      }
-      break;
-    case 251:
-      //Microblocks long message. Data format:
-      //[0xFB, OpCode, ChunkOrVariableID, DataSize-LSB, DataSize-MSB, ...data...]
-      var messageLength = ( state[3] | (state[4] << 8) )
-      if (messageLength <= 15) { //All data fits in this packet
-        mbRuntime.handleMessage(state)
+  for (var i = 0; i < this.portStates.length; i++) {
+    if (this.portStates[i] != newPortVals[i]) {
+      if (this.supportedStates.includes(newPortVals[i])) {
+        console.log("New value for port " + i + ": " + newPortVals[i])
+        this.setOutput(null, "portOff", i, 0, "offValue")
+        this.portStates[i] = newPortVals[i]
+        CodeManager.updateAvailablePorts(i);
       } else {
-        this.messageInProgress = {
-          'length': (messageLength + 5), //because we must include the header bytes, not just data
-          'data': state
-        }
+        console.log("Unsupported type " + newPortVals[i] + " at port " + i)
       }
-      break;
-    default:
-      console.error("Data received starts with unknown code: " + state)
+    }
   }
+
+
+
+
+  // if (this.messageInProgress != null) {
+  //   //console.log("Message from Hatchling in progress: " + this.messageInProgress.length + ", " + this.messageInProgress.data)
+  //   var newLength = this.messageInProgress.data.length + state.length
+  //   var currentData = new Uint8Array(newLength)
+  //   currentData.set(this.messageInProgress.data, 0)
+  //   currentData.set(state, this.messageInProgress.data.length)
+  //   if (newLength < this.messageInProgress.length) {
+  //     this.messageInProgress.data = currentData
+  //   } else {
+  //     this.messageInProgress = null
+  //     //console.log("Long msg from hatchling: [" + currentData + "]")
+  //     mbRuntime.handleMessage(currentData)
+  //   }
+
+  //   return
+  // }
+  
+  // var msgType = state[0]
+  // switch(msgType) {
+  //   case 252:  //Hatchling state message
+
+  //     this.hlState = state
+
+  //     var newPortVals = []
+  //     /*newPortVals[0] = state[10] & 0x1F //port A
+  //     newPortVals[1] = state[11] & 0x1F //port B
+  //     newPortVals[2] = state[12] & 0x1F //port C
+  //     newPortVals[3] = state[13] & 0x1F //port D
+  //     newPortVals[4] = ((state[10] >> 5) << 3) | (state[11] >> 5) //port E
+  //     newPortVals[5] = ((state[12] >> 5) << 3) | (state[13] >> 5) //port F*/
+  //     newPortVals[0] = state[7] //port A
+  //     newPortVals[1] = state[8] //port B
+  //     newPortVals[2] = state[9] //port C
+  //     newPortVals[3] = state[10] //port D
+  //     newPortVals[4] = state[11] //port E
+  //     newPortVals[5] = state[12] //port F
+
+
+  //     for (var i = 0; i < this.portStates.length; i++) {
+  //       if (this.portStates[i] != newPortVals[i]) {
+  //         if (this.supportedStates.includes(newPortVals[i])) {
+  //           console.log("New value for port " + i + ": " + newPortVals[i])
+  //           this.setOutput(null, "portOff", i, 0, "offValue")
+  //           this.portStates[i] = newPortVals[i]
+  //           if (this.portStates[i] == 31) { this.portStates[i] = 0 } //31 is basically also port empty
+  //           CodeManager.updateAvailablePorts(i);
+  //         } else {
+  //           console.log("Unsupported type " + newPortVals[i] + " at port " + i)
+  //         }
+  //       }
+  //     }
+
+  //     break;
+  //   case 250:
+  //     //Microblocks short message
+  //     mbRuntime.handleMessage(state)
+  //     if (state.length > 3) {
+  //       console.error("Short message length > 3.")
+  //       this.setHatchlingState(state.slice(3)) //TODO: REMOVE! Temporary! Can miss some packets.
+  //     }
+  //     break;
+  //   case 251:
+  //     //Microblocks long message. Data format:
+  //     //[0xFB, OpCode, ChunkOrVariableID, DataSize-LSB, DataSize-MSB, ...data...]
+  //     var messageLength = ( state[3] | (state[4] << 8) )
+  //     if (messageLength <= 15) { //All data fits in this packet
+  //       mbRuntime.handleMessage(state)
+  //     } else {
+  //       this.messageInProgress = {
+  //         'length': (messageLength + 5), //because we must include the header bytes, not just data
+  //         'data': state
+  //       }
+  //     }
+  //     break;
+  //   default:
+  //     console.error("Data received starts with unknown code: " + state)
+  // }
   
 }
 
@@ -6504,7 +6530,7 @@ DeviceHatchling.prototype.getColor = function(number) {
  * now that we are using the MicroBlocks VM
  */
 
-DeviceHatchling.prototype.setOutput = function(status, outputType, port, value, valueKey) {
+/*DeviceHatchling.prototype.setOutput = function(status, outputType, port, value, valueKey) {
 }
 
 DeviceHatchling.prototype.setTriLed = function(status, port, red, green, blue) {
@@ -6514,7 +6540,7 @@ DeviceHatchling.prototype.setBuzzer = function(status, note, duration) {
 }
 
 DeviceHatchling.prototype.setLedArray = function(status, ledStatusString) {
-}
+}*/
 
 
 
@@ -6730,7 +6756,7 @@ GuiElements.setGuiConstants = function() {
 GuiElements.setConstants = function() {
   /* If a class is static and does not build a part of the UI,
   then its main function is used to initialize its constants. */
-  if (Hatchling) { MicroBlocksRuntime.init(); }
+  //if (Hatchling) { MicroBlocksRuntime.init(); }
   VectorPaths();
   ImageLists();
   DialogManager();
@@ -13053,13 +13079,13 @@ DisplayStack.prototype.startRun = function() {
       this.updateRun();
     }.bind(this), CodeManager.updateInterval);
 
-    if (Hatchling) {
+    /*if (Hatchling) {
       if (mbRuntime.isRunning(this.firstBlock)) {
         mbRuntime.stopRunningChunk(mbRuntime.lookupChunkID(this.firstBlock))
       } else {
         mbRuntime.evalOnBoard(this.firstBlock)
       }
-    }
+    }*/
   }
 };
 
@@ -21070,7 +21096,7 @@ CodeManager.stop = function() {
   //If an autoExecute block is on the active tab, restart it.
   TabManager.activeTab.passRecursively("startRunIfAutoExec")
 
-  if (Hatchling) { mbRuntime.sendStopAll() }
+  //if (Hatchling) { mbRuntime.sendStopAll() }
 };
 
 /**
@@ -21380,15 +21406,15 @@ CodeManager.checkBroadcastRunning = function(message) {
  */
 CodeManager.eventFlagClicked = function() {
   TabManager.eventFlagClicked();
-  if (Hatchling) {
+  //if (Hatchling) {
     /*var device = DeviceHatchling.getManager().getDevice(0)
     if (device != null) {
       var bytes = new Uint8Array([0xFA,5,0])
       console.log("sending microblocks data: " + bytes)
       device.sendMicroBlocksData(bytes)
     }*/
-    mbRuntime.sendStartAll()
-  }
+  //  mbRuntime.sendStartAll()
+  //}
 };
 
 /**
@@ -26212,13 +26238,13 @@ BlockStack.prototype.startRun = function(startBlock, broadcastMessage, flagTappe
     this.firstBlock.glow();
     this.tab.startRun(); // Starts Tab if it is not already running.
   }
-  if (Hatchling) {
+  /*if (Hatchling) {
 
     mbRuntime.showInstructions(startBlock)
     mbRuntime.showCompiledBytes(startBlock)
     
     var device = DeviceHatchling.getManager().getDevice(0)
-    if (device != null) {
+    if (device != null) {*/
       //Data format:
       //[0xFB, OpCode, ChunkOrVariableID, DataSize-LSB, DataSize-MSB, ...data...]
       //The data size field specifies the number of data bytes. It is encoded as two bytes, least significant byte first.
@@ -26239,7 +26265,7 @@ BlockStack.prototype.startRun = function(startBlock, broadcastMessage, flagTappe
       console.log(bytes)
       device.sendMicroBlocksData(bytes)*/
       
-      mbRuntime.saveChunk(this.firstBlock)
+      /*mbRuntime.saveChunk(this.firstBlock)
       if (!flagTapped) {
         // from MicroBlocksPatches.gp
         // method clicked Block hand 
@@ -26254,7 +26280,7 @@ BlockStack.prototype.startRun = function(startBlock, broadcastMessage, flagTappe
     } else {
       console.log("Bytes not sent - device not connected.")
     }
-  }
+  }*/
 };
 
 /**
@@ -26362,7 +26388,7 @@ BlockStack.prototype.snap = function(block) {
 
   if (Hatchling) { 
     HL_Utils.showPortsPopup(block) 
-    mbRuntime.saveChunk(this.firstBlock)
+    //mbRuntime.saveChunk(this.firstBlock)
   }
 };
 
@@ -29861,7 +29887,7 @@ Block.prototype.snap = function(block) {
 
   if (Hatchling) { 
     HL_Utils.showPortsPopup(block) 
-    if (this.stack != null) { mbRuntime.saveChunk(this.stack.firstBlock) }
+    //if (this.stack != null) { mbRuntime.saveChunk(this.stack.firstBlock) }
   }
 };
 
@@ -29875,11 +29901,11 @@ Block.prototype.unsnap = function() {
     if (this.parent.isSlot || this.parent.isBlockSlot) { //Checks if it is attached to a Slot not another Block.
       this.parent.removeChild(); //Leave the Slot.
       this.parent.parent.stack.updateDim(); //Tell the stack the Slot belongs to to update its dimensions.
-      if (Hatchling) { mbRuntime.saveChunk(this.parent.parent.stack.firstBlock) }
+      //if (Hatchling) { mbRuntime.saveChunk(this.parent.parent.stack.firstBlock) }
     } else { //This Block is connected to another Block.
       this.parent.nextBlock = null; //Disconnect from parent Block.
       this.parent.stack.updateDim(); //Tell parent's stack to update dimensions.
-      if (Hatchling) { mbRuntime.saveChunk(this.parent.stack.firstBlock) }
+      //if (Hatchling) { mbRuntime.saveChunk(this.parent.stack.firstBlock) }
     }
     this.parent = null; //Delete reference to parent Block/Slot/BlockSlot.
     //Make a new BlockStack with this Block in current Tab.  Also moves over any subsequent Blocks.
@@ -33597,7 +33623,7 @@ BlockSlot.prototype.snap = function(block) {
   if (stack != null) {
     // Update the positions of everything
     this.parent.stack.updateDim();
-    if (Hatchling) { mbRuntime.saveChunk(this.parent.stack.firstBlock) }
+    //if (Hatchling) { mbRuntime.saveChunk(this.parent.stack.firstBlock) }
   }
 };
 
@@ -34427,9 +34453,9 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
   this.button.addMultiText(text, this.font, this.textColor);
   this.parent.updateValues();
 
-  if (Hatchling && this.parent.stack != null && !this.parent.stack.isDisplayStack) { 
+  /*if (Hatchling && this.parent.stack != null && !this.parent.stack.isDisplayStack) { 
     mbRuntime.saveChunk(this.parent.stack.firstBlock) 
-  }
+  }*/
 };
 
 /**

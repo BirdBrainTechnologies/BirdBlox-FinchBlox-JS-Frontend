@@ -27,85 +27,111 @@ DeviceHatchling.prototype.constructor = DeviceHatchling;
 Device.setDeviceTypeName(DeviceHatchling, "hatchling", "Hatchling", "Hatchling");
 
 DeviceHatchling.prototype.setHatchlingState = function(state) {
-  //console.log("From hatchling: [" + state + "]")
+  console.log("From hatchling: [" + state + "]")
 
-  if (this.messageInProgress != null) {
-    //console.log("Message from Hatchling in progress: " + this.messageInProgress.length + ", " + this.messageInProgress.data)
-    let newLength = this.messageInProgress.data.length + state.length
-    let currentData = new Uint8Array(newLength)
-    currentData.set(this.messageInProgress.data, 0)
-    currentData.set(state, this.messageInProgress.data.length)
-    if (newLength < this.messageInProgress.length) {
-      this.messageInProgress.data = currentData
-    } else {
-      this.messageInProgress = null
-      //console.log("Long msg from hatchling: [" + currentData + "]")
-      mbRuntime.handleMessage(currentData)
-    }
+  this.hlState = state
 
-    return
-  }
-  
-  let msgType = state[0]
-  switch(msgType) {
-    case 252:  //Hatchling state message
+  let newPortVals = []
+  newPortVals[0] = state[10] & 0x1F //port A
+  newPortVals[1] = state[11] & 0x1F //port B
+  newPortVals[2] = state[12] & 0x1F //port C
+  newPortVals[3] = state[13] & 0x1F //port D
+  newPortVals[4] = ((state[10] >> 5) << 3) | (state[11] >> 5) //port E
+  newPortVals[5] = ((state[12] >> 5) << 3) | (state[13] >> 5) //port F
 
-      this.hlState = state
-
-      let newPortVals = []
-      /*newPortVals[0] = state[10] & 0x1F //port A
-      newPortVals[1] = state[11] & 0x1F //port B
-      newPortVals[2] = state[12] & 0x1F //port C
-      newPortVals[3] = state[13] & 0x1F //port D
-      newPortVals[4] = ((state[10] >> 5) << 3) | (state[11] >> 5) //port E
-      newPortVals[5] = ((state[12] >> 5) << 3) | (state[13] >> 5) //port F*/
-      newPortVals[0] = state[7] //port A
-      newPortVals[1] = state[8] //port B
-      newPortVals[2] = state[9] //port C
-      newPortVals[3] = state[10] //port D
-      newPortVals[4] = state[11] //port E
-      newPortVals[5] = state[12] //port F
-
-
-      for (let i = 0; i < this.portStates.length; i++) {
-        if (this.portStates[i] != newPortVals[i]) {
-          if (this.supportedStates.includes(newPortVals[i])) {
-            console.log("New value for port " + i + ": " + newPortVals[i])
-            this.setOutput(null, "portOff", i, 0, "offValue")
-            this.portStates[i] = newPortVals[i]
-            if (this.portStates[i] == 31) { this.portStates[i] = 0 } //31 is basically also port empty
-            CodeManager.updateAvailablePorts(i);
-          } else {
-            console.log("Unsupported type " + newPortVals[i] + " at port " + i)
-          }
-        }
-      }
-
-      break;
-    case 250:
-      //Microblocks short message
-      mbRuntime.handleMessage(state)
-      if (state.length > 3) {
-        console.error("Short message length > 3.")
-        this.setHatchlingState(state.slice(3)) //TODO: REMOVE! Temporary! Can miss some packets.
-      }
-      break;
-    case 251:
-      //Microblocks long message. Data format:
-      //[0xFB, OpCode, ChunkOrVariableID, DataSize-LSB, DataSize-MSB, ...data...]
-      let messageLength = ( state[3] | (state[4] << 8) )
-      if (messageLength <= 15) { //All data fits in this packet
-        mbRuntime.handleMessage(state)
+  for (let i = 0; i < this.portStates.length; i++) {
+    if (this.portStates[i] != newPortVals[i]) {
+      if (this.supportedStates.includes(newPortVals[i])) {
+        console.log("New value for port " + i + ": " + newPortVals[i])
+        this.setOutput(null, "portOff", i, 0, "offValue")
+        this.portStates[i] = newPortVals[i]
+        CodeManager.updateAvailablePorts(i);
       } else {
-        this.messageInProgress = {
-          'length': (messageLength + 5), //because we must include the header bytes, not just data
-          'data': state
-        }
+        console.log("Unsupported type " + newPortVals[i] + " at port " + i)
       }
-      break;
-    default:
-      console.error("Data received starts with unknown code: " + state)
+    }
   }
+
+
+
+
+  // if (this.messageInProgress != null) {
+  //   //console.log("Message from Hatchling in progress: " + this.messageInProgress.length + ", " + this.messageInProgress.data)
+  //   let newLength = this.messageInProgress.data.length + state.length
+  //   let currentData = new Uint8Array(newLength)
+  //   currentData.set(this.messageInProgress.data, 0)
+  //   currentData.set(state, this.messageInProgress.data.length)
+  //   if (newLength < this.messageInProgress.length) {
+  //     this.messageInProgress.data = currentData
+  //   } else {
+  //     this.messageInProgress = null
+  //     //console.log("Long msg from hatchling: [" + currentData + "]")
+  //     mbRuntime.handleMessage(currentData)
+  //   }
+
+  //   return
+  // }
+  
+  // let msgType = state[0]
+  // switch(msgType) {
+  //   case 252:  //Hatchling state message
+
+  //     this.hlState = state
+
+  //     let newPortVals = []
+  //     /*newPortVals[0] = state[10] & 0x1F //port A
+  //     newPortVals[1] = state[11] & 0x1F //port B
+  //     newPortVals[2] = state[12] & 0x1F //port C
+  //     newPortVals[3] = state[13] & 0x1F //port D
+  //     newPortVals[4] = ((state[10] >> 5) << 3) | (state[11] >> 5) //port E
+  //     newPortVals[5] = ((state[12] >> 5) << 3) | (state[13] >> 5) //port F*/
+  //     newPortVals[0] = state[7] //port A
+  //     newPortVals[1] = state[8] //port B
+  //     newPortVals[2] = state[9] //port C
+  //     newPortVals[3] = state[10] //port D
+  //     newPortVals[4] = state[11] //port E
+  //     newPortVals[5] = state[12] //port F
+
+
+  //     for (let i = 0; i < this.portStates.length; i++) {
+  //       if (this.portStates[i] != newPortVals[i]) {
+  //         if (this.supportedStates.includes(newPortVals[i])) {
+  //           console.log("New value for port " + i + ": " + newPortVals[i])
+  //           this.setOutput(null, "portOff", i, 0, "offValue")
+  //           this.portStates[i] = newPortVals[i]
+  //           if (this.portStates[i] == 31) { this.portStates[i] = 0 } //31 is basically also port empty
+  //           CodeManager.updateAvailablePorts(i);
+  //         } else {
+  //           console.log("Unsupported type " + newPortVals[i] + " at port " + i)
+  //         }
+  //       }
+  //     }
+
+  //     break;
+  //   case 250:
+  //     //Microblocks short message
+  //     mbRuntime.handleMessage(state)
+  //     if (state.length > 3) {
+  //       console.error("Short message length > 3.")
+  //       this.setHatchlingState(state.slice(3)) //TODO: REMOVE! Temporary! Can miss some packets.
+  //     }
+  //     break;
+  //   case 251:
+  //     //Microblocks long message. Data format:
+  //     //[0xFB, OpCode, ChunkOrVariableID, DataSize-LSB, DataSize-MSB, ...data...]
+  //     let messageLength = ( state[3] | (state[4] << 8) )
+  //     if (messageLength <= 15) { //All data fits in this packet
+  //       mbRuntime.handleMessage(state)
+  //     } else {
+  //       this.messageInProgress = {
+  //         'length': (messageLength + 5), //because we must include the header bytes, not just data
+  //         'data': state
+  //       }
+  //     }
+  //     break;
+  //   default:
+  //     console.error("Data received starts with unknown code: " + state)
+  // }
   
 }
 
@@ -203,7 +229,7 @@ DeviceHatchling.prototype.getColor = function(number) {
  * now that we are using the MicroBlocks VM
  */
 
-DeviceHatchling.prototype.setOutput = function(status, outputType, port, value, valueKey) {
+/*DeviceHatchling.prototype.setOutput = function(status, outputType, port, value, valueKey) {
 }
 
 DeviceHatchling.prototype.setTriLed = function(status, port, red, green, blue) {
@@ -213,6 +239,6 @@ DeviceHatchling.prototype.setBuzzer = function(status, note, duration) {
 }
 
 DeviceHatchling.prototype.setLedArray = function(status, ledStatusString) {
-}
+}*/
 
 

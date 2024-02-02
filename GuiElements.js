@@ -131,7 +131,7 @@ GuiElements.setGuiConstants = function() {
 GuiElements.setConstants = function() {
   /* If a class is static and does not build a part of the UI,
   then its main function is used to initialize its constants. */
-  if (Hatchling) { MicroBlocksRuntime.init(); }
+  //if (Hatchling) { MicroBlocksRuntime.init(); }
   VectorPaths();
   ImageLists();
   DialogManager();

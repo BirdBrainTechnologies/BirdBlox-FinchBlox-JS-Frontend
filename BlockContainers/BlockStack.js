@@ -315,13 +315,13 @@ BlockStack.prototype.startRun = function(startBlock, broadcastMessage, flagTappe
     this.firstBlock.glow();
     this.tab.startRun(); // Starts Tab if it is not already running.
   }
-  if (Hatchling) {
+  /*if (Hatchling) {
 
     mbRuntime.showInstructions(startBlock)
     mbRuntime.showCompiledBytes(startBlock)
     
     let device = DeviceHatchling.getManager().getDevice(0)
-    if (device != null) {
+    if (device != null) {*/
       //Data format:
       //[0xFB, OpCode, ChunkOrVariableID, DataSize-LSB, DataSize-MSB, ...data...]
       //The data size field specifies the number of data bytes. It is encoded as two bytes, least significant byte first.
@@ -342,7 +342,7 @@ BlockStack.prototype.startRun = function(startBlock, broadcastMessage, flagTappe
       console.log(bytes)
       device.sendMicroBlocksData(bytes)*/
       
-      mbRuntime.saveChunk(this.firstBlock)
+      /*mbRuntime.saveChunk(this.firstBlock)
       if (!flagTapped) {
         // from MicroBlocksPatches.gp
         // method clicked Block hand 
@@ -357,7 +357,7 @@ BlockStack.prototype.startRun = function(startBlock, broadcastMessage, flagTappe
     } else {
       console.log("Bytes not sent - device not connected.")
     }
-  }
+  }*/
 };
 
 /**
@@ -465,7 +465,7 @@ BlockStack.prototype.snap = function(block) {
 
   if (Hatchling) { 
     HL_Utils.showPortsPopup(block) 
-    mbRuntime.saveChunk(this.firstBlock)
+    //mbRuntime.saveChunk(this.firstBlock)
   }
 };
 

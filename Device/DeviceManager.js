@@ -476,9 +476,9 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected)
     if (isConnected && !wasConnected && this.scanning) {
       this.markStoppedDiscover();
     }
-    if (Hatchling && isConnected && !wasConnected) {
+    /*if (Hatchling && isConnected && !wasConnected) {
       mbRuntime.justConnected()
-    }
+    }*/
   }
 };
 

@@ -195,13 +195,13 @@ DisplayStack.prototype.startRun = function() {
       this.updateRun();
     }.bind(this), CodeManager.updateInterval);
 
-    if (Hatchling) {
+    /*if (Hatchling) {
       if (mbRuntime.isRunning(this.firstBlock)) {
         mbRuntime.stopRunningChunk(mbRuntime.lookupChunkID(this.firstBlock))
       } else {
         mbRuntime.evalOnBoard(this.firstBlock)
       }
-    }
+    }*/
   }
 };
 
