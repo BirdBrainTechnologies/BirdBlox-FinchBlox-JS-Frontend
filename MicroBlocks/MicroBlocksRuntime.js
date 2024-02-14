@@ -2084,8 +2084,8 @@ MicroBlocksRuntime.prototype.sendMsg = function(msgName, chunkID, byteList) {
 		dataToSend = (copyFromTo dataToSend (bytesSent + 1))
 	}*/
 
-	// Note: For ble, there is a max of 20 bytes
-	let byteMax = 20
+	// Note: For ble, there is a max of 240 bytes (512 actual, 240 for performance?)
+	let byteMax = 240
 	for (let i = 0; i < Math.ceil(dataToSend.length/byteMax); i++ ) {
 		device.sendMicroBlocksData(dataToSend.subarray(i*byteMax, (i+1)*byteMax))
 	}

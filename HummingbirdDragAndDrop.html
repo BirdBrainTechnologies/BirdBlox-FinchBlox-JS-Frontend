@@ -4,7 +4,25 @@
         <title>Hummingbird Drag And Drop</title>
         <link href="MyCSS.css" rel="stylesheet" type="text/css" />
         
+		<!-- for webapp  -->
+        <script>
+        	var Hatchling = false
+        	if (window.parent.Hatchling) {
+        		Hatchling = true
+        	} 
+        </script>
 		<script type="text/javascript" src="all.js"></script>
+
+		<script> 
+			//Test to see if this page is loaded inside an iframe. If it is, then 
+			// this is running as a progressive web app.
+			try {
+		        GuiElements.isPWA = (window.self !== window.top);
+		    } catch (e) {
+		        GuiElements.isPWA = true;
+		    }
+			 true; 
+		</script>
 
 		<!--Prevents webview from scrolling/zooming.
 		From: http://stackoverflow.com/questions/7733703/how-do-i-disable-scrolling-on-an-ipad-webapp-->

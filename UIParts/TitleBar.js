@@ -445,6 +445,7 @@ TitleBar.isStackOverTitleBar = function(x, y) {
 TitleBar.flashFinchButton = function() {
   const finchBn = TitleBar.finchButton;
   if (finchBn != null) {
-    finchBn.flash();
+    //finchBn.flash();
+    new HelpingHand(finchBn)
   }
 }

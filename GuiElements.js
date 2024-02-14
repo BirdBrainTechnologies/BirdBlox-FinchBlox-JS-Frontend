@@ -588,6 +588,19 @@ GuiElements.draw.rect = function(x, y, width, height, color, rx, ry) {
   }
   return rect; //Return the rect.
 };
+
+GuiElements.draw.line = function(x1, y1, x2, y2, color, w) {
+  DebugOptions.validateNumbers(x1, y1, x2, y2)
+  const line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+  line.setAttributeNS(null, "x1", x1)
+  line.setAttributeNS(null, "y1", y1)
+  line.setAttributeNS(null, "x2", x2)
+  line.setAttributeNS(null, "y2", y2)
+  line.setAttributeNS(null, "stroke", color)
+  line.setAttributeNS(null, "stroke-width", w)
+
+  return line
+}
 /**
  * Creates a filled, triangular SVG path element with specified dimensions and returns it.
  * @param {number} x - The path's x coord.
