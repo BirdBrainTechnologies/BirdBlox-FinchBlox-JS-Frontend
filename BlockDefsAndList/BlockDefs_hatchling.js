@@ -314,6 +314,7 @@ function B_HLSingleNeopix(x, y) {
   this.colorButton.addSlider("color_red", this.red)
   this.colorButton.addSlider("color_green", this.green)
   this.colorButton.addSlider("color_blue", this.blue)
+  //this.colorButton.addColorPicker(Colors.white)
   this.addPart(this.colorButton);
 }
 B_HLSingleNeopix.prototype = Object.create(B_HLOutputBase.prototype);
@@ -421,9 +422,9 @@ function B_HLWaitUntil(x, y, usePort) {
 
   if (usePort) {
     HL_Utils.addHLButton(this, this.portType)
-    const blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 20);
-    this.addPart(blockIcon);
-    const blockIcon2 = new BlockIcon(this, VectorPaths.faRuler, Colors.white, "ruler", 20);
+    //const blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 20);
+    //this.addPart(blockIcon);
+    const blockIcon2 = new BlockIcon(this, VectorPaths.faRuler, Colors.white, "ruler", 35);//20);
     blockIcon2.isEndOfLine = true;
     this.addPart(blockIcon2);
     //distance only
@@ -533,7 +534,7 @@ B_HLWaitUntil.prototype.updateAction = function() {
         port = "left"
         break;
       case "distance": 
-        this.threshold = this.distance
+        //this.threshold = this.distance
         this.useLessThan = true
         port = this.port
         break;
@@ -554,27 +555,48 @@ B_HLWaitUntil.prototype.updateValues = function() {
 
 //Wait until for port connected sensors
 function B_HLWaitUntilPort(x, y) {
-  this.portType = 14 // just for distance sensor for now.
-  this.distance = 10
 
   B_HLWaitUntil.call(this, x, y, true)
 
-  this.distanceBN = new BlockButton(this);
-  this.distanceBN.addSlider("distance", this.distance, [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
-  this.addPart(this.distanceBN);
+  this.thresholdBN = new BlockButton(this);
+  this.thresholdBN.addSlider(this.sensorType, this.threshold, this.blockOptions);
+  this.addPart(this.thresholdBN);
 }
 B_HLWaitUntilPort.prototype = Object.create(B_HLWaitUntil.prototype);
 B_HLWaitUntilPort.prototype.constructor = B_HLWaitUntilPort;
 
 B_HLWaitUntilPort.prototype.updateValues = function() {
   HL_Utils.updatePort(this)
-  if (this.distanceBN != null) {
-    this.distance = this.distanceBN.values[0]
+  if (this.thresholdBN != null) {
+    this.threshold = this.thresholdBN.values[0]
   }
 }
 B_HLWaitUntilPort.prototype.checkActive = function() {
   return HL_Utils.checkActive(this)
 }
+
+function B_HLWaitUntilDistance(x, y) {
+  this.portType = 14
+  this.sensorType = "distance"
+  this.threshold = 10 //How close something has to be to trigger the block
+  this.blockOptions = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+
+  B_HLWaitUntilPort.call(this, x, y)
+}
+B_HLWaitUntilDistance.prototype = Object.create(B_HLWaitUntilPort.prototype);
+B_HLWaitUntilDistance.prototype.constructor = B_HLWaitUntilDistance;
+
+function B_HLWaitUntilDial(x, y) {
+
+}
+B_HLWaitUntilDial.prototype = Object.create(B_HLWaitUntilPort.prototype);
+B_HLWaitUntilDial.prototype.constructor = B_HLWaitUntilDial;
+
+function B_HLWaitUntilButton(x, y) {
+
+}
+B_HLWaitUntilButton.prototype = Object.create(B_HLWaitUntilPort.prototype);
+B_HLWaitUntilButton.prototype.constructor = B_HLWaitUntilButton;
 
 
 function B_HLPortBlock(x, y, port) {

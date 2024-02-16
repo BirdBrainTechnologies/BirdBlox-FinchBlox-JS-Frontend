@@ -269,6 +269,14 @@ BlockButton.prototype.addPiano = function(startingValue) {
 }
 
 /**
+ * Adds a new value with color picker input to this button
+ * @param {string} startingValue - the initial value
+ */
+BlockButton.prototype.addColorPicker = function(startingValue) {
+  this.addWidget(new InputWidget.Color(), "", startingValue)
+}
+
+/**
  * Adds a new widget for this button
  * @param {Widget} widget - The widget to add
  * @param {string} suffix - Suffix to use for value display

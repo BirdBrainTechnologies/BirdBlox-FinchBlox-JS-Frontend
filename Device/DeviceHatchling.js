@@ -5,7 +5,9 @@
  * @constructor
  */
 function DeviceHatchling(name, id, RSSI, device, advertisedName) {
+  console.log("DeviceHatchling " + name + ", " + id + ", " + RSSI + ", " + device + ", " + advertisedName)
   DeviceWithPorts.call(this, name, id, RSSI, device);
+  console.log("device created.")
   this.hlState = []
   // Code for what is connected to each of the 6 ports (A-F). Current options:
   // * 0  = Empty Port
@@ -19,6 +21,7 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
   this.supportedStates = [0, 1, 3, 8, 9, 10, 14, 31]
   this.portStates = [0, 0, 0, 0, 0, 0]
   this.advertisedName = advertisedName
+  this.batteryLevel = null
 
   this.messageInProgress = null
 }
@@ -27,7 +30,7 @@ DeviceHatchling.prototype.constructor = DeviceHatchling;
 Device.setDeviceTypeName(DeviceHatchling, "hatchling", "Hatchling", "Hatchling");
 
 DeviceHatchling.prototype.setHatchlingState = function(state) {
-  //console.log("From hatchling: [" + state + "]")
+  console.log("From hatchling: [" + state + "]")
 
   if (this.messageInProgress != null) {
     //console.log("Message from Hatchling in progress: " + this.messageInProgress.length + ", " + this.messageInProgress.data)
@@ -40,73 +43,66 @@ DeviceHatchling.prototype.setHatchlingState = function(state) {
     } else {
       this.messageInProgress = null
       //console.log("Long msg from hatchling: [" + currentData + "]")
-      mbRuntime.handleMessage(currentData)
+      this.setHatchlingState(currentData)
     }
 
     return
   }
+
+  //Microblocks short message data format: [0xFA, OpCode, ChunkOrVariableID]
+  //Microblocks long message data format:
+  //[0xFB, OpCode, ChunkOrVariableID, DataSize-LSB, DataSize-MSB, ...data...]
+
+  if (state[0] != 250 && state[0] != 251) {
+    console.error("Data received starts with unknown code: " + state)
+    return
+  }
+
+  let messageLength = (state[0] == 250) ? 3 : (( state[3] | (state[4] << 8) ) + 5) //Add 5 for header bytes
   
-  let msgType = state[0]
-  switch(msgType) {
-    case 252:  //Hatchling state message
-
-      this.hlState = state
-
-      let newPortVals = []
-      /*newPortVals[0] = state[10] & 0x1F //port A
-      newPortVals[1] = state[11] & 0x1F //port B
-      newPortVals[2] = state[12] & 0x1F //port C
-      newPortVals[3] = state[13] & 0x1F //port D
-      newPortVals[4] = ((state[10] >> 5) << 3) | (state[11] >> 5) //port E
-      newPortVals[5] = ((state[12] >> 5) << 3) | (state[13] >> 5) //port F*/
-      newPortVals[0] = state[7] //port A
-      newPortVals[1] = state[8] //port B
-      newPortVals[2] = state[9] //port C
-      newPortVals[3] = state[10] //port D
-      newPortVals[4] = state[11] //port E
-      newPortVals[5] = state[12] //port F
-
-
-      for (let i = 0; i < this.portStates.length; i++) {
-        if (this.portStates[i] != newPortVals[i]) {
-          if (this.supportedStates.includes(newPortVals[i])) {
-            console.log("New value for port " + i + ": " + newPortVals[i])
-            this.setOutput(null, "portOff", i, 0, "offValue")
-            this.portStates[i] = newPortVals[i]
-            if (this.portStates[i] == 31) { this.portStates[i] = 0 } //31 is basically also port empty
-            CodeManager.updateAvailablePorts(i);
-          } else {
-            console.log("Unsupported type " + newPortVals[i] + " at port " + i)
-          }
-        }
-      }
-
-      break;
-    case 250:
-      //Microblocks short message
-      mbRuntime.handleMessage(state)
-      if (state.length > 3) {
-        console.error("Short message length > 3.")
-        this.setHatchlingState(state.slice(3)) //TODO: REMOVE! Temporary! Can miss some packets.
-      }
-      break;
-    case 251:
-      //Microblocks long message. Data format:
-      //[0xFB, OpCode, ChunkOrVariableID, DataSize-LSB, DataSize-MSB, ...data...]
-      let messageLength = ( state[3] | (state[4] << 8) )
-      if (messageLength <= 15) { //All data fits in this packet
-        mbRuntime.handleMessage(state)
-      } else {
-        this.messageInProgress = {
-          'length': (messageLength + 5), //because we must include the header bytes, not just data
-          'data': state
-        }
-      }
-      break;
-    default:
-      console.error("Data received starts with unknown code: " + state)
+  if (state.length == messageLength) {
+    mbRuntime.handleMessage(state)
+  } else if (state.length > messageLength) {
+    mbRuntime.handleMessage(state.slice(0, messageLength))
+    this.setHatchlingState(state.slice(messageLength))
+  } else if (state.length < messageLength) {
+    this.messageInProgress = {
+      'length': messageLength, 
+      'data': state
+    }
   }
   
+}
+
+/**
+ * Receive a broadcast message from the hatchling. Currently, only port state
+ * updates are supported.
+ */
+DeviceHatchling.prototype.receiveBroadcast = function(msg) {
+  //The hatchling state is now sent as a broadcast message. more work will need to be done if 
+  // we want to support other broadcast messages...
+  if (msg[0] != 252) {
+    console.error("Unsupported broadcast message " + msg[0])
+    return
+  }
+
+  this.hlState = msg.slice(1)
+  this.batteryLevel = this.hlState[6] //TODO: Hook up battery monitoring
+
+  for (let i = 0; i < this.portStates.length; i++) {
+    if (this.portStates[i] != this.hlState[i]) {
+      if (this.supportedStates.includes(this.hlState[i])) {
+        console.log("New value for port " + i + ": " + this.hlState[i])
+        this.setOutput(null, "portOff", i, 0, "offValue")
+        this.portStates[i] = this.hlState[i]
+        if (this.portStates[i] == 31) { this.portStates[i] = 0 } //31 is basically also port empty
+        CodeManager.updateAvailablePorts(i);
+      } else {
+        console.log("Unsupported type " + this.hlState[i] + " at port " + i)
+      }
+    }
+  }
+
 }
 
 /**
@@ -155,7 +151,11 @@ DeviceHatchling.prototype.getSensorValue = function(port) {
  * @return {[string]} hex values of the 6 colors displayed.
  */
 DeviceHatchling.prototype.getHatchlingCode = function() {
-  let digits = this.advertisedName.substr(this.advertisedName.length - 5)
+  //let digits = this.advertisedName.substr(this.advertisedName.length - 5)
+
+  //TODO: Remove this function and associated color coding
+  let digits = "2468A"
+
   let colorArray = []
   let total = 0
   for (let i = 0; i < digits.length; i++) {

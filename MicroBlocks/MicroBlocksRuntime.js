@@ -1759,7 +1759,7 @@ MicroBlocksRuntime.prototype.collectCRCsBulk = async function() {
 	let startT = Date.now() //(msecsSinceStart)
 	while ((this.crcDict == null) && ((Date.now() - startT) < 2000)) {
 		//processMessages this  //Don't need to do this?
-		await delay(5) //waitMSecs 5
+		await delay(20) //waitMSecs 5
 	}
 	if (this.crcDict == null) { this.crcDict = {} } // timeout
 }
@@ -2142,7 +2142,7 @@ MicroBlocksRuntime.prototype.waitForResponse = async function() {
 		}
 
 		this.sendMsg('pingMsg')
-		await delay(5)
+		await delay(20) //5 bluetooth is slower
 	}
 	return false
 }
@@ -2270,8 +2270,11 @@ MicroBlocksRuntime.prototype.handleMessage = function(msg) {
 		this.allCRCsReceived(msg.slice(5))
 	} else if (op == this.msgNameToID('pingMsg')) {
 		this.lastPingRecvMSecs = Date.now() //(msecsSinceStart)
-	/*} else if (op == this.msgNameToID('broadcastMsg')) {
-		broadcastReceived (httpServer scripter) (toString (copyFromTo msg 6))*/
+	} else if (op == this.msgNameToID('broadcastMsg')) {
+		//broadcastReceived (httpServer scripter) (toString (copyFromTo msg 6))
+		let device = this.bleDevice()
+		if (device == null) { return }
+		device.receiveBroadcast(msg.slice(5))
 	} else if (op == this.msgNameToID('chunkCodeMsg')) {
 		this.receivedChunk(chunkID, msg[5], msg.slice(6))
 	} else if (op == this.msgNameToID('chunkAttributeMsg')) {

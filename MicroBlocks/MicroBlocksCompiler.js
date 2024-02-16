@@ -545,6 +545,12 @@ MicroBlocksCompiler.prototype.primitive = function(op, args, isCommand) {
 				result.push(['callReporterPrimitive', (args.length + 2)])
 			}
 		}
+	} else if ( op == "blockList" ) {
+		for (let i = 0; i < args.length; i++) {
+			let block = args[i]
+			result = result.concat(this.primitive(block.primName(), block.argList(), true))
+		}
+
 	} else {
 		console.log('Skipping unknown op: ' + op)
 		if (!isCommand) {

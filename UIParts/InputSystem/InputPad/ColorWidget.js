@@ -3,12 +3,513 @@
  * 
  */
 InputWidget.Color = function() {
-
+	this.type = "colorPicker"
 }
 InputWidget.Color.prototype = Object.create(InputWidget.prototype)
 InputWidget.Color.prototype.constructor = InputWidget.Color
 
 
+/**
+ * @inheritDoc
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} parentGroup
+ * @param {BubbleOverlay} overlay
+ * @param {EditableSlotShape} slotShape
+ * @param {function} updateFn
+ * @param {function} finishFn
+ * @param {Data} data
+ */
+InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
+	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
+ 	this.group = GuiElements.create.group(x, y, parentGroup);
+ 	//this.pickerDiv = document.createElement('div')
+ 	//this.pickerDiv.height = 200
+ 	//this.pickerDiv.width = 200
+ 	//this.group.appendChild(this.pickerDiv)
+
+ 	//this.addStyle() //TODO - only add once
+ 	/*this.container = document.createElement('div')
+ 	this.group.appendChild(this.container)
+
+ 	this.colorPickerControl()*/
+
+ 	let cx = this.width/3
+ 	let cy = this.height/2
+ 	let r = this.height/2 - 5
+ 	console.log("drawing wheel at " + cx + "," + cy)
+ 	this.wheel = GuiElements.draw.circle(cx, cy, r, Colors.white, this.group)
+ 	GuiElements.update.stroke(this.wheel, Colors.black, 0.5)
+  
+  	//this.createColorWheel()
+
+  	/*this.colorwheel = document.createElement('img')
+  	this.colorwheel.src = "Images/Color_circle_(RGB).svg"
+  	this.colorwheel.height = 100
+  	this.colorwheel.width = 100
+  	this.group.appendChild(this.colorwheel)*/
+
+  	this.colorwheel = GuiElements.draw.image("Color_circle_(RGB)", 0, 0, 100, 100, this.group, true)
+}
+
+/**
+ * @inheritDoc
+ * @param {number} x
+ * @param {number} y
+ */
+InputWidget.Color.prototype.updateDim = function(x, y) {
+  const S = InputWidget.Slider; //TODO
+  this.height = S.height;
+  this.width = S.width;
+}
+
+
+InputWidget.Color.prototype.createColorWheel = function() {
+	// create temporary canvas element
+    let can = document.createElement("canvas");
+    this.group.appendChild(can)
+
+    // set canvas size
+    can.width = can.height = 512;
+
+    // get canvas context
+    let ctx = can.getContext("2d");
+
+    // calculate canvas radius
+    let radius = can.width / 2;
+
+    // set loop step
+    let step = 1 / radius;
+
+    // clear canvas
+    ctx.clearRect(0, 0, can.width, can.height);
+
+    // set center points
+    let cx = radius;
+    let cy = radius;
+
+    // draw hue gradient
+    for(let i = 0; i < 360; i += step) {
+        // get angle in radians
+        let rad = i * (2 * Math.PI) / 360;
+
+        // get line direction from center
+        let x = radius * Math.cos(rad),
+            y = radius * Math.sin(rad);
+
+        // set stroke style
+        ctx.strokeStyle = 'hsl(' + i + ', 100%, 50%)';
+
+        // draw color line
+        ctx.beginPath();
+        ctx.moveTo(radius, radius);
+        ctx.lineTo(cx + x, cy + y);
+        ctx.stroke();
+    }
+
+    // draw saturation gradient
+    let grd = ctx.createRadialGradient(cx,cy,0,cx,cx,radius);
+    grd.addColorStop(0,'rgba(255, 255, 255, 1)');
+    grd.addColorStop(1,'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.fill();
+
+    // draw circle border
+    ctx.beginPath();
+    ctx.strokeStyle = "rgb(38, 41, 50)";
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    this.wheel = can
+}
+
+
+
+InputWidget.Color.prototype.addStyle = function() {
+	let style = `
+	:root, [data-theme="default"]{
+	    --base-background-color: rgba(38, 41, 50, 1.0);
+	    --thumb-border-color: rgba(255, 255, 255, 0.7);
+	    --color-wheel-control-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.85) inset;
+	    --brightness-control-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.5) inset;
+	    --input-controls-tab-header-background-color: rgba(41, 45, 53, 1.0);
+	    --input-controls-tab-header-font-color: rgba(255, 255, 255, 1.0);
+	    --input-controls-tab-background-color: rgba(0, 0, 0, 0.1);
+	    --range-input-control-background-color: rgba(55, 61, 71, 0.6);
+	    --range-input-control-background-color--focused: rgba(55, 61, 71, 0.5);
+	    --range-input-control-font-color: rgba(255, 255, 255, 1.0);
+	    --range-input-control-selection-color:rgba(0, 0, 0, 0.5);
+	    --range-input-control-progress-color:rgba(37, 43, 48, 1.0);
+	    --text-input-control-background-color: rgba(55, 61, 71, 0.6);
+	    --text-input-control-background-color--focused: rgba(55, 61, 71, 0.5);
+	    --text-input-control-font-color: rgba(255, 255, 255, 1.0);
+	    --text-input-control-selection-color:rgba(0, 0, 0, 0.5);
+	}
+
+	[data-theme="light"]{
+	    --base-background-color: rgba(217, 214, 205, 1.0);
+	    --thumb-border-color: rgba(255, 255, 255, 0.7);
+	    --color-wheel-control-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.45) inset;
+	    --brightness-control-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.25) inset;
+	    --input-controls-tab-header-background-color: rgba(221, 218, 210, 1.0);
+	    --input-controls-tab-header-font-color: rgba(35, 35, 35, 1.0);
+	    --input-controls-tab-background-color: rgba(122, 122, 122, 0.1);
+	    --range-input-control-background-color: rgba(221, 218, 210, 0.6);
+	    --range-input-control-background-color--focused: rgba(222, 220, 220, 0.5);
+	    --range-input-control-font-color: rgba(35, 35, 35, 1.0);
+	    --range-input-control-selection-color:rgba(255, 255, 255, 0.5);
+	    --range-input-control-progress-color:rgba(228, 228, 228, 1.0);
+	    --text-input-control-background-color: rgba(221, 218, 210, 0.6);
+	    --text-input-control-background-color--focused: rgba(222, 220, 220, 0.5);
+	    --text-input-control-font-color: rgba(35, 35, 35, 1.0);
+	    --text-input-control-selection-color:rgba(255, 255, 255, 0.5);
+	}
+
+	.color-picker{
+	    position: absolute;
+	    top: 50%;
+	    left: 50%;
+	    transform: translate(-50%, -50%);
+	    width: 180px;
+	    height: auto;
+	    min-height: 226px;
+	    background: var(--base-background-color);
+	    border-radius: 5px;
+	    -webkit-box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 
+	                            0px 2px 2px 0px rgba(0, 0, 0, 0.14), 
+	                                0px 1px 5px 0px rgba(0,0,0,.12);
+	    -moz-box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 
+	                        0px 2px 2px 0px rgba(0, 0, 0, 0.14), 
+	                            0px 1px 5px 0px rgba(0,0,0,.12);
+	    box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 
+	                    0px 2px 2px 0px rgba(0, 0, 0, 0.14), 
+	                        0px 1px 5px 0px rgba(0,0,0,.12);
+	    z-index: 1000;
+	}
+	.color-picker-controls{
+	    position: relative;
+	    width: 100%;
+	    height: auto;
+	    display: flex;
+	    flex-direction: column;
+	}
+	.color-picker-controls-group{
+	    position: relative;
+	    display: block;
+	    width: 100%;
+	    padding: 10px;
+	}
+
+	.color-picker-wheel-control {
+	    position: relative;
+	    display: flex;
+	    flex-direction: row;
+	    height: 100%;
+	    width: 140px;
+	    border: none;
+	}
+	.color-picker-wheel-control::after {
+	    content: '';
+	    position: absolute;
+	    display: block;
+	    top: 0;
+	    left: 0;
+	    width: 100%;
+	    height: 100%;
+	    border: 1px solid var(--base-background-color);
+	    border-radius: 50%;
+	    -webkit-box-shadow: var(--color-wheel-control-box-shadow);
+	    -moz-box-shadow: var(--color-wheel-control-box-shadow);
+	    box-shadow: var(--color-wheel-control-box-shadow);
+	    margin: -1px;
+	    pointer-events: none;
+	}
+	.color-picker-brightness-control {
+	    position: relative;
+	    display: flex;
+	    flex-direction: row;
+	    height: 100%;
+	    width: 8px;
+	    border: 1px solid transparent;
+	    border-radius: 3px;
+	    margin-left: 10px;
+	}
+	.color-picker-brightness-control::after {
+	    content: '';
+	    position: absolute;
+	    display: block;
+	    top: 0;
+	    left: 0;
+	    width: 100%;
+	    height: 100%;
+	    border-radius: 3px;
+	    -webkit-box-shadow: var(--brightness-control-box-shadow);
+	    -moz-box-shadow: var(--brightness-control-box-shadow);
+	    box-shadow: var(--brightness-control-box-shadow);
+	    pointer-events: none;
+	}
+	.color-picker-wheel-control-thumb,
+	.color-picker-brightness-control-thumb {
+	    position: absolute;
+	    display: block;
+	    width: 10px;
+	    height: 10px;
+	    border: 1px solid var(--thumb-border-color);
+	    border-radius: 50%;
+	    -webkit-box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 
+	                            0px 2px 2px 0px rgba(0, 0, 0, 0.14), 
+	                                0px 1px 5px 0px rgba(0, 0, 0, .12);
+	    -moz-box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 
+	                        0px 2px 2px 0px rgba(0, 0, 0, 0.14), 
+	                            0px 1px 5px 0px rgba(0, 0, 0, .12);
+	    box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 
+	                    0px 2px 2px 0px rgba(0, 0, 0, 0.14), 
+	                        0px 1px 5px 0px rgba(0, 0, 0, .12);
+	    cursor: pointer;
+	    z-index: 1000;
+	}
+	.wheel-canvas,
+	.brightness-canvas {
+	    width: 100%;
+	    height: 100%;
+	    border-radius: 3px;
+	}
+
+	.color-picker-input-controls{
+	    position: relative;
+	    width: 100%;
+	    height: 100%;
+	    display: flex;
+	    flex-direction: column;
+	    background: var(--input-controls-tab-background-color);
+	    border-radius: 3px;
+	    overflow: hidden;
+	}
+	.color-picker-input-controls-tab-headers{
+	    position: relative;
+	    display: flex;
+	    flex-direction: row;
+	    width: 100%;
+	    height: 25px;
+	    overflow: hidden;
+	}
+	.color-picker-input-controls-tab-headers button{
+	    position: relative;
+	    display: block;
+	    width: 33.33%;
+	    height: 100%;
+	    background: var(--input-controls-tab-header-background-color);
+	    font-size: 9px;
+	    color: var(--input-controls-tab-header-font-color);
+	    border: none;
+	    outline: none;
+	}
+	.color-picker-input-controls-tab-headers button.selected{
+	    background: none;
+	}
+	.color-picker-input-controls-tabs{
+	    position: relative;
+	    display: block;
+	    width: 100%;
+	    height: auto;
+	    padding: 4px;
+	}
+	.color-picker-input-controls-tab{
+	    position: relative;
+	    display: flex;
+	    flex-direction: column;
+	}
+	.color-picker-input-controls-tab:not(.selected){
+	    display: none;
+	}
+
+
+	input{
+	    font-size: 100%;
+	}
+	input::-webkit-outer-spin-button,
+	input::-webkit-inner-spin-button {
+	    -webkit-appearance: none;
+	    margin: 0;
+	}
+	input[type=number] {
+	    -moz-appearance: textfield;
+	}
+
+	.range-input-control{
+	    position: relative;
+	    display: block;
+	    width: 100%;
+	    height: auto;
+	    min-height: 20px;
+	    margin: 1px 0 0 0;
+	    background: var(--range-input-control-background-color);
+	    font-size: 10px;
+	    cursor: ew-resize;
+	    overflow: hidden;
+	}
+	.range-input-control:hover,
+	.range-input-control.range-input-control--focused{
+	    background: var(--range-input-control-background-color--focused);
+	}
+	.range-input-control:first-child{
+	    border-top-left-radius: 3px;
+	    border-top-right-radius: 3px;
+	}
+	.range-input-control:last-child{
+	    border-bottom-left-radius: 3px;
+	    border-bottom-right-radius: 3px;
+	}
+	.range-input-control .range-input-enter-block,
+	.range-input-control .range-input-details-block{
+	    position: absolute;
+	    display: block;
+	    top: 0;
+	    left: 0;
+	    right: 0;
+	    bottom: 0;
+	}
+	.range-input-control:not(.range-input-control--key-input-mode) .range-input-enter-block{
+	    display: none;
+	}
+	.range-input-control.range-input-control--key-input-mode .range-input-enter-block{
+	    display: block;
+	}
+	.range-input-control:not(.range-input-control--key-input-mode) .range-input-details-block{
+	    display: block;
+	}
+	.range-input-control.range-input-control--key-input-mode .range-input-details-block{
+	    display: none;
+	}
+	.range-input-control input{
+	    position: absolute;
+	    display: block;
+	    top: 50%;
+	    transform: translate(0, -50%);
+	    width: 100%;
+	    height: auto;
+	    background: none;
+	    border: none;
+	    color: var(--range-input-control-font-color);
+	    text-align: center;
+	    outline: none;
+	}
+
+	.range-input-control input::-moz-selection { background: var(--range-input-control-selection-color); }
+	.range-input-control input::selection { background: var(--range-input-control-selection-color); }
+	.range-input-control .range-input-progress{
+	    position: absolute;
+	    display: block;
+	    top: 0;
+	    left: 0;
+	    height: 100%;
+	    background: var(--range-input-control-progress-color);
+	}
+	.range-input-control .range-input-label,
+	.range-input-control .range-input-value{
+	    position: absolute;
+	    display: block;
+	    top: 50%;
+	    width: auto;
+	    height: auto;
+	    transform: translate(0, -50%);
+	    color: var(--range-input-control-font-color);
+	    pointer-events: none;
+	}
+	.range-input-control .range-input-label{
+	    left: 5px;
+	}
+	.range-input-control .range-input-value{
+	    right: 5px;
+	}
+
+
+	.text-input-control{
+	    position: relative;
+	    display: block;
+	    width: 100%;
+	    height: auto;
+	    min-height: 20px;
+	    background: var(--text-input-control-background-color);
+	    font-size: 10px;
+	    margin: 1px 0 0 0;
+	    cursor: text;
+	    overflow: hidden;
+	}
+	.text-input-control:hover,
+	.text-input-control.text-input-control--focused{
+	    background: var(--text-input-control-background-color--focused);
+	}
+	.text-input-control:first-child{
+	    border-top-left-radius: 3px;
+	    border-top-right-radius: 3px;
+	}
+	.text-input-control:last-child{
+	    border-bottom-left-radius: 3px;
+	    border-bottom-right-radius: 3px;
+	}
+	.text-input-control .text-input-enter-block,
+	.text-input-control .text-input-details-block{
+	    position: absolute;
+	    display: block;
+	    top: 0;
+	    left: 0;
+	    right: 0;
+	    bottom: 0;
+	}
+	.text-input-control:not(.text-input-control--focused) .text-input-enter-block{
+	    display: none;
+	}
+	.text-input-control.text-input-control--focused .text-input-enter-block{
+	    display: block;
+	}
+	.text-input-control:not(.text-input-control--focused) .text-input-details-block{
+	    display: block;
+	}
+	.text-input-control.text-input-control--focused .text-input-details-block{
+	    display: none;
+	}
+	.text-input-control input{
+	    position: absolute;
+	    display: block;
+	    top: 50%;
+	    transform: translate(0, -50%);
+	    width: 100%;
+	    height: auto;
+	    background: none;
+	    color: var(--text-input-control-font-color);
+	    text-align: center;
+	    border: none;
+	    outline: none;  
+	}
+	.text-input-control input::-moz-selection { background:var(--text-input-control-selection-color); }
+	.text-input-control input::selection { background:var(--text-input-control-selection-color); }
+	.text-input-control .text-input-label,
+	.text-input-control .text-input-value{
+	    position: absolute;
+	    display: block;
+	    top: 50%;
+	    width: auto;
+	    height: auto;
+	    transform: translate(0, -50%);
+	    color: var(--text-input-control-font-color);
+	    pointer-events: none;
+	}
+	.text-input-control .text-input-label{
+	    left: 5px;
+	}
+	.text-input-control .text-input-value{
+	    right: 5px;
+	}
+	`
+
+	let stylesheet = document.createElement('style')
+	stylesheet.innerHTML = style 
+	document.head.appendChild(stylesheet)
+}
 
 
 //============================================================
@@ -38,27 +539,25 @@ InputWidget.Color.prototype.constructor = InputWidget.Color
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 // OR OTHER DEALINGS IN THE SOFTWARE.
 //
+// See https://github.com/ivanvmat/color-picker
 //============================================================
 
-"use strict";
 
 /**
  * Color picker control creation function
- *
- * @param {Object} conf Color picker configuration
 */
-function ColorPickerControl(conf) {
+InputWidget.Color.prototype.colorPickerControl = function() {
     // copying configuration values
-    let config = Object.assign({
-        container: document.body,
-        theme: 'dark',
+    let config = {
+        container: this.pickerDiv,
+        theme: 'light',
         useAlpha: true,
         color: {
             r: 255,
             g: 255,
             b: 255
         }
-    }, conf);
+    }
 
     // private variables
     let self = this,
@@ -90,161 +589,7 @@ function ColorPickerControl(conf) {
             hex_input_change: null,
         },
         utils = {
-            /**
-             * Converts HSV spectrum to HSL
-             * 
-             * @param hue Hue value
-             * @param saturation Saturation value
-             * @param value Brightness value
-             * 
-             * @returns {Array} Array with HSL values
-             */
-            hsvToHsl: function (hue, saturation, value) {
-                saturation /= 100;
-                value /= 100;
-        
-                const lightness = (2 - saturation) * value / 2;
-        
-                if (lightness !== 0) {
-                    if (lightness === 1) {
-                        saturation = 0;
-                    } else if (lightness < 0.5) {
-                        saturation = saturation * value / (lightness * 2);
-                    } else {
-                        saturation = saturation * value / (2 - lightness * 2);
-                    }
-                }
-
-                return [
-                    hue,
-                    saturation * 100,
-                    lightness * 100
-                ];
-            },
-            /**
-             * Converts HSL spectrum to HSV
-             * 
-             * @param hue Hue value
-             * @param saturation Saturation value
-             * @param lightness Lightness value
-             * 
-             * @returns {Array} Array with HSV values
-             */
-            hslToHsv: function (hue, saturation, lightness) {
-                saturation /= 100;
-                lightness /= 100;
-                saturation *= lightness < 0.5 ? lightness : 1 - lightness;
             
-                const ns = (2 * saturation / (lightness + saturation)) * 100;
-                const value = (lightness + saturation) * 100;
-                return [hue, isNaN(ns) ? 0 : ns, value];
-            },
-            /**
-             * Converts HSV spectrum to RGB
-             * 
-             * @param hue Hue value
-             * @param saturation Saturation value
-             * @param value Brightness value
-             * 
-             * @returns {Array} Array with RGB values
-             */
-            hsvToRgb: function (hue, saturation, value) {
-                hue = (hue / 360) * 6;
-                saturation /= 100;
-                value /= 100;
-        
-                const i = Math.floor(hue);
-        
-                const f = hue - i;
-                const p = value * (1 - saturation);
-                const q = value * (1 - f * saturation);
-                const t = value * (1 - (1 - f) * saturation);
-        
-                const mod = i % 6;
-                const red = [value, q, p, p, t, value][mod];
-                const green = [t, value, value, q, p, p][mod];
-                const blue = [p, p, t, value, value, q][mod];
-        
-                return [
-                    (red * 255),
-                    (green * 255),
-                    (blue * 255)
-                ];
-            },
-            /**
-             * Converts RGB spectrum to HSV
-             * 
-             * @param red Red channel
-             * @param green Green channel
-             * @param blue Blue channel
-             * 
-             * @returns {Array} Array with HSV values
-             */
-            rgbToHsv: function (red, green, blue) {
-                red /= 255;
-                green /= 255;
-                blue /= 255;
-        
-                const minVal = Math.min(red, green, blue);
-                const maxVal = Math.max(red, green, blue);
-                const delta = maxVal - minVal;
-        
-                let hue, saturation;
-                const value = maxVal;
-                if (delta === 0) {
-                    hue = saturation = 0;
-                } else {
-                    saturation = delta / maxVal;
-                    const dr = (((maxVal - red) / 6) + (delta / 2)) / delta;
-                    const dg = (((maxVal - green) / 6) + (delta / 2)) / delta;
-                    const db = (((maxVal - blue) / 6) + (delta / 2)) / delta;
-        
-                    if (red === maxVal) {
-                        hue = db - dg;
-                    } else if (green === maxVal) {
-                        hue = (1 / 3) + dr - db;
-                    } else if (blue === maxVal) {
-                        hue = (2 / 3) + dg - dr;
-                    }
-        
-                    if (hue < 0) {
-                        hue += 1;
-                    } else if (hue > 1) {
-                        hue -= 1;
-                    }
-                }
-        
-                return [
-                    (hue * 360),
-                    (saturation * 100),
-                    (value * 100)
-                ];
-            },
-            /**
-             * Converts HSV spectrum to Hex
-             * 
-             * @param hue Hue value
-             * @param saturation Saturation value
-             * @param value Brightness value
-             * 
-             * @returns {Array} Array with HSV values
-             */
-            hsvToHex: function (hue, saturation, value) {
-                return utils.hsvToRgb(hue, saturation, value).map(v =>
-                    Math.round(v).toString(16).padStart(2, '0')
-                );
-            },
-            /**
-             * Converts Hex spectrum to HSV
-             * 
-             * @param hex Hex value
-             * 
-             * @returns {Array} Array with HSV values
-             */
-            hexToHsv: function (hex) {
-                hex = hex.trim().toLowerCase().replace(/ /g, '').replace(/[^A-Za-z0-9\s]/g,'');
-                return utils.rgbToHsv(...hex.match(/.{2}/g).map(v => parseInt(v, 16)));
-            },
             /**
              * Converts Hex spectrum to RGB
              * 
@@ -275,6 +620,7 @@ function ColorPickerControl(conf) {
              * @returns {Object} Size and position of the element
              */
             getBoundingBox: function(el){
+            	console.log(el)
                 let rect = el.getBoundingClientRect();
                 return { top: rect.top + (window.pageYOffset || document.documentElement.scrollTop), left: rect.left + (window.pageXOffset || document.documentElement.scrollLeft), width: rect.width, height: rect.height  };
             },
@@ -320,7 +666,7 @@ function ColorPickerControl(conf) {
 
     // properties
     this.root = document.createElement('div');
-    this.container = config.container;
+    //this.container = config.container;
     let _is_open = true;
     Object.defineProperty(self, 'isOpen', {
         get: function() { 
@@ -363,7 +709,7 @@ function ColorPickerControl(conf) {
      * Event emitter function
      * 
      * @param {String} event Event name 
-     * @param {Any} args Argument list
+     * @param {...Any} args Argument list
      */
     let emit = function(event, ...args) {
         eventListeners[event].forEach(cb => cb(...args, self));
@@ -406,8 +752,8 @@ function ColorPickerControl(conf) {
             <div class="color-picker"> 
             <div class="color-picker-controls">
                 <div class="color-picker-controls-group" style="display: flex; flex-direction: row;height: 160px;">
-                    <div class="color-picker-wheel-control">
-                        <canvas id="wheel-canvas" class="wheel-canvas"></canvas>
+                    <div class="color-picker-wheel-control" style="height:100%; width:100%;">
+                        <canvas id="wheel-canvas" class="wheel-canvas" height="140px" width="140px"></canvas>
                         <div class="color-picker-wheel-control-thumb" style="top:50%; left: 50%;"></div>
                     </div>
                     <div class="color-picker-brightness-control">
@@ -523,10 +869,14 @@ function ColorPickerControl(conf) {
         // set isOpen state
         self.isOpen = config.isOpen;
 
+        console.log("ready to create color wheel")
+
         // initialize control to manipulate hue and saturation values
         controls.color_wheel = new ColorWheelControl({ color_picker: self }); 
         controls.color_wheel.values.hue = self.color.h;
         controls.color_wheel.values.saturation = self.color.s;
+
+        console.log("ready to create brightness slider")
 
         // initialize control to manipulate brightness value
         controls.brightness_slider = new BrightnessSliderControl({ color_picker: self });
@@ -925,7 +1275,7 @@ function ColorPickerControl(conf) {
          * Event emitter function
          * 
          * @param {String} event Event name 
-         * @param {Any} args Argument list
+         * @param {...Any} args Argument list
          */
         let emit = function(event, ...args) {
             eventListeners[event].forEach(cb => cb(...args, self));
@@ -1228,7 +1578,7 @@ function ColorPickerControl(conf) {
          * Event emitter  function
          * 
          * @param {String} event Event name 
-         * @param {Any} args Argument list
+         * @param {...Any} args Argument list
          */
         let emit = function(event, ...args) {
             eventListeners[event].forEach(cb => cb(...args, self));
@@ -1356,12 +1706,14 @@ function ColorPickerControl(conf) {
         let drawCanvas = function () {
             // get the size of the main canvas and its position relative to the document
             let canvas_bb = utils.getBoundingBox(canvas);
+            console.log("canvas_bb: ")
+            console.log(canvas_bb)
 
             // update main canvas size
             canvas.width = canvas.height = canvas_bb.width;
 
             // update intermediate canvas size
-            intermediateCanvas.width = intermediateCanvas.height = canvas_bb.width;
+            intermediateCanvas.width = intermediateCanvas.height = 140//canvas_bb.width;
 
             // get main canvas context
             let ctx = canvas.getContext("2d");
@@ -1433,6 +1785,7 @@ function ColorPickerControl(conf) {
             ctx.stroke();
             ctx.closePath();   
             
+            console.log("draw color gradient")
             // draw color gradient to intermediate canvas context
             intermediateCtx.drawImage(colorGradient, 0, 0, canvas.width, canvas.height);
 
@@ -1443,8 +1796,10 @@ function ColorPickerControl(conf) {
             // set transparency level to the main canvas
             ctx.globalAlpha = color_picker.color.a / 255;
 
+            console.log("draw intermediateCanvas")
             // draw intermediate canvas to main canvas context
             ctx.drawImage(intermediateCanvas, 0, 0, canvas.width, canvas.height);
+            console.log("intermediateCanvas drawn")
         };
 
         /**
@@ -1768,7 +2123,7 @@ function ColorPickerControl(conf) {
          * Event emitter  function
          * 
          * @param {String} event Event name 
-         * @param {Any} args Argument list
+         * @param {...Any} args Argument list
          */
         let emit = function(event, ...args) {
             eventListeners[event].forEach(cb => cb(...args, self));
@@ -2165,7 +2520,7 @@ function ColorPickerControl(conf) {
          * Event emitter  function
          * 
          * @param {String} event Event name 
-         * @param {Any} args Argument list
+         * @param {...Any} args Argument list
          */
         let emit = function(event, ...args) {
             eventListeners[event].forEach(cb => cb(...args, self));
@@ -2516,7 +2871,7 @@ function ColorPickerControl(conf) {
          * Event emitter  function
          * 
          * @param {String} event Event name 
-         * @param {Any} args Argument list
+         * @param {...Any} args Argument list
          */
         let emit = function(event, ...args) {
             eventListeners[event].forEach(cb => cb(...args, self));

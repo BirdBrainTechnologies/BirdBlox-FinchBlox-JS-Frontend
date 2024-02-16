@@ -694,7 +694,7 @@ GuiElements.draw.circle = function(cx, cy, radius, color, group) {
 };
 /**
  * Creates an SVG image with the given dimensions and name
- * @param {string} imageName - The name of the png image file
+ * @param {string} imageName - The name of the png/svg image file
  * @param {number} x
  * @param {number} y
  * @param {number} width
@@ -702,15 +702,16 @@ GuiElements.draw.circle = function(cx, cy, radius, color, group) {
  * @param {Element} [parent]
  * @return {Element}
  */
-GuiElements.draw.image = function(imageName, x, y, width, height, parent) {
+GuiElements.draw.image = function(imageName, x, y, width, height, parent, isSvg) {
   DebugOptions.validateNumbers(x, y, width, height);
   const imageElement = GuiElements.create.image();
   imageElement.setAttributeNS(null, "x", x);
   imageElement.setAttributeNS(null, "y", y);
   imageElement.setAttributeNS(null, "width", width);
   imageElement.setAttributeNS(null, "height", height);
+  let extention = isSvg ? ".svg" : ".png"
   //imageElement.setAttributeNS('http://www.w3.org/2000/xlink','href', "Images/"+imageName+".png");
-  imageElement.setAttributeNS("http://www.w3.org/1999/xlink", "href", "Images/" + imageName + ".png");
+  imageElement.setAttributeNS("http://www.w3.org/1999/xlink", "href", "Images/" + imageName + extention);
   imageElement.setAttributeNS(null, 'visibility', 'visible');
   if (parent != null) {
     parent.appendChild(imageElement);

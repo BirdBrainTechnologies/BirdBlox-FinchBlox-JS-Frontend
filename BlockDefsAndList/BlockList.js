@@ -24,10 +24,15 @@ function BlockList() {
     if (Hatchling) { cat.push("Sensor_3") }
     cat.push("Control_3");*/
     if (Hatchling) {
-      cat.push("PortBlocks")
+      /*cat.push("PortBlocks")
       cat.push("OldBlocks")
       cat.push("MicrobitBlocks")
-      cat.push("Control_3")
+      cat.push("Control_3")*/
+      cat.push("Motion_3");
+      cat.push("Color_3");
+      cat.push("Sound_3");
+      cat.push("Sensor_3")
+      cat.push("Control_3");
     } else {
       cat.push("Motion_1");
       cat.push("Color_1");
@@ -183,6 +188,16 @@ BlockList.populateCat_sound_3 = function(category) {
   category.trimBottom();
   category.centerBlocks();
 }*/
+BlockList.populateCat_sensor_3 = function(category) {
+  //Hatchling only
+  category.addBlockByName("B_HLWaitUntilDistance");
+  //category.addBlockByName("B_HLWaitUntilDial");
+  //category.addBlockByName("B_HLWaitUntilLight");
+  //category.addBlockByName("B_HLWaitUntilButton");
+  //category.addBlockByName("B_HLWaitUntilClap");
+  category.trimBottom();
+  category.centerBlocks();
+}
 BlockList.populateCat_control_3 = function(category) {
   category.addBlockByName("B_WhenFlagTapped");
   category.addBlockByName("B_Wait");
