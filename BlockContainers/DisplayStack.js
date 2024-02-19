@@ -41,6 +41,20 @@ function DisplayStack(firstBlock, group, category) {
 }
 
 /**
+ * Update the stack glow when indicated by the MicroBlocks runtime.
+ * See also MicroBlocksRuntime.prototype.updateRunning
+ */
+DisplayStack.prototype.updateGlowForMicroBlocks = function() {
+  let chunkID = mbRuntime.lookupChunkID(this.firstBlock)
+  console.log("update called for chunkID " + chunkID)
+  if (mbRuntime.chunkRunning[chunkID]) {
+    this.firstBlock.glow() 
+  } else {
+    this.firstBlock.stopGlow()
+  }
+}
+
+/**
  * Computes the dimensions of the Stack and stores them
  */
 DisplayStack.prototype.updateDim = function() {
@@ -272,6 +286,9 @@ DisplayStack.prototype.passRecursivelyDown = function(message) {
   }
   if (myMessage === "hideDeviceDropDowns" && this.hideDeviceDropDowns != null) {
     this.hideDeviceDropDowns.apply(this, funArgs);
+  }
+  if (myMessage == "updateGlowForMicroBlocks") {
+    this.updateGlowForMicroBlocks()
   }
 };
 

@@ -62,6 +62,19 @@ BlockStack.prototype.startRunIfAutoExec = function() {
 }
 
 /**
+ * Update the stack glow when indicated by the MicroBlocks runtime.
+ * See also MicroBlocksRuntime.prototype.updateRunning
+ */
+BlockStack.prototype.updateGlowForMicroBlocks = function() {
+  let chunkID = mbRuntime.lookupChunkID(this.firstBlock)
+  if (mbRuntime.chunkRunning[chunkID]) {
+    this.firstBlock.glow() 
+  } else {
+    this.firstBlock.stopGlow()
+  }
+}
+
+/**
  * Recursively updates the this.dim values, the dimensions of the Blocks, and and the Blocks' alignment.
  */
 BlockStack.prototype.updateDim = function() {
@@ -342,7 +355,7 @@ BlockStack.prototype.startRun = function(startBlock, broadcastMessage, flagTappe
       console.log(bytes)
       device.sendMicroBlocksData(bytes)*/
       
-      mbRuntime.saveChunk(this.firstBlock)
+      mbRuntime.saveChunk(this.firstBlock) //async function
       if (!flagTapped) {
         // from MicroBlocksPatches.gp
         // method clicked Block hand 

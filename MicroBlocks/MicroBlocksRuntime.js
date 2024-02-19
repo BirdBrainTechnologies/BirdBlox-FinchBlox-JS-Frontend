@@ -2305,6 +2305,11 @@ MicroBlocksRuntime.prototype.updateRunning = function(chunkID, runFlag) {
 		// add chunkID to chunkStopping dictionary to be unhighlighted after a short pause
 		let stepCount = 2 // two scripter steps, about half a second
 		this.chunkStopping[chunkID] = stepCount
+
+
+		//added for ble. TODO: use updateStopping instead?
+		this.chunkRunning[chunkID] = runFlag
+		this.updateHighlights()
 	}
 }
 
@@ -2573,6 +2578,11 @@ MicroBlocksRuntime.prototype.clearRunningHighlights = function() {
 }
 
 MicroBlocksRuntime.prototype.updateHighlights = function() {
+
+	TabManager.activeTab.passRecursively("updateGlowForMicroBlocks")
+	BlockPalette.passRecursivelyDown("updateGlowForMicroBlocks")
+
+
 	//TODO: we should do it here too somehow.
 
 	/*scale = (global 'scale')
@@ -2603,7 +2613,7 @@ MicroBlocksRuntime.prototype.showError = function(chunkID, msg) {
 }
 
 MicroBlocksRuntime.prototype.showResult = function(chunkID, value, isError, isResult) {
-	console.error("Still need to implement showResult. Results: " + chunkID + ", " + value + ", " + isError + ", " + isResult)
+	console.error("Still need to implement showResult. Results for chunk " + chunkID + ": '" + value + "' (isError=" + isError + ", isResult=" + isResult + ")")
 	/*for m (join
 			(parts (morph (scriptEditor scripter)))
 			(parts (morph (blockPalette scripter)))) {

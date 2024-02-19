@@ -237,7 +237,7 @@ BlockGraphics.SetHitBox = function() {
 /* Constants for outline on running Blocks */
 BlockGraphics.SetGlow = function() {
   BlockGraphics.glow = function() {};
-  BlockGraphics.glow.color = Colors.white;
+  BlockGraphics.glow.color = Hatchling ? Colors.flagGreen : Colors.white;
   BlockGraphics.glow.strokeW = 2;
 };
 

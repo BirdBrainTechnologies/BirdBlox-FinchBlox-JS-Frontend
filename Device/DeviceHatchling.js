@@ -30,7 +30,7 @@ DeviceHatchling.prototype.constructor = DeviceHatchling;
 Device.setDeviceTypeName(DeviceHatchling, "hatchling", "Hatchling", "Hatchling");
 
 DeviceHatchling.prototype.setHatchlingState = function(state) {
-  console.log("From hatchling: [" + state + "]")
+  //console.log("From hatchling: [" + state + "]")
 
   if (this.messageInProgress != null) {
     //console.log("Message from Hatchling in progress: " + this.messageInProgress.length + ", " + this.messageInProgress.data)

@@ -149,6 +149,8 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
         const color = Colors.rgbToHex(this.values[0] * s, this.values[1] * s, this.values[2] * s);
         this.button.updateBgColor(color);
       }
+    } else if (this.widgets[i].type == "colorPicker") {
+      this.button.updateBgColor(this.values[i])
 
     } else if (this.widgets[i].type == "piano") {
       text[i] = InputWidget.Piano.noteStrings[this.values[i]];

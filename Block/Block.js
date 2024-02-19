@@ -334,7 +334,7 @@ Block.prototype.updateRun = function() {
  * In FinchBlox, update the color of the block to green while running.
  */
 Block.prototype.updateRunColor = function() {
-  if (this.autoExecute) {
+  if (this.autoExecute || Hatchling) {
     return;
   }
   if (this.running === 1 || this.running === 2) {
@@ -1108,7 +1108,7 @@ Block.prototype.getResultData = function() {
  */
 Block.prototype.glow = function() {
   //We will not make the whole stack glow for FinchBlox
-  if (FinchBlox) {
+  if (FinchBlox && !Hatchling) {
     return;
   }
 
