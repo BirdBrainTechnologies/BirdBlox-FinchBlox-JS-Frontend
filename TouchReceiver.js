@@ -559,6 +559,20 @@ TouchReceiver.touchStartScrollBox = function(target, e) {
   }
 };
 /**
+ * @param {ColorWidget} target
+ * @param {event} e - passed event arguments.
+ */
+TouchReceiver.touchStartColorWheel = function(target, e) {
+  const TR = TouchReceiver;
+  if (TR.touchstart(e, false)) {
+    TR.targetType = "colorWheel";
+    TR.target = target;
+    // Pick a new color based on the touch
+    TR.target.dragColor(TR.getX(e), TR.getY(e));
+    e.stopPropagation();
+  }
+}
+/**
  * @param {SliderWidget} target
  * @param {event} e - passed event arguments.
  */
@@ -738,6 +752,10 @@ TouchReceiver.touchmove = function(e) {
           TR.blocksMoving = true;
         }
       }
+      // Pick a new color based on the touch
+      if (TR.targetType === "colorWheel") {
+        TR.target.dragColor(TR.getX(e), TR.getY(e));
+      }
       // Drag the slider of the slider widget
       if (TR.targetType === "slider") {
         TR.target.drag(TR.getX(e));
@@ -877,6 +895,9 @@ TouchReceiver.touchend = function(e) {
 						execStatus = TR.target.updateRun();
             TR.target.displayResult(execStatus.getResult());
         }, 100);*/
+    } else if (TR.targetType === "colorWheel") {
+      //TR.target.drop(TR.getX(e));
+      TR.target.dropColor();
     } else if (TR.targetType === "slider") {
       //TR.target.drop(TR.getX(e));
       TR.target.drop();
@@ -1046,6 +1067,17 @@ TouchReceiver.addListenersScrollBox = function(element, parent) {
     TouchReceiver.touchStartScrollBox(parent, e);
   }, false);
 };
+/**
+ * @param {Element} element
+ * @param {ColorWidget} parent
+ */
+TouchReceiver.addListenersColorWheel = function(element, parent) {
+  const TR = TouchReceiver;
+  TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+    // When it is touched, the SVG element will tell the TouchReceiver.
+    TouchReceiver.touchStartColorWheel(parent, e);
+  }, false);
+}
 /**
  * @param {Element} element
  * @param {SliderWidget} parent

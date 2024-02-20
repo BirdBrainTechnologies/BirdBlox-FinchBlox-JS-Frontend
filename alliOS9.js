@@ -8456,7 +8456,7 @@ BlockList.populateCat_color_3 = function(category) {
   if (Hatchling) {
     category.addBlockByName("B_HLFairyLights")
     category.addBlockByName("B_HLSingleNeopix")
-    category.addBlockByName("B_HLNeopixStrip")
+    //category.addBlockByName("B_HLNeopixStrip")
     category.addBlockByName("B_FBLedArrayL2")
     category.addBlockByName("B_HLAlphabet")
   } else {
@@ -11421,6 +11421,20 @@ TouchReceiver.touchStartScrollBox = function(target, e) {
   }
 };
 /**
+ * @param {ColorWidget} target
+ * @param {event} e - passed event arguments.
+ */
+TouchReceiver.touchStartColorWheel = function(target, e) {
+  var TR = TouchReceiver;
+  if (TR.touchstart(e, false)) {
+    TR.targetType = "colorWheel";
+    TR.target = target;
+    // Pick a new color based on the touch
+    TR.target.dragColor(TR.getX(e), TR.getY(e));
+    e.stopPropagation();
+  }
+}
+/**
  * @param {SliderWidget} target
  * @param {event} e - passed event arguments.
  */
@@ -11600,6 +11614,10 @@ TouchReceiver.touchmove = function(e) {
           TR.blocksMoving = true;
         }
       }
+      // Pick a new color based on the touch
+      if (TR.targetType === "colorWheel") {
+        TR.target.dragColor(TR.getX(e), TR.getY(e));
+      }
       // Drag the slider of the slider widget
       if (TR.targetType === "slider") {
         TR.target.drag(TR.getX(e));
@@ -11739,6 +11757,9 @@ TouchReceiver.touchend = function(e) {
 						execStatus = TR.target.updateRun();
             TR.target.displayResult(execStatus.getResult());
         }, 100);*/
+    } else if (TR.targetType === "colorWheel") {
+      //TR.target.drop(TR.getX(e));
+      TR.target.dropColor();
     } else if (TR.targetType === "slider") {
       //TR.target.drop(TR.getX(e));
       TR.target.drop();
@@ -11908,6 +11929,17 @@ TouchReceiver.addListenersScrollBox = function(element, parent) {
     TouchReceiver.touchStartScrollBox(parent, e);
   }, false);
 };
+/**
+ * @param {Element} element
+ * @param {ColorWidget} parent
+ */
+TouchReceiver.addListenersColorWheel = function(element, parent) {
+  var TR = TouchReceiver;
+  TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+    // When it is touched, the SVG element will tell the TouchReceiver.
+    TouchReceiver.touchStartColorWheel(parent, e);
+  }, false);
+}
 /**
  * @param {Element} element
  * @param {SliderWidget} parent
@@ -18073,6 +18105,187 @@ InputWidget.Piano.prototype.updatePressed = function(num) {
   GuiElements.update.stroke(newPressed.icon.pathE, Colors.fbPurpleBorder, 1);
 
 }
+
+/**
+ * A widget with a flat circular color picker and Alpha slider.
+ * 
+ */
+InputWidget.Color = function(index) {
+	this.type = "colorPicker"
+	this.index = index
+
+	this.hue = 0 
+	this.saturation = 0 
+	this.brightness = 100
+
+}
+InputWidget.Color.prototype = Object.create(InputWidget.prototype)
+InputWidget.Color.prototype.constructor = InputWidget.Color
+
+
+/**
+ * @inheritDoc
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} parentGroup
+ * @param {BubbleOverlay} overlay
+ * @param {EditableSlotShape} slotShape
+ * @param {function} updateFn
+ * @param {function} finishFn
+ * @param {Data} data
+ */
+InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
+	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
+ 	this.group = GuiElements.create.group(x, y, parentGroup);
+    var margin = 100 //10
+
+    //Add the color wheel
+    this.colorWheelX = margin //this.width/2 - this.height - margin
+  	this.colorwheel = GuiElements.draw.image("Color_circle_(RGB)", this.colorWheelX, 0, this.height, this.height, this.group, true)
+  	TouchReceiver.addListenersColorWheel(this.colorwheel, this)
+
+    //Add a brightness slider
+    var barH = InputWidget.Slider.barHeight * 2
+    this.barX = this.height + 2*margin //this.width/2 + margin
+    this.barW = this.width - this.barX - margin //this.width/2 - margin*3
+    var barY = 2*this.height/3 - barH/2
+    var sliderH = 20
+    this.sliderW = VectorIcon.computeWidth(InputWidget.Slider.sliderIconPath, sliderH);
+    this.sliderY = 2*this.height/3 - sliderH/2
+    this.sliderX = this.barX + (this.brightness / 100) * (this.barW - this.sliderW)
+
+    //Make the bar beneath the slider
+    this.sliderBar = GuiElements.draw.rect(this.barX, barY, this.barW, barH, Colors.black)//barGradient);
+    this.group.appendChild(this.sliderBar);
+    TouchReceiver.addListenersSlider(this.sliderBar, this);
+
+    //Make the slider
+    this.sliderIcon = new VectorIcon(this.sliderX, this.sliderY, InputWidget.Slider.sliderIconPath, Colors.black, sliderH, this.group, null, 90);
+    TouchReceiver.addListenersSlider(this.sliderIcon.pathE, this);
+    GuiElements.update.stroke(this.sliderIcon.pathE, Colors.darkDarkGray, 3)
+
+    this.updateSlider()
+}
+
+InputWidget.Color.prototype.drag = function(x) {
+    var relX = x - this.overlay.x - this.overlay.margin
+
+    var errorMargin = 10;
+    var barMaxX = this.barX + this.barW;
+    if (relX < this.barX && relX > this.barX - errorMargin) {
+        relX = this.barX;
+    }
+    if (relX > barMaxX && relX < barMaxX + errorMargin) {
+        relX = barMaxX;
+    }
+
+    if (relX >= this.barX && relX <= barMaxX) {
+        this.sliderX = relX - this.sliderW / 2;
+        this.brightness = Math.round(((relX - this.barX) / (this.barW)) * 100);
+        this.sliderIcon.move(this.sliderX, this.sliderY);
+
+        this.updateFn(this.getHex(), this.index);
+    }
+}
+
+InputWidget.Color.prototype.drop = function() {
+    console.log("drop brightness slider")
+}
+
+InputWidget.Color.prototype.updateSlider = function() {
+    var color = this.getHex(true)
+    GuiElements.create.gradient("Brightness" + color, "#000000", color, true)
+    var barGradient = "url(#Brightness" + color + ")"
+    GuiElements.update.color(this.sliderBar, barGradient)
+    GuiElements.update.color(this.sliderIcon.pathE, color)
+}
+
+/**
+ * Calculate the new color based on the user's touch.
+ * Parts from https://github.com/ivanvmat/color-picker
+ */
+InputWidget.Color.prototype.dragColor = function(x, y) {
+	var relX = x - this.colorWheelX - this.overlay.x - this.overlay.margin;
+	var relY = y - this.overlay.y - this.overlay.margin;
+
+	// get canvas radius and prepare values to calculation of hue and saturation based on thumb position
+    var r = this.height/2 
+    var dx = relX - r 
+    var dy = relY - r 
+
+    // calculate angle of vector from control center to thumb element
+    var angle = Math.atan2(dy, dx) * 360 / (2 * Math.PI) - 90; //Math.atan2(y1 - y2, x1 - x2) * 360 / (2 * Math.PI) - 90;
+    if(angle < 0) angle += 360;
+    
+    var scale_length = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+    
+        // calculate hue and saturation values based on thumb position
+    this.hue = angle;
+    this.saturation = Math.min(100, Math.ceil(scale_length / r * 100));
+
+    console.log("dragColor hue=" + this.hue + "; saturation=" + this.saturation + "; x=" + relX + "; y=" + relY + "; r=" + r)
+
+
+    console.log(this.getHex())
+    this.updateSlider()
+    this.updateFn(this.getHex(), this.index)
+                
+}
+
+/**
+ * Converts HSV spectrum to RGB and returns the hex value
+ * From https://github.com/ivanvmat/color-picker
+ * 
+ * @returns {String} Hex value of current color
+ */
+InputWidget.Color.prototype.getHex = function (fullBrightness) {
+    var hue = (this.hue / 360) * 6;
+    var saturation = this.saturation / 100;
+    var value = fullBrightness ? 1 : this.brightness / 100;
+
+    var i = Math.floor(hue);
+
+    var f = hue - i;
+    var p = value * (1 - saturation);
+    var q = value * (1 - f * saturation);
+    var t = value * (1 - (1 - f) * saturation);
+
+    var mod = i % 6;
+    //red pointed down on color wheel
+    /*var red = [value, q, p, p, t, value][mod];
+    var green = [t, value, value, q, p, p][mod];
+    var blue = [p, p, t, value, value, q][mod];*/
+
+    var red = [p, t, value, value, q, p][mod];
+    var green = [q, p, p, t, value, value][mod];
+    var blue = [value, value, q, p, p, t][mod];
+
+    var rgb = [(red * 255),(green * 255),(blue * 255)];
+
+    var hex = rgb.map(v => Math.round(v).toString(16).padStart(2, '0') );
+
+    return "#" + hex.join('').toUpperCase()
+}
+
+InputWidget.Color.prototype.dropColor = function() {
+	console.log("dropColor")
+}
+
+/**
+ * @inheritDoc
+ * @param {number} x
+ * @param {number} y
+ */
+InputWidget.Color.prototype.updateDim = function(x, y) {
+  var S = InputWidget.Slider; //TODO
+  this.height = S.height * 2;
+  this.width = S.width;
+}
+
+
+
+
+
 
 /**
  * An InputSystem used for selecting a Sound from a list.  Provides buttons to preview sounds before selecting them.
@@ -34705,7 +34918,7 @@ BlockButton.prototype.addPiano = function(startingValue) {
  * @param {string} startingValue - the initial value
  */
 BlockButton.prototype.addColorPicker = function(startingValue) {
-  this.addWidget(new InputWidget.Color(), "", startingValue)
+  this.addWidget(new InputWidget.Color(this.widgets.length), "", startingValue)
 }
 
 /**
@@ -40803,11 +41016,11 @@ B_HLccRotationServo.prototype = Object.create(B_HLRotationServo.prototype);
 B_HLccRotationServo.prototype.constructor = B_HLccRotationServo;
 
 function B_HLSingleNeopix(x, y) {
-  this.value = ""
+  this.value = "#FFFFFF"
   this.valueKey = "color"
-  this.red = 100;
+  /*this.red = 100;
   this.green = 100;
-  this.blue = 100;
+  this.blue = 100;*/
   B_HLOutputBase.call(this, x, y, "color_3", "singleNeopix", 9);
 
   var icon = VectorPaths["faLightbulb"];
@@ -40815,24 +41028,35 @@ function B_HLSingleNeopix(x, y) {
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 
-  this.colorButton = new BlockButton(this);
+  //this.colorButton = new BlockButton(this);
   //this.colorButton.addSlider("color", { r: this.red, g: this.green, b: this.blue });
-  this.colorButton.addSlider("color_red", this.red)
+  /*this.colorButton.addSlider("color_red", this.red)
   this.colorButton.addSlider("color_green", this.green)
-  this.colorButton.addSlider("color_blue", this.blue)
-  //this.colorButton.addColorPicker(Colors.white)
-  this.addPart(this.colorButton);
+  this.colorButton.addSlider("color_blue", this.blue)*/
+  this.valueBN = new BlockButton(this)
+  this.valueBN.addColorPicker(this.value)
+  this.addPart(this.valueBN);
 }
 B_HLSingleNeopix.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLSingleNeopix.prototype.constructor = B_HLSingleNeopix;
 //MicroBlocks functions
 B_HLSingleNeopix.prototype.primName = function() { return "[h:np]" }
-B_HLSingleNeopix.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.red, this.green, this.blue] }
+B_HLSingleNeopix.prototype.argList = function() { 
+  var hex = this.value.slice(1).toLowerCase()
+  var r = hex.charAt(0) + '' + hex.charAt(1);
+  var g = hex.charAt(2) + '' + hex.charAt(3);
+  var b = hex.charAt(4) + '' + hex.charAt(5);
+  r = parseInt(r, 16);
+  g = parseInt(g, 16);
+  b = parseInt(b, 16);
+  return [HL_Utils.portNames[this.port], r, g, b] 
+}
 //
 B_HLSingleNeopix.prototype.updateColor = function() {
-  var s = 255 / 100;
+  /*var s = 255 / 100;
   this.colorHex = Colors.rgbToHex(this.red * s, this.green * s, this.blue * s);
-  GuiElements.update.color(this.blockIcon.icon.pathE, this.colorHex);
+  GuiElements.update.color(this.blockIcon.icon.pathE, this.colorHex);*/
+  GuiElements.update.color(this.blockIcon.icon.pathE, this.value)
 }
 
 function B_HLNeopixStrip(x, y) {

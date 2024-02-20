@@ -297,11 +297,11 @@ B_HLccRotationServo.prototype = Object.create(B_HLRotationServo.prototype);
 B_HLccRotationServo.prototype.constructor = B_HLccRotationServo;
 
 function B_HLSingleNeopix(x, y) {
-  this.value = ""
+  this.value = "#FFFFFF"
   this.valueKey = "color"
-  this.red = 100;
+  /*this.red = 100;
   this.green = 100;
-  this.blue = 100;
+  this.blue = 100;*/
   B_HLOutputBase.call(this, x, y, "color_3", "singleNeopix", 9);
 
   const icon = VectorPaths["faLightbulb"];
@@ -309,24 +309,35 @@ function B_HLSingleNeopix(x, y) {
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 
-  this.colorButton = new BlockButton(this);
+  //this.colorButton = new BlockButton(this);
   //this.colorButton.addSlider("color", { r: this.red, g: this.green, b: this.blue });
-  this.colorButton.addSlider("color_red", this.red)
+  /*this.colorButton.addSlider("color_red", this.red)
   this.colorButton.addSlider("color_green", this.green)
-  this.colorButton.addSlider("color_blue", this.blue)
-  //this.colorButton.addColorPicker(Colors.white)
-  this.addPart(this.colorButton);
+  this.colorButton.addSlider("color_blue", this.blue)*/
+  this.valueBN = new BlockButton(this)
+  this.valueBN.addColorPicker(this.value)
+  this.addPart(this.valueBN);
 }
 B_HLSingleNeopix.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLSingleNeopix.prototype.constructor = B_HLSingleNeopix;
 //MicroBlocks functions
 B_HLSingleNeopix.prototype.primName = function() { return "[h:np]" }
-B_HLSingleNeopix.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.red, this.green, this.blue] }
+B_HLSingleNeopix.prototype.argList = function() { 
+  let hex = this.value.slice(1).toLowerCase()
+  let r = hex.charAt(0) + '' + hex.charAt(1);
+  let g = hex.charAt(2) + '' + hex.charAt(3);
+  let b = hex.charAt(4) + '' + hex.charAt(5);
+  r = parseInt(r, 16);
+  g = parseInt(g, 16);
+  b = parseInt(b, 16);
+  return [HL_Utils.portNames[this.port], r, g, b] 
+}
 //
 B_HLSingleNeopix.prototype.updateColor = function() {
-  const s = 255 / 100;
+  /*const s = 255 / 100;
   this.colorHex = Colors.rgbToHex(this.red * s, this.green * s, this.blue * s);
-  GuiElements.update.color(this.blockIcon.icon.pathE, this.colorHex);
+  GuiElements.update.color(this.blockIcon.icon.pathE, this.colorHex);*/
+  GuiElements.update.color(this.blockIcon.icon.pathE, this.value)
 }
 
 function B_HLNeopixStrip(x, y) {

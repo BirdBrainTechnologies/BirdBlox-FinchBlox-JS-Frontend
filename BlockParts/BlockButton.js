@@ -275,7 +275,7 @@ BlockButton.prototype.addPiano = function(startingValue) {
  * @param {string} startingValue - the initial value
  */
 BlockButton.prototype.addColorPicker = function(startingValue) {
-  this.addWidget(new InputWidget.Color(), "", startingValue)
+  this.addWidget(new InputWidget.Color(this.widgets.length), "", startingValue)
 }
 
 /**
