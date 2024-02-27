@@ -18,7 +18,7 @@ function HelpingHand(parent, block) {
 	//console.log("HelpingHand: ")
 	//console.log(this)
 	this.show()
-	this.animate()
+	//this.animate()
 
 	setTimeout(function() { this.close() }.bind(this), 2000)
 }
@@ -28,8 +28,8 @@ HelpingHand.prototype.show = function() {
 	let height = 90
 	let width = VectorIcon.computeWidth(pathId, height)
 	this.group = GuiElements.create.group(this.x,this.y)
-	const pointer = new VectorIcon(0, 0, pathId, Colors.finchGreen, height, this.group)
-	GuiElements.update.stroke(pointer.pathE, Colors.fbDarkGreen, 0.5)
+	//const pointer = new VectorIcon(0, 0, pathId, Colors.finchGreen, height, this.group)
+	//GuiElements.update.stroke(pointer.pathE, Colors.fbDarkGreen, 0.5)
 
 
 	this.highlightG = GuiElements.create.group(0, 0, GuiElements.layers.overlay);

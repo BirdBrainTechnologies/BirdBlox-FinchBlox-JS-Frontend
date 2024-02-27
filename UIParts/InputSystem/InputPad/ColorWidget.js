@@ -50,6 +50,7 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
     this.sliderBar = GuiElements.draw.rect(this.barX, barY, this.barW, barH, Colors.black)//barGradient);
     this.group.appendChild(this.sliderBar);
     TouchReceiver.addListenersSlider(this.sliderBar, this);
+    GuiElements.update.stroke(this.sliderBar, Colors.darkDarkGray, 0.1)
 
     //Make the slider
     this.sliderIcon = new VectorIcon(this.sliderX, this.sliderY, InputWidget.Slider.sliderIconPath, Colors.black, sliderH, this.group, null, 90);
@@ -74,6 +75,7 @@ InputWidget.Color.prototype.drag = function(x) {
     if (relX >= this.barX && relX <= barMaxX) {
         this.sliderX = relX - this.sliderW / 2;
         this.brightness = Math.round(((relX - this.barX) / (this.barW)) * 100);
+        console.log("set brightness to " + this.brightness)
         this.sliderIcon.move(this.sliderX, this.sliderY);
 
         this.updateFn(this.getHex(), this.index);
@@ -87,6 +89,7 @@ InputWidget.Color.prototype.drop = function() {
 InputWidget.Color.prototype.updateSlider = function() {
     let color = this.getHex(true)
     GuiElements.create.gradient("Brightness" + color, "#000000", color, true)
+    //GuiElements.create.gradient("Brightness" + color, color, color, true, 0, 1)
     let barGradient = "url(#Brightness" + color + ")"
     GuiElements.update.color(this.sliderBar, barGradient)
     GuiElements.update.color(this.sliderIcon.pathE, color)

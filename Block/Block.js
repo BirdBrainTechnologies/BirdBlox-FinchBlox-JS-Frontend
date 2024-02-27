@@ -687,6 +687,7 @@ Block.prototype.updateAlignRI = function(x, y) {
       yCoord += bG.vMargin;
       if (FinchBlox) {
         xCoord = -BlockGraphics.command.fbBumpDepth;
+        if (Hatchling) { xCoord = bG.hMargin }
         yCoord = BlockGraphics.command.height - BlockPalette.blockButtonOverhang; //this.height - BlockPalette.blockButtonOverhang;
       }
     } else if (i < this.parts.length - 1) {
@@ -695,7 +696,7 @@ Block.prototype.updateAlignRI = function(x, y) {
   }
   if (Hatchling) {
     if (this.hlButton != null) {
-      this.hlButton.updateAlign(-5, -5)
+      this.hlButton.updateAlign(-1, 2)//3 - BlockGraphics.command.fbBumpDepth, 3) //-5, -5)
     }
   }
 };

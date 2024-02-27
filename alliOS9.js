@@ -6928,8 +6928,10 @@ GuiElements.create.layer = function(depth) {
  * @param {string} color2 - color in form "#fff" of the bottom of the gradient.
  * @param {boolean} horizontal - true if gradiant should be horizontal. vertical by default.
  */
-GuiElements.create.gradient = function(id, color1, color2, horizontal) { //Creates a gradient and adds to the defs
+GuiElements.create.gradient = function(id, color1, color2, horizontal, opacity1, opacity2) { 
   DebugOptions.validateNonNull(color1, color2);
+  if (opacity1 == null) { opacity1 = 1 }
+  if (opacity2 == null) { opacity2 = 1 }
   var gradient = document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient');
   gradient.setAttributeNS(null, "id", id); //Set attributes.
   gradient.setAttributeNS(null, "x1", "0%");
@@ -6943,11 +6945,11 @@ GuiElements.create.gradient = function(id, color1, color2, horizontal) { //Creat
   GuiElements.defs.appendChild(gradient); //Add it to the SVG's defs
   var stop1 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 1.
   stop1.setAttributeNS(null, "offset", "0%");
-  stop1.setAttributeNS(null, "style", "stop-color:" + color1 + ";stop-opacity:1");
+  stop1.setAttributeNS(null, "style", "stop-color:" + color1 + ";stop-opacity:" + opacity1);//1");
   gradient.appendChild(stop1);
   var stop2 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 2.
   stop2.setAttributeNS(null, "offset", "100%");
-  stop2.setAttributeNS(null, "style", "stop-color:" + color2 + ";stop-opacity:1");
+  stop2.setAttributeNS(null, "style", "stop-color:" + color2 + ";stop-opacity:" + opacity2);//1");
   gradient.appendChild(stop2);
 };
 
@@ -8443,9 +8445,9 @@ BlockList.populateCat_motion_3 = function(category) {
     category.addBlockByName("B_FBBackwardL3");
     category.addBlockByName("B_FBRightL3");
     category.addBlockByName("B_FBLeftL3");
-    category.addBlockByName("B_FBWheelsL3A");
+    //category.addBlockByName("B_FBWheelsL3A");
     //category.addBlockByName("B_FBWheelsL3B");
-    category.addBlockByName("B_FBCircleL3");
+    //category.addBlockByName("B_FBCircleL3");
     category.addBlockByName("B_FBForwardUntilDark");
     category.addBlockByName("B_FBForwardUntilObstacle");
   }
@@ -17404,7 +17406,7 @@ InputWidget.Slider.prototype.makeSlider = function() {
   if (this.type == 'ledArray') {
     //Add an image at the bottom to show your selection
     this.imageG = GuiElements.create.group(0, 0, this.group);
-  } else if (!this.type.startsWith('color') && !this.type.startsWith('hatchling') && this.type != 'sensor') {
+  } else if (!this.type.startsWith('color') && this.type != 'sensor') { //!this.type.startsWith('hatchling') && this.type != 'sensor') {
     //Add a label at the bottom to show your selection
     this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
     this.group.appendChild(this.textE);
@@ -17414,18 +17416,18 @@ InputWidget.Slider.prototype.makeSlider = function() {
       this.group.appendChild(this.textE2)
     }
   }
-  if (this.type == 'time' || this.type.startsWith('hatchling') || this.type == 'sensor') {
+  if (this.type == 'time' || this.type == 'sensor') { //this.type.startsWith('hatchling') || this.type == 'sensor') {
     this.labelIconH = 23;
     //var labelIconP = (this.type.startsWith('hatchling')) ? VectorPaths.faLightbulb : VectorPaths.faClock;
     var labelIconP = VectorPaths.faClock
-    if (this.type.startsWith('hatchling')) { labelIconP = VectorPaths.faLightbulb }
+    //if (this.type.startsWith('hatchling')) { labelIconP = VectorPaths.faLightbulb }
     if (this.type == 'sensor') { labelIconP = this.value }
 
     this.labelIconW = VectorIcon.computeWidth(labelIconP, this.labelIconH);
     this.labelIcon = new VectorIcon(0, 0, labelIconP, Colors.bbtDarkGray, this.labelIconH, this.group);
-    if (this.type.startsWith('hatchling')) { 
+    /*if (this.type.startsWith('hatchling')) { 
       GuiElements.update.stroke(this.labelIcon.pathE, Colors.bbtDarkGray, 3);
-    }
+    }*/
   }
 }
 
@@ -17467,7 +17469,7 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
       var iY = y - image.width - S.optionMargin;
       GuiElements.move.group(image.group, iX, iY);
       break;
-    case "hatchling":
+    /*case "hatchling":
       var iconPath = VectorPaths.faLightbulb
       var iconH = 23
       var iconW = VectorIcon.computeWidth(iconPath, iconH)
@@ -17490,7 +17492,7 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
         GuiElements.update.stroke(slash, S.barColor, 3);
         GuiElements.update.opacity(icon.pathE, 0.3)
       }
-      break;
+      break;*/
     case "sensor":
       var iconP = option
       var iH = 23
@@ -17504,13 +17506,20 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
     case "angle":
     case "time":
     case "wheels":
+    case "hatchling":
       var width = GuiElements.measure.stringWidth(option, font);
       var textX = x - width / 2 + tickW / 2;
       var textY = y - S.optionMargin; //font.charHeight/2 - S.optionMargin;
       var textE = GuiElements.draw.text(textX, textY, option, font, S.textColor);
       this.group.appendChild(textE);
+
+      if (typeGroup == "hatchling" && isDisabled) {
+        GuiElements.update.opacity(textE, 0.3)
+      }
       break;
   }
+
+  
 }
 
 /**
@@ -18158,6 +18167,7 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
     this.sliderBar = GuiElements.draw.rect(this.barX, barY, this.barW, barH, Colors.black)//barGradient);
     this.group.appendChild(this.sliderBar);
     TouchReceiver.addListenersSlider(this.sliderBar, this);
+    GuiElements.update.stroke(this.sliderBar, Colors.darkDarkGray, 0.1)
 
     //Make the slider
     this.sliderIcon = new VectorIcon(this.sliderX, this.sliderY, InputWidget.Slider.sliderIconPath, Colors.black, sliderH, this.group, null, 90);
@@ -18182,6 +18192,7 @@ InputWidget.Color.prototype.drag = function(x) {
     if (relX >= this.barX && relX <= barMaxX) {
         this.sliderX = relX - this.sliderW / 2;
         this.brightness = Math.round(((relX - this.barX) / (this.barW)) * 100);
+        console.log("set brightness to " + this.brightness)
         this.sliderIcon.move(this.sliderX, this.sliderY);
 
         this.updateFn(this.getHex(), this.index);
@@ -18195,6 +18206,7 @@ InputWidget.Color.prototype.drop = function() {
 InputWidget.Color.prototype.updateSlider = function() {
     var color = this.getHex(true)
     GuiElements.create.gradient("Brightness" + color, "#000000", color, true)
+    //GuiElements.create.gradient("Brightness" + color, color, color, true, 0, 1)
     var barGradient = "url(#Brightness" + color + ")"
     GuiElements.update.color(this.sliderBar, barGradient)
     GuiElements.update.color(this.sliderIcon.pathE, color)
@@ -20800,7 +20812,7 @@ function HelpingHand(parent, block) {
 	//console.log("HelpingHand: ")
 	//console.log(this)
 	this.show()
-	this.animate()
+	//this.animate()
 
 	setTimeout(function() { this.close() }.bind(this), 2000)
 }
@@ -20810,8 +20822,8 @@ HelpingHand.prototype.show = function() {
 	var height = 90
 	var width = VectorIcon.computeWidth(pathId, height)
 	this.group = GuiElements.create.group(this.x,this.y)
-	var pointer = new VectorIcon(0, 0, pathId, Colors.finchGreen, height, this.group)
-	GuiElements.update.stroke(pointer.pathE, Colors.fbDarkGreen, 0.5)
+	//var pointer = new VectorIcon(0, 0, pathId, Colors.finchGreen, height, this.group)
+	//GuiElements.update.stroke(pointer.pathE, Colors.fbDarkGreen, 0.5)
 
 
 	this.highlightG = GuiElements.create.group(0, 0, GuiElements.layers.overlay);
@@ -30078,6 +30090,7 @@ Block.prototype.updateAlignRI = function(x, y) {
       yCoord += bG.vMargin;
       if (FinchBlox) {
         xCoord = -BlockGraphics.command.fbBumpDepth;
+        if (Hatchling) { xCoord = bG.hMargin }
         yCoord = BlockGraphics.command.height - BlockPalette.blockButtonOverhang; //this.height - BlockPalette.blockButtonOverhang;
       }
     } else if (i < this.parts.length - 1) {
@@ -30086,7 +30099,7 @@ Block.prototype.updateAlignRI = function(x, y) {
   }
   if (Hatchling) {
     if (this.hlButton != null) {
-      this.hlButton.updateAlign(-5, -5)
+      this.hlButton.updateAlign(-1, 2)//3 - BlockGraphics.command.fbBumpDepth, 3) //-5, -5)
     }
   }
 };
@@ -34657,6 +34670,19 @@ function BlockButton(parent, width) {
   this.font = Font.uiFont(12);
   this.outlineStroke = 1;
 
+  if (Hatchling) {
+    var scale = 0.66//0.75
+    this.buttonMargin = this.buttonMargin * scale
+    this.lineHeight = this.lineHeight * scale
+    this.cornerRadius = this.cornerRadius * scale
+
+    this.height = this.blockButtonMargin + this.lineHeight;
+    this.width = width ? width : 30//40;
+    this.textColor = Colors.bbtDarkGray;
+    this.font = Font.uiFont(12 * scale);
+    this.outlineStroke = 1;
+  }
+
   this.parent = parent;
   this.x = 0;
   this.y = 0;
@@ -34807,8 +34833,8 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
       var iY = (i + 1) * this.button.height / (this.widgets.length + 1) - image.width / 2;
       GuiElements.move.group(image.group, iX, iY);
       this.ledArrayImage = image;
-    } else if (this.widgets[i].type.startsWith("hatchling")) {
-      this.button.updateBgColor(this.values[i]);
+    //} else if (this.widgets[i].type.startsWith("hatchling")) {
+      //this.button.updateBgColor(this.values[i]);
     } else if (this.widgets[i].type == "sensor") {
       if (this.sensorIcon != null) {
         this.sensorIcon.remove()
@@ -40724,16 +40750,16 @@ B_ListContainsItem.prototype.checkListContainsItem = function(listData, itemD) {
 
 var HL_Utils = {}
 //                      blue         yellow       sea-green    magenta      white        orange
-HL_Utils.portColors = ["#0000FF", "#FFFF00", "#00FF88", "#FF00FF", "#FFFFFF", "#FF4400"]//["#00f", "#ff0", "#0f0", "#f0f", "#0ff", "#f80"]//["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
+//HL_Utils.portColors = ["#0000FF", "#FFFF00", "#00FF88", "#FF00FF", "#FFFFFF", "#FF4400"]//["#00f", "#ff0", "#0f0", "#f0f", "#0ff", "#f80"]//["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
 HL_Utils.portNames = ["A", "B", "C", "D", "E", "F"]
 HL_Utils.addHLButton = function(block, portType) {
   block.port = -1 //unknown
-  block.hlButton = new BlockButton(block, 20);
-  block.hlButton.addSlider("hatchling_" + portType, Colors.bbtDarkGray, HL_Utils.portColors)
+  block.hlButton = new BlockButton(block, 14)//15)//20);
+  block.hlButton.addSlider("hatchling_" + portType, "X", HL_Utils.portNames)// Colors.bbtDarkGray, HL_Utils.portColors)
 }
 HL_Utils.updatePort = function(block) {
   if (block.hlButton != null) {
-    block.port = HL_Utils.portColors.indexOf(block.hlButton.values[0])
+    block.port = HL_Utils.portNames.indexOf(block.hlButton.values[0])//HL_Utils.portColors.indexOf(block.hlButton.values[0])
     console.log("update port for " + block.constructor.name + " to " + block.port)
     block.updateActive()
   }
@@ -40746,7 +40772,7 @@ HL_Utils.findPorts = function(block) {
     //console.log("findPorts found:")
     //console.log(ports)
     if (ports.length >= 1) {
-      block.hlButton.updateValue(HL_Utils.portColors[ports[0]], 0)
+      block.hlButton.updateValue(HL_Utils.portNames[ports[0]], 0) //HL_Utils.portColors[ports[0]], 0)
       //block.port = ports[0]
       if (ports.length > 1) {
         //block.hlButton.callbackFunction()
@@ -40977,7 +41003,7 @@ function B_HLPositionServo(x, y) {
   this.addPart(blockIcon);
 
   this.valueBN = new BlockButton(this);
-  this.valueBN.addSlider("angle_right", this.value, [0, 30, 60, 90, 120, 150, 180, 210, 240, 270]);
+  this.valueBN.addSlider("angle_right", this.value, [0, 30, 60, 90, 120, 150, 180]);
   this.addPart(this.valueBN);
 }
 B_HLPositionServo.prototype = Object.create(B_HLOutputBase.prototype);

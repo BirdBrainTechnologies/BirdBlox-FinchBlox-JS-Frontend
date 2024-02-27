@@ -14,6 +14,19 @@ function BlockButton(parent, width) {
   this.font = Font.uiFont(12);
   this.outlineStroke = 1;
 
+  if (Hatchling) {
+    let scale = 0.66//0.75
+    this.buttonMargin = this.buttonMargin * scale
+    this.lineHeight = this.lineHeight * scale
+    this.cornerRadius = this.cornerRadius * scale
+
+    this.height = this.blockButtonMargin + this.lineHeight;
+    this.width = width ? width : 30//40;
+    this.textColor = Colors.bbtDarkGray;
+    this.font = Font.uiFont(12 * scale);
+    this.outlineStroke = 1;
+  }
+
   this.parent = parent;
   this.x = 0;
   this.y = 0;
@@ -164,8 +177,8 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
       const iY = (i + 1) * this.button.height / (this.widgets.length + 1) - image.width / 2;
       GuiElements.move.group(image.group, iX, iY);
       this.ledArrayImage = image;
-    } else if (this.widgets[i].type.startsWith("hatchling")) {
-      this.button.updateBgColor(this.values[i]);
+    //} else if (this.widgets[i].type.startsWith("hatchling")) {
+      //this.button.updateBgColor(this.values[i]);
     } else if (this.widgets[i].type == "sensor") {
       if (this.sensorIcon != null) {
         this.sensorIcon.remove()

@@ -5,16 +5,16 @@
 
 const HL_Utils = {}
 //                      blue         yellow       sea-green    magenta      white        orange
-HL_Utils.portColors = ["#0000FF", "#FFFF00", "#00FF88", "#FF00FF", "#FFFFFF", "#FF4400"]//["#00f", "#ff0", "#0f0", "#f0f", "#0ff", "#f80"]//["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
+//HL_Utils.portColors = ["#0000FF", "#FFFF00", "#00FF88", "#FF00FF", "#FFFFFF", "#FF4400"]//["#00f", "#ff0", "#0f0", "#f0f", "#0ff", "#f80"]//["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
 HL_Utils.portNames = ["A", "B", "C", "D", "E", "F"]
 HL_Utils.addHLButton = function(block, portType) {
   block.port = -1 //unknown
-  block.hlButton = new BlockButton(block, 20);
-  block.hlButton.addSlider("hatchling_" + portType, Colors.bbtDarkGray, HL_Utils.portColors)
+  block.hlButton = new BlockButton(block, 14)//15)//20);
+  block.hlButton.addSlider("hatchling_" + portType, "X", HL_Utils.portNames)// Colors.bbtDarkGray, HL_Utils.portColors)
 }
 HL_Utils.updatePort = function(block) {
   if (block.hlButton != null) {
-    block.port = HL_Utils.portColors.indexOf(block.hlButton.values[0])
+    block.port = HL_Utils.portNames.indexOf(block.hlButton.values[0])//HL_Utils.portColors.indexOf(block.hlButton.values[0])
     console.log("update port for " + block.constructor.name + " to " + block.port)
     block.updateActive()
   }
@@ -27,7 +27,7 @@ HL_Utils.findPorts = function(block) {
     //console.log("findPorts found:")
     //console.log(ports)
     if (ports.length >= 1) {
-      block.hlButton.updateValue(HL_Utils.portColors[ports[0]], 0)
+      block.hlButton.updateValue(HL_Utils.portNames[ports[0]], 0) //HL_Utils.portColors[ports[0]], 0)
       //block.port = ports[0]
       if (ports.length > 1) {
         //block.hlButton.callbackFunction()
@@ -258,7 +258,7 @@ function B_HLPositionServo(x, y) {
   this.addPart(blockIcon);
 
   this.valueBN = new BlockButton(this);
-  this.valueBN.addSlider("angle_right", this.value, [0, 30, 60, 90, 120, 150, 180, 210, 240, 270]);
+  this.valueBN.addSlider("angle_right", this.value, [0, 30, 60, 90, 120, 150, 180]);
   this.addPart(this.valueBN);
 }
 B_HLPositionServo.prototype = Object.create(B_HLOutputBase.prototype);

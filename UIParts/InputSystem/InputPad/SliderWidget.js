@@ -384,7 +384,7 @@ InputWidget.Slider.prototype.makeSlider = function() {
   if (this.type == 'ledArray') {
     //Add an image at the bottom to show your selection
     this.imageG = GuiElements.create.group(0, 0, this.group);
-  } else if (!this.type.startsWith('color') && !this.type.startsWith('hatchling') && this.type != 'sensor') {
+  } else if (!this.type.startsWith('color') && this.type != 'sensor') { //!this.type.startsWith('hatchling') && this.type != 'sensor') {
     //Add a label at the bottom to show your selection
     this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
     this.group.appendChild(this.textE);
@@ -394,18 +394,18 @@ InputWidget.Slider.prototype.makeSlider = function() {
       this.group.appendChild(this.textE2)
     }
   }
-  if (this.type == 'time' || this.type.startsWith('hatchling') || this.type == 'sensor') {
+  if (this.type == 'time' || this.type == 'sensor') { //this.type.startsWith('hatchling') || this.type == 'sensor') {
     this.labelIconH = 23;
     //const labelIconP = (this.type.startsWith('hatchling')) ? VectorPaths.faLightbulb : VectorPaths.faClock;
     let labelIconP = VectorPaths.faClock
-    if (this.type.startsWith('hatchling')) { labelIconP = VectorPaths.faLightbulb }
+    //if (this.type.startsWith('hatchling')) { labelIconP = VectorPaths.faLightbulb }
     if (this.type == 'sensor') { labelIconP = this.value }
 
     this.labelIconW = VectorIcon.computeWidth(labelIconP, this.labelIconH);
     this.labelIcon = new VectorIcon(0, 0, labelIconP, Colors.bbtDarkGray, this.labelIconH, this.group);
-    if (this.type.startsWith('hatchling')) { 
+    /*if (this.type.startsWith('hatchling')) { 
       GuiElements.update.stroke(this.labelIcon.pathE, Colors.bbtDarkGray, 3);
-    }
+    }*/
   }
 }
 
@@ -447,7 +447,7 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
       const iY = y - image.width - S.optionMargin;
       GuiElements.move.group(image.group, iX, iY);
       break;
-    case "hatchling":
+    /*case "hatchling":
       const iconPath = VectorPaths.faLightbulb
       const iconH = 23
       const iconW = VectorIcon.computeWidth(iconPath, iconH)
@@ -470,7 +470,7 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
         GuiElements.update.stroke(slash, S.barColor, 3);
         GuiElements.update.opacity(icon.pathE, 0.3)
       }
-      break;
+      break;*/
     case "sensor":
       const iconP = option
       const iH = 23
@@ -484,13 +484,20 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
     case "angle":
     case "time":
     case "wheels":
+    case "hatchling":
       let width = GuiElements.measure.stringWidth(option, font);
       let textX = x - width / 2 + tickW / 2;
       let textY = y - S.optionMargin; //font.charHeight/2 - S.optionMargin;
       let textE = GuiElements.draw.text(textX, textY, option, font, S.textColor);
       this.group.appendChild(textE);
+
+      if (typeGroup == "hatchling" && isDisabled) {
+        GuiElements.update.opacity(textE, 0.3)
+      }
       break;
   }
+
+  
 }
 
 /**

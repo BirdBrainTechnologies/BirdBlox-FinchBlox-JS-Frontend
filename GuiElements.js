@@ -329,8 +329,10 @@ GuiElements.create.layer = function(depth) {
  * @param {string} color2 - color in form "#fff" of the bottom of the gradient.
  * @param {boolean} horizontal - true if gradiant should be horizontal. vertical by default.
  */
-GuiElements.create.gradient = function(id, color1, color2, horizontal) { //Creates a gradient and adds to the defs
+GuiElements.create.gradient = function(id, color1, color2, horizontal, opacity1, opacity2) { 
   DebugOptions.validateNonNull(color1, color2);
+  if (opacity1 == null) { opacity1 = 1 }
+  if (opacity2 == null) { opacity2 = 1 }
   const gradient = document.createElementNS("http://www.w3.org/2000/svg", 'linearGradient');
   gradient.setAttributeNS(null, "id", id); //Set attributes.
   gradient.setAttributeNS(null, "x1", "0%");
@@ -344,11 +346,11 @@ GuiElements.create.gradient = function(id, color1, color2, horizontal) { //Creat
   GuiElements.defs.appendChild(gradient); //Add it to the SVG's defs
   const stop1 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 1.
   stop1.setAttributeNS(null, "offset", "0%");
-  stop1.setAttributeNS(null, "style", "stop-color:" + color1 + ";stop-opacity:1");
+  stop1.setAttributeNS(null, "style", "stop-color:" + color1 + ";stop-opacity:" + opacity1);//1");
   gradient.appendChild(stop1);
   const stop2 = document.createElementNS("http://www.w3.org/2000/svg", 'stop'); //Create stop 2.
   stop2.setAttributeNS(null, "offset", "100%");
-  stop2.setAttributeNS(null, "style", "stop-color:" + color2 + ";stop-opacity:1");
+  stop2.setAttributeNS(null, "style", "stop-color:" + color2 + ";stop-opacity:" + opacity2);//1");
   gradient.appendChild(stop2);
 };
 
