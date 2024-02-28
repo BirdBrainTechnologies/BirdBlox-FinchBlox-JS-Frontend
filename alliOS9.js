@@ -8323,11 +8323,19 @@ function BlockList() {
       cat.push("OldBlocks")
       cat.push("MicrobitBlocks")
       cat.push("Control_3")*/
-      cat.push("Motion_3");
+      /*cat.push("Motion_3");
       cat.push("Color_3");
       cat.push("Sound_3");
       cat.push("Sensor_3")
-      cat.push("Control_3");
+      cat.push("Control_3");*/
+      cat.push("Motion_1");
+      cat.push("Color_1");
+      cat.push("Sound_1");
+      cat.push("Motion_2");
+      cat.push("Color_2");
+      cat.push("Sound_2");
+      cat.push("Sensor_2");
+      cat.push("Control_2");
     } else {
       cat.push("Motion_1");
       cat.push("Color_1");
@@ -8389,20 +8397,37 @@ BlockList.catCount = function() {
  * @param {Category} category
  */
 BlockList.populateCat_motion_1 = function(category) {
-  category.addBlockByName("B_FBForward");
-  category.addBlockByName("B_FBBackward");
-  category.addBlockByName("B_FBRight");
-  category.addBlockByName("B_FBLeft");
+  if (Hatchling) {
+    category.addBlockByName("B_HL_PS_L1_0")
+    category.addBlockByName("B_HL_PS_L1_90")
+    category.addBlockByName("B_HL_PS_L1_180")
+    category.addBlockByName("B_HLWave")
+    category.addBlockByName("B_HL_RS_L1_CW")
+    category.addBlockByName("B_HL_RS_L1_CC")
+  } else {
+    category.addBlockByName("B_FBForward");
+    category.addBlockByName("B_FBBackward");
+    category.addBlockByName("B_FBRight");
+    category.addBlockByName("B_FBLeft");
+  }
   category.trimBottom();
   category.centerBlocks();
 }
 BlockList.populateCat_color_1 = function(category) {
-  category.addBlockByName("B_FBBeakRed");
-  category.addBlockByName("B_FBTailRed");
-  category.addBlockByName("B_FBBeakGreen");
-  category.addBlockByName("B_FBTailGreen");
-  category.addBlockByName("B_FBBeakBlue");
-  category.addBlockByName("B_FBTailBlue");
+  if (Hatchling) {
+    category.addBlockByName("B_HL_SN_L1_Red")
+    category.addBlockByName("B_HL_SN_L1_Green")
+    category.addBlockByName("B_HL_SN_L1_Blue")
+    category.addBlockByName("B_HL_SN_L1_White")
+    category.addBlockByName("B_HLFairyLightsL1")
+  } else {
+    category.addBlockByName("B_FBBeakRed");
+    category.addBlockByName("B_FBTailRed");
+    category.addBlockByName("B_FBBeakGreen");
+    category.addBlockByName("B_FBTailGreen");
+    category.addBlockByName("B_FBBeakBlue");
+    category.addBlockByName("B_FBTailBlue");
+  }
   category.trimBottom();
   category.centerBlocks();
 }
@@ -8411,61 +8436,85 @@ BlockList.populateCat_sound_1 = function(category) {
   category.addBlockByName("B_FBD");
   category.addBlockByName("B_FBF");
   category.addBlockByName("B_FBG");
-  category.addBlockByName("B_FBA");
+  category.addBlockByName("B_FBA"); 
   category.trimBottom();
   category.centerBlocks();
 }
 BlockList.populateCat_motion_2 = function(category) {
-  category.addBlockByName("B_FBForwardL2");
-  category.addBlockByName("B_FBBackwardL2");
-  category.addBlockByName("B_FBRightL2");
-  category.addBlockByName("B_FBLeftL2");
+  if (Hatchling) {
+    category.addBlockByName("B_HL_PS_L2")
+    category.addBlockByName("B_HL_RS_L2_CW")
+    category.addBlockByName("B_HL_RS_L2_CC")
+  } else {
+    category.addBlockByName("B_FBForwardL2");
+    category.addBlockByName("B_FBBackwardL2");
+    category.addBlockByName("B_FBRightL2");
+    category.addBlockByName("B_FBLeftL2");
+  }
   category.trimBottom();
   category.centerBlocks();
 }
 BlockList.populateCat_color_2 = function(category) {
-  category.addBlockByName("B_FBBeakL2");
-  category.addBlockByName("B_FBTailL2");
-  category.addBlockByName("B_FBLedArrayL2");
-  category.trimBottom();
-  category.centerBlocks();
-}
-BlockList.populateCat_sound_2 = function(category) {
-  category.addBlockByName("B_FBSoundL2");
-  category.trimBottom();
-  category.centerBlocks();
-}
-BlockList.populateCat_motion_3 = function(category) {
   if (Hatchling) {
-    category.addBlockByName("B_HLPositionServo")
-    category.addBlockByName("B_HLRotationServo")
-    category.addBlockByName("B_HLccRotationServo")
-  } else {
-    category.addBlockByName("B_FBForwardL3");
-    category.addBlockByName("B_FBBackwardL3");
-    category.addBlockByName("B_FBRightL3");
-    category.addBlockByName("B_FBLeftL3");
-    //category.addBlockByName("B_FBWheelsL3A");
-    //category.addBlockByName("B_FBWheelsL3B");
-    //category.addBlockByName("B_FBCircleL3");
-    category.addBlockByName("B_FBForwardUntilDark");
-    category.addBlockByName("B_FBForwardUntilObstacle");
-  }
-  category.trimBottom();
-  category.centerBlocks();
-}
-BlockList.populateCat_color_3 = function(category) {
-  if (Hatchling) {
-    category.addBlockByName("B_HLFairyLights")
-    category.addBlockByName("B_HLSingleNeopix")
+    category.addBlockByName("B_HL_SN_L2")
+    category.addBlockByName("B_HLFairyLightsL2")
     //category.addBlockByName("B_HLNeopixStrip")
     category.addBlockByName("B_FBLedArrayL2")
     category.addBlockByName("B_HLAlphabet")
   } else {
-    category.addBlockByName("B_FBBeakL3");
-    category.addBlockByName("B_FBTailL3");
-    category.addBlockByName("B_FBLedArrayL3");
+    category.addBlockByName("B_FBBeakL2");
+    category.addBlockByName("B_FBTailL2");
+    category.addBlockByName("B_FBLedArrayL2");
   }
+  category.trimBottom();
+  category.centerBlocks();
+}
+BlockList.populateCat_sound_2 = function(category) {
+  if (Hatchling) {
+    category.addBlockByName("B_FBSoundL3");
+  } else {
+    category.addBlockByName("B_FBSoundL2");
+  }
+  category.trimBottom();
+  category.centerBlocks();
+}
+BlockList.populateCat_sensor_2 = function(category) {
+  //Hatchling only
+  category.addBlockByName("B_HLWaitUntilDistance");
+  //category.addBlockByName("B_HLWaitUntilDial");
+  //category.addBlockByName("B_HLWaitUntilLight");
+  //category.addBlockByName("B_HLWaitUntilButton");
+  //category.addBlockByName("B_HLWaitUntilClap");
+  category.trimBottom();
+  category.centerBlocks();
+}
+BlockList.populateCat_control_2 = function(category) {
+  //Hatchling only
+  category.addBlockByName("B_WhenFlagTapped");
+  category.addBlockByName("B_Wait");
+  category.addBlockByName("B_Forever");
+  category.addBlockByName("B_Repeat");
+  category.addBlockByName("B_Stop");
+  category.trimBottom();
+  category.centerBlocks();
+}
+BlockList.populateCat_motion_3 = function(category) {
+  category.addBlockByName("B_FBForwardL3");
+  category.addBlockByName("B_FBBackwardL3");
+  category.addBlockByName("B_FBRightL3");
+  category.addBlockByName("B_FBLeftL3");
+  //category.addBlockByName("B_FBWheelsL3A");
+  //category.addBlockByName("B_FBWheelsL3B");
+  //category.addBlockByName("B_FBCircleL3");
+  category.addBlockByName("B_FBForwardUntilDark");
+  category.addBlockByName("B_FBForwardUntilObstacle");
+  category.trimBottom();
+  category.centerBlocks();
+}
+BlockList.populateCat_color_3 = function(category) {
+  category.addBlockByName("B_FBBeakL3");
+  category.addBlockByName("B_FBTailL3");
+  category.addBlockByName("B_FBLedArrayL3");
   category.trimBottom();
   category.centerBlocks();
 }
@@ -8483,25 +8532,13 @@ BlockList.populateCat_sound_3 = function(category) {
   category.trimBottom();
   category.centerBlocks();
 }*/
-BlockList.populateCat_sensor_3 = function(category) {
-  //Hatchling only
-  category.addBlockByName("B_HLWaitUntilDistance");
-  //category.addBlockByName("B_HLWaitUntilDial");
-  //category.addBlockByName("B_HLWaitUntilLight");
-  //category.addBlockByName("B_HLWaitUntilButton");
-  //category.addBlockByName("B_HLWaitUntilClap");
-  category.trimBottom();
-  category.centerBlocks();
-}
 BlockList.populateCat_control_3 = function(category) {
   category.addBlockByName("B_WhenFlagTapped");
   category.addBlockByName("B_Wait");
   category.addBlockByName("B_Forever");
   category.addBlockByName("B_Repeat");
-  if (!Hatchling) {
-    category.addBlockByName("B_StartWhenDark");
-    category.addBlockByName("B_StartWhenClap");
-  }
+  category.addBlockByName("B_StartWhenDark");
+  category.addBlockByName("B_StartWhenClap");
   category.trimBottom();
   category.centerBlocks();
 }
@@ -8956,6 +8993,8 @@ Colors.setCategory = function() {
     "motion_2": Colors.easternBlue,
     "color_2": Colors.neonCarrot,
     "sound_2": Colors.seance,
+    "control_2": Colors.fbYellow,
+    "sensor_2": Colors.finchGreen,
     "motion_3": Colors.easternBlue,
     "color_3": Colors.neonCarrot,
     "sound_3": Colors.seance,
@@ -8973,6 +9012,8 @@ Colors.setCategory = function() {
     "motion_2": Colors.blockPaletteMotion,
     "color_2": Colors.blockPaletteColor,
     "sound_2": Colors.blockPaletteSound,
+    "control_2": Colors.blockPaletteControl,
+    "sensor_2": Colors.finchGreen,
     "motion_3": Colors.blockPaletteMotion,
     "color_3": Colors.blockPaletteColor,
     "sound_3": Colors.blockPaletteSound,
@@ -8990,6 +9031,8 @@ Colors.setCategory = function() {
     "motion_2": Colors.fbBlueBorder,
     "color_2": Colors.fbOrangeBorder,
     "sound_2": Colors.fbPurpleBorder,
+    "control_2": Colors.fbYellowBorder,
+    "sensor_2": Colors.fbDarkGreen,
     "motion_3": Colors.fbBlueBorder,
     "color_3": Colors.fbOrangeBorder,
     "sound_3": Colors.fbPurpleBorder,
@@ -9090,6 +9133,18 @@ Colors.rgbToHex = function(r, g, b) {
   g = Math.round(g);
   b = Math.round(b);
   return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+/**
+ * Returns the RGB value for a given hex value as an array
+ */
+Colors.hexToRgb = function(hex) {
+  hex = hex.slice(1).toLowerCase()
+  var r = parseInt( (hex.charAt(0) + '' + hex.charAt(1)), 16)
+  var g = parseInt( (hex.charAt(2) + '' + hex.charAt(3)), 16)
+  var b = parseInt( (hex.charAt(4) + '' + hex.charAt(5)), 16)
+
+  return [r, g, b]
 }
 
 /**
@@ -9557,6 +9612,8 @@ function VectorPaths(){
 	"motion_2": VP.faArrowsAlt,
 	"color_2": VP.faLightbulb,
 	"sound_2": VP.faMusic,
+    "sensor_2": VP.bsBroadcast,
+    "control_2": VP.faHandPointRight,
 	"motion_3": VP.faArrowsAlt,
 	"color_3": VP.faLightbulb,
 	"sound_3": VP.faMusic,
@@ -12282,13 +12339,19 @@ TitleBar.makeButtons = function() {
     //TB.trashButton.setCallbackFunction(function(){TabManager.activeTab.clear();}, false);
     //TB.trashButton.setCallbackFunction(function(){ UndoManager.deleteTab(); }, false);
 
-    if (!Hatchling) {
+    //if (!Hatchling) {
       TB.levelButton = new Button(TB.levelBnX, y, TB.buttonW, h, TBLayer, Colors.seance, r, r);
       TB.levelButton.addText(LevelManager.currentLevel, LevelManager.levelButtonFont, Colors.white);
       TB.levelButton.setCallbackFunction(function() {
-        (new LevelDialog()).show();
+        if (Hatchling) {
+          var level = (LevelManager.currentLevel == 1) ? 2 : 1
+          LevelManager.setLevel(level);
+          LevelManager.loadLevelSavePoint();
+        } else {
+          (new LevelDialog()).show();
+        }
       }, true);
-    }
+    //}
 
     TB.updateStatus = function(status) {
       //GuiElements.alert("TitleBar update status to " + status);
@@ -12412,7 +12475,8 @@ TitleBar.removeButtons = function() {
   TB.undoButton.remove();
   if (FinchBlox) {
     TB.finchButton.remove();
-    if (!Hatchling) { TB.levelButton.remove(); }
+    //if (!Hatchling) { TB.levelButton.remove(); }
+    TB.levelButton.remove();
     //  TB.trashButton.remove();
   } else {
     TB.viewBn.remove();
@@ -12757,15 +12821,21 @@ BlockPalette.createCategories = function() {
   if (FinchBlox) {
     var currentY = 0;
     var currentX = BlockPalette.catW / 2 - 1.5 * CategoryBN.width - CategoryBN.hMargin;
-    if (Hatchling) {
+    /*if (Hatchling) {
       //currentX = BlockPalette.catW / 2 - 2 * CategoryBN.width - 1.5 * CategoryBN.hMargin;  // 4 categories
       currentX = BlockPalette.catW / 2 - 2.5 * CategoryBN.width - 2 * CategoryBN.hMargin; // 5 categories
-    }
+    }*/
     for (var i = 0; i < catCount; i++) {
       var currentCat = new Category(currentX, currentY, BlockList.getCatName(i), BlockList.getCatId(i));
       BlockPalette.categories.push(currentCat);
-      if (i == 2 && !Hatchling) {
-        currentX = BlockPalette.catW / 2 - 1.5 * CategoryBN.width - CategoryBN.hMargin;
+      if (i == 2) { //&& !Hatchling) {
+        if (Hatchling) {
+          //5 level 2 categories
+          currentX = BlockPalette.catW / 2 - 2.5 * CategoryBN.width - 2 * CategoryBN.hMargin;
+        } else {
+          //3 level 2 categories
+          currentX = BlockPalette.catW / 2 - 1.5 * CategoryBN.width - CategoryBN.hMargin;
+        }
       } else if (i == 5 && !Hatchling) {
         //currentX = BlockPalette.catW/2 - 2.5*CategoryBN.width - 2*CategoryBN.hMargin;
         currentX = BlockPalette.catW / 2 - 2 * CategoryBN.width - 1.5 * CategoryBN.hMargin;
@@ -13253,7 +13323,7 @@ function CategoryBN(x, y, category) {
     this.fill = Colors.getGradient(this.catId);
   }
   this.buildGraphics();
-  if (FinchBlox && !Hatchling) {
+  if (FinchBlox) { //&& !Hatchling) {
     this.setHidden();
   }
 }
@@ -18272,11 +18342,13 @@ InputWidget.Color.prototype.getHex = function (fullBrightness) {
     var green = [q, p, p, t, value, value][mod];
     var blue = [value, value, q, p, p, t][mod];
 
-    var rgb = [(red * 255),(green * 255),(blue * 255)];
+    //var rgb = [(red * 255),(green * 255),(blue * 255)];
 
-    var hex = rgb.map(v => Math.round(v).toString(16).padStart(2, '0') );
+    //var hex = rgb.map(v => Math.round(v).toString(16).padStart(2, '0') );
 
-    return "#" + hex.join('').toUpperCase()
+    //return "#" + hex.join('').toUpperCase()
+
+    return Colors.rgbToHex((red * 255),(green * 255),(blue * 255))
 }
 
 InputWidget.Color.prototype.dropColor = function() {
@@ -29227,7 +29299,7 @@ UndoManager.clearUndos = function() {
  */
 function LevelManager() {
   var LM = LevelManager;
-  LM.currentLevel = Hatchling ? 3 : 1;
+  LM.currentLevel = 1 //Hatchling ? 3 : 1;
   LM.fileListRetreived = false;
   LM.filesSavedLocally = [];
   LM.levelFileList = null;
@@ -40911,7 +40983,7 @@ B_HLOutputBase.prototype.startAction = function() {
   if (device == null || !this.active) {
     return new ExecutionStatusError();
   }
-  if (this.port == -1 || this.port >= HL_Utils.portColors.length) {
+  if (this.port == -1 || this.port >= HL_Utils.portNames.length) {
     //no port chosen. Or possibly port our of bounds. Todo: pop up window if something is connected?
     return new ExecutionStatusError();
   }
@@ -40992,25 +41064,102 @@ B_HLOutputBase.prototype.checkActive = function() {
   return HL_Utils.checkActive(this)
 }
 
-function B_HLPositionServo(x, y) {
-  this.value = 90; //defaultAngle
+function B_HLPositionServo(x, y, defaultAngle) {
+  this.value = defaultAngle //90; //defaultAngle
   this.valueKey = "angle"
   B_HLOutputBase.call(this, x, y, "motion_3", "positionServo", 3);
 
   var icon = VectorPaths["bsSpeedometer2"];
-  var blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 27);
-  blockIcon.isEndOfLine = true;
-  this.addPart(blockIcon);
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 27);
+  this.blockIcon.isEndOfLine = true;
+  this.addPart(this.blockIcon);
+
+}
+B_HLPositionServo.prototype = Object.create(B_HLOutputBase.prototype);
+B_HLPositionServo.prototype.constructor = B_HLPositionServo;
+
+function B_HL_PS_L1(x, y, defaultAngle) {
+  B_HLPositionServo.call(this, x, y, defaultAngle)
+
+  this.blockIcon.addText(defaultAngle.toString(), 12, 30);
+}
+B_HL_PS_L1.prototype = Object.create(B_HLPositionServo.prototype)
+B_HL_PS_L1.prototype.constructor = B_HL_PS_L1
+//MicroBlocks functions
+B_HL_PS_L1.prototype.primName = function() { return "blockList" }
+B_HL_PS_L1.prototype.argList = function() { 
+  var prim = "[h:psv]"
+  var port = HL_Utils.portNames[this.port]
+  var duration = 1000
+
+  return [new BlockArg(prim, [port, this.value]), 
+    new BlockArg("waitMillis", [duration])] 
+}
+
+
+function B_HL_PS_L1_0(x, y) {
+  B_HL_PS_L1.call(this, x, y, 0)
+
+  this.blockIcon.addText("0", 12, 30);
+}
+B_HL_PS_L1_0.prototype = Object.create(B_HL_PS_L1.prototype)
+B_HL_PS_L1_0.prototype.constructor = B_HL_PS_L1_0
+
+function B_HL_PS_L1_90(x, y) {
+  B_HL_PS_L1.call(this, x, y, 90)
+
+  this.blockIcon.addText("90", 12, 30);
+}
+B_HL_PS_L1_90.prototype = Object.create(B_HL_PS_L1.prototype)
+B_HL_PS_L1_90.prototype.constructor = B_HL_PS_L1_90
+
+function B_HL_PS_L1_180(x, y) {
+  B_HL_PS_L1.call(this, x, y, 180)
+
+  this.blockIcon.addText("180", 12, 30);
+}
+B_HL_PS_L1_180.prototype = Object.create(B_HL_PS_L1.prototype)
+B_HL_PS_L1_180.prototype.constructor = B_HL_PS_L1_180
+
+function B_HL_PS_L2(x, y) {
+  B_HLPositionServo.call(this, x, y, 90)
 
   this.valueBN = new BlockButton(this);
   this.valueBN.addSlider("angle_right", this.value, [0, 30, 60, 90, 120, 150, 180]);
   this.addPart(this.valueBN);
 }
-B_HLPositionServo.prototype = Object.create(B_HLOutputBase.prototype);
-B_HLPositionServo.prototype.constructor = B_HLPositionServo;
+B_HL_PS_L2.prototype = Object.create(B_HLPositionServo.prototype)
+B_HL_PS_L2.prototype.constructor = B_HL_PS_L2
 //MicroBlocks functions
-B_HLPositionServo.prototype.primName = function() { return "[h:psv]" }
-B_HLPositionServo.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
+B_HL_PS_L2.prototype.primName = function() { return "[h:psv]" }
+B_HL_PS_L2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
+
+/**
+ * Wave a position servo
+ */
+function B_HLWave(x, y) {
+  B_HLOutputBase.call(this, x, y, "motion_3", "wave", 3);
+
+  var icon = VectorPaths["bsSpeedometer2"];
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 27);
+  this.blockIcon.isEndOfLine = true;
+  this.addPart(this.blockIcon);
+}
+B_HLWave.prototype = Object.create(B_HLOutputBase.prototype);
+B_HLWave.prototype.constructor = B_HLWave;
+//MicroBlocks functions
+B_HLWave.prototype.primName = function() { return "blockList" }
+B_HLWave.prototype.argList = function() { 
+  var prim = "[h:psv]" 
+  var port = HL_Utils.portNames[this.port]
+  var waitTime = 1000
+
+  return [new BlockArg(prim, [port, 90]), 
+    new BlockArg("waitMillis", [waitTime]), 
+    new BlockArg(prim, [port, 180]),
+    new BlockArg("waitMillis", [waitTime])] 
+}
+
 
 function B_HLRotationServo(x, y, flip) {
   this.value = 255 //off signal
@@ -41024,25 +41173,70 @@ function B_HLRotationServo(x, y, flip) {
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 
+}
+B_HLRotationServo.prototype = Object.create(B_HLOutputBase.prototype);
+B_HLRotationServo.prototype.constructor = B_HLRotationServo;
+
+
+function B_HL_RS_L1(x, y, flip) {
+  B_HLRotationServo.call(this, x, y, flip)
+
+  this.value = this.flip ? -50 : 50
+}
+B_HL_RS_L1.prototype = Object.create(B_HLRotationServo.prototype);
+B_HL_RS_L1.prototype.constructor = B_HL_RS_L1;
+//MicroBlocks functions
+B_HL_RS_L1.prototype.primName = function() { return "blockList" }
+B_HL_RS_L1.prototype.argList = function() { 
+  var prim = "[h:rsv]"
+  var port = HL_Utils.portNames[this.port]
+  var duration = 1000
+
+  return [new BlockArg(prim, [port, this.value]), 
+    new BlockArg("waitMillis", [duration]), 
+    new BlockArg(prim, [port, 0])] 
+}
+
+function B_HL_RS_L1_CW(x, y) {
+  B_HL_RS_L1.call(this, x, y, false)
+}
+B_HL_RS_L1_CW.prototype = Object.create(B_HL_RS_L1.prototype);
+B_HL_RS_L1_CW.prototype.constructor = B_HL_RS_L1_CW;
+
+function B_HL_RS_L1_CC(x, y) {
+  B_HL_RS_L1.call(this, x, y, true)
+}
+B_HL_RS_L1_CC.prototype = Object.create(B_HL_RS_L1.prototype);
+B_HL_RS_L1_CC.prototype.constructor = B_HL_RS_L1_CC;
+
+function B_HL_RS_L2(x, y, flip) {
+  B_HLRotationServo.call(this, x, y, flip)
+
   this.valueBN = new BlockButton(this);
   this.valueBN.addSlider("percent", this.defaultSpeed, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
   this.addPart(this.valueBN);
 }
-B_HLRotationServo.prototype = Object.create(B_HLOutputBase.prototype);
-B_HLRotationServo.prototype.constructor = B_HLRotationServo;
+B_HL_RS_L2.prototype = Object.create(B_HLRotationServo.prototype);
+B_HL_RS_L2.prototype.constructor = B_HL_RS_L2;
 //MicroBlocks functions
-B_HLRotationServo.prototype.primName = function() { return "[h:rsv]" }
-B_HLRotationServo.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
+B_HL_RS_L2.prototype.primName = function() { return "[h:rsv]" }
+B_HL_RS_L2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
 
-//To rotate the servo counter clockwise.
-function B_HLccRotationServo(x, y) {
-  B_HLRotationServo.call(this, x, y, true)
+function B_HL_RS_L2_CW(x, y) {
+  B_HL_RS_L2.call(this, x, y, false)
 }
-B_HLccRotationServo.prototype = Object.create(B_HLRotationServo.prototype);
-B_HLccRotationServo.prototype.constructor = B_HLccRotationServo;
+B_HL_RS_L2_CW.prototype = Object.create(B_HL_RS_L2.prototype);
+B_HL_RS_L2_CW.prototype.constructor = B_HL_RS_L2_CW;
 
-function B_HLSingleNeopix(x, y) {
-  this.value = "#FFFFFF"
+function B_HL_RS_L2_CC(x, y) {
+  B_HL_RS_L2.call(this, x, y, true)
+}
+B_HL_RS_L2_CC.prototype = Object.create(B_HL_RS_L2.prototype);
+B_HL_RS_L2_CC.prototype.constructor = B_HL_RS_L2_CC;
+
+
+function B_HLSingleNeopix(x, y, defaultColor) {
+  this.value = defaultColor //"#FFFFFF"
   this.valueKey = "color"
   /*this.red = 100;
   this.green = 100;
@@ -41054,6 +41248,64 @@ function B_HLSingleNeopix(x, y) {
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 
+}
+B_HLSingleNeopix.prototype = Object.create(B_HLOutputBase.prototype);
+B_HLSingleNeopix.prototype.constructor = B_HLSingleNeopix;
+
+B_HLSingleNeopix.prototype.updateColor = function() {
+  /*var s = 255 / 100;
+  this.colorHex = Colors.rgbToHex(this.red * s, this.green * s, this.blue * s);
+  GuiElements.update.color(this.blockIcon.icon.pathE, this.colorHex);*/
+  GuiElements.update.color(this.blockIcon.icon.pathE, this.value)
+}
+
+function B_HL_SN_L1(x, y, color) {
+  B_HLSingleNeopix.call(this, x, y, color)
+
+  this.updateColor()
+}
+B_HL_SN_L1.prototype = Object.create(B_HLSingleNeopix.prototype);
+B_HL_SN_L1.prototype.constructor = B_HL_SN_L1;
+//MicroBlocks functions
+B_HL_SN_L1.prototype.primName = function() { return "blockList" }
+B_HL_SN_L1.prototype.argList = function() { 
+  var prim = "[h:np]"
+  var port = HL_Utils.portNames[this.port]
+  var duration = 1000
+  var rgb = Colors.hexToRgb(this.value)
+
+  return [new BlockArg(prim, [port, rgb[0], rgb[1], rgb[2]]), 
+    new BlockArg("waitMillis", [duration]), 
+    new BlockArg(prim, [port, 0, 0, 0])] 
+}
+
+function B_HL_SN_L1_Red(x, y) {
+  B_HL_SN_L1.call(this, x, y, "#FF0000")
+}
+B_HL_SN_L1_Red.prototype = Object.create(B_HL_SN_L1.prototype);
+B_HL_SN_L1_Red.prototype.constructor = B_HL_SN_L1_Red
+
+function B_HL_SN_L1_Green(x, y) {
+  B_HL_SN_L1.call(this, x, y, "#00FF00")
+}
+B_HL_SN_L1_Green.prototype = Object.create(B_HL_SN_L1.prototype);
+B_HL_SN_L1_Green.prototype.constructor = B_HL_SN_L1_Green
+
+function B_HL_SN_L1_Blue(x, y) {
+  B_HL_SN_L1.call(this, x, y, "#0000FF")
+}
+B_HL_SN_L1_Blue.prototype = Object.create(B_HL_SN_L1.prototype);
+B_HL_SN_L1_Blue.prototype.constructor = B_HL_SN_L1_Blue
+
+function B_HL_SN_L1_White(x, y) {
+  B_HL_SN_L1.call(this, x, y, "#FFFFFF")
+}
+B_HL_SN_L1_White.prototype = Object.create(B_HL_SN_L1.prototype);
+B_HL_SN_L1_White.prototype.constructor = B_HL_SN_L1_White
+
+function B_HL_SN_L2(x, y) {
+  B_HLSingleNeopix.call(this, x, y, "#FFFFFF")
+
   //this.colorButton = new BlockButton(this);
   //this.colorButton.addSlider("color", { r: this.red, g: this.green, b: this.blue });
   /*this.colorButton.addSlider("color_red", this.red)
@@ -41063,27 +41315,23 @@ function B_HLSingleNeopix(x, y) {
   this.valueBN.addColorPicker(this.value)
   this.addPart(this.valueBN);
 }
-B_HLSingleNeopix.prototype = Object.create(B_HLOutputBase.prototype);
-B_HLSingleNeopix.prototype.constructor = B_HLSingleNeopix;
+B_HL_SN_L2.prototype = Object.create(B_HLSingleNeopix.prototype);
+B_HL_SN_L2.prototype.constructor = B_HL_SN_L2;
 //MicroBlocks functions
-B_HLSingleNeopix.prototype.primName = function() { return "[h:np]" }
-B_HLSingleNeopix.prototype.argList = function() { 
-  var hex = this.value.slice(1).toLowerCase()
+B_HL_SN_L2.prototype.primName = function() { return "[h:np]" }
+B_HL_SN_L2.prototype.argList = function() { 
+  /*var hex = this.value.slice(1).toLowerCase()
   var r = hex.charAt(0) + '' + hex.charAt(1);
   var g = hex.charAt(2) + '' + hex.charAt(3);
   var b = hex.charAt(4) + '' + hex.charAt(5);
   r = parseInt(r, 16);
   g = parseInt(g, 16);
-  b = parseInt(b, 16);
-  return [HL_Utils.portNames[this.port], r, g, b] 
+  b = parseInt(b, 16);*/
+  var rgb = Colors.hexToRgb(this.value)
+  return [HL_Utils.portNames[this.port], rgb[0], rgb[1], rgb[2]] 
 }
-//
-B_HLSingleNeopix.prototype.updateColor = function() {
-  /*var s = 255 / 100;
-  this.colorHex = Colors.rgbToHex(this.red * s, this.green * s, this.blue * s);
-  GuiElements.update.color(this.blockIcon.icon.pathE, this.colorHex);*/
-  GuiElements.update.color(this.blockIcon.icon.pathE, this.value)
-}
+
+
 
 function B_HLNeopixStrip(x, y) {
   this.value = ""
@@ -41142,9 +41390,8 @@ B_HLNeopixStrip.prototype.primName = function() { return "[h:nps]" }
 B_HLNeopixStrip.prototype.argList = function() { return [HL_Utils.portNames[this.port], 'all', this.red, this.green, this.blue] }
 
 function B_HLFairyLights(x, y) {
-  this.value = ""
+  this.value = 254
   this.valueKey = "value"
-  this.defaultIntensity = 50
 
   B_HLOutputBase.call(this, x, y, "color_3", "fairyLights", 8);
 
@@ -41153,15 +41400,40 @@ function B_HLFairyLights(x, y) {
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 
-  this.valueBN = new BlockButton(this);
-  this.valueBN.addSlider("percent", this.defaultIntensity, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
-  this.addPart(this.valueBN);
 }
 B_HLFairyLights.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLFairyLights.prototype.constructor = B_HLFairyLights;
+
+function B_HLFairyLightsL1(x, y) {
+  B_HLFairyLights.call(this, x, y)
+}
+B_HLFairyLightsL1.prototype = Object.create(B_HLFairyLights.prototype);
+B_HLFairyLightsL1.prototype.constructor = B_HLFairyLightsL1;
 //MicroBlocks functions
-B_HLFairyLights.prototype.primName = function() { return "[h:fl]" }
-B_HLFairyLights.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
+B_HLFairyLightsL1.prototype.primName = function() { return "blockList" }
+B_HLFairyLightsL1.prototype.argList = function() { 
+  var prim = "[h:fl]"
+  var port = HL_Utils.portNames[this.port]
+  var duration = 1000
+
+  return [new BlockArg(prim, [port, this.value]), 
+    new BlockArg("waitMillis", [duration]), 
+    new BlockArg(prim, [port, 0])] 
+}
+
+function B_HLFairyLightsL2(x, y) {
+  B_HLFairyLights.call(this, x, y)
+
+  this.valueBN = new BlockButton(this);
+  this.valueBN.addSlider("percent", 100, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  this.addPart(this.valueBN);
+}
+B_HLFairyLightsL2.prototype = Object.create(B_HLFairyLights.prototype);
+B_HLFairyLightsL2.prototype.constructor = B_HLFairyLightsL2;
+//MicroBlocks functions
+B_HLFairyLightsL2.prototype.primName = function() { return "[h:fl]" }
+B_HLFairyLightsL2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
+
 
 function B_HLAlphabet(x, y) {
   this.useAlphabet = true

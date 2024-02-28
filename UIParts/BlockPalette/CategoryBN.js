@@ -17,7 +17,7 @@ function CategoryBN(x, y, category) {
     this.fill = Colors.getGradient(this.catId);
   }
   this.buildGraphics();
-  if (FinchBlox && !Hatchling) {
+  if (FinchBlox) { //&& !Hatchling) {
     this.setHidden();
   }
 }

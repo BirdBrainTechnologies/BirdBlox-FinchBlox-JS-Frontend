@@ -91,6 +91,8 @@ Colors.setCategory = function() {
     "motion_2": Colors.easternBlue,
     "color_2": Colors.neonCarrot,
     "sound_2": Colors.seance,
+    "control_2": Colors.fbYellow,
+    "sensor_2": Colors.finchGreen,
     "motion_3": Colors.easternBlue,
     "color_3": Colors.neonCarrot,
     "sound_3": Colors.seance,
@@ -108,6 +110,8 @@ Colors.setCategory = function() {
     "motion_2": Colors.blockPaletteMotion,
     "color_2": Colors.blockPaletteColor,
     "sound_2": Colors.blockPaletteSound,
+    "control_2": Colors.blockPaletteControl,
+    "sensor_2": Colors.finchGreen,
     "motion_3": Colors.blockPaletteMotion,
     "color_3": Colors.blockPaletteColor,
     "sound_3": Colors.blockPaletteSound,
@@ -125,6 +129,8 @@ Colors.setCategory = function() {
     "motion_2": Colors.fbBlueBorder,
     "color_2": Colors.fbOrangeBorder,
     "sound_2": Colors.fbPurpleBorder,
+    "control_2": Colors.fbYellowBorder,
+    "sensor_2": Colors.fbDarkGreen,
     "motion_3": Colors.fbBlueBorder,
     "color_3": Colors.fbOrangeBorder,
     "sound_3": Colors.fbPurpleBorder,
@@ -225,4 +231,16 @@ Colors.rgbToHex = function(r, g, b) {
   g = Math.round(g);
   b = Math.round(b);
   return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+/**
+ * Returns the RGB value for a given hex value as an array
+ */
+Colors.hexToRgb = function(hex) {
+  hex = hex.slice(1).toLowerCase()
+  let r = parseInt( (hex.charAt(0) + '' + hex.charAt(1)), 16)
+  let g = parseInt( (hex.charAt(2) + '' + hex.charAt(3)), 16)
+  let b = parseInt( (hex.charAt(4) + '' + hex.charAt(5)), 16)
+
+  return [r, g, b]
 }

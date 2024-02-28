@@ -390,6 +390,8 @@ function VectorPaths(){
 	"motion_2": VP.faArrowsAlt,
 	"color_2": VP.faLightbulb,
 	"sound_2": VP.faMusic,
+    "sensor_2": VP.bsBroadcast,
+    "control_2": VP.faHandPointRight,
 	"motion_3": VP.faArrowsAlt,
 	"color_3": VP.faLightbulb,
 	"sound_3": VP.faMusic,

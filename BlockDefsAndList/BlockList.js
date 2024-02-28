@@ -28,11 +28,19 @@ function BlockList() {
       cat.push("OldBlocks")
       cat.push("MicrobitBlocks")
       cat.push("Control_3")*/
-      cat.push("Motion_3");
+      /*cat.push("Motion_3");
       cat.push("Color_3");
       cat.push("Sound_3");
       cat.push("Sensor_3")
-      cat.push("Control_3");
+      cat.push("Control_3");*/
+      cat.push("Motion_1");
+      cat.push("Color_1");
+      cat.push("Sound_1");
+      cat.push("Motion_2");
+      cat.push("Color_2");
+      cat.push("Sound_2");
+      cat.push("Sensor_2");
+      cat.push("Control_2");
     } else {
       cat.push("Motion_1");
       cat.push("Color_1");
@@ -94,20 +102,37 @@ BlockList.catCount = function() {
  * @param {Category} category
  */
 BlockList.populateCat_motion_1 = function(category) {
-  category.addBlockByName("B_FBForward");
-  category.addBlockByName("B_FBBackward");
-  category.addBlockByName("B_FBRight");
-  category.addBlockByName("B_FBLeft");
+  if (Hatchling) {
+    category.addBlockByName("B_HL_PS_L1_0")
+    category.addBlockByName("B_HL_PS_L1_90")
+    category.addBlockByName("B_HL_PS_L1_180")
+    category.addBlockByName("B_HLWave")
+    category.addBlockByName("B_HL_RS_L1_CW")
+    category.addBlockByName("B_HL_RS_L1_CC")
+  } else {
+    category.addBlockByName("B_FBForward");
+    category.addBlockByName("B_FBBackward");
+    category.addBlockByName("B_FBRight");
+    category.addBlockByName("B_FBLeft");
+  }
   category.trimBottom();
   category.centerBlocks();
 }
 BlockList.populateCat_color_1 = function(category) {
-  category.addBlockByName("B_FBBeakRed");
-  category.addBlockByName("B_FBTailRed");
-  category.addBlockByName("B_FBBeakGreen");
-  category.addBlockByName("B_FBTailGreen");
-  category.addBlockByName("B_FBBeakBlue");
-  category.addBlockByName("B_FBTailBlue");
+  if (Hatchling) {
+    category.addBlockByName("B_HL_SN_L1_Red")
+    category.addBlockByName("B_HL_SN_L1_Green")
+    category.addBlockByName("B_HL_SN_L1_Blue")
+    category.addBlockByName("B_HL_SN_L1_White")
+    category.addBlockByName("B_HLFairyLightsL1")
+  } else {
+    category.addBlockByName("B_FBBeakRed");
+    category.addBlockByName("B_FBTailRed");
+    category.addBlockByName("B_FBBeakGreen");
+    category.addBlockByName("B_FBTailGreen");
+    category.addBlockByName("B_FBBeakBlue");
+    category.addBlockByName("B_FBTailBlue");
+  }
   category.trimBottom();
   category.centerBlocks();
 }
@@ -116,61 +141,85 @@ BlockList.populateCat_sound_1 = function(category) {
   category.addBlockByName("B_FBD");
   category.addBlockByName("B_FBF");
   category.addBlockByName("B_FBG");
-  category.addBlockByName("B_FBA");
+  category.addBlockByName("B_FBA"); 
   category.trimBottom();
   category.centerBlocks();
 }
 BlockList.populateCat_motion_2 = function(category) {
-  category.addBlockByName("B_FBForwardL2");
-  category.addBlockByName("B_FBBackwardL2");
-  category.addBlockByName("B_FBRightL2");
-  category.addBlockByName("B_FBLeftL2");
+  if (Hatchling) {
+    category.addBlockByName("B_HL_PS_L2")
+    category.addBlockByName("B_HL_RS_L2_CW")
+    category.addBlockByName("B_HL_RS_L2_CC")
+  } else {
+    category.addBlockByName("B_FBForwardL2");
+    category.addBlockByName("B_FBBackwardL2");
+    category.addBlockByName("B_FBRightL2");
+    category.addBlockByName("B_FBLeftL2");
+  }
   category.trimBottom();
   category.centerBlocks();
 }
 BlockList.populateCat_color_2 = function(category) {
-  category.addBlockByName("B_FBBeakL2");
-  category.addBlockByName("B_FBTailL2");
-  category.addBlockByName("B_FBLedArrayL2");
-  category.trimBottom();
-  category.centerBlocks();
-}
-BlockList.populateCat_sound_2 = function(category) {
-  category.addBlockByName("B_FBSoundL2");
-  category.trimBottom();
-  category.centerBlocks();
-}
-BlockList.populateCat_motion_3 = function(category) {
   if (Hatchling) {
-    category.addBlockByName("B_HLPositionServo")
-    category.addBlockByName("B_HLRotationServo")
-    category.addBlockByName("B_HLccRotationServo")
-  } else {
-    category.addBlockByName("B_FBForwardL3");
-    category.addBlockByName("B_FBBackwardL3");
-    category.addBlockByName("B_FBRightL3");
-    category.addBlockByName("B_FBLeftL3");
-    //category.addBlockByName("B_FBWheelsL3A");
-    //category.addBlockByName("B_FBWheelsL3B");
-    //category.addBlockByName("B_FBCircleL3");
-    category.addBlockByName("B_FBForwardUntilDark");
-    category.addBlockByName("B_FBForwardUntilObstacle");
-  }
-  category.trimBottom();
-  category.centerBlocks();
-}
-BlockList.populateCat_color_3 = function(category) {
-  if (Hatchling) {
-    category.addBlockByName("B_HLFairyLights")
-    category.addBlockByName("B_HLSingleNeopix")
+    category.addBlockByName("B_HL_SN_L2")
+    category.addBlockByName("B_HLFairyLightsL2")
     //category.addBlockByName("B_HLNeopixStrip")
     category.addBlockByName("B_FBLedArrayL2")
     category.addBlockByName("B_HLAlphabet")
   } else {
-    category.addBlockByName("B_FBBeakL3");
-    category.addBlockByName("B_FBTailL3");
-    category.addBlockByName("B_FBLedArrayL3");
+    category.addBlockByName("B_FBBeakL2");
+    category.addBlockByName("B_FBTailL2");
+    category.addBlockByName("B_FBLedArrayL2");
   }
+  category.trimBottom();
+  category.centerBlocks();
+}
+BlockList.populateCat_sound_2 = function(category) {
+  if (Hatchling) {
+    category.addBlockByName("B_FBSoundL3");
+  } else {
+    category.addBlockByName("B_FBSoundL2");
+  }
+  category.trimBottom();
+  category.centerBlocks();
+}
+BlockList.populateCat_sensor_2 = function(category) {
+  //Hatchling only
+  category.addBlockByName("B_HLWaitUntilDistance");
+  //category.addBlockByName("B_HLWaitUntilDial");
+  //category.addBlockByName("B_HLWaitUntilLight");
+  //category.addBlockByName("B_HLWaitUntilButton");
+  //category.addBlockByName("B_HLWaitUntilClap");
+  category.trimBottom();
+  category.centerBlocks();
+}
+BlockList.populateCat_control_2 = function(category) {
+  //Hatchling only
+  category.addBlockByName("B_WhenFlagTapped");
+  category.addBlockByName("B_Wait");
+  category.addBlockByName("B_Forever");
+  category.addBlockByName("B_Repeat");
+  category.addBlockByName("B_Stop");
+  category.trimBottom();
+  category.centerBlocks();
+}
+BlockList.populateCat_motion_3 = function(category) {
+  category.addBlockByName("B_FBForwardL3");
+  category.addBlockByName("B_FBBackwardL3");
+  category.addBlockByName("B_FBRightL3");
+  category.addBlockByName("B_FBLeftL3");
+  //category.addBlockByName("B_FBWheelsL3A");
+  //category.addBlockByName("B_FBWheelsL3B");
+  //category.addBlockByName("B_FBCircleL3");
+  category.addBlockByName("B_FBForwardUntilDark");
+  category.addBlockByName("B_FBForwardUntilObstacle");
+  category.trimBottom();
+  category.centerBlocks();
+}
+BlockList.populateCat_color_3 = function(category) {
+  category.addBlockByName("B_FBBeakL3");
+  category.addBlockByName("B_FBTailL3");
+  category.addBlockByName("B_FBLedArrayL3");
   category.trimBottom();
   category.centerBlocks();
 }
@@ -188,25 +237,13 @@ BlockList.populateCat_sound_3 = function(category) {
   category.trimBottom();
   category.centerBlocks();
 }*/
-BlockList.populateCat_sensor_3 = function(category) {
-  //Hatchling only
-  category.addBlockByName("B_HLWaitUntilDistance");
-  //category.addBlockByName("B_HLWaitUntilDial");
-  //category.addBlockByName("B_HLWaitUntilLight");
-  //category.addBlockByName("B_HLWaitUntilButton");
-  //category.addBlockByName("B_HLWaitUntilClap");
-  category.trimBottom();
-  category.centerBlocks();
-}
 BlockList.populateCat_control_3 = function(category) {
   category.addBlockByName("B_WhenFlagTapped");
   category.addBlockByName("B_Wait");
   category.addBlockByName("B_Forever");
   category.addBlockByName("B_Repeat");
-  if (!Hatchling) {
-    category.addBlockByName("B_StartWhenDark");
-    category.addBlockByName("B_StartWhenClap");
-  }
+  category.addBlockByName("B_StartWhenDark");
+  category.addBlockByName("B_StartWhenClap");
   category.trimBottom();
   category.centerBlocks();
 }

@@ -173,13 +173,19 @@ TitleBar.makeButtons = function() {
     //TB.trashButton.setCallbackFunction(function(){TabManager.activeTab.clear();}, false);
     //TB.trashButton.setCallbackFunction(function(){ UndoManager.deleteTab(); }, false);
 
-    if (!Hatchling) {
+    //if (!Hatchling) {
       TB.levelButton = new Button(TB.levelBnX, y, TB.buttonW, h, TBLayer, Colors.seance, r, r);
       TB.levelButton.addText(LevelManager.currentLevel, LevelManager.levelButtonFont, Colors.white);
       TB.levelButton.setCallbackFunction(function() {
-        (new LevelDialog()).show();
+        if (Hatchling) {
+          let level = (LevelManager.currentLevel == 1) ? 2 : 1
+          LevelManager.setLevel(level);
+          LevelManager.loadLevelSavePoint();
+        } else {
+          (new LevelDialog()).show();
+        }
       }, true);
-    }
+    //}
 
     TB.updateStatus = function(status) {
       //GuiElements.alert("TitleBar update status to " + status);
@@ -303,7 +309,8 @@ TitleBar.removeButtons = function() {
   TB.undoButton.remove();
   if (FinchBlox) {
     TB.finchButton.remove();
-    if (!Hatchling) { TB.levelButton.remove(); }
+    //if (!Hatchling) { TB.levelButton.remove(); }
+    TB.levelButton.remove();
     //  TB.trashButton.remove();
   } else {
     TB.viewBn.remove();

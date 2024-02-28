@@ -155,11 +155,13 @@ InputWidget.Color.prototype.getHex = function (fullBrightness) {
     const green = [q, p, p, t, value, value][mod];
     const blue = [value, value, q, p, p, t][mod];
 
-    const rgb = [(red * 255),(green * 255),(blue * 255)];
+    //const rgb = [(red * 255),(green * 255),(blue * 255)];
 
-    const hex = rgb.map(v => Math.round(v).toString(16).padStart(2, '0') );
+    //const hex = rgb.map(v => Math.round(v).toString(16).padStart(2, '0') );
 
-    return "#" + hex.join('').toUpperCase()
+    //return "#" + hex.join('').toUpperCase()
+
+    return Colors.rgbToHex((red * 255),(green * 255),(blue * 255))
 }
 
 InputWidget.Color.prototype.dropColor = function() {

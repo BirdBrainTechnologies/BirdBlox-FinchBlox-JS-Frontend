@@ -3,7 +3,7 @@
  */
 function LevelManager() {
   const LM = LevelManager;
-  LM.currentLevel = Hatchling ? 3 : 1;
+  LM.currentLevel = 1 //Hatchling ? 3 : 1;
   LM.fileListRetreived = false;
   LM.filesSavedLocally = [];
   LM.levelFileList = null;
