@@ -3,7 +3,7 @@
  * @param {Block} parent - The Block this button is a part of
  * @param {number} width - (optional) button width
  */
-function BlockButton(parent, width) {
+function BlockButton(parent, width, fontSize) {
   this.buttonMargin = 2 * BlockPalette.blockButtonOverhang * (1 / 9);
   this.lineHeight = 2 * BlockPalette.blockButtonOverhang * (8 / 9);
   this.cornerRadius = BlockPalette.blockButtonOverhang;
@@ -23,7 +23,7 @@ function BlockButton(parent, width) {
     this.height = this.blockButtonMargin + this.lineHeight;
     this.width = width ? width : 30//40;
     this.textColor = Colors.bbtDarkGray;
-    this.font = Font.uiFont(12 * scale);
+    this.font = fontSize ? Font.uiFont(fontSize) : Font.uiFont(12 * scale);
     this.outlineStroke = 1;
   }
 
@@ -82,14 +82,18 @@ BlockButton.prototype.draw = function() {
 BlockButton.prototype.updateAlign = function(x, y) {
   DebugOptions.validateNumbers(x, y);
   this.move(x, y);
-  //Hide the button while the block is in the blockPalette
-  if (this.parent.stack === null || this.parent.stack.isDisplayStack) {
-    this.button.hide();
-    this.isHidden = true;
-  } else if (this.isHidden) {
-    this.button.show();
-    this.isHidden = false;
+
+  if (!Hatchling) {
+    //Hide the button while the block is in the blockPalette
+    if (this.parent.stack === null || this.parent.stack.isDisplayStack) {
+      this.button.hide();
+      this.isHidden = true;
+    } else if (this.isHidden) {
+      this.button.show();
+      this.isHidden = false;
+    }
   }
+
   return this.width;
 };
 

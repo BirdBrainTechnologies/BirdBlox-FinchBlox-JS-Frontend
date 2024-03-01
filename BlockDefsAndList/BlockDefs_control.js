@@ -414,21 +414,31 @@ B_Message.prototype.startAction = function() {
 
 
 function B_Stop(x, y) {
-  CommandBlock.call(this, x, y, "control", true);
-  const dS = new DropSlot(this, "DS_act", null, null, new SelectionData(Language.getStr("all"), "all"));
-  dS.addOption(new SelectionData(Language.getStr("all"), "all"));
-  dS.addOption(new SelectionData(Language.getStr("this_script"), "this_script"));
-  //dS.addOption(new SelectionData("this block", "this_block"));
-  dS.addOption(new SelectionData(Language.getStr("all_but_this_script"), "all_but_this_script"));
-  //dS.addOption(new SelectionData("other scripts in sprite", "other_scripts_in_sprite"));
-  this.addPart(dS);
-  this.parseTranslation(Language.getStr("block_stop"));
+
+  if (FinchBlox) {
+    CommandBlock.call(this, x, y, "control_2", true);
+    this.addPart(new BlockIcon(this, VectorPaths.stop, Colors.white, "stop", 35));
+  } else {
+    CommandBlock.call(this, x, y, "control", true);
+    const dS = new DropSlot(this, "DS_act", null, null, new SelectionData(Language.getStr("all"), "all"));
+    dS.addOption(new SelectionData(Language.getStr("all"), "all"));
+    dS.addOption(new SelectionData(Language.getStr("this_script"), "this_script"));
+    //dS.addOption(new SelectionData("this block", "this_block"));
+    dS.addOption(new SelectionData(Language.getStr("all_but_this_script"), "all_but_this_script"));
+    //dS.addOption(new SelectionData("other scripts in sprite", "other_scripts_in_sprite"));
+    this.addPart(dS);
+    this.parseTranslation(Language.getStr("block_stop"));
+  }
 }
 B_Stop.prototype = Object.create(CommandBlock.prototype);
 B_Stop.prototype.constructor = B_Stop;
+//MicroBlocks functions
+B_Stop.prototype.primName = function() { return "stopAll" }
+B_Stop.prototype.argList = function() { return [] }
 /* Stops whatever is selected */
 B_Stop.prototype.startAction = function() {
-  const selection = this.slots[0].getData().getValue();
+  let selection = this.slots[0].getData().getValue();
+  if (FinchBlox) { selection = "all_but_this_script" }
   if (selection === "all") {
     CodeManager.stop();
   } else if (selection === "this_script") {

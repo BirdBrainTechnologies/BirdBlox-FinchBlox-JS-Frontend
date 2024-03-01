@@ -92,11 +92,12 @@ DeviceHatchling.prototype.receiveBroadcast = function(msg) {
   for (let i = 0; i < this.portStates.length; i++) {
     if (this.portStates[i] != this.hlState[i]) {
       if (this.supportedStates.includes(this.hlState[i])) {
-        console.log("New value for port " + i + ": " + this.hlState[i])
+        let oldState = this.portStates[i]
+        console.log("New value for port " + i + ": " + this.hlState[i] + " (was " + oldState + ")")
         this.setOutput(null, "portOff", i, 0, "offValue")
         this.portStates[i] = this.hlState[i]
         if (this.portStates[i] == 31) { this.portStates[i] = 0 } //31 is basically also port empty
-        CodeManager.updateAvailablePorts(i);
+        CodeManager.updateAvailablePorts(i, oldState, this.portStates[i]);
       } else {
         console.log("Unsupported type " + this.hlState[i] + " at port " + i)
       }

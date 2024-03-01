@@ -7,10 +7,13 @@ const HL_Utils = {}
 //                      blue         yellow       sea-green    magenta      white        orange
 //HL_Utils.portColors = ["#0000FF", "#FFFF00", "#00FF88", "#FF00FF", "#FFFFFF", "#FF4400"]//["#00f", "#ff0", "#0f0", "#f0f", "#0ff", "#f80"]//["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
 HL_Utils.portNames = ["A", "B", "C", "D", "E", "F"]
+HL_Utils.noPort = "X"
 HL_Utils.addHLButton = function(block, portType) {
   block.port = -1 //unknown
-  block.hlButton = new BlockButton(block, 14)//15)//20);
-  block.hlButton.addSlider("hatchling_" + portType, "X", HL_Utils.portNames)// Colors.bbtDarkGray, HL_Utils.portColors)
+  block.hlButton = new BlockButton(block, 14, 10)//15)//20);
+  block.hlButton.addSlider("hatchling_" + portType, HL_Utils.noPort, HL_Utils.portNames)// Colors.bbtDarkGray, HL_Utils.portColors)
+  block.hlButton.button.unbutton()
+  HL_Utils.findPorts(block)
 }
 HL_Utils.updatePort = function(block) {
   if (block.hlButton != null) {
@@ -20,7 +23,7 @@ HL_Utils.updatePort = function(block) {
   }
 }
 HL_Utils.findPorts = function(block) {
-  console.log("findPorts for " + block.constructor.name)
+  console.log("findPorts for " + block.constructor.name + " " + block.portType)
   let device = DeviceHatchling.getManager().getDevice(0);
   if (block.hlButton != null && device != null) {
     let ports = device.getPortsByType(block.portType)
@@ -33,6 +36,16 @@ HL_Utils.findPorts = function(block) {
         //block.hlButton.callbackFunction()
         block.shouldShowPortsPopup = true
       }
+    }
+
+    if (ports.length == 0) {
+      block.hlButton.updateValue(HL_Utils.noPort, 0)
+    }
+
+    if (ports.length <= 1) {
+      block.hlButton.button.unbutton()
+    } else {
+      block.hlButton.button.rebutton()
     }
   }
 }
@@ -627,32 +640,40 @@ B_HLAlphabet.prototype = Object.create(B_FBLedArrayL2.prototype);
 B_HLAlphabet.prototype.constructor = B_HLAlphabet;
 
 // Wait until sensor reaches threshold
-function B_HLWaitUntil(x, y, usePort) {
+function B_HLWaitUntil(x, y, usePort, sensor) {
   CommandBlock.call(this, x, y, "sensor_3");
   this.usePort = usePort
+  this.sensor = sensor
 
   if (usePort) {
     HL_Utils.addHLButton(this, this.portType)
     //const blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 20);
     //this.addPart(blockIcon);
-    const blockIcon2 = new BlockIcon(this, VectorPaths.faRuler, Colors.white, "ruler", 35);//20);
+    /*const blockIcon2 = new BlockIcon(this, VectorPaths.faRuler, Colors.white, "ruler", 35);//20);
     blockIcon2.isEndOfLine = true;
-    this.addPart(blockIcon2);
+    this.addPart(blockIcon2);*/
     //distance only
 
   } else {
-    const blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 35);
+    /*const blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 35);
     blockIcon.isEndOfLine = true;
-    this.addPart(blockIcon);
+    this.addPart(blockIcon);*/
     //clap, light, shake
-    this.sensorPaths = [VectorPaths.clap, VectorPaths.mjSun, VectorPaths.share]
+    /*this.sensorPaths = [VectorPaths.clap, VectorPaths.mjSun, VectorPaths.share]
     this.sensorTypes = ["clap", "light", "shake"]
     this.sensorSelection = this.sensorPaths[1]
     this.sensorBN = new BlockButton(this);
     this.sensorBN.addSlider("sensor", this.sensorSelection, this.sensorPaths);
-    this.addPart(this.sensorBN);
+    this.addPart(this.sensorBN);*/
   }
-  
+
+  let sensorPaths = [VectorPaths.faRuler, VectorPaths.clap, VectorPaths.mjSun, VectorPaths.share]
+  let sensorTypes = ["distance", "clap", "light", "shake"]
+  let path = sensorPaths[sensorTypes.indexOf(this.sensor)]
+
+  const blockIcon = new BlockIcon(this, path, Colors.white, "sensor", 35)
+  blockIcon.isEndOfLine = true;
+  this.addPart(blockIcon);
   
 }
 B_HLWaitUntil.prototype = Object.create(CommandBlock.prototype);
@@ -660,25 +681,31 @@ B_HLWaitUntil.prototype.constructor = B_HLWaitUntil;
 //MicroBlocks functions
 B_HLWaitUntil.prototype.primName = function() { return "waitUntil" }
 B_HLWaitUntil.prototype.argList = function() { 
-  let sensor = "distance"
   let args = []
-  if(!this.usePort) {
+  /*if(!this.usePort) {
     sensor = this.sensorTypes[this.sensorPaths.indexOf(this.sensorSelection)]
   } else {
+    args = [HL_Utils.portNames[this.port]]
+  }*/
+  if (this.usePort) {
     args = [HL_Utils.portNames[this.port]]
   }
   let prim = null
   let threshold = 0
-  switch (sensor) {
+  switch (this.sensor) {
   case "distance":
     prim = "[h:ds]"
     threshold = 20
     break;
   case "light":
     prim = "[display:lightLevel]"
-    threshold = 150
+    threshold = 200 //150
     break;
   case "clap":
+    //must turn on microphone first
+    //digitalWriteOp 28 true
+    //waitMillis 50
+    threshold = 150
     break;
   }
   if (prim == null) { return [] }
@@ -727,11 +754,12 @@ B_HLWaitUntil.prototype.updateAction = function() {
     let device = DeviceHatchling.getManager().getDevice(0)
     if (device == null) { return new ExecutionStatusError(); }
 
-    let sensor = "distance"
+    /*let sensor = "distance"
     if(!this.usePort) {
       sensor = this.sensorTypes[this.sensorPaths.indexOf(this.sensorSelection)]
-    }
+    }*/
     
+    let sensor = this.sensor
     let port = null
     this.useLessThan = false
     switch(sensor) {
@@ -764,10 +792,23 @@ B_HLWaitUntil.prototype.updateValues = function() {
   }
 }
 
-//Wait until for port connected sensors
-function B_HLWaitUntilPort(x, y) {
+function B_HLWaitUntilClap(x, y) {
+  B_HLWaitUntil.call(this, x, y, false, "clap")
+}
+B_HLWaitUntilClap.prototype = Object.create(B_HLWaitUntil.prototype);
+B_HLWaitUntilClap.prototype.constructor = B_HLWaitUntilClap;
 
-  B_HLWaitUntil.call(this, x, y, true)
+function B_HLWaitUntilLight(x, y) {
+  B_HLWaitUntil.call(this, x, y, false, "light")
+}
+B_HLWaitUntilLight.prototype = Object.create(B_HLWaitUntil.prototype);
+B_HLWaitUntilLight.prototype.constructor = B_HLWaitUntilLight;
+
+
+//Wait until for port connected sensors
+function B_HLWaitUntilPort(x, y, sensor) {
+
+  B_HLWaitUntil.call(this, x, y, true, sensor)
 
   this.thresholdBN = new BlockButton(this);
   this.thresholdBN.addSlider(this.sensorType, this.threshold, this.blockOptions);
@@ -792,7 +833,7 @@ function B_HLWaitUntilDistance(x, y) {
   this.threshold = 10 //How close something has to be to trigger the block
   this.blockOptions = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
-  B_HLWaitUntilPort.call(this, x, y)
+  B_HLWaitUntilPort.call(this, x, y, "distance")
 }
 B_HLWaitUntilDistance.prototype = Object.create(B_HLWaitUntilPort.prototype);
 B_HLWaitUntilDistance.prototype.constructor = B_HLWaitUntilDistance;

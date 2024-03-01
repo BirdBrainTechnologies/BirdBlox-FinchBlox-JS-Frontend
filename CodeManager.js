@@ -630,8 +630,9 @@ CodeManager.updateAvailableSensors = function() {
  * Recursively tells Blocks to become active/inactive based on the accessory
  * that is plugged in to the specified port. Hatchling only.
  */
-CodeManager.updateAvailablePorts = function(port) {
-  CodeManager.passRecursivelyDown("updateAvailablePorts", true, port);
+CodeManager.updateAvailablePorts = function(port, oldPortType, newPortType) {
+  console.log("CodeManager updateAvailablePorts " + port + " " + oldPortType + " " + newPortType)
+  CodeManager.passRecursivelyDown("updateAvailablePorts", true, port, oldPortType, newPortType);
 }
 
 /**

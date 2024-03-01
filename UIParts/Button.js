@@ -513,6 +513,7 @@ Button.prototype.enable = function() {
  * Presses the button
  */
 Button.prototype.press = function() {
+  if (this.isUnButtoned) { return }
   if (!this.pressed) {
     this.pressed = true;
     if (!this.enabled) return;
@@ -728,3 +729,30 @@ Button.prototype.markAsOverlayPart = function(overlay) {
 Button.prototype.unmarkAsOverlayPart = function() {
   this.partOfOverlay = null;
 };
+
+/**
+ * Remove the button portion of this button - make it appear as plain text/image
+ */
+Button.prototype.unbutton = function() {
+  this.bgRect.remove()
+  this.isUnButtoned = true
+  if (this.hasText) {
+    this.textE.setAttributeNS(null, "fill", Colors.white);
+  }
+  if (this.textEs != null) {
+    for (let i = 0; i < this.textEs.length; i++) {
+      this.textEs[i].setAttributeNS(null, "fill", Colors.white);
+    }
+  }
+}
+
+/**
+ * Resets the unbuttoned button.
+ */
+Button.prototype.rebutton = function() {
+  this.group.insertBefore(this.bgRect, this.group.children[0])
+  this.isUnButtoned = false
+  if (this.hasText) {
+    this.textE.setAttributeNS(null, "fill", Colors.white);
+  }
+}

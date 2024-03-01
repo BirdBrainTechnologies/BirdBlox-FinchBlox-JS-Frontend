@@ -187,9 +187,10 @@ BlockList.populateCat_sensor_2 = function(category) {
   //Hatchling only
   category.addBlockByName("B_HLWaitUntilDistance");
   //category.addBlockByName("B_HLWaitUntilDial");
-  //category.addBlockByName("B_HLWaitUntilLight");
+  category.addBlockByName("B_HLWaitUntilLight");
   //category.addBlockByName("B_HLWaitUntilButton");
   //category.addBlockByName("B_HLWaitUntilClap");
+  //category.addBlockByName("B_HLWaitUntilShake");
   category.trimBottom();
   category.centerBlocks();
 }
