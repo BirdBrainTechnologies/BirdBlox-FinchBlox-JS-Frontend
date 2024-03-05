@@ -7,6 +7,7 @@ html
     height: 100%;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
+    background-color:#fff;
 }
 .mainBody
 {
@@ -79,6 +80,37 @@ path{
 .divLayer div {
     pointer-events: auto;
 }
+
+/* https://stackoverflow.com/questions/68308889/how-can-i-transition-content-off-screen-in-one-direction-fading-it-out-update 
+
+transition: 
+        transform .5s ease-in-out, 
+        opacity .5s linear;
+*/
+.slideLeft {
+    transform: translateX(-100vw);
+    transition: transform 1s ease-in;
+}
+.slideRight {
+    transform: translateX(100vw);
+    transition: transform 1s ease-in;
+}
+.popLeft {
+    opacity: 0;
+    transform: translateX(-100vw);
+}
+.popRight {
+    opacity: 0;
+    transform: translateX(100vw);
+}
+.center {
+    opacity: 1;
+    transform: translateX(0);
+    transition: transform 1s ease-out;
+}
+
+
+
 
 @font-face {
   font-family: AvenirHeavy;

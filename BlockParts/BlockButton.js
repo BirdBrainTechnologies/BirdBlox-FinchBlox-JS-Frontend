@@ -81,6 +81,10 @@ BlockButton.prototype.draw = function() {
  */
 BlockButton.prototype.updateAlign = function(x, y) {
   DebugOptions.validateNumbers(x, y);
+  if (Hatchling && !this.widgets[0].type.startsWith("hatchling")) { 
+    x = this.parent.width - this.width - 2
+    y = BlockGraphics.command.height - this.height - 2
+  }
   this.move(x, y);
 
   if (!Hatchling) {
@@ -208,7 +212,7 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
       text[i] = this.values[i].toString() + this.displaySuffixes[i];
     }
 
-    if (this.widgets[i].type == "time") {
+    if (this.widgets[i].type == "time" && !Hatchling) {
       if (this.timeIcon != null) {
         this.timeIcon.remove();
       }
@@ -223,7 +227,13 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
       this.timeIcon = new VectorIcon(tiX, tiY, tiPath, Colors.bbtDarkGray, tiH, this.button.group);
     }
   }
-  this.button.addMultiText(text, this.font, this.textColor);
+  if (Hatchling) {
+    let label = text.join(", ")
+    this.button.addText(text, this.font, this.textColor);
+  } else {
+    this.button.addMultiText(text, this.font, this.textColor);
+  }
+  
   this.parent.updateValues();
 
   if (Hatchling && this.parent.stack != null && !this.parent.stack.isDisplayStack) { 
@@ -273,6 +283,9 @@ BlockButton.prototype.addSlider = function(type, startingValue, options) {
     default:
       suffix = "";
   }
+  if (Hatchling && type == "time") {
+    suffix = "ds"
+  }
 
   const sliderColor = Colors.categoryColors[this.parent.category];
   const slider = new InputWidget.Slider(type, options, startingValue, sliderColor, suffix, this.widgets.length);
@@ -306,6 +319,7 @@ BlockButton.prototype.addWidget = function(widget, suffix, startingValue) {
   this.displaySuffixes.push(suffix);
   this.values.push(startingValue);
   this.height = this.buttonMargin + this.lineHeight * this.widgets.length;
+  if (Hatchling) { this.height = this.buttonMargin + this.lineHeight }
   if (this.widgets[0].type.startsWith("color_")) {
     this.height = this.buttonMargin + this.lineHeight;
   }

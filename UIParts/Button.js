@@ -111,6 +111,7 @@ Button.prototype.addText = function(text, font, color) {
 };
 Button.prototype.makeText = function(text, font, color) {
   DebugOptions.validateNonNull(text);
+  this.textColor = color
   this.removeContent();
   this.textInverts = true;
 
@@ -305,14 +306,14 @@ Button.prototype.addDeviceInfo = function(device) {
   const textX = textY;
   this.removeContent();
 
-  if (Hatchling) {
+  /*if (Hatchling) {
     this.hatchGroup = GuiElements.create.group(textX, iconY, this.group)
     this.eggIcon = new VectorIcon(0, -this.height*0.1, VectorPaths.faEgg, Colors.iron, this.height*0.8, this.hatchGroup, null, 90);
     this.hatchIcon = GuiElements.draw.hatchlingPattern(this.hatchGroup, iconH, device.getHatchlingCode())
     this.textE = GuiElements.draw.text(textX*2, textY, device.shortName, font, color);
-  } else {
+  } else {*/
     this.textE = GuiElements.draw.text(textX, textY, device.shortName, font, color);
-  }
+  //}
   this.group.appendChild(this.textE);
   //let shortW = GuiElements.measure.textWidth(this.textE);
 
@@ -739,11 +740,11 @@ Button.prototype.unbutton = function() {
   if (this.hasText) {
     this.textE.setAttributeNS(null, "fill", Colors.white);
   }
-  if (this.textEs != null) {
+  /*if (this.textEs != null) {
     for (let i = 0; i < this.textEs.length; i++) {
       this.textEs[i].setAttributeNS(null, "fill", Colors.white);
     }
-  }
+  }*/
 }
 
 /**
@@ -753,6 +754,6 @@ Button.prototype.rebutton = function() {
   this.group.insertBefore(this.bgRect, this.group.children[0])
   this.isUnButtoned = false
   if (this.hasText) {
-    this.textE.setAttributeNS(null, "fill", Colors.white);
+    this.textE.setAttributeNS(null, "fill", this.textColor);
   }
 }

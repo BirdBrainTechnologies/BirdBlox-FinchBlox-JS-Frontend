@@ -1,7 +1,12 @@
 /*
  * This file contains the implementations of hatchling blocks that aren't taken
- * from FinchBlox
+ * from FinchBlox, as well as several utility functions
+ *
+ * Hatchling specific blocks - These blocks do not need startAction,
+ * updateAction, etc. Hatchling only uses the microBlocks vm which
+ * has its own runtime.  
  */
+
 
 const HL_Utils = {}
 //                      blue         yellow       sea-green    magenta      white        orange
@@ -75,7 +80,7 @@ HL_Utils.checkActive = function(block) {
   //console.log(this.constructor.name + " " + portFound + " " + (this.stack == null ? "no stack" : this.stack.isDisplayStack))
   //return portFound
 }
-HL_Utils.setupAction = function(block) {
+/*HL_Utils.setupAction = function(block) {
   let mem = block.runMem;
   mem.requestStatus = {};
   mem.requestStatus.finished = false;
@@ -89,6 +94,15 @@ HL_Utils.setupAction = function(block) {
     TitleBar.flashFinchButton();
   }
   return device;
+}*/
+//Return true if the block is ok to execute
+HL_Utils.checkAction = function(block) {
+  if (block.port == -1) {
+    //TODO: add popup
+    console.error("Accessory not connected " + block.constructor.name)
+    return false
+  }
+  return true
 }
 HL_Utils.showPortsPopup = function(block) {
   if (block.shouldShowPortsPopup) {
@@ -164,6 +178,8 @@ HL_Utils.importXml = function(blockNode) {
 }
 
 
+
+
 function B_HLOutputBase(x, y, category, outputType, portType) {
   this.outputType = outputType
   this.portType = portType
@@ -174,7 +190,7 @@ function B_HLOutputBase(x, y, category, outputType, portType) {
 B_HLOutputBase.prototype = Object.create(CommandBlock.prototype);
 B_HLOutputBase.prototype.constructor = B_HLOutputBase;
 
-B_HLOutputBase.prototype.startAction = function() {
+/*B_HLOutputBase.prototype.startAction = function() {
   let device = HL_Utils.setupAction(this);
   if (device == null || !this.active) {
     return new ExecutionStatusError();
@@ -185,14 +201,16 @@ B_HLOutputBase.prototype.startAction = function() {
   }
   device.setOutput(this.runMem.requestStatus, this.outputType, this.port, this.value, this.valueKey)
   return new ExecutionStatusRunning();
-};
+};*/
 B_HLOutputBase.prototype.updateValues = function() {
   HL_Utils.updatePort(this)
   if (this.valueBN != null) {
     if (this.portType == 1) { //rotation servo
-      let percent = this.valueBN.values[0]
-      if (this.flip) { percent = -percent } //rotate counter clockwise
-      if (percent == 0) {
+      let percent = this.valueBN.values[0] * 0.9
+      if (percent < 5) { percent = 0 }
+      if (this.flip) { percent = -percent - 15 } //rotate counter clockwise
+      this.value = percent
+      /*if (percent == 0) {
         this.value = 89 //off signal
       } else if (percent > 100) {
         this.value = 174
@@ -202,7 +220,7 @@ B_HLOutputBase.prototype.updateValues = function() {
         this.value = Math.round( (percent * 75/100) + 98 ) 
       } else if (percent < 0) {
         this.value = Math.round( 78 + (percent * 75/100) )
-      }
+      }*/
     } else if (this.portType == 8) { //fairy lights
       let percent = this.valueBN.values[0]
       if (percent > 100) {
@@ -212,9 +230,9 @@ B_HLOutputBase.prototype.updateValues = function() {
       } else {
         this.value = Math.round(percent * 254/100)
       }
-    } else if (this.portType == 3) { //position servo
+    /*} else if (this.portType == 3) { //position servo
       this.value = Math.round(this.valueBN.values[0] / 1.5) + 2
-      //this.value = this.valueBN.values[0] + 5
+      //this.value = this.valueBN.values[0] + 5*/
     } else {
       this.value = this.valueBN.values[0]
     }
@@ -246,7 +264,7 @@ B_HLOutputBase.prototype.updateValues = function() {
     }
   }
 }
-B_HLOutputBase.prototype.updateAction = function() {
+/*B_HLOutputBase.prototype.updateAction = function() {
   if (this.runMem.requestStatus.finished) {
     if (this.runMem.requestStatus.error) {
       return new ExecutionStatusError();
@@ -255,7 +273,7 @@ B_HLOutputBase.prototype.updateAction = function() {
   } else {
     return new ExecutionStatusRunning();
   }
-};
+};*/
 B_HLOutputBase.prototype.checkActive = function() {
   return HL_Utils.checkActive(this)
 }
@@ -287,8 +305,9 @@ B_HL_PS_L1.prototype.argList = function() {
   let prim = "[h:psv]"
   let port = HL_Utils.portNames[this.port]
   let duration = 1000
+  let val = this.value + 2 //0 and 1 are off commands
 
-  return [new BlockArg(prim, [port, this.value]), 
+  return [new BlockArg(prim, [port, val]), 
     new BlockArg("waitMillis", [duration])] 
 }
 
@@ -350,15 +369,15 @@ B_HLWave.prototype.argList = function() {
   let port = HL_Utils.portNames[this.port]
   let waitTime = 1000
 
-  return [new BlockArg(prim, [port, 90]), 
+  return [new BlockArg(prim, [port, 92]), 
     new BlockArg("waitMillis", [waitTime]), 
-    new BlockArg(prim, [port, 180]),
+    new BlockArg(prim, [port, 182]),
     new BlockArg("waitMillis", [waitTime])] 
 }
 
 
 function B_HLRotationServo(x, y, flip) {
-  this.value = 255 //off signal
+  this.value = 0 //255 //off signal
   this.defaultSpeed = 50;
   this.valueKey = "value"
   this.flip = flip
@@ -377,7 +396,7 @@ B_HLRotationServo.prototype.constructor = B_HLRotationServo;
 function B_HL_RS_L1(x, y, flip) {
   B_HLRotationServo.call(this, x, y, flip)
 
-  this.value = this.flip ? -50 : 50
+  this.value = this.flip ? -60 : 45
 }
 B_HL_RS_L1.prototype = Object.create(B_HLRotationServo.prototype);
 B_HL_RS_L1.prototype.constructor = B_HL_RS_L1;
@@ -721,7 +740,7 @@ B_HLWaitUntil.prototype.argList = function() {
   }] */
 }
 
-B_HLWaitUntil.prototype.startAction = function() {
+/*B_HLWaitUntil.prototype.startAction = function() {
   let device = HL_Utils.setupAction(this)
   if (device == null) { return new ExecutionStatusError(); }
 
@@ -754,10 +773,10 @@ B_HLWaitUntil.prototype.updateAction = function() {
     let device = DeviceHatchling.getManager().getDevice(0)
     if (device == null) { return new ExecutionStatusError(); }
 
-    /*let sensor = "distance"
-    if(!this.usePort) {
-      sensor = this.sensorTypes[this.sensorPaths.indexOf(this.sensorSelection)]
-    }*/
+    //let sensor = "distance"
+    //if(!this.usePort) {
+    //  sensor = this.sensorTypes[this.sensorPaths.indexOf(this.sensorSelection)]
+    //}
     
     let sensor = this.sensor
     let port = null
@@ -785,7 +804,7 @@ B_HLWaitUntil.prototype.updateAction = function() {
     status.requestSent = true;
   }
   return new ExecutionStatusRunning();
-}
+}*/
 B_HLWaitUntil.prototype.updateValues = function() {
   if (this.sensorBN != null) {
     this.sensorSelection = this.sensorBN.values[0];
@@ -851,247 +870,247 @@ B_HLWaitUntilButton.prototype = Object.create(B_HLWaitUntilPort.prototype);
 B_HLWaitUntilButton.prototype.constructor = B_HLWaitUntilButton;
 
 
-function B_HLPortBlock(x, y, port) {
-  this.port = port 
-  CommandBlock.call(this, x, y, "portblocks");
+// function B_HLPortBlock(x, y, port) {
+//   this.port = port 
+//   CommandBlock.call(this, x, y, "portblocks");
 
-  this.updateBlockType(0)
-  this.updateActive()
-}
-B_HLPortBlock.prototype = Object.create(CommandBlock.prototype)
-B_HLPortBlock.prototype.constructor = B_HLPortBlock
-B_HLPortBlock.prototype.updateConnectionStatus = function() {
-  this.updateActive()
-}
-B_HLPortBlock.prototype.checkActive = function() {
-  let device = DeviceHatchling.getManager().getDevice(0);
-  if (device != null) {
-    const currentState = device.portStates[this.port]
+//   this.updateBlockType(0)
+//   this.updateActive()
+// }
+// B_HLPortBlock.prototype = Object.create(CommandBlock.prototype)
+// B_HLPortBlock.prototype.constructor = B_HLPortBlock
+// B_HLPortBlock.prototype.updateConnectionStatus = function() {
+//   this.updateActive()
+// }
+// B_HLPortBlock.prototype.checkActive = function() {
+//   let device = DeviceHatchling.getManager().getDevice(0);
+//   if (device != null) {
+//     const currentState = device.portStates[this.port]
 
-    /*// Update blocks on the canvas and in block palette
-    if (this.portType != currentState) {
-        this.updateBlockType(currentState)
-    }
-    return (currentState != 0)*/
+//     /*// Update blocks on the canvas and in block palette
+//     if (this.portType != currentState) {
+//         this.updateBlockType(currentState)
+//     }
+//     return (currentState != 0)*/
 
 
-    //just update the block if it is in the block palette
-    if (this.stack != null && this.stack.isDisplayStack) {
-      if (this.portType != currentState) {
-        this.updateBlockType(currentState)
-      }
-      return (currentState != 0)  //Nothing attached to port for type == 0
-    } else {
-      return (currentState != 0) && (this.portType == currentState)
-    }
+//     //just update the block if it is in the block palette
+//     if (this.stack != null && this.stack.isDisplayStack) {
+//       if (this.portType != currentState) {
+//         this.updateBlockType(currentState)
+//       }
+//       return (currentState != 0)  //Nothing attached to port for type == 0
+//     } else {
+//       return (currentState != 0) && (this.portType == currentState)
+//     }
 
-  }
-  return false
-}
-B_HLPortBlock.prototype.updateBlockType = function(newPortType) {
-  this.portType = newPortType
-  this.outputType = null
-  this.sensorType = null
-  this.removeParts()
-  if (this.portType == 0) { //Nothing attached, at port name label
-    this.isStatic = true //This block cannot be dragged from the block palette
-    this.icon = new LabelText(this, HL_Utils.portNames[this.port], HL_Utils.portColors[this.port])
-  } else {
-    this.isStatic = false
-    let iconName = null
-    let iconH = 0
-    switch(this.portType) {
-    case 1: iconName = "bsArrowClockwise"; iconH = 30; break; //rotation servo
-    case 3: iconName = "bsSpeedometer2"; iconH = 27; break; //position servo
-    case 8: iconName = "bsStars"; iconH = 27; break; //fairy lights
-    case 9: iconName = "faLightbulb"; iconH = 27; break; //single neopixel
-    case 10: iconName = "faLightbulb"; iconH = 25; break; //4 neopixel strip
-    case 14: iconName = "faRuler"; iconH = 20; break; //distance sensor
-    default:
-      console.error("PortBlock unsupported port type " + this.portType)
-      return
-    }
-    this.icon = new BlockIcon(this, VectorPaths[iconName], HL_Utils.portColors[this.port], iconName, iconH)
-  }
-  this.icon.isEndOfLine = true
-  this.addPart(this.icon)
+//   }
+//   return false
+// }
+// B_HLPortBlock.prototype.updateBlockType = function(newPortType) {
+//   this.portType = newPortType
+//   this.outputType = null
+//   this.sensorType = null
+//   this.removeParts()
+//   if (this.portType == 0) { //Nothing attached, at port name label
+//     this.isStatic = true //This block cannot be dragged from the block palette
+//     this.icon = new LabelText(this, HL_Utils.portNames[this.port], HL_Utils.portColors[this.port])
+//   } else {
+//     this.isStatic = false
+//     let iconName = null
+//     let iconH = 0
+//     switch(this.portType) {
+//     case 1: iconName = "bsArrowClockwise"; iconH = 30; break; //rotation servo
+//     case 3: iconName = "bsSpeedometer2"; iconH = 27; break; //position servo
+//     case 8: iconName = "bsStars"; iconH = 27; break; //fairy lights
+//     case 9: iconName = "faLightbulb"; iconH = 27; break; //single neopixel
+//     case 10: iconName = "faLightbulb"; iconH = 25; break; //4 neopixel strip
+//     case 14: iconName = "faRuler"; iconH = 20; break; //distance sensor
+//     default:
+//       console.error("PortBlock unsupported port type " + this.portType)
+//       return
+//     }
+//     this.icon = new BlockIcon(this, VectorPaths[iconName], HL_Utils.portColors[this.port], iconName, iconH)
+//   }
+//   this.icon.isEndOfLine = true
+//   this.addPart(this.icon)
 
-  if (this.portType != 0) {
-    this.button = new BlockButton(this)
-    switch(this.portType) {
-    case 1:
-      this.outputType = "rotationServo"
-      this.value = 255 //off signal
-      this.valueKey = "value"
-      this.button.addSlider("percent", 0, [-100, -80, -60, -40, -20, 0, 20, 40, 60, 80, 100])
-      break;
-    case 3:
-      this.outputType = "positionServo"
-      this.value = 90; //defaultAngle
-      this.valueKey = "angle"
-      this.button.addSlider("angle_right", 90, [0, 30, 60, 90, 120, 150, 180, 210, 240, 270])
-      break;
-    case 8:
-      this.outputType = "fairyLights"
-      this.value = ""
-      this.valueKey = "value"
-      this.button.addSlider("percent", 50, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
-      break;
-    case 9:
-      this.outputType = "singleNeopix"
-      this.value = ""
-      this.valueKey = "color"
-      this.button.addSlider("color_red", 100)
-      this.button.addSlider("color_green", 100)
-      this.button.addSlider("color_blue", 100)
-      break;
-    case 10:
-      this.outputType = "neopixStrip"
-      this.value = ""
-      this.valueKey = "colors"
-      this.button.addSlider("color_red", 100)
-      this.button.addSlider("color_green", 100)
-      this.button.addSlider("color_blue", 100)
-      break;
-    case 14:
-      this.sensorType = "distance"
-      this.value = 10
-      this.useLessThan = true
-      this.button.addSlider("distance", 10, [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
-      break;
-    }
-    this.addPart(this.button)
-  }
-  if (this.stack != null) {
-    this.stack.updateDim()
-  }
-}
-B_HLPortBlock.prototype.updateValues = function() {
-  let percent = null
-  switch(this.portType) {
-  case 1:
-    percent = this.button.values[0]
-    if (percent == 0) {
-      this.value = 89 //off signal
-    } else if (percent > 100) {
-      this.value = 174
-    } else if (percent < -100) {
-      this.value = 2
-    } else if (percent > 0) {
-      this.value = Math.round( (percent * 75/100) + 98 ) 
-    } else if (percent < 0) {
-      this.value = Math.round( 78 + (percent * 75/100) )
-    }
-    break;
-  case 3:
-    this.value = Math.round(this.button.values[0] / 1.5) + 2
-    break;
-  case 8:
-    percent = this.button.values[0]
-    if (percent > 100) {
-      this.value = 254
-    } else if (percent < 0) {
-      this.value = 0
-    } else {
-      this.value = Math.round(percent * 254/100)
-    }
-    break;
-  case 9:
-    if (this.button.widgets.length == 3) {
-      const red = this.button.values[0];
-      const green = this.button.values[1];
-      const blue = this.button.values[2];
-      this.value = Math.round(red*2.55) + ":" + Math.round(green*2.55) + ":" + Math.round(blue*2.55)
-    }
-    break;
-  case 10:
-    //TODO
-    break;
-  case 14:
-    this.value = this.button.values[0]
-    break;
-  default:
-    console.error("cannot update values for unsupported port type " + this.portType)
-    break;
-  }
-}
+//   if (this.portType != 0) {
+//     this.button = new BlockButton(this)
+//     switch(this.portType) {
+//     case 1:
+//       this.outputType = "rotationServo"
+//       this.value = 255 //off signal
+//       this.valueKey = "value"
+//       this.button.addSlider("percent", 0, [-100, -80, -60, -40, -20, 0, 20, 40, 60, 80, 100])
+//       break;
+//     case 3:
+//       this.outputType = "positionServo"
+//       this.value = 90; //defaultAngle
+//       this.valueKey = "angle"
+//       this.button.addSlider("angle_right", 90, [0, 30, 60, 90, 120, 150, 180, 210, 240, 270])
+//       break;
+//     case 8:
+//       this.outputType = "fairyLights"
+//       this.value = ""
+//       this.valueKey = "value"
+//       this.button.addSlider("percent", 50, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
+//       break;
+//     case 9:
+//       this.outputType = "singleNeopix"
+//       this.value = ""
+//       this.valueKey = "color"
+//       this.button.addSlider("color_red", 100)
+//       this.button.addSlider("color_green", 100)
+//       this.button.addSlider("color_blue", 100)
+//       break;
+//     case 10:
+//       this.outputType = "neopixStrip"
+//       this.value = ""
+//       this.valueKey = "colors"
+//       this.button.addSlider("color_red", 100)
+//       this.button.addSlider("color_green", 100)
+//       this.button.addSlider("color_blue", 100)
+//       break;
+//     case 14:
+//       this.sensorType = "distance"
+//       this.value = 10
+//       this.useLessThan = true
+//       this.button.addSlider("distance", 10, [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
+//       break;
+//     }
+//     this.addPart(this.button)
+//   }
+//   if (this.stack != null) {
+//     this.stack.updateDim()
+//   }
+// }
+// B_HLPortBlock.prototype.updateValues = function() {
+//   let percent = null
+//   switch(this.portType) {
+//   case 1:
+//     percent = this.button.values[0]
+//     if (percent == 0) {
+//       this.value = 89 //off signal
+//     } else if (percent > 100) {
+//       this.value = 174
+//     } else if (percent < -100) {
+//       this.value = 2
+//     } else if (percent > 0) {
+//       this.value = Math.round( (percent * 75/100) + 98 ) 
+//     } else if (percent < 0) {
+//       this.value = Math.round( 78 + (percent * 75/100) )
+//     }
+//     break;
+//   case 3:
+//     this.value = Math.round(this.button.values[0] / 1.5) + 2
+//     break;
+//   case 8:
+//     percent = this.button.values[0]
+//     if (percent > 100) {
+//       this.value = 254
+//     } else if (percent < 0) {
+//       this.value = 0
+//     } else {
+//       this.value = Math.round(percent * 254/100)
+//     }
+//     break;
+//   case 9:
+//     if (this.button.widgets.length == 3) {
+//       const red = this.button.values[0];
+//       const green = this.button.values[1];
+//       const blue = this.button.values[2];
+//       this.value = Math.round(red*2.55) + ":" + Math.round(green*2.55) + ":" + Math.round(blue*2.55)
+//     }
+//     break;
+//   case 10:
+//     //TODO
+//     break;
+//   case 14:
+//     this.value = this.button.values[0]
+//     break;
+//   default:
+//     console.error("cannot update values for unsupported port type " + this.portType)
+//     break;
+//   }
+// }
 
-B_HLPortBlock.prototype.startAction = function() {
-  if (this.portType == 0) {
-    return new ExecutionStatusDone();
-  }
+// B_HLPortBlock.prototype.startAction = function() {
+//   if (this.portType == 0) {
+//     return new ExecutionStatusDone();
+//   }
 
-  let device = HL_Utils.setupAction(this)
-  if (device == null || !this.active) {
-    return new ExecutionStatusError();
-  }
+//   let device = HL_Utils.setupAction(this)
+//   if (device == null || !this.active) {
+//     return new ExecutionStatusError();
+//   }
 
-  if (this.portType != 14) { //Not a sensor type
-    device.setOutput(this.runMem.requestStatus, this.outputType, this.port, this.value, this.valueKey)
-  }
+//   if (this.portType != 14) { //Not a sensor type
+//     device.setOutput(this.runMem.requestStatus, this.outputType, this.port, this.value, this.valueKey)
+//   }
 
-  return new ExecutionStatusRunning();
-}
-B_HLPortBlock.prototype.updateAction = function() {
-  if (this.portType == 14) { //Sensors
-    let device = DeviceHatchling.getManager().getDevice(0)
-    if (device == null) { return new ExecutionStatusError(); }
+//   return new ExecutionStatusRunning();
+// }
+// B_HLPortBlock.prototype.updateAction = function() {
+//   if (this.portType == 14) { //Sensors
+//     let device = DeviceHatchling.getManager().getDevice(0)
+//     if (device == null) { return new ExecutionStatusError(); }
       
-    const num = device.getSensorValue(this.port)
-    console.log(num)
-    if ((!this.useLessThan && num > this.value) || (this.useLessThan && num < this.value)) {
-      return new ExecutionStatusDone();
-    }
+//     const num = device.getSensorValue(this.port)
+//     console.log(num)
+//     if ((!this.useLessThan && num > this.value) || (this.useLessThan && num < this.value)) {
+//       return new ExecutionStatusDone();
+//     }
 
-    return new ExecutionStatusRunning();
-  } else {
-    if (this.runMem.requestStatus.finished) {
-      if (this.runMem.requestStatus.error) {
-        return new ExecutionStatusError();
-      }
-      return new ExecutionStatusDone();
-    } else {
-      return new ExecutionStatusRunning();
-    }
-  }
+//     return new ExecutionStatusRunning();
+//   } else {
+//     if (this.runMem.requestStatus.finished) {
+//       if (this.runMem.requestStatus.error) {
+//         return new ExecutionStatusError();
+//       }
+//       return new ExecutionStatusDone();
+//     } else {
+//       return new ExecutionStatusRunning();
+//     }
+//   }
 
-}
+// }
 
-function B_HLPortA(x, y) {
-  B_HLPortBlock.call(this, x, y, 0)
-}
-B_HLPortA.prototype = Object.create(B_HLPortBlock.prototype)
-B_HLPortA.prototype.constructor = B_HLPortA
+// function B_HLPortA(x, y) {
+//   B_HLPortBlock.call(this, x, y, 0)
+// }
+// B_HLPortA.prototype = Object.create(B_HLPortBlock.prototype)
+// B_HLPortA.prototype.constructor = B_HLPortA
 
-function B_HLPortB(x, y) {
-  B_HLPortBlock.call(this, x, y, 1)
-}
-B_HLPortB.prototype = Object.create(B_HLPortBlock.prototype)
-B_HLPortB.prototype.constructor = B_HLPortB
+// function B_HLPortB(x, y) {
+//   B_HLPortBlock.call(this, x, y, 1)
+// }
+// B_HLPortB.prototype = Object.create(B_HLPortBlock.prototype)
+// B_HLPortB.prototype.constructor = B_HLPortB
 
-function B_HLPortC(x, y) {
-  B_HLPortBlock.call(this, x, y, 2)
-}
-B_HLPortC.prototype = Object.create(B_HLPortBlock.prototype)
-B_HLPortC.prototype.constructor = B_HLPortC
+// function B_HLPortC(x, y) {
+//   B_HLPortBlock.call(this, x, y, 2)
+// }
+// B_HLPortC.prototype = Object.create(B_HLPortBlock.prototype)
+// B_HLPortC.prototype.constructor = B_HLPortC
 
-function B_HLPortD(x, y) {
-  B_HLPortBlock.call(this, x, y, 3)
-}
-B_HLPortD.prototype = Object.create(B_HLPortBlock.prototype)
-B_HLPortD.prototype.constructor = B_HLPortD
+// function B_HLPortD(x, y) {
+//   B_HLPortBlock.call(this, x, y, 3)
+// }
+// B_HLPortD.prototype = Object.create(B_HLPortBlock.prototype)
+// B_HLPortD.prototype.constructor = B_HLPortD
 
-function B_HLPortE(x, y) {
-  B_HLPortBlock.call(this, x, y, 4)
-}
-B_HLPortE.prototype = Object.create(B_HLPortBlock.prototype)
-B_HLPortE.prototype.constructor = B_HLPortE
+// function B_HLPortE(x, y) {
+//   B_HLPortBlock.call(this, x, y, 4)
+// }
+// B_HLPortE.prototype = Object.create(B_HLPortBlock.prototype)
+// B_HLPortE.prototype.constructor = B_HLPortE
 
-function B_HLPortF(x, y) {
-  B_HLPortBlock.call(this, x, y, 5)
-}
-B_HLPortF.prototype = Object.create(B_HLPortBlock.prototype)
-B_HLPortF.prototype.constructor = B_HLPortF
+// function B_HLPortF(x, y) {
+//   B_HLPortBlock.call(this, x, y, 5)
+// }
+// B_HLPortF.prototype = Object.create(B_HLPortBlock.prototype)
+// B_HLPortF.prototype.constructor = B_HLPortF
 
 
 /*** BirdBlox Blocks  ***/

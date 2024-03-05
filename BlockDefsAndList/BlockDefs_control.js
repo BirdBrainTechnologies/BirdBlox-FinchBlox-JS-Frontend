@@ -69,7 +69,7 @@ function B_Wait(x, y) {
     const blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 35);
     blockIcon.isEndOfLine = true;
     this.addPart(blockIcon);
-    this.timeSelection = 30;
+    this.timeSelection = Hatchling ? 5 : 30;
     this.timeBN = new BlockButton(this);
     this.timeBN.addSlider("time", this.timeSelection, [1, 10, 20, 30, 40, 50]);
     this.addPart(this.timeBN);
@@ -437,8 +437,7 @@ B_Stop.prototype.primName = function() { return "stopAll" }
 B_Stop.prototype.argList = function() { return [] }
 /* Stops whatever is selected */
 B_Stop.prototype.startAction = function() {
-  let selection = this.slots[0].getData().getValue();
-  if (FinchBlox) { selection = "all_but_this_script" }
+  let selection = FinchBlox ? "all_but_this_script" : this.slots[0].getData().getValue();
   if (selection === "all") {
     CodeManager.stop();
   } else if (selection === "this_script") {

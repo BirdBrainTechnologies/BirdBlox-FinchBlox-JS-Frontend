@@ -202,20 +202,17 @@ DisplayStack.prototype.updateRun = function() {
  * Starts execution of the DisplayStack. Makes BlockStack glow, too.
  */
 DisplayStack.prototype.startRun = function() {
+  if (Hatchling) {
+    mbRuntime.startRun(this.firstBlock, false)
+    return
+  }
+
   if (!this.isRunning) { // Only start if not already running.
     this.isRunning = true;
     this.firstBlock.glow();
     this.updateTimer = self.setInterval(function() {
       this.updateRun();
     }.bind(this), CodeManager.updateInterval);
-
-    if (Hatchling) {
-      if (mbRuntime.isRunning(this.firstBlock)) {
-        mbRuntime.stopRunningChunk(mbRuntime.lookupChunkID(this.firstBlock))
-      } else {
-        mbRuntime.evalOnBoard(this.firstBlock)
-      }
-    }
   }
 };
 

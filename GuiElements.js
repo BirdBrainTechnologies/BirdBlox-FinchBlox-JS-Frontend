@@ -870,7 +870,7 @@ GuiElements.draw.wedge = function(x, y, r, a, color, cc, arc) {
   return wedge; //Return the finished wedge shape.
 }
 
-GuiElements.draw.hatchlingPattern = function(parentGroup, h, colors) {
+/*GuiElements.draw.hatchlingPattern = function(parentGroup, h, colors) {
   let group = GuiElements.create.group(0, 0, parentGroup);
   let r = h/9
   let cx = r
@@ -900,7 +900,7 @@ GuiElements.draw.hatchlingPattern = function(parentGroup, h, colors) {
     }
   }
   return group
-}
+}*/
 
 /* GuiElements.update contains functions that modify the attributes of existing SVG elements.
  * They do not return anything. */

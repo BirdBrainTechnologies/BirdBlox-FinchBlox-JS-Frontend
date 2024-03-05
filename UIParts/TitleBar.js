@@ -178,9 +178,78 @@ TitleBar.makeButtons = function() {
       TB.levelButton.addText(LevelManager.currentLevel, LevelManager.levelButtonFont, Colors.white);
       TB.levelButton.setCallbackFunction(function() {
         if (Hatchling) {
+
           let level = (LevelManager.currentLevel == 1) ? 2 : 1
           LevelManager.setLevel(level);
           LevelManager.loadLevelSavePoint();
+
+          //When I try to animate the svg group, it travels off screen fine, but
+          //reappears on the screen rather than animating. This happens if I use
+          //css on the group too.
+          /*let code = TabManager.activeTab.mainG
+          let w = TB.width.toString()
+          let animate = document.createElementNS("http://www.w3.org/2000/svg", 'animateTransform');
+          animate.setAttributeNS(null, "attributeName", "transform");
+          animate.setAttributeNS(null, "from", "0 0");
+          animate.setAttributeNS(null, "to", "-" + w + " 0");
+          animate.setAttributeNS(null, "begin", "0s");
+          animate.setAttributeNS(null, "dur", "1s");
+          animate.setAttributeNS(null, "repeatCount", "1");
+          code.appendChild(animate)
+          console.log(code)
+          animate.beginElement()
+
+          setTimeout(()=>{
+            animate.remove()
+
+            GuiElements.move.group(code, w, 0)
+
+            let level = (LevelManager.currentLevel == 1) ? 2 : 1
+            LevelManager.setLevel(level);
+            LevelManager.loadLevelSavePoint();
+
+            animate = document.createElementNS("http://www.w3.org/2000/svg", 'animateTransform');
+            animate.setAttributeNS(null, "attributeName", "transform");
+            animate.setAttributeNS(null, "from", w +" 0");
+            animate.setAttributeNS(null, "to", "0 0");
+            animate.setAttributeNS(null, "begin", "0s");
+            animate.setAttributeNS(null, "dur", "1s");
+            animate.setAttributeNS(null, "repeatCount", "1");
+            code.appendChild(animate)
+            console.log(code)
+            animate.beginElement()
+          }, 1000)*/
+
+
+          //Slide the whole interface out of view and back
+          /*let b = document.body//TabManager.activeTab.mainG //document.body
+          let up = (LevelManager.currentLevel == 1)
+          let class1 = up ? "slideLeft" : "slideRight"
+          let class2 = up ? "popRight" : "popLeft"
+          let class3 = "center"
+          b.classList.add(class1)
+          
+          setTimeout(()=>{
+            console.log("popping over...")
+            b.classList.remove(class1)
+            b.classList.add(class2)
+
+            let level = up ? 2 : 1
+            LevelManager.setLevel(level);
+            LevelManager.loadLevelSavePoint();
+            
+          }, 1000)
+          setTimeout(()=>{
+            console.log("sliding back in")
+            b.classList.remove(class2)
+            b.classList.add(class3)
+          }, 1050)
+          setTimeout(()=>{
+            
+            b.classList.remove(class3)
+          }, 2100)*/
+
+          
         } else {
           (new LevelDialog()).show();
         }
@@ -198,10 +267,10 @@ TitleBar.makeButtons = function() {
         outlineColor = Colors.flagGreen;
         let sn = null
         if (Hatchling) {
-          //sn = DeviceHatchling.getManager().connectedDevices[0].shortName;
-          let hc = DeviceHatchling.getManager().connectedDevices[0].getHatchlingCode()
+          sn = DeviceHatchling.getManager().connectedDevices[0].shortName;
+          /*let hc = DeviceHatchling.getManager().connectedDevices[0].getHatchlingCode()
           let icon = GuiElements.draw.hatchlingPattern(finchBn.hatchGroup, finchBn.finchW, hc)
-          finchBn.hatchGroup.appendChild(icon)
+          finchBn.hatchGroup.appendChild(icon)*/
         } else {
           sn = DeviceFinch.getManager().connectedDevices[0].shortName;
         }

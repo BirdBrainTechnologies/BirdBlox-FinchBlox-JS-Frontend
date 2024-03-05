@@ -136,7 +136,7 @@ BlockIcon.prototype.addText = function(text, xOffset, yOffset) {
     this.parent.group.removeChild(this.textE);
   }
 
-  const font = Font.uiFont(28);
+  const font = Hatchling ? Font.uiFont(12) : Font.uiFont(28);
   //this.textXOffset = 12;
   //this.textYOffset = 30 + font.charHeight/2;
   this.textXOffset = xOffset;

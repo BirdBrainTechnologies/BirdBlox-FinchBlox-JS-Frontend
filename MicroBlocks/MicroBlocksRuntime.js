@@ -48,6 +48,63 @@ const delay = async function(ms) {
 	return new Promise(res => setTimeout(res, ms)) 
 }
 
+//Hatchling app specific
+MicroBlocksRuntime.prototype.startRun = function(startBlock, flagTapped) {
+	this.showInstructions(startBlock)
+    this.showCompiledBytes(startBlock)
+    
+    let device = this.bleDevice()
+    if (device != null) {
+
+      let blocksOk = true 
+      let blockToCheck = startBlock
+      while (blockToCheck != null) {
+        blocksOk = blocksOk && HL_Utils.checkAction(blockToCheck)
+        blockToCheck = blockToCheck.nextBlock
+      }
+      if (!blocksOk) {
+        console.error("Bytes not sent - not all necessary accessories attached")
+        return
+      }
+
+      //Data format:
+      //[0xFB, OpCode, ChunkOrVariableID, DataSize-LSB, DataSize-MSB, ...data...]
+      //The data size field specifies the number of data bytes. It is encoded as two bytes, least significant byte first.
+      //The incoming message buffer on the board sets a practical upper limit on the data size of long messages. This sets the upper limit on the size of a single compiled chunk or source attribute. */
+      //To help the board detect dropped bytes, all long messages sent to the board end with the terminator byte 0xFE. The data size field includes this terminator byte.
+      //Dropped bytes in messages from the board to the IDE have not (so far) been a problem, so long messages sent from the board to the IDE do not have a termination byte.
+      /*let chunkBytes = runtime.chunkBytesFor(startBlock.stack.firstBlock)
+      let dataSize = chunkBytes.length + 2 //Add one for termination byte and one for chunkType
+      if (this.chunkID == null) {
+        this.chunkID = runtime.nextChunkID()
+      } 
+      let chunkType = runtime.chunkTypeFor(startBlock.stack.firstBlock)
+      let bytes = new Uint8Array(dataSize + 5)
+      bytes.set([0xFB, 1, this.chunkID, (dataSize & 255), ((dataSize >> 8) & 255), chunkType])
+      bytes.set(chunkBytes, 6)
+      bytes.set([0xFE], bytes.length - 1)
+      console.log("BlockStack sending bytes: ")
+      console.log(bytes)
+      device.sendMicroBlocksData(bytes)*/
+      
+      this.saveChunk(startBlock) //async function
+      if (!flagTapped) {
+        // from MicroBlocksPatches.gp
+        // method clicked Block hand 
+
+        if (this.isRunning(startBlock)) {
+          this.stopRunningChunk(this.lookupChunkID(startBlock))
+        } else {
+          this.evalOnBoard(startBlock)
+        }
+
+      }
+    } else {
+      TitleBar.flashFinchButton()
+      console.log("Bytes not sent - device not connected.")
+    }
+}
+
 MicroBlocksRuntime.prototype.evalOnBoard = function(aBlock, showBytes) {
 	if (showBytes == null) { showBytes = false }
 	if (showBytes) {

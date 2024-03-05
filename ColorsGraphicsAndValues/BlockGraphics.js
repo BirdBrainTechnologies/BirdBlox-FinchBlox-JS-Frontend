@@ -314,18 +314,25 @@ BlockGraphics.CalcPaths = function() {
   fbHalfBumpIn += "l " + (-d) + ",0 ";
   fbHalfBumpIn += "a " + r + " " + r + " 0 0 0 " + (-r) + " " + r + " ";
   fbHalfBumpIn += "l 0," + u + " " + (-n) + ",0 ";
+
+  //*** Hatchling Bumps ***//
+  let hr = 8; //bump radius
+  //These must end with l command because the next part expects it.
+  let hBumpOut = "a " + hr + " " + hr + " 0 0 1 " + 0 + " " + (2*hr) + " l ";
+  let hBumpIn = "a " + hr + " " + hr + " 0 0 0 " + 0 + " " + (-2*hr) + " l ";
+
   com.path1 = path1; //Top edge
   com.path2 = path2; //top right corner
   com.path3 = path3; //bottom right corner
   com.path4 = path4; //Bottom edge and bottom left corner
   com.path4NoBump = path4NoBump;
   com.path5 = path5; //top left corner
-  com.fbBumpOut = fbBumpOut; //FinchBlox right side bump out
-  com.fbBumpIn = fbBumpIn; //FinchBlox left side bump in
+  com.fbBumpOut = Hatchling ? hBumpOut : fbBumpOut; //FinchBlox right side bump out
+  com.fbBumpIn = Hatchling ? hBumpIn : fbBumpIn; //FinchBlox left side bump in
   com.fbHalfBumpOut = fbHalfBumpOut;
   com.fbHalfBumpIn = fbHalfBumpIn;
-  com.fbBumpDepth = n + 2 * r + d; //  11; //total width of the bump
-  com.fbBumpNeck = (h - 2 * u) / 2; // 13; //half the height of the neck of the bump
+  com.fbBumpDepth = Hatchling ? hr : (n + 2 * r + d); //  11; //total width of the bump
+  com.fbBumpNeck = Hatchling ? hr : ((h - 2 * u) / 2); // 13; //half the height of the neck of the bump
 };
 
 /* Types of blocks are referred to by numbers, as indicated by this function */

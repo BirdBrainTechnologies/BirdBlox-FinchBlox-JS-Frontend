@@ -8,6 +8,10 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
   console.log("DeviceHatchling " + name + ", " + id + ", " + RSSI + ", " + device + ", " + advertisedName)
   DeviceWithPorts.call(this, name, id, RSSI, device);
   console.log("device created.")
+
+  //TODO: Use final naming convention
+  this.shortName = advertisedName
+
   this.hlState = []
   // Code for what is connected to each of the 6 ports (A-F). Current options:
   // * 0  = Empty Port
@@ -87,7 +91,13 @@ DeviceHatchling.prototype.receiveBroadcast = function(msg) {
   }
 
   this.hlState = msg.slice(1)
-  this.batteryLevel = this.hlState[6] //TODO: Hook up battery monitoring
+  //228 for full charge
+  let newBattState = (this.hlState[6] > 211) ? "2" : (this.hlState[6] > 194) ? "1" : "0"
+  if (newBattState != this.batteryState) {
+    this.setBatteryStatus( newBattState )
+    DeviceManager.checkBattery();
+  }
+  
 
   for (let i = 0; i < this.portStates.length; i++) {
     if (this.portStates[i] != this.hlState[i]) {
@@ -128,13 +138,13 @@ DeviceHatchling.prototype.getPortsByType = function(type) {
  * @param {string} port - Which port the sensor is plugged in to (null for micro:bit sensors)
  */
 DeviceHatchling.prototype.readSensor = function(status, sensor, port) {
-  const request = new HttpRequestBuilder("robot/in");
+  /*const request = new HttpRequestBuilder("robot/in");
   request.addParam("type", this.getDeviceTypeId());
   request.addParam("id", this.id);
   request.addParam("sensor", sensor);
   if (port != null) {
     request.addParam("port", port);
-  }
+  }*/
   //HtmlServer.sendRequest(request.toString(), status, true);
 }
 
@@ -142,16 +152,16 @@ DeviceHatchling.prototype.readSensor = function(status, sensor, port) {
  * Retrieves the sensor value for the given port from the locally stored array
  * @param {number} port - The port to return the value for
  */
-DeviceHatchling.prototype.getSensorValue = function(port) {
+/*DeviceHatchling.prototype.getSensorValue = function(port) {
   return this.hlState[ port + 14 ]
-}
+}*/
 
 /**
  * getHatchlingCode - calculate the color code displayed on the hatchling
  * @param {string} devName Advertised name of the robot
  * @return {[string]} hex values of the 6 colors displayed.
  */
-DeviceHatchling.prototype.getHatchlingCode = function() {
+/*DeviceHatchling.prototype.getHatchlingCode = function() {
   //let digits = this.advertisedName.substr(this.advertisedName.length - 5)
 
   //TODO: Remove this function and associated color coding
@@ -198,7 +208,7 @@ DeviceHatchling.prototype.getColor = function(number) {
     default:
       return "#000"
   }
-}
+}*/
 
 /** Temporarily override functions to make sure we don't send any regular requests 
  * now that we are using the MicroBlocks VM
