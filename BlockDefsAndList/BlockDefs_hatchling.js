@@ -283,7 +283,15 @@ function B_HLPositionServo(x, y, defaultAngle) {
   this.valueKey = "angle"
   B_HLOutputBase.call(this, x, y, "motion_3", "positionServo", 3);
 
-  const icon = VectorPaths["bsSpeedometer2"];
+  let icon = VectorPaths["bdPosition"];
+  switch (defaultAngle) {
+  case 0:
+    icon = VectorPaths["bdPosition0"];
+    break;
+  case 180:
+    icon = VectorPaths["bdPosition180"];
+    break;
+  }
   this.blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 27);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
@@ -355,7 +363,7 @@ B_HL_PS_L2.prototype.argList = function() { return [HL_Utils.portNames[this.port
 function B_HLWave(x, y) {
   B_HLOutputBase.call(this, x, y, "motion_3", "wave", 3);
 
-  const icon = VectorPaths["bsSpeedometer2"];
+  const icon = VectorPaths["bdPositionWW"];
   this.blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 27);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);

@@ -42,6 +42,9 @@
 			  	if (pathId.transform != null) {
 			    	pathE.setAttributeNS(null, "transform", pathId.transform);
 			  	}
+			  	if (pathId.fillRule != null) {
+			  		pathE.setAttributeNS(null, "fill-rule", pathId.fillRule)
+			  	}
 
 			  	var label = document.createElementNS("http://www.w3.org/2000/svg", 'text');
 			  	label.innerHTML = icon
