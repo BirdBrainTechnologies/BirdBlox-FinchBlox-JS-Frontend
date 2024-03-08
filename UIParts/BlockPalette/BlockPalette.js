@@ -34,9 +34,14 @@ BlockPalette.setGraphics = function() {
 
   // Dimensions for the region with CategoryBNs
   if (FinchBlox) {
+    BlockPalette.hl = 10 //Hatchling factor
     BlockPalette.width = GuiElements.width;
     BlockPalette.height = 90; //100;
     BlockPalette.y = GuiElements.height - BlockPalette.height;
+    if (Hatchling) {
+      BlockPalette.width -= 4*BlockPalette.hl 
+      BlockPalette.height += BlockPalette.hl
+    }
     BlockPalette.bg = Colors.bbtDarkGray;
     BlockPalette.catW = 300;
     BlockPalette.catX = GuiElements.width / 2 - BlockPalette.catW / 2;
@@ -64,6 +69,8 @@ BlockPalette.setGraphics = function() {
     BlockPalette.trashColor = Colors.black;
   }
 
+  BlockPalette.x = Hatchling ? 20 : 0
+
   BlockPalette.catBg = Colors.white;
   BlockPalette.labelFont = Font.uiFont(13);
   BlockPalette.labelColor = Colors.black;
@@ -77,11 +84,11 @@ BlockPalette.setGraphics = function() {
 BlockPalette.updateZoom = function() {
   let BP = BlockPalette;
   BP.setGraphics();
-  GuiElements.update.rect(BP.palRect, 0, BP.y, BP.width, BP.height);
+  GuiElements.update.rect(BP.palRect, BP.x, BP.y, BP.width, BP.height);
   if (FinchBlox) {
     //BP.updatePath(BP.leftShape);
     //BP.updatePath(BP.rightShape);
-    BP.updatePath();
+    if (!Hatchling) { BP.updatePath(); }
     GuiElements.update.rect(BP.catRect, 0, BP.catY, 0, BP.catH);
   } else {
     GuiElements.update.rect(BP.catRect, 0, BP.catY, BP.width, BP.catH);
@@ -102,6 +109,21 @@ BlockPalette.createCatBg = function() {
   let bgW = BP.catW;
   if (FinchBlox) {
     bgW = 0;
+
+    if (Hatchling) {
+      const CBN = CategoryBN
+      const color = Colors.ballyGrayLight
+      const widthL1 = CBN.width * 3 // 3 categories in level 1
+      const widthL2 = CBN.width * 5 // 5 categories in level 2
+      const xL1 = (GuiElements.width - widthL1)/2
+      const xL2 = (GuiElements.width - widthL2)/2
+      const y = BP.y - CBN.height
+      BP.level1CatRect = GuiElements.draw.tab(xL1, y, widthL1, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
+      BP.level2CatRect = GuiElements.draw.tab(xL2, y, widthL2, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
+      GuiElements.layers.catBg.appendChild(BP.level1CatRect);
+      GuiElements.layers.catBg.appendChild(BP.level2CatRect);
+      GuiElements.update.opacity(BlockPalette.level2CatRect, 0)
+    }
   }
   //BP.catRect = GuiElements.draw.rect(0, BP.catY, BP.width, BP.catH, BP.catBg);
   //BP.catRect = GuiElements.draw.rect(BP.catX, BP.catY, BP.catW, BP.catH, BP.catBg);
@@ -119,11 +141,20 @@ BlockPalette.createCatBg = function() {
 BlockPalette.createPalBg = function() {
   let BP = BlockPalette;
   BP.palRect = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
+  if (Hatchling) {
+    BP.palRect = GuiElements.draw.rect(BP.x, BP.y, BP.width, BP.height, BP.bg, BP.hl, BP.hl)
+  }
   GuiElements.layers.paletteBG.appendChild(BP.palRect);
   if (FinchBlox) {
-    BP.shape = GuiElements.create.path(GuiElements.layers.paletteBG);
-    BP.shape.setAttributeNS(null, "fill", BP.bg);
-    BlockPalette.updatePath();
+    
+    if (Hatchling) {
+      BP.shape = GuiElements.create.path(GuiElements.layers.titlebar);
+      BP.shape.setAttributeNS(null, "fill", "none");
+    } else {
+      BP.shape = GuiElements.create.path(GuiElements.layers.paletteBG);
+      BP.shape.setAttributeNS(null, "fill", BP.bg);
+      BlockPalette.updatePath();
+    }
     /*
     BP.leftShape = GuiElements.create.path(GuiElements.layers.paletteBG);
     BP.rightShape = GuiElements.create.path(GuiElements.layers.paletteBG);
@@ -133,6 +164,32 @@ BlockPalette.createPalBg = function() {
     BlockPalette.updatePath(BP.rightShape);*/
   }
 };
+
+BlockPalette.updateOutline = function(selectedCatButton) {
+  const BP = BlockPalette;
+  const CBN = CategoryBN
+  const color = Colors.getColor(selectedCatButton.catId)
+  const bnR = CBN.cornerRadius
+
+  var path = "m " + BP.x + "," + GuiElements.height;
+  path += " v " + (2*BP.hl - BP.height);
+  path += " a " + BP.hl + " " + BP.hl + " 0 0 1 " + BP.hl + " " + (-BP.hl);
+  path += " h " + ((GuiElements.width-BlockPalette.catW)/ 2 + selectedCatButton.x - bnR - 3*BP.hl);
+  path += " a " + bnR + " " + bnR + " 0 0 0 " + bnR + " " + (-bnR);
+  path += " v " + (2*bnR - CBN.height);
+  path += " a " + bnR + " " + bnR + " 0 0 1 " + bnR + " " + (-bnR);
+  path += " h " + (CBN.width - 2*bnR);
+  path += " a " + bnR + " " + bnR + " 0 0 1 " + bnR + " " + bnR;
+  path += " v " + (CBN.height - 2*bnR);
+  path += " a " + bnR + " " + bnR + " 0 0 0 " + bnR + " " + bnR;
+  path += " h " + ((GuiElements.width-BlockPalette.catW)/ 2 + (BlockPalette.catW - selectedCatButton.x - CBN.width) - bnR - 3*BP.hl);
+  path += " a " + BP.hl + " " + BP.hl + " 0 0 1 " + BP.hl + " " + BP.hl;
+  path += " v " + (BP.height - 2*BP.hl);
+
+  BP.shape.setAttributeNS(null, "d", path);
+  GuiElements.update.stroke(BP.shape, color, 2)
+  console.log(BP.shape)
+}
 
 BlockPalette.updatePath = function() {
   let BP = BlockPalette;
@@ -184,7 +241,7 @@ BlockPalette.updatePaletteColor = function(color) {
   GuiElements.update.color(BlockPalette.palRect, color);
   //GuiElements.update.color(BlockPalette.leftShape, color);
   //GuiElements.update.color(BlockPalette.rightShape, color);
-  GuiElements.update.color(BlockPalette.shape, color);
+  if (!Hatchling) { GuiElements.update.color(BlockPalette.shape, color); }
 }
 
 /**
@@ -367,9 +424,11 @@ BlockPalette.setLevel = function() {
   switch (LevelManager.currentLevel) {
     case 1:
       BlockPalette.getCategory("motion_1").select();
+      if (Hatchling) { GuiElements.update.opacity(BlockPalette.level2CatRect, 0) }
       break;
     case 2:
       BlockPalette.getCategory("motion_2").select();
+      if (Hatchling) { GuiElements.update.opacity(BlockPalette.level2CatRect, 1) }
       break;
     case 3:
       BlockPalette.getCategory("motion_3").select();

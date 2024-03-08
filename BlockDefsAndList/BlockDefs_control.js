@@ -4,9 +4,16 @@
 function B_WhenFlagTapped(x, y) {
 
   if (FinchBlox) {
-    HatBlock.call(this, x, y, "control_3");
-    this.addPart(new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 35));
+    if (Hatchling) {
+      HatBlock.call(this, x, y, "control_2");
+      this.addPart(new BlockIcon(this, VectorPaths.bdStart, Colors.ballyGreenYellow, "flag", 45));
+      GuiElements.update.color(this.path, Colors.white)
+    } else {
+      HatBlock.call(this, x, y, "control_3");
+      this.addPart(new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 35));
+    }    
     this.isStartBlock = true;
+  
   } else {
     HatBlock.call(this, x, y, "control");
     // Add flag icon with height 15
@@ -65,7 +72,7 @@ B_WhenIReceive.prototype.startAction = function() {
 function B_Wait(x, y) {
 
   if (FinchBlox) {
-    CommandBlock.call(this, x, y, "control_3");
+    CommandBlock.call(this, x, y, "control_" + (Hatchling ? "2" : "3"));
     const blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 35);
     blockIcon.isEndOfLine = true;
     this.addPart(blockIcon);
@@ -142,7 +149,7 @@ B_WaitUntil.prototype.startAction = function() {
 function B_Forever(x, y) {
   let category = "control";
   if (FinchBlox) {
-    category = "control_3";
+    category = "control_" + (Hatchling ? "2" : "3");
   }
   LoopBlock.call(this, x, y, category, false); //Bottom is not open.
   if (FinchBlox) {
@@ -179,7 +186,7 @@ B_Forever.prototype.updateAction = function() {
 function B_Repeat(x, y) {
   let category = "control";
   if (FinchBlox) {
-    category = "control_3";
+    category = "control_" + (Hatchling ? "2" : "3");
   }
   LoopBlock.call(this, x, y, category);
 
@@ -415,9 +422,9 @@ B_Message.prototype.startAction = function() {
 
 function B_Stop(x, y) {
 
-  if (FinchBlox) {
+  if (Hatchling) {
     CommandBlock.call(this, x, y, "control_2", true);
-    this.addPart(new BlockIcon(this, VectorPaths.stop, Colors.white, "stop", 35));
+    this.addPart(new BlockIcon(this, VectorPaths.bdStop, Colors.white, "stop", 45));
   } else {
     CommandBlock.call(this, x, y, "control", true);
     const dS = new DropSlot(this, "DS_act", null, null, new SelectionData(Language.getStr("all"), "all"));
@@ -560,7 +567,7 @@ B_WhenKeyPressed.prototype.updateAction = function() {
 //FinchBlox and Hatchling only
 function B_FBStartWhen(x, y, sensor) {
   this.sensor = sensor
-  let category = Hatchling ? "sensor_3" : "control_3"
+  let category = Hatchling ? "sensor_2" : "control_3"
   HatBlock.call(this, x, y, category, true);
 }
 B_FBStartWhen.prototype = Object.create(HatBlock.prototype);

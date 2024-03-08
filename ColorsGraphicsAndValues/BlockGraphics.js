@@ -47,8 +47,8 @@ BlockGraphics.SetCommand = function() {
     BlockGraphics.command.height = 60; //76;
     BlockGraphics.command.width = 50; //76;
     BlockGraphics.command.cornerRadius = 8; //10;
-    BlockGraphics.command.vMargin = 10; // The margin above and below the content (BlockParts) of the Block
-    BlockGraphics.command.hMargin = 10; //20;//25; // The margin to the left and right of the content
+    BlockGraphics.command.vMargin = Hatchling ? 1 : 10; // The margin above and below the content (BlockParts) of the Block
+    BlockGraphics.command.hMargin = Hatchling ? 1 : 10; //20;//25; // The margin to the left and right of the content
     //		BlockGraphics.command.bumpWidth = 15; //Width added by the bump sticking out
   } else {
     BlockGraphics.command.height = 34;
@@ -139,7 +139,7 @@ BlockGraphics.SetHat = function() {
   BlockGraphics.hat = {};
 
   //Hat radius for FinchBlox
-  BlockGraphics.hat.r = 24; //30;
+  BlockGraphics.hat.r = Hatchling ? 30 : 24; //30;
 
   // Radius of ellipse at top of Block
   BlockGraphics.hat.hRadius = 60;

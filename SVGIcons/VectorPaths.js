@@ -677,5 +677,17 @@ function VectorPaths(){
     "oldblocks": VP.undo,
     "microbitblocks": VP.microbit
   };
+  if (Hatchling) {
+    VP.categoryIcons = {
+    "motion_1": VP.bdHatchling,
+    "color_1": VP.bdLightBulb,
+    "sound_1": VP.bdMusic,
+    "motion_2": VP.bdHatchling,
+    "color_2": VP.bdLightBulb,
+    "sound_2": VP.bdMusic,
+    "sensor_2": VP.bdHatchling,
+    "control_2": VP.bdHatchling
+  };
+  }
 
 }

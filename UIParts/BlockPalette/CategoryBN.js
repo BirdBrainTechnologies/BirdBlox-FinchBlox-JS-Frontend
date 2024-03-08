@@ -12,7 +12,7 @@ function CategoryBN(x, y, category) {
   this.text = this.category.name;
   this.catId = this.category.id;
   if (FinchBlox) {
-    this.fill = Colors.getColor(this.catId);
+    this.fill = Hatchling ? Colors.blockPalette[this.catId] : Colors.getColor(this.catId);
   } else {
     this.fill = Colors.getGradient(this.catId);
   }
@@ -32,7 +32,7 @@ CategoryBN.setGraphics = function() {
   CBN.labelLMargin = 6; // The amount of space between the text of the button and the band of color
 
   if (FinchBlox) {
-    CBN.hMargin = BP.catHMargin;
+    CBN.hMargin = Hatchling ? 0 : BP.catHMargin;
     CBN.height = BP.catH;
     CBN.selectedH = BP.catH + 10;
     CBN.iconScale = 0.65;
@@ -62,6 +62,7 @@ CategoryBN.prototype.buildGraphics = function() {
   if (FinchBlox) {
     //this.bgRect = GuiElements.draw.rect(0, 0, CBN.width, CBN.height, this.fill);
     this.bgRect = GuiElements.draw.tab(0, 0, CBN.width, CBN.height, this.fill, CBN.cornerRadius);
+    if (Hatchling) { GuiElements.update.opacity(this.bgRect, 0) }
   } else {
     this.bgRect = GuiElements.draw.rect(0, 0, CBN.width, CBN.height, CBN.bg);
   }
@@ -73,7 +74,8 @@ CategoryBN.prototype.buildGraphics = function() {
     let iconW = VectorIcon.computeWidth(iconPath, iconH);
     let iconX = (CBN.width - iconW) / 2;
     let iconY = (CBN.height - iconH) / 2;
-    this.icon = new VectorIcon(iconX, iconY, iconPath, Button.foreground, iconH, this.group, false);
+    let color = Hatchling ? Colors.getColor(this.catId) : Button.foreground
+    this.icon = new VectorIcon(iconX, iconY, iconPath, color, iconH, this.group, false);
     if (iconPath == VectorPaths.microbit) { 
       this.icon.setColor(Colors.bbtDarkGray)
       this.icon.addBackgroundRect() 
@@ -95,7 +97,11 @@ CategoryBN.prototype.buildGraphics = function() {
  * Makes the button appear selected
  */
 CategoryBN.prototype.select = function() {
-  if (FinchBlox) {
+  if (Hatchling) {
+    BlockPalette.updatePaletteColor(Colors.blockPalette[this.catId]);
+    GuiElements.update.opacity(this.bgRect, 1)
+    BlockPalette.updateOutline(this)
+  } else if (FinchBlox) {
     let pop = CategoryBN.height - CategoryBN.selectedH;
     GuiElements.move.group(this.group, this.x, this.y + pop);
     GuiElements.update.tab(this.bgRect, 0, 0, CategoryBN.width, CategoryBN.selectedH, CategoryBN.cornerRadius);
@@ -118,7 +124,9 @@ CategoryBN.prototype.select = function() {
  * Makes the button appear deselected
  */
 CategoryBN.prototype.deselect = function() {
-  if (FinchBlox) {
+  if (Hatchling) {
+    GuiElements.update.opacity(this.bgRect, 0)
+  } else if (FinchBlox) {
     GuiElements.move.group(this.group, this.x, this.y);
     GuiElements.update.tab(this.bgRect, 0, 0, CategoryBN.width, CategoryBN.height, CategoryBN.cornerRadius);
 

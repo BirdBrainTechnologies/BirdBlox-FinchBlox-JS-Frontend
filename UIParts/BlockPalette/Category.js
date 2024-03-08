@@ -28,7 +28,7 @@ function Category(buttonX, buttonY, name, id) {
   }
 
   this.group = GuiElements.create.group(0, 0);
-  this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, 0, BlockPalette.y,
+  this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, BlockPalette.x, BlockPalette.y,
     BlockPalette.width, BlockPalette.height, 0, 0);
   this.button = new CategoryBN(this.buttonX, this.buttonY, this);
 
@@ -277,7 +277,7 @@ Category.prototype.trimBottom = function() {
  */
 Category.prototype.centerBlocks = function() {
   this.computeWidth();
-  const newX = (BlockPalette.width - this.width) / 2;
+  const newX = BlockPalette.x + (BlockPalette.width - this.width) / 2;
   this.smoothScrollBox.move(newX, BlockPalette.y);
 }
 

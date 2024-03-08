@@ -1164,17 +1164,25 @@ GuiElements.update.tab = function(pathE, x, y, width, height, r, isDown) {
   let path = "";
   if (isDown) {
     path += "m " + x + "," + y;
-    path += " l " + width + ",0 0," + (height - r);
-    path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + r;
-    path += " l " + (2 * r - width) + ",0 ";
-    path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + (-r);
-    path += " l 0," + (r - height);
+    path += " l " + width + ",0 0," + (height - r); //line across top and down right side
+    path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + r; //right rounded corner
+    path += " l " + (2 * r - width) + ",0 "; //line across bottom
+    path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + (-r); //left rounded corner
+    path += " l 0," + (r - height); //line up
   } else {
     path += "m " + (x + r) + "," + y;
-    path += " l " + (width - 2 * r) + ",0";
-    path += " a " + r + " " + r + " 0 0 1 " + r + " " + r;
-    path += " l 0," + (height - r) + " " + (-width) + ",0 0,";
-    path += (r - height);
+    path += " l " + (width - 2 * r) + ",0"; //line across top
+    path += " a " + r + " " + r + " 0 0 1 " + r + " " + r; //right rounded corner
+    if (Hatchling) {
+      path += " l 0," + (height - 2*r) 
+      path += " a " + r + " " + r + " 0 0 0 " + r + " " + r;
+      path += " l " + (-width - 2*r) + ",0";
+      path += " a " + r + " " + r + " 0 0 0 " + r + " " + (-r);
+      path += " l 0," + (2*r - height) 
+    } else {
+      path += " l 0," + (height - r) + " " + (-width) + ",0 0,";
+      path += (r - height);
+    }
     path += " a " + r + " " + r + " 0 0 1 " + r + " " + (0 - r);
   }
   path += " z"; //Closes path.

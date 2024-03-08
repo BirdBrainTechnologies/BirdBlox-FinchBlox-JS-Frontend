@@ -281,7 +281,7 @@ B_HLOutputBase.prototype.checkActive = function() {
 function B_HLPositionServo(x, y, defaultAngle) {
   this.value = defaultAngle //90; //defaultAngle
   this.valueKey = "angle"
-  B_HLOutputBase.call(this, x, y, "motion_3", "positionServo", 3);
+  B_HLOutputBase.call(this, x, y, "motion_2", "positionServo", 3);
 
   let icon = VectorPaths["bdPosition"];
   switch (defaultAngle) {
@@ -361,7 +361,7 @@ B_HL_PS_L2.prototype.argList = function() { return [HL_Utils.portNames[this.port
  * Wave a position servo
  */
 function B_HLWave(x, y) {
-  B_HLOutputBase.call(this, x, y, "motion_3", "wave", 3);
+  B_HLOutputBase.call(this, x, y, "motion_2", "wave", 3);
 
   const icon = VectorPaths["bdPositionWW"];
   this.blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 27);
@@ -389,9 +389,9 @@ function B_HLRotationServo(x, y, flip) {
   this.defaultSpeed = 50;
   this.valueKey = "value"
   this.flip = flip
-  B_HLOutputBase.call(this, x, y, "motion_3", "rotationServo", 1);
+  B_HLOutputBase.call(this, x, y, "motion_2", "rotationServo", 1);
 
-  const icon = flip ? VectorPaths["bsArrowClockwise"] : VectorPaths["bsArrowCounterClockwise"];
+  const icon = flip ? VectorPaths["bdRotateRight"] : VectorPaths["bdRotateLeft"];
   let blockIcon = new BlockIcon(this, icon, Colors.white, "rServo", 30, null, true);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
@@ -464,9 +464,9 @@ function B_HLSingleNeopix(x, y, defaultColor) {
   /*this.red = 100;
   this.green = 100;
   this.blue = 100;*/
-  B_HLOutputBase.call(this, x, y, "color_3", "singleNeopix", 9);
+  B_HLOutputBase.call(this, x, y, "color_2", "singleNeopix", 9);
 
-  const icon = VectorPaths["faLightbulb"];
+  const icon = VectorPaths["bdLightBulb"];
   this.blockIcon = new BlockIcon(this, icon, Colors.white, "sNeopix", 27);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
@@ -565,7 +565,7 @@ function B_HLNeopixStrip(x, y) {
   this.blockIcons = []
   this.colorButtons = []
 
-  B_HLOutputBase.call(this, x, y, "color_3", "neopixStrip", 10);
+  B_HLOutputBase.call(this, x, y, "color_2", "neopixStrip", 10);
 
   const icon = VectorPaths["faLightbulb"];
   /*this.blockIcon1 = new BlockIcon(this, icon, Colors.white, "neopix1", 27);
@@ -616,9 +616,9 @@ function B_HLFairyLights(x, y) {
   this.value = 254
   this.valueKey = "value"
 
-  B_HLOutputBase.call(this, x, y, "color_3", "fairyLights", 8);
+  B_HLOutputBase.call(this, x, y, "color_2", "fairyLights", 8);
 
-  const icon = VectorPaths["bsStars"];
+  const icon = VectorPaths["bdFairyLights"];
   this.blockIcon = new BlockIcon(this, icon, Colors.white, "fairyLights", 27);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
@@ -668,7 +668,7 @@ B_HLAlphabet.prototype.constructor = B_HLAlphabet;
 
 // Wait until sensor reaches threshold
 function B_HLWaitUntil(x, y, usePort, sensor) {
-  CommandBlock.call(this, x, y, "sensor_3");
+  CommandBlock.call(this, x, y, "sensor_2");
   this.usePort = usePort
   this.sensor = sensor
 

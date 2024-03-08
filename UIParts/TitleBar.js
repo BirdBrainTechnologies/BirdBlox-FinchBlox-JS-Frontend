@@ -26,18 +26,18 @@ TitleBar.setGraphicsPart1 = function() {
   } else {
     if (FinchBlox) {
       TB.height = 90; //100;
-      TB.solidHeight = 5; //height that is solid blue all the way across
+      TB.solidHeight = Hatchling ? 25 : 5; //height that is solid blue all the way across
     } else {
       TB.height = 54;
     }
-    TB.buttonMargin = Button.defaultMargin;
+    TB.buttonMargin = Hatchling ? Button.defaultMargin * 2 : Button.defaultMargin;
   }
   TB.width = GuiElements.width;
 
   if (FinchBlox) {
     TB.buttonH = TB.height / 2;
     TB.tallButtonH = TB.buttonH * 1.25;
-    TB.buttonW = TB.tallButtonH * (5 / 4);
+    TB.buttonW = Hatchling ? TB.tallButtonH * (3/2) : TB.tallButtonH * (5 / 4);
     const maxBnWidth = (TB.width - 6 * TB.buttonMargin) / 8;
     TB.buttonW = Math.min(maxBnWidth, TB.buttonW);
     TB.longButtonW = TB.tallButtonH * (5 / 2);
@@ -45,7 +45,7 @@ TitleBar.setGraphicsPart1 = function() {
     TB.longButtonW = Math.min(maxLongBnW, TB.longButtonW);
 
     TB.bnIconMargin = 3;
-    TB.bg = Hatchling ? Colors.blockPaletteControl : Colors.easternBlue;
+    TB.bg = Hatchling ? Colors.ballyGrayLight : Colors.easternBlue;
     TB.bnIconH = TB.buttonH - 2 * TB.bnIconMargin;
     const maxIconHeight = maxBnWidth * 0.7;
     TB.bnIconH = Math.min(maxIconHeight, TB.bnIconH);
@@ -124,15 +124,18 @@ TitleBar.createBar = function() {
 };
 TitleBar.updateShapePath = function() {
   const TB = TitleBar;
-  const r = (TB.height - TB.solidHeight) / 2; //TB.buttonMargin)/2;
-  const shapeW = TB.width / 2 - TB.longButtonW - 2 * r;
+  const r = Hatchling ? ((TB.height - TB.solidHeight) / 6) : ((TB.height - TB.solidHeight) / 2); //TB.buttonMargin)/2;
+  const shapeW = Hatchling ? (TB.width * 2/7 - r) : (TB.width / 2 - TB.longButtonW - 2 * r);
+  const midW = Hatchling ? (TB.width * 3/7 - 2*r) : (2 * TB.longButtonW)
 
   var path = " m 0,0";
   path += " l " + TB.width + ",0 0," + TB.height + " " + (-shapeW) + ",0";
   path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + (-r);
+  if (Hatchling) { path += " v " + -r*4 }
   path += " a " + r + " " + r + " 0 0 0 " + (-r) + " " + (-r);
-  path += " l " + (-2 * TB.longButtonW) + ",0";
+  path += " l " + (-midW) + ",0";
   path += " a " + r + " " + r + " 0 0 0 " + (-r) + " " + r;
+  if (Hatchling) { path += " v " + r*4 }
   path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + r;
   path += " l " + (-shapeW) + ",0";
   path += " z ";
@@ -151,21 +154,43 @@ TitleBar.makeButtons = function() {
   if (FinchBlox) {
     const r = TB.defaultCornerRounding;
     const y = (TB.height / 2) - (TB.tallButtonH / 2);
+    const startStopY = Hatchling ? (y/2 + TB.solidHeight) : y
     const h = TB.tallButtonH;
+    const startStopH = Hatchling ? TB.buttonH : TB.tallButtonH;
     TB.undoBnX = TB.width - TB.sideWidth / 2 + TB.buttonMargin / 2;
-    TB.levelBnX = TB.width - TB.sideWidth / 2 - TB.buttonMargin / 2 - TB.buttonW;
+    TB.levelBnX = Hatchling ? (TB.longButtonW + TB.buttonMargin - 10) : TB.width - TB.sideWidth / 2 - TB.buttonMargin / 2 - TB.buttonW;
+    TB.fileBnX = TB.width - TB.sideWidth / 2 - TB.buttonMargin / 2 - TB.buttonW;
 
-    TB.flagBn = new Button(TB.flagBnX, y, TB.longButtonW, h, TBLayer, Colors.flagGreen, r, r);
-    TB.flagBn.addIcon(VectorPaths.faFlag, TB.bnIconH);
+
+    let flagBnColor = Hatchling ? Colors.ballyGreenLight : Colors.flagGreen
+    let flagBnOutline = Hatchling ? Colors.ballyGreen : null
+    TB.flagBn = new Button(TB.flagBnX, startStopY, TB.longButtonW, startStopH, TBLayer, flagBnColor, r, r, flagBnOutline);
     TB.flagBn.setCallbackFunction(CodeManager.eventFlagClicked, false);
 
-    TB.stopBn = new Button(TB.stopBnX, y, TB.longButtonW, h, TBLayer, Colors.stopRed, r, r);
-    TB.stopBn.addIcon(VectorPaths.stop, TB.bnIconH * 0.9);
+    let stopBnColor = Hatchling ? Colors.ballyRedLight : Colors.stopRed
+    let stopBnOutline = Hatchling ? Colors.ballyRed : null
+    TB.stopBn = new Button(TB.stopBnX, startStopY, TB.longButtonW, startStopH, TBLayer, stopBnColor, r, r, stopBnOutline);
     TB.stopBn.setCallbackFunction(CodeManager.stop, false);
 
-    TB.undoButton = new Button(TB.undoBnX, y, TB.buttonW, h, TBLayer, Colors.neonCarrot, r, r);
-    TB.undoButton.addIcon(VectorPaths.faUndoAlt, TB.bnIconH * 0.8);
+    let undoBnColor = Hatchling ? Colors.ballyGrayLight : Colors.neonCarrot
+    let undoBnOutline = Hatchling ? Colors.ballyBrandBlue : null
+    TB.undoButton = new Button(TB.undoBnX, y, TB.buttonW, h, TBLayer, undoBnColor, r, r, undoBnOutline);
     UndoManager.setUndoButton(TB.undoButton);
+
+    //Add icons to buttons
+    if (Hatchling) {
+      TB.flagBn.addColorIcon(VectorPaths.bdStart, TB.bnIconH * 1.3, Colors.ballyGreen);
+      TB.stopBn.addColorIcon(VectorPaths.bdStop, TB.bnIconH * 1.3, Colors.ballyRed);
+      TB.undoButton.addColorIcon(VectorPaths.bdUndo, TB.bnIconH * 0.5, Colors.ballyBrandBlue);
+
+      TB.fileBn = new Button(TB.fileBnX, y, TB.buttonW, h, TBLayer, undoBnColor, r, r, undoBnOutline);
+      TB.fileBn.addColorIcon(VectorPaths.bdFile, TB.bnIconH * 0.78, Colors.ballyBrandBlue);
+      TB.fileBn.setCallbackFunction(function() {}, true);
+    } else {
+      TB.flagBn.addIcon(VectorPaths.faFlag, TB.bnIconH);
+      TB.stopBn.addIcon(VectorPaths.stop, TB.bnIconH * 0.9);
+      TB.undoButton.addIcon(VectorPaths.faUndoAlt, TB.bnIconH * 0.8);
+    }
 
     //TB.trashButton = new Button(TB.trashBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.seance, r, r);
     //TB.trashButton = new Button(TB.trashBnX, y, TB.buttonW, h, TBLayer, Colors.neonCarrot, r, r);
@@ -174,7 +199,9 @@ TitleBar.makeButtons = function() {
     //TB.trashButton.setCallbackFunction(function(){ UndoManager.deleteTab(); }, false);
 
     //if (!Hatchling) {
-      TB.levelButton = new Button(TB.levelBnX, y, TB.buttonW, h, TBLayer, Colors.seance, r, r);
+      let levelBnColor = Hatchling ? Colors.ballyBrandBlue : Colors.seance
+      let levelBnW = Hatchling ? TB.buttonW * 3/4 : TB.buttonW
+      TB.levelButton = new Button(TB.levelBnX, y, levelBnW, h, TBLayer, levelBnColor, r, r);
       TB.levelButton.addText(LevelManager.currentLevel, LevelManager.levelButtonFont, Colors.white);
       TB.levelButton.setCallbackFunction(function() {
         if (Hatchling) {
@@ -259,45 +286,48 @@ TitleBar.makeButtons = function() {
     TB.updateStatus = function(status) {
       //GuiElements.alert("TitleBar update status to " + status);
       const finchBn = TitleBar.finchButton;
-      let color = Colors.stopRed;
-      let outlineColor = Colors.darkenColor(Colors.stopRed, 0.5);
+      let color = Hatchling ? Colors.ballyGrayLight : Colors.stopRed;
+      let outlineColor = Hatchling ? Colors.ballyRed : Colors.darkenColor(Colors.stopRed, 0.5);
       let shortName = "";
       if (status === DeviceManager.statuses.connected) {
-        color = Colors.finchGreen;
-        outlineColor = Colors.flagGreen;
+        color = Hatchling ? Colors.ballyGrayLight : Colors.finchGreen;
+        outlineColor = Hatchling ? Colors.ballyBrandBlue : Colors.flagGreen;
         let sn = null
         if (Hatchling) {
           sn = DeviceHatchling.getManager().connectedDevices[0].shortName;
-          /*let hc = DeviceHatchling.getManager().connectedDevices[0].getHatchlingCode()
-          let icon = GuiElements.draw.hatchlingPattern(finchBn.hatchGroup, finchBn.finchW, hc)
-          finchBn.hatchGroup.appendChild(icon)*/
         } else {
           sn = DeviceFinch.getManager().connectedDevices[0].shortName;
         }
         if (sn != null) {
           shortName = sn;
         }
-        finchBn.battIcon.group.appendChild(finchBn.battIcon.pathE);
         finchBn.xIcon.pathE.remove();
-        finchBn.icon.move(finchBn.finchConnectedX, finchBn.finchY);
+        if (!Hatchling) { 
+          finchBn.battIcon.group.appendChild(finchBn.battIcon.pathE);
+          finchBn.icon.move(finchBn.finchConnectedX, finchBn.finchY); 
+        }
         DeviceManager.checkBattery();
       } else {
         finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
-        finchBn.battIcon.pathE.remove();
-        finchBn.icon.move(finchBn.finchX, finchBn.finchY);
-        if (Hatchling && finchBn.hatchGroup) {
-          while (finchBn.hatchGroup.firstChild) {
-            finchBn.hatchGroup.removeChild(finchBn.hatchGroup.firstChild)
-          }
+        if (!Hatchling) { 
+          finchBn.battIcon.pathE.remove();
+          finchBn.icon.move(finchBn.finchX, finchBn.finchY); 
         }
       }
       finchBn.updateBgColor(color);
-      GuiElements.update.stroke(finchBn.icon.pathE, outlineColor, 4);
+      if (Hatchling) { 
+        GuiElements.update.color(finchBn.icon.pathE, outlineColor) 
+        GuiElements.update.stroke(finchBn.bgRect, outlineColor, Button.strokeW)
+      } else {
+        GuiElements.update.stroke(finchBn.icon.pathE, outlineColor, 4);
+      }
       GuiElements.update.text(finchBn.textE, shortName);
     }
     DeviceManager.setStatusListener(TB.updateStatus);
 
-    TB.finchButton = new Button((TB.sideWidth - TB.longButtonW) / 2, (TB.height / 2) - (TB.tallButtonH / 2), TB.longButtonW, TB.tallButtonH, TBLayer, Colors.fbGray, r, r);
+    const fBnX = Hatchling ? TB.buttonMargin : ((TB.sideWidth - TB.longButtonW) / 2)
+    const fBnW = Hatchling ? TB.longButtonW * 13/16 : TB.longButtonW
+    TB.finchButton = new Button(fBnX, (TB.height / 2) - (TB.tallButtonH / 2), fBnW, TB.tallButtonH, TBLayer, Colors.fbGray, r, r);
 
     TB.finchButton.addFinchBnIcons();
     TB.finchButton.setCallbackFunction(function() {
@@ -315,16 +345,18 @@ TitleBar.makeButtons = function() {
       }
     }, true);
 
-    TB.fileBn = new FBFileNameDisplay();
-    const rcBnW = TB.fileBn.H + TB.fileBn.r //TB.shortButtonW
-    const rcBnH = TB.fileBn.H - TB.fileBn.margin
-    const rcBnX = TB.width - rcBnW + TB.fileBn.r
-    const rcBnY = TB.height + 2 * TB.fileBn.margin + TB.fileBn.H
-    TB.recenterBn = new Button(rcBnX, rcBnY, rcBnW, rcBnH, TBLayer, TB.fileBn.bgColor, TB.fileBn.r, TB.fileBn.r)
-    TB.recenterBn.addColorIcon(VectorPaths.faCrosshairs, TB.bnIconH * 0.5, Colors.bbtDarkGray)
-    TB.recenterBn.setCallbackFunction(function() {
-      TabManager.activeTab.recenter()
-    })
+    if (!Hatchling) {
+      TB.fileBn = new FBFileNameDisplay();
+      const rcBnW = TB.fileBn.H + TB.fileBn.r //TB.shortButtonW
+      const rcBnH = TB.fileBn.H - TB.fileBn.margin
+      const rcBnX = TB.width - rcBnW + TB.fileBn.r
+      const rcBnY = TB.height + 2 * TB.fileBn.margin + TB.fileBn.H
+      TB.recenterBn = new Button(rcBnX, rcBnY, rcBnW, rcBnH, TBLayer, TB.fileBn.bgColor, TB.fileBn.r, TB.fileBn.r)
+      TB.recenterBn.addColorIcon(VectorPaths.faCrosshairs, TB.bnIconH * 0.5, Colors.bbtDarkGray)
+      TB.recenterBn.setCallbackFunction(function() {
+        TabManager.activeTab.recenter()
+      })
+    }
 
   } else {
     TB.flagBn = new Button(TB.flagBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);

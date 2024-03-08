@@ -32,7 +32,7 @@ SaveManager.backendOpen = function(fileName, data) {
     if (fileLevel != LevelManager.currentLevel && fileLevel > 0 && fileLevel <= LevelManager.totalLevels) {
       LevelManager.setLevel(fileLevel)
     }
-    TitleBar.fileBn.update();
+    if (!Hatchling) { TitleBar.fileBn.update(); }
   }
   OpenDialog.closeDialog();
   GuiElements.unblockInteraction();
@@ -196,7 +196,7 @@ SaveManager.autoSave = function(nextAction) {
     if (nextAction != null) nextAction();
     return;
   }
-  if (FinchBlox) {
+  if (FinchBlox && !Hatchling) {
     TitleBar.fileBn.update();
   }
   const xmlDocText = XmlWriter.docToText(CodeManager.createXml());

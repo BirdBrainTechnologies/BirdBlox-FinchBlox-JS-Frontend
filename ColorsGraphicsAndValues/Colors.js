@@ -67,6 +67,39 @@ Colors.setCommon = function() {
   if (FinchBlox) {
     Colors.inactiveGray = Colors.fbGray;
   }
+  //Bally Design
+  Colors.ballyGray = "#99A5B1" //Disabled actionable graphics
+  Colors.ballyGrayLight = "#EEEEF4" //Backgrounds
+  Colors.ballyGrayDark = "#4F4F4F" //Disabled actionable graphics
+  Colors.ballyPurple = "#A94FC9" //Sound blocks
+  Colors.ballyPurpleLight = "#F3DDFA" //Backgrounds
+  Colors.ballyPurpleDark = "#600B75" //Actionable graphics
+  Colors.ballyPurpleOnDrag = "#8A6696" 
+  Colors.ballyPink = "#ED5ACD" //Sensor blocks
+  Colors.ballyPinkLight = "#FBDDF0" //Backgrounds
+  Colors.ballyPinkDark = "#A30981" //Actionable graphics
+  Colors.ballyPinkOnDrag = "#CB6BB6" 
+  Colors.ballyGreen = "#018043" //Go, confirmation, yes
+  Colors.ballyGreenLight = "#C3F5DD" //Backgrounds
+  Colors.ballyGreenDark = "#034827" //Actionable graphics
+  Colors.ballyGreenYellow = "#65A400" //Controls blocks
+  Colors.ballyGreenYellowLight = "#DDF7B3" //Backgrounds
+  Colors.ballyGreenYellowDark = "#446F00" //Actionable graphics
+  Colors.ballyGreenYellowOnDrag = "#80985A"
+  Colors.ballyOrange = "#FF600A" //Light blocks
+  Colors.ballyOrangeLight = "#F9E2D0" //Backgrounds
+  Colors.ballyOrangeDark = "#B64F05" //Actionable graphics
+  Colors.ballyOrangeOnDrag = "#E19166"
+  Colors.ballyBrandBlue = "#089BAB"//"#079BAB" //Movement blocks
+  Colors.ballyBrandBlueLight = "#E3F7FA" //Backgrounds
+  Colors.ballyBrandBlueDark = "#05646E" //Actionable graphics
+  Colors.ballyRed = "#DD1D28" //Stop, disconnected, and no
+  Colors.ballyRedLight = "#F9DCE4" //Backgrounds
+  Colors.ballyRedDark = "#9E0227" //Actionable graphics
+  Colors.ballyBlue = "#3751E4" 
+  Colors.ballyBlueLight = "#DFE2F6" //Backgrounds
+  Colors.ballyBlueDark = "#103288" //Actionable graphics
+  Colors.ballyBlueOnDrag = "#5562EA" 
 };
 
 Colors.setCategory = function() {
@@ -140,6 +173,40 @@ Colors.setCategory = function() {
     "portblocks": Colors.fbBlueBorder,
     "oldblocks": Colors.fbOrangeBorder,
     "microbitblocks": Colors.fbPurpleBorder
+  }
+  if (Hatchling) {
+    Colors.categoryColors = {
+      "motion_1": Colors.ballyBlue,
+      "color_1": Colors.ballyOrange,
+      "sound_1": Colors.ballyPurple,
+      "motion_2": Colors.ballyBlue,
+      "color_2": Colors.ballyOrange,
+      "sound_2": Colors.ballyPurple,
+      "control_2": Colors.ballyGreenYellow,
+      "sensor_2": Colors.ballyPink,
+      "inactive": Colors.ballyGray
+    }
+    Colors.blockPalette = {
+      "motion_1": Colors.ballyBlueLight,
+      "color_1": Colors.ballyOrangeLight,
+      "sound_1": Colors.ballyPurpleLight,
+      "motion_2": Colors.ballyBlueLight,
+      "color_2": Colors.ballyOrangeLight,
+      "sound_2": Colors.ballyPurpleLight,
+      "control_2": Colors.ballyGreenYellowLight,
+      "sensor_2": Colors.ballyPinkLight
+    }
+    Colors.blockOutline = {
+      "motion_1": Colors.ballyBlueDark,
+      "color_1": Colors.ballyOrangeDark,
+      "sound_1": Colors.ballyPurpleDark,
+      "motion_2": Colors.ballyBlueDark,
+      "color_2": Colors.ballyOrangeDark,
+      "sound_2": Colors.ballyPurpleDark,
+      "control_2": Colors.ballyGreenYellowDark,
+      "sensor_2": Colors.ballyPinkDark,
+      "inactive": Colors.ballyGrayDark
+    }
   }
 };
 

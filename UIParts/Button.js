@@ -11,9 +11,10 @@
  * @param {string} color - (optional) background color for the button
  * @param {number} rx - (optional) Corner rounding parameter
  * @param {number} ry - (optional) Corner rounding parameter
+ * @param {Color} outlineColor - (optional) color to outline the button with
  * @constructor
  */
-function Button(x, y, width, height, parent, color, rx, ry) {
+function Button(x, y, width, height, parent, color, rx, ry, outlineColor) {
   DebugOptions.validateNumbers(x, y, width, height);
   this.x = x;
   this.y = y;
@@ -29,6 +30,7 @@ function Button(x, y, width, height, parent, color, rx, ry) {
   }
   this.rx = rx;
   this.ry = ry;
+  this.strokeColor = outlineColor;
   this.buildBg();
   this.pressed = false;
   this.enabled = true;
@@ -61,8 +63,8 @@ Button.setGraphics = function() {
     Button.disabledBg = Colors.darkenColor(Colors.easternBlue, 0.85);
     Button.disabledFore = Colors.darkenColor(Colors.blockPaletteMotion, 0.9);
     if (Hatchling) {
-      Button.disabledBg = Colors.darkenColor(Colors.blockPaletteControl, 0.85);
-      Button.disabledFore = Colors.darkenColor(Colors.blockPaletteControl, 0.95);
+      Button.disabledBg = Colors.ballyGray
+      Button.disabledFore = Colors.ballyGrayLight
     }
   } else {
     Button.defaultMargin = 5;
@@ -75,6 +77,9 @@ Button.setGraphics = function() {
 
   Button.defaultIconH = 15;
   Button.defaultSideMargin = 10;
+
+  //Hatchling
+  Button.strokeW = 1.5
 };
 
 /**
@@ -82,6 +87,9 @@ Button.setGraphics = function() {
  */
 Button.prototype.buildBg = function() {
   this.bgRect = GuiElements.draw.rect(0, 0, this.width, this.height, this.bg, this.rx, this.ry);
+  if (this.strokeColor != null) {
+    GuiElements.update.stroke(this.bgRect, this.strokeColor, Button.strokeW)
+  }
   this.group.appendChild(this.bgRect);
   TouchReceiver.addListenersBN(this.bgRect, this);
 };
@@ -98,6 +106,9 @@ Button.prototype.addText = function(text, font, color) {
   }
   if (color == null) {
     color = Button.foreground;
+  }
+  if (this.isUnButtoned) {
+    color = Colors.white
   }
   this.textE = this.makeText(text, font, color);
 
@@ -380,17 +391,17 @@ Button.prototype.addFinchBnIcons = function() {
   let finchPathId = VectorPaths.mvFinch;
   let finchColor = Colors.white
   if (Hatchling) { 
-    finchPathId = VectorPaths.faEgg; 
+    finchPathId = VectorPaths.bdHatchling; 
     finchColor = Colors.iron;
     this.iconColor = finchColor
   }
-  const battPathId = VectorPaths.battery;
-  const xPathId = VectorPaths.faTimesCircle;
+  const battPathId = Hatchling ? VectorPaths.bdBatteryDisconnected : VectorPaths.battery;
+  const xPathId = Hatchling ? VectorPaths.bdClose : VectorPaths.faTimesCircle;
   const font = Font.uiFont(18);
 
-  const finchH = TitleBar.bnIconH * 1.65; //the long dimension of the finch since we will rotate it
+  const finchH = Hatchling ? TitleBar.bnIconH * 1.1 : TitleBar.bnIconH * 1.65; //the long dimension of the finch since we will rotate it
   const battH = TitleBar.bnIconH * 0.75;
-  const xH = TitleBar.bnIconH * 0.6;
+  const xH = Hatchling ? TitleBar.bnIconH * 1.1 : TitleBar.bnIconH * 0.6;
   this.finchW = VectorIcon.computeWidth(finchPathId, finchH);
   const battW = VectorIcon.computeWidth(battPathId, battH);
   const xW = VectorIcon.computeWidth(xPathId, xH);
@@ -398,10 +409,10 @@ Button.prototype.addFinchBnIcons = function() {
   //const battX = finchH + 1.5*finchX;
   const m = 10; //Margin between finch icon and battery icon.
   this.finchConnectedX = (this.width - this.finchW - battW - m) / 2;
-  const battX = (this.width + finchH + m - battW) / 2;
-  const textX = (this.width - finchH - battW - m) / 2 + m;
+  const battX = Hatchling ? (this.width + this.finchW + m - battW) / 2 : (this.width + finchH + m - battW) / 2;
+  const textX = Hatchling ? (this.width - this.finchW - battW - m) / 2 + m : (this.width - finchH - battW - m) / 2 + m;
 
-  const xX = (this.width - xW) / 2; //finchX + finchH/2;
+  const xX = Hatchling ? (this.finchConnectedX + 5) : (this.width - xW) / 2; //finchX + finchH/2;
   this.finchY = (this.height - finchH) / 2;
   const battY = (this.height - battH) / 2;
   const textY = (this.height + font.charHeight) / 2;
@@ -412,18 +423,17 @@ Button.prototype.addFinchBnIcons = function() {
   this.iconInverts = false;
   this.hasText = true;
 
-  this.icon = new VectorIcon(this.finchX, this.finchY, finchPathId, finchColor, finchH, this.group, null, 90);
-  GuiElements.update.stroke(this.icon.pathE, Colors.iron, 2);
-  this.battIcon = new VectorIcon(battX, battY, battPathId, Colors.iron, battH, this.group);
-  this.textE = GuiElements.draw.text(textX, textY, "", font, Colors.flagGreen);
-  this.group.appendChild(this.textE);
-  this.xIcon = new VectorIcon(xX, xY, xPathId, Colors.stopRed, xH, this.group);
-  if (Hatchling) {
-    const hY = (this.height - this.finchW) / 2
-    this.hatchGroup = GuiElements.create.group(this.finchConnectedX, hY, this.group)
-    //TODO: the elements placed inside this group probably need listeners too...
-    TouchReceiver.addListenersBN(this.hatchGroup, this);
+  if (Hatchling) { 
+    this.finchX = this.finchConnectedX 
   }
+  this.icon = new VectorIcon(this.finchX, this.finchY, finchPathId, finchColor, finchH, this.group, null, (Hatchling ? null : 90));
+  if (!Hatchling) { GuiElements.update.stroke(this.icon.pathE, Colors.iron, 2); }
+  this.battIcon = new VectorIcon(battX, battY, battPathId, (Hatchling ? Colors.white : Colors.iron), battH, this.group);
+  this.textE = GuiElements.draw.text(textX, textY, "", font, (Hatchling ? Colors.white : Colors.flagGreen));
+  this.group.appendChild(this.textE);
+  this.xIcon = new VectorIcon(xX, xY, xPathId, (Hatchling ? Colors.white : Colors.stopRed), xH, this.group);
+
+  if (Hatchling) { this.battIcon.group.appendChild(this.battIcon.pathE) }
 
   TouchReceiver.addListenersBN(this.icon.pathE, this);
   TouchReceiver.addListenersBN(this.battIcon.pathE, this);

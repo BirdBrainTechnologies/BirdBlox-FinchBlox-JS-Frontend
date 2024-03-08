@@ -7774,17 +7774,25 @@ GuiElements.update.tab = function(pathE, x, y, width, height, r, isDown) {
   var path = "";
   if (isDown) {
     path += "m " + x + "," + y;
-    path += " l " + width + ",0 0," + (height - r);
-    path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + r;
-    path += " l " + (2 * r - width) + ",0 ";
-    path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + (-r);
-    path += " l 0," + (r - height);
+    path += " l " + width + ",0 0," + (height - r); //line across top and down right side
+    path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + r; //right rounded corner
+    path += " l " + (2 * r - width) + ",0 "; //line across bottom
+    path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + (-r); //left rounded corner
+    path += " l 0," + (r - height); //line up
   } else {
     path += "m " + (x + r) + "," + y;
-    path += " l " + (width - 2 * r) + ",0";
-    path += " a " + r + " " + r + " 0 0 1 " + r + " " + r;
-    path += " l 0," + (height - r) + " " + (-width) + ",0 0,";
-    path += (r - height);
+    path += " l " + (width - 2 * r) + ",0"; //line across top
+    path += " a " + r + " " + r + " 0 0 1 " + r + " " + r; //right rounded corner
+    if (Hatchling) {
+      path += " l 0," + (height - 2*r) 
+      path += " a " + r + " " + r + " 0 0 0 " + r + " " + r;
+      path += " l " + (-width - 2*r) + ",0";
+      path += " a " + r + " " + r + " 0 0 0 " + r + " " + (-r);
+      path += " l 0," + (2*r - height) 
+    } else {
+      path += " l 0," + (height - r) + " " + (-width) + ",0 0,";
+      path += (r - height);
+    }
     path += " a " + r + " " + r + " 0 0 1 " + r + " " + (0 - r);
   }
   path += " z"; //Closes path.
@@ -8981,6 +8989,39 @@ Colors.setCommon = function() {
   if (FinchBlox) {
     Colors.inactiveGray = Colors.fbGray;
   }
+  //Bally Design
+  Colors.ballyGray = "#99A5B1" //Disabled actionable graphics
+  Colors.ballyGrayLight = "#EEEEF4" //Backgrounds
+  Colors.ballyGrayDark = "#4F4F4F" //Disabled actionable graphics
+  Colors.ballyPurple = "#A94FC9" //Sound blocks
+  Colors.ballyPurpleLight = "#F3DDFA" //Backgrounds
+  Colors.ballyPurpleDark = "#600B75" //Actionable graphics
+  Colors.ballyPurpleOnDrag = "#8A6696" 
+  Colors.ballyPink = "#ED5ACD" //Sensor blocks
+  Colors.ballyPinkLight = "#FBDDF0" //Backgrounds
+  Colors.ballyPinkDark = "#A30981" //Actionable graphics
+  Colors.ballyPinkOnDrag = "#CB6BB6" 
+  Colors.ballyGreen = "#018043" //Go, confirmation, yes
+  Colors.ballyGreenLight = "#C3F5DD" //Backgrounds
+  Colors.ballyGreenDark = "#034827" //Actionable graphics
+  Colors.ballyGreenYellow = "#65A400" //Controls blocks
+  Colors.ballyGreenYellowLight = "#DDF7B3" //Backgrounds
+  Colors.ballyGreenYellowDark = "#446F00" //Actionable graphics
+  Colors.ballyGreenYellowOnDrag = "#80985A"
+  Colors.ballyOrange = "#FF600A" //Light blocks
+  Colors.ballyOrangeLight = "#F9E2D0" //Backgrounds
+  Colors.ballyOrangeDark = "#B64F05" //Actionable graphics
+  Colors.ballyOrangeOnDrag = "#E19166"
+  Colors.ballyBrandBlue = "#089BAB"//"#079BAB" //Movement blocks
+  Colors.ballyBrandBlueLight = "#E3F7FA" //Backgrounds
+  Colors.ballyBrandBlueDark = "#05646E" //Actionable graphics
+  Colors.ballyRed = "#DD1D28" //Stop, disconnected, and no
+  Colors.ballyRedLight = "#F9DCE4" //Backgrounds
+  Colors.ballyRedDark = "#9E0227" //Actionable graphics
+  Colors.ballyBlue = "#3751E4" 
+  Colors.ballyBlueLight = "#DFE2F6" //Backgrounds
+  Colors.ballyBlueDark = "#103288" //Actionable graphics
+  Colors.ballyBlueOnDrag = "#5562EA" 
 };
 
 Colors.setCategory = function() {
@@ -9054,6 +9095,40 @@ Colors.setCategory = function() {
     "portblocks": Colors.fbBlueBorder,
     "oldblocks": Colors.fbOrangeBorder,
     "microbitblocks": Colors.fbPurpleBorder
+  }
+  if (Hatchling) {
+    Colors.categoryColors = {
+      "motion_1": Colors.ballyBlue,
+      "color_1": Colors.ballyOrange,
+      "sound_1": Colors.ballyPurple,
+      "motion_2": Colors.ballyBlue,
+      "color_2": Colors.ballyOrange,
+      "sound_2": Colors.ballyPurple,
+      "control_2": Colors.ballyGreenYellow,
+      "sensor_2": Colors.ballyPink,
+      "inactive": Colors.ballyGray
+    }
+    Colors.blockPalette = {
+      "motion_1": Colors.ballyBlueLight,
+      "color_1": Colors.ballyOrangeLight,
+      "sound_1": Colors.ballyPurpleLight,
+      "motion_2": Colors.ballyBlueLight,
+      "color_2": Colors.ballyOrangeLight,
+      "sound_2": Colors.ballyPurpleLight,
+      "control_2": Colors.ballyGreenYellowLight,
+      "sensor_2": Colors.ballyPinkLight
+    }
+    Colors.blockOutline = {
+      "motion_1": Colors.ballyBlueDark,
+      "color_1": Colors.ballyOrangeDark,
+      "sound_1": Colors.ballyPurpleDark,
+      "motion_2": Colors.ballyBlueDark,
+      "color_2": Colors.ballyOrangeDark,
+      "sound_2": Colors.ballyPurpleDark,
+      "control_2": Colors.ballyGreenYellowDark,
+      "sensor_2": Colors.ballyPinkDark,
+      "inactive": Colors.ballyGrayDark
+    }
   }
 };
 
@@ -9911,6 +9986,18 @@ function VectorPaths(){
     "oldblocks": VP.undo,
     "microbitblocks": VP.microbit
   };
+  if (Hatchling) {
+    VP.categoryIcons = {
+    "motion_1": VP.bdHatchling,
+    "color_1": VP.bdLightBulb,
+    "sound_1": VP.bdMusic,
+    "motion_2": VP.bdHatchling,
+    "color_2": VP.bdLightBulb,
+    "sound_2": VP.bdMusic,
+    "sensor_2": VP.bdHatchling,
+    "control_2": VP.bdHatchling
+  };
+  }
 
 }
 
@@ -9976,8 +10063,8 @@ BlockGraphics.SetCommand = function() {
     BlockGraphics.command.height = 60; //76;
     BlockGraphics.command.width = 50; //76;
     BlockGraphics.command.cornerRadius = 8; //10;
-    BlockGraphics.command.vMargin = 10; // The margin above and below the content (BlockParts) of the Block
-    BlockGraphics.command.hMargin = 10; //20;//25; // The margin to the left and right of the content
+    BlockGraphics.command.vMargin = Hatchling ? 1 : 10; // The margin above and below the content (BlockParts) of the Block
+    BlockGraphics.command.hMargin = Hatchling ? 1 : 10; //20;//25; // The margin to the left and right of the content
     //		BlockGraphics.command.bumpWidth = 15; //Width added by the bump sticking out
   } else {
     BlockGraphics.command.height = 34;
@@ -10068,7 +10155,7 @@ BlockGraphics.SetHat = function() {
   BlockGraphics.hat = {};
 
   //Hat radius for FinchBlox
-  BlockGraphics.hat.r = 24; //30;
+  BlockGraphics.hat.r = Hatchling ? 30 : 24; //30;
 
   // Radius of ellipse at top of Block
   BlockGraphics.hat.hRadius = 60;
@@ -12487,18 +12574,18 @@ TitleBar.setGraphicsPart1 = function() {
   } else {
     if (FinchBlox) {
       TB.height = 90; //100;
-      TB.solidHeight = 5; //height that is solid blue all the way across
+      TB.solidHeight = Hatchling ? 25 : 5; //height that is solid blue all the way across
     } else {
       TB.height = 54;
     }
-    TB.buttonMargin = Button.defaultMargin;
+    TB.buttonMargin = Hatchling ? Button.defaultMargin * 2 : Button.defaultMargin;
   }
   TB.width = GuiElements.width;
 
   if (FinchBlox) {
     TB.buttonH = TB.height / 2;
     TB.tallButtonH = TB.buttonH * 1.25;
-    TB.buttonW = TB.tallButtonH * (5 / 4);
+    TB.buttonW = Hatchling ? TB.tallButtonH * (3/2) : TB.tallButtonH * (5 / 4);
     var maxBnWidth = (TB.width - 6 * TB.buttonMargin) / 8;
     TB.buttonW = Math.min(maxBnWidth, TB.buttonW);
     TB.longButtonW = TB.tallButtonH * (5 / 2);
@@ -12506,7 +12593,7 @@ TitleBar.setGraphicsPart1 = function() {
     TB.longButtonW = Math.min(maxLongBnW, TB.longButtonW);
 
     TB.bnIconMargin = 3;
-    TB.bg = Hatchling ? Colors.blockPaletteControl : Colors.easternBlue;
+    TB.bg = Hatchling ? Colors.ballyGrayLight : Colors.easternBlue;
     TB.bnIconH = TB.buttonH - 2 * TB.bnIconMargin;
     var maxIconHeight = maxBnWidth * 0.7;
     TB.bnIconH = Math.min(maxIconHeight, TB.bnIconH);
@@ -12585,15 +12672,18 @@ TitleBar.createBar = function() {
 };
 TitleBar.updateShapePath = function() {
   var TB = TitleBar;
-  var r = (TB.height - TB.solidHeight) / 2; //TB.buttonMargin)/2;
-  var shapeW = TB.width / 2 - TB.longButtonW - 2 * r;
+  var r = Hatchling ? ((TB.height - TB.solidHeight) / 6) : ((TB.height - TB.solidHeight) / 2); //TB.buttonMargin)/2;
+  var shapeW = Hatchling ? (TB.width * 2/7 - r) : (TB.width / 2 - TB.longButtonW - 2 * r);
+  var midW = Hatchling ? (TB.width * 3/7 - 2*r) : (2 * TB.longButtonW)
 
   var path = " m 0,0";
   path += " l " + TB.width + ",0 0," + TB.height + " " + (-shapeW) + ",0";
   path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + (-r);
+  if (Hatchling) { path += " v " + -r*4 }
   path += " a " + r + " " + r + " 0 0 0 " + (-r) + " " + (-r);
-  path += " l " + (-2 * TB.longButtonW) + ",0";
+  path += " l " + (-midW) + ",0";
   path += " a " + r + " " + r + " 0 0 0 " + (-r) + " " + r;
+  if (Hatchling) { path += " v " + r*4 }
   path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + r;
   path += " l " + (-shapeW) + ",0";
   path += " z ";
@@ -12612,21 +12702,43 @@ TitleBar.makeButtons = function() {
   if (FinchBlox) {
     var r = TB.defaultCornerRounding;
     var y = (TB.height / 2) - (TB.tallButtonH / 2);
+    var startStopY = Hatchling ? (y/2 + TB.solidHeight) : y
     var h = TB.tallButtonH;
+    var startStopH = Hatchling ? TB.buttonH : TB.tallButtonH;
     TB.undoBnX = TB.width - TB.sideWidth / 2 + TB.buttonMargin / 2;
-    TB.levelBnX = TB.width - TB.sideWidth / 2 - TB.buttonMargin / 2 - TB.buttonW;
+    TB.levelBnX = Hatchling ? (TB.longButtonW + TB.buttonMargin - 10) : TB.width - TB.sideWidth / 2 - TB.buttonMargin / 2 - TB.buttonW;
+    TB.fileBnX = TB.width - TB.sideWidth / 2 - TB.buttonMargin / 2 - TB.buttonW;
 
-    TB.flagBn = new Button(TB.flagBnX, y, TB.longButtonW, h, TBLayer, Colors.flagGreen, r, r);
-    TB.flagBn.addIcon(VectorPaths.faFlag, TB.bnIconH);
+
+    var flagBnColor = Hatchling ? Colors.ballyGreenLight : Colors.flagGreen
+    var flagBnOutline = Hatchling ? Colors.ballyGreen : null
+    TB.flagBn = new Button(TB.flagBnX, startStopY, TB.longButtonW, startStopH, TBLayer, flagBnColor, r, r, flagBnOutline);
     TB.flagBn.setCallbackFunction(CodeManager.eventFlagClicked, false);
 
-    TB.stopBn = new Button(TB.stopBnX, y, TB.longButtonW, h, TBLayer, Colors.stopRed, r, r);
-    TB.stopBn.addIcon(VectorPaths.stop, TB.bnIconH * 0.9);
+    var stopBnColor = Hatchling ? Colors.ballyRedLight : Colors.stopRed
+    var stopBnOutline = Hatchling ? Colors.ballyRed : null
+    TB.stopBn = new Button(TB.stopBnX, startStopY, TB.longButtonW, startStopH, TBLayer, stopBnColor, r, r, stopBnOutline);
     TB.stopBn.setCallbackFunction(CodeManager.stop, false);
 
-    TB.undoButton = new Button(TB.undoBnX, y, TB.buttonW, h, TBLayer, Colors.neonCarrot, r, r);
-    TB.undoButton.addIcon(VectorPaths.faUndoAlt, TB.bnIconH * 0.8);
+    var undoBnColor = Hatchling ? Colors.ballyGrayLight : Colors.neonCarrot
+    var undoBnOutline = Hatchling ? Colors.ballyBrandBlue : null
+    TB.undoButton = new Button(TB.undoBnX, y, TB.buttonW, h, TBLayer, undoBnColor, r, r, undoBnOutline);
     UndoManager.setUndoButton(TB.undoButton);
+
+    //Add icons to buttons
+    if (Hatchling) {
+      TB.flagBn.addColorIcon(VectorPaths.bdStart, TB.bnIconH * 1.3, Colors.ballyGreen);
+      TB.stopBn.addColorIcon(VectorPaths.bdStop, TB.bnIconH * 1.3, Colors.ballyRed);
+      TB.undoButton.addColorIcon(VectorPaths.bdUndo, TB.bnIconH * 0.5, Colors.ballyBrandBlue);
+
+      TB.fileBn = new Button(TB.fileBnX, y, TB.buttonW, h, TBLayer, undoBnColor, r, r, undoBnOutline);
+      TB.fileBn.addColorIcon(VectorPaths.bdFile, TB.bnIconH * 0.78, Colors.ballyBrandBlue);
+      TB.fileBn.setCallbackFunction(function() {}, true);
+    } else {
+      TB.flagBn.addIcon(VectorPaths.faFlag, TB.bnIconH);
+      TB.stopBn.addIcon(VectorPaths.stop, TB.bnIconH * 0.9);
+      TB.undoButton.addIcon(VectorPaths.faUndoAlt, TB.bnIconH * 0.8);
+    }
 
     //TB.trashButton = new Button(TB.trashBnX, (TB.height/2) - (TB.buttonH/2), TB.buttonW, TB.buttonH, TBLayer, Colors.seance, r, r);
     //TB.trashButton = new Button(TB.trashBnX, y, TB.buttonW, h, TBLayer, Colors.neonCarrot, r, r);
@@ -12635,7 +12747,9 @@ TitleBar.makeButtons = function() {
     //TB.trashButton.setCallbackFunction(function(){ UndoManager.deleteTab(); }, false);
 
     //if (!Hatchling) {
-      TB.levelButton = new Button(TB.levelBnX, y, TB.buttonW, h, TBLayer, Colors.seance, r, r);
+      var levelBnColor = Hatchling ? Colors.ballyBrandBlue : Colors.seance
+      var levelBnW = Hatchling ? TB.buttonW * 3/4 : TB.buttonW
+      TB.levelButton = new Button(TB.levelBnX, y, levelBnW, h, TBLayer, levelBnColor, r, r);
       TB.levelButton.addText(LevelManager.currentLevel, LevelManager.levelButtonFont, Colors.white);
       TB.levelButton.setCallbackFunction(function() {
         if (Hatchling) {
@@ -12720,45 +12834,48 @@ TitleBar.makeButtons = function() {
     TB.updateStatus = function(status) {
       //GuiElements.alert("TitleBar update status to " + status);
       var finchBn = TitleBar.finchButton;
-      var color = Colors.stopRed;
-      var outlineColor = Colors.darkenColor(Colors.stopRed, 0.5);
+      var color = Hatchling ? Colors.ballyGrayLight : Colors.stopRed;
+      var outlineColor = Hatchling ? Colors.ballyRed : Colors.darkenColor(Colors.stopRed, 0.5);
       var shortName = "";
       if (status === DeviceManager.statuses.connected) {
-        color = Colors.finchGreen;
-        outlineColor = Colors.flagGreen;
+        color = Hatchling ? Colors.ballyGrayLight : Colors.finchGreen;
+        outlineColor = Hatchling ? Colors.ballyBrandBlue : Colors.flagGreen;
         var sn = null
         if (Hatchling) {
           sn = DeviceHatchling.getManager().connectedDevices[0].shortName;
-          /*var hc = DeviceHatchling.getManager().connectedDevices[0].getHatchlingCode()
-          var icon = GuiElements.draw.hatchlingPattern(finchBn.hatchGroup, finchBn.finchW, hc)
-          finchBn.hatchGroup.appendChild(icon)*/
         } else {
           sn = DeviceFinch.getManager().connectedDevices[0].shortName;
         }
         if (sn != null) {
           shortName = sn;
         }
-        finchBn.battIcon.group.appendChild(finchBn.battIcon.pathE);
         finchBn.xIcon.pathE.remove();
-        finchBn.icon.move(finchBn.finchConnectedX, finchBn.finchY);
+        if (!Hatchling) { 
+          finchBn.battIcon.group.appendChild(finchBn.battIcon.pathE);
+          finchBn.icon.move(finchBn.finchConnectedX, finchBn.finchY); 
+        }
         DeviceManager.checkBattery();
       } else {
         finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
-        finchBn.battIcon.pathE.remove();
-        finchBn.icon.move(finchBn.finchX, finchBn.finchY);
-        if (Hatchling && finchBn.hatchGroup) {
-          while (finchBn.hatchGroup.firstChild) {
-            finchBn.hatchGroup.removeChild(finchBn.hatchGroup.firstChild)
-          }
+        if (!Hatchling) { 
+          finchBn.battIcon.pathE.remove();
+          finchBn.icon.move(finchBn.finchX, finchBn.finchY); 
         }
       }
       finchBn.updateBgColor(color);
-      GuiElements.update.stroke(finchBn.icon.pathE, outlineColor, 4);
+      if (Hatchling) { 
+        GuiElements.update.color(finchBn.icon.pathE, outlineColor) 
+        GuiElements.update.stroke(finchBn.bgRect, outlineColor, Button.strokeW)
+      } else {
+        GuiElements.update.stroke(finchBn.icon.pathE, outlineColor, 4);
+      }
       GuiElements.update.text(finchBn.textE, shortName);
     }
     DeviceManager.setStatusListener(TB.updateStatus);
 
-    TB.finchButton = new Button((TB.sideWidth - TB.longButtonW) / 2, (TB.height / 2) - (TB.tallButtonH / 2), TB.longButtonW, TB.tallButtonH, TBLayer, Colors.fbGray, r, r);
+    var fBnX = Hatchling ? TB.buttonMargin : ((TB.sideWidth - TB.longButtonW) / 2)
+    var fBnW = Hatchling ? TB.longButtonW * 13/16 : TB.longButtonW
+    TB.finchButton = new Button(fBnX, (TB.height / 2) - (TB.tallButtonH / 2), fBnW, TB.tallButtonH, TBLayer, Colors.fbGray, r, r);
 
     TB.finchButton.addFinchBnIcons();
     TB.finchButton.setCallbackFunction(function() {
@@ -12776,16 +12893,18 @@ TitleBar.makeButtons = function() {
       }
     }, true);
 
-    TB.fileBn = new FBFileNameDisplay();
-    var rcBnW = TB.fileBn.H + TB.fileBn.r //TB.shortButtonW
-    var rcBnH = TB.fileBn.H - TB.fileBn.margin
-    var rcBnX = TB.width - rcBnW + TB.fileBn.r
-    var rcBnY = TB.height + 2 * TB.fileBn.margin + TB.fileBn.H
-    TB.recenterBn = new Button(rcBnX, rcBnY, rcBnW, rcBnH, TBLayer, TB.fileBn.bgColor, TB.fileBn.r, TB.fileBn.r)
-    TB.recenterBn.addColorIcon(VectorPaths.faCrosshairs, TB.bnIconH * 0.5, Colors.bbtDarkGray)
-    TB.recenterBn.setCallbackFunction(function() {
-      TabManager.activeTab.recenter()
-    })
+    if (!Hatchling) {
+      TB.fileBn = new FBFileNameDisplay();
+      var rcBnW = TB.fileBn.H + TB.fileBn.r //TB.shortButtonW
+      var rcBnH = TB.fileBn.H - TB.fileBn.margin
+      var rcBnX = TB.width - rcBnW + TB.fileBn.r
+      var rcBnY = TB.height + 2 * TB.fileBn.margin + TB.fileBn.H
+      TB.recenterBn = new Button(rcBnX, rcBnY, rcBnW, rcBnH, TBLayer, TB.fileBn.bgColor, TB.fileBn.r, TB.fileBn.r)
+      TB.recenterBn.addColorIcon(VectorPaths.faCrosshairs, TB.bnIconH * 0.5, Colors.bbtDarkGray)
+      TB.recenterBn.setCallbackFunction(function() {
+        TabManager.activeTab.recenter()
+      })
+    }
 
   } else {
     TB.flagBn = new Button(TB.flagBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
@@ -13023,9 +13142,14 @@ BlockPalette.setGraphics = function() {
 
   // Dimensions for the region with CategoryBNs
   if (FinchBlox) {
+    BlockPalette.hl = 10 //Hatchling factor
     BlockPalette.width = GuiElements.width;
     BlockPalette.height = 90; //100;
     BlockPalette.y = GuiElements.height - BlockPalette.height;
+    if (Hatchling) {
+      BlockPalette.width -= 4*BlockPalette.hl 
+      BlockPalette.height += BlockPalette.hl
+    }
     BlockPalette.bg = Colors.bbtDarkGray;
     BlockPalette.catW = 300;
     BlockPalette.catX = GuiElements.width / 2 - BlockPalette.catW / 2;
@@ -13053,6 +13177,8 @@ BlockPalette.setGraphics = function() {
     BlockPalette.trashColor = Colors.black;
   }
 
+  BlockPalette.x = Hatchling ? 20 : 0
+
   BlockPalette.catBg = Colors.white;
   BlockPalette.labelFont = Font.uiFont(13);
   BlockPalette.labelColor = Colors.black;
@@ -13066,11 +13192,11 @@ BlockPalette.setGraphics = function() {
 BlockPalette.updateZoom = function() {
   var BP = BlockPalette;
   BP.setGraphics();
-  GuiElements.update.rect(BP.palRect, 0, BP.y, BP.width, BP.height);
+  GuiElements.update.rect(BP.palRect, BP.x, BP.y, BP.width, BP.height);
   if (FinchBlox) {
     //BP.updatePath(BP.leftShape);
     //BP.updatePath(BP.rightShape);
-    BP.updatePath();
+    if (!Hatchling) { BP.updatePath(); }
     GuiElements.update.rect(BP.catRect, 0, BP.catY, 0, BP.catH);
   } else {
     GuiElements.update.rect(BP.catRect, 0, BP.catY, BP.width, BP.catH);
@@ -13091,6 +13217,21 @@ BlockPalette.createCatBg = function() {
   var bgW = BP.catW;
   if (FinchBlox) {
     bgW = 0;
+
+    if (Hatchling) {
+      var CBN = CategoryBN
+      var color = Colors.ballyGrayLight
+      var widthL1 = CBN.width * 3 // 3 categories in level 1
+      var widthL2 = CBN.width * 5 // 5 categories in level 2
+      var xL1 = (GuiElements.width - widthL1)/2
+      var xL2 = (GuiElements.width - widthL2)/2
+      var y = BP.y - CBN.height
+      BP.level1CatRect = GuiElements.draw.tab(xL1, y, widthL1, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
+      BP.level2CatRect = GuiElements.draw.tab(xL2, y, widthL2, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
+      GuiElements.layers.catBg.appendChild(BP.level1CatRect);
+      GuiElements.layers.catBg.appendChild(BP.level2CatRect);
+      GuiElements.update.opacity(BlockPalette.level2CatRect, 0)
+    }
   }
   //BP.catRect = GuiElements.draw.rect(0, BP.catY, BP.width, BP.catH, BP.catBg);
   //BP.catRect = GuiElements.draw.rect(BP.catX, BP.catY, BP.catW, BP.catH, BP.catBg);
@@ -13108,11 +13249,20 @@ BlockPalette.createCatBg = function() {
 BlockPalette.createPalBg = function() {
   var BP = BlockPalette;
   BP.palRect = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
+  if (Hatchling) {
+    BP.palRect = GuiElements.draw.rect(BP.x, BP.y, BP.width, BP.height, BP.bg, BP.hl, BP.hl)
+  }
   GuiElements.layers.paletteBG.appendChild(BP.palRect);
   if (FinchBlox) {
-    BP.shape = GuiElements.create.path(GuiElements.layers.paletteBG);
-    BP.shape.setAttributeNS(null, "fill", BP.bg);
-    BlockPalette.updatePath();
+    
+    if (Hatchling) {
+      BP.shape = GuiElements.create.path(GuiElements.layers.titlebar);
+      BP.shape.setAttributeNS(null, "fill", "none");
+    } else {
+      BP.shape = GuiElements.create.path(GuiElements.layers.paletteBG);
+      BP.shape.setAttributeNS(null, "fill", BP.bg);
+      BlockPalette.updatePath();
+    }
     /*
     BP.leftShape = GuiElements.create.path(GuiElements.layers.paletteBG);
     BP.rightShape = GuiElements.create.path(GuiElements.layers.paletteBG);
@@ -13122,6 +13272,32 @@ BlockPalette.createPalBg = function() {
     BlockPalette.updatePath(BP.rightShape);*/
   }
 };
+
+BlockPalette.updateOutline = function(selectedCatButton) {
+  var BP = BlockPalette;
+  var CBN = CategoryBN
+  var color = Colors.getColor(selectedCatButton.catId)
+  var bnR = CBN.cornerRadius
+
+  var path = "m " + BP.x + "," + GuiElements.height;
+  path += " v " + (2*BP.hl - BP.height);
+  path += " a " + BP.hl + " " + BP.hl + " 0 0 1 " + BP.hl + " " + (-BP.hl);
+  path += " h " + ((GuiElements.width-BlockPalette.catW)/ 2 + selectedCatButton.x - bnR - 3*BP.hl);
+  path += " a " + bnR + " " + bnR + " 0 0 0 " + bnR + " " + (-bnR);
+  path += " v " + (2*bnR - CBN.height);
+  path += " a " + bnR + " " + bnR + " 0 0 1 " + bnR + " " + (-bnR);
+  path += " h " + (CBN.width - 2*bnR);
+  path += " a " + bnR + " " + bnR + " 0 0 1 " + bnR + " " + bnR;
+  path += " v " + (CBN.height - 2*bnR);
+  path += " a " + bnR + " " + bnR + " 0 0 0 " + bnR + " " + bnR;
+  path += " h " + ((GuiElements.width-BlockPalette.catW)/ 2 + (BlockPalette.catW - selectedCatButton.x - CBN.width) - bnR - 3*BP.hl);
+  path += " a " + BP.hl + " " + BP.hl + " 0 0 1 " + BP.hl + " " + BP.hl;
+  path += " v " + (BP.height - 2*BP.hl);
+
+  BP.shape.setAttributeNS(null, "d", path);
+  GuiElements.update.stroke(BP.shape, color, 2)
+  console.log(BP.shape)
+}
 
 BlockPalette.updatePath = function() {
   var BP = BlockPalette;
@@ -13173,7 +13349,7 @@ BlockPalette.updatePaletteColor = function(color) {
   GuiElements.update.color(BlockPalette.palRect, color);
   //GuiElements.update.color(BlockPalette.leftShape, color);
   //GuiElements.update.color(BlockPalette.rightShape, color);
-  GuiElements.update.color(BlockPalette.shape, color);
+  if (!Hatchling) { GuiElements.update.color(BlockPalette.shape, color); }
 }
 
 /**
@@ -13356,9 +13532,11 @@ BlockPalette.setLevel = function() {
   switch (LevelManager.currentLevel) {
     case 1:
       BlockPalette.getCategory("motion_1").select();
+      if (Hatchling) { GuiElements.update.opacity(BlockPalette.level2CatRect, 0) }
       break;
     case 2:
       BlockPalette.getCategory("motion_2").select();
+      if (Hatchling) { GuiElements.update.opacity(BlockPalette.level2CatRect, 1) }
       break;
     case 3:
       BlockPalette.getCategory("motion_3").select();
@@ -13679,7 +13857,7 @@ function CategoryBN(x, y, category) {
   this.text = this.category.name;
   this.catId = this.category.id;
   if (FinchBlox) {
-    this.fill = Colors.getColor(this.catId);
+    this.fill = Hatchling ? Colors.blockPalette[this.catId] : Colors.getColor(this.catId);
   } else {
     this.fill = Colors.getGradient(this.catId);
   }
@@ -13699,7 +13877,7 @@ CategoryBN.setGraphics = function() {
   CBN.labelLMargin = 6; // The amount of space between the text of the button and the band of color
 
   if (FinchBlox) {
-    CBN.hMargin = BP.catHMargin;
+    CBN.hMargin = Hatchling ? 0 : BP.catHMargin;
     CBN.height = BP.catH;
     CBN.selectedH = BP.catH + 10;
     CBN.iconScale = 0.65;
@@ -13729,6 +13907,7 @@ CategoryBN.prototype.buildGraphics = function() {
   if (FinchBlox) {
     //this.bgRect = GuiElements.draw.rect(0, 0, CBN.width, CBN.height, this.fill);
     this.bgRect = GuiElements.draw.tab(0, 0, CBN.width, CBN.height, this.fill, CBN.cornerRadius);
+    if (Hatchling) { GuiElements.update.opacity(this.bgRect, 0) }
   } else {
     this.bgRect = GuiElements.draw.rect(0, 0, CBN.width, CBN.height, CBN.bg);
   }
@@ -13740,7 +13919,8 @@ CategoryBN.prototype.buildGraphics = function() {
     var iconW = VectorIcon.computeWidth(iconPath, iconH);
     var iconX = (CBN.width - iconW) / 2;
     var iconY = (CBN.height - iconH) / 2;
-    this.icon = new VectorIcon(iconX, iconY, iconPath, Button.foreground, iconH, this.group, false);
+    var color = Hatchling ? Colors.getColor(this.catId) : Button.foreground
+    this.icon = new VectorIcon(iconX, iconY, iconPath, color, iconH, this.group, false);
     if (iconPath == VectorPaths.microbit) { 
       this.icon.setColor(Colors.bbtDarkGray)
       this.icon.addBackgroundRect() 
@@ -13762,7 +13942,11 @@ CategoryBN.prototype.buildGraphics = function() {
  * Makes the button appear selected
  */
 CategoryBN.prototype.select = function() {
-  if (FinchBlox) {
+  if (Hatchling) {
+    BlockPalette.updatePaletteColor(Colors.blockPalette[this.catId]);
+    GuiElements.update.opacity(this.bgRect, 1)
+    BlockPalette.updateOutline(this)
+  } else if (FinchBlox) {
     var pop = CategoryBN.height - CategoryBN.selectedH;
     GuiElements.move.group(this.group, this.x, this.y + pop);
     GuiElements.update.tab(this.bgRect, 0, 0, CategoryBN.width, CategoryBN.selectedH, CategoryBN.cornerRadius);
@@ -13785,7 +13969,9 @@ CategoryBN.prototype.select = function() {
  * Makes the button appear deselected
  */
 CategoryBN.prototype.deselect = function() {
-  if (FinchBlox) {
+  if (Hatchling) {
+    GuiElements.update.opacity(this.bgRect, 0)
+  } else if (FinchBlox) {
     GuiElements.move.group(this.group, this.x, this.y);
     GuiElements.update.tab(this.bgRect, 0, 0, CategoryBN.width, CategoryBN.height, CategoryBN.cornerRadius);
 
@@ -13861,7 +14047,7 @@ function Category(buttonX, buttonY, name, id) {
   }
 
   this.group = GuiElements.create.group(0, 0);
-  this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, 0, BlockPalette.y,
+  this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, BlockPalette.x, BlockPalette.y,
     BlockPalette.width, BlockPalette.height, 0, 0);
   this.button = new CategoryBN(this.buttonX, this.buttonY, this);
 
@@ -14110,7 +14296,7 @@ Category.prototype.trimBottom = function() {
  */
 Category.prototype.centerBlocks = function() {
   this.computeWidth();
-  var newX = (BlockPalette.width - this.width) / 2;
+  var newX = BlockPalette.x + (BlockPalette.width - this.width) / 2;
   this.smoothScrollBox.move(newX, BlockPalette.y);
 }
 
@@ -14802,9 +14988,10 @@ CollapsibleItem.prototype.passRecursively = function(functionName) {
  * @param {string} color - (optional) background color for the button
  * @param {number} rx - (optional) Corner rounding parameter
  * @param {number} ry - (optional) Corner rounding parameter
+ * @param {Color} outlineColor - (optional) color to outline the button with
  * @constructor
  */
-function Button(x, y, width, height, parent, color, rx, ry) {
+function Button(x, y, width, height, parent, color, rx, ry, outlineColor) {
   DebugOptions.validateNumbers(x, y, width, height);
   this.x = x;
   this.y = y;
@@ -14820,6 +15007,7 @@ function Button(x, y, width, height, parent, color, rx, ry) {
   }
   this.rx = rx;
   this.ry = ry;
+  this.strokeColor = outlineColor;
   this.buildBg();
   this.pressed = false;
   this.enabled = true;
@@ -14852,8 +15040,8 @@ Button.setGraphics = function() {
     Button.disabledBg = Colors.darkenColor(Colors.easternBlue, 0.85);
     Button.disabledFore = Colors.darkenColor(Colors.blockPaletteMotion, 0.9);
     if (Hatchling) {
-      Button.disabledBg = Colors.darkenColor(Colors.blockPaletteControl, 0.85);
-      Button.disabledFore = Colors.darkenColor(Colors.blockPaletteControl, 0.95);
+      Button.disabledBg = Colors.ballyGray
+      Button.disabledFore = Colors.ballyGrayLight
     }
   } else {
     Button.defaultMargin = 5;
@@ -14866,6 +15054,9 @@ Button.setGraphics = function() {
 
   Button.defaultIconH = 15;
   Button.defaultSideMargin = 10;
+
+  //Hatchling
+  Button.strokeW = 1.5
 };
 
 /**
@@ -14873,6 +15064,9 @@ Button.setGraphics = function() {
  */
 Button.prototype.buildBg = function() {
   this.bgRect = GuiElements.draw.rect(0, 0, this.width, this.height, this.bg, this.rx, this.ry);
+  if (this.strokeColor != null) {
+    GuiElements.update.stroke(this.bgRect, this.strokeColor, Button.strokeW)
+  }
   this.group.appendChild(this.bgRect);
   TouchReceiver.addListenersBN(this.bgRect, this);
 };
@@ -14889,6 +15083,9 @@ Button.prototype.addText = function(text, font, color) {
   }
   if (color == null) {
     color = Button.foreground;
+  }
+  if (this.isUnButtoned) {
+    color = Colors.white
   }
   this.textE = this.makeText(text, font, color);
 
@@ -15171,17 +15368,17 @@ Button.prototype.addFinchBnIcons = function() {
   var finchPathId = VectorPaths.mvFinch;
   var finchColor = Colors.white
   if (Hatchling) { 
-    finchPathId = VectorPaths.faEgg; 
+    finchPathId = VectorPaths.bdHatchling; 
     finchColor = Colors.iron;
     this.iconColor = finchColor
   }
-  var battPathId = VectorPaths.battery;
-  var xPathId = VectorPaths.faTimesCircle;
+  var battPathId = Hatchling ? VectorPaths.bdBatteryDisconnected : VectorPaths.battery;
+  var xPathId = Hatchling ? VectorPaths.bdClose : VectorPaths.faTimesCircle;
   var font = Font.uiFont(18);
 
-  var finchH = TitleBar.bnIconH * 1.65; //the long dimension of the finch since we will rotate it
+  var finchH = Hatchling ? TitleBar.bnIconH * 1.1 : TitleBar.bnIconH * 1.65; //the long dimension of the finch since we will rotate it
   var battH = TitleBar.bnIconH * 0.75;
-  var xH = TitleBar.bnIconH * 0.6;
+  var xH = Hatchling ? TitleBar.bnIconH * 1.1 : TitleBar.bnIconH * 0.6;
   this.finchW = VectorIcon.computeWidth(finchPathId, finchH);
   var battW = VectorIcon.computeWidth(battPathId, battH);
   var xW = VectorIcon.computeWidth(xPathId, xH);
@@ -15189,10 +15386,10 @@ Button.prototype.addFinchBnIcons = function() {
   //var battX = finchH + 1.5*finchX;
   var m = 10; //Margin between finch icon and battery icon.
   this.finchConnectedX = (this.width - this.finchW - battW - m) / 2;
-  var battX = (this.width + finchH + m - battW) / 2;
-  var textX = (this.width - finchH - battW - m) / 2 + m;
+  var battX = Hatchling ? (this.width + this.finchW + m - battW) / 2 : (this.width + finchH + m - battW) / 2;
+  var textX = Hatchling ? (this.width - this.finchW - battW - m) / 2 + m : (this.width - finchH - battW - m) / 2 + m;
 
-  var xX = (this.width - xW) / 2; //finchX + finchH/2;
+  var xX = Hatchling ? (this.finchConnectedX + 5) : (this.width - xW) / 2; //finchX + finchH/2;
   this.finchY = (this.height - finchH) / 2;
   var battY = (this.height - battH) / 2;
   var textY = (this.height + font.charHeight) / 2;
@@ -15203,18 +15400,17 @@ Button.prototype.addFinchBnIcons = function() {
   this.iconInverts = false;
   this.hasText = true;
 
-  this.icon = new VectorIcon(this.finchX, this.finchY, finchPathId, finchColor, finchH, this.group, null, 90);
-  GuiElements.update.stroke(this.icon.pathE, Colors.iron, 2);
-  this.battIcon = new VectorIcon(battX, battY, battPathId, Colors.iron, battH, this.group);
-  this.textE = GuiElements.draw.text(textX, textY, "", font, Colors.flagGreen);
-  this.group.appendChild(this.textE);
-  this.xIcon = new VectorIcon(xX, xY, xPathId, Colors.stopRed, xH, this.group);
-  if (Hatchling) {
-    var hY = (this.height - this.finchW) / 2
-    this.hatchGroup = GuiElements.create.group(this.finchConnectedX, hY, this.group)
-    //TODO: the elements placed inside this group probably need listeners too...
-    TouchReceiver.addListenersBN(this.hatchGroup, this);
+  if (Hatchling) { 
+    this.finchX = this.finchConnectedX 
   }
+  this.icon = new VectorIcon(this.finchX, this.finchY, finchPathId, finchColor, finchH, this.group, null, (Hatchling ? null : 90));
+  if (!Hatchling) { GuiElements.update.stroke(this.icon.pathE, Colors.iron, 2); }
+  this.battIcon = new VectorIcon(battX, battY, battPathId, (Hatchling ? Colors.white : Colors.iron), battH, this.group);
+  this.textE = GuiElements.draw.text(textX, textY, "", font, (Hatchling ? Colors.white : Colors.flagGreen));
+  this.group.appendChild(this.textE);
+  this.xIcon = new VectorIcon(xX, xY, xPathId, (Hatchling ? Colors.white : Colors.stopRed), xH, this.group);
+
+  if (Hatchling) { this.battIcon.group.appendChild(this.battIcon.pathE) }
 
   TouchReceiver.addListenersBN(this.icon.pathE, this);
   TouchReceiver.addListenersBN(this.battIcon.pathE, this);
@@ -28980,7 +29176,7 @@ SaveManager.backendOpen = function(fileName, data) {
     if (fileLevel != LevelManager.currentLevel && fileLevel > 0 && fileLevel <= LevelManager.totalLevels) {
       LevelManager.setLevel(fileLevel)
     }
-    TitleBar.fileBn.update();
+    if (!Hatchling) { TitleBar.fileBn.update(); }
   }
   OpenDialog.closeDialog();
   GuiElements.unblockInteraction();
@@ -29144,7 +29340,7 @@ SaveManager.autoSave = function(nextAction) {
     if (nextAction != null) nextAction();
     return;
   }
-  if (FinchBlox) {
+  if (FinchBlox && !Hatchling) {
     TitleBar.fileBn.update();
   }
   var xmlDocText = XmlWriter.docToText(CodeManager.createXml());
@@ -38520,13 +38716,15 @@ B_FBForwardUntilObstacle.prototype.constructor = B_FBForwardUntilObstacle;
 
 function B_FBSound(x, y, level) {
   this.level = level;
+  if (Hatchling && level == 3) { level = 2 }
   CommandBlock.call(this, x, y, "sound_" + level);
 
   var iconH = 35;
   if (level == 1) {
     iconH = 24;
   }
-  this.blockIcon = new BlockIcon(this, VectorPaths.mvMusicNote, Colors.white, "finchSound", iconH);
+  var iconPath = Hatchling ? VectorPaths.bdMusicNote : VectorPaths.mvMusicNote
+  this.blockIcon = new BlockIcon(this, iconPath, Colors.white, "finchSound", iconH);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 
@@ -38691,9 +38889,16 @@ B_FBSoundL3.prototype.constructor = B_FBSoundL3;
 function B_WhenFlagTapped(x, y) {
 
   if (FinchBlox) {
-    HatBlock.call(this, x, y, "control_3");
-    this.addPart(new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 35));
+    if (Hatchling) {
+      HatBlock.call(this, x, y, "control_2");
+      this.addPart(new BlockIcon(this, VectorPaths.bdStart, Colors.ballyGreenYellow, "flag", 45));
+      GuiElements.update.color(this.path, Colors.white)
+    } else {
+      HatBlock.call(this, x, y, "control_3");
+      this.addPart(new BlockIcon(this, VectorPaths.faFlag, Colors.flagGreen, "flag", 35));
+    }    
     this.isStartBlock = true;
+  
   } else {
     HatBlock.call(this, x, y, "control");
     // Add flag icon with height 15
@@ -38752,7 +38957,7 @@ B_WhenIReceive.prototype.startAction = function() {
 function B_Wait(x, y) {
 
   if (FinchBlox) {
-    CommandBlock.call(this, x, y, "control_3");
+    CommandBlock.call(this, x, y, "control_" + (Hatchling ? "2" : "3"));
     var blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 35);
     blockIcon.isEndOfLine = true;
     this.addPart(blockIcon);
@@ -38829,7 +39034,7 @@ B_WaitUntil.prototype.startAction = function() {
 function B_Forever(x, y) {
   var category = "control";
   if (FinchBlox) {
-    category = "control_3";
+    category = "control_" + (Hatchling ? "2" : "3");
   }
   LoopBlock.call(this, x, y, category, false); //Bottom is not open.
   if (FinchBlox) {
@@ -38866,7 +39071,7 @@ B_Forever.prototype.updateAction = function() {
 function B_Repeat(x, y) {
   var category = "control";
   if (FinchBlox) {
-    category = "control_3";
+    category = "control_" + (Hatchling ? "2" : "3");
   }
   LoopBlock.call(this, x, y, category);
 
@@ -39102,9 +39307,9 @@ B_Message.prototype.startAction = function() {
 
 function B_Stop(x, y) {
 
-  if (FinchBlox) {
+  if (Hatchling) {
     CommandBlock.call(this, x, y, "control_2", true);
-    this.addPart(new BlockIcon(this, VectorPaths.stop, Colors.white, "stop", 35));
+    this.addPart(new BlockIcon(this, VectorPaths.bdStop, Colors.white, "stop", 45));
   } else {
     CommandBlock.call(this, x, y, "control", true);
     var dS = new DropSlot(this, "DS_act", null, null, new SelectionData(Language.getStr("all"), "all"));
@@ -39247,7 +39452,7 @@ B_WhenKeyPressed.prototype.updateAction = function() {
 //FinchBlox and Hatchling only
 function B_FBStartWhen(x, y, sensor) {
   this.sensor = sensor
-  var category = Hatchling ? "sensor_3" : "control_3"
+  var category = Hatchling ? "sensor_2" : "control_3"
   HatBlock.call(this, x, y, category, true);
 }
 B_FBStartWhen.prototype = Object.create(HatBlock.prototype);
@@ -41492,7 +41697,7 @@ B_HLOutputBase.prototype.checkActive = function() {
 function B_HLPositionServo(x, y, defaultAngle) {
   this.value = defaultAngle //90; //defaultAngle
   this.valueKey = "angle"
-  B_HLOutputBase.call(this, x, y, "motion_3", "positionServo", 3);
+  B_HLOutputBase.call(this, x, y, "motion_2", "positionServo", 3);
 
   var icon = VectorPaths["bdPosition"];
   switch (defaultAngle) {
@@ -41572,7 +41777,7 @@ B_HL_PS_L2.prototype.argList = function() { return [HL_Utils.portNames[this.port
  * Wave a position servo
  */
 function B_HLWave(x, y) {
-  B_HLOutputBase.call(this, x, y, "motion_3", "wave", 3);
+  B_HLOutputBase.call(this, x, y, "motion_2", "wave", 3);
 
   var icon = VectorPaths["bdPositionWW"];
   this.blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 27);
@@ -41600,9 +41805,9 @@ function B_HLRotationServo(x, y, flip) {
   this.defaultSpeed = 50;
   this.valueKey = "value"
   this.flip = flip
-  B_HLOutputBase.call(this, x, y, "motion_3", "rotationServo", 1);
+  B_HLOutputBase.call(this, x, y, "motion_2", "rotationServo", 1);
 
-  var icon = flip ? VectorPaths["bsArrowClockwise"] : VectorPaths["bsArrowCounterClockwise"];
+  var icon = flip ? VectorPaths["bdRotateRight"] : VectorPaths["bdRotateLeft"];
   var blockIcon = new BlockIcon(this, icon, Colors.white, "rServo", 30, null, true);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
@@ -41675,9 +41880,9 @@ function B_HLSingleNeopix(x, y, defaultColor) {
   /*this.red = 100;
   this.green = 100;
   this.blue = 100;*/
-  B_HLOutputBase.call(this, x, y, "color_3", "singleNeopix", 9);
+  B_HLOutputBase.call(this, x, y, "color_2", "singleNeopix", 9);
 
-  var icon = VectorPaths["faLightbulb"];
+  var icon = VectorPaths["bdLightBulb"];
   this.blockIcon = new BlockIcon(this, icon, Colors.white, "sNeopix", 27);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
@@ -41776,7 +41981,7 @@ function B_HLNeopixStrip(x, y) {
   this.blockIcons = []
   this.colorButtons = []
 
-  B_HLOutputBase.call(this, x, y, "color_3", "neopixStrip", 10);
+  B_HLOutputBase.call(this, x, y, "color_2", "neopixStrip", 10);
 
   var icon = VectorPaths["faLightbulb"];
   /*this.blockIcon1 = new BlockIcon(this, icon, Colors.white, "neopix1", 27);
@@ -41827,9 +42032,9 @@ function B_HLFairyLights(x, y) {
   this.value = 254
   this.valueKey = "value"
 
-  B_HLOutputBase.call(this, x, y, "color_3", "fairyLights", 8);
+  B_HLOutputBase.call(this, x, y, "color_2", "fairyLights", 8);
 
-  var icon = VectorPaths["bsStars"];
+  var icon = VectorPaths["bdFairyLights"];
   this.blockIcon = new BlockIcon(this, icon, Colors.white, "fairyLights", 27);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
@@ -41879,7 +42084,7 @@ B_HLAlphabet.prototype.constructor = B_HLAlphabet;
 
 // Wait until sensor reaches threshold
 function B_HLWaitUntil(x, y, usePort, sensor) {
-  CommandBlock.call(this, x, y, "sensor_3");
+  CommandBlock.call(this, x, y, "sensor_2");
   this.usePort = usePort
   this.sensor = sensor
 

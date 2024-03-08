@@ -5,13 +5,15 @@
 
 function B_FBSound(x, y, level) {
   this.level = level;
+  if (Hatchling && level == 3) { level = 2 }
   CommandBlock.call(this, x, y, "sound_" + level);
 
   let iconH = 35;
   if (level == 1) {
     iconH = 24;
   }
-  this.blockIcon = new BlockIcon(this, VectorPaths.mvMusicNote, Colors.white, "finchSound", iconH);
+  let iconPath = Hatchling ? VectorPaths.bdMusicNote : VectorPaths.mvMusicNote
+  this.blockIcon = new BlockIcon(this, iconPath, Colors.white, "finchSound", iconH);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 
