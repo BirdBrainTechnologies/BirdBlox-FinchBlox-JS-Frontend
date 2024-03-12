@@ -82,7 +82,11 @@ BlockButton.prototype.draw = function() {
 BlockButton.prototype.updateAlign = function(x, y) {
   DebugOptions.validateNumbers(x, y);
   if (Hatchling && !this.widgets[0].type.startsWith("hatchling")) { 
-    x = this.parent.width - this.width - 2
+    if (this.parent.hasBlockSlot1) {
+      x = this.parent.topWidth - this.width - 2
+    } else {
+      x = this.parent.width - this.width - 2
+    }
     y = BlockGraphics.command.height - this.height - 2
   }
   this.move(x, y);

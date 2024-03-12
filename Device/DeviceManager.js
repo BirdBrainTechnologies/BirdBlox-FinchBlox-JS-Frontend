@@ -66,7 +66,7 @@ DeviceManager.setStatics();
 DeviceManager.checkBattery = function() {
   var worstBatteryStatus = "4";
   var curBatteryStatus = "";
-  var color = Colors.lightGray;
+  var color = Hatchling ? Colors.white : Colors.lightGray;
   DeviceManager.forEach(function(manager) {
     for (var i = 0; i < manager.connectedDevices.length; i++) {
       let robot = manager.connectedDevices[i];

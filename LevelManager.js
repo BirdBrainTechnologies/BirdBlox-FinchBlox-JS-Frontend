@@ -83,8 +83,8 @@ LevelManager.checkSavedFiles = function() {
 LevelManager.loadLevelSavePoint = function() {
   const LM = LevelManager;
   GuiElements.blockInteraction();
-  //console.log("loadLevelSavePoint for level " + LM.currentLevel);
   const levelFileName = LM.savePointFileNames[LM.currentLevel];
+  console.log("loadLevelSavePoint for level " + LM.currentLevel + ": " + levelFileName);
   if (!LM.fileListRetreived) {
     setTimeout(function() {
       LevelManager.loadLevelSavePoint();

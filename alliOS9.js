@@ -5420,7 +5420,7 @@ DeviceManager.setStatics();
 DeviceManager.checkBattery = function() {
   var worstBatteryStatus = "4";
   var curBatteryStatus = "";
-  var color = Colors.lightGray;
+  var color = Hatchling ? Colors.white : Colors.lightGray;
   DeviceManager.forEach(function(manager) {
     for (var i = 0; i < manager.connectedDevices.length; i++) {
       var robot = manager.connectedDevices[i];
@@ -9286,6 +9286,9 @@ Font.uiFont = function(fontSize) {
   //if (FinchBlox) { return new Font('AvenirHeavy', fontSize, "normal"); }
   //if (FinchBlox) { return new Font('FredericBlack', fontSize, "normal"); }
   //if (FinchBlox) { return new Font("NunitoSans-ExtraBold", fontSize, "normal"); }
+  if (Hatchling) {
+    return new Font("MPLUS-ExtraBold", fontSize, "normal");
+  }
   if (FinchBlox) {
     return new Font("Nunito-ExtraBold", fontSize, "normal");
   }
@@ -9382,7 +9385,12 @@ function VectorPaths(){
     VP.bdConnected.path="M16.2947 39.3686L19.0351 41.7908C20.5926 43.3143 22.6028 43.6043 24.6137 41.7292L45.5719 21.0892C47.0953 19.5318 47.0678 17.0342 45.5103 15.5107C43.9528 13.9872 41.4552 14.0148 39.9317 15.5723L21.8116 33.7285L12.8771 24.989C11.3196 23.4655 8.82199 23.4931 7.29852 25.0505C5.77504 26.608 5.80261 29.1056 7.36009 30.6291L16.2947 39.3686Z"
     VP.bdConnected.width=57
     VP.bdConnected.height=57
-    //bdControls
+
+    VP.bdControls={} //the square and ellipse had to be translated to a path
+    VP.bdControls.path="M 51.1397 51.1394 m 6 0 l 11.8604 0 a 6 6 0 0 1 6 6 l 0 11.8604 a 6 6 0 0 1 -6 6 l -11.8604 0 a 6 6 0 0 1 -6 -6 l 0 -11.8604 a 6 6 0 0 1 6 -6 Z M 33.5581 33.5581 m 12.5581 0 a 12.5581 12.5581 0 1 0 -25.1162 0 a 12.5581 12.5581 0 1 0 25.1162 0 Z M44.7741 60.7421C46.5635 61.7765 46.5635 64.3626 44.7741 65.397L28.7934 74.6357C27.0041 75.6701 24.7674 74.3771 24.7674 72.3082L24.7674 53.8309C24.7674 51.7621 27.0041 50.469 28.7934 51.5034L44.7741 60.7421Z M63.365 39.6835C62.5073 39.6835 61.812 40.3788 61.812 41.2365V44.1877C61.812 45.0454 62.5073 45.7407 63.365 45.7407C69.7728 45.7407 74.9996 40.6037 74.9996 34.2275C74.9996 27.8512 69.7728 22.7143 63.365 22.7143C58.492 22.7143 54.302 25.685 52.5744 29.9124L50.3614 29.2582C49.5427 29.0162 48.8167 29.8453 49.1647 30.6248L52.5036 38.1037C52.754 38.6646 53.4463 38.8693 53.9614 38.5347L60.8301 34.0734C61.5461 33.6084 61.3876 32.5179 60.5689 32.2758L58.4763 31.6572C59.4069 29.9447 61.2393 28.7714 63.365 28.7714C66.4433 28.7714 68.9065 31.2319 68.9065 34.2275C68.9065 37.2231 66.4433 39.6835 63.365 39.6835Z"    
+    VP.bdControls.width=95
+    VP.bdControls.height=95
+
     VP.bdCreateFilePage={}
     VP.bdCreateFilePage.path="M10 0C4.47715 0 0 4.47716 0 10V90C0 95.5229 4.47715 100 10 100H66C71.5229 100 76 95.5229 76 90V30.4H59.2C53.0144 30.4 48 25.3856 48 19.2V0.00546447C47.89 0.00182721 47.7797 0 47.6692 0H10Z M54.4 2.60423V19.2C54.4 21.851 56.549 24 59.2 24H74.5525C74.1784 23.3826 73.7359 22.8032 73.2297 22.2734L54.8989 3.09121C54.7378 2.92258 54.5714 2.7602 54.4 2.60423Z"
     VP.bdCreateFilePage.width=76
@@ -9433,7 +9441,10 @@ function VectorPaths(){
     VP.bdLoop.path="M41.1282 34.1464C40.8575 34.6229 41.0695 35.2169 41.5625 35.4562L47.4834 38.3305C48.2521 38.7036 48.2829 39.8308 47.5341 40.1871L27.192 49.867C26.6548 50.1226 26.007 49.8082 25.8262 49.204L18.9805 26.3259C18.7285 25.4839 19.527 24.7592 20.2956 25.1324L27.0298 28.4014C27.5396 28.6489 28.1515 28.4228 28.3986 27.9128C30.4035 23.7748 33.3436 20.2407 36.9554 17.6464C40.9958 14.7442 45.7123 13.1364 50.5609 13.0083C55.4096 12.8802 60.193 14.2371 64.3596 16.9225C68.2734 19.4449 71.4933 23.0431 73.6963 27.3439C73.9369 27.8135 73.7508 28.3844 73.2888 28.6393L62.6415 34.5148C62.136 34.7938 61.5031 34.5857 61.2152 34.0853C60.2214 32.3578 58.8577 30.9074 57.2335 29.8606C55.3213 28.6282 53.1261 28.0055 50.9009 28.0643C48.6757 28.1231 46.5112 28.8609 44.6569 30.1929C43.2244 31.2217 42.0222 32.5727 41.1282 34.1464Z M62.9662 50.9418C63.2369 50.4653 63.0249 49.8713 62.5319 49.632L56.611 46.7578C55.8424 46.3846 55.8116 45.2574 56.5603 44.9011L76.9025 35.2212C77.4397 34.9656 78.0875 35.2801 78.2683 35.8843L85.114 58.7623C85.3659 59.6044 84.5675 60.329 83.7988 59.9559L77.0646 56.6868C76.5548 56.4393 75.9429 56.6654 75.6958 57.1754C73.69 61.3151 70.7484 64.8503 67.1347 67.4448C63.0923 70.3472 58.3736 71.9541 53.5231 72.0802C48.6727 72.2062 43.8881 70.8462 39.7215 68.1572C35.8076 65.6312 32.5888 62.0292 30.3881 57.7248C30.1479 57.255 30.3345 56.6842 30.7967 56.4297L41.4483 50.5634C41.9539 50.2849 42.5866 50.4935 42.8741 50.9941C43.867 52.7232 45.2305 54.1754 46.8548 55.2237C48.767 56.4578 50.9628 57.0819 53.1888 57.024C55.4148 56.9662 57.5803 56.2287 59.4356 54.8967C60.8688 53.8677 62.0718 52.5162 62.9662 50.9418Z"
     VP.bdLoop.width=95
     VP.bdLoop.height=95
-    //bdMovement
+    VP.bdMovement={} //the circle had to be translated to a path element
+    VP.bdMovement.path="M29.4482 71.0831C29.4482 72.4885 31.1024 73.2207 32.1231 72.2671L58.061 48.033C58.744 47.3949 58.744 46.3033 58.061 45.6651L32.1231 21.431C31.1024 20.4774 29.4482 21.2096 29.4482 22.615L29.4482 31.5369C29.4482 32.4271 28.7347 32.7908 27.8546 32.7908H3.47385C2.59373 32.7908 2 33.3745 2 34.2647V47.655V60.794C2 61.6841 2.59373 62.1612 3.47385 62.1612H27.8546C28.7347 62.1612 29.4482 62.8828 29.4482 63.773V71.0831Z M 78.5 47.5 m 15.5 0 a 15.5 15.5 0 1 0 -31 0 a 15.5 15.5 0 1 0 31 0 Z"
+    VP.bdMovement.width=95
+    VP.bdMovement.height=95
     VP.bdMultiLightBulb={}
     VP.bdMultiLightBulb.path="M35.1441 54.638C35.7491 54.2887 36.1295 53.6458 36.01 52.9575C35.9936 52.8632 35.9762 52.7666 35.9581 52.6667C35.7532 51.5347 35.473 49.9862 35.8865 46.719C36.1272 44.8176 36.0861 37.7917 30.7382 34.7108C25.3903 31.6299 20.2772 32.8195 17.9349 34.1719C15.5926 35.5242 12.0059 39.3574 12 45.5293C11.9942 51.7011 18.0583 55.2497 19.8252 55.992C22.8615 57.2674 24.0623 58.2843 24.9402 59.0277C25.0177 59.0933 25.0927 59.1568 25.1662 59.2182C25.7025 59.6659 26.4495 59.6578 27.0545 59.3085L35.1441 54.638ZM17.9886 47.1705C17.2811 45.2386 17.6175 43.0787 18.8789 41.4534C19.3022 40.9081 19.2032 40.1228 18.6578 39.6996C18.1124 39.2763 17.3272 39.3753 16.9039 39.9206C15.1147 42.226 14.6375 45.2899 15.641 48.0302L15.7616 48.3594C15.9989 49.0076 16.7169 49.3407 17.3652 49.1033C18.0134 48.8659 18.3465 48.148 18.1091 47.4997L17.9886 47.1705Z M36.7621 56.2381L27.627 61.5123C27.3949 61.6463 27.3154 61.943 27.4494 62.1751L27.481 62.2299C29.0714 64.9846 32.5938 65.9284 35.3485 64.338C38.1032 62.7476 39.047 59.2252 37.4566 56.4705L37.425 56.4157C37.291 56.1836 36.9942 56.1041 36.7621 56.2381Z M50.141 33.5101C50.8396 33.5101 51.4905 33.1436 51.7311 32.4878C51.7641 32.3979 51.7973 32.3054 51.8316 32.2098C52.2202 31.127 52.7517 29.646 54.7435 27.0233C55.9026 25.497 59.38 19.3918 56.289 14.0497C53.198 8.70767 48.1751 7.18137 45.4705 7.18137C42.7658 7.18137 37.743 8.70767 34.652 14.0497C31.561 19.3918 35.0383 25.497 36.1975 27.0233C38.1892 29.646 38.7207 31.127 39.1093 32.2098L39.1098 32.2113C39.144 32.3064 39.177 32.3984 39.2098 32.4878C39.4504 33.1436 40.1013 33.5101 40.7999 33.5101L50.141 33.5101ZM39.0179 18.4654C39.3712 16.4387 40.7424 14.7363 42.6475 13.9595C43.2867 13.6988 43.5936 12.9693 43.333 12.33C43.0723 11.6908 42.3428 11.3839 41.7035 11.6445C39.0013 12.7464 37.0561 15.1612 36.555 18.0361L36.4948 18.3815C36.3763 19.0616 36.8315 19.7091 37.5116 19.8276C38.1917 19.9462 38.8391 19.4909 38.9577 18.8108L39.0179 18.4654Z M50.7426 35.705H40.1943C39.9263 35.705 39.709 35.9222 39.709 36.1902V36.2535C39.709 39.4343 42.2876 42.0129 45.4684 42.0129C48.6493 42.0129 51.2279 39.4343 51.2279 36.2535V36.1902C51.2279 35.9222 51.0106 35.705 50.7426 35.705Z M55.3459 54.638C54.7409 54.2887 54.3605 53.6458 54.48 52.9575C54.4964 52.8632 54.5139 52.7666 54.5319 52.6667C54.7368 51.5347 55.0171 49.9862 54.6035 46.719C54.3628 44.8176 54.4039 37.7917 59.7518 34.7108C65.0998 31.6299 70.2128 32.8195 72.5551 34.1719C74.8974 35.5242 78.4842 39.3574 78.49 45.5293C78.4959 51.7011 72.4318 55.2497 70.6648 55.992C67.6285 57.2674 66.4277 58.2843 65.5499 59.0277C65.4723 59.0933 65.3973 59.1568 65.3238 59.2182C64.7875 59.6659 64.0405 59.6578 63.4355 59.3085L55.3459 54.638ZM72.5014 47.1705C73.2089 45.2386 72.8725 43.0787 71.6111 41.4534C71.1878 40.9081 71.2868 40.1228 71.8322 39.6996C72.3775 39.2763 73.1628 39.3753 73.5861 39.9206C75.3753 42.226 75.8525 45.2899 74.849 48.0302L74.7284 48.3594C74.491 49.0076 73.7731 49.3407 73.1248 49.1033C72.4766 48.8659 72.1435 48.148 72.3809 47.4997L72.5014 47.1705Z M53.7279 56.2381L62.863 61.5123C63.0951 61.6463 63.1746 61.943 63.0406 62.1751L63.009 62.2299C61.4186 64.9846 57.8962 65.9284 55.1415 64.338C52.3868 62.7476 51.443 59.2252 53.0334 56.4705L53.065 56.4157C53.199 56.1836 53.4958 56.1041 53.7279 56.2381Z"
     VP.bdMultiLightBulb.width=94
@@ -9511,7 +9522,10 @@ function VectorPaths(){
     VP.bdSavedFiles.path="M19.0489 2.92707C19.3483 2.00576 20.6517 2.00576 20.9511 2.92707L24.2658 13.1287C24.3996 13.5407 24.7836 13.8197 25.2168 13.8197H35.9435C36.9122 13.8197 37.3149 15.0593 36.5312 15.6287L27.8532 21.9336C27.5027 22.1883 27.3561 22.6397 27.4899 23.0517L30.8047 33.2533C31.104 34.1746 30.0495 34.9407 29.2658 34.3713L20.5878 28.0664C20.2373 27.8117 19.7627 27.8117 19.4122 28.0664L10.7342 34.3713C9.95048 34.9407 8.89601 34.1746 9.19536 33.2533L12.5101 23.0517C12.6439 22.6397 12.4973 22.1883 12.1468 21.9336L3.46877 15.6287C2.68506 15.0593 3.08784 13.8197 4.05656 13.8197H14.7832C15.2164 13.8197 15.6004 13.5407 15.7342 13.1287L19.0489 2.92707Z M46 10C46 8.89545 46.8954 8.00002 48 8.00002H114C115.105 8.00002 116 8.89545 116 10V30C116 31.1046 115.105 32 114 32H48C46.8954 32 46 31.1046 46 30V10Z M19.0489 46.9271C19.3483 46.0058 20.6517 46.0058 20.9511 46.9271L24.2658 57.1287C24.3996 57.5407 24.7836 57.8197 25.2168 57.8197H35.9435C36.9122 57.8197 37.3149 59.0593 36.5312 59.6287L27.8532 65.9336C27.5027 66.1883 27.3561 66.6397 27.4899 67.0517L30.8047 77.2533C31.104 78.1746 30.0495 78.9407 29.2658 78.3713L20.5878 72.0664C20.2373 71.8117 19.7627 71.8117 19.4122 72.0664L10.7342 78.3713C9.95048 78.9407 8.89601 78.1746 9.19536 77.2533L12.5101 67.0517C12.6439 66.6397 12.4973 66.1883 12.1468 65.9336L3.46877 59.6287C2.68506 59.0593 3.08784 57.8197 4.05656 57.8197H14.7832C15.2164 57.8197 15.6004 57.5407 15.7342 57.1287L19.0489 46.9271Z M46 54C46 52.8954 46.8954 52 48 52H114C115.105 52 116 52.8954 116 54V74C116 75.1046 115.105 76 114 76H48C46.8954 76 46 75.1046 46 74V54Z"
     VP.bdSavedFiles.width=116
     VP.bdSavedFiles.height=84
-    //bdSense
+    VP.bdSense={} //the ellipse had to be translated to a path 
+    VP.bdSense.path="M 64.7119 48.131 m 19.3779 0 a 19.3779 19.8747 0 1 0 -38.7558 0 a 19.3779 19.8747 0 1 0 38.7558 0 Z M22.9748 25.4649C24.5165 23.6904 27.2048 23.5016 28.9794 25.0433C34.5756 29.9052 37.9369 37.9952 38.3504 46.189C38.7691 54.4861 36.1981 63.5254 29.0841 70.1312C27.3615 71.7308 24.6684 71.631 23.0689 69.9084C21.4693 68.1858 21.569 65.4927 23.2916 63.8932C28.2017 59.3338 30.1674 52.9367 29.8485 46.618C29.5244 40.196 26.8737 34.4906 23.3964 31.4695C21.6218 29.9278 21.4331 27.2395 22.9748 25.4649Z M12.2223 34.2182C13.871 32.5426 16.5659 32.5207 18.2415 34.1694C23.2485 39.0957 24.0004 45.1706 23.2232 50.0714C22.4777 54.7728 20.2618 58.9434 18.3706 60.9733C16.7682 62.6932 14.0749 62.7885 12.355 61.1861C10.635 59.5837 10.5397 56.8904 12.1422 55.1705C12.7597 54.5077 14.3068 51.9466 14.8156 48.7381C15.2928 45.729 14.7904 42.716 12.2712 40.2374C10.5956 38.5888 10.5737 35.8939 12.2223 34.2182Z"
+    VP.bdSense.width=95
+    VP.bdSense.height=95
     //bdShake
     VP.bdShort={}
     VP.bdShort.path="M1 13.125C1 11.3991 1.82198 10 2.83594 10L46.1641 10C47.178 10 48 11.3991 48 13.125V36.875C48 38.6009 47.178 40 46.1641 40H2.83594C1.82198 40 1 38.6009 1 36.875L1 13.125ZM5.54181 24.1968C5.54181 23.515 6.03926 22.9622 6.6529 22.9622H8.31954C8.93318 22.9622 9.43064 23.515 9.43064 24.1968L9.43064 37.1599H5.54181L5.54181 24.1968ZM18.5516 28.3972C17.9379 28.3972 17.4405 28.95 17.4405 29.6318V37.0393H21.8849V29.6318C21.8849 28.95 21.3874 28.3972 20.7738 28.3972H18.5516ZM28.8333 23.958C28.8333 23.2762 29.3308 22.7235 29.9444 22.7235H32.1666C32.7802 22.7235 33.2777 23.2762 33.2777 23.958V36.9212H28.8333V23.958ZM40.9432 28.8342C40.3296 28.8342 39.8322 29.3869 39.8322 30.0688V37.4763H44.2765V30.0688C44.2765 29.3869 43.7791 28.8342 43.1654 28.8342H40.9432Z"
@@ -9536,7 +9550,10 @@ function VectorPaths(){
     VP.bdStop.path="M18 28C18 22.4772 22.4772 18 28 18H68C73.5228 18 78 22.4772 78 28V68C78 73.5228 73.5228 78 68 78H28C22.4772 78 18 73.5228 18 68V28Z"
     VP.bdStop.width=95
     VP.bdStop.height=95
-    //bdStopWatch
+    VP.bdStopWatch={} //There was a clip path that was not copied.
+    VP.bdStopWatch.path="M43.75 68.9206C58.5236 68.9206 70.5 57.4994 70.5 43.4107C70.5 29.322 58.5236 17.9008 43.75 17.9008C28.9764 17.9008 17 29.322 17 43.4107C17 57.4994 28.9764 68.9206 43.75 68.9206ZM41.3179 29.8575C41.3179 28.8439 42.1395 28.0223 43.153 28.0223C44.1666 28.0223 44.9882 28.8439 44.9882 29.8575V44.6973L53.7121 48.6431C54.6054 49.0471 54.9757 50.0864 54.5391 50.9643C54.1024 51.8422 53.0243 52.2263 52.1309 51.8222L41.3179 46.9315L41.67 46.2234H41.3179V29.8575Z M33.1499 7C33.1499 6.44772 33.5976 6 34.1499 6H53.4381C53.9904 6 54.4381 6.44772 54.4381 7V12.0004C54.4381 12.5527 53.9904 13.0004 53.4381 13.0004H34.1499C33.5976 13.0004 33.1499 12.5527 33.1499 12.0004V7Z M46.6458 11.9486C47.1981 11.9482 47.6461 12.3957 47.6466 12.9479L47.6511 18.9558C47.6515 19.5081 47.2041 19.9561 46.6518 19.9565L40.7616 19.9605C40.2093 19.9609 39.7613 19.5135 39.7609 18.9612L39.7563 12.9533C39.7559 12.4011 40.2033 11.953 40.7556 11.9527L46.6458 11.9486Z M69.5508 23.6127C69.9669 23.9759 69.9941 24.5933 69.6116 24.9917L66.164 28.5828C65.7815 28.9812 65.1342 29.0097 64.7181 28.6465L58.1284 22.893C57.7124 22.5298 57.6852 21.9123 58.0676 21.5139L61.5153 17.9229C61.8978 17.5245 62.5451 17.496 62.9611 17.8592L69.5508 23.6127Z"
+    VP.bdStopWatch.width=95
+    VP.bdStopWatch.height=95
     //bdSymbolDiamondPreview - Will use existing micro:bit display previews
     VP.bdSymbolDiamond={}
     VP.bdSymbolDiamond.path="M41.0122 22.6274L22.6274 4.24264L4.24264 22.6274L22.6274 41.0122L41.0122 22.6274ZM22.6274 0L0 22.6274L22.6274 45.2548L45.2548 22.6274L22.6274 0Z"
@@ -9988,14 +10005,14 @@ function VectorPaths(){
   };
   if (Hatchling) {
     VP.categoryIcons = {
-    "motion_1": VP.bdHatchling,
+    "motion_1": VP.bdMovement,
     "color_1": VP.bdLightBulb,
     "sound_1": VP.bdMusic,
-    "motion_2": VP.bdHatchling,
+    "motion_2": VP.bdMovement,
     "color_2": VP.bdLightBulb,
     "sound_2": VP.bdMusic,
-    "sensor_2": VP.bdHatchling,
-    "control_2": VP.bdHatchling
+    "sensor_2": VP.bdSense,
+    "control_2": VP.bdControls
   };
   }
 
@@ -13150,16 +13167,16 @@ BlockPalette.setGraphics = function() {
       BlockPalette.width -= 4*BlockPalette.hl 
       BlockPalette.height += BlockPalette.hl
     }
-    BlockPalette.bg = Colors.bbtDarkGray;
+    BlockPalette.bg = Hatchling ? Colors.ballyRedLight : Colors.bbtDarkGray;
     BlockPalette.catW = 300;
     BlockPalette.catX = GuiElements.width / 2 - BlockPalette.catW / 2;
     BlockPalette.catH = 40;
     BlockPalette.catY = BlockPalette.y - BlockPalette.catH;
     BlockPalette.blockMargin = 35; //25;   // The horizontal spacing between Blocks
-    BlockPalette.trashHeight = BlockPalette.height * 0.75;
-    BlockPalette.trashIconVP = VectorPaths.faTrash;
-    BlockPalette.trashOpacity = 0.9;
-    BlockPalette.trashColor = Colors.easternBlue;
+    BlockPalette.trashHeight = Hatchling ? BlockPalette.height * 0.5 : BlockPalette.height * 0.75;
+    BlockPalette.trashIconVP = Hatchling ? VectorPaths.bdTrash : VectorPaths.faTrash;
+    BlockPalette.trashOpacity = Hatchling ? 1 : 0.9;
+    BlockPalette.trashColor = Hatchling ? Colors.ballyRed : Colors.easternBlue;
     BlockPalette.blockButtonOverhang = 10; //12; //How much block buttons are allowd to hang over the bottom of the block
   } else {
     BlockPalette.width = 253;
@@ -13194,9 +13211,13 @@ BlockPalette.updateZoom = function() {
   BP.setGraphics();
   GuiElements.update.rect(BP.palRect, BP.x, BP.y, BP.width, BP.height);
   if (FinchBlox) {
-    //BP.updatePath(BP.leftShape);
-    //BP.updatePath(BP.rightShape);
-    if (!Hatchling) { BP.updatePath(); }
+    if (Hatchling) { 
+      var CBN = CategoryBN
+      GuiElements.move.group(GuiElements.layers.catBg, (GuiElements.width - (CBN.width * 5))/2, BP.y - CBN.height);
+      BP.updateOutline()
+    } else {
+      BP.updatePath(); 
+    }
     GuiElements.update.rect(BP.catRect, 0, BP.catY, 0, BP.catH);
   } else {
     GuiElements.update.rect(BP.catRect, 0, BP.catY, BP.width, BP.catH);
@@ -13223,14 +13244,12 @@ BlockPalette.createCatBg = function() {
       var color = Colors.ballyGrayLight
       var widthL1 = CBN.width * 3 // 3 categories in level 1
       var widthL2 = CBN.width * 5 // 5 categories in level 2
-      var xL1 = (GuiElements.width - widthL1)/2
-      var xL2 = (GuiElements.width - widthL2)/2
-      var y = BP.y - CBN.height
-      BP.level1CatRect = GuiElements.draw.tab(xL1, y, widthL1, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
-      BP.level2CatRect = GuiElements.draw.tab(xL2, y, widthL2, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
+      BP.level1CatRect = GuiElements.draw.tab(CBN.width, 0, widthL1, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
+      BP.level2CatRect = GuiElements.draw.tab(0, 0, widthL2, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
       GuiElements.layers.catBg.appendChild(BP.level1CatRect);
       GuiElements.layers.catBg.appendChild(BP.level2CatRect);
       GuiElements.update.opacity(BlockPalette.level2CatRect, 0)
+      GuiElements.move.group(GuiElements.layers.catBg, BP.catX, BP.catY);
     }
   }
   //BP.catRect = GuiElements.draw.rect(0, BP.catY, BP.width, BP.catH, BP.catBg);
@@ -13273,7 +13292,8 @@ BlockPalette.createPalBg = function() {
   }
 };
 
-BlockPalette.updateOutline = function(selectedCatButton) {
+BlockPalette.updateOutline = function() {
+  var selectedCatButton = BlockPalette.selectedCat.button
   var BP = BlockPalette;
   var CBN = CategoryBN
   var color = Colors.getColor(selectedCatButton.catId)
@@ -13296,7 +13316,6 @@ BlockPalette.updateOutline = function(selectedCatButton) {
 
   BP.shape.setAttributeNS(null, "d", path);
   GuiElements.update.stroke(BP.shape, color, 2)
-  console.log(BP.shape)
 }
 
 BlockPalette.updatePath = function() {
@@ -13450,8 +13469,20 @@ BlockPalette.showTrash = function() {
   var BP = BlockPalette;
   // If the trash is not visible
   if (!BP.trash) {
+
+    var r = null
+    if (Hatchling) {
+      var GE = GuiElements;
+      GE.layers.paletteBG.hide();
+      GE.layers.paletteScroll.style.visibility = "hidden";
+      GE.layers.catBg.hide();
+      GE.layers.categories.hide();
+      BP.shape.remove()
+      r = BP.hl
+    }
+
     BP.trash = GuiElements.create.group(0, 0);
-    var trashBg = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
+    var trashBg = GuiElements.draw.rect(BP.x, BP.y, BP.width, BP.height, BP.bg, r, r);
     GuiElements.update.opacity(trashBg, BP.trashOpacity);
     BP.trash.appendChild(trashBg);
 
@@ -13473,6 +13504,15 @@ BlockPalette.hideTrash = function() {
   if (BP.trash) {
     BP.trash.remove();
     BP.trash = null;
+
+    if (Hatchling) {
+      var GE = GuiElements;
+      GE.layers.paletteBG.show();
+      GE.layers.paletteScroll.style.visibility = "visible";
+      GE.layers.catBg.show();
+      GE.layers.categories.show();
+      GuiElements.layers.titlebar.appendChild(BP.shape)
+    }
   }
 };
 
@@ -13880,7 +13920,7 @@ CategoryBN.setGraphics = function() {
     CBN.hMargin = Hatchling ? 0 : BP.catHMargin;
     CBN.height = BP.catH;
     CBN.selectedH = BP.catH + 10;
-    CBN.iconScale = 0.65;
+    CBN.iconScale = Hatchling ? 1 : 0.65;
     CBN.width = 60;
     CBN.vMargin = 15;
     CBN.labelX = CBN.colorW + CBN.labelLMargin;
@@ -13945,7 +13985,7 @@ CategoryBN.prototype.select = function() {
   if (Hatchling) {
     BlockPalette.updatePaletteColor(Colors.blockPalette[this.catId]);
     GuiElements.update.opacity(this.bgRect, 1)
-    BlockPalette.updateOutline(this)
+    BlockPalette.updateOutline()
   } else if (FinchBlox) {
     var pop = CategoryBN.height - CategoryBN.selectedH;
     GuiElements.move.group(this.group, this.x, this.y + pop);
@@ -29936,8 +29976,8 @@ LevelManager.checkSavedFiles = function() {
 LevelManager.loadLevelSavePoint = function() {
   var LM = LevelManager;
   GuiElements.blockInteraction();
-  //console.log("loadLevelSavePoint for level " + LM.currentLevel);
   var levelFileName = LM.savePointFileNames[LM.currentLevel];
+  console.log("loadLevelSavePoint for level " + LM.currentLevel + ": " + levelFileName);
   if (!LM.fileListRetreived) {
     setTimeout(function() {
       LevelManager.loadLevelSavePoint();
@@ -35198,7 +35238,7 @@ BlockIcon.prototype.addSecondIcon = function(pathId, color, centerBelow, height,
 
 /**
  * Add some text to this icon. Created for the FinchBlox level 1 music block.
- * Also used for FinchBlox level 3 repeat block.
+ * Also used for FinchBlox level 3 repeat block and several Hatchling blocks.
  * @param {string} text - Text to add
  */
 BlockIcon.prototype.addText = function(text, xOffset, yOffset) {
@@ -35218,10 +35258,12 @@ BlockIcon.prototype.addText = function(text, xOffset, yOffset) {
   this.parent.group.appendChild(this.textE);
   TouchReceiver.addListenersChild(this.textE, this.parent);
 
-  var textHeight = GuiElements.measure.textHeight(this.textE);
-  var textWidth = GuiElements.measure.textWidth(this.textE);
-  this.height = this.textYOffset;
-  this.width = this.textXOffset + textWidth;
+  if (!Hatchling) {
+    var textHeight = GuiElements.measure.textHeight(this.textE);
+    var textWidth = GuiElements.measure.textWidth(this.textE);
+    this.height = this.textYOffset;
+    this.width = this.textXOffset + textWidth;
+  }
   //console.log("BlockIcon addText " + x + ", " + y + "; " + this.height + " " + this.width);
 }
 
@@ -35373,7 +35415,11 @@ BlockButton.prototype.draw = function() {
 BlockButton.prototype.updateAlign = function(x, y) {
   DebugOptions.validateNumbers(x, y);
   if (Hatchling && !this.widgets[0].type.startsWith("hatchling")) { 
-    x = this.parent.width - this.width - 2
+    if (this.parent.hasBlockSlot1) {
+      x = this.parent.topWidth - this.width - 2
+    } else {
+      x = this.parent.width - this.width - 2
+    }
     y = BlockGraphics.command.height - this.height - 2
   }
   this.move(x, y);
@@ -37718,6 +37764,14 @@ function B_FBColor(x, y, level, type) {
   this.ledArray = [];
   CommandBlock.call(this, x, y, "color_" + level);
 
+  if (Hatchling) {
+    var iconP = this.useAlphabet ? VectorPaths.bdAlpha : VectorPaths.bdSymbols
+    this.blockIcon = new BlockIcon(this, iconP, Colors.white, "ledArray", 45);
+    this.blockIcon.isEndOfLine = true;
+    this.addPart(this.blockIcon);
+    return
+  }
+
   var iconPath = VectorPaths.mvFinch;
   var iconColor = Colors.white;
   var iconH = 40;
@@ -37822,6 +37876,7 @@ B_FBColor.prototype.updateAction = function() {
   }
 }
 B_FBColor.prototype.updateColor = function() {
+  if (Hatchling) { return }
   if (this.isLEDArray) {
     this.ledArrayImage.group.remove();
     this.ledArrayImage = GuiElements.draw.ledArray(this.blockIcon.icon.group, this.ledStatusString, 20);
@@ -38723,6 +38778,7 @@ function B_FBSound(x, y, level) {
   if (level == 1) {
     iconH = 24;
   }
+  if (Hatchling) { iconH = 40 }
   var iconPath = Hatchling ? VectorPaths.bdMusicNote : VectorPaths.mvMusicNote
   this.blockIcon = new BlockIcon(this, iconPath, Colors.white, "finchSound", iconH);
   this.blockIcon.isEndOfLine = true;
@@ -38810,7 +38866,9 @@ function B_FBSoundL1(x, y, note, midiNote) {
 
   //this.addPart(new LabelText(this, note));
   //this.blockIcon.addText(note);
-  this.blockIcon.addText(note, 12, 30);
+  var xOffset = Hatchling ? 25 : 12
+  var yOffset = Hatchling ? 40 : 30
+  this.blockIcon.addText(note, xOffset, yOffset);
 }
 B_FBSoundL1.prototype = Object.create(B_FBSound.prototype);
 B_FBSoundL1.prototype.constructor = B_FBSoundL1;
@@ -38958,7 +39016,9 @@ function B_Wait(x, y) {
 
   if (FinchBlox) {
     CommandBlock.call(this, x, y, "control_" + (Hatchling ? "2" : "3"));
-    var blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 35);
+    var iconPath = Hatchling ? VectorPaths.bdStopWatch : VectorPaths.faClockSolid
+    var iconH = Hatchling ? 45 : 35
+    var blockIcon = new BlockIcon(this, iconPath, Colors.white, "clock", iconH);
     blockIcon.isEndOfLine = true;
     this.addPart(blockIcon);
     this.timeSelection = Hatchling ? 5 : 30;
@@ -39038,7 +39098,9 @@ function B_Forever(x, y) {
   }
   LoopBlock.call(this, x, y, category, false); //Bottom is not open.
   if (FinchBlox) {
-    this.addPart(new BlockIcon(this, VectorPaths.faSyncAlt, Colors.white, "repeat", 30));
+    var iconPath = Hatchling ? VectorPaths.bdLoop : VectorPaths.faSyncAlt
+    var iconH = Hatchling ? 45 : 30
+    this.addPart(new BlockIcon(this, iconPath, Colors.white, "repeat", iconH));
   } else {
     this.addPart(new LabelText(this, Language.getStr("block_repeat_forever")));
   }
@@ -39077,7 +39139,9 @@ function B_Repeat(x, y) {
 
   if (FinchBlox) {
     this.countSelection = 10;
-    this.blockIcon = new BlockIcon(this, VectorPaths.faSyncAlt, Colors.white, "repeat", 30);
+    var iconPath = Hatchling ? VectorPaths.bdLoop : VectorPaths.faSyncAlt
+    var iconH = Hatchling ? 45 : 30
+    this.blockIcon = new BlockIcon(this, iconPath, Colors.white, "repeat", iconH);
     this.blockIcon.isEndOfLine = true;
     this.addPart(this.blockIcon);
     this.countBN = new BlockButton(this);
@@ -39134,7 +39198,9 @@ B_Repeat.prototype.updateAction = function() {
 B_Repeat.prototype.updateValues = function() {
   if (this.countBN != null) {
     this.countSelection = this.countBN.values[0];
-    this.blockIcon.addText(this.countSelection, 30, 28);
+    if(!Hatchling) {
+      this.blockIcon.addText(this.countSelection, 30, 28);
+    }
   }
 }
 
@@ -41708,7 +41774,7 @@ function B_HLPositionServo(x, y, defaultAngle) {
     icon = VectorPaths["bdPosition180"];
     break;
   }
-  this.blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 27);
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 40);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 
@@ -41719,7 +41785,7 @@ B_HLPositionServo.prototype.constructor = B_HLPositionServo;
 function B_HL_PS_L1(x, y, defaultAngle) {
   B_HLPositionServo.call(this, x, y, defaultAngle)
 
-  this.blockIcon.addText(defaultAngle.toString(), 12, 30);
+  this.blockIcon.addText(defaultAngle.toString() + "°", 28 - (defaultAngle/11.25), 40);
 }
 B_HL_PS_L1.prototype = Object.create(B_HLPositionServo.prototype)
 B_HL_PS_L1.prototype.constructor = B_HL_PS_L1
@@ -41738,24 +41804,18 @@ B_HL_PS_L1.prototype.argList = function() {
 
 function B_HL_PS_L1_0(x, y) {
   B_HL_PS_L1.call(this, x, y, 0)
-
-  this.blockIcon.addText("0", 12, 30);
 }
 B_HL_PS_L1_0.prototype = Object.create(B_HL_PS_L1.prototype)
 B_HL_PS_L1_0.prototype.constructor = B_HL_PS_L1_0
 
 function B_HL_PS_L1_90(x, y) {
   B_HL_PS_L1.call(this, x, y, 90)
-
-  this.blockIcon.addText("90", 12, 30);
 }
 B_HL_PS_L1_90.prototype = Object.create(B_HL_PS_L1.prototype)
 B_HL_PS_L1_90.prototype.constructor = B_HL_PS_L1_90
 
 function B_HL_PS_L1_180(x, y) {
   B_HL_PS_L1.call(this, x, y, 180)
-
-  this.blockIcon.addText("180", 12, 30);
 }
 B_HL_PS_L1_180.prototype = Object.create(B_HL_PS_L1.prototype)
 B_HL_PS_L1_180.prototype.constructor = B_HL_PS_L1_180
@@ -41780,7 +41840,7 @@ function B_HLWave(x, y) {
   B_HLOutputBase.call(this, x, y, "motion_2", "wave", 3);
 
   var icon = VectorPaths["bdPositionWW"];
-  this.blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 27);
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 40);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 }
@@ -41808,7 +41868,7 @@ function B_HLRotationServo(x, y, flip) {
   B_HLOutputBase.call(this, x, y, "motion_2", "rotationServo", 1);
 
   var icon = flip ? VectorPaths["bdRotateRight"] : VectorPaths["bdRotateLeft"];
-  var blockIcon = new BlockIcon(this, icon, Colors.white, "rServo", 30, null, true);
+  var blockIcon = new BlockIcon(this, icon, Colors.white, "rServo", 45);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 
@@ -41883,7 +41943,7 @@ function B_HLSingleNeopix(x, y, defaultColor) {
   B_HLOutputBase.call(this, x, y, "color_2", "singleNeopix", 9);
 
   var icon = VectorPaths["bdLightBulb"];
-  this.blockIcon = new BlockIcon(this, icon, Colors.white, "sNeopix", 27);
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "sNeopix", 45);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 
@@ -42035,7 +42095,7 @@ function B_HLFairyLights(x, y) {
   B_HLOutputBase.call(this, x, y, "color_2", "fairyLights", 8);
 
   var icon = VectorPaths["bdFairyLights"];
-  this.blockIcon = new BlockIcon(this, icon, Colors.white, "fairyLights", 27);
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "fairyLights", 45);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 
@@ -42110,11 +42170,11 @@ function B_HLWaitUntil(x, y, usePort, sensor) {
     this.addPart(this.sensorBN);*/
   }
 
-  var sensorPaths = [VectorPaths.faRuler, VectorPaths.clap, VectorPaths.mjSun, VectorPaths.share]
+  var sensorPaths = [VectorPaths.bdRuler, VectorPaths.bdClap, VectorPaths.bdNoLight, VectorPaths.share]
   var sensorTypes = ["distance", "clap", "light", "shake"]
   var path = sensorPaths[sensorTypes.indexOf(this.sensor)]
 
-  var blockIcon = new BlockIcon(this, path, Colors.white, "sensor", 35)
+  var blockIcon = new BlockIcon(this, path, Colors.white, "sensor", 45)
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
   
@@ -43837,7 +43897,8 @@ MicroBlocksRuntime.prototype.chunkTypeFor = function(aBlockOrFunction) {
 	if (expr instanceof CommandBlock) { return 1 }
 	if (expr instanceof ReporterBlock) { return 2 }
 
-	console.error('Unexpected argument to chunkTypeFor: ' + aBlockOrFunction)
+	console.error('Unexpected argument to chunkTypeFor: ' + op)
+	console.error(aBlockOrFunction)
 }
 
 MicroBlocksRuntime.prototype.chunkBytesFor = function(aBlockOrFunction) {

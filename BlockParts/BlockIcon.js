@@ -128,7 +128,7 @@ BlockIcon.prototype.addSecondIcon = function(pathId, color, centerBelow, height,
 
 /**
  * Add some text to this icon. Created for the FinchBlox level 1 music block.
- * Also used for FinchBlox level 3 repeat block.
+ * Also used for FinchBlox level 3 repeat block and several Hatchling blocks.
  * @param {string} text - Text to add
  */
 BlockIcon.prototype.addText = function(text, xOffset, yOffset) {
@@ -148,10 +148,12 @@ BlockIcon.prototype.addText = function(text, xOffset, yOffset) {
   this.parent.group.appendChild(this.textE);
   TouchReceiver.addListenersChild(this.textE, this.parent);
 
-  const textHeight = GuiElements.measure.textHeight(this.textE);
-  const textWidth = GuiElements.measure.textWidth(this.textE);
-  this.height = this.textYOffset;
-  this.width = this.textXOffset + textWidth;
+  if (!Hatchling) {
+    const textHeight = GuiElements.measure.textHeight(this.textE);
+    const textWidth = GuiElements.measure.textWidth(this.textE);
+    this.height = this.textYOffset;
+    this.width = this.textXOffset + textWidth;
+  }
   //console.log("BlockIcon addText " + x + ", " + y + "; " + this.height + " " + this.width);
 }
 

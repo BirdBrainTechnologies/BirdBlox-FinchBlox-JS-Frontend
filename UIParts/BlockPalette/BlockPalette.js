@@ -42,16 +42,16 @@ BlockPalette.setGraphics = function() {
       BlockPalette.width -= 4*BlockPalette.hl 
       BlockPalette.height += BlockPalette.hl
     }
-    BlockPalette.bg = Colors.bbtDarkGray;
+    BlockPalette.bg = Hatchling ? Colors.ballyRedLight : Colors.bbtDarkGray;
     BlockPalette.catW = 300;
     BlockPalette.catX = GuiElements.width / 2 - BlockPalette.catW / 2;
     BlockPalette.catH = 40;
     BlockPalette.catY = BlockPalette.y - BlockPalette.catH;
     BlockPalette.blockMargin = 35; //25;   // The horizontal spacing between Blocks
-    BlockPalette.trashHeight = BlockPalette.height * 0.75;
-    BlockPalette.trashIconVP = VectorPaths.faTrash;
-    BlockPalette.trashOpacity = 0.9;
-    BlockPalette.trashColor = Colors.easternBlue;
+    BlockPalette.trashHeight = Hatchling ? BlockPalette.height * 0.5 : BlockPalette.height * 0.75;
+    BlockPalette.trashIconVP = Hatchling ? VectorPaths.bdTrash : VectorPaths.faTrash;
+    BlockPalette.trashOpacity = Hatchling ? 1 : 0.9;
+    BlockPalette.trashColor = Hatchling ? Colors.ballyRed : Colors.easternBlue;
     BlockPalette.blockButtonOverhang = 10; //12; //How much block buttons are allowd to hang over the bottom of the block
   } else {
     BlockPalette.width = 253;
@@ -86,9 +86,13 @@ BlockPalette.updateZoom = function() {
   BP.setGraphics();
   GuiElements.update.rect(BP.palRect, BP.x, BP.y, BP.width, BP.height);
   if (FinchBlox) {
-    //BP.updatePath(BP.leftShape);
-    //BP.updatePath(BP.rightShape);
-    if (!Hatchling) { BP.updatePath(); }
+    if (Hatchling) { 
+      const CBN = CategoryBN
+      GuiElements.move.group(GuiElements.layers.catBg, (GuiElements.width - (CBN.width * 5))/2, BP.y - CBN.height);
+      BP.updateOutline()
+    } else {
+      BP.updatePath(); 
+    }
     GuiElements.update.rect(BP.catRect, 0, BP.catY, 0, BP.catH);
   } else {
     GuiElements.update.rect(BP.catRect, 0, BP.catY, BP.width, BP.catH);
@@ -115,14 +119,12 @@ BlockPalette.createCatBg = function() {
       const color = Colors.ballyGrayLight
       const widthL1 = CBN.width * 3 // 3 categories in level 1
       const widthL2 = CBN.width * 5 // 5 categories in level 2
-      const xL1 = (GuiElements.width - widthL1)/2
-      const xL2 = (GuiElements.width - widthL2)/2
-      const y = BP.y - CBN.height
-      BP.level1CatRect = GuiElements.draw.tab(xL1, y, widthL1, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
-      BP.level2CatRect = GuiElements.draw.tab(xL2, y, widthL2, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
+      BP.level1CatRect = GuiElements.draw.tab(CBN.width, 0, widthL1, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
+      BP.level2CatRect = GuiElements.draw.tab(0, 0, widthL2, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
       GuiElements.layers.catBg.appendChild(BP.level1CatRect);
       GuiElements.layers.catBg.appendChild(BP.level2CatRect);
       GuiElements.update.opacity(BlockPalette.level2CatRect, 0)
+      GuiElements.move.group(GuiElements.layers.catBg, BP.catX, BP.catY);
     }
   }
   //BP.catRect = GuiElements.draw.rect(0, BP.catY, BP.width, BP.catH, BP.catBg);
@@ -165,7 +167,8 @@ BlockPalette.createPalBg = function() {
   }
 };
 
-BlockPalette.updateOutline = function(selectedCatButton) {
+BlockPalette.updateOutline = function() {
+  let selectedCatButton = BlockPalette.selectedCat.button
   const BP = BlockPalette;
   const CBN = CategoryBN
   const color = Colors.getColor(selectedCatButton.catId)
@@ -188,7 +191,6 @@ BlockPalette.updateOutline = function(selectedCatButton) {
 
   BP.shape.setAttributeNS(null, "d", path);
   GuiElements.update.stroke(BP.shape, color, 2)
-  console.log(BP.shape)
 }
 
 BlockPalette.updatePath = function() {
@@ -342,8 +344,20 @@ BlockPalette.showTrash = function() {
   let BP = BlockPalette;
   // If the trash is not visible
   if (!BP.trash) {
+
+    let r = null
+    if (Hatchling) {
+      let GE = GuiElements;
+      GE.layers.paletteBG.hide();
+      GE.layers.paletteScroll.style.visibility = "hidden";
+      GE.layers.catBg.hide();
+      GE.layers.categories.hide();
+      BP.shape.remove()
+      r = BP.hl
+    }
+
     BP.trash = GuiElements.create.group(0, 0);
-    let trashBg = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
+    let trashBg = GuiElements.draw.rect(BP.x, BP.y, BP.width, BP.height, BP.bg, r, r);
     GuiElements.update.opacity(trashBg, BP.trashOpacity);
     BP.trash.appendChild(trashBg);
 
@@ -365,6 +379,15 @@ BlockPalette.hideTrash = function() {
   if (BP.trash) {
     BP.trash.remove();
     BP.trash = null;
+
+    if (Hatchling) {
+      let GE = GuiElements;
+      GE.layers.paletteBG.show();
+      GE.layers.paletteScroll.style.visibility = "visible";
+      GE.layers.catBg.show();
+      GE.layers.categories.show();
+      GuiElements.layers.titlebar.appendChild(BP.shape)
+    }
   }
 };
 

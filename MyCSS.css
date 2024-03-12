@@ -146,3 +146,8 @@ transition:
   font-family: Nunito-ExtraBold;
   src: url(Fonts/Nunito-ExtraBold.ttf);
 }
+
+@font-face {
+  font-family: MPLUS-ExtraBold;
+  src: url(Fonts/MPLUSRounded1c-ExtraBold.ttf);
+}

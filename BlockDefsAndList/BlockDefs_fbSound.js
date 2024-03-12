@@ -12,6 +12,7 @@ function B_FBSound(x, y, level) {
   if (level == 1) {
     iconH = 24;
   }
+  if (Hatchling) { iconH = 40 }
   let iconPath = Hatchling ? VectorPaths.bdMusicNote : VectorPaths.mvMusicNote
   this.blockIcon = new BlockIcon(this, iconPath, Colors.white, "finchSound", iconH);
   this.blockIcon.isEndOfLine = true;
@@ -99,7 +100,9 @@ function B_FBSoundL1(x, y, note, midiNote) {
 
   //this.addPart(new LabelText(this, note));
   //this.blockIcon.addText(note);
-  this.blockIcon.addText(note, 12, 30);
+  let xOffset = Hatchling ? 25 : 12
+  let yOffset = Hatchling ? 40 : 30
+  this.blockIcon.addText(note, xOffset, yOffset);
 }
 B_FBSoundL1.prototype = Object.create(B_FBSound.prototype);
 B_FBSoundL1.prototype.constructor = B_FBSoundL1;

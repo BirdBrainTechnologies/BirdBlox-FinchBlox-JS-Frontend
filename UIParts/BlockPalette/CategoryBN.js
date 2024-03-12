@@ -35,7 +35,7 @@ CategoryBN.setGraphics = function() {
     CBN.hMargin = Hatchling ? 0 : BP.catHMargin;
     CBN.height = BP.catH;
     CBN.selectedH = BP.catH + 10;
-    CBN.iconScale = 0.65;
+    CBN.iconScale = Hatchling ? 1 : 0.65;
     CBN.width = 60;
     CBN.vMargin = 15;
     CBN.labelX = CBN.colorW + CBN.labelLMargin;
@@ -100,7 +100,7 @@ CategoryBN.prototype.select = function() {
   if (Hatchling) {
     BlockPalette.updatePaletteColor(Colors.blockPalette[this.catId]);
     GuiElements.update.opacity(this.bgRect, 1)
-    BlockPalette.updateOutline(this)
+    BlockPalette.updateOutline()
   } else if (FinchBlox) {
     let pop = CategoryBN.height - CategoryBN.selectedH;
     GuiElements.move.group(this.group, this.x, this.y + pop);

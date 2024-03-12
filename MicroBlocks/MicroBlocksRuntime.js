@@ -165,7 +165,8 @@ MicroBlocksRuntime.prototype.chunkTypeFor = function(aBlockOrFunction) {
 	if (expr instanceof CommandBlock) { return 1 }
 	if (expr instanceof ReporterBlock) { return 2 }
 
-	console.error('Unexpected argument to chunkTypeFor: ' + aBlockOrFunction)
+	console.error('Unexpected argument to chunkTypeFor: ' + op)
+	console.error(aBlockOrFunction)
 }
 
 MicroBlocksRuntime.prototype.chunkBytesFor = function(aBlockOrFunction) {

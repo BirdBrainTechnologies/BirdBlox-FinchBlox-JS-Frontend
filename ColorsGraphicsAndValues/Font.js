@@ -50,6 +50,9 @@ Font.uiFont = function(fontSize) {
   //if (FinchBlox) { return new Font('AvenirHeavy', fontSize, "normal"); }
   //if (FinchBlox) { return new Font('FredericBlack', fontSize, "normal"); }
   //if (FinchBlox) { return new Font("NunitoSans-ExtraBold", fontSize, "normal"); }
+  if (Hatchling) {
+    return new Font("MPLUS-ExtraBold", fontSize, "normal");
+  }
   if (FinchBlox) {
     return new Font("Nunito-ExtraBold", fontSize, "normal");
   }

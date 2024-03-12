@@ -25,6 +25,14 @@ function B_FBColor(x, y, level, type) {
   this.ledArray = [];
   CommandBlock.call(this, x, y, "color_" + level);
 
+  if (Hatchling) {
+    let iconP = this.useAlphabet ? VectorPaths.bdAlpha : VectorPaths.bdSymbols
+    this.blockIcon = new BlockIcon(this, iconP, Colors.white, "ledArray", 45);
+    this.blockIcon.isEndOfLine = true;
+    this.addPart(this.blockIcon);
+    return
+  }
+
   let iconPath = VectorPaths.mvFinch;
   let iconColor = Colors.white;
   let iconH = 40;
@@ -129,6 +137,7 @@ B_FBColor.prototype.updateAction = function() {
   }
 }
 B_FBColor.prototype.updateColor = function() {
+  if (Hatchling) { return }
   if (this.isLEDArray) {
     this.ledArrayImage.group.remove();
     this.ledArrayImage = GuiElements.draw.ledArray(this.blockIcon.icon.group, this.ledStatusString, 20);

@@ -73,7 +73,9 @@ function B_Wait(x, y) {
 
   if (FinchBlox) {
     CommandBlock.call(this, x, y, "control_" + (Hatchling ? "2" : "3"));
-    const blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 35);
+    const iconPath = Hatchling ? VectorPaths.bdStopWatch : VectorPaths.faClockSolid
+    const iconH = Hatchling ? 45 : 35
+    const blockIcon = new BlockIcon(this, iconPath, Colors.white, "clock", iconH);
     blockIcon.isEndOfLine = true;
     this.addPart(blockIcon);
     this.timeSelection = Hatchling ? 5 : 30;
@@ -153,7 +155,9 @@ function B_Forever(x, y) {
   }
   LoopBlock.call(this, x, y, category, false); //Bottom is not open.
   if (FinchBlox) {
-    this.addPart(new BlockIcon(this, VectorPaths.faSyncAlt, Colors.white, "repeat", 30));
+    const iconPath = Hatchling ? VectorPaths.bdLoop : VectorPaths.faSyncAlt
+    const iconH = Hatchling ? 45 : 30
+    this.addPart(new BlockIcon(this, iconPath, Colors.white, "repeat", iconH));
   } else {
     this.addPart(new LabelText(this, Language.getStr("block_repeat_forever")));
   }
@@ -192,7 +196,9 @@ function B_Repeat(x, y) {
 
   if (FinchBlox) {
     this.countSelection = 10;
-    this.blockIcon = new BlockIcon(this, VectorPaths.faSyncAlt, Colors.white, "repeat", 30);
+    const iconPath = Hatchling ? VectorPaths.bdLoop : VectorPaths.faSyncAlt
+    const iconH = Hatchling ? 45 : 30
+    this.blockIcon = new BlockIcon(this, iconPath, Colors.white, "repeat", iconH);
     this.blockIcon.isEndOfLine = true;
     this.addPart(this.blockIcon);
     this.countBN = new BlockButton(this);
@@ -249,7 +255,9 @@ B_Repeat.prototype.updateAction = function() {
 B_Repeat.prototype.updateValues = function() {
   if (this.countBN != null) {
     this.countSelection = this.countBN.values[0];
-    this.blockIcon.addText(this.countSelection, 30, 28);
+    if(!Hatchling) {
+      this.blockIcon.addText(this.countSelection, 30, 28);
+    }
   }
 }
 

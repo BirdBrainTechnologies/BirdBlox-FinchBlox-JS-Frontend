@@ -292,7 +292,7 @@ function B_HLPositionServo(x, y, defaultAngle) {
     icon = VectorPaths["bdPosition180"];
     break;
   }
-  this.blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 27);
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 40);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 
@@ -303,7 +303,7 @@ B_HLPositionServo.prototype.constructor = B_HLPositionServo;
 function B_HL_PS_L1(x, y, defaultAngle) {
   B_HLPositionServo.call(this, x, y, defaultAngle)
 
-  this.blockIcon.addText(defaultAngle.toString(), 12, 30);
+  this.blockIcon.addText(defaultAngle.toString() + "°", 28 - (defaultAngle/11.25), 40);
 }
 B_HL_PS_L1.prototype = Object.create(B_HLPositionServo.prototype)
 B_HL_PS_L1.prototype.constructor = B_HL_PS_L1
@@ -322,24 +322,18 @@ B_HL_PS_L1.prototype.argList = function() {
 
 function B_HL_PS_L1_0(x, y) {
   B_HL_PS_L1.call(this, x, y, 0)
-
-  this.blockIcon.addText("0", 12, 30);
 }
 B_HL_PS_L1_0.prototype = Object.create(B_HL_PS_L1.prototype)
 B_HL_PS_L1_0.prototype.constructor = B_HL_PS_L1_0
 
 function B_HL_PS_L1_90(x, y) {
   B_HL_PS_L1.call(this, x, y, 90)
-
-  this.blockIcon.addText("90", 12, 30);
 }
 B_HL_PS_L1_90.prototype = Object.create(B_HL_PS_L1.prototype)
 B_HL_PS_L1_90.prototype.constructor = B_HL_PS_L1_90
 
 function B_HL_PS_L1_180(x, y) {
   B_HL_PS_L1.call(this, x, y, 180)
-
-  this.blockIcon.addText("180", 12, 30);
 }
 B_HL_PS_L1_180.prototype = Object.create(B_HL_PS_L1.prototype)
 B_HL_PS_L1_180.prototype.constructor = B_HL_PS_L1_180
@@ -364,7 +358,7 @@ function B_HLWave(x, y) {
   B_HLOutputBase.call(this, x, y, "motion_2", "wave", 3);
 
   const icon = VectorPaths["bdPositionWW"];
-  this.blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 27);
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 40);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 }
@@ -392,7 +386,7 @@ function B_HLRotationServo(x, y, flip) {
   B_HLOutputBase.call(this, x, y, "motion_2", "rotationServo", 1);
 
   const icon = flip ? VectorPaths["bdRotateRight"] : VectorPaths["bdRotateLeft"];
-  let blockIcon = new BlockIcon(this, icon, Colors.white, "rServo", 30, null, true);
+  let blockIcon = new BlockIcon(this, icon, Colors.white, "rServo", 45);
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
 
@@ -467,7 +461,7 @@ function B_HLSingleNeopix(x, y, defaultColor) {
   B_HLOutputBase.call(this, x, y, "color_2", "singleNeopix", 9);
 
   const icon = VectorPaths["bdLightBulb"];
-  this.blockIcon = new BlockIcon(this, icon, Colors.white, "sNeopix", 27);
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "sNeopix", 45);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 
@@ -619,7 +613,7 @@ function B_HLFairyLights(x, y) {
   B_HLOutputBase.call(this, x, y, "color_2", "fairyLights", 8);
 
   const icon = VectorPaths["bdFairyLights"];
-  this.blockIcon = new BlockIcon(this, icon, Colors.white, "fairyLights", 27);
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "fairyLights", 45);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 
@@ -694,11 +688,11 @@ function B_HLWaitUntil(x, y, usePort, sensor) {
     this.addPart(this.sensorBN);*/
   }
 
-  let sensorPaths = [VectorPaths.faRuler, VectorPaths.clap, VectorPaths.mjSun, VectorPaths.share]
+  let sensorPaths = [VectorPaths.bdRuler, VectorPaths.bdClap, VectorPaths.bdNoLight, VectorPaths.share]
   let sensorTypes = ["distance", "clap", "light", "shake"]
   let path = sensorPaths[sensorTypes.indexOf(this.sensor)]
 
-  const blockIcon = new BlockIcon(this, path, Colors.white, "sensor", 35)
+  const blockIcon = new BlockIcon(this, path, Colors.white, "sensor", 45)
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
   
