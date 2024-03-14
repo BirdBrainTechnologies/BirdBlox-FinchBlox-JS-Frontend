@@ -15161,9 +15161,7 @@ Button.prototype.addText = function(text, font, color) {
   if (color == null) {
     color = Button.foreground;
   }
-  if (this.isUnButtoned) {
-    color = Colors.white
-  }
+  
   this.textE = this.makeText(text, font, color);
 
   // Text is centered
@@ -15179,6 +15177,10 @@ Button.prototype.makeText = function(text, font, color) {
   this.textColor = color
   this.removeContent();
   this.textInverts = true;
+
+  if (this.isUnButtoned) {
+    color = Colors.white
+  }
 
   var textE = GuiElements.draw.text(0, 0, "", font, color);
   GuiElements.update.textLimitWidth(textE, text, this.width);
@@ -35715,7 +35717,6 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
         if (this.parent.useAlphabet) {
           text[i] = HL_Utils.alphaDict[this.values[i]]
         } else {
-          console.log("*** UPDATE LED SYMBOL " + this.values[i])
           var iconPath = VectorPaths[HL_Utils.symbolDict[this.values[i]]]
           if (iconPath != null) { 
             this.button.addColorIcon(iconPath, 10, Colors.getColor(this.parent.category))  
@@ -35835,7 +35836,6 @@ BlockButton.prototype.createInputSystem = function() {
  * @param {Array} options - (Optional) list of discrete options to display on the slider
  */
 BlockButton.prototype.addSlider = function(type, startingValue, options) {
-  console.log("*** ADD SLIDER STARTING VALUE " + startingValue)
 
   var suffix = "";
   switch (type) {
@@ -41771,7 +41771,7 @@ HL_Utils.alphaDict = {
 }
 HL_Utils.addHLButton = function(block, portType) {
   block.port = -1 //unknown
-  block.hlButton = new BlockButton(block, 14, 12)//10)//15)//20);
+  block.hlButton = new BlockButton(block, 14)//14, 10)//12)//10)//15)//20);
   block.hlButton.addSlider("hatchling_" + portType, HL_Utils.noPort, HL_Utils.portNames)// Colors.bbtDarkGray, HL_Utils.portColors)
   block.hlButton.button.unbutton()
   HL_Utils.findPorts(block)

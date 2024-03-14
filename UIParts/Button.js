@@ -107,9 +107,7 @@ Button.prototype.addText = function(text, font, color) {
   if (color == null) {
     color = Button.foreground;
   }
-  if (this.isUnButtoned) {
-    color = Colors.white
-  }
+  
   this.textE = this.makeText(text, font, color);
 
   // Text is centered
@@ -125,6 +123,10 @@ Button.prototype.makeText = function(text, font, color) {
   this.textColor = color
   this.removeContent();
   this.textInverts = true;
+
+  if (this.isUnButtoned) {
+    color = Colors.white
+  }
 
   const textE = GuiElements.draw.text(0, 0, "", font, color);
   GuiElements.update.textLimitWidth(textE, text, this.width);

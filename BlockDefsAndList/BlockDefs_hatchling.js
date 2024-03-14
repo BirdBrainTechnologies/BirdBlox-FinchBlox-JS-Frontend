@@ -53,7 +53,7 @@ HL_Utils.alphaDict = {
 }
 HL_Utils.addHLButton = function(block, portType) {
   block.port = -1 //unknown
-  block.hlButton = new BlockButton(block, 14, 12)//10)//15)//20);
+  block.hlButton = new BlockButton(block, 14)//14, 10)//12)//10)//15)//20);
   block.hlButton.addSlider("hatchling_" + portType, HL_Utils.noPort, HL_Utils.portNames)// Colors.bbtDarkGray, HL_Utils.portColors)
   block.hlButton.button.unbutton()
   HL_Utils.findPorts(block)
