@@ -232,7 +232,7 @@ MicroBlocksCompiler.prototype.instructionsFor = function(aBlockOrFunction) {
 		result.push(['halt', 0])
 	} else if ('whenCondition' == op) {
 		result.push.apply(result, this.instructionsForWhenCondition(aBlockOrFunction))
-	} else if (aBlockOrFunction instanceof CommandBlock) {
+	} else if (aBlockOrFunction instanceof CommandBlock || aBlockOrFunction instanceof LoopBlock) {
 		result.push.apply(result, this.instructionsForCmdList(aBlockOrFunction))
 		result.push(['halt', 0])
 	} else if (aBlockOrFunction instanceof ReporterBlock) {

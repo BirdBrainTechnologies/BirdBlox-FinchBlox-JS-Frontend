@@ -104,7 +104,7 @@ CodeManager.move.update = function(x, y) {
     move.stack.move(CodeManager.dragAbsToRelX(move.topX), CodeManager.dragAbsToRelY(move.topY));
     // If the BlockStack overlaps with the BlockPalette then no slots are highlighted.
     var wouldDelete = BlockPalette.isStackOverPalette(move.touchX, move.touchY);
-    if (FinchBlox) {
+    if (FinchBlox && !Hatchling) {
       wouldDelete |= TitleBar.isStackOverTitleBar(move.touchX, move.touchY);
     }
     if (wouldDelete) {
@@ -113,7 +113,11 @@ CodeManager.move.update = function(x, y) {
         BlockPalette.showTrash();
       }
     } else {
-      BlockPalette.hideTrash();
+      if (Hatchling) {
+        BlockPalette.showTrash()
+      } else {
+        BlockPalette.hideTrash();
+      }
       // The slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
       CodeManager.findBestFit();
       if (CodeManager.fit.found) {
@@ -143,7 +147,7 @@ CodeManager.move.end = function() {
     move.bottomY = move.stack.relToAbsY(move.stack.dim.rh);
     // If the BlockStack overlaps with the BlockPalette, delete it.
     var shouldDelete = BlockPalette.isStackOverPalette(move.touchX, move.touchY);
-    if (FinchBlox) {
+    if (FinchBlox && !Hatchling) {
       shouldDelete |= TitleBar.isStackOverTitleBar(move.touchX, move.touchY);
     }
     if (shouldDelete) {

@@ -575,7 +575,7 @@ Block.prototype.updateDim = function() {
     height = bG.height;
   }
   if (this.hasBlockSlot1) { //If it has a BlockSlot update that.
-    this.topHeight = height; //The topHeight is the height of everything avove the BlockSlot.
+    this.topHeight = height; //The topHeight is the height of everything above the BlockSlot.
     this.topWidth = width;
     this.blockSlot1.updateDim(); //Update the BlockSlot.
     if (FinchBlox) {

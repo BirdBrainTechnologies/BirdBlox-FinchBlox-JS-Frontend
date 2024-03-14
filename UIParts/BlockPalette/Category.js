@@ -443,7 +443,8 @@ Category.prototype.passRecursively = function(functionName) {
 Category.prototype.updateZoom = function() {
   if (!this.finalized) return;
   if (FinchBlox) {
-    const newX = (BlockPalette.width - this.width) / 2;
+    let newX = (BlockPalette.width - this.width) / 2;
+    if (Hatchling) { newX += BlockPalette.x }
     this.smoothScrollBox.move(newX, BlockPalette.y);
   } else {
     this.smoothScrollBox.move(0, BlockPalette.y);

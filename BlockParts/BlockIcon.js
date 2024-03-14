@@ -96,8 +96,9 @@ BlockIcon.prototype.textSummary = function() {
  * @param {boolean} centerBelow - if true, center the new icon below the first.
  * @param {number} height - height of the second icon
  * @param {number} margin - space between icons
+ * @param {number} xOffset - (optional) extra offset in the x direction - used with centerBelow
  */
-BlockIcon.prototype.addSecondIcon = function(pathId, color, centerBelow, height, margin) {
+BlockIcon.prototype.addSecondIcon = function(pathId, color, centerBelow, height, margin, xOffset) {
   if (centerBelow == null) {
     centerBelow = false;
   }
@@ -107,17 +108,19 @@ BlockIcon.prototype.addSecondIcon = function(pathId, color, centerBelow, height,
   if (margin == null) {
     margin = 0;
   }
+  if (xOffset == null) { xOffset = 0 }
+
   if (centerBelow) {
     const w = VectorIcon.computeWidth(pathId, height);
     if (w > this.width) {
       this.xOffset = w / 2 - this.width / 2;
-      this.icon2xOffset = 0;
+      this.icon2xOffset = xOffset; //0;
       this.width = w;
     } else {
-      this.icon2xOffset = this.width / 2 - w / 2;
+      this.icon2xOffset = this.width / 2 - w / 2 + xOffset;
     }
     this.icon2yOffset = this.height + margin;
-    this.height += height + margin;
+    if (!Hatchling) { this.height += height + margin; }
     this.icon2 = new VectorIcon(0, 0, pathId, color, height, this.parent.group);
     TouchReceiver.addListenersChild(this.icon2.pathE, this.parent);
   } else {
@@ -155,6 +158,17 @@ BlockIcon.prototype.addText = function(text, xOffset, yOffset) {
     this.width = this.textXOffset + textWidth;
   }
   //console.log("BlockIcon addText " + x + ", " + y + "; " + this.height + " " + this.width);
+}
+
+BlockIcon.prototype.addIndicatorCircle = function(color, xOffset, yOffset) {
+  if (this.indicator != null) {
+    this.parent.group.removeChild(this.indicator)
+  }
+
+  const x = this.x + xOffset
+  const y = this.x + yOffset
+  this.indicator = GuiElements.draw.circle(x, y, 7, color, this.parent.group)
+  GuiElements.update.stroke(this.indicator, Colors.white, 1)
 }
 
 /**

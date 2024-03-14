@@ -126,3 +126,8 @@ path{
   font-family: MPLUS-ExtraBold;
   src: url(Fonts/MPLUSRounded1c-ExtraBold.ttf);
 }
+
+@font-face {
+  font-family: MPLUS-Bold;
+  src: url(Fonts/MPLUSRounded1c-Bold.ttf);
+}

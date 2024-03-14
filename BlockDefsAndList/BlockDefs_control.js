@@ -157,7 +157,9 @@ function B_Forever(x, y) {
   if (FinchBlox) {
     const iconPath = Hatchling ? VectorPaths.bdLoop : VectorPaths.faSyncAlt
     const iconH = Hatchling ? 45 : 30
-    this.addPart(new BlockIcon(this, iconPath, Colors.white, "repeat", iconH));
+    const blockIcon = new BlockIcon(this, iconPath, Colors.white, "repeat", iconH)
+    if (Hatchling) { blockIcon.addSecondIcon(VectorPaths.bdForever, Colors.white, true, 10, -5, 15) }
+    this.addPart(blockIcon);
   } else {
     this.addPart(new LabelText(this, Language.getStr("block_repeat_forever")));
   }

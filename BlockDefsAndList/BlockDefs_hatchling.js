@@ -13,9 +13,47 @@ const HL_Utils = {}
 //HL_Utils.portColors = ["#0000FF", "#FFFF00", "#00FF88", "#FF00FF", "#FFFFFF", "#FF4400"]//["#00f", "#ff0", "#0f0", "#f0f", "#0ff", "#f80"]//["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
 HL_Utils.portNames = ["A", "B", "C", "D", "E", "F"]
 HL_Utils.noPort = "X"
+HL_Utils.symbolDict = {
+  "0000001010000001000101110": "bdSymbolHappy", //smiley face
+  "0000001010000000111010001": "bdSymbolFrown", //frowny face
+  "0101000000001000101000100": "bdSymbolSurprised", //surprise face
+  "1010010100111101101011110": "bdSymbolPeace", //OK
+  "0111010101111111111110101": "bdSymbolGhost", //alien
+  "1111110001100011000111111": "bdSymbolSquare", //square
+  "0101011111111110111000100": "bdSymbolHeart", //heart
+  "0010001010100010101000100": "bdSymbolDiamond" //diamond
+}
+HL_Utils.alphaDict = {
+  "0110010010111101001010010": "A", // A
+  "1110010010111001001011100": "B", // B
+  "0111010000100001000001110": "C", // C
+  "1110010010100101001011100": "D", // D
+  "1111010000111001000011110": "E", // E
+  "1111010000111001000010000": "F", // F
+  "0111010000100111000101110": "G", // G
+  "1001010010111101001010010": "H", // H
+  "1110001000010000100011100": "I", // I
+  "0111000100001001010001100": "J", // J - mod
+  "1001010100110001010010010": "K", // K
+  "1000010000100001000011110": "L", // L
+  "1000111011101011000110001": "M", // M
+  "1000111001101011001110001": "N", // N
+  "0110010010100101001001100": "O", // O
+  "1110010010111001000010000": "P", // P
+  "0110010010101101001001101": "Q", // Q - mod
+  "1110010010111001010010010": "R", // R
+  "0110010000011000001011100": "S", // S
+  "1111100100001000010000100": "T", // T
+  "1000110001100011000101110": "U", // U
+  "1000110001100010101000100": "V", // V
+  "1000110001101011101110001": "W", // W
+  "1000101010001000101010001": "X", // X - mod
+  "1000101010001000010000100": "Y", // Y
+  "1111100010001000100011111": "Z"  // Z
+}
 HL_Utils.addHLButton = function(block, portType) {
   block.port = -1 //unknown
-  block.hlButton = new BlockButton(block, 14, 10)//15)//20);
+  block.hlButton = new BlockButton(block, 14, 12)//10)//15)//20);
   block.hlButton.addSlider("hatchling_" + portType, HL_Utils.noPort, HL_Utils.portNames)// Colors.bbtDarkGray, HL_Utils.portColors)
   block.hlButton.button.unbutton()
   HL_Utils.findPorts(block)
@@ -479,7 +517,8 @@ B_HLSingleNeopix.prototype.updateColor = function() {
 function B_HL_SN_L1(x, y, color) {
   B_HLSingleNeopix.call(this, x, y, color)
 
-  this.updateColor()
+  //this.updateColor()
+  this.blockIcon.addIndicatorCircle(this.value, 40, 50)
 }
 B_HL_SN_L1.prototype = Object.create(B_HLSingleNeopix.prototype);
 B_HL_SN_L1.prototype.constructor = B_HL_SN_L1;

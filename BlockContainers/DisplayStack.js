@@ -140,7 +140,7 @@ DisplayStack.prototype.getAbsY = function() {
 DisplayStack.prototype.move = function(x, y) {
   this.x = x;
   this.y = y;
-  if (FinchBlox && (this.firstBlock.type == 5)) {
+  if (FinchBlox && (this.firstBlock.type == 5) && !Hatchling) {
     //The loop blocks appear smaller in the blockPalette so that they fit in the space.
     this.zoom = 0.85;
     const zY = y + (this.firstBlock.height * (1 - this.zoom));

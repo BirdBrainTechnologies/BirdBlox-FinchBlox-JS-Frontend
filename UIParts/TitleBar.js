@@ -282,6 +282,10 @@ TitleBar.makeButtons = function() {
         }
       }, true);
     //}
+    if (Hatchling) {
+      TB.levelButton.remove()
+      TB.levelButton = new HLLevelSwitch(TB.levelBnX, y)
+    }
 
     TB.updateStatus = function(status) {
       //GuiElements.alert("TitleBar update status to " + status);

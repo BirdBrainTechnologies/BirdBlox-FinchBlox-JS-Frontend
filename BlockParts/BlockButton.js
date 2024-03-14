@@ -21,9 +21,9 @@ function BlockButton(parent, width, fontSize) {
     this.cornerRadius = this.cornerRadius * scale
 
     this.height = this.blockButtonMargin + this.lineHeight;
-    this.width = width ? width : 30//40;
-    this.textColor = Colors.bbtDarkGray;
-    this.font = fontSize ? Font.uiFont(fontSize) : Font.uiFont(12 * scale);
+    this.width = width ? width : 20 //30//40;
+    this.textColor = Colors.blockOutline[parent.category] //Colors.bbtDarkGray;
+    this.font = fontSize ? Font.secondaryUiFont(fontSize) : Font.secondaryUiFont(9);
     this.outlineStroke = 1;
   }
 
@@ -43,6 +43,8 @@ function BlockButton(parent, width, fontSize) {
     this.outlineColor = Colors.iron;
   }
 
+  this.bgColor = Hatchling ? Colors.blockPalette[this.parent.category] : Colors.white
+
   const me = this;
   this.callbackFunction = function() {
     if (!me.parent.stack.isDisplayStack) { //Disable popups for blocks in the blockpalette
@@ -58,6 +60,7 @@ function BlockButton(parent, width, fontSize) {
   this.isSlot = false;
   parent.blockButton = this;
   if (Hatchling) { parent.blockButtons.push(this) }
+  this.currentLabel = "" //Hatchling  
 };
 BlockButton.prototype = Object.create(BlockPart.prototype);
 BlockButton.prototype.constructor = BlockButton;
@@ -69,7 +72,7 @@ BlockButton.prototype.draw = function() {
   if (this.button != null) {
     this.button.remove();
   }
-  this.button = new Button(this.x, this.y, this.width, this.height, this.parent.group, Colors.white, this.cornerRadius, this.cornerRadius);
+  this.button = new Button(this.x, this.y, this.width, this.height, this.parent.group, this.bgColor, this.cornerRadius, this.cornerRadius);
   GuiElements.update.stroke(this.button.bgRect, this.outlineColor, this.outlineStroke);
   this.button.setCallbackFunction(this.callbackFunction, true);
 }
@@ -180,15 +183,31 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
     } else if (this.widgets[i].type == "piano") {
       text[i] = InputWidget.Piano.noteStrings[this.values[i]];
     } else if (this.widgets[i].type == "ledArray") {
-      if (this.ledArrayImage != null) {
-        this.ledArrayImage.group.remove();
+      if (Hatchling) {
+        if (this.parent.useAlphabet) {
+          text[i] = HL_Utils.alphaDict[this.values[i]]
+        } else {
+          let iconPath = VectorPaths[HL_Utils.symbolDict[this.values[i]]]
+          if (iconPath != null) { 
+            this.button.addColorIcon(iconPath, 10, Colors.getColor(this.parent.category))  
+          } else {
+            this.button.removeContent()
+          }
+        }
+
+      } else {
+
+        if (this.ledArrayImage != null) {
+          this.ledArrayImage.group.remove();
+        }
+        let image = GuiElements.draw.ledArray(this.button.group, this.values[i], 1.8);
+        const iX = this.button.width / 2 - image.width / 2;
+        //const iY = this.button.height/2 - image.width/2;
+        const iY = (i + 1) * this.button.height / (this.widgets.length + 1) - image.width / 2;
+        GuiElements.move.group(image.group, iX, iY);
+        this.ledArrayImage = image;
       }
-      let image = GuiElements.draw.ledArray(this.button.group, this.values[i], 1.8);
-      const iX = this.button.width / 2 - image.width / 2;
-      //const iY = this.button.height/2 - image.width/2;
-      const iY = (i + 1) * this.button.height / (this.widgets.length + 1) - image.width / 2;
-      GuiElements.move.group(image.group, iX, iY);
-      this.ledArrayImage = image;
+
     //} else if (this.widgets[i].type.startsWith("hatchling")) {
       //this.button.updateBgColor(this.values[i]);
     } else if (this.widgets[i].type == "sensor") {
@@ -232,8 +251,26 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
     }
   }
   if (Hatchling) {
-    let label = text.join(", ")
-    this.button.addText(text, this.font, this.textColor);
+    let label = text.join(" ")
+    if (this.widgets[0].type == "count") { label = "x" + label }
+    if (this.currentLabel != label) {
+      const margin = 8
+      const txtW = GuiElements.measure.stringWidth(label, this.font)
+      const fullW = Math.max(txtW + margin, this.height*1.5)
+      //console.log("Updating text to " + label + " with w=" + this.width + " and fullW=" + fullW)
+      if (this.width != fullW && !this.widgets[0].type.startsWith("hatchling")) {
+        const xOffset = this.width - fullW
+        //console.log("rightJustify moving button by " + xOffset)
+        this.x = this.x + xOffset
+        this.width = fullW
+        this.draw()
+      }
+      this.button.addText(label, this.font, this.textColor);
+      this.currentLabel = label
+    }
+
+    //this.button.addText(label, this.font, this.textColor);
+    //this.button.addTextAndResize(label, this.font, this.textColor, true);
   } else {
     this.button.addMultiText(text, this.font, this.textColor);
   }

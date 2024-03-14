@@ -170,7 +170,7 @@ BlockGraphics.SetLoop = function() {
   BlockGraphics.loop.side = 7; //width of the bit that connects the main block to the bottom arm.
   //FinchBlox
   BlockGraphics.loop.armW = 5 + 2 * BlockGraphics.command.cornerRadius; //Width of the loop arm.
-  BlockGraphics.loop.loopH = 10; //height of the bit connecting the main block to the arm.
+  BlockGraphics.loop.loopH = Hatchling ? 3 : 10; //height of the bit connecting the main block to the arm.
 };
 
 

@@ -163,6 +163,7 @@ MicroBlocksRuntime.prototype.chunkTypeFor = function(aBlockOrFunction) {
 		return 9 // A+B
 	}
 	if (expr instanceof CommandBlock) { return 1 }
+	if (expr instanceof LoopBlock) { return 1 }
 	if (expr instanceof ReporterBlock) { return 2 }
 
 	console.error('Unexpected argument to chunkTypeFor: ' + op)
@@ -1514,7 +1515,7 @@ MicroBlocksRuntime.prototype.saveChunk = async function(aBlockOrFunction, skipHi
 	let data = new Uint8Array(chunkBytes.length + 1)
 	data.set([chunkType], 0)
 	data.set(chunkBytes, 1)
-	if (data.length > 1000) {
+	if (data.length > 2048) {
 		/*if (isClass aBlockOrFunction 'Function') {
 			inform (global 'page') (join
 				(localized 'Function "') (functionName aBlockOrFunction)

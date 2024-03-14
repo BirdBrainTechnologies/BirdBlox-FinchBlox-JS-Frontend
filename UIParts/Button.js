@@ -396,12 +396,12 @@ Button.prototype.addFinchBnIcons = function() {
     this.iconColor = finchColor
   }
   const battPathId = Hatchling ? VectorPaths.bdBatteryDisconnected : VectorPaths.battery;
-  const xPathId = Hatchling ? VectorPaths.bdClose : VectorPaths.faTimesCircle;
+  const xPathId = Hatchling ? VectorPaths.bdHatchlingDisconnected : VectorPaths.faTimesCircle;
   const font = Font.uiFont(18);
 
-  const finchH = Hatchling ? TitleBar.bnIconH * 1.1 : TitleBar.bnIconH * 1.65; //the long dimension of the finch since we will rotate it
+  const finchH = Hatchling ? TitleBar.bnIconH * 1.2 : TitleBar.bnIconH * 1.65; //the long dimension of the finch since we will rotate it
   const battH = TitleBar.bnIconH * 0.75;
-  const xH = Hatchling ? TitleBar.bnIconH * 1.1 : TitleBar.bnIconH * 0.6;
+  const xH = Hatchling ? TitleBar.bnIconH * 1.3 : TitleBar.bnIconH * 0.6;
   this.finchW = VectorIcon.computeWidth(finchPathId, finchH);
   const battW = VectorIcon.computeWidth(battPathId, battH);
   const xW = VectorIcon.computeWidth(xPathId, xH);
@@ -412,7 +412,7 @@ Button.prototype.addFinchBnIcons = function() {
   const battX = Hatchling ? (this.width + this.finchW + m - battW) / 2 : (this.width + finchH + m - battW) / 2;
   const textX = Hatchling ? (this.width - this.finchW - battW - m) / 2 + m : (this.width - finchH - battW - m) / 2 + m;
 
-  const xX = Hatchling ? (this.finchConnectedX + 5) : (this.width - xW) / 2; //finchX + finchH/2;
+  const xX = Hatchling ? (this.finchConnectedX) : (this.width - xW) / 2; //finchX + finchH/2;
   this.finchY = (this.height - finchH) / 2;
   const battY = (this.height - battH) / 2;
   const textY = (this.height + font.charHeight) / 2;
