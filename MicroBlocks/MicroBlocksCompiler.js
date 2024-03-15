@@ -228,7 +228,15 @@ MicroBlocksCompiler.prototype.instructionsFor = function(aBlockOrFunction) {
 	let op = aBlockOrFunction.primName()
 	let result = [['initLocals', 0]] //just to match microblocks. we have no local variables for now
 	if ('whenStarted' == op) {//aBlockOrFunction instanceof B_WhenFlagTapped) { //whenStarted
-		result.push.apply(result, this.instructionsForCmdList(aBlockOrFunction.nextBlock))
+
+		//For level 1 programs, we will add an implicit forever loop
+		if (LevelManager.currentLevel == 1) {
+			let implicitLoop = new BlockArg("forever", [aBlockOrFunction.nextBlock])
+			result.push.apply(result, this.instructionsForCmdList(implicitLoop))
+
+		} else {
+			result.push.apply(result, this.instructionsForCmdList(aBlockOrFunction.nextBlock))
+		}
 		result.push(['halt', 0])
 	} else if ('whenCondition' == op) {
 		result.push.apply(result, this.instructionsForWhenCondition(aBlockOrFunction))
@@ -241,7 +249,7 @@ MicroBlocksCompiler.prototype.instructionsFor = function(aBlockOrFunction) {
 
 
 	if ( (result.length == 2) && (['halt', 'stopAll'].includes(result[0])) ) {
-			// In general, just looking at the final instructon isn't enough because
+			// In general, just looking at the final instruction isn't enough because
 			// it could just be the end of a conditional body that is jumped
 			// over; in that case, we need the final halt as the jump target.
 			result.pop() // remove the final halt
@@ -382,6 +390,12 @@ MicroBlocksCompiler.prototype.instructionsForCmd = function(cmd) {
 
 MicroBlocksCompiler.prototype.instructionsForForever = function(args) {
 	let result = this.instructionsForCmdList(args[0])
+
+	//for level 1, add a pause at the end of the implicit loop
+	if (LevelManager.currentLevel == 1) {
+		result = result.concat(this.instructionsForCmd(new BlockArg('waitMillis', [5000])))
+	}
+
 	result.push(['jmp', (0 - (result.length + 1))])
 	return result
 }

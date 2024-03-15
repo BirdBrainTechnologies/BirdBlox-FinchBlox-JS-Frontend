@@ -48,7 +48,10 @@ LevelManager.setLevel = function(level) {
     //TabManager.activeTab.clear();
     TitleBar.levelButton.addText(level, LM.levelButtonFont, Colors.white);
     //LM.loadLevelSavePoint();
-    if (Hatchling) { TitleBar.levelButton.setSwitch(level) }
+    if (Hatchling) { 
+      TitleBar.levelButton.setSwitch(level) 
+      mbRuntime.clearBoardIfConnected()
+    }
   }
 }
 
