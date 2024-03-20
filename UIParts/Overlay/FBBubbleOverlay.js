@@ -2,10 +2,10 @@
  * Special BubbleOverlay for FinchBlox
  */
 function FBBubbleOverlay(overlayType, margin, innerGroup, parent, outlineColor, block) {
-  if (block != null) {
+  if (block != null && !Hatchling) {
     this.width = GuiElements.width * 19 / 20;
   }
-  this.outlineColor = outlineColor;
+  this.outlineColor = Hatchling ? Colors.white : outlineColor;
   this.block = block;
   BubbleOverlay.call(this, overlayType, Colors.white, margin, innerGroup, parent, GuiElements.layers.overlay);
   this.blockG = GuiElements.create.group(0, 0, GuiElements.layers.overlay);
@@ -68,7 +68,7 @@ FBBubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHe
   GuiElements.move.group(this.innerGroup, this.margin, this.margin);
 
   //Determine whether the overlay should go on the bottom or top
-  const preferBottom = (this.block == null) || (y1 > (this.block.y + (this.block.stack ? this.block.stack.y : 0)))
+  const preferBottom = (this.block == null) || (y1 > (this.block.y + (this.block.stack ? this.block.stack.y : 0) + this.block.height/3))
   const longH = height + BO.triangleH;
   const attemptB = Math.max(0, y2 + longH - GuiElements.height);
   const attemptT = Math.max(0, longH - y1);
@@ -84,7 +84,12 @@ FBBubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHe
     triangleDir = -1;
   }
   // Convert the triangle's coords from abs to rel coords
-  this.x = (GuiElements.width - this.width) / 2;
+  this.x = (GuiElements.width - width) / 2;
+  if (Hatchling) {
+    let maxX = GuiElements.width - this.margin - width 
+    let minX = this.margin
+    this.x = Math.min(Math.max(minX, (triangleX - width/2)), maxX)
+  }
   var triX = triangleX - this.x;
   if (this.block == null) {
     this.x = GuiElements.width - width - this.margin;

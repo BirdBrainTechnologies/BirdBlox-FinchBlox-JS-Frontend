@@ -54,7 +54,8 @@ HL_Utils.alphaDict = {
 HL_Utils.addHLButton = function(block, portType) {
   block.port = -1 //unknown
   block.hlButton = new BlockButton(block, 14)//14, 10)//12)//10)//15)//20);
-  block.hlButton.addSlider("hatchling_" + portType, HL_Utils.noPort, HL_Utils.portNames)// Colors.bbtDarkGray, HL_Utils.portColors)
+  //block.hlButton.addSlider("hatchling_" + portType, HL_Utils.noPort, HL_Utils.portNames)// Colors.bbtDarkGray, HL_Utils.portColors)
+  block.hlButton.addPortWidget(portType)
   block.hlButton.button.unbutton()
   HL_Utils.findPorts(block)
 }
@@ -93,9 +94,10 @@ HL_Utils.findPorts = function(block) {
   }
 }
 HL_Utils.checkActive = function(block) {
+  return true
   //console.log("checkActive " + block.constructor.name)
   //Always active in blockPalette
-  if (block.stack != null && block.stack.isDisplayStack) {
+  /*if (block.stack != null && block.stack.isDisplayStack) {
     //console.log("found display stack - returning true")
     return true
   }
@@ -112,7 +114,7 @@ HL_Utils.checkActive = function(block) {
     }
   }
   //console.log("found nothing - returning false")
-  return false
+  return false*/
 
   //let portFound = HL_Utils.findPorts(this)
   //console.log(this.constructor.name + " " + portFound + " " + (this.stack == null ? "no stack" : this.stack.isDisplayStack))

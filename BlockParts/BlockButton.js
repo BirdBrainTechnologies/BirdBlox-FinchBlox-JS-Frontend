@@ -350,6 +350,13 @@ BlockButton.prototype.addColorPicker = function(startingValue) {
 }
 
 /**
+ * Adds port chooser widget to this button. Hatchling only.
+ */
+BlockButton.prototype.addPortWidget = function(portType) {
+  this.addWidget(new InputWidget.HLPortWidget(portType), "", HL_Utils.noPort)
+}
+
+/**
  * Adds a new widget for this button
  * @param {Widget} widget - The widget to add
  * @param {string} suffix - Suffix to use for value display

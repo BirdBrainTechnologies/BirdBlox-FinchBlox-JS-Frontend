@@ -121,6 +121,7 @@ Button.prototype.addText = function(text, font, color) {
 Button.prototype.makeText = function(text, font, color) {
   DebugOptions.validateNonNull(text);
   this.textColor = color
+  this.textFont = font
   this.removeContent();
   this.textInverts = true;
 
@@ -221,6 +222,51 @@ Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargi
   this.icon = new VectorIcon(iconX, iconY, pathId, color, iconHeight, this.group);
   TouchReceiver.addListenersBN(this.icon.pathE, this);
 };
+
+/**
+ * Adds an icon and text to the button with the text centered and the icon centered beneath
+ * 
+ * @param {object} pathId - Entry from VectorPaths
+ * @param {number|null} [iconHeight] - The height the icon should have in the button
+ * @param {string} text - The text to show
+ * @param {Font|null} [font] - The font to use
+ * @param {string|null} [color=null] - Color in hex
+ */
+Button.prototype.addTextOverIcon = function(pathId, iconHeight, text, font, color) {
+  this.removeContent();
+  if (color == null) {
+    color = Button.foreground;
+    this.textInverts = true;
+    this.iconInverts = true;
+  }
+  if (font == null) {
+    font = Button.defaultFont;
+  }
+  if (iconHeight == null) {
+    iconHeight = Button.defaultIconH;
+  }
+
+  this.hasIcon = true;
+  this.hasText = true;
+  this.iconColor = color
+  this.textColor = color
+
+  const iconW = VectorIcon.computeWidth(pathId, iconHeight);
+  this.textE = GuiElements.draw.text(0, 0, "", font, color);
+  GuiElements.update.textLimitWidth(this.textE, text, this.width);
+  this.group.appendChild(this.textE);
+  const textW = GuiElements.measure.textWidth(this.textE);
+  
+  const offset = this.height/20
+  const iconX = (this.width - iconW) / 2;
+  const iconY = this.height/2 + (this.height/2 - iconHeight) / 2 - offset;
+  const textX = (this.width - textW) / 2
+  const textY = this.height/2 - offset //(this.height/2 + font.charHeight) / 2;
+  GuiElements.move.text(this.textE, textX, textY);
+  TouchReceiver.addListenersBN(this.textE, this);
+  this.icon = new VectorIcon(iconX, iconY, pathId, color, iconHeight, this.group);
+  TouchReceiver.addListenersBN(this.icon.pathE, this);
+}
 
 /**
  * Adds an icon and text to the button, with the icon aligned to the left/right and the text centered.
@@ -496,9 +542,17 @@ Button.prototype.setDisabledTabFunction = function(callback) {
 
 /**
  * Disables the button so it cannot be interacted with
+ * 
+ * @param {boolean} keepColors - true if disabling should not change the button's colors
  */
-Button.prototype.disable = function() {
+Button.prototype.disable = function(keepColors) {
   if (this.enabled) {
+    if (keepColors) {
+      this.enabled = false;
+      this.pressed = false;
+      return
+    }
+
     this.enabled = false;
     this.pressed = false;
     this.bgRect.setAttributeNS(null, "fill", Button.disabledBg);
@@ -751,6 +805,7 @@ Button.prototype.unbutton = function() {
   this.isUnButtoned = true
   if (this.hasText) {
     this.textE.setAttributeNS(null, "fill", Colors.white);
+    this.textE.setAttributeNS(null, "font-size", this.textFont.fontSize * 4/3)
   }
   /*if (this.textEs != null) {
     for (let i = 0; i < this.textEs.length; i++) {
@@ -767,5 +822,6 @@ Button.prototype.rebutton = function() {
   this.isUnButtoned = false
   if (this.hasText) {
     this.textE.setAttributeNS(null, "fill", this.textColor);
+    this.textE.setAttributeNS(null, "font-size", this.textFont.fontSize)
   }
 }

@@ -9012,7 +9012,7 @@ Colors.setCommon = function() {
   Colors.ballyOrangeLight = "#F9E2D0" //Backgrounds
   Colors.ballyOrangeDark = "#B64F05" //Actionable graphics
   Colors.ballyOrangeOnDrag = "#E19166"
-  Colors.ballyBrandBlue = "#089BAB"//"#079BAB" //Movement blocks
+  Colors.ballyBrandBlue = "#079BAB" //"#089BAB"//"#079BAB" //Movement blocks
   Colors.ballyBrandBlueLight = "#E3F7FA" //Backgrounds
   Colors.ballyBrandBlueDark = "#05646E" //Actionable graphics
   Colors.ballyRed = "#DD1D28" //Stop, disconnected, and no
@@ -15175,6 +15175,7 @@ Button.prototype.addText = function(text, font, color) {
 Button.prototype.makeText = function(text, font, color) {
   DebugOptions.validateNonNull(text);
   this.textColor = color
+  this.textFont = font
   this.removeContent();
   this.textInverts = true;
 
@@ -15275,6 +15276,51 @@ Button.prototype.addCenteredTextAndIcon = function(pathId, iconHeight, sideMargi
   this.icon = new VectorIcon(iconX, iconY, pathId, color, iconHeight, this.group);
   TouchReceiver.addListenersBN(this.icon.pathE, this);
 };
+
+/**
+ * Adds an icon and text to the button with the text centered and the icon centered beneath
+ * 
+ * @param {object} pathId - Entry from VectorPaths
+ * @param {number|null} [iconHeight] - The height the icon should have in the button
+ * @param {string} text - The text to show
+ * @param {Font|null} [font] - The font to use
+ * @param {string|null} [color=null] - Color in hex
+ */
+Button.prototype.addTextOverIcon = function(pathId, iconHeight, text, font, color) {
+  this.removeContent();
+  if (color == null) {
+    color = Button.foreground;
+    this.textInverts = true;
+    this.iconInverts = true;
+  }
+  if (font == null) {
+    font = Button.defaultFont;
+  }
+  if (iconHeight == null) {
+    iconHeight = Button.defaultIconH;
+  }
+
+  this.hasIcon = true;
+  this.hasText = true;
+  this.iconColor = color
+  this.textColor = color
+
+  var iconW = VectorIcon.computeWidth(pathId, iconHeight);
+  this.textE = GuiElements.draw.text(0, 0, "", font, color);
+  GuiElements.update.textLimitWidth(this.textE, text, this.width);
+  this.group.appendChild(this.textE);
+  var textW = GuiElements.measure.textWidth(this.textE);
+  
+  var offset = this.height/20
+  var iconX = (this.width - iconW) / 2;
+  var iconY = this.height/2 + (this.height/2 - iconHeight) / 2 - offset;
+  var textX = (this.width - textW) / 2
+  var textY = this.height/2 - offset //(this.height/2 + font.charHeight) / 2;
+  GuiElements.move.text(this.textE, textX, textY);
+  TouchReceiver.addListenersBN(this.textE, this);
+  this.icon = new VectorIcon(iconX, iconY, pathId, color, iconHeight, this.group);
+  TouchReceiver.addListenersBN(this.icon.pathE, this);
+}
 
 /**
  * Adds an icon and text to the button, with the icon aligned to the left/right and the text centered.
@@ -15550,9 +15596,17 @@ Button.prototype.setDisabledTabFunction = function(callback) {
 
 /**
  * Disables the button so it cannot be interacted with
+ * 
+ * @param {boolean} keepColors - true if disabling should not change the button's colors
  */
-Button.prototype.disable = function() {
+Button.prototype.disable = function(keepColors) {
   if (this.enabled) {
+    if (keepColors) {
+      this.enabled = false;
+      this.pressed = false;
+      return
+    }
+
     this.enabled = false;
     this.pressed = false;
     this.bgRect.setAttributeNS(null, "fill", Button.disabledBg);
@@ -15805,6 +15859,7 @@ Button.prototype.unbutton = function() {
   this.isUnButtoned = true
   if (this.hasText) {
     this.textE.setAttributeNS(null, "fill", Colors.white);
+    this.textE.setAttributeNS(null, "font-size", this.textFont.fontSize * 4/3)
   }
   /*if (this.textEs != null) {
     for (var i = 0; i < this.textEs.length; i++) {
@@ -15821,6 +15876,7 @@ Button.prototype.rebutton = function() {
   this.isUnButtoned = false
   if (this.hasText) {
     this.textE.setAttributeNS(null, "fill", this.textColor);
+    this.textE.setAttributeNS(null, "font-size", this.textFont.fontSize)
   }
 }
 
@@ -17155,7 +17211,7 @@ InputPad.prototype.show = function(slotShape, updateFn, finishFn, data, color, b
  */
 InputPad.prototype.updateDim = function() {
   var IP = InputPad;
-  var width = IP.width;
+  var width = Hatchling ? 0 : IP.width;
   var height = 0;
   this.widgets.forEach(function(widget) {
     // Some widgets have adjustable heights (like SelectPads)
@@ -17168,6 +17224,10 @@ InputPad.prototype.updateDim = function() {
 
     if (widget.constructor == InputWidget.Piano && !FinchBlox) {
       width = InputWidget.Piano.inputPadWidth;
+    }
+
+    if (Hatchling) {
+      width = Math.min(Math.max(width, widget.width), IP.width)
     }
   });
   height -= IP.margin;
@@ -19172,6 +19232,147 @@ InputWidget.Color.prototype.updateDim = function(x, y) {
 
 
 /**
+ * Hatchling specific widget to allow the user to select between different ports.
+ * 
+ */
+InputWidget.HLPortWidget = function(portType) {
+
+	this.index = 0 //This widget cannot currently be combined with other widgets
+	this.width = 275
+	this.height = this.width * 3/4 
+	this.optionDisabled = [true, true, true, true, true, true]
+	this.value = HL_Utils.noPort //Always start with no connection
+	this.portType = portType
+	this.type = "hatchling_" + portType
+
+}
+InputWidget.HLPortWidget.prototype = Object.create(InputWidget.prototype)
+InputWidget.HLPortWidget.prototype.constructor = InputWidget.HLPortWidget
+
+
+InputWidget.HLPortWidget.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
+  InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
+
+  this.value = data[this.index]
+  this.group = GuiElements.create.group(x, y, parentGroup);
+  this.bgRect = GuiElements.draw.rect(0, 0, this.width, this.height, "none");
+  //Normally, invisible shapes don't respond to touch events.
+  this.bgRect.setAttributeNS(null, "pointer-events", "all");
+
+  this.group.appendChild(this.bgRect);
+  //TouchReceiver.addListenersSlider(this.bgRect, this);
+
+  var device = DeviceHatchling.getManager().getDevice(0);
+  if (device != null) {
+    var portType = this.type.split("_")[1]
+    var ports = device.getPortsByType(portType)
+    for (var i = 0; i < HL_Utils.portNames.length; i++) {
+      this.optionDisabled[i] = (ports.indexOf(i) == -1)
+    }
+  }
+
+  //Draw the egg
+  var eggPath = VectorPaths.bdHatchling
+  var eggH = this.height * 5/7
+  var eggW = VectorIcon.computeWidth(eggPath, eggH)
+  var eggX = (this.width - eggW)/2
+  var eggY = (this.height - eggH)/2
+  var egg = new VectorIcon(eggX, eggY, eggPath, Colors.ballyBrandBlue, eggH, this.group)
+
+
+  //Draw a circle button for each port
+  var font = Font.secondaryUiFont(18)
+  var r = eggH/7 //this.height/9
+  var startX = eggX + 1.25*r //(this.width - 8*r) / 2 
+  var bnX = startX
+  var bnY = eggY + 1.25*r //2*r
+  var iconH = 20
+  this.portBns = []
+  for (var i = 0; i < HL_Utils.portNames.length; i++) {
+  	var isDisabled = this.optionDisabled[i]
+  	var bgColor = isDisabled ? Colors.ballyRedLight : Colors.ballyBrandBlueLight
+  	var textColor = isDisabled ? Colors.ballyRedDark : Colors.ballyBrandBlueDark
+  	var outlineColor = isDisabled ? null : textColor
+  	
+  	switch (i) {
+      case 0:
+      case 2:
+        bnY = eggY + 1.25*r //2*r
+        break;
+      case 1:
+        bnY = eggY + 0.75*r //1*r
+        break;
+      case 3:
+      case 5:
+        bnY = eggY + 3.75*r //5*r
+        break;
+      case 4:
+        bnY = eggY + 4.25*r //6*r
+        break;
+    }
+  	//var circle = GuiElements.draw.circle(cx, cy, r, bgColor, this.group)
+  	//if (isDisabled) { GuiElements.update.stroke(circle, textColor, 1) }
+  	var portBn = new Button(bnX, bnY, 2*r, 2*r, this.group, bgColor, r, r, outlineColor)
+  	portBn.markAsOverlayPart(this.overlay)
+  	if (!isDisabled) {
+  	  portBn.setCallbackFunction(function() {
+  	  	
+  	  }.bind(this), false)
+  	  portBn.setCallbackFunction(function() {
+  	  	this.value = HL_Utils.portNames[i]
+  		this.updateFn(this.value, 0)
+
+  	  	for (var j = 0; j < this.portBns.length; j++) {
+  	  		var bn = this.portBns[j]
+  	  		if (bn.portName == this.value) {
+  	  			bn.addTextOverIcon(VectorPaths.bdConnected, iconH, bn.portName, font, textColor)
+  	  		} else {
+  	  			bn.addText(bn.portName, font, textColor)
+  	  		}
+  	  	}
+  	  }.bind(this), true)
+  	  this.portBns.push(portBn)
+    } else {
+      portBn.disable(true)
+    }
+
+  	//Add the text
+  	var portName = HL_Utils.portNames[i]
+  	portBn.portName = portName 
+  	console.log("about to set status icon for " + portName + " with this.value=" + this.value)
+  	var statusIconPath = isDisabled ? VectorPaths.bdClose : //VectorPaths.bdHatchlingDisconnected : 
+  		((this.value == portName) ? VectorPaths.bdConnected : null)
+  	/*var portNameW = GuiElements.measure.stringWidth(portName, font)
+  	var portNameX = (2*r - portNameW) / 2
+  	var portNameY = 2*r * ((statusIconPath == null) ? 1 : 1/2) + font.charHeight/2
+  	var nameTextE = GuiElements.draw.text(portNameX, portNameY, font, textColor)
+  	this.group.appendChild(nameTextE)*/
+  	if (statusIconPath == null) {
+  		portBn.addText(portName, font, textColor)
+  	} else {
+  		portBn.addTextOverIcon(statusIconPath, iconH, portName, font, textColor)
+  	}
+  	/*if (statusIconPath != null) {
+  		var iconW = VectorIcon.computeWidth(statusIconPath, iconH)
+  		var iconX = (2*r - iconW) / 2
+  		var iconY = r + (r - iconH)/2
+  		var statusIcon = new VectorIcon(iconX, iconY, statusIconPath, textColor, iconH, this.group)
+  	}*/
+
+    if (i == 2) {
+    	bnX = startX
+    } else {
+    	bnX = bnX + 2.5*r //bnX + 3*r
+    }
+  }  
+
+}
+
+InputWidget.HLPortWidget.prototype.updateDim = function(x, y) {
+	console.log("HLPortWidget update dim")
+}
+
+/**
  * An InputSystem used for selecting a Sound from a list.  Provides buttons to preview sounds before selecting them.
  * @param {number} x1
  * @param {number} x2
@@ -19603,10 +19804,10 @@ BubbleOverlay.prototype.relToAbsY = function(y) {
  * Special BubbleOverlay for FinchBlox
  */
 function FBBubbleOverlay(overlayType, margin, innerGroup, parent, outlineColor, block) {
-  if (block != null) {
+  if (block != null && !Hatchling) {
     this.width = GuiElements.width * 19 / 20;
   }
-  this.outlineColor = outlineColor;
+  this.outlineColor = Hatchling ? Colors.white : outlineColor;
   this.block = block;
   BubbleOverlay.call(this, overlayType, Colors.white, margin, innerGroup, parent, GuiElements.layers.overlay);
   this.blockG = GuiElements.create.group(0, 0, GuiElements.layers.overlay);
@@ -19669,7 +19870,7 @@ FBBubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHe
   GuiElements.move.group(this.innerGroup, this.margin, this.margin);
 
   //Determine whether the overlay should go on the bottom or top
-  var preferBottom = (this.block == null) || (y1 > (this.block.y + (this.block.stack ? this.block.stack.y : 0)))
+  var preferBottom = (this.block == null) || (y1 > (this.block.y + (this.block.stack ? this.block.stack.y : 0) + this.block.height/3))
   var longH = height + BO.triangleH;
   var attemptB = Math.max(0, y2 + longH - GuiElements.height);
   var attemptT = Math.max(0, longH - y1);
@@ -19685,7 +19886,12 @@ FBBubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHe
     triangleDir = -1;
   }
   // Convert the triangle's coords from abs to rel coords
-  this.x = (GuiElements.width - this.width) / 2;
+  this.x = (GuiElements.width - width) / 2;
+  if (Hatchling) {
+    var maxX = GuiElements.width - this.margin - width 
+    var minX = this.margin
+    this.x = Math.min(Math.max(minX, (triangleX - width/2)), maxX)
+  }
   var triX = triangleX - this.x;
   if (this.block == null) {
     this.x = GuiElements.width - width - this.margin;
@@ -35883,6 +36089,13 @@ BlockButton.prototype.addColorPicker = function(startingValue) {
 }
 
 /**
+ * Adds port chooser widget to this button. Hatchling only.
+ */
+BlockButton.prototype.addPortWidget = function(portType) {
+  this.addWidget(new InputWidget.HLPortWidget(portType), "", HL_Utils.noPort)
+}
+
+/**
  * Adds a new widget for this button
  * @param {Widget} widget - The widget to add
  * @param {string} suffix - Suffix to use for value display
@@ -41775,7 +41988,8 @@ HL_Utils.alphaDict = {
 HL_Utils.addHLButton = function(block, portType) {
   block.port = -1 //unknown
   block.hlButton = new BlockButton(block, 14)//14, 10)//12)//10)//15)//20);
-  block.hlButton.addSlider("hatchling_" + portType, HL_Utils.noPort, HL_Utils.portNames)// Colors.bbtDarkGray, HL_Utils.portColors)
+  //block.hlButton.addSlider("hatchling_" + portType, HL_Utils.noPort, HL_Utils.portNames)// Colors.bbtDarkGray, HL_Utils.portColors)
+  block.hlButton.addPortWidget(portType)
   block.hlButton.button.unbutton()
   HL_Utils.findPorts(block)
 }
@@ -41814,9 +42028,10 @@ HL_Utils.findPorts = function(block) {
   }
 }
 HL_Utils.checkActive = function(block) {
+  return true
   //console.log("checkActive " + block.constructor.name)
   //Always active in blockPalette
-  if (block.stack != null && block.stack.isDisplayStack) {
+  /*if (block.stack != null && block.stack.isDisplayStack) {
     //console.log("found display stack - returning true")
     return true
   }
@@ -41833,7 +42048,7 @@ HL_Utils.checkActive = function(block) {
     }
   }
   //console.log("found nothing - returning false")
-  return false
+  return false*/
 
   //var portFound = HL_Utils.findPorts(this)
   //console.log(this.constructor.name + " " + portFound + " " + (this.stack == null ? "no stack" : this.stack.isDisplayStack))
