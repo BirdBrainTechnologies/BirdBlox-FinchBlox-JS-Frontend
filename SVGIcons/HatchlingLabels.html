@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script type="text/javascript" src="VectorPaths.js"></script>
+		<style>
+			@font-face {
+			  font-family: MPLUS-ExtraBold;
+			  src: url(../Fonts/MPLUSRounded1c-ExtraBold.ttf);
+			}
+		</style>
+	</head>
+	<body>
+		<svg id="svg" xmlns:xlink="http://www.w3.org/2000/xlink" viewBox="0 0 1500 3000">
+		</svg>
+		<script type="text/javascript">
+			const Hatchling = false
+			//This html file can be used to print labels for Hatchling accessories
+			VectorPaths()
+
+
+			function drawRect(x, y, width, height, color, rx, ry, strokeW, strokeC) {
+			  const rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create the rect.
+			  rect.setAttributeNS(null, "x", x); //Set its attributes.
+			  rect.setAttributeNS(null, "y", y);
+			  rect.setAttributeNS(null, "width", width);
+			  rect.setAttributeNS(null, "height", height);
+			  if (color != null) {
+			    rect.setAttributeNS(null, "fill", color);
+			  }
+			  if (rx != null && ry != null) {
+			    rect.setAttributeNS(null, "rx", rx);
+			    rect.setAttributeNS(null, "ry", ry);
+			  }
+			  if (strokeC != null && strokeW != null) {
+			  	rect.setAttributeNS(null, "stroke", strokeC);
+  				rect.setAttributeNS(null, "stroke-width", strokeW);
+			  }
+			  return rect; //Return the rect.
+			};
+
+			function drawText(width, y, text, color, fontSize, group) {
+			  var textElement = document.createElementNS("http://www.w3.org/2000/svg", 'text'); //Create text.
+			  textElement.setAttributeNS(null, "font-family", "MPLUS-ExtraBold");
+			  textElement.setAttributeNS(null, "font-size", fontSize);
+			  textElement.setAttributeNS(null, "font-weight", "normal");
+			  textElement.setAttributeNS(null, "fill", color);
+			  textElement.setAttributeNS(null, "class", "noselect"); //Make sure it can't be selected.
+			  
+			  text += ""; //Make text into a string
+			  text = text.replace(new RegExp(" ", 'g'), String.fromCharCode(160)); //Replace space with nbsp
+			  const textNode = document.createTextNode(text);
+			  textElement.textNode = textNode;
+			  textElement.appendChild(textNode);
+			  group.appendChild(textElement)
+
+			  let textW = measureTextDim(textElement, false)
+			  let x = (width - textW)/2
+			  textElement.setAttributeNS(null, "x", x);
+			  textElement.setAttributeNS(null, "y", y);
+
+			  //return textElement;
+			};
+
+			function measureTextDim(textE, height) { //Measures an existing text SVG element
+			  if (textE.textContent === "") { //If it has no text, the width is 0.
+			    return 0;
+			  }
+			  //Gets the bounding box, but that is 0 if it isn't visible on the screen.
+			  let bbox = textE.getBBox();
+			  let textD = bbox.width; //Gets the width of the bounding box.
+			  if (height) {
+			    textD = bbox.height; //Gets the height of the bounding box.
+			  }
+			  if (textD === 0) { //The text element probably is not visible on the screen.
+			    const parent = textE.parentNode; //Store the text element's current (hidden) parent.
+			    //GuiElements.layers.temp.appendChild(textE); //Change its parent to one we know is visible.
+			    bbox = textE.getBBox(); //Now get its bounding box.
+			    textD = bbox.width;
+			    if (height) {
+			      textD = bbox.height;
+			    }
+			    textE.remove(); //Remove it from the temp layer.
+			    if (parent != null) {
+			      parent.appendChild(textE); //Add it back to its old parent.
+			    }
+			  }
+			  return textD; //Return the width/height.
+			};
+
+
+
+			const Labels = {}
+			Labels.positionServo = {}
+			Labels.positionServo.icon = "bdPosition"
+			Labels.positionServo.iconH = 200
+			Labels.positionServo.text = "SERVO"
+			Labels.rotationServo = {}
+			Labels.rotationServo.icon = "bdRotateRight"
+			Labels.rotationServo.iconH = 200
+			Labels.rotationServo.text = "MOTOR"
+			Labels.singleNeopix = {}
+			Labels.singleNeopix.icon = "bdLightBulb"
+			Labels.singleNeopix.iconH = 125
+			Labels.singleNeopix.text = "LIGHT"
+			Labels.fairyLights = {}
+			Labels.fairyLights.icon = "bdFairyLights"
+			Labels.fairyLights.iconH = 125
+			Labels.fairyLights.text = "FAIRY LIGHTS"
+			Labels.distanceSensor = {}
+			Labels.distanceSensor.icon = "bdRuler"
+			Labels.distanceSensor.iconH = 200
+			Labels.distanceSensor.text = "DISTANCE"
+	
+
+			const labelList = [
+					"positionServo","positionServo","positionServo","positionServo",
+					"positionServo","positionServo","positionServo","positionServo",
+					"rotationServo","rotationServo","rotationServo","rotationServo",
+					"rotationServo","rotationServo","rotationServo","rotationServo",
+					//"singleNeopix",
+					"fairyLights","fairyLights","fairyLights","fairyLights","fairyLights",
+					"distanceSensor","distanceSensor","distanceSensor","distanceSensor",
+				]
+
+			const svg = document.getElementById("svg");
+			const group = document.createElementNS("http://www.w3.org/2000/svg", 'g'); //Make the group.
+			svg.appendChild(group)
+			const offset = 300
+			const margin = 20
+			const color = "#888"
+			let x = 0
+			let y = 0
+			
+			for (var i in labelList) {
+
+				let label = Labels[labelList[i]]
+				let pathId = VectorPaths[label.icon]
+				let iconH = label.iconH
+
+				let scaleX = iconH / pathId.height;
+				let iconW = scaleX * pathId.width
+				if (pathId.width > pathId.height) { scaleX = iconH / pathId.width }
+				let scaleY = scaleX;
+
+
+				//Make a container to hold the label parts
+				let containerGroup = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+				containerGroup.setAttributeNS(null, "transform", "translate(" + x + "," + y + ")")
+				group.appendChild(containerGroup)
+
+
+				//Make the outline
+				let bgRect = drawRect(0, 0, offset, 300, "#FFF", null, null, 1, color)
+				containerGroup.appendChild(bgRect)
+
+
+				//Make and center the icon
+				let iconGroup = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+				containerGroup.appendChild(iconGroup)
+				let pathE = document.createElementNS("http://www.w3.org/2000/svg", 'path'); 
+				iconGroup.appendChild(pathE)
+				pathE.setAttributeNS(null, "d", pathId.path);
+				pathE.setAttributeNS(null, "fill", color);
+			  	if (pathId.transform != null) {
+			    	pathE.setAttributeNS(null, "transform", pathId.transform);
+			  	}
+			  	if (pathId.fillRule != null) {
+			  		pathE.setAttributeNS(null, "fill-rule", pathId.fillRule)
+			  	}
+			  	let iX = (offset - iconW)/2
+			  	let iY = margin
+			  	iconGroup.setAttributeNS(null, "transform", "translate(" + iX + "," + iY + ") scale(" + scaleX + ", " + scaleY + ")");
+  
+
+			  	//Add the label text
+			  	drawText(offset, iconH+2*margin, label.text, color, 30, containerGroup)
+
+				x = x + offset
+				if (x > 1200) {
+					x = 0 
+					y = y + offset
+				}
+			}
+		</script>
+	</body>
+</html>
