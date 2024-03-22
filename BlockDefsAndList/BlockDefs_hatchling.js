@@ -91,6 +91,11 @@ HL_Utils.findPorts = function(block) {
     } else {
       block.hlButton.button.rebutton()
     }
+
+    //if we are updating the block associated with the current ports popup, update the popup
+    if (device.updateListener != null && device.updateListener.parent == block.hlButton) {
+      device.updateListener.value = device.updateListener.parent.values[0]
+    }
   }
 }
 HL_Utils.checkActive = function(block) {
@@ -138,7 +143,12 @@ HL_Utils.checkActive = function(block) {
 //Return true if the block is ok to execute
 HL_Utils.checkAction = function(block) {
   if (block.port == -1) {
-    //TODO: add popup
+    if (block.hlButton != null) {
+      block.hlButton.widgets[0].addPlugArea()
+      block.hlButton.callbackFunction()
+      block.hlButton.widgets[0].removePlugArea()
+    }
+
     console.error("Accessory not connected " + block.constructor.name)
     return false
   }

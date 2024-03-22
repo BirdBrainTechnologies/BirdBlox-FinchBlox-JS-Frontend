@@ -108,12 +108,19 @@ DeviceHatchling.prototype.receiveBroadcast = function(msg) {
         this.portStates[i] = this.hlState[i]
         if (this.portStates[i] == 31) { this.portStates[i] = 0 } //31 is basically also port empty
         CodeManager.updateAvailablePorts(i, oldState, this.portStates[i]);
+        if(this.updateListener != null) {
+          this.updateListener.updatePorts()
+        }
       } else {
         console.log("Unsupported type " + this.hlState[i] + " at port " + i)
       }
     }
   }
 
+}
+
+DeviceHatchling.prototype.registerUpdateListener = function(listener) {
+  this.updateListener = listener
 }
 
 /**

@@ -313,7 +313,9 @@ TitleBar.makeButtons = function() {
         DeviceManager.checkBattery();
       } else {
         finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
-        if (!Hatchling) { 
+        if (Hatchling) {
+          finchBn.battIcon.setColor(Colors.white);
+        } else { 
           finchBn.battIcon.pathE.remove();
           finchBn.icon.move(finchBn.finchX, finchBn.finchY); 
         }

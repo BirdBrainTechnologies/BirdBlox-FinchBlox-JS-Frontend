@@ -296,8 +296,17 @@ BlockButton.prototype.createInputSystem = function() {
     inputPad.addWidget(widget);
   });
 
-  return inputPad;
+  this.inputPad = inputPad
+
+  return this.inputPad;
 };
+
+/**
+ * Manually close the open input system
+ */
+BlockButton.prototype.closeInputSystem = function() {
+  if (this.inputPad != null) { this.inputPad.close() }
+}
 
 /**
  * Add a value with slider input to this button.
@@ -353,7 +362,7 @@ BlockButton.prototype.addColorPicker = function(startingValue) {
  * Adds port chooser widget to this button. Hatchling only.
  */
 BlockButton.prototype.addPortWidget = function(portType) {
-  this.addWidget(new InputWidget.HLPortWidget(portType), "", HL_Utils.noPort)
+  this.addWidget(new InputWidget.HLPortWidget(portType, this), "", HL_Utils.noPort)
 }
 
 /**

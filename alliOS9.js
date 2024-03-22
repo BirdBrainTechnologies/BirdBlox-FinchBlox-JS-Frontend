@@ -6409,12 +6409,19 @@ DeviceHatchling.prototype.receiveBroadcast = function(msg) {
         this.portStates[i] = this.hlState[i]
         if (this.portStates[i] == 31) { this.portStates[i] = 0 } //31 is basically also port empty
         CodeManager.updateAvailablePorts(i, oldState, this.portStates[i]);
+        if(this.updateListener != null) {
+          this.updateListener.updatePorts()
+        }
       } else {
         console.log("Unsupported type " + this.hlState[i] + " at port " + i)
       }
     }
   }
 
+}
+
+DeviceHatchling.prototype.registerUpdateListener = function(listener) {
+  this.updateListener = listener
 }
 
 /**
@@ -9495,6 +9502,10 @@ function VectorPaths(){
     VP.bdPlay.path="M48.6731 25.887C52.487 28.2288 52.487 33.7712 48.6731 36.113L9.13959 60.388C5.1418 62.8427 1.56787e-06 59.9662 1.73265e-06 55.2749L3.43798e-06 6.72505C3.60276e-06 2.03376 5.1418 -0.84276 9.13958 1.61202L48.6731 25.887Z"
     VP.bdPlay.width=52
     VP.bdPlay.height=62
+    VP.bdPlug={}
+    VP.bdPlug.path="M38 6C38 2.68629 40.6863 0 44 0H121C124.314 0 127 2.68629 127 6V15H70C67.7909 15 66 16.7909 66 19V43C66 45.2091 67.7909 47 70 47H127V55C127 58.3137 124.314 61 121 61H44C40.6863 61 38 58.3137 38 55V37.0522C22.8729 37.8465 12 47.5911 12 58.5002C12 65.3437 15.3825 70.536 21.8931 75.6485C27.227 79.837 33.9222 83.4222 41.4761 87.4673C43.5507 88.5782 45.69 89.7238 47.8837 90.9261C67.4671 101.659 97 127 97 174H85C85 138 61.5329 112.091 42.1163 101.449C40.2323 100.417 38.3004 99.384 36.3524 98.3427C28.6652 94.2334 20.7257 89.9893 14.4819 85.0864C6.36752 78.7145 0 70.4068 0 58.5002C0 38.5766 18.8276 25.8744 38 25.0434V6Z M127 44V18H70C69.4477 18 69 18.4477 69 19V43C69 43.5523 69.4477 44 70 44H127Z M150 23C150 21.8954 149.105 21 148 21H130V40H148C149.105 40 150 39.1046 150 38V23Z M153 25C153 24.4477 152.552 24 152 24H134V37H152C152.552 37 153 36.5523 153 36V25Z"
+    VP.bdPlug.width=153
+    VP.bdPlug.height=174
     VP.bdPosition0={}
     VP.bdPosition0.path="M92.9687 63.6428C93.8366 63.6428 94.5435 62.9387 94.5075 62.0715C94.1068 52.4129 90.023 43.2311 83.0336 36.3687C75.6661 29.1352 65.6736 25.0714 55.2544 25.0714C44.8352 25.0714 34.8428 29.1352 27.4753 36.3687C20.4858 43.231 16.402 52.4129 16.0013 62.0715C15.9653 62.9387 16.6723 63.6428 17.5402 63.6428L92.9687 63.6428ZM86.1857 52.3921C86.7983 54.004 87.2795 55.6642 87.623 57.3571L22.8859 57.3571C23.2327 55.648 23.7198 53.9722 24.3407 52.3458L32.1118 54.7253C33.4206 55.142 34.8551 54.3065 35.3159 52.8593C35.7766 51.4121 35.0891 49.9011 33.7802 49.4844L26.7717 47.3384C28.1732 44.9948 29.8837 42.8129 31.879 40.854C32.7997 39.9499 33.7699 39.1045 34.7834 38.3202L38.9246 44.2684C39.7192 45.3888 41.3676 45.5849 42.6065 44.7063C43.8453 43.8277 44.2055 42.2072 43.4109 41.0867L39.401 35.3271C43.2816 33.2474 47.5731 31.94 52.0257 31.5119C52.0222 31.5663 52.0207 31.6213 52.0211 31.6766L52.0724 37.7022C52.0841 39.0757 53.3247 40.1787 54.8435 40.1658C56.3622 40.1529 57.5839 39.0289 57.5722 37.6554L57.5209 31.6298C57.5204 31.5634 57.5169 31.4976 57.5107 31.4326C62.243 31.7497 66.8156 33.059 70.9327 35.2338L66.4387 41.0867C65.6441 42.2071 66.0043 43.8277 67.2431 44.7063C68.482 45.5848 70.1304 45.3888 70.925 44.2684L75.5788 38.2074C76.6454 39.0232 77.6648 39.9064 78.6299 40.854C80.6375 42.8251 82.3569 45.0219 83.7632 47.3821L76.8953 49.4844C75.5864 49.9011 74.8989 51.4121 75.3596 52.8593C75.8204 54.3065 77.2549 55.1419 78.5637 54.7252L86.1857 52.3921Z M0.392857 62.8548C-0.130952 62.5524 -0.130953 61.7963 0.392856 61.4939L11.2064 55.2507C11.7302 54.9483 12.385 55.3263 12.385 55.9311V68.4176C12.385 69.0224 11.7302 69.4004 11.2064 69.098L0.392857 62.8548Z"
     VP.bdPosition0.width=95
@@ -12910,7 +12921,9 @@ TitleBar.makeButtons = function() {
         DeviceManager.checkBattery();
       } else {
         finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
-        if (!Hatchling) { 
+        if (Hatchling) {
+          finchBn.battIcon.setColor(Colors.white);
+        } else { 
           finchBn.battIcon.pathE.remove();
           finchBn.icon.move(finchBn.finchX, finchBn.finchY); 
         }
@@ -15494,7 +15507,7 @@ Button.prototype.addFinchBnIcons = function() {
   var finchColor = Colors.white
   if (Hatchling) { 
     finchPathId = VectorPaths.bdHatchling; 
-    finchColor = Colors.iron;
+    finchColor = Colors.ballyRed;
     this.iconColor = finchColor
   }
   var battPathId = Hatchling ? VectorPaths.bdBatteryDisconnected : VectorPaths.battery;
@@ -15795,10 +15808,17 @@ Button.prototype.setColor = function(isPressed) {
 
 /**
  * Updates the button's background color
+ * 
+ * @param {string} color - hex value of color to set as background
+ * @param {string} outlineColor - (optional) hex value of color to set outline
  */
-Button.prototype.updateBgColor = function(color) {
+Button.prototype.updateBgColor = function(color, outlineColor) {
   this.bg = color;
   this.setColor(false);
+  if (outlineColor != null) {
+    this.strokeColor = outlineColor
+    GuiElements.update.stroke(this.bgRect, this.strokeColor, Button.strokeW)
+  }
 }
 
 Button.prototype.flash = function() {
@@ -19234,65 +19254,82 @@ InputWidget.Color.prototype.updateDim = function(x, y) {
 /**
  * Hatchling specific widget to allow the user to select between different ports.
  * 
+ * @param {number} portType - The type of accessory this widget will look for
+ * @param {BlockButton} parent - The block button parent of this popup
  */
-InputWidget.HLPortWidget = function(portType) {
+InputWidget.HLPortWidget = function(portType, parent) {
 
 	this.index = 0 //This widget cannot currently be combined with other widgets
-	this.width = 275
-	this.height = this.width * 3/4 
+	this.standardWidth = 275
+  this.plugAreaWidth = this.standardWidth * 1/2
+  this.width = this.standardWidth
+	this.height = this.standardWidth * 3/4 
 	this.optionDisabled = [true, true, true, true, true, true]
 	this.value = HL_Utils.noPort //Always start with no connection
 	this.portType = portType
 	this.type = "hatchling_" + portType
+  this.buttons = []
+  this.iconH = 20
+  this.font = Font.secondaryUiFont(18)
+  this.showPlug = false
+  this.parent = parent
+
 
 }
 InputWidget.HLPortWidget.prototype = Object.create(InputWidget.prototype)
 InputWidget.HLPortWidget.prototype.constructor = InputWidget.HLPortWidget
+
+InputWidget.HLPortWidget.prototype.addPlugArea = function() {
+  this.width = this.standardWidth + this.plugAreaWidth
+  this.showPlug = true
+}
+InputWidget.HLPortWidget.prototype.removePlugArea = function() {
+  this.width = this.standardWidth
+  this.showPlug = false
+}
 
 
 InputWidget.HLPortWidget.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
   InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
 
   this.value = data[this.index]
+  this.buttons = []
+  //var noPort = this.value == HL_Utils.noPort
+
   this.group = GuiElements.create.group(x, y, parentGroup);
   this.bgRect = GuiElements.draw.rect(0, 0, this.width, this.height, "none");
   //Normally, invisible shapes don't respond to touch events.
   this.bgRect.setAttributeNS(null, "pointer-events", "all");
 
   this.group.appendChild(this.bgRect);
-  //TouchReceiver.addListenersSlider(this.bgRect, this);
 
-  var device = DeviceHatchling.getManager().getDevice(0);
-  if (device != null) {
-    var portType = this.type.split("_")[1]
-    var ports = device.getPortsByType(portType)
-    for (var i = 0; i < HL_Utils.portNames.length; i++) {
-      this.optionDisabled[i] = (ports.indexOf(i) == -1)
-    }
+  //Draw the plug icon if needed
+  if (this.showPlug) {
+    var plugPath = VectorPaths.bdPlug
+    var plugH = this.height * 3/5
+    var plugX = 20
+    var plugY = this.height - plugH
+    this.plug = new VectorIcon(plugX, plugY, plugPath, Colors.ballyBrandBlueDark, plugH, this.group)
+  } else {
+    this.plug = null
   }
 
   //Draw the egg
   var eggPath = VectorPaths.bdHatchling
+  var eggColor = this.showPlug ? Colors.ballyRed : Colors.ballyBrandBlue
   var eggH = this.height * 5/7
   var eggW = VectorIcon.computeWidth(eggPath, eggH)
-  var eggX = (this.width - eggW)/2
+  var eggX = this.showPlug ? (this.plugAreaWidth + (this.standardWidth - eggW)/2) : (this.width - eggW)/2
   var eggY = (this.height - eggH)/2
-  var egg = new VectorIcon(eggX, eggY, eggPath, Colors.ballyBrandBlue, eggH, this.group)
+  var egg = new VectorIcon(eggX, eggY, eggPath, eggColor, eggH, this.group)
 
 
   //Draw a circle button for each port
-  var font = Font.secondaryUiFont(18)
   var r = eggH/7 //this.height/9
   var startX = eggX + 1.25*r //(this.width - 8*r) / 2 
   var bnX = startX
   var bnY = eggY + 1.25*r //2*r
-  var iconH = 20
-  this.portBns = []
   for (var i = 0; i < HL_Utils.portNames.length; i++) {
-  	var isDisabled = this.optionDisabled[i]
-  	var bgColor = isDisabled ? Colors.ballyRedLight : Colors.ballyBrandBlueLight
-  	var textColor = isDisabled ? Colors.ballyRedDark : Colors.ballyBrandBlueDark
-  	var outlineColor = isDisabled ? null : textColor
   	
   	switch (i) {
       case 0:
@@ -19310,54 +19347,11 @@ InputWidget.HLPortWidget.prototype.show = function(x, y, parentGroup, overlay, s
         bnY = eggY + 4.25*r //6*r
         break;
     }
-  	//var circle = GuiElements.draw.circle(cx, cy, r, bgColor, this.group)
-  	//if (isDisabled) { GuiElements.update.stroke(circle, textColor, 1) }
-  	var portBn = new Button(bnX, bnY, 2*r, 2*r, this.group, bgColor, r, r, outlineColor)
+
+    var portBn = new Button(bnX, bnY, 2*r, 2*r, this.group, Colors.ballyGray, r, r)
   	portBn.markAsOverlayPart(this.overlay)
-  	if (!isDisabled) {
-  	  portBn.setCallbackFunction(function() {
-  	  	
-  	  }.bind(this), false)
-  	  portBn.setCallbackFunction(function() {
-  	  	this.value = HL_Utils.portNames[i]
-  		this.updateFn(this.value, 0)
 
-  	  	for (var j = 0; j < this.portBns.length; j++) {
-  	  		var bn = this.portBns[j]
-  	  		if (bn.portName == this.value) {
-  	  			bn.addTextOverIcon(VectorPaths.bdConnected, iconH, bn.portName, font, textColor)
-  	  		} else {
-  	  			bn.addText(bn.portName, font, textColor)
-  	  		}
-  	  	}
-  	  }.bind(this), true)
-  	  this.portBns.push(portBn)
-    } else {
-      portBn.disable(true)
-    }
-
-  	//Add the text
-  	var portName = HL_Utils.portNames[i]
-  	portBn.portName = portName 
-  	console.log("about to set status icon for " + portName + " with this.value=" + this.value)
-  	var statusIconPath = isDisabled ? VectorPaths.bdClose : //VectorPaths.bdHatchlingDisconnected : 
-  		((this.value == portName) ? VectorPaths.bdConnected : null)
-  	/*var portNameW = GuiElements.measure.stringWidth(portName, font)
-  	var portNameX = (2*r - portNameW) / 2
-  	var portNameY = 2*r * ((statusIconPath == null) ? 1 : 1/2) + font.charHeight/2
-  	var nameTextE = GuiElements.draw.text(portNameX, portNameY, font, textColor)
-  	this.group.appendChild(nameTextE)*/
-  	if (statusIconPath == null) {
-  		portBn.addText(portName, font, textColor)
-  	} else {
-  		portBn.addTextOverIcon(statusIconPath, iconH, portName, font, textColor)
-  	}
-  	/*if (statusIconPath != null) {
-  		var iconW = VectorIcon.computeWidth(statusIconPath, iconH)
-  		var iconX = (2*r - iconW) / 2
-  		var iconY = r + (r - iconH)/2
-  		var statusIcon = new VectorIcon(iconX, iconY, statusIconPath, textColor, iconH, this.group)
-  	}*/
+    this.buttons.push(portBn)
 
     if (i == 2) {
     	bnX = startX
@@ -19365,6 +19359,70 @@ InputWidget.HLPortWidget.prototype.show = function(x, y, parentGroup, overlay, s
     	bnX = bnX + 2.5*r //bnX + 3*r
     }
   }  
+
+  this.updatePorts()
+
+}
+
+InputWidget.HLPortWidget.prototype.updatePorts = function() {
+  console.log("**** update ports this.value=" + this.value)
+  var portStates = [0, 0, 0, 0, 0, 0]
+
+	var device = DeviceHatchling.getManager().getDevice(0);
+  if (device != null) {
+
+      var ports = device.getPortsByType(this.portType)
+      for (var i = 0; i < HL_Utils.portNames.length; i++) {
+        this.optionDisabled[i] = (ports.indexOf(i) == -1)
+    }
+
+    portStates = device.portStates
+    device.registerUpdateListener(this)
+  }
+
+  for (var i = 0; i < portStates.length; i++) {
+    var portName = HL_Utils.portNames[i]
+    var state = portStates[i]
+    if (state == this.portType) {
+      var textColor = Colors.ballyGreenDark
+      this.buttons[i].updateBgColor(Colors.ballyGreenLight, textColor)
+      if (this.value == portName) {
+        this.buttons[i].addTextOverIcon(VectorPaths.bdConnected, this.iconH, portName, this.font, textColor)
+      } else {
+        this.buttons[i].addText(portName, this.font, textColor)
+      }
+      this.buttons[i].enable()
+      this.buttons[i].setCallbackFunction(function() {
+        this.value = HL_Utils.portNames[i]
+        this.updateFn(this.value, 0)
+
+        for (var j = 0; j < this.buttons.length; j++) {
+          var pName = HL_Utils.portNames[j]
+          var bn = this.buttons[j]
+          if (pName == this.value) {
+            bn.addTextOverIcon(VectorPaths.bdConnected, this.iconH, pName, this.font, textColor)
+          } else if (portStates[j] == this.portType) {
+            bn.addText(pName, this.font, textColor)
+          }
+        }
+      }.bind(this), true)
+
+    } else {
+      this.buttons[i].updateBgColor(Colors.ballyRedLight, Colors.ballyRedLight)
+      this.buttons[i].addTextOverIcon(VectorPaths.bdClose, this.iconH, portName, this.font, Colors.ballyRedDark)
+      this.buttons[i].disable(true)
+    }
+    
+  }
+
+  //If we are showing this popup as though there is no accessory plugged in
+  // and the appropriate accessory was just added, we can close the popup
+  if (this.plug != null && this.value != HL_Utils.noPort) {
+    console.log("**** about to close popup " + this.value)
+    setTimeout( function() { 
+      this.parent.closeInputSystem() 
+    }.bind(this), 1000 )
+  }
 
 }
 
@@ -36035,8 +36093,17 @@ BlockButton.prototype.createInputSystem = function() {
     inputPad.addWidget(widget);
   });
 
-  return inputPad;
+  this.inputPad = inputPad
+
+  return this.inputPad;
 };
+
+/**
+ * Manually close the open input system
+ */
+BlockButton.prototype.closeInputSystem = function() {
+  if (this.inputPad != null) { this.inputPad.close() }
+}
 
 /**
  * Add a value with slider input to this button.
@@ -36092,7 +36159,7 @@ BlockButton.prototype.addColorPicker = function(startingValue) {
  * Adds port chooser widget to this button. Hatchling only.
  */
 BlockButton.prototype.addPortWidget = function(portType) {
-  this.addWidget(new InputWidget.HLPortWidget(portType), "", HL_Utils.noPort)
+  this.addWidget(new InputWidget.HLPortWidget(portType, this), "", HL_Utils.noPort)
 }
 
 /**
@@ -42025,6 +42092,11 @@ HL_Utils.findPorts = function(block) {
     } else {
       block.hlButton.button.rebutton()
     }
+
+    //if we are updating the block associated with the current ports popup, update the popup
+    if (device.updateListener != null && device.updateListener.parent == block.hlButton) {
+      device.updateListener.value = device.updateListener.parent.values[0]
+    }
   }
 }
 HL_Utils.checkActive = function(block) {
@@ -42072,7 +42144,12 @@ HL_Utils.checkActive = function(block) {
 //Return true if the block is ok to execute
 HL_Utils.checkAction = function(block) {
   if (block.port == -1) {
-    //TODO: add popup
+    if (block.hlButton != null) {
+      block.hlButton.widgets[0].addPlugArea()
+      block.hlButton.callbackFunction()
+      block.hlButton.widgets[0].removePlugArea()
+    }
+
     console.error("Accessory not connected " + block.constructor.name)
     return false
   }

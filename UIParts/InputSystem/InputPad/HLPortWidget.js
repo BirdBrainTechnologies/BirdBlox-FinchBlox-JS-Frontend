@@ -1,74 +1,82 @@
 /**
  * Hatchling specific widget to allow the user to select between different ports.
  * 
+ * @param {number} portType - The type of accessory this widget will look for
+ * @param {BlockButton} parent - The block button parent of this popup
  */
-InputWidget.HLPortWidget = function(portType) {
+InputWidget.HLPortWidget = function(portType, parent) {
 
 	this.index = 0 //This widget cannot currently be combined with other widgets
-	this.width = 275
-	this.height = this.width * 3/4 
+	this.standardWidth = 275
+  this.plugAreaWidth = this.standardWidth * 1/2
+  this.width = this.standardWidth
+	this.height = this.standardWidth * 3/4 
 	this.optionDisabled = [true, true, true, true, true, true]
 	this.value = HL_Utils.noPort //Always start with no connection
 	this.portType = portType
 	this.type = "hatchling_" + portType
+  this.buttons = []
+  this.iconH = 20
+  this.font = Font.secondaryUiFont(18)
+  this.showPlug = false
+  this.parent = parent
 
-	this.accesoryIcons = {
-		1: VectorPaths.bd90Deg,
-		3: VectorPaths.bdRotateRight,
-		8: VectorPaths.bdFairyLights,
-		9: VectorPaths.bdLightBulb,
-		10: VectorPaths.bdMultiLightBulb,
-		14: VectorPaths.bdRuler
-	}
 
 }
 InputWidget.HLPortWidget.prototype = Object.create(InputWidget.prototype)
 InputWidget.HLPortWidget.prototype.constructor = InputWidget.HLPortWidget
+
+InputWidget.HLPortWidget.prototype.addPlugArea = function() {
+  this.width = this.standardWidth + this.plugAreaWidth
+  this.showPlug = true
+}
+InputWidget.HLPortWidget.prototype.removePlugArea = function() {
+  this.width = this.standardWidth
+  this.showPlug = false
+}
 
 
 InputWidget.HLPortWidget.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
   InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
 
   this.value = data[this.index]
+  this.buttons = []
+  //const noPort = this.value == HL_Utils.noPort
+
   this.group = GuiElements.create.group(x, y, parentGroup);
   this.bgRect = GuiElements.draw.rect(0, 0, this.width, this.height, "none");
   //Normally, invisible shapes don't respond to touch events.
   this.bgRect.setAttributeNS(null, "pointer-events", "all");
 
   this.group.appendChild(this.bgRect);
-  //TouchReceiver.addListenersSlider(this.bgRect, this);
 
-  let device = DeviceHatchling.getManager().getDevice(0);
-  if (device != null) {
-    let portType = this.type.split("_")[1]
-    let ports = device.getPortsByType(portType)
-    for (let i = 0; i < HL_Utils.portNames.length; i++) {
-      this.optionDisabled[i] = (ports.indexOf(i) == -1)
-    }
+  //Draw the plug icon if needed
+  if (this.showPlug) {
+    const plugPath = VectorPaths.bdPlug
+    const plugH = this.height * 3/5
+    const plugX = 20
+    const plugY = this.height - plugH
+    this.plug = new VectorIcon(plugX, plugY, plugPath, Colors.ballyBrandBlueDark, plugH, this.group)
+  } else {
+    this.plug = null
   }
 
   //Draw the egg
   const eggPath = VectorPaths.bdHatchling
+  const eggColor = this.showPlug ? Colors.ballyRed : Colors.ballyBrandBlue
   const eggH = this.height * 5/7
   const eggW = VectorIcon.computeWidth(eggPath, eggH)
-  const eggX = (this.width - eggW)/2
+  const eggX = this.showPlug ? (this.plugAreaWidth + (this.standardWidth - eggW)/2) : (this.width - eggW)/2
   const eggY = (this.height - eggH)/2
-  let egg = new VectorIcon(eggX, eggY, eggPath, Colors.ballyBrandBlue, eggH, this.group)
+  let egg = new VectorIcon(eggX, eggY, eggPath, eggColor, eggH, this.group)
 
 
   //Draw a circle button for each port
-  const font = Font.secondaryUiFont(18)
   const r = eggH/7 //this.height/9
   const startX = eggX + 1.25*r //(this.width - 8*r) / 2 
   let bnX = startX
   let bnY = eggY + 1.25*r //2*r
-  const iconH = 20
-  this.portBns = []
   for (let i = 0; i < HL_Utils.portNames.length; i++) {
-  	const isDisabled = this.optionDisabled[i]
-  	const bgColor = isDisabled ? Colors.ballyRedLight : Colors.ballyBrandBlueLight
-  	const textColor = isDisabled ? Colors.ballyRedDark : Colors.ballyBrandBlueDark
-  	const outlineColor = isDisabled ? null : textColor
   	
   	switch (i) {
       case 0:
@@ -86,54 +94,11 @@ InputWidget.HLPortWidget.prototype.show = function(x, y, parentGroup, overlay, s
         bnY = eggY + 4.25*r //6*r
         break;
     }
-  	//const circle = GuiElements.draw.circle(cx, cy, r, bgColor, this.group)
-  	//if (isDisabled) { GuiElements.update.stroke(circle, textColor, 1) }
-  	const portBn = new Button(bnX, bnY, 2*r, 2*r, this.group, bgColor, r, r, outlineColor)
+
+    const portBn = new Button(bnX, bnY, 2*r, 2*r, this.group, Colors.ballyGray, r, r)
   	portBn.markAsOverlayPart(this.overlay)
-  	if (!isDisabled) {
-  	  portBn.setCallbackFunction(function() {
-  	  	
-  	  }.bind(this), false)
-  	  portBn.setCallbackFunction(function() {
-  	  	this.value = HL_Utils.portNames[i]
-  		this.updateFn(this.value, 0)
 
-  	  	for (let j = 0; j < this.portBns.length; j++) {
-  	  		const bn = this.portBns[j]
-  	  		if (bn.portName == this.value) {
-  	  			bn.addTextOverIcon(VectorPaths.bdConnected, iconH, bn.portName, font, textColor)
-  	  		} else {
-  	  			bn.addText(bn.portName, font, textColor)
-  	  		}
-  	  	}
-  	  }.bind(this), true)
-  	  this.portBns.push(portBn)
-    } else {
-      portBn.disable(true)
-    }
-
-  	//Add the text
-  	const portName = HL_Utils.portNames[i]
-  	portBn.portName = portName 
-  	console.log("about to set status icon for " + portName + " with this.value=" + this.value)
-  	const statusIconPath = isDisabled ? VectorPaths.bdClose : //VectorPaths.bdHatchlingDisconnected : 
-  		((this.value == portName) ? VectorPaths.bdConnected : null)
-  	/*const portNameW = GuiElements.measure.stringWidth(portName, font)
-  	const portNameX = (2*r - portNameW) / 2
-  	const portNameY = 2*r * ((statusIconPath == null) ? 1 : 1/2) + font.charHeight/2
-  	const nameTextE = GuiElements.draw.text(portNameX, portNameY, font, textColor)
-  	this.group.appendChild(nameTextE)*/
-  	if (statusIconPath == null) {
-  		portBn.addText(portName, font, textColor)
-  	} else {
-  		portBn.addTextOverIcon(statusIconPath, iconH, portName, font, textColor)
-  	}
-  	/*if (statusIconPath != null) {
-  		const iconW = VectorIcon.computeWidth(statusIconPath, iconH)
-  		const iconX = (2*r - iconW) / 2
-  		const iconY = r + (r - iconH)/2
-  		const statusIcon = new VectorIcon(iconX, iconY, statusIconPath, textColor, iconH, this.group)
-  	}*/
+    this.buttons.push(portBn)
 
     if (i == 2) {
     	bnX = startX
@@ -142,18 +107,69 @@ InputWidget.HLPortWidget.prototype.show = function(x, y, parentGroup, overlay, s
     }
   }  
 
+  this.updatePorts()
+
 }
 
 InputWidget.HLPortWidget.prototype.updatePorts = function() {
+  console.log("**** update ports this.value=" + this.value)
+  let portStates = [0, 0, 0, 0, 0, 0]
+
 	let device = DeviceHatchling.getManager().getDevice(0);
-  	if (device != null) {
+  if (device != null) {
 
       let ports = device.getPortsByType(this.portType)
       for (let i = 0; i < HL_Utils.portNames.length; i++) {
         this.optionDisabled[i] = (ports.indexOf(i) == -1)
-      }
     }
 
+    portStates = device.portStates
+    device.registerUpdateListener(this)
+  }
+
+  for (let i = 0; i < portStates.length; i++) {
+    let portName = HL_Utils.portNames[i]
+    let state = portStates[i]
+    if (state == this.portType) {
+      let textColor = Colors.ballyGreenDark
+      this.buttons[i].updateBgColor(Colors.ballyGreenLight, textColor)
+      if (this.value == portName) {
+        this.buttons[i].addTextOverIcon(VectorPaths.bdConnected, this.iconH, portName, this.font, textColor)
+      } else {
+        this.buttons[i].addText(portName, this.font, textColor)
+      }
+      this.buttons[i].enable()
+      this.buttons[i].setCallbackFunction(function() {
+        this.value = HL_Utils.portNames[i]
+        this.updateFn(this.value, 0)
+
+        for (let j = 0; j < this.buttons.length; j++) {
+          let pName = HL_Utils.portNames[j]
+          const bn = this.buttons[j]
+          if (pName == this.value) {
+            bn.addTextOverIcon(VectorPaths.bdConnected, this.iconH, pName, this.font, textColor)
+          } else if (portStates[j] == this.portType) {
+            bn.addText(pName, this.font, textColor)
+          }
+        }
+      }.bind(this), true)
+
+    } else {
+      this.buttons[i].updateBgColor(Colors.ballyRedLight, Colors.ballyRedLight)
+      this.buttons[i].addTextOverIcon(VectorPaths.bdClose, this.iconH, portName, this.font, Colors.ballyRedDark)
+      this.buttons[i].disable(true)
+    }
+    
+  }
+
+  //If we are showing this popup as though there is no accessory plugged in
+  // and the appropriate accessory was just added, we can close the popup
+  if (this.plug != null && this.value != HL_Utils.noPort) {
+    console.log("**** about to close popup " + this.value)
+    setTimeout( function() { 
+      this.parent.closeInputSystem() 
+    }.bind(this), 1000 )
+  }
 
 }
 

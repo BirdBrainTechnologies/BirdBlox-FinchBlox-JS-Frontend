@@ -440,7 +440,7 @@ Button.prototype.addFinchBnIcons = function() {
   let finchColor = Colors.white
   if (Hatchling) { 
     finchPathId = VectorPaths.bdHatchling; 
-    finchColor = Colors.iron;
+    finchColor = Colors.ballyRed;
     this.iconColor = finchColor
   }
   const battPathId = Hatchling ? VectorPaths.bdBatteryDisconnected : VectorPaths.battery;
@@ -741,10 +741,17 @@ Button.prototype.setColor = function(isPressed) {
 
 /**
  * Updates the button's background color
+ * 
+ * @param {string} color - hex value of color to set as background
+ * @param {string} outlineColor - (optional) hex value of color to set outline
  */
-Button.prototype.updateBgColor = function(color) {
+Button.prototype.updateBgColor = function(color, outlineColor) {
   this.bg = color;
   this.setColor(false);
+  if (outlineColor != null) {
+    this.strokeColor = outlineColor
+    GuiElements.update.stroke(this.bgRect, this.strokeColor, Button.strokeW)
+  }
 }
 
 Button.prototype.flash = function() {

@@ -111,7 +111,7 @@
 			Labels.distanceSensor.iconH = 200
 			Labels.distanceSensor.text = "DISTANCE"
 	
-
+			//Edit this list to include the labels you want to print
 			const labelList = [
 					"positionServo","positionServo","positionServo","positionServo",
 					"positionServo","positionServo","positionServo","positionServo",
@@ -127,7 +127,7 @@
 			svg.appendChild(group)
 			const offset = 300
 			const margin = 20
-			const color = "#888"
+			const color = "#777"//"#666"//"#888"
 			let x = 0
 			let y = 0
 			
@@ -181,6 +181,35 @@
 					y = y + offset
 				}
 			}
+
+			//Edit to change the number of port letter label sets to print
+			let portLabels = 12
+			let portLabelW = 400
+			let portLabelH = 100
+
+			if (x != 0) { 
+				x = 0
+				y = y + offset
+			}
+
+			for (let i = 0; i < portLabels; i++) {
+				//Make a container to hold the label parts
+				let containerGroup = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+				containerGroup.setAttributeNS(null, "transform", "translate(" + x + "," + y + ")")
+				group.appendChild(containerGroup)
+
+				//Add the label text
+			  	drawText(portLabelW, portLabelH, "A  B  C  D  E  F", color, 50, containerGroup)
+
+			  	x = x + portLabelW
+				if (x > 1000) {
+					x = 0 
+					y = y + portLabelH
+				}
+			}
+
+
+
 		</script>
 	</body>
 </html>
