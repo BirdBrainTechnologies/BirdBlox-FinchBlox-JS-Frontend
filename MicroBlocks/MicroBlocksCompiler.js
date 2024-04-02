@@ -119,12 +119,12 @@ function MicroBlocksCompiler () {
 	RESERVED 109
 	RESERVED 110
 	RESERVED 111
-	RESERVED 112
-	RESERVED 113
-	RESERVED 114
-	RESERVED 115
-	RESERVED 116
-	RESERVED 117
+	hatchlingPlayNote 112	
+	hatchlingServoWithDelay 113
+	hatchlingMotorWithDelay 114
+	hatchlingFairyLightWithDelay 115
+	hatchlingNeopixelWithDelay 116
+	hatchlingNeopixelStripWithDelay 117
 	RESERVED 118
 	RESERVED 119
 	RESERVED 120

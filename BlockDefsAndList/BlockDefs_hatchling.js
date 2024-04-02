@@ -358,7 +358,15 @@ function B_HL_PS_L1(x, y, defaultAngle) {
 B_HL_PS_L1.prototype = Object.create(B_HLPositionServo.prototype)
 B_HL_PS_L1.prototype.constructor = B_HL_PS_L1
 //MicroBlocks functions
-B_HL_PS_L1.prototype.primName = function() { return "blockList" }
+B_HL_PS_L1.prototype.primName = function() { return "hatchlingServoWithDelay" }
+B_HL_PS_L1.prototype.argList = function() { 
+  let port = HL_Utils.portNames[this.port]
+  let duration = 1000
+  let val = this.value + 2 //0 and 1 are off commands
+
+  return [port, val, duration] 
+}
+/*B_HL_PS_L1.prototype.primName = function() { return "blockList" }
 B_HL_PS_L1.prototype.argList = function() { 
   let prim = "[h:psv]"
   let port = HL_Utils.portNames[this.port]
@@ -367,7 +375,7 @@ B_HL_PS_L1.prototype.argList = function() {
 
   return [new BlockArg(prim, [port, val]), 
     new BlockArg("waitMillis", [duration])] 
-}
+}*/
 
 
 function B_HL_PS_L1_0(x, y) {
@@ -392,7 +400,7 @@ function B_HL_PS_L2(x, y) {
   B_HLPositionServo.call(this, x, y, 90)
 
   this.valueBN = new BlockButton(this);
-  this.valueBN.addSlider("angle_right", this.value, [0, 30, 60, 90, 120, 150, 180]);
+  this.valueBN.addSlider("servo", this.value, [0, 180]);
   this.addPart(this.valueBN);
 }
 B_HL_PS_L2.prototype = Object.create(B_HLPositionServo.prototype)
@@ -453,7 +461,14 @@ function B_HL_RS_L1(x, y, flip) {
 B_HL_RS_L1.prototype = Object.create(B_HLRotationServo.prototype);
 B_HL_RS_L1.prototype.constructor = B_HL_RS_L1;
 //MicroBlocks functions
-B_HL_RS_L1.prototype.primName = function() { return "blockList" }
+B_HL_RS_L1.prototype.primName = function() { return "hatchlingMotorWithDelay" }
+B_HL_RS_L1.prototype.argList = function() { 
+  let port = HL_Utils.portNames[this.port]
+  let duration = 1000
+
+  return [port, this.value, duration]
+}
+/*B_HL_RS_L1.prototype.primName = function() { return "blockList" }
 B_HL_RS_L1.prototype.argList = function() { 
   let prim = "[h:rsv]"
   let port = HL_Utils.portNames[this.port]
@@ -462,7 +477,7 @@ B_HL_RS_L1.prototype.argList = function() {
   return [new BlockArg(prim, [port, this.value]), 
     new BlockArg("waitMillis", [duration]), 
     new BlockArg(prim, [port, 0])] 
-}
+}*/
 
 function B_HL_RS_L1_CW(x, y) {
   B_HL_RS_L1.call(this, x, y, false)
@@ -480,7 +495,7 @@ function B_HL_RS_L2(x, y, flip) {
   B_HLRotationServo.call(this, x, y, flip)
 
   this.valueBN = new BlockButton(this);
-  this.valueBN.addSlider("percent", this.defaultSpeed, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  this.valueBN.addSlider("motor_" + flip, this.defaultSpeed, [0, 100]);
   this.addPart(this.valueBN);
 }
 B_HL_RS_L2.prototype = Object.create(B_HLRotationServo.prototype);
@@ -535,7 +550,15 @@ function B_HL_SN_L1(x, y, color) {
 B_HL_SN_L1.prototype = Object.create(B_HLSingleNeopix.prototype);
 B_HL_SN_L1.prototype.constructor = B_HL_SN_L1;
 //MicroBlocks functions
-B_HL_SN_L1.prototype.primName = function() { return "blockList" }
+B_HL_SN_L1.prototype.primName = function() { return "hatchlingNeopixelWithDelay" }
+B_HL_SN_L1.prototype.argList = function() { 
+  let port = HL_Utils.portNames[this.port]
+  let duration = 1000
+  let rgb = Colors.hexToRgb(this.value)
+
+  return [port, rgb[0], rgb[1], rgb[2], duration]
+}
+/*B_HL_SN_L1.prototype.primName = function() { return "blockList" }
 B_HL_SN_L1.prototype.argList = function() { 
   let prim = "[h:np]"
   let port = HL_Utils.portNames[this.port]
@@ -545,7 +568,7 @@ B_HL_SN_L1.prototype.argList = function() {
   return [new BlockArg(prim, [port, rgb[0], rgb[1], rgb[2]]), 
     new BlockArg("waitMillis", [duration]), 
     new BlockArg(prim, [port, 0, 0, 0])] 
-}
+}*/
 
 function B_HL_SN_L1_Red(x, y) {
   B_HL_SN_L1.call(this, x, y, "#FF0000")
@@ -678,7 +701,14 @@ function B_HLFairyLightsL1(x, y) {
 B_HLFairyLightsL1.prototype = Object.create(B_HLFairyLights.prototype);
 B_HLFairyLightsL1.prototype.constructor = B_HLFairyLightsL1;
 //MicroBlocks functions
-B_HLFairyLightsL1.prototype.primName = function() { return "blockList" }
+B_HLFairyLightsL1.prototype.primName = function() { return "hatchlingFairyLightWithDelay" }
+B_HLFairyLightsL1.prototype.argList = function() { 
+  let port = HL_Utils.portNames[this.port]
+  let duration = 1000
+
+  return [port, this.value, duration]
+}
+/*B_HLFairyLightsL1.prototype.primName = function() { return "blockList" }
 B_HLFairyLightsL1.prototype.argList = function() { 
   let prim = "[h:fl]"
   let port = HL_Utils.portNames[this.port]
@@ -687,13 +717,13 @@ B_HLFairyLightsL1.prototype.argList = function() {
   return [new BlockArg(prim, [port, this.value]), 
     new BlockArg("waitMillis", [duration]), 
     new BlockArg(prim, [port, 0])] 
-}
+}*/
 
 function B_HLFairyLightsL2(x, y) {
   B_HLFairyLights.call(this, x, y)
 
   this.valueBN = new BlockButton(this);
-  this.valueBN.addSlider("percent", 100, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  this.valueBN.addSlider("light", 100, [0, 100]);
   this.addPart(this.valueBN);
 }
 B_HLFairyLightsL2.prototype = Object.create(B_HLFairyLights.prototype);

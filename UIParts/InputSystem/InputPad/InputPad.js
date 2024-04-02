@@ -30,6 +30,9 @@ InputPad.setConstants = function() {
     IP.background = Colors.white;
     IP.margin = Button.defaultMargin;
     IP.width = GuiElements.width * 19 / 20 - 2 * IP.margin;
+    if (Hatchling) {
+      IP.width = GuiElements.width * 7/8 - 2*IP.margin
+    }
   } else {
     IP.background = Colors.lightGray;
     IP.margin = Button.defaultMargin;

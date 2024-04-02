@@ -7208,7 +7208,7 @@ GuiElements.draw.rect = function(x, y, width, height, color, rx, ry) {
   return rect; //Return the rect.
 };
 
-GuiElements.draw.line = function(x1, y1, x2, y2, color, w) {
+GuiElements.draw.line = function(x1, y1, x2, y2, color, w, rounded) {
   DebugOptions.validateNumbers(x1, y1, x2, y2)
   var line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
   line.setAttributeNS(null, "x1", x1)
@@ -7217,6 +7217,9 @@ GuiElements.draw.line = function(x1, y1, x2, y2, color, w) {
   line.setAttributeNS(null, "y2", y2)
   line.setAttributeNS(null, "stroke", color)
   line.setAttributeNS(null, "stroke-width", w)
+  if (rounded) {
+    line.setAttributeNS(null, "stroke-linecap", "round")
+  }
 
   return line
 }
@@ -17184,6 +17187,9 @@ InputPad.setConstants = function() {
     IP.background = Colors.white;
     IP.margin = Button.defaultMargin;
     IP.width = GuiElements.width * 19 / 20 - 2 * IP.margin;
+    if (Hatchling) {
+      IP.width = GuiElements.width * 7/8 - 2*IP.margin
+    }
   } else {
     IP.background = Colors.lightGray;
     IP.margin = Button.defaultMargin;
@@ -17979,8 +17985,9 @@ InputWidget.SelectPad.prototype.getAbsY = function() {
  * @param {string} sliderColor - Color hex value. Determined by the category of the parent block.
  * @param {string} displaySuffix - Suffix for the displayed value (eg. "cm")
  * @param {number} index - Position of this slider in the InputSystem.
+ * @param {string} barColor - (optional) Color hex value for bar and text - Hatchling only
  */
-InputWidget.Slider = function(type, options, startVal, sliderColor, displaySuffix, index) {
+InputWidget.Slider = function(type, options, startVal, sliderColor, displaySuffix, index, barColor) {
   this.type = type;
   this.options = options;
   this.optionDisabled = [];
@@ -17988,6 +17995,8 @@ InputWidget.Slider = function(type, options, startVal, sliderColor, displaySuffi
   this.sliderColor = sliderColor;
   this.displaySuffix = displaySuffix;
   this.index = index;
+  this.barColor = barColor
+  this.textColor = barColor
 
   this.snapToOption = false;
   if (type == "ledArray" || type.startsWith("hatchling") || type == "sensor") {
@@ -18059,18 +18068,21 @@ InputWidget.Slider.Slide.prototype.getValueIndex = function() {
 InputWidget.Slider.setConstants = function() {
   var S = InputWidget.Slider;
   S.width = InputPad.width;
-  S.height = S.width / 8; //80;
+  S.height = Hatchling ? S.width/4 : S.width / 8; //80;
   S.hMargin = 20;
   S.barHeight = 4;
   S.barColor = Colors.iron;
   if (Hatchling) {
-    S.sliderIconPath = VectorPaths.faEgg;
+    S.sliderIconPath = VectorPaths.circle;
+    S.font = Font.secondaryUiFont(16); 
+    S.optionFont = Font.secondaryUiFont(16); 
   } else {
     S.sliderIconPath = VectorPaths.mvFinch;
+    S.font = Font.uiFont(24); //Font.uiFont(16);
+    S.optionFont = Font.uiFont(16); //Font.uiFont(12);//InputWidget.Label.font;
   }
   S.optionMargin = 10; //5;//distance between ticks and option display
-  S.font = Font.uiFont(24); //Font.uiFont(16);
-  S.optionFont = Font.uiFont(16); //Font.uiFont(12);//InputWidget.Label.font;
+  
   S.textColor = Colors.bbtDarkGray;
 
   GuiElements.create.spectrum();
@@ -18139,6 +18151,8 @@ InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotSha
     }
 
   }
+
+  if (Hatchling) { this.addHatchlingIcons() }
 };
 
 /**
@@ -18153,6 +18167,15 @@ InputWidget.Slider.prototype.updateDim = function(x, y) {
   this.width = S.width;
 }
 
+/*
+<svg width="4" height="30" viewBox="0 0 4 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M2 2L2 28" stroke="white" stroke-width="3" stroke-linecap="round"/>
+</svg>
+<svg width="4" height="30" viewBox="0 0 4 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M2 2L2 28" stroke="white" stroke-width="3" stroke-linecap="round"/>
+</svg>
+*/
+
 /**
  * Draws the slider on the screen. Called by show().
  */
@@ -18161,14 +18184,16 @@ InputWidget.Slider.prototype.makeSlider = function() {
   this.position = 0;
   this.range = 100;
 
+  var hatchFact = 4/3
+
   this.barX = S.hMargin;
-  this.barY = (this.height - S.barHeight) / 2;
+  this.barY = Hatchling ? (hatchFact*this.height - S.barHeight)/2 : (this.height - S.barHeight)/2;
   this.barW = S.width - 2 * S.hMargin;
-  var barColor = S.barColor;
+  var barColor = this.barColor ?? S.barColor;
 
   this.sliderH = 35; //30;//10
   this.sliderW = VectorIcon.computeWidth(S.sliderIconPath, this.sliderH);
-  this.sliderY = (this.height - this.sliderH) / 2;
+  this.sliderY = Hatchling ? (hatchFact*this.height - this.sliderH)/2 : (this.height - this.sliderH)/2;
   this.sliderX = this.barX + (this.position / (this.range)) * (this.barW - this.sliderW);
 
   //Add a color spectrum behind a color slider
@@ -18182,7 +18207,7 @@ InputWidget.Slider.prototype.makeSlider = function() {
     TouchReceiver.addListenersSlider(colorRect, this);
 
   //Add a group of 3 sliders to represent rgb values
-  } else if (this.type.startsWith("color_")) {
+  //} else if (this.type.startsWith("color_")) {
     /* rgb gradient sliders
     barColor = Colors.white;
     var specH = S.barHeight * 10;
@@ -18192,14 +18217,14 @@ InputWidget.Slider.prototype.makeSlider = function() {
     this.group.appendChild(colorRect);
     TouchReceiver.addListenersSlider(colorRect, this); */
 
-    var triH = S.barHeight * 10;
+    /*var triH = S.barHeight * 10;
     var offset = triH/2 - S.barHeight
     this.barY += offset
     this.sliderY += offset
     var color = this.type.split("_")[1]
     var colorTri = GuiElements.draw.rightTriangle(this.barX, this.barY, this.barW, triH, Colors[color])   
     this.group.appendChild(colorTri);
-    TouchReceiver.addListenersSlider(colorTri, this);
+    TouchReceiver.addListenersSlider(colorTri, this);*/
 
 
     //All other sliders have tick marks with options above
@@ -18305,14 +18330,27 @@ InputWidget.Slider.prototype.makeSlider = function() {
       this.angleIcon = new VectorIcon(iconX, iconY, S.sliderIconPath, Colors.white, iconH, this.group);
       GuiElements.update.stroke(this.angleIcon.pathE, S.textColor, 6);
     }
-    //Make space to display the selected value to the right.
-    this.barW -= 2 * this.sideSpaceR + S.hMargin + InputPad.margin;
+    if (!Hatchling) {
+      //Make space to display the selected value to the right.
+      this.barW -= 2 * this.sideSpaceR + S.hMargin + InputPad.margin;
+    }
   }
 
   //Make the bar beneath the slider
   var sliderBar = GuiElements.draw.rect(this.barX, this.barY, this.barW, S.barHeight, barColor);
   this.group.appendChild(sliderBar);
   TouchReceiver.addListenersSlider(sliderBar, this);
+
+  //For Hatchling, add the thick bar that follows the slider
+  if (Hatchling) {
+    //var visibleH = this.sliderH - 3 //must subtract for the white border
+    this.sTailH = this.sliderH * 4/5//visibleH - 3
+    var circle = GuiElements.draw.circle(this.barX, this.barY + S.barHeight/2, this.sTailH/2, barColor, this.group)
+    this.sliderTail = GuiElements.draw.rect(this.barX, this.barY + S.barHeight/2 - this.sTailH/2, 0, this.sTailH, barColor)
+    this.group.appendChild(this.sliderTail)
+    //TODO: Add touch receivers?
+  }
+
 
   //If there is a list of options to display, add them with a tick mark at each
   if (this.options != null && this.options.length != 0) {
@@ -18333,6 +18371,18 @@ InputWidget.Slider.prototype.makeSlider = function() {
     color = this.sliderColor;
   }
   this.sliderIcon = new VectorIcon(this.sliderX, this.sliderY, S.sliderIconPath, color, this.sliderH, this.group, null, 90);
+  if (Hatchling) {
+    //Add border and center lines
+    var x1 = S.sliderIconPath.height * 3/7//this.sliderW * 1/3
+    var x2 = S.sliderIconPath.height * 4/7//this.sliderW * 2/3
+    var y1 = S.sliderIconPath.width * 1/3//this.sliderH * 1/3
+    var y2 = S.sliderIconPath.width * 2/3//this.sliderH * 2/3
+    var line1 = GuiElements.draw.line(y1, x1, y2, x1, Colors.white, 5, true)
+    var line2 = GuiElements.draw.line(y1, x2, y2, x2, Colors.white, 5, true)
+    this.sliderIcon.group.appendChild(line1)
+    this.sliderIcon.group.appendChild(line2)
+    GuiElements.update.stroke(this.sliderIcon.pathE, Colors.white, 10) 
+ }
   TouchReceiver.addListenersSlider(this.sliderIcon.pathE, this);
   if (this.type.startsWith("wheels")) {
 
@@ -18358,7 +18408,7 @@ InputWidget.Slider.prototype.makeSlider = function() {
     this.imageG = GuiElements.create.group(0, 0, this.group);
   } else if (!this.type.startsWith('color') && this.type != 'sensor') { //!this.type.startsWith('hatchling') && this.type != 'sensor') {
     //Add a label at the bottom to show your selection
-    this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
+    this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, this.sliderColor ?? S.textColor);
     this.group.appendChild(this.textE);
     if (this.type.startsWith("wheels")) {
       this.group.appendChild(document.createElement("br"))
@@ -18382,8 +18432,46 @@ InputWidget.Slider.prototype.makeSlider = function() {
 }
 
 /**
+ * Add the extra icons displayed for Hatchling
+ */
+InputWidget.Slider.prototype.addHatchlingIcons = function() {
+  var iconLowPath, iconHighPath, iconPath
+  switch(this.type){
+  case "servo":
+    iconLowPath = VectorPaths.bd0Deg 
+    iconHighPath = VectorPaths.bd180Deg  
+    iconPath = VectorPaths.bd90Deg 
+    break;
+  case "motor_true":
+  case "motor_false":
+    iconLowPath = VectorPaths.bdSlow
+    iconHighPath = VectorPaths.bdFast
+    iconPath = (this.type == "motor_true") ? VectorPaths.bdRotateRight : VectorPaths.bdRotateLeft
+    break;
+  case "light":
+    iconLowPath = VectorPaths.bdDark
+    iconHighPath = VectorPaths.bdLight 
+    iconPath = VectorPaths.bdFairyLights 
+    break;
+  default:
+    console.error("Add hatchling icons not implemented for type " + this.type)
+    return
+  }
+
+  var margin = 50//40
+  var iH = 25
+  var iW = VectorIcon.computeWidth(iconLowPath, iH)
+  var iconLow = new VectorIcon(this.barX - iW/2, this.barY - margin, iconLowPath, this.sliderColor, iH, this.group)
+  var iconHigh = new VectorIcon(this.barX + this.barW - iW/2, this.barY - margin, iconHighPath, this.sliderColor, iH, this.group)
+  var iconH = 80//40
+  var iconW = VectorIcon.computeWidth(iconPath, iconH)
+  var iconX = (this.width - iconW)/2
+  var icon = new VectorIcon(iconX, 0, iconPath, this.sliderColor, iconH, this.group)
+}
+
+/**
  * Adds one option to the slider display. Called by makeSlider when there are
- * specified options to display.
+ * specified options to display. FinchBlox only.
  * @param {number} x - x position of the option
  * @param {number} y - y position of the option
  * @param {string} option - String representation of the option
@@ -18398,13 +18486,13 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
 
   //Ticks on the edges of the slider are longer
   var tickY = y;
-  if (isOnEdge) {
+  if (isOnEdge && !Hatchling) {
     var extra = tickH / 6;
     tickY -= extra;
     tickH += 2 * extra;
   }
 
-  var tick = GuiElements.draw.rect(x, tickY, tickW, tickH, S.barColor);
+  var tick = GuiElements.draw.rect(x, tickY, tickW, tickH, this.barColor ?? S.barColor);
   this.group.appendChild(tick);
   TouchReceiver.addListenersSlider(tick, this);
 
@@ -18419,30 +18507,6 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
       var iY = y - image.width - S.optionMargin;
       GuiElements.move.group(image.group, iX, iY);
       break;
-    /*case "hatchling":
-      var iconPath = VectorPaths.faLightbulb
-      var iconH = 23
-      var iconW = VectorIcon.computeWidth(iconPath, iconH)
-      var iconX = x - iconW / 2 + tickW / 2
-      var iconY = y - iconH - S.optionMargin
-      var icon = new VectorIcon(iconX, iconY, iconPath, option, iconH, this.group)
-      GuiElements.update.stroke(icon.pathE, Colors.bbtDarkGray, 3);
-
-      if (isDisabled) {
-        var slashG = GuiElements.create.group(0, 0, this.group);
-        var slash = GuiElements.create.path(slashG);
-        var cr = iconW
-        var cx = iconX + iconW/2
-        var cy = iconY + iconH/2
-        var slashPath = "M " + (cx + cr * Math.cos(315 * Math.PI / 180)) + ",";
-        slashPath += (cy + cr * Math.sin(315 * Math.PI / 180));
-        slashPath += " L " + (cx + cr * Math.cos(135 * Math.PI / 180)) + ",";
-        slashPath += (cy + cr * Math.sin(135 * Math.PI / 180));
-        slash.setAttributeNS(null, "d", slashPath);
-        GuiElements.update.stroke(slash, S.barColor, 3);
-        GuiElements.update.opacity(icon.pathE, 0.3)
-      }
-      break;*/
     case "sensor":
       var iconP = option
       var iH = 23
@@ -18456,16 +18520,16 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
     case "angle":
     case "time":
     case "wheels":
-    case "hatchling":
+    case "servo":
+    case "motor":
+    case "light":
       var width = GuiElements.measure.stringWidth(option, font);
       var textX = x - width / 2 + tickW / 2;
-      var textY = y - S.optionMargin; //font.charHeight/2 - S.optionMargin;
-      var textE = GuiElements.draw.text(textX, textY, option, font, S.textColor);
+      var textY = Hatchling ? y + tickH + font.charHeight + S.optionMargin : y - S.optionMargin; //font.charHeight/2 - S.optionMargin;
+      var text = Hatchling ? (option + this.displaySuffix) : option
+      var textE = GuiElements.draw.text(textX, textY, text, font, this.textColor ?? S.textColor);
       this.group.appendChild(textE);
 
-      if (typeGroup == "hatchling" && isDisabled) {
-        GuiElements.update.opacity(textE, 0.3)
-      }
       break;
   }
 
@@ -18800,6 +18864,11 @@ InputWidget.Slider.prototype.updateLabel = function() {
     //If there is an angle display, make space for that.
     textY += (this.cR ? this.cR + S.font.charHeight / 2 : 0)
     if (this.type.endsWith("clockwise")) { textY -= this.cR*1.5 }
+    if (Hatchling) {
+      //Hatchling places the label below the slider
+      textX = this.sliderX + (this.sliderW - textW)/2
+      textY = this.sliderY + this.sliderH + S.font.charHeight + S.optionMargin
+    }
     GuiElements.move.text(this.textE, textX, textY);
 
     if (this.type.startsWith("wheels")) {
@@ -18815,9 +18884,6 @@ InputWidget.Slider.prototype.updateLabel = function() {
     var iconX = this.width - S.hMargin - this.sideSpaceR - this.labelIconW / 2;
     var iconY = this.height / 2 - this.labelIconH / 2;
     this.labelIcon.move(iconX, iconY);
-    if (this.type.startsWith('hatchling')) {
-      this.labelIcon.setColor(this.value)
-    }
   }
   if (this.imageG != null) {
     this.imageG.remove();
@@ -18826,6 +18892,14 @@ InputWidget.Slider.prototype.updateLabel = function() {
     var iY = this.height / 2 - image.width / 2;
     GuiElements.move.group(image.group, iX, iY);
     this.imageG = image.group;
+  }
+
+  //Update the tail behind the slider while you update the label
+  if (Hatchling) {
+    //var visibleH = this.sliderH - 3
+    var rectY = this.barY + S.barHeight/2 - this.sTailH/2//this.barY + S.barHeight/2 - visibleH/2//this.barY - 3*S.barHeight
+    var rectW = this.sliderX + this.sliderW/2 - this.barX
+    GuiElements.update.rect(this.sliderTail, this.barX, rectY, rectW, this.sTailH)//visibleH)
   }
 }
 
@@ -36119,12 +36193,16 @@ BlockButton.prototype.addSlider = function(type, startingValue, options) {
       suffix = " cm";
       break;
     case "percent":
+    case "motor_true":
+    case "motor_false":
+    case "light":
       suffix = "%";
       break;
     case "angle_left":
     case "angle_right":
     case "angle_clockwise":
     case "angle_counterclockwise":
+    case "servo":
       suffix = "°";
       break;
     default:
@@ -36135,7 +36213,8 @@ BlockButton.prototype.addSlider = function(type, startingValue, options) {
   }
 
   var sliderColor = Colors.categoryColors[this.parent.category];
-  var slider = new InputWidget.Slider(type, options, startingValue, sliderColor, suffix, this.widgets.length);
+  var barColor = Hatchling ? Colors.blockOutline[this.parent.category] : null
+  var slider = new InputWidget.Slider(type, options, startingValue, sliderColor, suffix, this.widgets.length, barColor);
   this.addWidget(slider, suffix, startingValue);
 }
 
@@ -39307,7 +39386,13 @@ function B_FBSound(x, y, level) {
 B_FBSound.prototype = Object.create(CommandBlock.prototype);
 B_FBSound.prototype.constructor = B_FBSound;
 //MicroBlocks functions
-B_FBSound.prototype.primName = function() { return "blockList" }
+B_FBSound.prototype.primName = function() { return "hatchlingPlayNote" }
+B_FBSound.prototype.argList = function() { 
+  var frequency = 440 * Math.pow(2, (this.midiNote - 69)/12)
+  var duration = (100 * this.beats)
+  return [frequency, duration]
+}
+/*B_FBSound.prototype.primName = function() { return "blockList" }
 B_FBSound.prototype.argList = function() { 
   var frequency = 440 * Math.pow(2, (this.midiNote - 69)/12)
   var prim = "[io:playTone]"
@@ -39315,7 +39400,7 @@ B_FBSound.prototype.argList = function() {
   return [new BlockArg(prim, [-1, frequency]), 
     new BlockArg("waitMillis", [duration]), 
     new BlockArg(prim, [-1, 0])] 
-}
+}*/
 B_FBSound.prototype.startAction = function() {
   var mem = this.runMem;
   mem.timerStarted = false;
@@ -42359,7 +42444,15 @@ function B_HL_PS_L1(x, y, defaultAngle) {
 B_HL_PS_L1.prototype = Object.create(B_HLPositionServo.prototype)
 B_HL_PS_L1.prototype.constructor = B_HL_PS_L1
 //MicroBlocks functions
-B_HL_PS_L1.prototype.primName = function() { return "blockList" }
+B_HL_PS_L1.prototype.primName = function() { return "hatchlingServoWithDelay" }
+B_HL_PS_L1.prototype.argList = function() { 
+  var port = HL_Utils.portNames[this.port]
+  var duration = 1000
+  var val = this.value + 2 //0 and 1 are off commands
+
+  return [port, val, duration] 
+}
+/*B_HL_PS_L1.prototype.primName = function() { return "blockList" }
 B_HL_PS_L1.prototype.argList = function() { 
   var prim = "[h:psv]"
   var port = HL_Utils.portNames[this.port]
@@ -42368,7 +42461,7 @@ B_HL_PS_L1.prototype.argList = function() {
 
   return [new BlockArg(prim, [port, val]), 
     new BlockArg("waitMillis", [duration])] 
-}
+}*/
 
 
 function B_HL_PS_L1_0(x, y) {
@@ -42393,7 +42486,7 @@ function B_HL_PS_L2(x, y) {
   B_HLPositionServo.call(this, x, y, 90)
 
   this.valueBN = new BlockButton(this);
-  this.valueBN.addSlider("angle_right", this.value, [0, 30, 60, 90, 120, 150, 180]);
+  this.valueBN.addSlider("servo", this.value, [0, 180]);
   this.addPart(this.valueBN);
 }
 B_HL_PS_L2.prototype = Object.create(B_HLPositionServo.prototype)
@@ -42454,7 +42547,14 @@ function B_HL_RS_L1(x, y, flip) {
 B_HL_RS_L1.prototype = Object.create(B_HLRotationServo.prototype);
 B_HL_RS_L1.prototype.constructor = B_HL_RS_L1;
 //MicroBlocks functions
-B_HL_RS_L1.prototype.primName = function() { return "blockList" }
+B_HL_RS_L1.prototype.primName = function() { return "hatchlingMotorWithDelay" }
+B_HL_RS_L1.prototype.argList = function() { 
+  var port = HL_Utils.portNames[this.port]
+  var duration = 1000
+
+  return [port, this.value, duration]
+}
+/*B_HL_RS_L1.prototype.primName = function() { return "blockList" }
 B_HL_RS_L1.prototype.argList = function() { 
   var prim = "[h:rsv]"
   var port = HL_Utils.portNames[this.port]
@@ -42463,7 +42563,7 @@ B_HL_RS_L1.prototype.argList = function() {
   return [new BlockArg(prim, [port, this.value]), 
     new BlockArg("waitMillis", [duration]), 
     new BlockArg(prim, [port, 0])] 
-}
+}*/
 
 function B_HL_RS_L1_CW(x, y) {
   B_HL_RS_L1.call(this, x, y, false)
@@ -42481,7 +42581,7 @@ function B_HL_RS_L2(x, y, flip) {
   B_HLRotationServo.call(this, x, y, flip)
 
   this.valueBN = new BlockButton(this);
-  this.valueBN.addSlider("percent", this.defaultSpeed, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  this.valueBN.addSlider("motor_" + flip, this.defaultSpeed, [0, 100]);
   this.addPart(this.valueBN);
 }
 B_HL_RS_L2.prototype = Object.create(B_HLRotationServo.prototype);
@@ -42536,7 +42636,15 @@ function B_HL_SN_L1(x, y, color) {
 B_HL_SN_L1.prototype = Object.create(B_HLSingleNeopix.prototype);
 B_HL_SN_L1.prototype.constructor = B_HL_SN_L1;
 //MicroBlocks functions
-B_HL_SN_L1.prototype.primName = function() { return "blockList" }
+B_HL_SN_L1.prototype.primName = function() { return "hatchlingNeopixelWithDelay" }
+B_HL_SN_L1.prototype.argList = function() { 
+  var port = HL_Utils.portNames[this.port]
+  var duration = 1000
+  var rgb = Colors.hexToRgb(this.value)
+
+  return [port, rgb[0], rgb[1], rgb[2], duration]
+}
+/*B_HL_SN_L1.prototype.primName = function() { return "blockList" }
 B_HL_SN_L1.prototype.argList = function() { 
   var prim = "[h:np]"
   var port = HL_Utils.portNames[this.port]
@@ -42546,7 +42654,7 @@ B_HL_SN_L1.prototype.argList = function() {
   return [new BlockArg(prim, [port, rgb[0], rgb[1], rgb[2]]), 
     new BlockArg("waitMillis", [duration]), 
     new BlockArg(prim, [port, 0, 0, 0])] 
-}
+}*/
 
 function B_HL_SN_L1_Red(x, y) {
   B_HL_SN_L1.call(this, x, y, "#FF0000")
@@ -42679,7 +42787,14 @@ function B_HLFairyLightsL1(x, y) {
 B_HLFairyLightsL1.prototype = Object.create(B_HLFairyLights.prototype);
 B_HLFairyLightsL1.prototype.constructor = B_HLFairyLightsL1;
 //MicroBlocks functions
-B_HLFairyLightsL1.prototype.primName = function() { return "blockList" }
+B_HLFairyLightsL1.prototype.primName = function() { return "hatchlingFairyLightWithDelay" }
+B_HLFairyLightsL1.prototype.argList = function() { 
+  var port = HL_Utils.portNames[this.port]
+  var duration = 1000
+
+  return [port, this.value, duration]
+}
+/*B_HLFairyLightsL1.prototype.primName = function() { return "blockList" }
 B_HLFairyLightsL1.prototype.argList = function() { 
   var prim = "[h:fl]"
   var port = HL_Utils.portNames[this.port]
@@ -42688,13 +42803,13 @@ B_HLFairyLightsL1.prototype.argList = function() {
   return [new BlockArg(prim, [port, this.value]), 
     new BlockArg("waitMillis", [duration]), 
     new BlockArg(prim, [port, 0])] 
-}
+}*/
 
 function B_HLFairyLightsL2(x, y) {
   B_HLFairyLights.call(this, x, y)
 
   this.valueBN = new BlockButton(this);
-  this.valueBN.addSlider("percent", 100, [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  this.valueBN.addSlider("light", 100, [0, 100]);
   this.addPart(this.valueBN);
 }
 B_HLFairyLightsL2.prototype = Object.create(B_HLFairyLights.prototype);
@@ -43627,12 +43742,12 @@ function MicroBlocksCompiler () {
 	RESERVED 109
 	RESERVED 110
 	RESERVED 111
-	RESERVED 112
-	RESERVED 113
-	RESERVED 114
-	RESERVED 115
-	RESERVED 116
-	RESERVED 117
+	hatchlingPlayNote 112	
+	hatchlingServoWithDelay 113
+	hatchlingMotorWithDelay 114
+	hatchlingFairyLightWithDelay 115
+	hatchlingNeopixelWithDelay 116
+	hatchlingNeopixelStripWithDelay 117
 	RESERVED 118
 	RESERVED 119
 	RESERVED 120

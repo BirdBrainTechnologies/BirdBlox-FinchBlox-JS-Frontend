@@ -591,7 +591,7 @@ GuiElements.draw.rect = function(x, y, width, height, color, rx, ry) {
   return rect; //Return the rect.
 };
 
-GuiElements.draw.line = function(x1, y1, x2, y2, color, w) {
+GuiElements.draw.line = function(x1, y1, x2, y2, color, w, rounded) {
   DebugOptions.validateNumbers(x1, y1, x2, y2)
   const line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
   line.setAttributeNS(null, "x1", x1)
@@ -600,6 +600,9 @@ GuiElements.draw.line = function(x1, y1, x2, y2, color, w) {
   line.setAttributeNS(null, "y2", y2)
   line.setAttributeNS(null, "stroke", color)
   line.setAttributeNS(null, "stroke-width", w)
+  if (rounded) {
+    line.setAttributeNS(null, "stroke-linecap", "round")
+  }
 
   return line
 }

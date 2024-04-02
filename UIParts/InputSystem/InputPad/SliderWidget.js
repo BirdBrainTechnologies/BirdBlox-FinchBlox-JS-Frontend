@@ -7,8 +7,9 @@
  * @param {string} sliderColor - Color hex value. Determined by the category of the parent block.
  * @param {string} displaySuffix - Suffix for the displayed value (eg. "cm")
  * @param {number} index - Position of this slider in the InputSystem.
+ * @param {string} barColor - (optional) Color hex value for bar and text - Hatchling only
  */
-InputWidget.Slider = function(type, options, startVal, sliderColor, displaySuffix, index) {
+InputWidget.Slider = function(type, options, startVal, sliderColor, displaySuffix, index, barColor) {
   this.type = type;
   this.options = options;
   this.optionDisabled = [];
@@ -16,6 +17,8 @@ InputWidget.Slider = function(type, options, startVal, sliderColor, displaySuffi
   this.sliderColor = sliderColor;
   this.displaySuffix = displaySuffix;
   this.index = index;
+  this.barColor = barColor
+  this.textColor = barColor
 
   this.snapToOption = false;
   if (type == "ledArray" || type.startsWith("hatchling") || type == "sensor") {
@@ -87,18 +90,21 @@ InputWidget.Slider.Slide.prototype.getValueIndex = function() {
 InputWidget.Slider.setConstants = function() {
   const S = InputWidget.Slider;
   S.width = InputPad.width;
-  S.height = S.width / 8; //80;
+  S.height = Hatchling ? S.width/4 : S.width / 8; //80;
   S.hMargin = 20;
   S.barHeight = 4;
   S.barColor = Colors.iron;
   if (Hatchling) {
-    S.sliderIconPath = VectorPaths.faEgg;
+    S.sliderIconPath = VectorPaths.circle;
+    S.font = Font.secondaryUiFont(16); 
+    S.optionFont = Font.secondaryUiFont(16); 
   } else {
     S.sliderIconPath = VectorPaths.mvFinch;
+    S.font = Font.uiFont(24); //Font.uiFont(16);
+    S.optionFont = Font.uiFont(16); //Font.uiFont(12);//InputWidget.Label.font;
   }
   S.optionMargin = 10; //5;//distance between ticks and option display
-  S.font = Font.uiFont(24); //Font.uiFont(16);
-  S.optionFont = Font.uiFont(16); //Font.uiFont(12);//InputWidget.Label.font;
+  
   S.textColor = Colors.bbtDarkGray;
 
   GuiElements.create.spectrum();
@@ -167,6 +173,8 @@ InputWidget.Slider.prototype.show = function(x, y, parentGroup, overlay, slotSha
     }
 
   }
+
+  if (Hatchling) { this.addHatchlingIcons() }
 };
 
 /**
@@ -181,6 +189,15 @@ InputWidget.Slider.prototype.updateDim = function(x, y) {
   this.width = S.width;
 }
 
+/*
+<svg width="4" height="30" viewBox="0 0 4 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M2 2L2 28" stroke="white" stroke-width="3" stroke-linecap="round"/>
+</svg>
+<svg width="4" height="30" viewBox="0 0 4 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M2 2L2 28" stroke="white" stroke-width="3" stroke-linecap="round"/>
+</svg>
+*/
+
 /**
  * Draws the slider on the screen. Called by show().
  */
@@ -189,14 +206,16 @@ InputWidget.Slider.prototype.makeSlider = function() {
   this.position = 0;
   this.range = 100;
 
+  const hatchFact = 4/3
+
   this.barX = S.hMargin;
-  this.barY = (this.height - S.barHeight) / 2;
+  this.barY = Hatchling ? (hatchFact*this.height - S.barHeight)/2 : (this.height - S.barHeight)/2;
   this.barW = S.width - 2 * S.hMargin;
-  let barColor = S.barColor;
+  let barColor = this.barColor ?? S.barColor;
 
   this.sliderH = 35; //30;//10
   this.sliderW = VectorIcon.computeWidth(S.sliderIconPath, this.sliderH);
-  this.sliderY = (this.height - this.sliderH) / 2;
+  this.sliderY = Hatchling ? (hatchFact*this.height - this.sliderH)/2 : (this.height - this.sliderH)/2;
   this.sliderX = this.barX + (this.position / (this.range)) * (this.barW - this.sliderW);
 
   //Add a color spectrum behind a color slider
@@ -210,7 +229,7 @@ InputWidget.Slider.prototype.makeSlider = function() {
     TouchReceiver.addListenersSlider(colorRect, this);
 
   //Add a group of 3 sliders to represent rgb values
-  } else if (this.type.startsWith("color_")) {
+  //} else if (this.type.startsWith("color_")) {
     /* rgb gradient sliders
     barColor = Colors.white;
     const specH = S.barHeight * 10;
@@ -220,14 +239,14 @@ InputWidget.Slider.prototype.makeSlider = function() {
     this.group.appendChild(colorRect);
     TouchReceiver.addListenersSlider(colorRect, this); */
 
-    const triH = S.barHeight * 10;
+    /*const triH = S.barHeight * 10;
     const offset = triH/2 - S.barHeight
     this.barY += offset
     this.sliderY += offset
     const color = this.type.split("_")[1]
     const colorTri = GuiElements.draw.rightTriangle(this.barX, this.barY, this.barW, triH, Colors[color])   
     this.group.appendChild(colorTri);
-    TouchReceiver.addListenersSlider(colorTri, this);
+    TouchReceiver.addListenersSlider(colorTri, this);*/
 
 
     //All other sliders have tick marks with options above
@@ -333,14 +352,27 @@ InputWidget.Slider.prototype.makeSlider = function() {
       this.angleIcon = new VectorIcon(iconX, iconY, S.sliderIconPath, Colors.white, iconH, this.group);
       GuiElements.update.stroke(this.angleIcon.pathE, S.textColor, 6);
     }
-    //Make space to display the selected value to the right.
-    this.barW -= 2 * this.sideSpaceR + S.hMargin + InputPad.margin;
+    if (!Hatchling) {
+      //Make space to display the selected value to the right.
+      this.barW -= 2 * this.sideSpaceR + S.hMargin + InputPad.margin;
+    }
   }
 
   //Make the bar beneath the slider
   const sliderBar = GuiElements.draw.rect(this.barX, this.barY, this.barW, S.barHeight, barColor);
   this.group.appendChild(sliderBar);
   TouchReceiver.addListenersSlider(sliderBar, this);
+
+  //For Hatchling, add the thick bar that follows the slider
+  if (Hatchling) {
+    //const visibleH = this.sliderH - 3 //must subtract for the white border
+    this.sTailH = this.sliderH * 4/5//visibleH - 3
+    const circle = GuiElements.draw.circle(this.barX, this.barY + S.barHeight/2, this.sTailH/2, barColor, this.group)
+    this.sliderTail = GuiElements.draw.rect(this.barX, this.barY + S.barHeight/2 - this.sTailH/2, 0, this.sTailH, barColor)
+    this.group.appendChild(this.sliderTail)
+    //TODO: Add touch receivers?
+  }
+
 
   //If there is a list of options to display, add them with a tick mark at each
   if (this.options != null && this.options.length != 0) {
@@ -361,6 +393,18 @@ InputWidget.Slider.prototype.makeSlider = function() {
     color = this.sliderColor;
   }
   this.sliderIcon = new VectorIcon(this.sliderX, this.sliderY, S.sliderIconPath, color, this.sliderH, this.group, null, 90);
+  if (Hatchling) {
+    //Add border and center lines
+    const x1 = S.sliderIconPath.height * 3/7//this.sliderW * 1/3
+    const x2 = S.sliderIconPath.height * 4/7//this.sliderW * 2/3
+    const y1 = S.sliderIconPath.width * 1/3//this.sliderH * 1/3
+    const y2 = S.sliderIconPath.width * 2/3//this.sliderH * 2/3
+    const line1 = GuiElements.draw.line(y1, x1, y2, x1, Colors.white, 5, true)
+    const line2 = GuiElements.draw.line(y1, x2, y2, x2, Colors.white, 5, true)
+    this.sliderIcon.group.appendChild(line1)
+    this.sliderIcon.group.appendChild(line2)
+    GuiElements.update.stroke(this.sliderIcon.pathE, Colors.white, 10) 
+ }
   TouchReceiver.addListenersSlider(this.sliderIcon.pathE, this);
   if (this.type.startsWith("wheels")) {
 
@@ -386,7 +430,7 @@ InputWidget.Slider.prototype.makeSlider = function() {
     this.imageG = GuiElements.create.group(0, 0, this.group);
   } else if (!this.type.startsWith('color') && this.type != 'sensor') { //!this.type.startsWith('hatchling') && this.type != 'sensor') {
     //Add a label at the bottom to show your selection
-    this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, S.textColor);
+    this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, this.sliderColor ?? S.textColor);
     this.group.appendChild(this.textE);
     if (this.type.startsWith("wheels")) {
       this.group.appendChild(document.createElement("br"))
@@ -410,8 +454,46 @@ InputWidget.Slider.prototype.makeSlider = function() {
 }
 
 /**
+ * Add the extra icons displayed for Hatchling
+ */
+InputWidget.Slider.prototype.addHatchlingIcons = function() {
+  let iconLowPath, iconHighPath, iconPath
+  switch(this.type){
+  case "servo":
+    iconLowPath = VectorPaths.bd0Deg 
+    iconHighPath = VectorPaths.bd180Deg  
+    iconPath = VectorPaths.bd90Deg 
+    break;
+  case "motor_true":
+  case "motor_false":
+    iconLowPath = VectorPaths.bdSlow
+    iconHighPath = VectorPaths.bdFast
+    iconPath = (this.type == "motor_true") ? VectorPaths.bdRotateRight : VectorPaths.bdRotateLeft
+    break;
+  case "light":
+    iconLowPath = VectorPaths.bdDark
+    iconHighPath = VectorPaths.bdLight 
+    iconPath = VectorPaths.bdFairyLights 
+    break;
+  default:
+    console.error("Add hatchling icons not implemented for type " + this.type)
+    return
+  }
+
+  const margin = 50//40
+  const iH = 25
+  const iW = VectorIcon.computeWidth(iconLowPath, iH)
+  const iconLow = new VectorIcon(this.barX - iW/2, this.barY - margin, iconLowPath, this.sliderColor, iH, this.group)
+  const iconHigh = new VectorIcon(this.barX + this.barW - iW/2, this.barY - margin, iconHighPath, this.sliderColor, iH, this.group)
+  const iconH = 80//40
+  const iconW = VectorIcon.computeWidth(iconPath, iconH)
+  const iconX = (this.width - iconW)/2
+  const icon = new VectorIcon(iconX, 0, iconPath, this.sliderColor, iconH, this.group)
+}
+
+/**
  * Adds one option to the slider display. Called by makeSlider when there are
- * specified options to display.
+ * specified options to display. FinchBlox only.
  * @param {number} x - x position of the option
  * @param {number} y - y position of the option
  * @param {string} option - String representation of the option
@@ -426,13 +508,13 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
 
   //Ticks on the edges of the slider are longer
   let tickY = y;
-  if (isOnEdge) {
+  if (isOnEdge && !Hatchling) {
     const extra = tickH / 6;
     tickY -= extra;
     tickH += 2 * extra;
   }
 
-  let tick = GuiElements.draw.rect(x, tickY, tickW, tickH, S.barColor);
+  let tick = GuiElements.draw.rect(x, tickY, tickW, tickH, this.barColor ?? S.barColor);
   this.group.appendChild(tick);
   TouchReceiver.addListenersSlider(tick, this);
 
@@ -447,30 +529,6 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
       const iY = y - image.width - S.optionMargin;
       GuiElements.move.group(image.group, iX, iY);
       break;
-    /*case "hatchling":
-      const iconPath = VectorPaths.faLightbulb
-      const iconH = 23
-      const iconW = VectorIcon.computeWidth(iconPath, iconH)
-      const iconX = x - iconW / 2 + tickW / 2
-      const iconY = y - iconH - S.optionMargin
-      let icon = new VectorIcon(iconX, iconY, iconPath, option, iconH, this.group)
-      GuiElements.update.stroke(icon.pathE, Colors.bbtDarkGray, 3);
-
-      if (isDisabled) {
-        const slashG = GuiElements.create.group(0, 0, this.group);
-        const slash = GuiElements.create.path(slashG);
-        const cr = iconW
-        const cx = iconX + iconW/2
-        const cy = iconY + iconH/2
-        let slashPath = "M " + (cx + cr * Math.cos(315 * Math.PI / 180)) + ",";
-        slashPath += (cy + cr * Math.sin(315 * Math.PI / 180));
-        slashPath += " L " + (cx + cr * Math.cos(135 * Math.PI / 180)) + ",";
-        slashPath += (cy + cr * Math.sin(135 * Math.PI / 180));
-        slash.setAttributeNS(null, "d", slashPath);
-        GuiElements.update.stroke(slash, S.barColor, 3);
-        GuiElements.update.opacity(icon.pathE, 0.3)
-      }
-      break;*/
     case "sensor":
       const iconP = option
       const iH = 23
@@ -484,16 +542,16 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
     case "angle":
     case "time":
     case "wheels":
-    case "hatchling":
+    case "servo":
+    case "motor":
+    case "light":
       let width = GuiElements.measure.stringWidth(option, font);
       let textX = x - width / 2 + tickW / 2;
-      let textY = y - S.optionMargin; //font.charHeight/2 - S.optionMargin;
-      let textE = GuiElements.draw.text(textX, textY, option, font, S.textColor);
+      let textY = Hatchling ? y + tickH + font.charHeight + S.optionMargin : y - S.optionMargin; //font.charHeight/2 - S.optionMargin;
+      let text = Hatchling ? (option + this.displaySuffix) : option
+      let textE = GuiElements.draw.text(textX, textY, text, font, this.textColor ?? S.textColor);
       this.group.appendChild(textE);
 
-      if (typeGroup == "hatchling" && isDisabled) {
-        GuiElements.update.opacity(textE, 0.3)
-      }
       break;
   }
 
@@ -823,11 +881,16 @@ InputWidget.Slider.prototype.updateLabel = function() {
       const iconY = this.height / 2 - this.labelIconH / 2;
       this.labelIcon.move(iconX, iconY);
     }
-    const textX = this.width - S.hMargin - this.sideSpaceR - (textW + iconW) / 2;
+    let textX = this.width - S.hMargin - this.sideSpaceR - (textW + iconW) / 2;
     let textY = this.height / 2 + S.font.charHeight / 2;
     //If there is an angle display, make space for that.
     textY += (this.cR ? this.cR + S.font.charHeight / 2 : 0)
     if (this.type.endsWith("clockwise")) { textY -= this.cR*1.5 }
+    if (Hatchling) {
+      //Hatchling places the label below the slider
+      textX = this.sliderX + (this.sliderW - textW)/2
+      textY = this.sliderY + this.sliderH + S.font.charHeight + S.optionMargin
+    }
     GuiElements.move.text(this.textE, textX, textY);
 
     if (this.type.startsWith("wheels")) {
@@ -843,9 +906,6 @@ InputWidget.Slider.prototype.updateLabel = function() {
     const iconX = this.width - S.hMargin - this.sideSpaceR - this.labelIconW / 2;
     const iconY = this.height / 2 - this.labelIconH / 2;
     this.labelIcon.move(iconX, iconY);
-    if (this.type.startsWith('hatchling')) {
-      this.labelIcon.setColor(this.value)
-    }
   }
   if (this.imageG != null) {
     this.imageG.remove();
@@ -854,5 +914,13 @@ InputWidget.Slider.prototype.updateLabel = function() {
     const iY = this.height / 2 - image.width / 2;
     GuiElements.move.group(image.group, iX, iY);
     this.imageG = image.group;
+  }
+
+  //Update the tail behind the slider while you update the label
+  if (Hatchling) {
+    //const visibleH = this.sliderH - 3
+    let rectY = this.barY + S.barHeight/2 - this.sTailH/2//this.barY + S.barHeight/2 - visibleH/2//this.barY - 3*S.barHeight
+    let rectW = this.sliderX + this.sliderW/2 - this.barX
+    GuiElements.update.rect(this.sliderTail, this.barX, rectY, rectW, this.sTailH)//visibleH)
   }
 }

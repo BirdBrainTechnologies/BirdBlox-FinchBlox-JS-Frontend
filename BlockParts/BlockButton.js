@@ -322,12 +322,16 @@ BlockButton.prototype.addSlider = function(type, startingValue, options) {
       suffix = " cm";
       break;
     case "percent":
+    case "motor_true":
+    case "motor_false":
+    case "light":
       suffix = "%";
       break;
     case "angle_left":
     case "angle_right":
     case "angle_clockwise":
     case "angle_counterclockwise":
+    case "servo":
       suffix = "°";
       break;
     default:
@@ -338,7 +342,8 @@ BlockButton.prototype.addSlider = function(type, startingValue, options) {
   }
 
   const sliderColor = Colors.categoryColors[this.parent.category];
-  const slider = new InputWidget.Slider(type, options, startingValue, sliderColor, suffix, this.widgets.length);
+  const barColor = Hatchling ? Colors.blockOutline[this.parent.category] : null
+  const slider = new InputWidget.Slider(type, options, startingValue, sliderColor, suffix, this.widgets.length, barColor);
   this.addWidget(slider, suffix, startingValue);
 }
 
