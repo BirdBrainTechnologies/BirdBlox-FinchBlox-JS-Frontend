@@ -80,7 +80,8 @@ function B_Wait(x, y) {
     this.addPart(blockIcon);
     this.timeSelection = Hatchling ? 5 : 30;
     this.timeBN = new BlockButton(this);
-    this.timeBN.addSlider("time", this.timeSelection, [1, 10, 20, 30, 40, 50]);
+    const options = Hatchling ? [1, 50] : [1, 10, 20, 30, 40, 50]
+    this.timeBN.addSlider("time", this.timeSelection, options);
     this.addPart(this.timeBN);
   } else {
     // Derived from CommandBlock
@@ -204,7 +205,12 @@ function B_Repeat(x, y) {
     this.blockIcon.isEndOfLine = true;
     this.addPart(this.blockIcon);
     this.countBN = new BlockButton(this);
-    this.countBN.addSlider("count", this.countSelection, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    if (Hatchling) {
+      const optionsDict = {2: "2", 3: "3", 4: "4", 5: "5", 6: "6", 7: "7", 8: "8", 9: "9", 10: "10"}
+      this.countBN.addButtonsWidget("count", optionsDict, this.countSelection, VectorPaths.bdLoop);
+    } else {
+      this.countBN.addSlider("count", this.countSelection, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    }
     this.addPart(this.countBN);
     this.updateValues();
   } else {

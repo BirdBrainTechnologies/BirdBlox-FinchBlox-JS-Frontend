@@ -7448,16 +7448,16 @@ GuiElements.draw.ledArray = function(parentGroup, arrayString, dim) {
   var values = arrayString.split("");
   var group = GuiElements.create.group(0, 0, parentGroup);
   //var dim = 4;//25;
-  var r = dim / 4; //1;//8;
+  var r = Hatchling ? dim/2 : dim / 4; //1;//8;
   var margin = dim / 2; //dim/4; //1;//5;
   var startX = 0;
   var y = 0;
   for (var i = 0; i < 5; i++) {
     var x = startX;
     for (var j = 0; j < 5; j++) {
-      var color = Colors.fbGray; //Colors.iron;
+      var color = Hatchling ? Colors.ballyGrayLight : Colors.fbGray; //Colors.iron;
       if (values[5 * i + j] == "1") {
-        color = Colors.bbtDarkGray;
+        color = Hatchling ? Colors.ballyGrayDark : Colors.bbtDarkGray;
       }
       var rect = GuiElements.draw.rect(x, y, dim, dim, color, r, r);
       group.appendChild(rect);
@@ -15082,9 +15082,10 @@ CollapsibleItem.prototype.passRecursively = function(functionName) {
  * @param {number} rx - (optional) Corner rounding parameter
  * @param {number} ry - (optional) Corner rounding parameter
  * @param {Color} outlineColor - (optional) color to outline the button with
+ * @param {number} outlineW - (optional) width of outline
  * @constructor
  */
-function Button(x, y, width, height, parent, color, rx, ry, outlineColor) {
+function Button(x, y, width, height, parent, color, rx, ry, outlineColor, outlineW) {
   DebugOptions.validateNumbers(x, y, width, height);
   this.x = x;
   this.y = y;
@@ -15101,6 +15102,7 @@ function Button(x, y, width, height, parent, color, rx, ry, outlineColor) {
   this.rx = rx;
   this.ry = ry;
   this.strokeColor = outlineColor;
+  this.strokeW = outlineW
   this.buildBg();
   this.pressed = false;
   this.enabled = true;
@@ -15158,7 +15160,7 @@ Button.setGraphics = function() {
 Button.prototype.buildBg = function() {
   this.bgRect = GuiElements.draw.rect(0, 0, this.width, this.height, this.bg, this.rx, this.ry);
   if (this.strokeColor != null) {
-    GuiElements.update.stroke(this.bgRect, this.strokeColor, Button.strokeW)
+    GuiElements.update.stroke(this.bgRect, this.strokeColor, this.strokeW ?? Button.strokeW)
   }
   this.group.appendChild(this.bgRect);
   TouchReceiver.addListenersBN(this.bgRect, this);
@@ -15820,7 +15822,7 @@ Button.prototype.updateBgColor = function(color, outlineColor) {
   this.setColor(false);
   if (outlineColor != null) {
     this.strokeColor = outlineColor
-    GuiElements.update.stroke(this.bgRect, this.strokeColor, Button.strokeW)
+    GuiElements.update.stroke(this.bgRect, this.strokeColor, this.strokeW ?? Button.strokeW)
   }
 }
 
@@ -18008,6 +18010,9 @@ InputWidget.Slider = function(type, options, startVal, sliderColor, displaySuffi
   this.cR = 0; //circle radius for angle display if there is one.
 
   this.sliders = []
+  
+  //Hatchling only
+  this.optionTexts = []
 };
 InputWidget.Slider.prototype = Object.create(InputWidget.prototype);
 InputWidget.Slider.prototype.constructor = InputWidget.Slider;
@@ -18348,7 +18353,7 @@ InputWidget.Slider.prototype.makeSlider = function() {
     var circle = GuiElements.draw.circle(this.barX, this.barY + S.barHeight/2, this.sTailH/2, barColor, this.group)
     this.sliderTail = GuiElements.draw.rect(this.barX, this.barY + S.barHeight/2 - this.sTailH/2, 0, this.sTailH, barColor)
     this.group.appendChild(this.sliderTail)
-    //TODO: Add touch receivers?
+    TouchReceiver.addListenersSlider(this.sliderTail, this)
   }
 
 
@@ -18381,6 +18386,8 @@ InputWidget.Slider.prototype.makeSlider = function() {
     var line2 = GuiElements.draw.line(y1, x2, y2, x2, Colors.white, 5, true)
     this.sliderIcon.group.appendChild(line1)
     this.sliderIcon.group.appendChild(line2)
+    TouchReceiver.addListenersSlider(line1, this)
+    TouchReceiver.addListenersSlider(line2, this)
     GuiElements.update.stroke(this.sliderIcon.pathE, Colors.white, 10) 
  }
   TouchReceiver.addListenersSlider(this.sliderIcon.pathE, this);
@@ -18408,7 +18415,9 @@ InputWidget.Slider.prototype.makeSlider = function() {
     this.imageG = GuiElements.create.group(0, 0, this.group);
   } else if (!this.type.startsWith('color') && this.type != 'sensor') { //!this.type.startsWith('hatchling') && this.type != 'sensor') {
     //Add a label at the bottom to show your selection
-    this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, this.sliderColor ?? S.textColor);
+    var labelColor = Hatchling ? this.sliderColor : S.textColor
+    this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, labelColor);
+    if (Hatchling) { TouchReceiver.addListenersSlider(this.textE, this) }
     this.group.appendChild(this.textE);
     if (this.type.startsWith("wheels")) {
       this.group.appendChild(document.createElement("br"))
@@ -18416,7 +18425,7 @@ InputWidget.Slider.prototype.makeSlider = function() {
       this.group.appendChild(this.textE2)
     }
   }
-  if (this.type == 'time' || this.type == 'sensor') { //this.type.startsWith('hatchling') || this.type == 'sensor') {
+  if (!Hatchling && (this.type == 'time' || this.type == 'sensor')) { //this.type.startsWith('hatchling') || this.type == 'sensor') {
     this.labelIconH = 23;
     //var labelIconP = (this.type.startsWith('hatchling')) ? VectorPaths.faLightbulb : VectorPaths.faClock;
     var labelIconP = VectorPaths.faClock
@@ -18453,6 +18462,16 @@ InputWidget.Slider.prototype.addHatchlingIcons = function() {
     iconHighPath = VectorPaths.bdLight 
     iconPath = VectorPaths.bdFairyLights 
     break;
+  case "distance":
+    iconLowPath = VectorPaths.bdShort
+    iconHighPath = VectorPaths.bdLong
+    iconPath = VectorPaths.bdRuler
+    break;
+  case "time":
+    iconLowPath = VectorPaths.bdFast
+    iconHighPath = VectorPaths.bdSlow
+    iconPath = VectorPaths.bdStopWatch
+    break;
   default:
     console.error("Add hatchling icons not implemented for type " + this.type)
     return
@@ -18460,9 +18479,10 @@ InputWidget.Slider.prototype.addHatchlingIcons = function() {
 
   var margin = 50//40
   var iH = 25
-  var iW = VectorIcon.computeWidth(iconLowPath, iH)
-  var iconLow = new VectorIcon(this.barX - iW/2, this.barY - margin, iconLowPath, this.sliderColor, iH, this.group)
-  var iconHigh = new VectorIcon(this.barX + this.barW - iW/2, this.barY - margin, iconHighPath, this.sliderColor, iH, this.group)
+  var iLowW = VectorIcon.computeWidth(iconLowPath, iH)
+  var iHighW = VectorIcon.computeWidth(iconHighPath, iH)
+  var iconLow = new VectorIcon(this.barX - iLowW/2, this.barY - margin, iconLowPath, this.sliderColor, iH, this.group)
+  var iconHigh = new VectorIcon(this.barX + this.barW - iHighW/2, this.barY - margin, iconHighPath, this.sliderColor, iH, this.group)
   var iconH = 80//40
   var iconW = VectorIcon.computeWidth(iconPath, iconH)
   var iconX = (this.width - iconW)/2
@@ -18523,12 +18543,14 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
     case "servo":
     case "motor":
     case "light":
-      var width = GuiElements.measure.stringWidth(option, font);
+      var text = Hatchling ? (option + this.displaySuffix) : option
+      var width = GuiElements.measure.stringWidth(text, font);
       var textX = x - width / 2 + tickW / 2;
       var textY = Hatchling ? y + tickH + font.charHeight + S.optionMargin : y - S.optionMargin; //font.charHeight/2 - S.optionMargin;
-      var text = Hatchling ? (option + this.displaySuffix) : option
       var textE = GuiElements.draw.text(textX, textY, text, font, this.textColor ?? S.textColor);
       this.group.appendChild(textE);
+
+      if (Hatchling) { this.optionTexts.push(textE) }
 
       break;
   }
@@ -18868,6 +18890,17 @@ InputWidget.Slider.prototype.updateLabel = function() {
       //Hatchling places the label below the slider
       textX = this.sliderX + (this.sliderW - textW)/2
       textY = this.sliderY + this.sliderH + S.font.charHeight + S.optionMargin
+
+      for (var i = 0; i < this.optionTexts.length; i++) {
+        var textE = this.optionTexts[i]
+        var w = GuiElements.measure.textWidth(textE)
+        var x = this.optionXs[i] - w/2
+        if (textX+textW >= x && textX <= x+w) {
+          textE.remove()
+        } else {
+          this.group.appendChild(textE)
+        }
+      }
     }
     GuiElements.move.text(this.textE, textX, textY);
 
@@ -19143,9 +19176,10 @@ InputWidget.Piano.prototype.updatePressed = function(num) {
  * A widget with a flat circular color picker and Alpha slider.
  * 
  */
-InputWidget.Color = function(index) {
+InputWidget.Color = function(index, iconColor) {
 	this.type = "colorPicker"
 	this.index = index
+    this.iconColor = iconColor
 
 	this.hue = 0 
 	this.saturation = 0 
@@ -19155,6 +19189,18 @@ InputWidget.Color = function(index) {
 InputWidget.Color.prototype = Object.create(InputWidget.prototype)
 InputWidget.Color.prototype.constructor = InputWidget.Color
 
+//Global color history
+InputWidget.Color.recentColors = [
+    "#FFFFFF", //white
+    "#079BAB", //ballyBrandBlue
+    "#FF600A", //ballyOrange
+    "#A94FC9", //ballyPurple
+    "#DD1D28", //ballyRed
+    "#65A400", //ballyGreenYellow
+    "#3751E4", //ballyBlue
+    "#ED5ACD", //ballyPink
+    "#99A5B1" //ballyGray
+    ]
 
 /**
  * @inheritDoc
@@ -19170,35 +19216,108 @@ InputWidget.Color.prototype.constructor = InputWidget.Color
 InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
 	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
  	this.group = GuiElements.create.group(x, y, parentGroup);
-    var margin = 100 //10
+    var margin = this.height/20 //100 //10
+    var smIconH = 35 
+
+    //Add icon at top
+    var iconPath = VectorPaths.bdLightBulb
+    var iconH = 80
+    var iconW = VectorIcon.computeWidth(iconPath, iconH)
+    var iconX = (this.width - iconW)/2
+    var icon = new VectorIcon(iconX, 0, iconPath, this.iconColor, iconH, this.group)
 
     //Add the color wheel
     this.colorWheelX = margin //this.width/2 - this.height - margin
-  	this.colorwheel = GuiElements.draw.image("Color_circle_(RGB)", this.colorWheelX, 0, this.height, this.height, this.group, true)
+    this.colorWheelH = this.width*2/7 - margin*2  //this.width/3 - margin*2 //this.height/2
+    this.colorWheelY = this.height - this.colorWheelH - margin
+  	this.colorwheel = GuiElements.draw.image("Color_circle_(RGB)", this.colorWheelX, this.colorWheelY, this.colorWheelH, this.colorWheelH, this.group, true)
   	TouchReceiver.addListenersColorWheel(this.colorwheel, this)
 
     //Add a brightness slider
-    var barH = InputWidget.Slider.barHeight * 2
-    this.barX = this.height + 2*margin //this.width/2 + margin
-    this.barW = this.width - this.barX - margin //this.width/2 - margin*3
-    var barY = 2*this.height/3 - barH/2
-    var sliderH = 20
+    var sX = this.width*2/7 // /3 //starting x of slider area
+    var sY = this.height*2/3 //center y of slider area
+    var sW = this.width*3/7 // /3 //width of slider area
+    var iconHighPath = VectorPaths.bdLight 
+    var iconLowPath = VectorPaths.bdDark
+    var iLowW = VectorIcon.computeWidth(iconLowPath, smIconH)
+    var iHighW = VectorIcon.computeWidth(iconHighPath, smIconH)
+    var iconM = 5 //margin between slider icons and slider
+    var barH = smIconH
+    this.barX = sX + iLowW + iconM + barH/2 //this.width/3//this.height + 2*margin //this.width/2 + margin
+    this.barW = sW - iLowW - iHighW - 2*iconM - barH//this.width/3//this.width - this.barX - margin //this.width/2 - margin*3
+    var barY = sY - barH/2 //2*this.height/3 - barH/2
+    var sliderH = smIconH*3/2 //20
     this.sliderW = VectorIcon.computeWidth(InputWidget.Slider.sliderIconPath, sliderH);
-    this.sliderY = 2*this.height/3 - sliderH/2
+    this.sliderY = sY - sliderH/2 //2*this.height/3 - sliderH/2
     this.sliderX = this.barX + (this.brightness / 100) * (this.barW - this.sliderW)
+    
+
+    //Make the icons on either side of the slider
+    var iconLow = new VectorIcon(sX, barY, iconLowPath, this.iconColor, smIconH, this.group)
+    var iconHigh = new VectorIcon(sX + sW - iHighW, barY, iconHighPath, this.iconColor, smIconH, this.group)
+    
+    //Make round ends for the slider bar
+    var lowEnd = GuiElements.draw.circle(this.barX, sY, barH/2, Colors.black, this.group)
+    this.highEnd = GuiElements.draw.circle(this.barX + this.barW, sY, barH/2, Colors.black, this.group)
 
     //Make the bar beneath the slider
-    this.sliderBar = GuiElements.draw.rect(this.barX, barY, this.barW, barH, Colors.black)//barGradient);
+    this.sliderBar = GuiElements.draw.rect(this.barX, barY, this.barW, barH, Colors.black)//, barH/2, barH/2)//barGradient);
     this.group.appendChild(this.sliderBar);
     TouchReceiver.addListenersSlider(this.sliderBar, this);
-    GuiElements.update.stroke(this.sliderBar, Colors.darkDarkGray, 0.1)
+    //GuiElements.update.stroke(this.sliderBar, Colors.ballyGrayDark, 0.1)
 
     //Make the slider
     this.sliderIcon = new VectorIcon(this.sliderX, this.sliderY, InputWidget.Slider.sliderIconPath, Colors.black, sliderH, this.group, null, 90);
     TouchReceiver.addListenersSlider(this.sliderIcon.pathE, this);
-    GuiElements.update.stroke(this.sliderIcon.pathE, Colors.darkDarkGray, 3)
+    GuiElements.update.stroke(this.sliderIcon.pathE, Colors.white, 10)
+    //Add center lines
+
+    var x1 = InputWidget.Slider.sliderIconPath.height * 3/7//this.sliderW * 1/3
+    var x2 = InputWidget.Slider.sliderIconPath.height * 4/7//this.sliderW * 2/3
+    var y1 = InputWidget.Slider.sliderIconPath.width * 1/3//this.sliderH * 1/3
+    var y2 = InputWidget.Slider.sliderIconPath.width * 2/3//this.sliderH * 2/3
+    var line1 = GuiElements.draw.line(y1, x1, y2, x1, Colors.white, 5, true)
+    var line2 = GuiElements.draw.line(y1, x2, y2, x2, Colors.white, 5, true)
+    this.sliderIcon.group.appendChild(line1)
+    this.sliderIcon.group.appendChild(line2)
+    TouchReceiver.addListenersSlider(line1, this)
+    TouchReceiver.addListenersSlider(line2, this)
 
     this.updateSlider()
+
+
+    //Add the recent colors picker
+    var rX = this.width*5/7 // *2/3 //x coord to start this section
+    var rY = this.height/3 //y coord to start this section
+    var rW = this.width*2/7 ///3 //width of section
+    var rIconPath = VectorPaths.bdRecent
+    var rIconW = VectorIcon.computeWidth(rIconPath, smIconH)
+    var rIconX = rX + (rW - rIconW)/2
+    var recentIcon = new VectorIcon(rIconX, rY, rIconPath, this.iconColor, smIconH, this.group)
+    var recentCs = InputWidget.Color.recentColors
+    var bnM = 10
+    var bnH = (rW - 10*bnM)/3
+    var bnX = rX + 4*bnM
+    var bnY = rY + smIconH + 2*bnM
+    console.log("about to add recents")
+    console.log(recentCs)
+    for (var i = 0; i < recentCs.length; i++) {
+
+        console.log("button " + i + " at " + bnX + "," + bnY)
+
+        var bn = new Button(bnX, bnY, bnH, bnH, this.group, recentCs[i], 6, 6, Colors.ballyGray, 3)
+        bn.markAsOverlayPart(this.overlay)
+        bn.setCallbackFunction(function() {
+            this.updateSlider()
+            this.updateFn(this.getHex(), this.index)
+        }.bind(this), true)
+
+        bnX += bnH + bnM
+        if ((i+1)%3 == 0) {
+            bnX = rX + 4*bnM
+            bnY += bnH + bnM
+        }
+    }
 }
 
 InputWidget.Color.prototype.drag = function(x) {
@@ -19233,6 +19352,7 @@ InputWidget.Color.prototype.updateSlider = function() {
     //GuiElements.create.gradient("Brightness" + color, color, color, true, 0, 1)
     var barGradient = "url(#Brightness" + color + ")"
     GuiElements.update.color(this.sliderBar, barGradient)
+    GuiElements.update.color(this.highEnd, color)
     GuiElements.update.color(this.sliderIcon.pathE, color)
 }
 
@@ -19242,10 +19362,10 @@ InputWidget.Color.prototype.updateSlider = function() {
  */
 InputWidget.Color.prototype.dragColor = function(x, y) {
 	var relX = x - this.colorWheelX - this.overlay.x - this.overlay.margin;
-	var relY = y - this.overlay.y - this.overlay.margin;
+	var relY = y - this.colorWheelY - this.overlay.y - this.overlay.margin;
 
 	// get canvas radius and prepare values to calculation of hue and saturation based on thumb position
-    var r = this.height/2 
+    var r = this.colorWheelH/2 //this.height/2 
     var dx = relX - r 
     var dy = relY - r 
 
@@ -19316,7 +19436,7 @@ InputWidget.Color.prototype.dropColor = function() {
  */
 InputWidget.Color.prototype.updateDim = function(x, y) {
   var S = InputWidget.Slider; //TODO
-  this.height = S.height * 2;
+  this.height = S.height * 1.5;
   this.width = S.width;
 }
 
@@ -19504,6 +19624,119 @@ InputWidget.HLPortWidget.prototype.updateDim = function(x, y) {
 	console.log("HLPortWidget update dim")
 }
 
+/**
+ * Display options as a series of buttons
+ *
+ */
+InputWidget.Buttons = function(type, valueDictionary, startVal, iconPath, iconColor, bgColor, index) {
+	this.type = type
+	this.valueDictionary = valueDictionary
+	this.value = startVal
+	this.iconPath = iconPath
+	this.iconColor = iconColor
+	this.bgColor = bgColor
+	this.index = index
+	this.useIcons = Object.values(valueDictionary)[0].length != 1
+
+	this.buttons = {}
+
+
+	//TODO: Make a constants function?
+	this.width = InputPad.width 
+	this.height = this.width * 1/3
+	this.hMargin = 20 
+	this.bnH = this.height * 1/5
+	this.font = Font.secondaryUiFont(18)
+}
+InputWidget.Buttons.prototype = Object.create(InputWidget.prototype)
+InputWidget.Buttons.prototype.constructor = InputWidget.Buttons 
+
+
+InputWidget.Buttons.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
+	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
+
+	this.parentGroup = parentGroup;
+	this.group = GuiElements.create.group(x, y, parentGroup);
+	this.bgRect = GuiElements.draw.rect(0, 0, this.width, this.height, "none");
+
+	this.group.appendChild(this.bgRect);
+
+	this.value = data[this.index];
+
+
+	//Add top icon 
+	var iconH = 80
+	var iconW = VectorIcon.computeWidth(this.iconPath, iconH)
+	var iconX = (this.width - iconW)/2
+	var icon = new VectorIcon(iconX, 0, this.iconPath, this.iconColor, iconH, this.group)
+
+
+	//Add a button and preview for each option 
+	var bnY = this.height * 2/5
+	var keys = Object.keys(this.valueDictionary)
+	var bnX = this.hMargin
+	var bnMargin = (1/4) * (this.width - 2*this.hMargin)/(keys.length - 1)
+	var bnW = (this.width - 2*this.hMargin - bnMargin * (keys.length - 1))/keys.length
+	var previewY = bnY + this.bnH + bnMargin*3/4
+	for (var i = 0; i < keys.length; i++) {
+		//option button
+		var bn = new Button(bnX, bnY, bnW, this.bnH, this.group, this.bgColor, 3, 3, this.iconColor)
+		bn.markAsOverlayPart(this.overlay)
+		var val = keys[i]
+		bn.setCallbackFunction(function() {
+			this.value = val
+			this.updateFn(this.value, this.index)
+			this.updateBns()
+		}.bind(this), true)
+		this.buttons[val] = bn
+
+		//led array option preview
+		if (this.type == "ledArray") {
+			var preview = GuiElements.draw.ledArray(this.group, val, bnW/7);
+			GuiElements.move.group(preview.group, bnX, previewY)
+		}
+
+      	//set x for next option
+		bnX += bnW + bnMargin
+	}
+
+	this.updateBns()
+}
+
+/**
+ * Marks the currently selected button
+ */
+InputWidget.Buttons.prototype.updateBns = function() {
+	var bnVals = Object.keys(this.buttons)
+	for (var i = 0; i < bnVals.length; i++) {
+		var val = bnVals[i]
+		var button = this.buttons[val]
+		var option = this.valueDictionary[val]
+		var bgColor = this.bgColor
+		var iconColor = this.iconColor
+
+		if (val == this.value) {
+			bgColor = this.iconColor
+			iconColor = this.bgColor
+		}
+
+		button.updateBgColor(bgColor)
+
+		if (option != null) {
+			if (this.useIcons) {
+				button.addColorIcon(VectorPaths[option], this.bnH/2, iconColor)
+			} else {
+				button.addText(option, this.font, iconColor)
+			}
+		}
+
+	}
+
+}
+
+InputWidget.Buttons.prototype.updateDim = function(x, y) {
+	//TODO: anything to update here?
+}
 /**
  * An InputSystem used for selecting a Sound from a list.  Provides buttons to preview sounds before selecting them.
  * @param {number} x1
@@ -36060,7 +36293,7 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
         } else {
           var iconPath = VectorPaths[HL_Utils.symbolDict[this.values[i]]]
           if (iconPath != null) { 
-            this.button.addColorIcon(iconPath, 10, Colors.getColor(this.parent.category))  
+            this.button.addColorIcon(iconPath, 10, this.textColor)//Colors.getColor(this.parent.category))  
           } else {
             this.button.removeContent()
           }
@@ -36231,7 +36464,7 @@ BlockButton.prototype.addPiano = function(startingValue) {
  * @param {string} startingValue - the initial value
  */
 BlockButton.prototype.addColorPicker = function(startingValue) {
-  this.addWidget(new InputWidget.Color(this.widgets.length), "", startingValue)
+  this.addWidget(new InputWidget.Color(this.widgets.length, Colors.categoryColors[this.parent.category]), "", startingValue)
 }
 
 /**
@@ -36239,6 +36472,16 @@ BlockButton.prototype.addColorPicker = function(startingValue) {
  */
 BlockButton.prototype.addPortWidget = function(portType) {
   this.addWidget(new InputWidget.HLPortWidget(portType, this), "", HL_Utils.noPort)
+}
+
+/**
+ * Adds a widget to this button that shows options as buttons. Hatchling only.
+ */
+BlockButton.prototype.addButtonsWidget = function(type, options, startingValue, icon) {
+  var iconColor = Colors.categoryColors[this.parent.category]
+  var bgColor = Colors.blockPalette[this.parent.category]
+  var bnsWidget = new InputWidget.Buttons(type, options, startingValue, icon, iconColor, bgColor, this.widgets.length)
+  this.addWidget(bnsWidget, "", startingValue)
 }
 
 /**
@@ -38511,6 +38754,18 @@ B_FBColor.prototype.updateValues = function() {
   }
 }
 B_FBColor.prototype.addL2Button = function() {
+  if (Hatchling) {
+    this.colorButton = new BlockButton(this);
+    if (this.useAlphabet) {
+      this.colorButton.addButtonsWidget("ledArray", HL_Utils.alphaDict, "0110010010111101001010010", VectorPaths.bdAlpha)
+    } else {
+      this.colorButton.addButtonsWidget("ledArray", HL_Utils.symbolDict, "1010010100111101101011110", VectorPaths.bdSymbols)
+    }
+    this.addPart(this.colorButton);
+    return
+  }
+
+
   if (this.isLEDArray) {
     var options = ["0000001010000001000101110", //smiley face
       "0000001010000000111010001", //frowny face
@@ -38519,43 +38774,8 @@ B_FBColor.prototype.addL2Button = function() {
       "0111010101111111111110101", //alien
       "1111110001100011000111111", //square
       "0101011111111110111000100", //heart
-      "0010001010100010101000100"
-    ] //diamond
-    if (Hatchling) {
-      options.push("0000000000000000000000000") //off
-    }
+      "0010001010100010101000100"] //diamond
     var defaultVal = options[3]
-    if (this.useAlphabet) {
-      //Same letters as micro:bit print command unless noted.
-      options = ["0110010010111101001010010", // A
-        "1110010010111001001011100", // B
-        "0111010000100001000001110", // C
-        "1110010010100101001011100", // D
-        "1111010000111001000011110", // E
-        "1111010000111001000010000", // F
-        "0111010000100111000101110", // G
-        "1001010010111101001010010", // H
-        "1110001000010000100011100", // I
-        "0111000100001001010001100", // J - mod
-        "1001010100110001010010010", // K
-        "1000010000100001000011110", // L
-        "1000111011101011000110001", // M
-        "1000111001101011001110001", // N
-        "0110010010100101001001100", // O
-        "1110010010111001000010000", // P
-        "0110010010101101001001101", // Q - mod
-        "1110010010111001010010010", // R
-        "0110010000011000001011100", // S
-        "1111100100001000010000100", // T
-        "1000110001100011000101110", // U
-        "1000110001100010101000100", // V
-        "1000110001101011101110001", // W
-        "1000101010001000101010001", // X - mod
-        "1000101010001000010000100", // Y
-        "1111100010001000100011111"  // Z
-      ]
-      defaultVal = options[0]
-    }
     this.colorButton = new BlockButton(this);
     this.colorButton.addSlider("ledArray", defaultVal, options);
   } else {
@@ -39533,7 +39753,8 @@ function B_FBSoundL3(x, y) {
   this.noteButton.addPiano(this.midiNote);
   this.addPart(this.noteButton);
 
-  this.noteButton.addSlider("time", this.beats, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  var options = Hatchling ? [1, 10] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  this.noteButton.addSlider("time", this.beats, options);
 
   /*
     this.beatsButton = new BlockButton(this);
@@ -39625,7 +39846,8 @@ function B_Wait(x, y) {
     this.addPart(blockIcon);
     this.timeSelection = Hatchling ? 5 : 30;
     this.timeBN = new BlockButton(this);
-    this.timeBN.addSlider("time", this.timeSelection, [1, 10, 20, 30, 40, 50]);
+    var options = Hatchling ? [1, 50] : [1, 10, 20, 30, 40, 50]
+    this.timeBN.addSlider("time", this.timeSelection, options);
     this.addPart(this.timeBN);
   } else {
     // Derived from CommandBlock
@@ -39749,7 +39971,12 @@ function B_Repeat(x, y) {
     this.blockIcon.isEndOfLine = true;
     this.addPart(this.blockIcon);
     this.countBN = new BlockButton(this);
-    this.countBN.addSlider("count", this.countSelection, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    if (Hatchling) {
+      var optionsDict = {2: "2", 3: "3", 4: "4", 5: "5", 6: "6", 7: "7", 8: "8", 9: "9", 10: "10"}
+      this.countBN.addButtonsWidget("count", optionsDict, this.countSelection, VectorPaths.bdLoop);
+    } else {
+      this.countBN.addSlider("count", this.countSelection, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    }
     this.addPart(this.countBN);
     this.updateValues();
   } else {
@@ -42107,7 +42334,8 @@ HL_Utils.symbolDict = {
   "0111010101111111111110101": "bdSymbolGhost", //alien
   "1111110001100011000111111": "bdSymbolSquare", //square
   "0101011111111110111000100": "bdSymbolHeart", //heart
-  "0010001010100010101000100": "bdSymbolDiamond" //diamond
+  "0010001010100010101000100": "bdSymbolDiamond", //diamond
+  "0000000000000000000000000": null //off
 }
 HL_Utils.alphaDict = {
   "0110010010111101001010010": "A", // A
@@ -43019,7 +43247,7 @@ function B_HLWaitUntilDistance(x, y) {
   this.portType = 14
   this.sensorType = "distance"
   this.threshold = 10 //How close something has to be to trigger the block
-  this.blockOptions = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+  this.blockOptions = [5, 100]
 
   B_HLWaitUntilPort.call(this, x, y, "distance")
 }

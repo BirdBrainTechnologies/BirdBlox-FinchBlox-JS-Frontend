@@ -2,9 +2,10 @@
  * A widget with a flat circular color picker and Alpha slider.
  * 
  */
-InputWidget.Color = function(index) {
+InputWidget.Color = function(index, iconColor) {
 	this.type = "colorPicker"
 	this.index = index
+    this.iconColor = iconColor
 
 	this.hue = 0 
 	this.saturation = 0 
@@ -14,6 +15,18 @@ InputWidget.Color = function(index) {
 InputWidget.Color.prototype = Object.create(InputWidget.prototype)
 InputWidget.Color.prototype.constructor = InputWidget.Color
 
+//Global color history
+InputWidget.Color.recentColors = [
+    "#FFFFFF", //white
+    "#079BAB", //ballyBrandBlue
+    "#FF600A", //ballyOrange
+    "#A94FC9", //ballyPurple
+    "#DD1D28", //ballyRed
+    "#65A400", //ballyGreenYellow
+    "#3751E4", //ballyBlue
+    "#ED5ACD", //ballyPink
+    "#99A5B1" //ballyGray
+    ]
 
 /**
  * @inheritDoc
@@ -29,35 +42,108 @@ InputWidget.Color.prototype.constructor = InputWidget.Color
 InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
 	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
  	this.group = GuiElements.create.group(x, y, parentGroup);
-    let margin = 100 //10
+    const margin = this.height/20 //100 //10
+    const smIconH = 35 
+
+    //Add icon at top
+    const iconPath = VectorPaths.bdLightBulb
+    const iconH = 80
+    const iconW = VectorIcon.computeWidth(iconPath, iconH)
+    const iconX = (this.width - iconW)/2
+    const icon = new VectorIcon(iconX, 0, iconPath, this.iconColor, iconH, this.group)
 
     //Add the color wheel
     this.colorWheelX = margin //this.width/2 - this.height - margin
-  	this.colorwheel = GuiElements.draw.image("Color_circle_(RGB)", this.colorWheelX, 0, this.height, this.height, this.group, true)
+    this.colorWheelH = this.width*2/7 - margin*2  //this.width/3 - margin*2 //this.height/2
+    this.colorWheelY = this.height - this.colorWheelH - margin
+  	this.colorwheel = GuiElements.draw.image("Color_circle_(RGB)", this.colorWheelX, this.colorWheelY, this.colorWheelH, this.colorWheelH, this.group, true)
   	TouchReceiver.addListenersColorWheel(this.colorwheel, this)
 
     //Add a brightness slider
-    let barH = InputWidget.Slider.barHeight * 2
-    this.barX = this.height + 2*margin //this.width/2 + margin
-    this.barW = this.width - this.barX - margin //this.width/2 - margin*3
-    let barY = 2*this.height/3 - barH/2
-    let sliderH = 20
+    const sX = this.width*2/7 // /3 //starting x of slider area
+    const sY = this.height*2/3 //center y of slider area
+    const sW = this.width*3/7 // /3 //width of slider area
+    const iconHighPath = VectorPaths.bdLight 
+    const iconLowPath = VectorPaths.bdDark
+    const iLowW = VectorIcon.computeWidth(iconLowPath, smIconH)
+    const iHighW = VectorIcon.computeWidth(iconHighPath, smIconH)
+    const iconM = 5 //margin between slider icons and slider
+    let barH = smIconH
+    this.barX = sX + iLowW + iconM + barH/2 //this.width/3//this.height + 2*margin //this.width/2 + margin
+    this.barW = sW - iLowW - iHighW - 2*iconM - barH//this.width/3//this.width - this.barX - margin //this.width/2 - margin*3
+    let barY = sY - barH/2 //2*this.height/3 - barH/2
+    let sliderH = smIconH*3/2 //20
     this.sliderW = VectorIcon.computeWidth(InputWidget.Slider.sliderIconPath, sliderH);
-    this.sliderY = 2*this.height/3 - sliderH/2
+    this.sliderY = sY - sliderH/2 //2*this.height/3 - sliderH/2
     this.sliderX = this.barX + (this.brightness / 100) * (this.barW - this.sliderW)
+    
+
+    //Make the icons on either side of the slider
+    const iconLow = new VectorIcon(sX, barY, iconLowPath, this.iconColor, smIconH, this.group)
+    const iconHigh = new VectorIcon(sX + sW - iHighW, barY, iconHighPath, this.iconColor, smIconH, this.group)
+    
+    //Make round ends for the slider bar
+    const lowEnd = GuiElements.draw.circle(this.barX, sY, barH/2, Colors.black, this.group)
+    this.highEnd = GuiElements.draw.circle(this.barX + this.barW, sY, barH/2, Colors.black, this.group)
 
     //Make the bar beneath the slider
-    this.sliderBar = GuiElements.draw.rect(this.barX, barY, this.barW, barH, Colors.black)//barGradient);
+    this.sliderBar = GuiElements.draw.rect(this.barX, barY, this.barW, barH, Colors.black)//, barH/2, barH/2)//barGradient);
     this.group.appendChild(this.sliderBar);
     TouchReceiver.addListenersSlider(this.sliderBar, this);
-    GuiElements.update.stroke(this.sliderBar, Colors.darkDarkGray, 0.1)
+    //GuiElements.update.stroke(this.sliderBar, Colors.ballyGrayDark, 0.1)
 
     //Make the slider
     this.sliderIcon = new VectorIcon(this.sliderX, this.sliderY, InputWidget.Slider.sliderIconPath, Colors.black, sliderH, this.group, null, 90);
     TouchReceiver.addListenersSlider(this.sliderIcon.pathE, this);
-    GuiElements.update.stroke(this.sliderIcon.pathE, Colors.darkDarkGray, 3)
+    GuiElements.update.stroke(this.sliderIcon.pathE, Colors.white, 10)
+    //Add center lines
+
+    const x1 = InputWidget.Slider.sliderIconPath.height * 3/7//this.sliderW * 1/3
+    const x2 = InputWidget.Slider.sliderIconPath.height * 4/7//this.sliderW * 2/3
+    const y1 = InputWidget.Slider.sliderIconPath.width * 1/3//this.sliderH * 1/3
+    const y2 = InputWidget.Slider.sliderIconPath.width * 2/3//this.sliderH * 2/3
+    const line1 = GuiElements.draw.line(y1, x1, y2, x1, Colors.white, 5, true)
+    const line2 = GuiElements.draw.line(y1, x2, y2, x2, Colors.white, 5, true)
+    this.sliderIcon.group.appendChild(line1)
+    this.sliderIcon.group.appendChild(line2)
+    TouchReceiver.addListenersSlider(line1, this)
+    TouchReceiver.addListenersSlider(line2, this)
 
     this.updateSlider()
+
+
+    //Add the recent colors picker
+    const rX = this.width*5/7 // *2/3 //x coord to start this section
+    const rY = this.height/3 //y coord to start this section
+    const rW = this.width*2/7 ///3 //width of section
+    const rIconPath = VectorPaths.bdRecent
+    const rIconW = VectorIcon.computeWidth(rIconPath, smIconH)
+    const rIconX = rX + (rW - rIconW)/2
+    const recentIcon = new VectorIcon(rIconX, rY, rIconPath, this.iconColor, smIconH, this.group)
+    const recentCs = InputWidget.Color.recentColors
+    const bnM = 10
+    const bnH = (rW - 10*bnM)/3
+    let bnX = rX + 4*bnM
+    let bnY = rY + smIconH + 2*bnM
+    console.log("about to add recents")
+    console.log(recentCs)
+    for (let i = 0; i < recentCs.length; i++) {
+
+        console.log("button " + i + " at " + bnX + "," + bnY)
+
+        const bn = new Button(bnX, bnY, bnH, bnH, this.group, recentCs[i], 6, 6, Colors.ballyGray, 3)
+        bn.markAsOverlayPart(this.overlay)
+        bn.setCallbackFunction(function() {
+            this.updateSlider()
+            this.updateFn(this.getHex(), this.index)
+        }.bind(this), true)
+
+        bnX += bnH + bnM
+        if ((i+1)%3 == 0) {
+            bnX = rX + 4*bnM
+            bnY += bnH + bnM
+        }
+    }
 }
 
 InputWidget.Color.prototype.drag = function(x) {
@@ -92,6 +178,7 @@ InputWidget.Color.prototype.updateSlider = function() {
     //GuiElements.create.gradient("Brightness" + color, color, color, true, 0, 1)
     let barGradient = "url(#Brightness" + color + ")"
     GuiElements.update.color(this.sliderBar, barGradient)
+    GuiElements.update.color(this.highEnd, color)
     GuiElements.update.color(this.sliderIcon.pathE, color)
 }
 
@@ -101,10 +188,10 @@ InputWidget.Color.prototype.updateSlider = function() {
  */
 InputWidget.Color.prototype.dragColor = function(x, y) {
 	let relX = x - this.colorWheelX - this.overlay.x - this.overlay.margin;
-	let relY = y - this.overlay.y - this.overlay.margin;
+	let relY = y - this.colorWheelY - this.overlay.y - this.overlay.margin;
 
 	// get canvas radius and prepare values to calculation of hue and saturation based on thumb position
-    let r = this.height/2 
+    let r = this.colorWheelH/2 //this.height/2 
     let dx = relX - r 
     let dy = relY - r 
 
@@ -175,7 +262,7 @@ InputWidget.Color.prototype.dropColor = function() {
  */
 InputWidget.Color.prototype.updateDim = function(x, y) {
   const S = InputWidget.Slider; //TODO
-  this.height = S.height * 2;
+  this.height = S.height * 1.5;
   this.width = S.width;
 }
 

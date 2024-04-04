@@ -30,6 +30,9 @@ InputWidget.Slider = function(type, options, startVal, sliderColor, displaySuffi
   this.cR = 0; //circle radius for angle display if there is one.
 
   this.sliders = []
+  
+  //Hatchling only
+  this.optionTexts = []
 };
 InputWidget.Slider.prototype = Object.create(InputWidget.prototype);
 InputWidget.Slider.prototype.constructor = InputWidget.Slider;
@@ -370,7 +373,7 @@ InputWidget.Slider.prototype.makeSlider = function() {
     const circle = GuiElements.draw.circle(this.barX, this.barY + S.barHeight/2, this.sTailH/2, barColor, this.group)
     this.sliderTail = GuiElements.draw.rect(this.barX, this.barY + S.barHeight/2 - this.sTailH/2, 0, this.sTailH, barColor)
     this.group.appendChild(this.sliderTail)
-    //TODO: Add touch receivers?
+    TouchReceiver.addListenersSlider(this.sliderTail, this)
   }
 
 
@@ -403,6 +406,8 @@ InputWidget.Slider.prototype.makeSlider = function() {
     const line2 = GuiElements.draw.line(y1, x2, y2, x2, Colors.white, 5, true)
     this.sliderIcon.group.appendChild(line1)
     this.sliderIcon.group.appendChild(line2)
+    TouchReceiver.addListenersSlider(line1, this)
+    TouchReceiver.addListenersSlider(line2, this)
     GuiElements.update.stroke(this.sliderIcon.pathE, Colors.white, 10) 
  }
   TouchReceiver.addListenersSlider(this.sliderIcon.pathE, this);
@@ -430,7 +435,9 @@ InputWidget.Slider.prototype.makeSlider = function() {
     this.imageG = GuiElements.create.group(0, 0, this.group);
   } else if (!this.type.startsWith('color') && this.type != 'sensor') { //!this.type.startsWith('hatchling') && this.type != 'sensor') {
     //Add a label at the bottom to show your selection
-    this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, this.sliderColor ?? S.textColor);
+    const labelColor = Hatchling ? this.sliderColor : S.textColor
+    this.textE = GuiElements.draw.text(0, 0, "", InputWidget.Slider.font, labelColor);
+    if (Hatchling) { TouchReceiver.addListenersSlider(this.textE, this) }
     this.group.appendChild(this.textE);
     if (this.type.startsWith("wheels")) {
       this.group.appendChild(document.createElement("br"))
@@ -438,7 +445,7 @@ InputWidget.Slider.prototype.makeSlider = function() {
       this.group.appendChild(this.textE2)
     }
   }
-  if (this.type == 'time' || this.type == 'sensor') { //this.type.startsWith('hatchling') || this.type == 'sensor') {
+  if (!Hatchling && (this.type == 'time' || this.type == 'sensor')) { //this.type.startsWith('hatchling') || this.type == 'sensor') {
     this.labelIconH = 23;
     //const labelIconP = (this.type.startsWith('hatchling')) ? VectorPaths.faLightbulb : VectorPaths.faClock;
     let labelIconP = VectorPaths.faClock
@@ -475,6 +482,16 @@ InputWidget.Slider.prototype.addHatchlingIcons = function() {
     iconHighPath = VectorPaths.bdLight 
     iconPath = VectorPaths.bdFairyLights 
     break;
+  case "distance":
+    iconLowPath = VectorPaths.bdShort
+    iconHighPath = VectorPaths.bdLong
+    iconPath = VectorPaths.bdRuler
+    break;
+  case "time":
+    iconLowPath = VectorPaths.bdFast
+    iconHighPath = VectorPaths.bdSlow
+    iconPath = VectorPaths.bdStopWatch
+    break;
   default:
     console.error("Add hatchling icons not implemented for type " + this.type)
     return
@@ -482,9 +499,10 @@ InputWidget.Slider.prototype.addHatchlingIcons = function() {
 
   const margin = 50//40
   const iH = 25
-  const iW = VectorIcon.computeWidth(iconLowPath, iH)
-  const iconLow = new VectorIcon(this.barX - iW/2, this.barY - margin, iconLowPath, this.sliderColor, iH, this.group)
-  const iconHigh = new VectorIcon(this.barX + this.barW - iW/2, this.barY - margin, iconHighPath, this.sliderColor, iH, this.group)
+  const iLowW = VectorIcon.computeWidth(iconLowPath, iH)
+  const iHighW = VectorIcon.computeWidth(iconHighPath, iH)
+  const iconLow = new VectorIcon(this.barX - iLowW/2, this.barY - margin, iconLowPath, this.sliderColor, iH, this.group)
+  const iconHigh = new VectorIcon(this.barX + this.barW - iHighW/2, this.barY - margin, iconHighPath, this.sliderColor, iH, this.group)
   const iconH = 80//40
   const iconW = VectorIcon.computeWidth(iconPath, iconH)
   const iconX = (this.width - iconW)/2
@@ -545,12 +563,14 @@ InputWidget.Slider.prototype.addOption = function(x, y, option, tickH, tickW, is
     case "servo":
     case "motor":
     case "light":
-      let width = GuiElements.measure.stringWidth(option, font);
+      let text = Hatchling ? (option + this.displaySuffix) : option
+      let width = GuiElements.measure.stringWidth(text, font);
       let textX = x - width / 2 + tickW / 2;
       let textY = Hatchling ? y + tickH + font.charHeight + S.optionMargin : y - S.optionMargin; //font.charHeight/2 - S.optionMargin;
-      let text = Hatchling ? (option + this.displaySuffix) : option
       let textE = GuiElements.draw.text(textX, textY, text, font, this.textColor ?? S.textColor);
       this.group.appendChild(textE);
+
+      if (Hatchling) { this.optionTexts.push(textE) }
 
       break;
   }
@@ -890,6 +910,17 @@ InputWidget.Slider.prototype.updateLabel = function() {
       //Hatchling places the label below the slider
       textX = this.sliderX + (this.sliderW - textW)/2
       textY = this.sliderY + this.sliderH + S.font.charHeight + S.optionMargin
+
+      for (let i = 0; i < this.optionTexts.length; i++) {
+        const textE = this.optionTexts[i]
+        const w = GuiElements.measure.textWidth(textE)
+        const x = this.optionXs[i] - w/2
+        if (textX+textW >= x && textX <= x+w) {
+          textE.remove()
+        } else {
+          this.group.appendChild(textE)
+        }
+      }
     }
     GuiElements.move.text(this.textE, textX, textY);
 

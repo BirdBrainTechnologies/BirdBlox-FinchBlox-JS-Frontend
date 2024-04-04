@@ -189,7 +189,7 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
         } else {
           let iconPath = VectorPaths[HL_Utils.symbolDict[this.values[i]]]
           if (iconPath != null) { 
-            this.button.addColorIcon(iconPath, 10, Colors.getColor(this.parent.category))  
+            this.button.addColorIcon(iconPath, 10, this.textColor)//Colors.getColor(this.parent.category))  
           } else {
             this.button.removeContent()
           }
@@ -360,7 +360,7 @@ BlockButton.prototype.addPiano = function(startingValue) {
  * @param {string} startingValue - the initial value
  */
 BlockButton.prototype.addColorPicker = function(startingValue) {
-  this.addWidget(new InputWidget.Color(this.widgets.length), "", startingValue)
+  this.addWidget(new InputWidget.Color(this.widgets.length, Colors.categoryColors[this.parent.category]), "", startingValue)
 }
 
 /**
@@ -368,6 +368,16 @@ BlockButton.prototype.addColorPicker = function(startingValue) {
  */
 BlockButton.prototype.addPortWidget = function(portType) {
   this.addWidget(new InputWidget.HLPortWidget(portType, this), "", HL_Utils.noPort)
+}
+
+/**
+ * Adds a widget to this button that shows options as buttons. Hatchling only.
+ */
+BlockButton.prototype.addButtonsWidget = function(type, options, startingValue, icon) {
+  const iconColor = Colors.categoryColors[this.parent.category]
+  const bgColor = Colors.blockPalette[this.parent.category]
+  const bnsWidget = new InputWidget.Buttons(type, options, startingValue, icon, iconColor, bgColor, this.widgets.length)
+  this.addWidget(bnsWidget, "", startingValue)
 }
 
 /**

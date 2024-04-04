@@ -21,7 +21,8 @@ HL_Utils.symbolDict = {
   "0111010101111111111110101": "bdSymbolGhost", //alien
   "1111110001100011000111111": "bdSymbolSquare", //square
   "0101011111111110111000100": "bdSymbolHeart", //heart
-  "0010001010100010101000100": "bdSymbolDiamond" //diamond
+  "0010001010100010101000100": "bdSymbolDiamond", //diamond
+  "0000000000000000000000000": null //off
 }
 HL_Utils.alphaDict = {
   "0110010010111101001010010": "A", // A
@@ -933,7 +934,7 @@ function B_HLWaitUntilDistance(x, y) {
   this.portType = 14
   this.sensorType = "distance"
   this.threshold = 10 //How close something has to be to trigger the block
-  this.blockOptions = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+  this.blockOptions = [5, 100]
 
   B_HLWaitUntilPort.call(this, x, y, "distance")
 }

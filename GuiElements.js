@@ -831,16 +831,16 @@ GuiElements.draw.ledArray = function(parentGroup, arrayString, dim) {
   const values = arrayString.split("");
   let group = GuiElements.create.group(0, 0, parentGroup);
   //const dim = 4;//25;
-  const r = dim / 4; //1;//8;
+  const r = Hatchling ? dim/2 : dim / 4; //1;//8;
   const margin = dim / 2; //dim/4; //1;//5;
   const startX = 0;
   let y = 0;
   for (let i = 0; i < 5; i++) {
     let x = startX;
     for (let j = 0; j < 5; j++) {
-      let color = Colors.fbGray; //Colors.iron;
+      let color = Hatchling ? Colors.ballyGrayLight : Colors.fbGray; //Colors.iron;
       if (values[5 * i + j] == "1") {
-        color = Colors.bbtDarkGray;
+        color = Hatchling ? Colors.ballyGrayDark : Colors.bbtDarkGray;
       }
       let rect = GuiElements.draw.rect(x, y, dim, dim, color, r, r);
       group.appendChild(rect);

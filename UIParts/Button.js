@@ -12,9 +12,10 @@
  * @param {number} rx - (optional) Corner rounding parameter
  * @param {number} ry - (optional) Corner rounding parameter
  * @param {Color} outlineColor - (optional) color to outline the button with
+ * @param {number} outlineW - (optional) width of outline
  * @constructor
  */
-function Button(x, y, width, height, parent, color, rx, ry, outlineColor) {
+function Button(x, y, width, height, parent, color, rx, ry, outlineColor, outlineW) {
   DebugOptions.validateNumbers(x, y, width, height);
   this.x = x;
   this.y = y;
@@ -31,6 +32,7 @@ function Button(x, y, width, height, parent, color, rx, ry, outlineColor) {
   this.rx = rx;
   this.ry = ry;
   this.strokeColor = outlineColor;
+  this.strokeW = outlineW
   this.buildBg();
   this.pressed = false;
   this.enabled = true;
@@ -88,7 +90,7 @@ Button.setGraphics = function() {
 Button.prototype.buildBg = function() {
   this.bgRect = GuiElements.draw.rect(0, 0, this.width, this.height, this.bg, this.rx, this.ry);
   if (this.strokeColor != null) {
-    GuiElements.update.stroke(this.bgRect, this.strokeColor, Button.strokeW)
+    GuiElements.update.stroke(this.bgRect, this.strokeColor, this.strokeW ?? Button.strokeW)
   }
   this.group.appendChild(this.bgRect);
   TouchReceiver.addListenersBN(this.bgRect, this);
@@ -750,7 +752,7 @@ Button.prototype.updateBgColor = function(color, outlineColor) {
   this.setColor(false);
   if (outlineColor != null) {
     this.strokeColor = outlineColor
-    GuiElements.update.stroke(this.bgRect, this.strokeColor, Button.strokeW)
+    GuiElements.update.stroke(this.bgRect, this.strokeColor, this.strokeW ?? Button.strokeW)
   }
 }
 

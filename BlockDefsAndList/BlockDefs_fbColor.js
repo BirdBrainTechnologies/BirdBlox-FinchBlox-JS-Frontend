@@ -176,6 +176,18 @@ B_FBColor.prototype.updateValues = function() {
   }
 }
 B_FBColor.prototype.addL2Button = function() {
+  if (Hatchling) {
+    this.colorButton = new BlockButton(this);
+    if (this.useAlphabet) {
+      this.colorButton.addButtonsWidget("ledArray", HL_Utils.alphaDict, "0110010010111101001010010", VectorPaths.bdAlpha)
+    } else {
+      this.colorButton.addButtonsWidget("ledArray", HL_Utils.symbolDict, "1010010100111101101011110", VectorPaths.bdSymbols)
+    }
+    this.addPart(this.colorButton);
+    return
+  }
+
+
   if (this.isLEDArray) {
     let options = ["0000001010000001000101110", //smiley face
       "0000001010000000111010001", //frowny face
@@ -184,43 +196,8 @@ B_FBColor.prototype.addL2Button = function() {
       "0111010101111111111110101", //alien
       "1111110001100011000111111", //square
       "0101011111111110111000100", //heart
-      "0010001010100010101000100"
-    ] //diamond
-    if (Hatchling) {
-      options.push("0000000000000000000000000") //off
-    }
+      "0010001010100010101000100"] //diamond
     let defaultVal = options[3]
-    if (this.useAlphabet) {
-      //Same letters as micro:bit print command unless noted.
-      options = ["0110010010111101001010010", // A
-        "1110010010111001001011100", // B
-        "0111010000100001000001110", // C
-        "1110010010100101001011100", // D
-        "1111010000111001000011110", // E
-        "1111010000111001000010000", // F
-        "0111010000100111000101110", // G
-        "1001010010111101001010010", // H
-        "1110001000010000100011100", // I
-        "0111000100001001010001100", // J - mod
-        "1001010100110001010010010", // K
-        "1000010000100001000011110", // L
-        "1000111011101011000110001", // M
-        "1000111001101011001110001", // N
-        "0110010010100101001001100", // O
-        "1110010010111001000010000", // P
-        "0110010010101101001001101", // Q - mod
-        "1110010010111001010010010", // R
-        "0110010000011000001011100", // S
-        "1111100100001000010000100", // T
-        "1000110001100011000101110", // U
-        "1000110001100010101000100", // V
-        "1000110001101011101110001", // W
-        "1000101010001000101010001", // X - mod
-        "1000101010001000010000100", // Y
-        "1111100010001000100011111"  // Z
-      ]
-      defaultVal = options[0]
-    }
     this.colorButton = new BlockButton(this);
     this.colorButton.addSlider("ledArray", defaultVal, options);
   } else {

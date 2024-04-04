@@ -171,7 +171,8 @@ function B_FBSoundL3(x, y) {
   this.noteButton.addPiano(this.midiNote);
   this.addPart(this.noteButton);
 
-  this.noteButton.addSlider("time", this.beats, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  const options = Hatchling ? [1, 10] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  this.noteButton.addSlider("time", this.beats, options);
 
   /*
     this.beatsButton = new BlockButton(this);
