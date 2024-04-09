@@ -116,8 +116,9 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
     }
   }
 
+  const r = Hatchling ? 7 : null
   // TODO: use RowDialog.createMainBnWithText instead
-  const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup, color);
+  const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup, color, r, r);
   if (FinchBlox) {
     button.addDeviceInfo(this.discoveredDevices[index]);
   } else {

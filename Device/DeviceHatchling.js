@@ -11,6 +11,7 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
 
   //TODO: Use final naming convention
   this.shortName = advertisedName
+  this.name = ""
 
   this.hlState = []
   // Code for what is connected to each of the 6 ports (A-F). Current options:
@@ -28,6 +29,21 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
   this.batteryLevel = null
 
   this.messageInProgress = null
+
+/* //Battery monitor test - disable in receiveBroadcast first
+  setTimeout(function() {
+    this.setBatteryStatus( "2" )
+    DeviceManager.checkBattery();
+  }.bind(this), 1000)
+  setTimeout(function() {
+    this.setBatteryStatus( "1" )
+    DeviceManager.checkBattery();
+  }.bind(this), 3000)
+  setTimeout(function() {
+    this.setBatteryStatus( "0" )
+    DeviceManager.checkBattery();
+  }.bind(this), 5000)
+  */
 }
 DeviceHatchling.prototype = Object.create(DeviceWithPorts.prototype);
 DeviceHatchling.prototype.constructor = DeviceHatchling;

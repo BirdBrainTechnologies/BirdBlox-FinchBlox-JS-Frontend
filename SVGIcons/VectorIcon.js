@@ -45,7 +45,7 @@ VectorIcon.prototype.draw = function() {
 
 	//If the icon should not be mirrored, it will need to be flipped for rtl
 	// languages. The negative scale flips the icon along the horizontal axis, but
-	// it then also needs to be translated by the width to pisition it correctly.
+	// it then also needs to be translated by the width to position it correctly.
 	if (Language.isRTL && !this.mirror) {
 		this.scaleX = -this.scaleX;
 		this.x += this.width;
@@ -116,7 +116,21 @@ VectorIcon.prototype.move = function(x, y) {
 /* Deletes the icon and removes the path from its parent group. */
 VectorIcon.prototype.remove = function() {
 	this.pathE.remove();
+	if (this.pathE2 != null) { this.pathE2.remove() }
+	if (this.pathE3 != null) { this.pathE3.remove() }
 };
+
+/* Deletes any additional icon paths that have been added */
+VectorIcon.prototype.removeAddedPaths = function() {
+	if (this.pathE2 != null) { 
+		this.pathE2.remove() 
+		this.pathE2 = null
+	}
+	if (this.pathE3 != null) { 
+		this.pathE3.remove() 
+		this.pathE3 = null
+	}
+}
 
 /**
  *  Add a second path to this icon. Shares the same group and transforms
@@ -124,7 +138,12 @@ VectorIcon.prototype.remove = function() {
  * @param color - fill color hex value
  */
 VectorIcon.prototype.addSecondPath = function(pathId, color){
-  this.pathId2 = pathId;
+	if (this.pathE2 != null) { this.pathE2.remove() }
+	if (this.pathE3 != null) { this.pathE3.remove() }
+
+	this.pathE2 = this.addPath(pathId, color)
+
+  /*this.pathId2 = pathId;
   this.color2 = color;
 
   this.pathE2 = GuiElements.create.path(this.group);
@@ -136,7 +155,31 @@ VectorIcon.prototype.addSecondPath = function(pathId, color){
   if (this.pathId2.fillRule != null) {
   	this.pathE2.setAttributeNS(null, "fill-rule", this.pathId2.fillRule);
   }
-	this.group.appendChild(this.pathE2);
+	this.group.appendChild(this.pathE2);*/
+}
+
+/**
+ *  Add a third path to this icon. Shares the same group and transforms
+ * @param pathId - VectorPaths entry
+ * @param color - fill color hex value
+ */
+VectorIcon.prototype.addThirdPath = function(pathId, color) {
+	if (this.pathE3 != null) { this.pathE3.remove() }
+
+	this.pathE3 = this.addPath(pathId, color)
+}
+
+VectorIcon.prototype.addPath = function(pathId, color){
+  let pathE = GuiElements.create.path(this.group);
+	pathE.setAttributeNS(null, "d", pathId.path);
+	pathE.setAttributeNS(null, "fill", color);
+  if (pathId.transform != null) {
+    pathE.setAttributeNS(null, "transform", pathId.transform);
+  }
+  if (pathId.fillRule != null) {
+  	pathE.setAttributeNS(null, "fill-rule", pathId.fillRule);
+  }
+	return pathE
 }
 
 /**

@@ -1283,6 +1283,17 @@ GuiElements.move.text = function(text, x, y) {
   text.setAttributeNS(null, "y", y);
 };
 /**
+ * Moves an SVG circle element
+ * 
+ * @param {number} cx - The new center x coord of the circle.
+ * @param {number} cy - The new center y coord of the circle.
+ */
+GuiElements.move.circle = function(circle, cx, cy) {
+  DebugOptions.validateNumbers(cx, cy);
+  circle.setAttributeNS(null, "cx", cx);
+  circle.setAttributeNS(null, "cy", cy);
+}
+/**
  * Moves an SVG element.
  * @param {Element} element - The element to move.
  * @param {number} x - The new x coord of the element.

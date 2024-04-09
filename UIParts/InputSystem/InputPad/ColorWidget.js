@@ -18,15 +18,36 @@ InputWidget.Color.prototype.constructor = InputWidget.Color
 //Global color history
 InputWidget.Color.recentColors = [
     "#FFFFFF", //white
-    "#079BAB", //ballyBrandBlue
-    "#FF600A", //ballyOrange
-    "#A94FC9", //ballyPurple
-    "#DD1D28", //ballyRed
-    "#65A400", //ballyGreenYellow
-    "#3751E4", //ballyBlue
-    "#ED5ACD", //ballyPink
-    "#99A5B1" //ballyGray
+    "#FF0000", 
+    "#FF8800", 
+    "#FFFF00",
+    "#00FF00", 
+    "#00FFFF", 
+    "#0000FF", 
+    "#8800FF", 
+    "#FF00FF", 
+    "#FF8888",
+    "#FFCC88",
+    "#FFFF88",
+    "#88FF88",
+    "#88FFFF",
+    "#8888FF",
+    "#FF88FF"
     ]
+InputWidget.Color.addRecentColor = function(color) {
+    const rcs = InputWidget.Color.recentColors
+
+    //Remove first instance of color or pop last item
+    const index = rcs.indexOf(color)
+    if (index > -1) {
+        rcs.splice(index, 1)
+    } else {
+        rcs.pop() //remove the last element to maintain array length
+    }
+
+    //add the new color to the beginning of the list
+    rcs.unshift(color)
+}
 
 /**
  * @inheritDoc
@@ -42,8 +63,9 @@ InputWidget.Color.recentColors = [
 InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
 	InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
  	this.group = GuiElements.create.group(x, y, parentGroup);
-    const margin = this.height/20 //100 //10
+    const margin = 10 //this.height/20 //100 //10
     const smIconH = 35 
+    this.setColor(data[this.index])
 
     //Add icon at top
     const iconPath = VectorPaths.bdLightBulb
@@ -54,10 +76,21 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
 
     //Add the color wheel
     this.colorWheelX = margin //this.width/2 - this.height - margin
-    this.colorWheelH = this.width*2/7 - margin*2  //this.width/3 - margin*2 //this.height/2
+    this.colorWheelH = this.height - 2*margin //this.width/2 - margin*2 //this.width*2/7 - margin*2  //this.width/3 - margin*2 //this.height/2
     this.colorWheelY = this.height - this.colorWheelH - margin
   	this.colorwheel = GuiElements.draw.image("Color_circle_(RGB)", this.colorWheelX, this.colorWheelY, this.colorWheelH, this.colorWheelH, this.group, true)
   	TouchReceiver.addListenersColorWheel(this.colorwheel, this)
+
+    //Add the circular preview on the color wheel
+    this.preview = GuiElements.draw.circle(0, 0, smIconH/2, Colors.black, this.group)
+    GuiElements.update.stroke(this.preview, Colors.white, 3)
+    TouchReceiver.addListenersColorWheel(this.preview, this)
+    this.updatePreview()
+
+    //Make the current color the first color in the recent color list 
+    InputWidget.Color.addRecentColor(this.getHex())
+
+    /* The slider just wasn't working out
 
     //Add a brightness slider
     const sX = this.width*2/7 // /3 //starting x of slider area
@@ -111,42 +144,75 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
 
     this.updateSlider()
 
+    */
+
 
     //Add the recent colors picker
-    const rX = this.width*5/7 // *2/3 //x coord to start this section
-    const rY = this.height/3 //y coord to start this section
-    const rW = this.width*2/7 ///3 //width of section
+    this.recentColorButtons = []
+    const rX = this.width - this.height + margin //this.width*5/7 // *2/3 //x coord to start this section
+    const rY = margin //this.height/3 //y coord to start this section
+    const rW = this.height - 2*margin //this.width*2/7 ///3 //width of section
     const rIconPath = VectorPaths.bdRecent
     const rIconW = VectorIcon.computeWidth(rIconPath, smIconH)
     const rIconX = rX + (rW - rIconW)/2
     const recentIcon = new VectorIcon(rIconX, rY, rIconPath, this.iconColor, smIconH, this.group)
     const recentCs = InputWidget.Color.recentColors
-    const bnM = 10
-    const bnH = (rW - 10*bnM)/3
-    let bnX = rX + 4*bnM
-    let bnY = rY + smIconH + 2*bnM
-    console.log("about to add recents")
-    console.log(recentCs)
+    const bnM = 15//10
+    const bnH = (rW - 7*bnM)/4 //(rW - 3*bnM)/4 //(rW - 10*bnM)/3
+    let bnX = rX + 2*bnM // rX //rX + 4*bnM
+    let bnY = rY + smIconH + bnM
+    
     for (let i = 0; i < recentCs.length; i++) {
 
-        console.log("button " + i + " at " + bnX + "," + bnY)
-
-        const bn = new Button(bnX, bnY, bnH, bnH, this.group, recentCs[i], 6, 6, Colors.ballyGray, 3)
+        let color = recentCs[i]
+        const bn = new Button(bnX, bnY, bnH, bnH, this.group, color, 6, 6)
         bn.markAsOverlayPart(this.overlay)
-        bn.setCallbackFunction(function() {
-            this.updateSlider()
-            this.updateFn(this.getHex(), this.index)
-        }.bind(this), true)
+        
+        this.recentColorButtons.push(bn)
 
         bnX += bnH + bnM
-        if ((i+1)%3 == 0) {
-            bnX = rX + 4*bnM
+        if ((i+1)%4 == 0) {//if ((i+1)%3 == 0) {
+            bnX = rX + 2*bnM // rX // + 4*bnM
             bnY += bnH + bnM
         }
     }
+
+    this.updateRecentBns()
 }
 
-InputWidget.Color.prototype.drag = function(x) {
+InputWidget.Color.prototype.updateRecentBns = function() {
+    const recentCs = InputWidget.Color.recentColors
+
+    for (let i = 0; i < recentCs.length; i++) {
+        const bn = this.recentColorButtons[i]
+        const color = recentCs[i]
+        
+        bn.updateBgColor(color)
+
+        bn.setCallbackFunction(function() {
+            //this.updateSlider()
+            this.setColor(color)
+            this.updateFn(this.getHex(), this.index)
+            this.updatePreview()
+            this.selectRecent()
+            InputWidget.Color.addRecentColor(color)
+        }.bind(this), true)
+    }
+
+    this.selectRecent()
+}
+
+InputWidget.Color.prototype.selectRecent = function () {
+    const currentColor = this.getHex()
+
+    for (let i = 0; i < this.recentColorButtons.length; i++) {
+        const bn = this.recentColorButtons[i]
+        const outlineW = (bn.bg == currentColor) ? 6 : 3
+        GuiElements.update.stroke(bn.bgRect, Colors.ballyGray, outlineW)
+    }
+}
+
+/*InputWidget.Color.prototype.drag = function(x) {
     let relX = x - this.overlay.x - this.overlay.margin
 
     const errorMargin = 10;
@@ -180,7 +246,7 @@ InputWidget.Color.prototype.updateSlider = function() {
     GuiElements.update.color(this.sliderBar, barGradient)
     GuiElements.update.color(this.highEnd, color)
     GuiElements.update.color(this.sliderIcon.pathE, color)
-}
+}*/
 
 /**
  * Calculate the new color based on the user's touch.
@@ -209,9 +275,23 @@ InputWidget.Color.prototype.dragColor = function(x, y) {
 
 
     console.log(this.getHex())
-    this.updateSlider()
+    //this.updateSlider()
     this.updateFn(this.getHex(), this.index)
+    this.updatePreview()
                 
+}
+
+/**
+ * Update the position of the preview circle
+ * Parts from https://github.com/ivanvmat/color-picker
+ */
+InputWidget.Color.prototype.updatePreview = function() {
+    //thumb.style.left = (canvas_bb.width / 2) + ((canvas_bb.width / 2)/100*color_picker.color.s) * Math.cos(utils.degreesToRadians(color_picker.color.h + 90)) - (thumb_bb.width / 2) + 'px';
+    //thumb.style.top = (canvas_bb.height / 2) + ((canvas_bb.width / 2)/100*color_picker.color.s)  * Math.sin(utils.degreesToRadians(color_picker.color.h + 90)) - (thumb_bb.height / 2) + 'px';
+    const cx = this.colorWheelX + this.colorWheelH/2 + ((this.colorWheelH/2)/100*this.saturation) * Math.cos( (this.hue + 90)*(Math.PI/180) )       
+    const cy = this.colorWheelY + this.colorWheelH/2 + ((this.colorWheelH/2)/100*this.saturation) * Math.sin( (this.hue + 90)*(Math.PI/180) )  
+    GuiElements.update.color(this.preview, this.getHex())
+    GuiElements.move.circle(this.preview, cx, cy) 
 }
 
 /**
@@ -248,11 +328,13 @@ InputWidget.Color.prototype.getHex = function (fullBrightness) {
 
     //return "#" + hex.join('').toUpperCase()
 
-    return Colors.rgbToHex((red * 255),(green * 255),(blue * 255))
+    return Colors.rgbToHex((red * 255),(green * 255),(blue * 255)).toUpperCase()
 }
 
 InputWidget.Color.prototype.dropColor = function() {
-	console.log("dropColor")
+	console.log("dropColor and update...")
+    InputWidget.Color.addRecentColor(this.getHex())
+    this.updateRecentBns()
 }
 
 /**
@@ -267,6 +349,52 @@ InputWidget.Color.prototype.updateDim = function(x, y) {
 }
 
 
+/**
+ * Set new color based on the given hex value.
+ * Parts from https://github.com/ivanvmat/color-picker
+ */
+InputWidget.Color.prototype.setColor =function(hex) {
 
+    let [red, green, blue] = Colors.hexToRgb(hex)
+
+    red /= 255;
+    green /= 255;
+    blue /= 255;
+
+    const minVal = Math.min(red, green, blue);
+    const maxVal = Math.max(red, green, blue);
+    const delta = maxVal - minVal;
+
+    let hue, saturation;
+    const value = maxVal;
+    if (delta === 0) {
+        hue = saturation = 0;
+    } else {
+        saturation = delta / maxVal;
+        const dr = (((maxVal - red) / 6) + (delta / 2)) / delta;
+        const dg = (((maxVal - green) / 6) + (delta / 2)) / delta;
+        const db = (((maxVal - blue) / 6) + (delta / 2)) / delta;
+
+        if (red === maxVal) {
+            hue = db - dg;
+        } else if (green === maxVal) {
+            hue = (1 / 3) + dr - db;
+        } else if (blue === maxVal) {
+            hue = (2 / 3) + dg - dr;
+        }
+
+        if (hue < 0) {
+            hue += 1;
+        } else if (hue > 1) {
+            hue -= 1;
+        }
+    }
+
+    // Red down color wheel
+    //this.hue = hue * 360
+    this.hue = (hue*360 + 180) % 360
+    this.saturation = saturation * 100
+    this.brightness = value * 100
+}
 
 

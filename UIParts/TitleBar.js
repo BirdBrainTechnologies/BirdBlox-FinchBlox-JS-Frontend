@@ -314,7 +314,7 @@ TitleBar.makeButtons = function() {
       } else {
         finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
         if (Hatchling) {
-          finchBn.battIcon.setColor(Colors.white);
+          finchBn.battIcon.removeAddedPaths()
         } else { 
           finchBn.battIcon.pathE.remove();
           finchBn.icon.move(finchBn.finchX, finchBn.finchY); 

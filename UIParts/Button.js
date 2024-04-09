@@ -353,11 +353,11 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, c
  * @param device
  */
 Button.prototype.addDeviceInfo = function(device) {
-  const color = Colors.flagGreen;
-  const color2 = Colors.bbtDarkGray;
+  const color = Hatchling ? Colors.ballyBrandBlue : Colors.flagGreen;
+  const color2 = Hatchling ? Colors.ballyBrandBlueDark : Colors.bbtDarkGray;
   const font = Button.defaultFont;
   const font2 = Font.secondaryUiFont(16);
-  const pathId = VectorPaths.faPlusCircle;
+  const pathId = Hatchling ? VectorPaths.bdAdd : VectorPaths.faPlusCircle;
   const iconH = this.height * 0.6;
   const iconW = VectorIcon.computeWidth(pathId, iconH);
   const margin = (this.height - iconH) / 2;
@@ -367,22 +367,28 @@ Button.prototype.addDeviceInfo = function(device) {
   const textX = textY;
   this.removeContent();
 
-  /*if (Hatchling) {
-    this.hatchGroup = GuiElements.create.group(textX, iconY, this.group)
-    this.eggIcon = new VectorIcon(0, -this.height*0.1, VectorPaths.faEgg, Colors.iron, this.height*0.8, this.hatchGroup, null, 90);
-    this.hatchIcon = GuiElements.draw.hatchlingPattern(this.hatchGroup, iconH, device.getHatchlingCode())
-    this.textE = GuiElements.draw.text(textX*2, textY, device.shortName, font, color);
-  } else {*/
+  if (Hatchling) {
+    const dIconH = 25
+    const dIconY = (this.height - dIconH)/2 
+    const dIconX = margin
+    const dIcon = new VectorIcon(dIconX, dIconY, VectorPaths.bdClose, Colors.ballyGray, dIconH, this.group)
+    this.textE = GuiElements.draw.text(2*margin + dIconH, textY, device.shortName, font, color2);
+    this.group.appendChild(this.textE);
+  } else {
     this.textE = GuiElements.draw.text(textX, textY, device.shortName, font, color);
-  //}
-  this.group.appendChild(this.textE);
-  //let shortW = GuiElements.measure.textWidth(this.textE);
+    this.group.appendChild(this.textE);
+
+    
+  }
 
   const text2X = 3 * this.height;
   this.textE2 = GuiElements.draw.text(text2X, textY, device.name, font2, color2);
   this.group.appendChild(this.textE2);
 
   this.icon = new VectorIcon(iconX, iconY, pathId, color, iconH, this.group);
+  if (Hatchling) {
+    GuiElements.update.stroke(this.icon.pathE, color, 3)
+  }
 
   this.hasText = true;
   TouchReceiver.addListenersBN(this.textE, this);
@@ -447,7 +453,7 @@ Button.prototype.addFinchBnIcons = function() {
   }
   const battPathId = Hatchling ? VectorPaths.bdBatteryDisconnected : VectorPaths.battery;
   const xPathId = Hatchling ? VectorPaths.bdHatchlingDisconnected : VectorPaths.faTimesCircle;
-  const font = Font.uiFont(18);
+  const font = Hatchling ? Font.uiFont(22) : Font.uiFont(18);
 
   const finchH = Hatchling ? TitleBar.bnIconH * 1.2 : TitleBar.bnIconH * 1.65; //the long dimension of the finch since we will rotate it
   const battH = TitleBar.bnIconH * 0.75;

@@ -79,7 +79,31 @@ DeviceManager.checkBattery = function() {
   if (worstBatteryStatus === "3") {
     worstBatteryStatus = "2" //Status 3 is full charge for finch
   }
-  if (FinchBlox) {
+  if (Hatchling) {
+    if (worstBatteryStatus === "4") {
+      TitleBar.finchButton.battIcon.removeAddedPaths()
+      return
+    }
+    let pathId = VectorPaths.bdBatteryDisconnected
+    if (worstBatteryStatus === "2") {
+      pathId = VectorPaths.bdBatteryHigh
+      color = Colors.ballyBrandBlueDark
+    } else if (worstBatteryStatus === "1") {
+      pathId = VectorPaths.bdBatteryMed
+      color = Colors.ballyBrandBlueDark
+    } else if (worstBatteryStatus === "0") {
+      pathId = VectorPaths.bdBatteryLow
+      color = Colors.ballyRedDark
+    }
+    TitleBar.finchButton.battIcon.addSecondPath(pathId, color)
+    TouchReceiver.addListenersBN(TitleBar.finchButton.battIcon.pathE2, TitleBar.finchButton);
+
+    if (worstBatteryStatus === "0") {
+      TitleBar.finchButton.battIcon.addThirdPath(VectorPaths.bdBatteryExcl, Colors.ballyRed)
+      TouchReceiver.addListenersBN(TitleBar.finchButton.battIcon.pathE3, TitleBar.finchButton);
+    }
+
+  } else if (FinchBlox) {
     if (worstBatteryStatus === "2") {
       color = Colors.flagGreen;
     } else if (worstBatteryStatus === "1") {

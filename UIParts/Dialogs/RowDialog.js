@@ -36,7 +36,15 @@ RowDialog.setConstants = function() {
   //TODO: This really should be in a separate "setStatics" function, since it isn't a constant
   RowDialog.currentDialog = null;
 
-  if (FinchBlox) {
+  if (Hatchling) {
+    RowDialog.titleBarColor = Colors.ballyGrayLight;
+    RowDialog.bgColor = Colors.ballyGrayLight;
+    RowDialog.bnMargin = 10;
+    RowDialog.cornerR = 10;
+    RowDialog.bnHeight = 50;//SmoothMenuBnList.bnHeight;
+    RowDialog.titleBarH = RowDialog.bnHeight * 1.5;
+    RowDialog.outlineColor = Colors.ballyGray;
+  } else if (FinchBlox) {
     RowDialog.titleBarColor = Colors.finchGreen;
     RowDialog.bgColor = Colors.white;
     RowDialog.bnMargin = 0;
@@ -96,6 +104,20 @@ RowDialog.prototype.addCenteredButton = function(text, callbackFn) {
 };
 
 /**
+ * Add a button to the top right corner that will cancel the dialog.
+ */
+RowDialog.prototype.addCancelButton = function() {
+  const h = 30 
+  const m = RowDialog.bnMargin
+  const x = this.width - h - m
+  const y = m
+  const pathId = VectorPaths.bdClose
+  const cancel = new Button(x, y, h, h, this.group, RowDialog.titleBarColor)
+  cancel.addColorIcon(pathId, h, Colors.ballyBrandBlueDark)
+  cancel.setCallbackFunction(this.closeDialog.bind(this), true)
+}
+
+/**
  * Builds all the visuals of the dialog and sets the dialog as currentDialog.  Closes any existing dialogs.
  */
 RowDialog.prototype.show = function() {
@@ -114,10 +136,11 @@ RowDialog.prototype.show = function() {
     this.bgRect = this.drawBackground();
 
 
-    this.titleRect = this.createTitleRect();
+    this.titleRect = Hatchling ? null : this.createTitleRect();
     if (FinchBlox) {
       if (Hatchling) {
-        this.icon = this.createTitleIcon(VectorPaths.faEgg);
+        this.icon = this.createTitleIcon(VectorPaths.bdHatchling);
+        this.addCancelButton()
       } else {
         this.icon = this.createTitleIcon(VectorPaths.mvFinch);
       }
@@ -183,6 +206,9 @@ RowDialog.prototype.calcWidths = function() {
 RowDialog.prototype.drawBackground = function() {
   const RD = RowDialog;
   let rect = GuiElements.draw.rect(0, 0, this.width, this.height, RD.bgColor, RD.cornerR, RD.cornerR);
+  if (Hatchling) {
+    GuiElements.update.stroke(rect, RD.outlineColor, 2)
+  }
   this.group.appendChild(rect);
   return rect;
 };
@@ -227,13 +253,19 @@ RowDialog.prototype.createTitleLabel = function(title) {
 RowDialog.prototype.createTitleIcon = function(pathId) {
   var RD = RowDialog;
 
-  const iconH = RD.titleBarH * 0.9;
+  const iconH = Hatchling ? RD.titleBarH * 0.5 : RD.titleBarH * 0.9;
   const iconW = VectorIcon.computeWidth(pathId, iconH);
   const iconX = (this.width - iconW) / 2;
   const iconY = (RD.titleBarH - iconH) / 2;
 
-  const icon = new VectorIcon(iconX, iconY, pathId, Colors.white, iconH, this.group, null, 90);
-  GuiElements.update.stroke(icon.pathE, RD.outlineColor, 4);
+  let icon
+  if (Hatchling) {
+    icon = new VectorIcon(iconX, iconY, pathId, Colors.ballyBrandBlue, iconH, this.group)
+  } else {
+    icon = new VectorIcon(iconX, iconY, pathId, Colors.white, iconH, this.group, null, 90);
+    GuiElements.update.stroke(icon.pathE, RD.outlineColor, 4);
+  }
+  
   return icon;
 };
 
