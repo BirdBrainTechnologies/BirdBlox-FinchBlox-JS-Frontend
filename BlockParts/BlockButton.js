@@ -178,7 +178,18 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
         this.button.updateBgColor(color);
       }
     } else if (this.widgets[i].type == "colorPicker") {
-      this.button.updateBgColor(this.values[i])
+      //this.button.updateBgColor(this.values[i])
+      if (this.colorCircle == null) { 
+        const cx = this.button.width/2 
+        const cy = this.button.height/2 
+        const r = cy * 2/3
+        this.colorCircle = GuiElements.draw.circle(cx, cy, r, this.values[i], this.button.group)
+        GuiElements.update.stroke(this.colorCircle, Colors.white, 1)
+        TouchReceiver.addListenersBN(this.colorCircle, this.button)
+      } else {
+        GuiElements.update.color(this.colorCircle, this.values[i])
+      }
+      
 
     } else if (this.widgets[i].type == "piano") {
       text[i] = InputWidget.Piano.noteStrings[this.values[i]];
@@ -267,6 +278,15 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
       }
       this.button.addText(label, this.font, this.textColor);
       this.currentLabel = label
+      if (this.widgets[0].type.startsWith("hatchling") && (label == HL_Utils.noPort)) { //|| label == HL_Utils.unknownPort)) {
+        const iconPath = (label == HL_Utils.noPort) ? VectorPaths.bdClose : VectorPaths.bdHatchling
+        const iconH = (label == HL_Utils.noPort) ? 10 : 8
+        this.button.addColorIcon(iconPath, iconH, Colors.ballyRed)
+        /*if (label == HL_Utils.unknownPort) {
+          this.button.icon.addSecondPath(VectorPaths.bdHatchlingDisconnected, Colors.white)
+          TouchReceiver.addListenersBN(this.button.icon.pathE2, this.button)
+        }*/
+      }
     }
 
     //this.button.addText(label, this.font, this.textColor);
@@ -367,7 +387,7 @@ BlockButton.prototype.addColorPicker = function(startingValue) {
  * Adds port chooser widget to this button. Hatchling only.
  */
 BlockButton.prototype.addPortWidget = function(portType) {
-  this.addWidget(new InputWidget.HLPortWidget(portType, this), "", HL_Utils.noPort)
+  this.addWidget(new InputWidget.HLPortWidget(portType, this), "", HL_Utils.unknownPort)
 }
 
 /**

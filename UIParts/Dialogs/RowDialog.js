@@ -41,7 +41,7 @@ RowDialog.setConstants = function() {
     RowDialog.bgColor = Colors.ballyGrayLight;
     RowDialog.bnMargin = 10;
     RowDialog.cornerR = 10;
-    RowDialog.bnHeight = 50;//SmoothMenuBnList.bnHeight;
+    RowDialog.bnHeight = 54;//50;//SmoothMenuBnList.bnHeight;
     RowDialog.titleBarH = RowDialog.bnHeight * 1.5;
     RowDialog.outlineColor = Colors.ballyGray;
   } else if (FinchBlox) {

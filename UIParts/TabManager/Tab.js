@@ -428,7 +428,7 @@ Tab.prototype.wheelZoom = function(x, y, zoomIn) {
   this.startZoom = this.zoomFactor;
   this.updateTabDim();
 
-  const zoomDelta = zoomIn ? 0.9 : 1.1
+  const zoomDelta = zoomIn ? 0.95 : 1.05
   this.zoomFactor = this.startZoom * zoomDelta;
   this.zoomFactor = Math.max(TabManager.minZoom, Math.min(TabManager.maxZoom, this.zoomFactor));
   const zoomRatio = this.zoomFactor / this.startZoom;

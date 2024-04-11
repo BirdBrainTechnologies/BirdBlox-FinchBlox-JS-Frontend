@@ -1481,6 +1481,10 @@ Block.prototype.updateAvailablePorts = function(args) {
   if (port == this.port) { //&& (this.hlButton != null || this.updateBlockType)) {
     this.updateActive()
   } 
+  //Calling this function for port -1 signals a change in device. Find ports for all blocks.
+  if (port == -1) {
+    HL_Utils.findPorts(this)
+  }
 }
 
 /**

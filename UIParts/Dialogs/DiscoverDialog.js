@@ -35,6 +35,16 @@ DiscoverDialog.prototype.constructor = DiscoverDialog;
  */
 DiscoverDialog.prototype.show = function() {
   const DD = DiscoverDialog;
+  if (Hatchling && GuiElements.isPWA) {
+    let device = DeviceHatchling.getManager().getDevice(0)
+    if (device != null) {
+      console.log("***** skip the scan")
+      this.discoveredDevices = [device]
+      this.rowCount = 1
+      RowDialog.prototype.show.call(this);
+      return
+    }
+  }
   RowDialog.prototype.show.call(this);
   this.discoverDevices();
 };
@@ -90,6 +100,13 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
     return parseFloat(b.RSSI) - parseFloat(a.RSSI);
   });
 
+  if (Hatchling) {
+    let device = DeviceHatchling.getManager().getDevice(0)
+    if (device != null) {
+      this.discoveredDevices.unshift(device)
+    }
+  }
+
   //if ((updateDeviceListCounter % 40) == 0){
   this.reloadRows(this.discoveredDevicesRSSISorted.length);
   //};
@@ -117,17 +134,27 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
   }
 
   const r = Hatchling ? 7 : null
+  const m = Hatchling ? 2 : 0
   // TODO: use RowDialog.createMainBnWithText instead
-  const button = new Button(0, y, width, RowDialog.bnHeight, contentGroup, color, r, r);
+  const button = new Button(0 + m, y + m, width - 2*m, RowDialog.bnHeight - 2*m, contentGroup, color, r, r);
   if (FinchBlox) {
     button.addDeviceInfo(this.discoveredDevices[index]);
   } else {
     button.addText(this.discoveredDevices[index].listLabel);
   }
   const me = this;
-  button.setCallbackFunction(function() {
-    me.selectDevice(me.discoveredDevices[index]);
-  }, true);
+  if (this.discoveredDevices[index].connected) {
+    console.log("*** setting disconnect callback")
+    button.setCallbackFunction(function() {
+      me.closeDialog()
+      me.discoveredDevices[index].disconnect()
+    }, true)
+  } else {
+    console.log("*** setting selectDevice callback")
+    button.setCallbackFunction(function() {
+      me.selectDevice(me.discoveredDevices[index]);
+    }, true);
+  }
   button.makeScrollable();
 };
 
@@ -136,9 +163,12 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
  * @param device
  */
 DiscoverDialog.prototype.selectDevice = function(device) {
+  console.log(device)
   this.deviceClass = DeviceManager.getDeviceClass(device);
   this.deviceClass.getManager().setOneDevice(device);
-  this.closeDialog();
+  if (!Hatchling) {
+    this.closeDialog();
+  }
 };
 
 /**

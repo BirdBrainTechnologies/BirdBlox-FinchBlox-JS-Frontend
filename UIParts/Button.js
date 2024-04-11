@@ -357,7 +357,7 @@ Button.prototype.addDeviceInfo = function(device) {
   const color2 = Hatchling ? Colors.ballyBrandBlueDark : Colors.bbtDarkGray;
   const font = Button.defaultFont;
   const font2 = Font.secondaryUiFont(16);
-  const pathId = Hatchling ? VectorPaths.bdAdd : VectorPaths.faPlusCircle;
+  let pathId = Hatchling ? VectorPaths.bdAdd : VectorPaths.faPlusCircle;
   const iconH = this.height * 0.6;
   const iconW = VectorIcon.computeWidth(pathId, iconH);
   const margin = (this.height - iconH) / 2;
@@ -371,9 +371,16 @@ Button.prototype.addDeviceInfo = function(device) {
     const dIconH = 25
     const dIconY = (this.height - dIconH)/2 
     const dIconX = margin
-    const dIcon = new VectorIcon(dIconX, dIconY, VectorPaths.bdClose, Colors.ballyGray, dIconH, this.group)
+    const dIconPath = device.connected ? VectorPaths.bdConnected : VectorPaths.bdClose
+    const dIconColor = device.connected ? Colors.ballyBrandBlue : Colors.ballyGray
+    const dIcon = new VectorIcon(dIconX, dIconY, dIconPath, dIconColor, dIconH, this.group)
     this.textE = GuiElements.draw.text(2*margin + dIconH, textY, device.shortName, font, color2);
     this.group.appendChild(this.textE);
+
+    if (device.connected) { 
+      pathId = VectorPaths.bdDisconnect 
+      this.updateBgColor(Colors.ballyBrandBlueLight, Colors.ballyBrandBlue)
+    }
   } else {
     this.textE = GuiElements.draw.text(textX, textY, device.shortName, font, color);
     this.group.appendChild(this.textE);

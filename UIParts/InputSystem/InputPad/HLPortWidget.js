@@ -12,7 +12,7 @@ InputWidget.HLPortWidget = function(portType, parent) {
   this.width = this.standardWidth
 	this.height = this.standardWidth * 3/4 
 	this.optionDisabled = [true, true, true, true, true, true]
-	this.value = HL_Utils.noPort //Always start with no connection
+	this.value = HL_Utils.unknownPort
 	this.portType = portType
 	this.type = "hatchling_" + portType
   this.buttons = []
@@ -37,9 +37,16 @@ InputWidget.HLPortWidget.prototype.removePlugArea = function() {
 
 
 InputWidget.HLPortWidget.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
+  
+  this.value = data[this.index]
+  if (this.value == HL_Utils.unknownPort) {
+    this.parent.closeInputSystem()
+    new HelpingHand(TitleBar.finchButton)
+    return
+  }
+
   InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
 
-  this.value = data[this.index]
   this.buttons = []
   //const noPort = this.value == HL_Utils.noPort
 

@@ -13,6 +13,7 @@ const HL_Utils = {}
 //HL_Utils.portColors = ["#0000FF", "#FFFF00", "#00FF88", "#FF00FF", "#FFFFFF", "#FF4400"]//["#00f", "#ff0", "#0f0", "#f0f", "#0ff", "#f80"]//["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
 HL_Utils.portNames = ["A", "B", "C", "D", "E", "F"]
 HL_Utils.noPort = "X"
+HL_Utils.unknownPort = "?"
 HL_Utils.symbolDict = {
   "0000001010000001000101110": "bdSymbolHappy", //smiley face
   "0000001010000000111010001": "bdSymbolFrown", //frowny face
@@ -57,7 +58,7 @@ HL_Utils.addHLButton = function(block, portType) {
   block.hlButton = new BlockButton(block, 14)//14, 10)//12)//10)//15)//20);
   //block.hlButton.addSlider("hatchling_" + portType, HL_Utils.noPort, HL_Utils.portNames)// Colors.bbtDarkGray, HL_Utils.portColors)
   block.hlButton.addPortWidget(portType)
-  block.hlButton.button.unbutton()
+  //block.hlButton.button.unbutton()
   HL_Utils.findPorts(block)
 }
 HL_Utils.updatePort = function(block) {
@@ -68,9 +69,13 @@ HL_Utils.updatePort = function(block) {
   }
 }
 HL_Utils.findPorts = function(block) {
-  console.log("findPorts for " + block.constructor.name + " " + block.portType)
+  console.log("findPorts for " + block.constructor.name + " " + block.portType + " " + ((block.stack != null) ? block.stack.isDisplayStack : ""))
   let device = DeviceHatchling.getManager().getDevice(0);
   if (block.hlButton != null && device != null) {
+    if (block.hlButton.values[0] == HL_Utils.unknownPort) {
+      block.hlButton.button.show()
+    }
+
     let ports = device.getPortsByType(block.portType)
     //console.log("findPorts found:")
     //console.log(ports)
@@ -87,7 +92,7 @@ HL_Utils.findPorts = function(block) {
       block.hlButton.updateValue(HL_Utils.noPort, 0)
     }
 
-    if (ports.length <= 1) {
+    if (ports.length == 1) {
       block.hlButton.button.unbutton()
     } else {
       block.hlButton.button.rebutton()
@@ -97,6 +102,10 @@ HL_Utils.findPorts = function(block) {
     if (device.updateListener != null && device.updateListener.parent == block.hlButton) {
       device.updateListener.value = device.updateListener.parent.values[0]
     }
+  } else if (block.hlButton != null) {
+    block.hlButton.updateValue(HL_Utils.unknownPort, 0)
+    //block.hlButton.button.unbutton()
+    //block.hlButton.button.hide()
   }
 }
 HL_Utils.checkActive = function(block) {

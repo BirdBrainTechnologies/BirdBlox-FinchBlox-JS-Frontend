@@ -349,6 +349,9 @@ DeviceManager.prototype.devicesChanged = function(deviceClass, multiple) {
   DeviceManager.updateStatus();
   CodeManager.updateConnectionStatus();
   DeviceManager.checkBattery();
+  if (Hatchling) {
+    CodeManager.updateAvailablePorts(-1)
+  }
 };
 
 /**
@@ -672,6 +675,10 @@ DeviceManager.updateStatus = function() {
   const DM = DeviceManager;
   let totalStatus = DM.getStatus();
   if (DM.statusListener != null) DM.statusListener(totalStatus);
+  if (Hatchling && RowDialog.currentDialog != null) {
+    //Update the discover dialog when connection status changes
+    RowDialog.currentDialog.reloadRows()
+  }
   return totalStatus;
 };
 

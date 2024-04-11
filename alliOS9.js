@@ -5703,6 +5703,9 @@ DeviceManager.prototype.devicesChanged = function(deviceClass, multiple) {
   DeviceManager.updateStatus();
   CodeManager.updateConnectionStatus();
   DeviceManager.checkBattery();
+  if (Hatchling) {
+    CodeManager.updateAvailablePorts(-1)
+  }
 };
 
 /**
@@ -6026,6 +6029,10 @@ DeviceManager.updateStatus = function() {
   var DM = DeviceManager;
   var totalStatus = DM.getStatus();
   if (DM.statusListener != null) DM.statusListener(totalStatus);
+  if (Hatchling && RowDialog.currentDialog != null) {
+    //Update the discover dialog when connection status changes
+    RowDialog.currentDialog.reloadRows()
+  }
   return totalStatus;
 };
 
@@ -6427,7 +6434,7 @@ DeviceHatchling.prototype.receiveBroadcast = function(msg) {
   //The hatchling state is now sent as a broadcast message. more work will need to be done if 
   // we want to support other broadcast messages...
   if (msg[0] != 252) {
-    console.error("Unsupported broadcast message " + msg[0])
+    console.error("Unsupported broadcast message " + msg)
     return
   }
 
@@ -12965,10 +12972,34 @@ TitleBar.makeButtons = function() {
     if (Hatchling) {
       TB.levelButton.remove()
       TB.levelButton = new HLLevelSwitch(TB.levelBnX, y)
+
+      //Add the zoom and recenter buttons
+      var zoomBnW = 25
+      var zoomBnM = 5 
+      TB.zoomBnGroup = GuiElements.create.group(TB.width - zoomBnW - 1.5*zoomBnM, TB.height + 40, TBLayer);
+      var zoomBnBg = GuiElements.draw.rect(0, 0, zoomBnW + 3*zoomBnM, 3*zoomBnW + 6*zoomBnM, TB.bg, 10, 10);
+      TB.zoomBnGroup.appendChild(zoomBnBg);
+      var zoomPlusBn = new Button(zoomBnM, 2*zoomBnM, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
+      zoomPlusBn.addColorIcon(VectorPaths.bdZoomIn, 0.75*zoomBnW, Colors.ballyBrandBlue)
+      zoomPlusBn.setCallbackFunction(function() {
+        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, false)
+      }, false)
+      var zoomMinusBn = new Button(zoomBnM, 3*zoomBnM + zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
+      zoomMinusBn.addColorIcon(VectorPaths.bdZoomOut, 0.17*zoomBnW, Colors.ballyBrandBlue)
+      zoomMinusBn.setCallbackFunction(function() {
+        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, true)
+      }, false)
+      var recenterBn = new Button(zoomBnM, 4*zoomBnM + 2*zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
+      recenterBn.addColorIcon(VectorPaths.bdRecenter, 0.85*zoomBnW, Colors.ballyBrandBlue)
+      recenterBn.setCallbackFunction(function() {
+        TabManager.activeTab.recenter()
+      }, false)
+
     }
 
     TB.updateStatus = function(status) {
       //GuiElements.alert("TitleBar update status to " + status);
+      console.log("TitleBar update status to " + status)
       var finchBn = TitleBar.finchButton;
       var color = Hatchling ? Colors.ballyGrayLight : Colors.stopRed;
       var outlineColor = Hatchling ? Colors.ballyRed : Colors.darkenColor(Colors.stopRed, 0.5);
@@ -13002,7 +13033,9 @@ TitleBar.makeButtons = function() {
       }
       finchBn.updateBgColor(color);
       if (Hatchling) { 
-        GuiElements.update.color(finchBn.icon.pathE, outlineColor) 
+        //GuiElements.update.color(finchBn.icon.pathE, outlineColor) 
+        finchBn.icon.setColor(outlineColor)
+        finchBn.iconColor = outlineColor
         GuiElements.update.stroke(finchBn.bgRect, outlineColor, Button.strokeW)
       } else {
         GuiElements.update.stroke(finchBn.icon.pathE, outlineColor, 4);
@@ -13018,16 +13051,20 @@ TitleBar.makeButtons = function() {
     TB.finchButton.addFinchBnIcons();
     TB.finchButton.setCallbackFunction(function() {
       var deviceClass = Hatchling ? DeviceHatchling : DeviceFinch
-      switch (DeviceManager.getStatus()) {
-        case DeviceManager.statuses.noDevices:
-          (new DiscoverDialog(deviceClass)).show();
-          break;
-        case DeviceManager.statuses.connected:
-          DeviceManager.removeAllDevices();
-          break;
-        default:
-          DeviceManager.removeAllDevices();
-          (new DiscoverDialog(deviceClass)).show();
+      if (Hatchling) {
+        (new DiscoverDialog(deviceClass)).show();
+      } else {
+        switch (DeviceManager.getStatus()) {
+          case DeviceManager.statuses.noDevices:
+            (new DiscoverDialog(deviceClass)).show();
+            break;
+          case DeviceManager.statuses.connected:
+            DeviceManager.removeAllDevices();
+            break;
+          default:
+            DeviceManager.removeAllDevices();
+            (new DiscoverDialog(deviceClass)).show();
+        }
       }
     }, true);
 
@@ -15510,9 +15547,16 @@ Button.prototype.addDeviceInfo = function(device) {
     var dIconH = 25
     var dIconY = (this.height - dIconH)/2 
     var dIconX = margin
-    var dIcon = new VectorIcon(dIconX, dIconY, VectorPaths.bdClose, Colors.ballyGray, dIconH, this.group)
+    var dIconPath = device.connected ? VectorPaths.bdConnected : VectorPaths.bdClose
+    var dIconColor = device.connected ? Colors.ballyBrandBlue : Colors.ballyGray
+    var dIcon = new VectorIcon(dIconX, dIconY, dIconPath, dIconColor, dIconH, this.group)
     this.textE = GuiElements.draw.text(2*margin + dIconH, textY, device.shortName, font, color2);
     this.group.appendChild(this.textE);
+
+    if (device.connected) { 
+      pathId = VectorPaths.bdDisconnect 
+      this.updateBgColor(Colors.ballyBrandBlueLight, Colors.ballyBrandBlue)
+    }
   } else {
     this.textE = GuiElements.draw.text(textX, textY, device.shortName, font, color);
     this.group.appendChild(this.textE);
@@ -19662,7 +19706,7 @@ InputWidget.HLPortWidget = function(portType, parent) {
   this.width = this.standardWidth
 	this.height = this.standardWidth * 3/4 
 	this.optionDisabled = [true, true, true, true, true, true]
-	this.value = HL_Utils.noPort //Always start with no connection
+	this.value = HL_Utils.unknownPort
 	this.portType = portType
 	this.type = "hatchling_" + portType
   this.buttons = []
@@ -19687,9 +19731,16 @@ InputWidget.HLPortWidget.prototype.removePlugArea = function() {
 
 
 InputWidget.HLPortWidget.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
+  
+  this.value = data[this.index]
+  if (this.value == HL_Utils.unknownPort) {
+    this.parent.closeInputSystem()
+    new HelpingHand(TitleBar.finchButton)
+    return
+  }
+
   InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
 
-  this.value = data[this.index]
   this.buttons = []
   //var noPort = this.value == HL_Utils.noPort
 
@@ -24754,7 +24805,7 @@ Tab.prototype.wheelZoom = function(x, y, zoomIn) {
   this.startZoom = this.zoomFactor;
   this.updateTabDim();
 
-  var zoomDelta = zoomIn ? 0.9 : 1.1
+  var zoomDelta = zoomIn ? 0.95 : 1.05
   this.zoomFactor = this.startZoom * zoomDelta;
   this.zoomFactor = Math.max(TabManager.minZoom, Math.min(TabManager.maxZoom, this.zoomFactor));
   var zoomRatio = this.zoomFactor / this.startZoom;
@@ -25247,7 +25298,7 @@ RowDialog.setConstants = function() {
     RowDialog.bgColor = Colors.ballyGrayLight;
     RowDialog.bnMargin = 10;
     RowDialog.cornerR = 10;
-    RowDialog.bnHeight = 50;//SmoothMenuBnList.bnHeight;
+    RowDialog.bnHeight = 54;//50;//SmoothMenuBnList.bnHeight;
     RowDialog.titleBarH = RowDialog.bnHeight * 1.5;
     RowDialog.outlineColor = Colors.ballyGray;
   } else if (FinchBlox) {
@@ -27447,6 +27498,16 @@ DiscoverDialog.prototype.constructor = DiscoverDialog;
  */
 DiscoverDialog.prototype.show = function() {
   var DD = DiscoverDialog;
+  if (Hatchling && GuiElements.isPWA) {
+    var device = DeviceHatchling.getManager().getDevice(0)
+    if (device != null) {
+      console.log("***** skip the scan")
+      this.discoveredDevices = [device]
+      this.rowCount = 1
+      RowDialog.prototype.show.call(this);
+      return
+    }
+  }
   RowDialog.prototype.show.call(this);
   this.discoverDevices();
 };
@@ -27502,6 +27563,13 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
     return parseFloat(b.RSSI) - parseFloat(a.RSSI);
   });
 
+  if (Hatchling) {
+    var device = DeviceHatchling.getManager().getDevice(0)
+    if (device != null) {
+      this.discoveredDevices.unshift(device)
+    }
+  }
+
   //if ((updateDeviceListCounter % 40) == 0){
   this.reloadRows(this.discoveredDevicesRSSISorted.length);
   //};
@@ -27529,17 +27597,27 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
   }
 
   var r = Hatchling ? 7 : null
+  var m = Hatchling ? 2 : 0
   // TODO: use RowDialog.createMainBnWithText instead
-  var button = new Button(0, y, width, RowDialog.bnHeight, contentGroup, color, r, r);
+  var button = new Button(0 + m, y + m, width - 2*m, RowDialog.bnHeight - 2*m, contentGroup, color, r, r);
   if (FinchBlox) {
     button.addDeviceInfo(this.discoveredDevices[index]);
   } else {
     button.addText(this.discoveredDevices[index].listLabel);
   }
   var me = this;
-  button.setCallbackFunction(function() {
-    me.selectDevice(me.discoveredDevices[index]);
-  }, true);
+  if (this.discoveredDevices[index].connected) {
+    console.log("*** setting disconnect callback")
+    button.setCallbackFunction(function() {
+      me.closeDialog()
+      me.discoveredDevices[index].disconnect()
+    }, true)
+  } else {
+    console.log("*** setting selectDevice callback")
+    button.setCallbackFunction(function() {
+      me.selectDevice(me.discoveredDevices[index]);
+    }, true);
+  }
   button.makeScrollable();
 };
 
@@ -27548,9 +27626,12 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
  * @param device
  */
 DiscoverDialog.prototype.selectDevice = function(device) {
+  console.log(device)
   this.deviceClass = DeviceManager.getDeviceClass(device);
   this.deviceClass.getManager().setOneDevice(device);
-  this.closeDialog();
+  if (!Hatchling) {
+    this.closeDialog();
+  }
 };
 
 /**
@@ -32589,6 +32670,10 @@ Block.prototype.updateAvailablePorts = function(args) {
   if (port == this.port) { //&& (this.hlButton != null || this.updateBlockType)) {
     this.updateActive()
   } 
+  //Calling this function for port -1 signals a change in device. Find ports for all blocks.
+  if (port == -1) {
+    HL_Utils.findPorts(this)
+  }
 }
 
 /**
@@ -36561,7 +36646,18 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
         this.button.updateBgColor(color);
       }
     } else if (this.widgets[i].type == "colorPicker") {
-      this.button.updateBgColor(this.values[i])
+      //this.button.updateBgColor(this.values[i])
+      if (this.colorCircle == null) { 
+        var cx = this.button.width/2 
+        var cy = this.button.height/2 
+        var r = cy * 2/3
+        this.colorCircle = GuiElements.draw.circle(cx, cy, r, this.values[i], this.button.group)
+        GuiElements.update.stroke(this.colorCircle, Colors.white, 1)
+        TouchReceiver.addListenersBN(this.colorCircle, this.button)
+      } else {
+        GuiElements.update.color(this.colorCircle, this.values[i])
+      }
+      
 
     } else if (this.widgets[i].type == "piano") {
       text[i] = InputWidget.Piano.noteStrings[this.values[i]];
@@ -36650,6 +36746,15 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
       }
       this.button.addText(label, this.font, this.textColor);
       this.currentLabel = label
+      if (this.widgets[0].type.startsWith("hatchling") && (label == HL_Utils.noPort)) { //|| label == HL_Utils.unknownPort)) {
+        var iconPath = (label == HL_Utils.noPort) ? VectorPaths.bdClose : VectorPaths.bdHatchling
+        var iconH = (label == HL_Utils.noPort) ? 10 : 8
+        this.button.addColorIcon(iconPath, iconH, Colors.ballyRed)
+        /*if (label == HL_Utils.unknownPort) {
+          this.button.icon.addSecondPath(VectorPaths.bdHatchlingDisconnected, Colors.white)
+          TouchReceiver.addListenersBN(this.button.icon.pathE2, this.button)
+        }*/
+      }
     }
 
     //this.button.addText(label, this.font, this.textColor);
@@ -36750,7 +36855,7 @@ BlockButton.prototype.addColorPicker = function(startingValue) {
  * Adds port chooser widget to this button. Hatchling only.
  */
 BlockButton.prototype.addPortWidget = function(portType) {
-  this.addWidget(new InputWidget.HLPortWidget(portType, this), "", HL_Utils.noPort)
+  this.addWidget(new InputWidget.HLPortWidget(portType, this), "", HL_Utils.unknownPort)
 }
 
 /**
@@ -42605,6 +42710,7 @@ var HL_Utils = {}
 //HL_Utils.portColors = ["#0000FF", "#FFFF00", "#00FF88", "#FF00FF", "#FFFFFF", "#FF4400"]//["#00f", "#ff0", "#0f0", "#f0f", "#0ff", "#f80"]//["#f00", "#ff0", "#0f0", "#0ff", "#00f", "#f0f"]
 HL_Utils.portNames = ["A", "B", "C", "D", "E", "F"]
 HL_Utils.noPort = "X"
+HL_Utils.unknownPort = "?"
 HL_Utils.symbolDict = {
   "0000001010000001000101110": "bdSymbolHappy", //smiley face
   "0000001010000000111010001": "bdSymbolFrown", //frowny face
@@ -42649,7 +42755,7 @@ HL_Utils.addHLButton = function(block, portType) {
   block.hlButton = new BlockButton(block, 14)//14, 10)//12)//10)//15)//20);
   //block.hlButton.addSlider("hatchling_" + portType, HL_Utils.noPort, HL_Utils.portNames)// Colors.bbtDarkGray, HL_Utils.portColors)
   block.hlButton.addPortWidget(portType)
-  block.hlButton.button.unbutton()
+  //block.hlButton.button.unbutton()
   HL_Utils.findPorts(block)
 }
 HL_Utils.updatePort = function(block) {
@@ -42660,9 +42766,13 @@ HL_Utils.updatePort = function(block) {
   }
 }
 HL_Utils.findPorts = function(block) {
-  console.log("findPorts for " + block.constructor.name + " " + block.portType)
+  console.log("findPorts for " + block.constructor.name + " " + block.portType + " " + ((block.stack != null) ? block.stack.isDisplayStack : ""))
   var device = DeviceHatchling.getManager().getDevice(0);
   if (block.hlButton != null && device != null) {
+    if (block.hlButton.values[0] == HL_Utils.unknownPort) {
+      block.hlButton.button.show()
+    }
+
     var ports = device.getPortsByType(block.portType)
     //console.log("findPorts found:")
     //console.log(ports)
@@ -42679,7 +42789,7 @@ HL_Utils.findPorts = function(block) {
       block.hlButton.updateValue(HL_Utils.noPort, 0)
     }
 
-    if (ports.length <= 1) {
+    if (ports.length == 1) {
       block.hlButton.button.unbutton()
     } else {
       block.hlButton.button.rebutton()
@@ -42689,6 +42799,10 @@ HL_Utils.findPorts = function(block) {
     if (device.updateListener != null && device.updateListener.parent == block.hlButton) {
       device.updateListener.value = device.updateListener.parent.values[0]
     }
+  } else if (block.hlButton != null) {
+    block.hlButton.updateValue(HL_Utils.unknownPort, 0)
+    //block.hlButton.button.unbutton()
+    //block.hlButton.button.hide()
   }
 }
 HL_Utils.checkActive = function(block) {

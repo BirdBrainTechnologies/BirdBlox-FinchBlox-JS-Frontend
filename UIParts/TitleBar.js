@@ -285,10 +285,34 @@ TitleBar.makeButtons = function() {
     if (Hatchling) {
       TB.levelButton.remove()
       TB.levelButton = new HLLevelSwitch(TB.levelBnX, y)
+
+      //Add the zoom and recenter buttons
+      const zoomBnW = 25
+      const zoomBnM = 5 
+      TB.zoomBnGroup = GuiElements.create.group(TB.width - zoomBnW - 1.5*zoomBnM, TB.height + 40, TBLayer);
+      const zoomBnBg = GuiElements.draw.rect(0, 0, zoomBnW + 3*zoomBnM, 3*zoomBnW + 6*zoomBnM, TB.bg, 10, 10);
+      TB.zoomBnGroup.appendChild(zoomBnBg);
+      const zoomPlusBn = new Button(zoomBnM, 2*zoomBnM, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
+      zoomPlusBn.addColorIcon(VectorPaths.bdZoomIn, 0.75*zoomBnW, Colors.ballyBrandBlue)
+      zoomPlusBn.setCallbackFunction(function() {
+        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, false)
+      }, false)
+      const zoomMinusBn = new Button(zoomBnM, 3*zoomBnM + zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
+      zoomMinusBn.addColorIcon(VectorPaths.bdZoomOut, 0.17*zoomBnW, Colors.ballyBrandBlue)
+      zoomMinusBn.setCallbackFunction(function() {
+        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, true)
+      }, false)
+      const recenterBn = new Button(zoomBnM, 4*zoomBnM + 2*zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
+      recenterBn.addColorIcon(VectorPaths.bdRecenter, 0.85*zoomBnW, Colors.ballyBrandBlue)
+      recenterBn.setCallbackFunction(function() {
+        TabManager.activeTab.recenter()
+      }, false)
+
     }
 
     TB.updateStatus = function(status) {
       //GuiElements.alert("TitleBar update status to " + status);
+      console.log("TitleBar update status to " + status)
       const finchBn = TitleBar.finchButton;
       let color = Hatchling ? Colors.ballyGrayLight : Colors.stopRed;
       let outlineColor = Hatchling ? Colors.ballyRed : Colors.darkenColor(Colors.stopRed, 0.5);
@@ -322,7 +346,9 @@ TitleBar.makeButtons = function() {
       }
       finchBn.updateBgColor(color);
       if (Hatchling) { 
-        GuiElements.update.color(finchBn.icon.pathE, outlineColor) 
+        //GuiElements.update.color(finchBn.icon.pathE, outlineColor) 
+        finchBn.icon.setColor(outlineColor)
+        finchBn.iconColor = outlineColor
         GuiElements.update.stroke(finchBn.bgRect, outlineColor, Button.strokeW)
       } else {
         GuiElements.update.stroke(finchBn.icon.pathE, outlineColor, 4);
@@ -338,16 +364,20 @@ TitleBar.makeButtons = function() {
     TB.finchButton.addFinchBnIcons();
     TB.finchButton.setCallbackFunction(function() {
       const deviceClass = Hatchling ? DeviceHatchling : DeviceFinch
-      switch (DeviceManager.getStatus()) {
-        case DeviceManager.statuses.noDevices:
-          (new DiscoverDialog(deviceClass)).show();
-          break;
-        case DeviceManager.statuses.connected:
-          DeviceManager.removeAllDevices();
-          break;
-        default:
-          DeviceManager.removeAllDevices();
-          (new DiscoverDialog(deviceClass)).show();
+      if (Hatchling) {
+        (new DiscoverDialog(deviceClass)).show();
+      } else {
+        switch (DeviceManager.getStatus()) {
+          case DeviceManager.statuses.noDevices:
+            (new DiscoverDialog(deviceClass)).show();
+            break;
+          case DeviceManager.statuses.connected:
+            DeviceManager.removeAllDevices();
+            break;
+          default:
+            DeviceManager.removeAllDevices();
+            (new DiscoverDialog(deviceClass)).show();
+        }
       }
     }, true);
 
