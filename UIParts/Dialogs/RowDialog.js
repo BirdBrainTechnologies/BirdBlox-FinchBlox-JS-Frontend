@@ -65,7 +65,10 @@ RowDialog.setConstants = function() {
 
 
   // The dialog tries to take up a certain ratio of the smaller of the screen's dimensions
-  if (FinchBlox) {
+  if (Hatchling) {
+    RowDialog.widthRatio = 0.7//0.65;
+    RowDialog.heightRatio = 0.2//0.75;
+  } else if (FinchBlox) {
     RowDialog.widthRatio = 0.7;
     RowDialog.heightRatio = 0.2;
   } else {
@@ -74,7 +77,10 @@ RowDialog.setConstants = function() {
   }
 
   // But if that is too small, it uses the min dimensions
-  if (FinchBlox) {
+  if (Hatchling) {
+    RowDialog.minWidth = 500;
+    RowDialog.minHeight = 400;
+  } else if (FinchBlox) {
     RowDialog.minWidth = 400;
     RowDialog.minHeight = 200;
   } else {
@@ -342,6 +348,7 @@ RowDialog.prototype.createCenteredBn = function(y, entry) {
  * @return {SmoothScrollBox}
  */
 RowDialog.prototype.createScrollBox = function() {
+  console.log("*** " + this.scrollBoxWidth + " " + this.scrollBoxHeight + " " + this.rowCount)
   if (this.rowCount === 0) return null;
   let x = this.x + this.scrollBoxX;
   let y = this.y + this.scrollBoxY;
@@ -440,6 +447,7 @@ RowDialog.prototype.hide = function() {
  * @param {number} rowCount - The new number of rows
  */
 RowDialog.prototype.reloadRows = function(rowCount) {
+  console.log("*** reloadRows " + rowCount)
   this.rowCount = rowCount;
   if (this.visible) {
     let scroll = this.getScroll();

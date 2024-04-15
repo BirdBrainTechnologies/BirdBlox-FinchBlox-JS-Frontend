@@ -1474,7 +1474,7 @@ Block.prototype.updateAvailablePorts = function(args) {
   let port = args[0]
   let oldPortType = args[1]
   let newPortType = args[2]
-  console.log("Block updateAvailablePorts " + port + " " + oldPortType + " " + newPortType)
+  //console.log("Block updateAvailablePorts " + port + " " + oldPortType + " " + newPortType)
   if (this.portType == oldPortType || this.portType == newPortType) {
     HL_Utils.findPorts(this)
   }

@@ -2120,7 +2120,7 @@ MicroBlocksRuntime.prototype.sendMsg = function(msgName, chunkID, byteList) {
 		msg.push(254) // terminator byte (helps board detect dropped bytes)
 	}
 	let dataToSend = new Uint8Array(msg)
-	console.log("sendMsg sending [" + dataToSend + "]")
+	//console.log("sendMsg sending [" + dataToSend + "]")
 
 	/*if ('boardie' == portName) { // send all data at once to boardie
 		(writeSerialPort port dataToSend)
@@ -2194,10 +2194,10 @@ MicroBlocksRuntime.prototype.waitForResponse = async function() {
 			return true
 		}*/
 		if (this.lastPingRecvMSecs > start) { 
-			console.log("waitForResponse done.")
+			//console.log("waitForResponse done.")
 			return true 
 		} else {
-			console.log("waitForResponse start=" + start + " lastPing=" + this.lastPingRecvMSecs)
+			//console.log("waitForResponse start=" + start + " lastPing=" + this.lastPingRecvMSecs)
 		}
 
 		this.sendMsg('pingMsg')
@@ -2297,7 +2297,7 @@ method skipMessage SmallRuntime discard {
 // Message handling
 
 MicroBlocksRuntime.prototype.handleMessage = function(msg) {
-	console.log("handleMessage: [" + msg + "]")
+	//console.log("handleMessage: [" + msg + "]")
 	this.lastPingRecvMSecs = Date.now() //(msecsSinceStart) // reset ping timer when any valid message is recevied
 	let op = msg[1]
 	let chunkID = msg[2]

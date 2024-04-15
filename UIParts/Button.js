@@ -74,7 +74,7 @@ Button.setGraphics = function() {
     Button.disabledFore = Colors.black;
   }
 
-  // The suggested font for the forground of buttons
+  // The suggested font for the foreground of buttons
   Button.defaultFont = Font.uiFont(16);
 
   Button.defaultIconH = 15;

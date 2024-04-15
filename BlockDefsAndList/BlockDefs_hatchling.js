@@ -64,12 +64,12 @@ HL_Utils.addHLButton = function(block, portType) {
 HL_Utils.updatePort = function(block) {
   if (block.hlButton != null) {
     block.port = HL_Utils.portNames.indexOf(block.hlButton.values[0])//HL_Utils.portColors.indexOf(block.hlButton.values[0])
-    console.log("update port for " + block.constructor.name + " to " + block.port)
+    //console.log("update port for " + block.constructor.name + " to " + block.port)
     block.updateActive()
   }
 }
 HL_Utils.findPorts = function(block) {
-  console.log("findPorts for " + block.constructor.name + " " + block.portType + " " + ((block.stack != null) ? block.stack.isDisplayStack : ""))
+  //console.log("findPorts for " + block.constructor.name + " " + block.portType + " " + ((block.stack != null) ? block.stack.isDisplayStack : ""))
   let device = DeviceHatchling.getManager().getDevice(0);
   if (block.hlButton != null && device != null) {
     if (block.hlButton.values[0] == HL_Utils.unknownPort) {

@@ -295,12 +295,12 @@ TitleBar.makeButtons = function() {
       const zoomPlusBn = new Button(zoomBnM, 2*zoomBnM, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
       zoomPlusBn.addColorIcon(VectorPaths.bdZoomIn, 0.75*zoomBnW, Colors.ballyBrandBlue)
       zoomPlusBn.setCallbackFunction(function() {
-        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, false)
+        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, false, true)
       }, false)
       const zoomMinusBn = new Button(zoomBnM, 3*zoomBnM + zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
       zoomMinusBn.addColorIcon(VectorPaths.bdZoomOut, 0.17*zoomBnW, Colors.ballyBrandBlue)
       zoomMinusBn.setCallbackFunction(function() {
-        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, true)
+        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, true, true)
       }, false)
       const recenterBn = new Button(zoomBnM, 4*zoomBnM + 2*zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
       recenterBn.addColorIcon(VectorPaths.bdRecenter, 0.85*zoomBnW, Colors.ballyBrandBlue)
@@ -338,6 +338,7 @@ TitleBar.makeButtons = function() {
       } else {
         finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
         if (Hatchling) {
+          console.log("*** removing battery level - battery indicator should turn white")
           finchBn.battIcon.removeAddedPaths()
         } else { 
           finchBn.battIcon.pathE.remove();

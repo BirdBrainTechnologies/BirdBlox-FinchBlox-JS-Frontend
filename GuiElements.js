@@ -1405,7 +1405,7 @@ GuiElements.blockInteraction = function() {
     GuiElements.update.opacity(rect, GuiElements.blockerOpacity);
     if (FinchBlox) {
       rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height, Colors.bbtDarkGray);
-      GuiElements.update.opacity(rect, 0.9);
+      GuiElements.update.opacity(rect, (Hatchling ? 0.5 : 0.9));
     }
     GuiElements.layers.dialogBlock.appendChild(rect);
     TouchReceiver.touchInterrupt();

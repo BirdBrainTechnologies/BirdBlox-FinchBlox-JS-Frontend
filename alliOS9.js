@@ -252,6 +252,7 @@ function UserException(message) {
   this.message = message;
   this.name = 'UserException';
   this.stack = (new Error()).stack; // Get the call stack
+  console.error("*** Created UserException '" + this.message + "': " + this.stack)
 }
 
 /**
@@ -5849,7 +5850,7 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected)
   if (robot != null) {
     var wasConnected = robot.getConnected();
     robot.setConnected(isConnected);
-    if (wasConnected && !isConnected && !this.scanning) {
+    if (wasConnected && !isConnected && !this.scanning && !(Hatchling && GuiElements.isPWA)) {
       this.startDiscover(function() {
         return true;
       });
@@ -6031,7 +6032,7 @@ DeviceManager.updateStatus = function() {
   if (DM.statusListener != null) DM.statusListener(totalStatus);
   if (Hatchling && RowDialog.currentDialog != null) {
     //Update the discover dialog when connection status changes
-    RowDialog.currentDialog.reloadRows()
+    RowDialog.currentDialog.reloadRows((totalStatus == 3) ? 1 : 0)
   }
   return totalStatus;
 };
@@ -8069,7 +8070,7 @@ GuiElements.blockInteraction = function() {
     GuiElements.update.opacity(rect, GuiElements.blockerOpacity);
     if (FinchBlox) {
       rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height, Colors.bbtDarkGray);
-      GuiElements.update.opacity(rect, 0.9);
+      GuiElements.update.opacity(rect, (Hatchling ? 0.5 : 0.9));
     }
     GuiElements.layers.dialogBlock.appendChild(rect);
     TouchReceiver.touchInterrupt();
@@ -12982,12 +12983,12 @@ TitleBar.makeButtons = function() {
       var zoomPlusBn = new Button(zoomBnM, 2*zoomBnM, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
       zoomPlusBn.addColorIcon(VectorPaths.bdZoomIn, 0.75*zoomBnW, Colors.ballyBrandBlue)
       zoomPlusBn.setCallbackFunction(function() {
-        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, false)
+        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, false, true)
       }, false)
       var zoomMinusBn = new Button(zoomBnM, 3*zoomBnM + zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
       zoomMinusBn.addColorIcon(VectorPaths.bdZoomOut, 0.17*zoomBnW, Colors.ballyBrandBlue)
       zoomMinusBn.setCallbackFunction(function() {
-        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, true)
+        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, true, true)
       }, false)
       var recenterBn = new Button(zoomBnM, 4*zoomBnM + 2*zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
       recenterBn.addColorIcon(VectorPaths.bdRecenter, 0.85*zoomBnW, Colors.ballyBrandBlue)
@@ -13025,6 +13026,7 @@ TitleBar.makeButtons = function() {
       } else {
         finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
         if (Hatchling) {
+          console.log("*** removing battery level - battery indicator should turn white")
           finchBn.battIcon.removeAddedPaths()
         } else { 
           finchBn.battIcon.pathE.remove();
@@ -15250,7 +15252,7 @@ Button.setGraphics = function() {
     Button.disabledFore = Colors.black;
   }
 
-  // The suggested font for the forground of buttons
+  // The suggested font for the foreground of buttons
   Button.defaultFont = Font.uiFont(16);
 
   Button.defaultIconH = 15;
@@ -23602,7 +23604,7 @@ CodeManager.updateAvailableSensors = function() {
  * that is plugged in to the specified port. Hatchling only.
  */
 CodeManager.updateAvailablePorts = function(port, oldPortType, newPortType) {
-  console.log("CodeManager updateAvailablePorts " + port + " " + oldPortType + " " + newPortType)
+  //console.log("CodeManager updateAvailablePorts " + port + " " + oldPortType + " " + newPortType)
   CodeManager.passRecursivelyDown("updateAvailablePorts", true, port, oldPortType, newPortType);
 }
 
@@ -24177,11 +24179,11 @@ TabManager.endZooming = function() {
  * @param {number} y
  * @param {boolean} zoomIn
  */
-TabManager.wheelZoom = function(x, y, zoomIn) {
+TabManager.wheelZoom = function(x, y, zoomIn, buttonPress) {
   var TM = TabManager;
   if (!TM.zooming) {
     TM.zooming = true;
-    TM.activeTab.wheelZoom(x, y, zoomIn);
+    TM.activeTab.wheelZoom(x, y, zoomIn, buttonPress);
     TM.zooming = false;
   }
 }
@@ -24794,8 +24796,9 @@ Tab.prototype.endZooming = function() {
  * @param {number} x - x coord of mouse during event
  * @param {number} y - y coord of mouse during event
  * @param {boolean} zoomIn - true if the canvas should zoom in
+ * @param {boolean} buttonPress - true if this function called by zoom button rather that wheel event
  */
-Tab.prototype.wheelZoom = function(x, y, zoomIn) {
+Tab.prototype.wheelZoom = function(x, y, zoomIn, buttonPress) {
   if (this.zooming) {
     return;
   }
@@ -24805,7 +24808,7 @@ Tab.prototype.wheelZoom = function(x, y, zoomIn) {
   this.startZoom = this.zoomFactor;
   this.updateTabDim();
 
-  var zoomDelta = zoomIn ? 0.95 : 1.05
+  var zoomDelta = buttonPress ? (zoomIn ? 0.75 : 1.25) : (zoomIn ? 0.975 : 1.025)
   this.zoomFactor = this.startZoom * zoomDelta;
   this.zoomFactor = Math.max(TabManager.minZoom, Math.min(TabManager.maxZoom, this.zoomFactor));
   var zoomRatio = this.zoomFactor / this.startZoom;
@@ -25322,7 +25325,10 @@ RowDialog.setConstants = function() {
 
 
   // The dialog tries to take up a certain ratio of the smaller of the screen's dimensions
-  if (FinchBlox) {
+  if (Hatchling) {
+    RowDialog.widthRatio = 0.7//0.65;
+    RowDialog.heightRatio = 0.2//0.75;
+  } else if (FinchBlox) {
     RowDialog.widthRatio = 0.7;
     RowDialog.heightRatio = 0.2;
   } else {
@@ -25331,7 +25337,10 @@ RowDialog.setConstants = function() {
   }
 
   // But if that is too small, it uses the min dimensions
-  if (FinchBlox) {
+  if (Hatchling) {
+    RowDialog.minWidth = 500;
+    RowDialog.minHeight = 400;
+  } else if (FinchBlox) {
     RowDialog.minWidth = 400;
     RowDialog.minHeight = 200;
   } else {
@@ -25599,6 +25608,7 @@ RowDialog.prototype.createCenteredBn = function(y, entry) {
  * @return {SmoothScrollBox}
  */
 RowDialog.prototype.createScrollBox = function() {
+  console.log("*** " + this.scrollBoxWidth + " " + this.scrollBoxHeight + " " + this.rowCount)
   if (this.rowCount === 0) return null;
   var x = this.x + this.scrollBoxX;
   var y = this.y + this.scrollBoxY;
@@ -25697,6 +25707,7 @@ RowDialog.prototype.hide = function() {
  * @param {number} rowCount - The new number of rows
  */
 RowDialog.prototype.reloadRows = function(rowCount) {
+  console.log("*** reloadRows " + rowCount)
   this.rowCount = rowCount;
   if (this.visible) {
     var scroll = this.getScroll();
@@ -27484,6 +27495,10 @@ function DiscoverDialog(deviceClass) {
   /** @type {Array<Device>} - The discovered devices to use as the content of the dialog */
   this.discoveredDevices = [];
 
+  //Hatchling
+  this.connectedDevices = []
+  this.hasBeenShown = false
+
   /* If an update happens at an inconvenient time (like while scrolling), the dialog is not reloaded; rather
    * updatePending is set to true, the timer is started, and the reload occurs at a better time */
   this.updatePending = false;
@@ -27500,22 +27515,43 @@ DiscoverDialog.prototype.show = function() {
   var DD = DiscoverDialog;
   if (Hatchling && GuiElements.isPWA) {
     var device = DeviceHatchling.getManager().getDevice(0)
-    if (device != null) {
+    console.log("*** DiscoverDialog show " + this.rowCount)
+    console.log(device)
+    console.log(this.discoveredDevices)
+    if (device != null && device.connected) {
+      //Show the connected device - user can scan if they disconnect
       console.log("***** skip the scan")
-      this.discoveredDevices = [device]
+      this.connectedDevices = [device]
+      this.discoveredDevices = []
+      this.rowCount = 1
+      RowDialog.prototype.show.call(this);
+      this.hasBeenShown = true
+      return
+    } else if (this.discoveredDevices.length == 0 && this.hasBeenShown) {
+      //No devices. Show new scan button
+      console.log("*** display new scan button")
+      this.connectedDevices = []
       this.rowCount = 1
       RowDialog.prototype.show.call(this);
       return
+    } else if (this.discoveredDevices.length == 1) {
+      //This is a weird case where the back end sends the device you are connecting before it is connected.
+      console.log("*** one discovered device")
+      RowDialog.prototype.show.call(this);
+      return
     }
+    this.hasBeenShown = true
   }
   RowDialog.prototype.show.call(this);
   this.discoverDevices();
+
 };
 
 /**
  * Starts the scan for devices and registers the dialog to receive updates when devices are detected
  */
 DiscoverDialog.prototype.discoverDevices = function() {
+  console.log("*** DiscoverDialog discoverDevices")
   var me = this;
   // Start the discover, and if the DeviceManager wants to know if it should ever restart a scan...
   this.deviceClass.getManager().startDiscover(function() {
@@ -27566,12 +27602,12 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
   if (Hatchling) {
     var device = DeviceHatchling.getManager().getDevice(0)
     if (device != null) {
-      this.discoveredDevices.unshift(device)
+      this.connectedDevices = [device]
     }
   }
 
   //if ((updateDeviceListCounter % 40) == 0){
-  this.reloadRows(this.discoveredDevicesRSSISorted.length);
+  this.reloadRows(this.discoveredDevicesRSSISorted.length + this.connectedDevices.length);
   //};
 
   //	this.reloadRows(this.discoveredDevices.length);
@@ -27587,35 +27623,58 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
  */
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
 
+  var deviceList = this.connectedDevices.concat(this.discoveredDevices)
+  var device = deviceList[index]
+  console.log(deviceList)
+
+
   var color = Button.bg;
-  if (FinchBlox) {
+  if (FinchBlox && !Hatchling) {
     if (index % 2 == 0) {
       color = Colors.white;
     } else {
       color = Colors.fbGray;
     }
   }
+  if (Hatchling) {
+    color = Colors.white
+  }
 
   var r = Hatchling ? 7 : null
   var m = Hatchling ? 2 : 0
   // TODO: use RowDialog.createMainBnWithText instead
   var button = new Button(0 + m, y + m, width - 2*m, RowDialog.bnHeight - 2*m, contentGroup, color, r, r);
+  
+  //In this case we will present the option to start a scan
+  if (Hatchling && deviceList.length == 0) { 
+    var iconH = button.height * 0.6
+    button.addSideTextAndIcon(VectorPaths.bdAdd, iconH, "CONNECT ANOTHER ROBOT", Button.defaultFont, Colors.ballyBrandBlueDark, Colors.ballyBrandBlue, false, true)
+    GuiElements.update.stroke(button.icon.pathE, Colors.ballyBrandBlue, 3)
+    button.updateBgColor(Colors.white, Colors.ballyBrandBlue)
+    button.setCallbackFunction(function() {
+      console.log("Clicked CONNECT ANOTHER ROBOT")
+      this.discoverDevices()
+    }.bind(this), true)
+    return
+  }
+
+
   if (FinchBlox) {
-    button.addDeviceInfo(this.discoveredDevices[index]);
+    button.addDeviceInfo(device);
   } else {
-    button.addText(this.discoveredDevices[index].listLabel);
+    button.addText(device.listLabel);
   }
   var me = this;
-  if (this.discoveredDevices[index].connected) {
+  if (device.connected) {
     console.log("*** setting disconnect callback")
     button.setCallbackFunction(function() {
-      me.closeDialog()
-      me.discoveredDevices[index].disconnect()
+      //me.closeDialog()
+      device.disconnect()
     }, true)
   } else {
     console.log("*** setting selectDevice callback")
     button.setCallbackFunction(function() {
-      me.selectDevice(me.discoveredDevices[index]);
+      me.selectDevice(device);
     }, true);
   }
   button.makeScrollable();
@@ -27638,6 +27697,7 @@ DiscoverDialog.prototype.selectDevice = function(device) {
  * Stops the update timer and discover
  */
 DiscoverDialog.prototype.closeDialog = function() {
+  console.error("*** closDialog: " + new Error().stack)
   RowDialog.prototype.closeDialog.call(this);
   this.updateTimer.stop();
   this.deviceClass.getManager().stopDiscover();
@@ -32663,7 +32723,7 @@ Block.prototype.updateAvailablePorts = function(args) {
   var port = args[0]
   var oldPortType = args[1]
   var newPortType = args[2]
-  console.log("Block updateAvailablePorts " + port + " " + oldPortType + " " + newPortType)
+  //console.log("Block updateAvailablePorts " + port + " " + oldPortType + " " + newPortType)
   if (this.portType == oldPortType || this.portType == newPortType) {
     HL_Utils.findPorts(this)
   }
@@ -42761,12 +42821,12 @@ HL_Utils.addHLButton = function(block, portType) {
 HL_Utils.updatePort = function(block) {
   if (block.hlButton != null) {
     block.port = HL_Utils.portNames.indexOf(block.hlButton.values[0])//HL_Utils.portColors.indexOf(block.hlButton.values[0])
-    console.log("update port for " + block.constructor.name + " to " + block.port)
+    //console.log("update port for " + block.constructor.name + " to " + block.port)
     block.updateActive()
   }
 }
 HL_Utils.findPorts = function(block) {
-  console.log("findPorts for " + block.constructor.name + " " + block.portType + " " + ((block.stack != null) ? block.stack.isDisplayStack : ""))
+  //console.log("findPorts for " + block.constructor.name + " " + block.portType + " " + ((block.stack != null) ? block.stack.isDisplayStack : ""))
   var device = DeviceHatchling.getManager().getDevice(0);
   if (block.hlButton != null && device != null) {
     if (block.hlButton.values[0] == HL_Utils.unknownPort) {
@@ -47172,7 +47232,7 @@ MicroBlocksRuntime.prototype.sendMsg = function(msgName, chunkID, byteList) {
 		msg.push(254) // terminator byte (helps board detect dropped bytes)
 	}
 	var dataToSend = new Uint8Array(msg)
-	console.log("sendMsg sending [" + dataToSend + "]")
+	//console.log("sendMsg sending [" + dataToSend + "]")
 
 	/*if ('boardie' == portName) { // send all data at once to boardie
 		(writeSerialPort port dataToSend)
@@ -47246,10 +47306,10 @@ MicroBlocksRuntime.prototype.waitForResponse = async function() {
 			return true
 		}*/
 		if (this.lastPingRecvMSecs > start) { 
-			console.log("waitForResponse done.")
+			//console.log("waitForResponse done.")
 			return true 
 		} else {
-			console.log("waitForResponse start=" + start + " lastPing=" + this.lastPingRecvMSecs)
+			//console.log("waitForResponse start=" + start + " lastPing=" + this.lastPingRecvMSecs)
 		}
 
 		this.sendMsg('pingMsg')
@@ -47349,7 +47409,7 @@ method skipMessage SmallRuntime discard {
 // Message handling
 
 MicroBlocksRuntime.prototype.handleMessage = function(msg) {
-	console.log("handleMessage: [" + msg + "]")
+	//console.log("handleMessage: [" + msg + "]")
 	this.lastPingRecvMSecs = Date.now() //(msecsSinceStart) // reset ping timer when any valid message is recevied
 	var op = msg[1]
 	var chunkID = msg[2]

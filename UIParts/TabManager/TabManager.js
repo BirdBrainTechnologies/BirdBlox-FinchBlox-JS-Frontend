@@ -217,11 +217,11 @@ TabManager.endZooming = function() {
  * @param {number} y
  * @param {boolean} zoomIn
  */
-TabManager.wheelZoom = function(x, y, zoomIn) {
+TabManager.wheelZoom = function(x, y, zoomIn, buttonPress) {
   const TM = TabManager;
   if (!TM.zooming) {
     TM.zooming = true;
-    TM.activeTab.wheelZoom(x, y, zoomIn);
+    TM.activeTab.wheelZoom(x, y, zoomIn, buttonPress);
     TM.zooming = false;
   }
 }

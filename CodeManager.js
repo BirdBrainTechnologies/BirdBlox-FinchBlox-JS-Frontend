@@ -635,7 +635,7 @@ CodeManager.updateAvailableSensors = function() {
  * that is plugged in to the specified port. Hatchling only.
  */
 CodeManager.updateAvailablePorts = function(port, oldPortType, newPortType) {
-  console.log("CodeManager updateAvailablePorts " + port + " " + oldPortType + " " + newPortType)
+  //console.log("CodeManager updateAvailablePorts " + port + " " + oldPortType + " " + newPortType)
   CodeManager.passRecursivelyDown("updateAvailablePorts", true, port, oldPortType, newPortType);
 }
 
