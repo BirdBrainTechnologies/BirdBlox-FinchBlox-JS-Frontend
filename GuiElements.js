@@ -1396,16 +1396,66 @@ GuiElements.measure.stringWidth = function(text, font) {
 };
 
 /**
+ * GuiElements animate contains functions used to animate svg elements.
+ * Hatchling only. 
+ */
+GuiElements.animate = {}
+/**
+ * Move the element from its current location to the one specified with 
+ * animation. Applies a transform that stays in place until the animation 
+ * is removed.
+ * @param {Element} element - element to move
+ * @param {number} x - x coordinate of destination
+ * @param {number} y - y coordinate of destination
+ * @param {number} duration - duration of animation in seconds 
+ */
+GuiElements.animate.move = function(element, x, y, duration) {
+  let animate = document.createElementNS("http://www.w3.org/2000/svg", 'animateTransform');
+  animate.setAttributeNS(null, "attributeName", "transform");
+  animate.setAttributeNS(null, "to", x + " " + y) 
+  animate.setAttributeNS(null, "dur", duration + "s");
+  animate.setAttributeNS(null, "repeatCount", "1");
+  animate.setAttributeNS(null, "fill", "freeze");
+
+  element.appendChild(animate)
+  animate.beginElement()
+
+  return animate
+}
+/**
+ * Update the fill color of an element with animation
+ * @param {Element} element - element to color
+ * @param {string} color - hex value of color
+ * @param {number} duration - duration of animation in seconds
+ */
+GuiElements.animate.updateColor = function(element, color, duration) {
+  let animate = document.createElementNS("http://www.w3.org/2000/svg", 'animate');
+  animate.setAttributeNS(null, "attributeName", "fill");
+  animate.setAttributeNS(null, "to", color);
+  animate.setAttributeNS(null, "dur", duration + "s");
+  animate.setAttributeNS(null, "repeatCount", "1");
+  animate.setAttributeNS(null, "fill", "freeze");
+
+  element.appendChild(animate)
+  animate.beginElement()
+
+  return animate
+}
+
+/**
  * Creates a black rectangle to block interaction with the main screen.  Used for
  * dialogs and for FinchBlox popups.
+ * 
+ * @param {boolean} invisible - (optional) True if the block should be invisible (Hatchling only)
  */
-GuiElements.blockInteraction = function() {
+GuiElements.blockInteraction = function(invisible) {
   if (GuiElements.dialogBlock == null) {
     let rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height);
     GuiElements.update.opacity(rect, GuiElements.blockerOpacity);
     if (FinchBlox) {
       rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height, Colors.bbtDarkGray);
-      GuiElements.update.opacity(rect, (Hatchling ? 0.5 : 0.9));
+      const opacity = invisible ? 0 : (Hatchling ? 0.5 : 0.9)
+      GuiElements.update.opacity(rect, opacity);
     }
     GuiElements.layers.dialogBlock.appendChild(rect);
     TouchReceiver.touchInterrupt();

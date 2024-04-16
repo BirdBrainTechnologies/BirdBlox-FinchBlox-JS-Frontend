@@ -185,7 +185,10 @@ TitleBar.makeButtons = function() {
 
       TB.fileBn = new Button(TB.fileBnX, y, TB.buttonW, h, TBLayer, undoBnColor, r, r, undoBnOutline);
       TB.fileBn.addColorIcon(VectorPaths.bdFile, TB.bnIconH * 0.78, Colors.ballyBrandBlue);
-      TB.fileBn.setCallbackFunction(function() {}, true);
+      TB.fileBn.setCallbackFunction(function() {
+        const menu = new HLFileDrawer()
+        menu.open()
+      }, true);
     } else {
       TB.flagBn.addIcon(VectorPaths.faFlag, TB.bnIconH);
       TB.stopBn.addIcon(VectorPaths.stop, TB.bnIconH * 0.9);

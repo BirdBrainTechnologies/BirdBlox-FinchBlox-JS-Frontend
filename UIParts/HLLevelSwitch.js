@@ -19,13 +19,12 @@ function HLLevelSwitch(x, y) {
   	const cr = r - m
   	const cx = m + cr 
   	this.cx1 = cx
-  	this.dcx = this.w - m - 2*cr 
+  	this.dcx = this.w - 2*m - 2*cr //this.w - m - 2*cr 
   	this.cx2 = this.w - m - cr
   	const cy = iconH + 2.5*m + cr
-  	this.cy = cy
   	const font = Font.uiFont(22)
-  	const text1X = 0.5*m + (2*cr - GuiElements.measure.stringWidth("1", font))/2
-  	const text2X = this.w - m - 2*cr + (2*cr - GuiElements.measure.stringWidth("2", font))/2 
+  	const text1X = (2*cr - GuiElements.measure.stringWidth("1", font))/2
+  	const text2X = this.w - 1.5*m - 2*cr + (2*cr - GuiElements.measure.stringWidth("2", font))/2 
   	const textY = iconH + 2.5*m + ((2*cr + font.charHeight) / 2)
 
   	this.group = GuiElements.create.group(this.x, this.y, TBLayer)
@@ -47,61 +46,42 @@ function HLLevelSwitch(x, y) {
   	TouchReceiver.addListenersBN(this.text1, this)
   	TouchReceiver.addListenersBN(this.text2, this)
 
-  	this.setSwitch(LevelManager.currentLevel) //when you reload the window, it will remember the level
-}
+  	this.animations = []
+  }
 
 HLLevelSwitch.prototype.press = function() {
-	const dur = "0.5s"
 
-	let blueToWhite = document.createElementNS("http://www.w3.org/2000/svg", 'animate');
-	blueToWhite.setAttributeNS(null, "attributeName", "fill");
-    blueToWhite.setAttributeNS(null, "to", Colors.white);
-	blueToWhite.setAttributeNS(null, "dur", dur);
-	blueToWhite.setAttributeNS(null, "repeatCount", "1");
-
-	let whiteToBlue = document.createElementNS("http://www.w3.org/2000/svg", 'animate');
-	whiteToBlue.setAttributeNS(null, "attributeName", "fill");
-    whiteToBlue.setAttributeNS(null, "to", this.textColor);
-	whiteToBlue.setAttributeNS(null, "dur", dur);
-	whiteToBlue.setAttributeNS(null, "repeatCount", "1");
-
-	let animate = document.createElementNS("http://www.w3.org/2000/svg", 'animateTransform');
-	animate.setAttributeNS(null, "attributeName", "transform");
-	//animate.setAttributeNS(null, "from", "0 0");
-	animate.setAttributeNS(null, "to", this.dcx + " 0") //+ this.cy);
-	//animate.setAttributeNS(null, "begin", "0s");
-	animate.setAttributeNS(null, "dur", dur);
-	animate.setAttributeNS(null, "repeatCount", "1");
-
-
+	const duration = 0.5
 	let tB = this.text1 
 	let tW = this.text2
-	let finalCx = this.cx2
+	let x = this.dcx
 	let level = (LevelManager.currentLevel == 1) ? 2 : 1
 	if (level == 1) {
 		tB = this.text2
 		tW = this.text1
-		animate.setAttributeNS(null, "to", -this.dcx + " 0")
-		finalCx = this.cx1
+		x = -this.dcx
 	}
-
-	tB.appendChild(blueToWhite)
-	blueToWhite.beginElement()
-
-	tW.appendChild(whiteToBlue)
-	whiteToBlue.beginElement()
-
-	this.circleE.appendChild(animate)
-	animate.beginElement()
 
 	setTimeout(function() {
 		LevelManager.setLevel(level); //will call setSwitch
 		LevelManager.loadLevelSavePoint();
 	}.bind(this), 475)
+
+
+	this.animations[0] = GuiElements.animate.updateColor(tB, Colors.white, duration)
+	this.animations[1] = GuiElements.animate.updateColor(tW, this.textColor, duration)
+	this.animations[2] = GuiElements.animate.move(this.circleE, x, 0, duration)
 	
 }
 
 HLLevelSwitch.prototype.setSwitch = function(level) {
+
+
+	for (let i = 0; i < this.animations.length; i++) {
+		this.animations[i].remove()
+	}
+	
+
 	switch(level){
 	case 1:
 		GuiElements.update.color(this.text2, Colors.white)

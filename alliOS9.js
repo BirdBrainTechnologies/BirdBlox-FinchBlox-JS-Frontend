@@ -8061,16 +8061,66 @@ GuiElements.measure.stringWidth = function(text, font) {
 };
 
 /**
+ * GuiElements animate contains functions used to animate svg elements.
+ * Hatchling only. 
+ */
+GuiElements.animate = {}
+/**
+ * Move the element from its current location to the one specified with 
+ * animation. Applies a transform that stays in place until the animation 
+ * is removed.
+ * @param {Element} element - element to move
+ * @param {number} x - x coordinate of destination
+ * @param {number} y - y coordinate of destination
+ * @param {number} duration - duration of animation in seconds 
+ */
+GuiElements.animate.move = function(element, x, y, duration) {
+  var animate = document.createElementNS("http://www.w3.org/2000/svg", 'animateTransform');
+  animate.setAttributeNS(null, "attributeName", "transform");
+  animate.setAttributeNS(null, "to", x + " " + y) 
+  animate.setAttributeNS(null, "dur", duration + "s");
+  animate.setAttributeNS(null, "repeatCount", "1");
+  animate.setAttributeNS(null, "fill", "freeze");
+
+  element.appendChild(animate)
+  animate.beginElement()
+
+  return animate
+}
+/**
+ * Update the fill color of an element with animation
+ * @param {Element} element - element to color
+ * @param {string} color - hex value of color
+ * @param {number} duration - duration of animation in seconds
+ */
+GuiElements.animate.updateColor = function(element, color, duration) {
+  var animate = document.createElementNS("http://www.w3.org/2000/svg", 'animate');
+  animate.setAttributeNS(null, "attributeName", "fill");
+  animate.setAttributeNS(null, "to", color);
+  animate.setAttributeNS(null, "dur", duration + "s");
+  animate.setAttributeNS(null, "repeatCount", "1");
+  animate.setAttributeNS(null, "fill", "freeze");
+
+  element.appendChild(animate)
+  animate.beginElement()
+
+  return animate
+}
+
+/**
  * Creates a black rectangle to block interaction with the main screen.  Used for
  * dialogs and for FinchBlox popups.
+ * 
+ * @param {boolean} invisible - (optional) True if the block should be invisible (Hatchling only)
  */
-GuiElements.blockInteraction = function() {
+GuiElements.blockInteraction = function(invisible) {
   if (GuiElements.dialogBlock == null) {
     var rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height);
     GuiElements.update.opacity(rect, GuiElements.blockerOpacity);
     if (FinchBlox) {
       rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height, Colors.bbtDarkGray);
-      GuiElements.update.opacity(rect, (Hatchling ? 0.5 : 0.9));
+      var opacity = invisible ? 0 : (Hatchling ? 0.5 : 0.9)
+      GuiElements.update.opacity(rect, opacity);
     }
     GuiElements.layers.dialogBlock.appendChild(rect);
     TouchReceiver.touchInterrupt();
@@ -9429,8 +9479,8 @@ function VectorPaths(){
     VP.bd90Deg.path="M35.0206 8.75C34.8281 8.41667 34.347 8.41667 34.1546 8.75L30.1816 15.6314C29.9892 15.9647 30.2297 16.3814 30.6146 16.3814H38.5605C38.9454 16.3814 39.186 15.9647 38.9935 15.6314L35.0206 8.75Z M10.0824 40.5536C10.3716 37.0643 11.4164 33.6947 13.1247 30.6629C14.2465 28.672 15.6544 26.8268 17.3223 25.1892C21.7745 20.8179 27.7331 18.2657 34.0001 18.0196C34.0029 18.0195 34.0057 18.0194 34.0085 18.0193C34.3382 18.0065 34.6688 18 35 18C41.6304 18 47.9893 20.5861 52.6777 25.1892C57.1255 29.5562 59.7243 35.3992 59.9793 41.5456C60.0022 42.0974 59.5523 42.5455 59 42.5455L11 42.5455C10.4477 42.5455 9.99783 42.0974 10.0207 41.5456C10.0345 41.214 10.0551 40.8832 10.0824 40.5536ZM43.756 30.8229L48.0689 26.4636C44.3778 23.5924 39.7778 22 35 22L35 38.5455L55.5982 38.5455C54.8699 34.9564 53.1694 31.5978 50.643 28.8384L46.244 33.2845C45.5643 33.9716 44.4562 33.9775 43.7692 33.2977C43.0821 32.6179 43.0762 31.5099 43.756 30.8229ZM20.7859 27.7397C20.0898 28.4102 20.0691 29.518 20.7396 30.2141L23.6812 33.2678C24.3517 33.9638 25.4596 33.9846 26.1556 33.314C26.8517 32.6435 26.8724 31.5357 26.2019 30.8396L23.2604 27.7859C22.5898 27.0899 21.482 27.0691 20.7859 27.7397Z"
     VP.bd90Deg.width=70
     VP.bd90Deg.height=50
-    VP.bdAdd={} //Circle added manually, plus included a stroke that was not added
-    VP.bdAdd.path="M 40 40 m 40 0 a 40 40 0 1 0 -80 0 a 40 40 0 1 0 80 0 Z m -3 0 a 37 37 0 1 0 -74 0 a 37 37 0 1 0 74 0 Z M23.8273 36.3083C21.6901 36.3319 19.9767 38.0835 20.0002 40.2207C20.0238 42.358 21.7755 44.0714 23.9127 44.0478L36.1729 43.9125L36.3083 56.1727C36.3319 58.3099 38.0835 60.0233 40.2207 59.9998C42.358 59.9762 44.0714 58.2245 44.0478 56.0873L43.9125 43.8271L56.1727 43.6917C58.3099 43.6681 60.0233 41.9165 59.9998 39.7792C59.9762 37.642 58.2245 35.9286 56.0873 35.9522L43.8271 36.0875L43.6917 23.8273C43.6681 21.6901 41.9165 19.9766 39.7792 20.0002C37.642 20.0238 35.9286 21.7755 35.9522 23.9127L36.0875 36.1729L23.8273 36.3083Z"
+    VP.bdAdd={} //Circle added manually, plus original included a 3px stroke that was not added
+    VP.bdAdd.path="M 40 40 m 38.6 0 a 38.6 38.6 0 1 0 -77.2 0 a 38.6 38.6 0 1 0 77.2 0 Z m -0.2 0 a 38.4 38.4 0 1 0 -76.8 0 a 38.4 38.4 0 1 0 76.8 0 Z M23.8273 36.3083C21.6901 36.3319 19.9767 38.0835 20.0002 40.2207C20.0238 42.358 21.7755 44.0714 23.9127 44.0478L36.1729 43.9125L36.3083 56.1727C36.3319 58.3099 38.0835 60.0233 40.2207 59.9998C42.358 59.9762 44.0714 58.2245 44.0478 56.0873L43.9125 43.8271L56.1727 43.6917C58.3099 43.6681 60.0233 41.9165 59.9998 39.7792C59.9762 37.642 58.2245 35.9286 56.0873 35.9522L43.8271 36.0875L43.6917 23.8273C43.6681 21.6901 41.9165 19.9766 39.7792 20.0002C37.642 20.0238 35.9286 21.7755 35.9522 23.9127L36.0875 36.1729L23.8273 36.3083Z"
     VP.bdAdd.width=80
     VP.bdAdd.height=80
     VP.bdAdd.fillRule="evenodd"
@@ -9500,7 +9550,7 @@ function VectorPaths(){
     VP.bdDelete.height=56
     VP.bdDelete.fillRule="evenodd"
     VP.bdDisconnect={} //Circle added manually, x included a stroke that was not added
-    VP.bdDisconnect.path="M 40 40 m 40 0 a 40 40 0 1 0 -80 0 a 40 40 0 1 0 80 0 Z m -3 0 a 37 37 0 1 0 -74 0 a 37 37 0 1 0 74 0 Z M25.9537 48.8254C24.4591 50.3533 24.4862 52.8035 26.0141 54.2981C27.542 55.7926 29.9922 55.7656 31.4868 54.2377L40.0604 45.4727L48.8254 54.0463C50.3533 55.5408 52.8035 55.5138 54.298 53.9859C55.7926 52.458 55.7655 50.0078 54.2376 48.5132L45.4726 39.9396L54.0462 31.1746C55.5408 29.6467 55.5138 27.1965 53.9858 25.7019C52.4579 24.2074 50.0077 24.2344 48.5132 25.7623L39.9396 34.5273L31.1746 25.9537C29.6467 24.4592 27.1965 24.4862 25.7019 26.0141C24.2074 27.542 24.2344 29.9922 25.7623 31.4868L34.5273 40.0604L25.9537 48.8254Z"
+    VP.bdDisconnect.path="M 40 40 m 38.6 0 a 38.6 38.6 0 1 0 -77.2 0 a 38.6 38.6 0 1 0 77.2 0 Z m -0.2 0 a 38.4 38.4 0 1 0 -76.8 0 a 38.4 38.4 0 1 0 76.8 0 Z M25.9537 48.8254C24.4591 50.3533 24.4862 52.8035 26.0141 54.2981C27.542 55.7926 29.9922 55.7656 31.4868 54.2377L40.0604 45.4727L48.8254 54.0463C50.3533 55.5408 52.8035 55.5138 54.298 53.9859C55.7926 52.458 55.7655 50.0078 54.2376 48.5132L45.4726 39.9396L54.0462 31.1746C55.5408 29.6467 55.5138 27.1965 53.9858 25.7019C52.4579 24.2074 50.0077 24.2344 48.5132 25.7623L39.9396 34.5273L31.1746 25.9537C29.6467 24.4592 27.1965 24.4862 25.7019 26.0141C24.2074 27.542 24.2344 29.9922 25.7623 31.4868L34.5273 40.0604L25.9537 48.8254Z"
     VP.bdDisconnect.width=80
     VP.bdDisconnect.height=80
     VP.bdDisconnect.fillRule="evenodd"
@@ -12873,7 +12923,10 @@ TitleBar.makeButtons = function() {
 
       TB.fileBn = new Button(TB.fileBnX, y, TB.buttonW, h, TBLayer, undoBnColor, r, r, undoBnOutline);
       TB.fileBn.addColorIcon(VectorPaths.bdFile, TB.bnIconH * 0.78, Colors.ballyBrandBlue);
-      TB.fileBn.setCallbackFunction(function() {}, true);
+      TB.fileBn.setCallbackFunction(function() {
+        var menu = new HLFileDrawer()
+        menu.open()
+      }, true);
     } else {
       TB.flagBn.addIcon(VectorPaths.faFlag, TB.bnIconH);
       TB.stopBn.addIcon(VectorPaths.stop, TB.bnIconH * 0.9);
@@ -15937,13 +15990,18 @@ Button.prototype.setColor = function(isPressed) {
  * 
  * @param {string} color - hex value of color to set as background
  * @param {string} outlineColor - (optional) hex value of color to set outline
+ * @param {string} iconColor - (optional) hex value of color to set main icon
  */
-Button.prototype.updateBgColor = function(color, outlineColor) {
+Button.prototype.updateBgColor = function(color, outlineColor, iconColor) {
   this.bg = color;
   this.setColor(false);
   if (outlineColor != null) {
     this.strokeColor = outlineColor
     GuiElements.update.stroke(this.bgRect, this.strokeColor, this.strokeW ?? Button.strokeW)
+  }
+  if (iconColor != null && this.hasIcon) {
+    this.iconColor = iconColor 
+    this.icon.setColor(this.iconColor)
   }
 }
 
@@ -16001,6 +16059,7 @@ Button.prototype.unmarkAsOverlayPart = function() {
  * Remove the button portion of this button - make it appear as plain text/image
  */
 Button.prototype.unbutton = function() {
+  if (this.isUnButtoned) { return }
   this.bgRect.remove()
   this.isUnButtoned = true
   if (this.hasText) {
@@ -16018,6 +16077,7 @@ Button.prototype.unbutton = function() {
  * Resets the unbuttoned button.
  */
 Button.prototype.rebutton = function() {
+  if (!this.isUnButtoned) { return }
   this.group.insertBefore(this.bgRect, this.group.children[0])
   this.isUnButtoned = false
   if (this.hasText) {
@@ -16656,13 +16716,12 @@ function HLLevelSwitch(x, y) {
   	var cr = r - m
   	var cx = m + cr 
   	this.cx1 = cx
-  	this.dcx = this.w - m - 2*cr 
+  	this.dcx = this.w - 2*m - 2*cr //this.w - m - 2*cr 
   	this.cx2 = this.w - m - cr
   	var cy = iconH + 2.5*m + cr
-  	this.cy = cy
   	var font = Font.uiFont(22)
-  	var text1X = 0.5*m + (2*cr - GuiElements.measure.stringWidth("1", font))/2
-  	var text2X = this.w - m - 2*cr + (2*cr - GuiElements.measure.stringWidth("2", font))/2 
+  	var text1X = (2*cr - GuiElements.measure.stringWidth("1", font))/2
+  	var text2X = this.w - 1.5*m - 2*cr + (2*cr - GuiElements.measure.stringWidth("2", font))/2 
   	var textY = iconH + 2.5*m + ((2*cr + font.charHeight) / 2)
 
   	this.group = GuiElements.create.group(this.x, this.y, TBLayer)
@@ -16684,61 +16743,42 @@ function HLLevelSwitch(x, y) {
   	TouchReceiver.addListenersBN(this.text1, this)
   	TouchReceiver.addListenersBN(this.text2, this)
 
-  	this.setSwitch(LevelManager.currentLevel) //when you reload the window, it will remember the level
-}
+  	this.animations = []
+  }
 
 HLLevelSwitch.prototype.press = function() {
-	var dur = "0.5s"
 
-	var blueToWhite = document.createElementNS("http://www.w3.org/2000/svg", 'animate');
-	blueToWhite.setAttributeNS(null, "attributeName", "fill");
-    blueToWhite.setAttributeNS(null, "to", Colors.white);
-	blueToWhite.setAttributeNS(null, "dur", dur);
-	blueToWhite.setAttributeNS(null, "repeatCount", "1");
-
-	var whiteToBlue = document.createElementNS("http://www.w3.org/2000/svg", 'animate');
-	whiteToBlue.setAttributeNS(null, "attributeName", "fill");
-    whiteToBlue.setAttributeNS(null, "to", this.textColor);
-	whiteToBlue.setAttributeNS(null, "dur", dur);
-	whiteToBlue.setAttributeNS(null, "repeatCount", "1");
-
-	var animate = document.createElementNS("http://www.w3.org/2000/svg", 'animateTransform');
-	animate.setAttributeNS(null, "attributeName", "transform");
-	//animate.setAttributeNS(null, "from", "0 0");
-	animate.setAttributeNS(null, "to", this.dcx + " 0") //+ this.cy);
-	//animate.setAttributeNS(null, "begin", "0s");
-	animate.setAttributeNS(null, "dur", dur);
-	animate.setAttributeNS(null, "repeatCount", "1");
-
-
+	var duration = 0.5
 	var tB = this.text1 
 	var tW = this.text2
-	var finalCx = this.cx2
+	var x = this.dcx
 	var level = (LevelManager.currentLevel == 1) ? 2 : 1
 	if (level == 1) {
 		tB = this.text2
 		tW = this.text1
-		animate.setAttributeNS(null, "to", -this.dcx + " 0")
-		finalCx = this.cx1
+		x = -this.dcx
 	}
-
-	tB.appendChild(blueToWhite)
-	blueToWhite.beginElement()
-
-	tW.appendChild(whiteToBlue)
-	whiteToBlue.beginElement()
-
-	this.circleE.appendChild(animate)
-	animate.beginElement()
 
 	setTimeout(function() {
 		LevelManager.setLevel(level); //will call setSwitch
 		LevelManager.loadLevelSavePoint();
 	}.bind(this), 475)
+
+
+	this.animations[0] = GuiElements.animate.updateColor(tB, Colors.white, duration)
+	this.animations[1] = GuiElements.animate.updateColor(tW, this.textColor, duration)
+	this.animations[2] = GuiElements.animate.move(this.circleE, x, 0, duration)
 	
 }
 
 HLLevelSwitch.prototype.setSwitch = function(level) {
+
+
+	for (var i = 0; i < this.animations.length; i++) {
+		this.animations[i].remove()
+	}
+	
+
 	switch(level){
 	case 1:
 		GuiElements.update.color(this.text2, Colors.white)
@@ -22221,6 +22261,264 @@ DeviceMenu.prototype.createAddIconToBnFn = function(pathId, text, color) {
     bn.addSideTextAndIcon(pathId, null, text, null, null, null, null, null, color, true, false);
   }
 };
+
+/**
+ * Hatchling only class for the file drawer that slides out when the file 
+ * button in the title bar is pressed.
+ */
+function HLFileDrawer() {
+	//Constants
+	this.vMargin = 10
+	this.bgColor = Colors.ballyBrandBlueDark 
+	this.menuColor = Colors.ballyGrayLight
+	this.iconColor = Colors.ballyBrandBlue
+	this.iconColor2 = Colors.ballyBrandBlueLight
+	this.visible = false
+	this.slideDuration = 0.33
+	
+	
+
+	Overlay.call(this, Overlay.types.menu)
+}
+HLFileDrawer.prototype = Object.create(Overlay.prototype);
+HLFileDrawer.prototype.constructor = HLFileDrawer;
+
+
+HLFileDrawer.prototype.open = function() {
+	if (this.visible) { return }
+
+	this.visible = true
+	Overlay.addOverlay(this)
+	GuiElements.blockInteraction(true);
+	
+	//Basic measurements
+	this.height = GuiElements.height - 2*this.vMargin
+	this.width = GuiElements.width/2
+	this.x = GuiElements.width*2/3
+	this.menuW = GuiElements.width/3
+	var r = 15 //rectangle corner radius
+
+	//Menu button measurements
+	var menuBnX = 2*r
+	this.bnH = GuiElements.height/6
+	this.bnW = this.menuW - 2*menuBnX
+	this.bnR = 15
+	this.bnM = 15 //margin between buttons
+	this.bnIconM = 20 //margin inside button 
+	this.bnIconH = this.bnH * 3/5
+	this.bnIconY = (this.bnH - this.bnIconH)/2
+	this.bnIcon2H = this.bnH * 2/5
+	this.bnIcon2X = this.bnW - this.bnIcon2H - this.bnIconM
+	this.bnIcon2Y = (this.bnH - this.bnIcon2H)/2
+
+
+	this.group = GuiElements.create.group(GuiElements.width, 0, GuiElements.layers.overlay)
+
+	this.bgRect = GuiElements.draw.rect(0, this.vMargin, this.width, this.height, this.bgColor, r, r)
+	this.group.appendChild(this.bgRect)
+
+	//Add close button. Clicking outside the overlay will also close it.
+	var bnW = 30
+	var bnM = 10
+	var bnX = this.menuW - bnW - bnM
+	var bnY = this.vMargin + bnM
+	var closeBn = new Button(bnX, bnY, bnW, bnW, this.group, this.bgColor)
+	closeBn.addColorIcon(VectorPaths.bdClose, bnW, this.iconColor2)
+	closeBn.setCallbackFunction(this.close.bind(this), true)
+	closeBn.markAsOverlayPart(this)
+
+
+
+	//Add menu space and initial file menu
+	var menuOutlineW = 2
+	var menuOffset = 60
+	var menuY = this.vMargin + menuOffset
+	var menuH = this.height - menuOffset - menuOutlineW
+	var menuR = r * 2/3
+	this.menuTopRect = GuiElements.draw.rect(menuOutlineW, menuY, this.menuW - menuOutlineW, menuH - r, this.menuColor, menuR, menuR)
+	this.group.appendChild(this.menuTopRect)
+	var bottomY = GuiElements.height - this.vMargin - menuOutlineW - 3*r
+	var bottomH = 3*r
+	this.menuBottomRect = GuiElements.draw.rect(menuOutlineW, bottomY, this.width, bottomH, this.menuColor, r, r)
+	this.group.appendChild(this.menuBottomRect)
+
+
+	//Add tabs
+	var tabW = GuiElements.width/10.5
+	var tabH = tabW*0.65
+	var tabR = r/2
+	var tab1X = tabR*5
+	var tab2X = tab1X + tabW + menuOutlineW
+	var tabY = menuY - tabH
+	var tabIconH = tabH * 2/3
+	var tabIconY = tabY + (tabH - tabIconH)/2
+	this.tab1 = GuiElements.draw.tab(tab1X, tabY, tabW, tabH, this.menuColor, tabR)
+
+	this.group.appendChild(this.tab1)
+	this.tab2 = GuiElements.draw.tab(tab2X, tabY, tabW, tabH, this.menuColor, tabR)
+	this.group.appendChild(this.tab2)
+	GuiElements.update.opacity(this.tab2, 0)
+
+	//Add file tab button
+	this.fileTabBn = new Button(tab1X, tabY, tabW, tabH, this.group, this.menuColor, tabR, tabR)
+	this.fileTabBn.addColorIcon(VectorPaths.bdFile, tabIconH, this.iconColor)
+	this.fileTabBn.setCallbackFunction(this.displayMainMenu.bind(this), true)
+	this.fileTabBn.disable(true)
+	this.fileTabBn.markAsOverlayPart(this)
+
+	//Add tab 2 icons
+	function tabIcon(path, color) {
+		var w = VectorIcon.computeWidth(path, tabIconH)
+		var x = tab2X + (tabW - w)/2
+		var icon = new VectorIcon(x, tabIconY, path, color, tabIconH, null)
+		icon.group.remove()
+		return icon
+	}
+	this.createFileIcon = tabIcon(VectorPaths.bdCreateFilePage, this.iconColor)
+	this.saveProgramIcon = tabIcon(VectorPaths.bdSaveProgramStar, this.iconColor)
+	this.savedFilesIcon = tabIcon(VectorPaths.bdSavedFiles, this.iconColor)
+	
+	
+
+	//Add buttons for file menu
+	this.menuGroup = GuiElements.create.group(menuBnX, menuY + tabH, this.group)
+	this.displayMainMenu()
+
+
+	//Slide the drawer into view
+	GuiElements.animate.move(this.group, this.x, 0, this.slideDuration)
+
+}
+
+HLFileDrawer.prototype.close = function() {
+	if (!this.visible) { return }
+
+	this.visible = false
+
+	//Must wait until the animation is complete to remove the overlay
+	setTimeout(function() {
+		this.group.remove()
+		Overlay.removeOverlay(this)
+		GuiElements.unblockInteraction();
+	}.bind(this), this.slideDuration*1000)
+
+	GuiElements.animate.move(this.group, GuiElements.width, 0, this.slideDuration)
+}
+
+HLFileDrawer.prototype.resetTab = function(tab) {
+	if (this.menuContainer != null) {
+		this.menuContainer.remove()
+	}
+	this.menuContainer = GuiElements.create.group(0, 0, this.menuGroup)
+
+	switch(tab) {
+	case 1:
+		GuiElements.update.opacity(this.tab1, 1)
+		GuiElements.update.opacity(this.tab2, 0)
+		this.fileTabBn.disable(true)
+		this.fileTabBn.updateBgColor(this.menuColor, null, this.iconColor)
+		this.createFileIcon.group.remove()
+		this.saveProgramIcon.group.remove()
+		this.savedFilesIcon.group.remove()
+		break;
+	case 2:
+		GuiElements.update.opacity(this.tab1, 0)
+		GuiElements.update.opacity(this.tab2, 1)
+		this.fileTabBn.enable()
+		this.fileTabBn.updateBgColor(this.bgColor, null, this.iconColor2)
+		break;
+	default:
+		console.error("HLFileDrawer tab " + tab + " not implemented.")
+	}
+}
+
+HLFileDrawer.prototype.displayMainMenu = function() {
+	var VP = VectorPaths
+	this.resetTab(1)
+
+	var createFileBn = new Button(0, 0, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
+	createFileBn.setCallbackFunction(function() {
+		var stackList = TabManager.activeTab.stackList
+		if (SaveManager.fileName != undefined && 
+			SaveManager.fileName == LevelManager.savePointFileNames[LevelManager.currentLevel] &&
+			(stackList.length > 1 || !(stackList.length != 0 &&
+        	stackList[0].firstBlock.isStartBlock && 
+        	stackList[0].firstBlock.nextBlock == null))) {
+			this.displayCreateFileMenu()
+		} else {
+			LevelManager.loadLevelSavePoint();
+			this.close()
+		}
+	}.bind(this), true)
+	createFileBn.markAsOverlayPart(this)
+	var createFileBnIcon = new VectorIcon(this.bnIconM, this.bnIconY, VP.bdCreateFilePage, this.iconColor, this.bnIconH, createFileBn.group)
+	TouchReceiver.addListenersBN(createFileBnIcon.pathE, createFileBn)
+	var createFileBnAdd = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdAdd, this.iconColor, this.bnIcon2H, createFileBn.group)
+	GuiElements.update.stroke(createFileBnAdd.pathE, this.iconColor, 3)
+	TouchReceiver.addListenersBN(createFileBnAdd.pathE, createFileBn)
+
+	var saveProgramBn = new Button(0, this.bnH + this.bnM, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
+	saveProgramBn.setCallbackFunction(this.displaySaveProgramMenu.bind(this), true)
+	saveProgramBn.markAsOverlayPart(this)
+	var saveProgramBnIcon = new VectorIcon(this.bnIconM, this.bnIconY, VP.bdSaveProgramStar, this.iconColor, this.bnIconH, saveProgramBn.group)
+	TouchReceiver.addListenersBN(saveProgramBnIcon.pathE, saveProgramBn)
+	var saveProgramBnAdd = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdAdd, this.iconColor, this.bnIcon2H, saveProgramBn.group)
+	GuiElements.update.stroke(saveProgramBnAdd.pathE, this.iconColor, 3)
+	TouchReceiver.addListenersBN(saveProgramBnAdd.pathE, saveProgramBn)
+
+	var savedFilesBn = new Button(0, (this.bnH + this.bnM)*2, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
+	savedFilesBn.setCallbackFunction(this.displaySavedFilesMenu.bind(this), true)
+	savedFilesBn.markAsOverlayPart(this)
+	var savedFilesBnIcon = new VectorIcon(this.bnIconM, this.bnIconY, VP.bdSavedFiles, this.iconColor, this.bnIconH, savedFilesBn.group)
+	TouchReceiver.addListenersBN(savedFilesBnIcon.pathE, saveProgramBn)
+	var savedFilesBnOpen = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdOpen, this.iconColor, this.bnIcon2H, savedFilesBn.group)
+	TouchReceiver.addListenersBN(savedFilesBnOpen.pathE, saveProgramBn)
+
+}
+
+HLFileDrawer.prototype.displayCreateFileMenu = function() {
+	var VP = VectorPaths
+	this.resetTab(2)
+
+	this.group.appendChild(this.createFileIcon.group)
+
+	var saveProgramBn = new Button(0, 0, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
+	saveProgramBn.setCallbackFunction(function() { this.displaySaveProgramMenu(true) }.bind(this), true)
+	saveProgramBn.markAsOverlayPart(this)
+	var saveProgramBnIcon = new VectorIcon(this.bnIconM, this.bnIconY, VP.bdSaveProgramStar, this.iconColor, this.bnIconH, saveProgramBn.group)
+	TouchReceiver.addListenersBN(saveProgramBnIcon.pathE, saveProgramBn)
+	var saveProgramBnAdd = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdAdd, this.iconColor, this.bnIcon2H, saveProgramBn.group)
+	GuiElements.update.stroke(saveProgramBnAdd.pathE, this.iconColor, 3)
+	TouchReceiver.addListenersBN(saveProgramBnAdd.pathE, saveProgramBn)
+
+	var trashBn = new Button(0, this.bnH + this.bnM, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
+	trashBn.setCallbackFunction(this.displayTrashMenu.bind(this), true)
+	trashBn.markAsOverlayPart(this)
+	var trashBnIcon = new VectorIcon(this.bnIconM, this.bnIconY, VP.bdTrash, this.iconColor, this.bnIconH, trashBn.group)
+	TouchReceiver.addListenersBN(trashBnIcon.pathE, trashBn)
+	var trashBnOpen = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdOpen, this.iconColor, this.bnIcon2H, trashBn.group)
+	GuiElements.update.stroke(trashBnOpen.pathE, this.iconColor, 3)
+	TouchReceiver.addListenersBN(trashBnOpen.pathE, trashBn)
+}
+
+HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile) {
+	this.resetTab(2)
+
+	this.group.appendChild(this.saveProgramIcon.group)
+}
+
+HLFileDrawer.prototype.displayTrashMenu = function() {
+	this.resetTab(2)
+
+
+}
+
+HLFileDrawer.prototype.displaySavedFilesMenu = function() {
+	this.resetTab(2)
+
+	this.group.appendChild(this.savedFilesIcon.group)
+}
+
 
 /**
  * A menu that appears when a Block is long pressed. Provides options to delete or duplicate the block.
@@ -42860,6 +43158,7 @@ HL_Utils.findPorts = function(block) {
       device.updateListener.value = device.updateListener.parent.values[0]
     }
   } else if (block.hlButton != null) {
+    block.hlButton.button.rebutton()
     block.hlButton.updateValue(HL_Utils.unknownPort, 0)
     //block.hlButton.button.unbutton()
     //block.hlButton.button.hide()

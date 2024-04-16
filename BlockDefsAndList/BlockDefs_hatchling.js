@@ -103,6 +103,7 @@ HL_Utils.findPorts = function(block) {
       device.updateListener.value = device.updateListener.parent.values[0]
     }
   } else if (block.hlButton != null) {
+    block.hlButton.button.rebutton()
     block.hlButton.updateValue(HL_Utils.unknownPort, 0)
     //block.hlButton.button.unbutton()
     //block.hlButton.button.hide()

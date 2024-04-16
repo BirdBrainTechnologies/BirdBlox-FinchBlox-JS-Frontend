@@ -759,13 +759,18 @@ Button.prototype.setColor = function(isPressed) {
  * 
  * @param {string} color - hex value of color to set as background
  * @param {string} outlineColor - (optional) hex value of color to set outline
+ * @param {string} iconColor - (optional) hex value of color to set main icon
  */
-Button.prototype.updateBgColor = function(color, outlineColor) {
+Button.prototype.updateBgColor = function(color, outlineColor, iconColor) {
   this.bg = color;
   this.setColor(false);
   if (outlineColor != null) {
     this.strokeColor = outlineColor
     GuiElements.update.stroke(this.bgRect, this.strokeColor, this.strokeW ?? Button.strokeW)
+  }
+  if (iconColor != null && this.hasIcon) {
+    this.iconColor = iconColor 
+    this.icon.setColor(this.iconColor)
   }
 }
 
@@ -823,6 +828,7 @@ Button.prototype.unmarkAsOverlayPart = function() {
  * Remove the button portion of this button - make it appear as plain text/image
  */
 Button.prototype.unbutton = function() {
+  if (this.isUnButtoned) { return }
   this.bgRect.remove()
   this.isUnButtoned = true
   if (this.hasText) {
@@ -840,6 +846,7 @@ Button.prototype.unbutton = function() {
  * Resets the unbuttoned button.
  */
 Button.prototype.rebutton = function() {
+  if (!this.isUnButtoned) { return }
   this.group.insertBefore(this.bgRect, this.group.children[0])
   this.isUnButtoned = false
   if (this.hasText) {
