@@ -37,7 +37,7 @@ HLFileDrawer.prototype.open = function() {
 	const r = 15 //rectangle corner radius
 
 	//Menu button measurements
-	const menuBnX = 2*r
+	const menuBnX = this.menuW/12
 	this.bnH = GuiElements.height/6
 	this.bnW = this.menuW - 2*menuBnX
 	this.bnR = 15
@@ -58,27 +58,33 @@ HLFileDrawer.prototype.open = function() {
 	//Add close button. Clicking outside the overlay will also close it.
 	const bnW = 30
 	const bnM = 10
-	const bnX = this.menuW - bnW - bnM
-	const bnY = this.vMargin + bnM
-	const closeBn = new Button(bnX, bnY, bnW, bnW, this.group, this.bgColor)
-	closeBn.addColorIcon(VectorPaths.bdClose, bnW, this.iconColor2)
-	closeBn.setCallbackFunction(this.close.bind(this), true)
-	closeBn.markAsOverlayPart(this)
+	this.closeBnX = this.menuW - bnW - bnM
+	this.closeBnY = this.vMargin + bnM
+	this.closeBn = new Button(this.closeBnX, this.closeBnY, bnW, bnW, this.group, this.bgColor)
+	this.closeBn.addColorIcon(VectorPaths.bdClose, bnW, this.iconColor2)
+	this.closeBn.setCallbackFunction(this.close.bind(this), true)
+	this.closeBn.markAsOverlayPart(this)
 
 
 
 	//Add menu space and initial file menu
-	const menuOutlineW = 2
+	this.menuOutlineW = 2
 	const menuOffset = 60
-	const menuY = this.vMargin + menuOffset
-	const menuH = this.height - menuOffset - menuOutlineW
+	this.menuX = this.menuOutlineW
+	this.menuY = this.vMargin + menuOffset
+	this.menuH = this.height - menuOffset - this.menuOutlineW
 	const menuR = r * 2/3
-	this.menuTopRect = GuiElements.draw.rect(menuOutlineW, menuY, this.menuW - menuOutlineW, menuH - r, this.menuColor, menuR, menuR)
+	this.menuTopRect = GuiElements.draw.rect(this.menuX, this.menuY, this.menuW - this.menuOutlineW, this.menuH - r, this.menuColor, menuR, menuR)
 	this.group.appendChild(this.menuTopRect)
-	const bottomY = GuiElements.height - this.vMargin - menuOutlineW - 3*r
+	const bottomY = GuiElements.height - this.vMargin - this.menuOutlineW - 3*r
 	const bottomH = 3*r
-	this.menuBottomRect = GuiElements.draw.rect(menuOutlineW, bottomY, this.width, bottomH, this.menuColor, r, r)
+	this.menuBottomRect = GuiElements.draw.rect(this.menuOutlineW, bottomY, this.width, bottomH, this.menuColor, r, r)
 	this.group.appendChild(this.menuBottomRect)
+	this.menuBonus = this.menuW*1/3
+
+	//Measurements needed for the extra-wide menu
+	this.menuW2 = this.menuW + this.menuBonus
+	this.closeBnX2 = this.menuW2 - bnW - bnM
 
 
 	//Add tabs
@@ -86,8 +92,8 @@ HLFileDrawer.prototype.open = function() {
 	const tabH = tabW*0.65
 	const tabR = r/2
 	const tab1X = tabR*5
-	const tab2X = tab1X + tabW + menuOutlineW
-	const tabY = menuY - tabH
+	const tab2X = tab1X + tabW + this.menuOutlineW
+	const tabY = this.menuY - tabH
 	const tabIconH = tabH * 2/3
 	this.tab1 = GuiElements.draw.tab(tab1X, tabY, tabW, tabH, this.menuColor, tabR)
 
@@ -119,7 +125,10 @@ HLFileDrawer.prototype.open = function() {
 	
 
 	//Add buttons for file menu
-	this.menuGroup = GuiElements.create.group(menuBnX, menuY + tabH, this.group)
+	this.menuGroupX = menuBnX 
+	this.menuGroupY = this.menuY + tabH
+	this.menuGroup = GuiElements.create.group(this.menuGroupX, this.menuGroupY, this.group)
+	this.innerHeight = this.menuH - 2*tabH //Height of menu content area
 	this.displayMainMenu()
 
 
@@ -138,6 +147,10 @@ HLFileDrawer.prototype.close = function() {
 		this.group.remove()
 		Overlay.removeOverlay(this)
 		GuiElements.unblockInteraction();
+
+		if (this.scrollBox != null) {
+		  this.scrollBox.hide();
+		}
 	}.bind(this), this.slideDuration*1000)
 
 	GuiElements.animate.move(this.group, GuiElements.width, 0, this.slideDuration)
@@ -169,6 +182,10 @@ HLFileDrawer.prototype.resetTab = function(tab) {
 		break;
 	default:
 		console.error("HLFileDrawer tab " + tab + " not implemented.")
+	}
+
+	if (this.scrollBox != null) {
+	  this.scrollBox.hide();
 	}
 }
 
@@ -329,6 +346,122 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 	this.resetTab(2)
 
 	this.group.appendChild(this.savedFilesIcon.group)
+
+	GuiElements.update.rect(this.menuTopRect, this.menuX, this.menuY, this.menuW2 - this.menuOutlineW, this.menuH - 15)
+	this.closeBn.move(this.closeBnX2, this.closeBnY)
+
+
+
+	//Get the list of files to display and determine how much space that will take
+	const list = []
+	for (let i = 0; i < LevelManager.filesSavedLocally.length; i++) {
+	  const file = LevelManager.filesSavedLocally[i];
+	  const suffix = file.slice(-2);
+	  switch (suffix) {
+	    case LevelManager.fileLevelSuffixes[1]:
+	    case LevelManager.fileLevelSuffixes[2]:
+	    case LevelManager.fileLevelSuffixes[3]:
+	      list.push(file);
+	  }
+	}
+	this.fileList = FileList.getSortedList(list);
+	this.rowCount = this.fileList.length;
+
+
+	const bnM = 10 
+	this.fileBnH = 50
+	const scrollHeight = this.rowCount*(bnM + this.fileBnH) - bnM;
+
+	//Calculations for the scrollbox
+	const availableHeight = this.innerHeight
+	this.contentWidth = this.menuW2 - this.menuW/12
+	this.hintText = "";
+
+	const scrollBoxX = GuiElements.width - this.menuW2 + this.menuW/24 //GuiElements.width - this.menuW + this.menuGroupX
+	//const scrollBoxX2 = GuiElements.width - this.menuW2 + this.menuGroupX
+	const scrollBoxY = this.menuY + this.menuW/12
+	const scrollBoxWidth = this.contentWidth;
+	const scrollBoxHeight = Math.min(availableHeight, scrollHeight);
+	//console.log("making content. sx=" + scrollBoxX + " sy=" + scrollBoxY + " this.y=" + this.y + " sh=" + scrollHeight + " ah=" + availableHeight + " sbh=" + scrollBoxHeight + " rc=" + this.rowCount + " bnh=" + RD.bnHeight);
+	//Create the rows to display and the scrollbox to contain them
+	if (this.rowCount != 0) {
+	  const rowGroup = RowDialog.prototype.createContent.call(this);
+	  this.scrollBox = new SmoothScrollBox(rowGroup, GuiElements.layers.frontScroll,
+	    scrollBoxX, scrollBoxY, scrollBoxWidth, scrollBoxHeight, scrollBoxWidth, scrollHeight);
+	  this.scrollBox.partOfOverlay = this
+
+	  setTimeout(function() {
+	  	this.scrollBox.show();
+	  }.bind(this), this.slideDuration)
+	  
+	  //GuiElements.animate.move(this.scrollBox.scrollDiv, scrollBoxX2 - scrollBoxX, 0, this.slideDuration) //couldn't animate well
+	}
+
+	GuiElements.animate.move(this.group, this.x - this.menuBonus, 0, this.slideDuration)
+	
+}
+/**
+ * Create one row to display one filename in the saved files menu
+ */
+HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup) {
+	const VP = VectorPaths
+	const displayName = this.fileList[index].slice(0, -2)
+	const level = this.fileList[index].slice(-1)
+
+	const button = new Button(0, y, width, this.fileBnH, contentGroup, Colors.white, 10, 10);
+	button.markAsOverlayPart(this)
+
+	//Star
+	const m = 5
+	const starH = 20
+	const starY = (this.fileBnH - starH)/2
+	const starX = m
+	const star = new VectorIcon(starX, starY, VP.bdSaveProgramStar, this.textColor, starH, button.group)
+	TouchReceiver.addListenersBN(star.pathE, button)
+
+	//File name 
+	const font = Font.uiFont(12)
+	const textX = starX + starH + m
+	const textY = (this.fileBnH + font.charHeight)/2
+	const textE = GuiElements.draw.text(textX, textY, displayName, font, this.textColor)
+	const textW = GuiElements.measure.textWidth(textE)
+	button.group.appendChild(textE)
+	TouchReceiver.addListenersBN(textE, button)
+
+	//Level indicator
+	const liX = textX + textW + 2*m 
+	const liY = starY 
+	const liH = 18
+	const liRect = GuiElements.draw.rect(liX, liY, liH, liH, this.textColor, 2, 2)
+	button.group.appendChild(liRect)
+	TouchReceiver.addListenersBN(liRect, button)
+	const levelFont = Font.uiFont(14)
+	const liTextW = GuiElements.measure.stringWidth(level, levelFont)
+	const liTextX = liX + (liH - liTextW)/2
+	const liTextY = (this.fileBnH + levelFont.charHeight)/2
+	const liTextE = GuiElements.draw.text(liTextX, liTextY, level, levelFont, Colors.white)
+	button.group.appendChild(liTextE)
+	TouchReceiver.addListenersBN(liTextE, button)
+
+
+	//Arrow 
+	const m2 = 8
+	const arrowH = 30
+	const arrowX = width - m2 - arrowH 
+	const arrowY = (this.fileBnH - arrowH)/2
+	const arrow = new VectorIcon(arrowX, arrowY, VP.bdOpen, this.iconColor, arrowH, button.group)
+	TouchReceiver.addListenersBN(arrow.pathE, button)
+
+	//Trash
+	const trashH = arrowH
+	const trashX = arrowX - m2 - trashH
+	const trashY = (this.fileBnH - trashH)/2
+	const trash = new Button(trashX, trashY, trashH, trashH, button.group, Colors.white, trashH/2, trashH/2)
+	trash.addColorIcon(VP.bdDelete, trashH, Colors.ballyRed)
+	trash.markAsOverlayPart(this)
+
+
+
 }
 
 HLFileDrawer.prototype.displaySuccess = function() {

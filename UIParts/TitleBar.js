@@ -345,7 +345,6 @@ TitleBar.makeButtons = function() {
       } else {
         finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
         if (Hatchling) {
-          console.log("*** removing battery level - battery indicator should turn white")
           finchBn.battIcon.removeAddedPaths()
         } else { 
           finchBn.battIcon.pathE.remove();
