@@ -25,6 +25,7 @@ SaveManager.setConstants = function() {
  * @param {boolean} named - false if the user should be prompted to name the file when they try to use the OpenDialog
  */
 SaveManager.backendOpen = function(fileName, data) {
+  console.log("*** backendOpen " + fileName + ": " + data)
   SaveManager.fileName = fileName;
   SaveManager.loadData(data);
   if (FinchBlox) {
@@ -32,7 +33,11 @@ SaveManager.backendOpen = function(fileName, data) {
     if (fileLevel != LevelManager.currentLevel && fileLevel > 0 && fileLevel <= LevelManager.totalLevels) {
       LevelManager.setLevel(fileLevel)
     }
-    if (!Hatchling) { TitleBar.fileBn.update(); }
+    if (Hatchling) {
+      TitleBar.editableFileName.updateFileName()
+    } else { 
+      TitleBar.fileBn.update(); 
+    }
   }
   OpenDialog.closeDialog();
   GuiElements.unblockInteraction();
@@ -196,8 +201,12 @@ SaveManager.autoSave = function(nextAction) {
     if (nextAction != null) nextAction();
     return;
   }
-  if (FinchBlox && !Hatchling) {
-    TitleBar.fileBn.update();
+  if (FinchBlox) {
+    if (Hatchling) {
+      TitleBar.editableFileName.updateFileName()
+    } else {
+      TitleBar.fileBn.update();
+    }
   }
   const xmlDocText = XmlWriter.docToText(CodeManager.createXml());
   const request = new HttpRequestBuilder("data/autoSave");
@@ -279,6 +288,7 @@ SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, 
  * @param {function} nextAction
  */
 SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction) {
+  console.log("*** sanitizeRename")
   if (proposedName === "") {
     const message = Language.getStr("Name_error_blank");
     SaveManager.promptRename(isRecording, oldFilename, title, message, nextAction);
@@ -314,6 +324,7 @@ SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedN
  * @param {function} nextAction
  */
 SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, nextAction) {
+  console.log("*** renameSoft")
   const request = new HttpRequestBuilder("data/rename");
   request.addParam("oldFilename", oldFilename);
   request.addParam("newFilename", newName);

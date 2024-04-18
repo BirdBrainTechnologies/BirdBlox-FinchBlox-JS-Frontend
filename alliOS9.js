@@ -1,4 +1,4 @@
-var FinchBlox = true;
+//var FinchBlox = true;
 //var Hatchling = false;
 if (Hatchling) { FinchBlox = true; }
 var FrontendVersion = 393;
@@ -7125,7 +7125,7 @@ GuiElements.create.rect = function(group) {
  * @param  {number} w         text box width
  * @param  {number} h         text box height
  * @param  {Element} group     svg group to add the box to
- * @param  {Object} parent  Parent object (ususally a Comment or null)
+ * @param  {Object} parent  Parent object (usually a Comment or null)
  * @return {Element}         editable text box element created
  */
 GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, parent) {
@@ -7215,6 +7215,7 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, p
     if (this.parent != null) {
       this.parent.update()
       if (Comment.currentlyEditing) {
+        console.log("*** set currentlyEditing to null")
         Comment.currentlyEditing = null
       }
       this.parent.setPosition()
@@ -9356,7 +9357,7 @@ Colors.hexToRgb = function(hex) {
 /**
  * Contains data about a font.  Immutable and typically generated using the Font.uiFont(size) function.
  * Properties are accessed directly to be read, but should not be assigned.  charHeight is a computed property that
- * indicates how tall the text will be when it appears on the screen and is used for centring text vertically.
+ * indicates how tall the text will be when it appears on the screen and is used for centering text vertically.
  * @param {string} fontFamily - The font to use.  So far, everything is Arial
  * @param {number} fontSize
  * @param {string} fontWeight - ["bold", "normal"]
@@ -11688,6 +11689,9 @@ TouchReceiver.touchstart = function(e, preventD) {
   if (Comment.currentlyEditing) {
     Comment.currentlyEditing.editableText.blur()
   }
+  if (Hatchling && TitleBar.editableFileName.isEditing) {
+    TitleBar.editableFileName.editableText.blur()
+  }
   if (preventD == null) {
     preventD = true;
   }
@@ -11918,6 +11922,8 @@ TouchReceiver.multiTouchEnd = function(e) {
             } else { //the comment was tapped
               mto.target.editText();
             }
+          } else if (mto.targetType === "editableFileName") {
+            mto.target.editText()
           } else if (mto.targetType === "slot") {
             // If a Slot is pressed and released without dragging, it is time to edit its value.
             mto.target.onTap();
@@ -11963,7 +11969,7 @@ TouchReceiver.multiTouchLong = function(t) {
 }
 /**
  * Handles new touch events for Comments.  Stores the target Comment.
- * @param {Comment} target - The Comment that was touched.
+ * @param {EditableFileName} target - The Comment that was touched.
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchStartComment = function(target, e) {
@@ -11977,6 +11983,24 @@ TouchReceiver.touchStartComment = function(target, e) {
     }
   } else {
     TR.multiTouchStart(e, target, "comment")
+  }
+}
+/**
+ * Handles new touch events for Hatchling's editable file name. 
+ * @param {Comment} target - The editable file name.
+ * @param {event} e - passed event arguments.
+ */
+TouchReceiver.touchStartEditableFN = function(target, e) {
+  var TR = TouchReceiver;
+  if (e.type.startsWith("mouse")) {
+    TR.checkStartZoom(e);
+    if (TR.touchstart(e)) {
+      Overlay.closeOverlays(); // Close any visible overlays.
+      TR.target = target; // Store target.
+      TR.targetType = "editableFileName"
+    }
+  } else {
+    TR.multiTouchStart(e, target, "editableFileName")
   }
 }
 /**
@@ -12080,6 +12104,9 @@ TouchReceiver.touchStartSlider = function(target, e) {
   }
 };
 TouchReceiver.touchStartEditText = function(target, e) {
+  if (Hatchling) {
+    TouchReceiver.touchstart(e)
+  }
   target.editText();
 }
 /**
@@ -12401,6 +12428,8 @@ TouchReceiver.touchend = function(e) {
       } else { //the comment was tapped
         TR.target.editText()
       }
+    } else if (TR.targetType === "editableFileName") {
+      TR.target.editText()
     }
   } else {
     TR.touchDown = false;
@@ -12523,6 +12552,18 @@ TouchReceiver.addListenersComment = function(element, comment) {
   TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
     // When it is touched, the SVG element will tell the TouchReceiver its Comment.
     TouchReceiver.touchStartComment(comment, e);
+  }, false);
+};
+/**
+ * Adds handlerDown listeners to the EditableFileName.
+ * @param {Element} element - The part of the EditableFileName the listeners are being applied to.
+ * @param {Comment} comment - The EditableFileName the SVG element belongs to.
+ */
+TouchReceiver.addListenersEditableFN = function(element, comment) {
+  var TR = TouchReceiver;
+  TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+    // When it is touched, the SVG element will tell the TouchReceiver its EditableFileName.
+    TouchReceiver.touchStartEditableFN(comment, e);
   }, false);
 };
 /**
@@ -13048,6 +13089,10 @@ TitleBar.makeButtons = function() {
       recenterBn.setCallbackFunction(function() {
         TabManager.activeTab.recenter()
       }, false)
+
+      //Add the filename to the title bar
+      var etW = TB.width - 2*TB.sideWidth
+      TB.editableFileName = new HLEditableFileName(TB.sideWidth, 5, etW, TBLayer)
 
     }
 
@@ -16810,6 +16855,105 @@ HLLevelSwitch.prototype.addText = function() {
 HLLevelSwitch.prototype.remove = function() {
 	this.group.remove()
 }
+
+
+
+
+
+
+function HLEditableFileName(x, y, w, group) {
+	this.font = Font.uiFont(12)
+	this.color = Colors.ballyBrandBlueDark
+	this.defaultText = "NEW"
+	this.width = w
+	this.height = this.font.charHeight * 2
+	this.iconH = this.font.charHeight * 2 //these icons are square: width=height
+	this.iconY = (this.height - this.iconH)/2
+	this.iconM = 5
+	this.isEditing = false
+	
+	this.group = GuiElements.create.group(x, y, group)
+
+	var etX = this.iconH + this.iconM
+	this.editableText = GuiElements.create.editableText(this.font, this.color, etX, 0, w - etX, this.height, this.group)
+	this.editableText.textContent = this.defaultText
+	this.editableText.addEventListener("keyup", function(event) {
+		this.positionIcon()
+	}.bind(this))
+	this.editableText.addEventListener('blur', function() {
+		this.isEditing = false
+		var txt = this.editableText.textContent
+		var LM = LevelManager
+		var rename = SaveManager.fileName != LM.savePointFileNames[LM.currentLevel]
+		var displayname = SaveManager.fileName.slice(0, -2)
+		console.log("use editableText to rename " + displayname + " to " + txt)
+		if (txt == this.defaultText || txt == "") { 
+			//Cannot rename a file to the default text or empty string. Set back to current.
+			this.updateFileName()
+		} else {
+			LM.saveAs(this.editableText.textContent, rename) 
+		}
+		
+	}.bind(this))
+	TouchReceiver.addListenersEditableFN(this.editableText, this);
+
+	this.updateIcon()
+}
+
+HLEditableFileName.prototype.updateIcon = function() {
+	if (this.icon != null) {
+		this.icon.remove()
+	}
+
+	var fileSaved = (SaveManager.fileName != LevelManager.savePointFileNames[LevelManager.currentLevel])
+	var iconP = VectorPaths.bdStarOutlined
+	var fill = "none"
+	if (fileSaved) {
+		iconP = VectorPaths.bdSaveProgramStar
+		fill = this.color
+	}
+
+	this.icon = new VectorIcon(0, 0, iconP, fill, this.iconH, this.group)
+
+	if (!fileSaved) {
+		GuiElements.update.stroke(this.icon.pathE, this.color, 3)
+	}
+
+	this.positionIcon()
+}
+
+HLEditableFileName.prototype.positionIcon = function() {
+	if (this.icon == null) { return }
+
+	//var textW = GuiElements.measure.textWidth(this.editableText)
+	var textW = GuiElements.measure.stringWidth(this.editableText.textContent, this.font)
+	var x = (this.width - textW - this.iconH - this.iconM)/2
+
+
+	this.icon.move(x, this.iconY)
+
+}
+
+HLEditableFileName.prototype.editText = function() {
+	if (this.editableText.textContent == this.defaultText) {
+		this.editableText.textContent = ""
+	}
+	this.isEditing = true
+	this.editableText.focus()
+}
+
+HLEditableFileName.prototype.updateFileName = function() {
+	var displayname = this.defaultText
+	if (SaveManager.fileName != LevelManager.savePointFileNames[LevelManager.currentLevel]) {
+		displayname = SaveManager.fileName.slice(0, -2)
+	}
+
+	this.editableText.textContent = displayname
+
+	this.updateIcon()
+}
+
+
 //TODO:
 // - Saving
 // - Draggable to another block or the canvas
@@ -22273,8 +22417,10 @@ function HLFileDrawer() {
 	this.menuColor = Colors.ballyGrayLight
 	this.iconColor = Colors.ballyBrandBlue
 	this.iconColor2 = Colors.ballyBrandBlueLight
+	this.textColor = Colors.ballyBrandBlueDark
 	this.visible = false
 	this.slideDuration = 0.33
+
 	
 	
 
@@ -22351,7 +22497,6 @@ HLFileDrawer.prototype.open = function() {
 	var tab2X = tab1X + tabW + menuOutlineW
 	var tabY = menuY - tabH
 	var tabIconH = tabH * 2/3
-	var tabIconY = tabY + (tabH - tabIconH)/2
 	this.tab1 = GuiElements.draw.tab(tab1X, tabY, tabW, tabH, this.menuColor, tabR)
 
 	this.group.appendChild(this.tab1)
@@ -22367,16 +22512,17 @@ HLFileDrawer.prototype.open = function() {
 	this.fileTabBn.markAsOverlayPart(this)
 
 	//Add tab 2 icons
-	function tabIcon(path, color) {
-		var w = VectorIcon.computeWidth(path, tabIconH)
+	function tabIcon(path, color, h) {
+		var w = VectorIcon.computeWidth(path, h)
 		var x = tab2X + (tabW - w)/2
-		var icon = new VectorIcon(x, tabIconY, path, color, tabIconH, null)
+		var y = tabY + (tabH - h)/2
+		var icon = new VectorIcon(x, y, path, color, h, null)
 		icon.group.remove()
 		return icon
 	}
-	this.createFileIcon = tabIcon(VectorPaths.bdCreateFilePage, this.iconColor)
-	this.saveProgramIcon = tabIcon(VectorPaths.bdSaveProgramStar, this.iconColor)
-	this.savedFilesIcon = tabIcon(VectorPaths.bdSavedFiles, this.iconColor)
+	this.createFileIcon = tabIcon(VectorPaths.bdCreateFilePage, this.iconColor, tabIconH)
+	this.saveProgramIcon = tabIcon(VectorPaths.bdSaveProgramStar, this.iconColor, tabIconH * 3/2)
+	this.savedFilesIcon = tabIcon(VectorPaths.bdSavedFiles, this.iconColor, tabIconH)
 	
 	
 
@@ -22410,6 +22556,8 @@ HLFileDrawer.prototype.resetTab = function(tab) {
 		this.menuContainer.remove()
 	}
 	this.menuContainer = GuiElements.create.group(0, 0, this.menuGroup)
+
+	this.editableText = null
 
 	switch(tab) {
 	case 1:
@@ -22446,7 +22594,9 @@ HLFileDrawer.prototype.displayMainMenu = function() {
         	stackList[0].firstBlock.nextBlock == null))) {
 			this.displayCreateFileMenu()
 		} else {
-			LevelManager.loadLevelSavePoint();
+			if (SaveManager.fileName != LevelManager.savePointFileNames[LevelManager.currentLevel]) {
+				LevelManager.loadLevelSavePoint();
+			}
 			this.close()
 		}
 	}.bind(this), true)
@@ -22457,22 +22607,26 @@ HLFileDrawer.prototype.displayMainMenu = function() {
 	GuiElements.update.stroke(createFileBnAdd.pathE, this.iconColor, 3)
 	TouchReceiver.addListenersBN(createFileBnAdd.pathE, createFileBn)
 
-	var saveProgramBn = new Button(0, this.bnH + this.bnM, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
-	saveProgramBn.setCallbackFunction(this.displaySaveProgramMenu.bind(this), true)
-	saveProgramBn.markAsOverlayPart(this)
-	var saveProgramBnIcon = new VectorIcon(this.bnIconM, this.bnIconY, VP.bdSaveProgramStar, this.iconColor, this.bnIconH, saveProgramBn.group)
-	TouchReceiver.addListenersBN(saveProgramBnIcon.pathE, saveProgramBn)
-	var saveProgramBnAdd = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdAdd, this.iconColor, this.bnIcon2H, saveProgramBn.group)
-	GuiElements.update.stroke(saveProgramBnAdd.pathE, this.iconColor, 3)
-	TouchReceiver.addListenersBN(saveProgramBnAdd.pathE, saveProgramBn)
+	var y = this.bnH + this.bnM
+	if (SaveManager.fileName == LevelManager.savePointFileNames[LevelManager.currentLevel]) {
+		var saveProgramBn = new Button(0, y, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
+		saveProgramBn.setCallbackFunction(this.displaySaveProgramMenu.bind(this), true)
+		saveProgramBn.markAsOverlayPart(this)
+		var saveProgramBnIcon = new VectorIcon(this.bnIconM - this.bnIconH/8, this.bnIconY - this.bnIconH/8, VP.bdSaveProgramStar, this.iconColor, this.bnIconH*5/4, saveProgramBn.group)
+		TouchReceiver.addListenersBN(saveProgramBnIcon.pathE, saveProgramBn)
+		var saveProgramBnAdd = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdAdd, this.iconColor, this.bnIcon2H, saveProgramBn.group)
+		GuiElements.update.stroke(saveProgramBnAdd.pathE, this.iconColor, 3)
+		TouchReceiver.addListenersBN(saveProgramBnAdd.pathE, saveProgramBn)
+		y += this.bnH + this.bnM
+	}
 
-	var savedFilesBn = new Button(0, (this.bnH + this.bnM)*2, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
+	var savedFilesBn = new Button(0, y, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
 	savedFilesBn.setCallbackFunction(this.displaySavedFilesMenu.bind(this), true)
 	savedFilesBn.markAsOverlayPart(this)
 	var savedFilesBnIcon = new VectorIcon(this.bnIconM, this.bnIconY, VP.bdSavedFiles, this.iconColor, this.bnIconH, savedFilesBn.group)
-	TouchReceiver.addListenersBN(savedFilesBnIcon.pathE, saveProgramBn)
+	TouchReceiver.addListenersBN(savedFilesBnIcon.pathE, savedFilesBn)
 	var savedFilesBnOpen = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdOpen, this.iconColor, this.bnIcon2H, savedFilesBn.group)
-	TouchReceiver.addListenersBN(savedFilesBnOpen.pathE, saveProgramBn)
+	TouchReceiver.addListenersBN(savedFilesBnOpen.pathE, savedFilesBn)
 
 }
 
@@ -22485,7 +22639,7 @@ HLFileDrawer.prototype.displayCreateFileMenu = function() {
 	var saveProgramBn = new Button(0, 0, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
 	saveProgramBn.setCallbackFunction(function() { this.displaySaveProgramMenu(true) }.bind(this), true)
 	saveProgramBn.markAsOverlayPart(this)
-	var saveProgramBnIcon = new VectorIcon(this.bnIconM, this.bnIconY, VP.bdSaveProgramStar, this.iconColor, this.bnIconH, saveProgramBn.group)
+	var saveProgramBnIcon = new VectorIcon(this.bnIconM - this.bnIconH/8, this.bnIconY - this.bnIconH/8, VP.bdSaveProgramStar, this.iconColor, this.bnIconH*5/4, saveProgramBn.group)
 	TouchReceiver.addListenersBN(saveProgramBnIcon.pathE, saveProgramBn)
 	var saveProgramBnAdd = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdAdd, this.iconColor, this.bnIcon2H, saveProgramBn.group)
 	GuiElements.update.stroke(saveProgramBnAdd.pathE, this.iconColor, 3)
@@ -22497,18 +22651,84 @@ HLFileDrawer.prototype.displayCreateFileMenu = function() {
 	var trashBnIcon = new VectorIcon(this.bnIconM, this.bnIconY, VP.bdTrash, this.iconColor, this.bnIconH, trashBn.group)
 	TouchReceiver.addListenersBN(trashBnIcon.pathE, trashBn)
 	var trashBnOpen = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdOpen, this.iconColor, this.bnIcon2H, trashBn.group)
-	GuiElements.update.stroke(trashBnOpen.pathE, this.iconColor, 3)
 	TouchReceiver.addListenersBN(trashBnOpen.pathE, trashBn)
 }
 
 HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile) {
+	var VP = VectorPaths
 	this.resetTab(2)
+	
+	var y = 0
+	if (shouldCreateFile) {
+		//Add the star at the top if this is in the create file tab
+		var iconP = VP.bdSaveProgramStar
+		var iconH = this.bnH * 4/5
+		var iconW = VectorIcon.computeWidth(iconP, iconH)
+		var iconX = (this.bnW - iconW)/2
+		var spsIcon = new VectorIcon(iconX, y, iconP, this.iconColor, iconH, this.menuContainer)
 
-	this.group.appendChild(this.saveProgramIcon.group)
+		y += iconH + 10
+	} else {
+		//Add the star on the tab if it is its own menu
+		this.group.appendChild(this.saveProgramIcon.group)
+	}
+
+	//Make the editable text box
+	var bgRect = GuiElements.draw.rect(0, y, this.bnW, this.bnH, Colors.white, this.bnR/2, this.bnR/2)
+	GuiElements.update.stroke(bgRect, Colors.ballyGray, 1)
+	this.menuContainer.appendChild(bgRect)
+	var font = Font.uiFont(16)
+	this.editableText = GuiElements.create.editableText(font, this.textColor, 0, y + 10, this.bnW, this.bnH - 20, this.menuContainer)
+  	if (this.currentName != null) {
+    	this.editableText.textContent = this.currentName;
+  	}
+
+  	TouchReceiver.addListenersEditText(this.editableText, this);
+
+	y += this.bnH + 20
+
+	this.addConfirmCancelBns(y, function() {
+		var LM = LevelManager
+		if (this.editableText == null ||
+			this.editableText.textContent == null ||
+		    this.editableText.textContent == "") {
+		    //console.log("confirm button pressed without a name");
+		    return;
+		}
+
+		var fileName = this.editableText.textContent
+
+		if (fileName == SaveManager.fileName) {
+		    //console.log("confirm button pressed without changing the name.")
+		    return;
+		}
+
+		//console.log("Name file " + fileName);
+		LM.saveAs(fileName, (SaveManager.fileName != LM.savePointFileNames[LM.currentLevel]));
+
+		this.displaySuccess()
+	
+	}.bind(this))
+
+	this.editText()
 }
 
 HLFileDrawer.prototype.displayTrashMenu = function() {
 	this.resetTab(2)
+
+	//Add the trash icon
+	var iconP = VectorPaths.bdTrash
+	var iconH = 100
+	var iconW = VectorIcon.computeWidth(iconP, iconH)
+	var iconX = (this.bnW - iconW)/2
+	var trashIcon = new VectorIcon(iconX, 0, iconP, this.iconColor, iconH, this.menuContainer)
+
+	//Buttons
+	this.addConfirmCancelBns(iconH + 40, function() {
+		LevelManager.userDeleteFile(SaveManager.fileName)
+		LevelManager.loadLevelSavePoint()
+		this.displaySuccess()
+	}.bind(this))
 
 
 }
@@ -22519,6 +22739,41 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 	this.group.appendChild(this.savedFilesIcon.group)
 }
 
+HLFileDrawer.prototype.displaySuccess = function() {
+	this.resetTab(2)
+
+	var m = this.bnW/6
+	var h = this.bnW - 2*m 
+	var r = h/2
+	var center = m + r 
+	var circle = GuiElements.draw.circle(center, center, r, Colors.white, this.menuContainer)
+	var icon = new VectorIcon(m, m, VectorPaths.bdCheck, Colors.ballyGreen, h, this.menuContainer)
+}
+
+HLFileDrawer.prototype.editText = function() {
+	if (this.editableText == null) { return }
+
+	FBPopup.isEditingText = true; //TODO!
+	this.editableText.focus();
+
+}
+
+HLFileDrawer.prototype.addConfirmCancelBns = function(y, callback) {
+	var VP = VectorPaths
+	var m = 10
+	var w = (this.bnW - m)/2
+	var h = this.bnH * 2/3
+	var iH = h * 4/5
+	var cancelBn = new Button(0, y, w, h, this.menuContainer, Colors.ballyRed, this.bnR, this.bnR)
+	cancelBn.addColorIcon(VP.bdClose, iH, Colors.ballyRedLight)
+	cancelBn.markAsOverlayPart(this)
+	cancelBn.setCallbackFunction(this.displayMainMenu.bind(this), true)
+	var confirmBn = new Button(w + m, y, w, h, this.menuContainer, Colors.ballyGreen, this.bnR, this.bnR)
+	confirmBn.addColorIcon(VP.bdConnected, iH, Colors.ballyGreenLight)
+	GuiElements.update.stroke(confirmBn.icon.pathE, Colors.ballyGreenLight, 3)
+	confirmBn.markAsOverlayPart(this)
+	confirmBn.setCallbackFunction(callback, true)
+}
 
 /**
  * A menu that appears when a Block is long pressed. Provides options to delete or duplicate the block.
@@ -27995,7 +28250,6 @@ DiscoverDialog.prototype.selectDevice = function(device) {
  * Stops the update timer and discover
  */
 DiscoverDialog.prototype.closeDialog = function() {
-  console.error("*** closDialog: " + new Error().stack)
   RowDialog.prototype.closeDialog.call(this);
   this.updateTimer.stop();
   this.deviceClass.getManager().stopDiscover();
@@ -30680,6 +30934,7 @@ SaveManager.setConstants = function() {
  * @param {boolean} named - false if the user should be prompted to name the file when they try to use the OpenDialog
  */
 SaveManager.backendOpen = function(fileName, data) {
+  console.log("*** backendOpen " + fileName + ": " + data)
   SaveManager.fileName = fileName;
   SaveManager.loadData(data);
   if (FinchBlox) {
@@ -30687,7 +30942,11 @@ SaveManager.backendOpen = function(fileName, data) {
     if (fileLevel != LevelManager.currentLevel && fileLevel > 0 && fileLevel <= LevelManager.totalLevels) {
       LevelManager.setLevel(fileLevel)
     }
-    if (!Hatchling) { TitleBar.fileBn.update(); }
+    if (Hatchling) {
+      TitleBar.editableFileName.updateFileName()
+    } else { 
+      TitleBar.fileBn.update(); 
+    }
   }
   OpenDialog.closeDialog();
   GuiElements.unblockInteraction();
@@ -30851,8 +31110,12 @@ SaveManager.autoSave = function(nextAction) {
     if (nextAction != null) nextAction();
     return;
   }
-  if (FinchBlox && !Hatchling) {
-    TitleBar.fileBn.update();
+  if (FinchBlox) {
+    if (Hatchling) {
+      TitleBar.editableFileName.updateFileName()
+    } else {
+      TitleBar.fileBn.update();
+    }
   }
   var xmlDocText = XmlWriter.docToText(CodeManager.createXml());
   var request = new HttpRequestBuilder("data/autoSave");
@@ -30934,6 +31197,7 @@ SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, 
  * @param {function} nextAction
  */
 SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction) {
+  console.log("*** sanitizeRename")
   if (proposedName === "") {
     var message = Language.getStr("Name_error_blank");
     SaveManager.promptRename(isRecording, oldFilename, title, message, nextAction);
@@ -30969,6 +31233,7 @@ SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedN
  * @param {function} nextAction
  */
 SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, nextAction) {
+  console.log("*** renameSoft")
   var request = new HttpRequestBuilder("data/rename");
   request.addParam("oldFilename", oldFilename);
   request.addParam("newFilename", newName);
@@ -31460,7 +31725,7 @@ LevelManager.loadLevelSavePoint = function() {
     return;
   }
   if (LM.filesSavedLocally.indexOf(levelFileName) === -1) {
-    //console.log("file '" + levelFileName + "' not found. Must create...");
+    console.log("file '" + levelFileName + "' not found. Must create...");
     var request = new HttpRequestBuilder("data/new");
     request.addParam("filename", levelFileName);
     if (GuiElements.isIos) {
@@ -31504,14 +31769,18 @@ LevelManager.saveAs = function(name, rename) {
   }
   //console.log("Rename " + currentLevelFile + " to " + fileName);
   GuiElements.blockInteraction();
-  //console.log("Rename " + currentFile + " to " + fileName);
+  console.log("Rename " + currentFile + " to " + fileName);
   //SaveManager.sanitizeRename(false, currentLevelFile, "", fileName, function () {
   SaveManager.sanitizeRename(false, currentFile, "", fileName, function() {
     LM.checkSavedFiles()
     //console.log("Renamed " + currentLevelFile + " to " + fileName);
-    //console.log("Renamed " + currentFile + " to " + fileName);
-    //console.log(LM.filesSavedLocally);
-    TitleBar.fileBn.update();
+    console.log("Renamed " + currentFile + " to " + fileName);
+    console.log(LM.filesSavedLocally);
+    if (Hatchling) {
+      TitleBar.editableFileName.updateFileName()
+    } else {
+      TitleBar.fileBn.update();
+    }
     if (GuiElements.isAndroid) {
       GuiElements.unblockInteraction();
     }
@@ -32762,6 +33031,7 @@ Block.prototype.writeToXml = function(xmlDoc, xmlBlocks) {
  * @return {Node}
  */
 Block.prototype.createXml = function(xmlDoc) {
+  console.log("*** createXml " + this.blockTypeName)
   var block = XmlWriter.createElement(xmlDoc, "block");
   XmlWriter.setAttribute(block, "type", this.blockTypeName);
   XmlWriter.setAttribute(block, "id", this.id);
@@ -32803,6 +33073,7 @@ Block.prototype.createXml = function(xmlDoc) {
 Block.importXml = function(blockNode) {
   // Get the correct class of the Block
   var type = XmlWriter.getAttribute(blockNode, "type");
+  console.log("*** importXml " + type)
   var block;
   try {
     // All classes start with "B_"

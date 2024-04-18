@@ -9,8 +9,10 @@ function HLFileDrawer() {
 	this.menuColor = Colors.ballyGrayLight
 	this.iconColor = Colors.ballyBrandBlue
 	this.iconColor2 = Colors.ballyBrandBlueLight
+	this.textColor = Colors.ballyBrandBlueDark
 	this.visible = false
 	this.slideDuration = 0.33
+
 	
 	
 
@@ -87,7 +89,6 @@ HLFileDrawer.prototype.open = function() {
 	const tab2X = tab1X + tabW + menuOutlineW
 	const tabY = menuY - tabH
 	const tabIconH = tabH * 2/3
-	const tabIconY = tabY + (tabH - tabIconH)/2
 	this.tab1 = GuiElements.draw.tab(tab1X, tabY, tabW, tabH, this.menuColor, tabR)
 
 	this.group.appendChild(this.tab1)
@@ -103,16 +104,17 @@ HLFileDrawer.prototype.open = function() {
 	this.fileTabBn.markAsOverlayPart(this)
 
 	//Add tab 2 icons
-	function tabIcon(path, color) {
-		const w = VectorIcon.computeWidth(path, tabIconH)
+	function tabIcon(path, color, h) {
+		const w = VectorIcon.computeWidth(path, h)
 		const x = tab2X + (tabW - w)/2
-		const icon = new VectorIcon(x, tabIconY, path, color, tabIconH, null)
+		const y = tabY + (tabH - h)/2
+		const icon = new VectorIcon(x, y, path, color, h, null)
 		icon.group.remove()
 		return icon
 	}
-	this.createFileIcon = tabIcon(VectorPaths.bdCreateFilePage, this.iconColor)
-	this.saveProgramIcon = tabIcon(VectorPaths.bdSaveProgramStar, this.iconColor)
-	this.savedFilesIcon = tabIcon(VectorPaths.bdSavedFiles, this.iconColor)
+	this.createFileIcon = tabIcon(VectorPaths.bdCreateFilePage, this.iconColor, tabIconH)
+	this.saveProgramIcon = tabIcon(VectorPaths.bdSaveProgramStar, this.iconColor, tabIconH * 3/2)
+	this.savedFilesIcon = tabIcon(VectorPaths.bdSavedFiles, this.iconColor, tabIconH)
 	
 	
 
@@ -146,6 +148,8 @@ HLFileDrawer.prototype.resetTab = function(tab) {
 		this.menuContainer.remove()
 	}
 	this.menuContainer = GuiElements.create.group(0, 0, this.menuGroup)
+
+	this.editableText = null
 
 	switch(tab) {
 	case 1:
@@ -182,7 +186,9 @@ HLFileDrawer.prototype.displayMainMenu = function() {
         	stackList[0].firstBlock.nextBlock == null))) {
 			this.displayCreateFileMenu()
 		} else {
-			LevelManager.loadLevelSavePoint();
+			if (SaveManager.fileName != LevelManager.savePointFileNames[LevelManager.currentLevel]) {
+				LevelManager.loadLevelSavePoint();
+			}
 			this.close()
 		}
 	}.bind(this), true)
@@ -193,22 +199,26 @@ HLFileDrawer.prototype.displayMainMenu = function() {
 	GuiElements.update.stroke(createFileBnAdd.pathE, this.iconColor, 3)
 	TouchReceiver.addListenersBN(createFileBnAdd.pathE, createFileBn)
 
-	const saveProgramBn = new Button(0, this.bnH + this.bnM, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
-	saveProgramBn.setCallbackFunction(this.displaySaveProgramMenu.bind(this), true)
-	saveProgramBn.markAsOverlayPart(this)
-	const saveProgramBnIcon = new VectorIcon(this.bnIconM, this.bnIconY, VP.bdSaveProgramStar, this.iconColor, this.bnIconH, saveProgramBn.group)
-	TouchReceiver.addListenersBN(saveProgramBnIcon.pathE, saveProgramBn)
-	const saveProgramBnAdd = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdAdd, this.iconColor, this.bnIcon2H, saveProgramBn.group)
-	GuiElements.update.stroke(saveProgramBnAdd.pathE, this.iconColor, 3)
-	TouchReceiver.addListenersBN(saveProgramBnAdd.pathE, saveProgramBn)
+	let y = this.bnH + this.bnM
+	if (SaveManager.fileName == LevelManager.savePointFileNames[LevelManager.currentLevel]) {
+		const saveProgramBn = new Button(0, y, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
+		saveProgramBn.setCallbackFunction(this.displaySaveProgramMenu.bind(this), true)
+		saveProgramBn.markAsOverlayPart(this)
+		const saveProgramBnIcon = new VectorIcon(this.bnIconM - this.bnIconH/8, this.bnIconY - this.bnIconH/8, VP.bdSaveProgramStar, this.iconColor, this.bnIconH*5/4, saveProgramBn.group)
+		TouchReceiver.addListenersBN(saveProgramBnIcon.pathE, saveProgramBn)
+		const saveProgramBnAdd = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdAdd, this.iconColor, this.bnIcon2H, saveProgramBn.group)
+		GuiElements.update.stroke(saveProgramBnAdd.pathE, this.iconColor, 3)
+		TouchReceiver.addListenersBN(saveProgramBnAdd.pathE, saveProgramBn)
+		y += this.bnH + this.bnM
+	}
 
-	const savedFilesBn = new Button(0, (this.bnH + this.bnM)*2, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
+	const savedFilesBn = new Button(0, y, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
 	savedFilesBn.setCallbackFunction(this.displaySavedFilesMenu.bind(this), true)
 	savedFilesBn.markAsOverlayPart(this)
 	const savedFilesBnIcon = new VectorIcon(this.bnIconM, this.bnIconY, VP.bdSavedFiles, this.iconColor, this.bnIconH, savedFilesBn.group)
-	TouchReceiver.addListenersBN(savedFilesBnIcon.pathE, saveProgramBn)
+	TouchReceiver.addListenersBN(savedFilesBnIcon.pathE, savedFilesBn)
 	const savedFilesBnOpen = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdOpen, this.iconColor, this.bnIcon2H, savedFilesBn.group)
-	TouchReceiver.addListenersBN(savedFilesBnOpen.pathE, saveProgramBn)
+	TouchReceiver.addListenersBN(savedFilesBnOpen.pathE, savedFilesBn)
 
 }
 
@@ -221,7 +231,7 @@ HLFileDrawer.prototype.displayCreateFileMenu = function() {
 	const saveProgramBn = new Button(0, 0, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
 	saveProgramBn.setCallbackFunction(function() { this.displaySaveProgramMenu(true) }.bind(this), true)
 	saveProgramBn.markAsOverlayPart(this)
-	const saveProgramBnIcon = new VectorIcon(this.bnIconM, this.bnIconY, VP.bdSaveProgramStar, this.iconColor, this.bnIconH, saveProgramBn.group)
+	const saveProgramBnIcon = new VectorIcon(this.bnIconM - this.bnIconH/8, this.bnIconY - this.bnIconH/8, VP.bdSaveProgramStar, this.iconColor, this.bnIconH*5/4, saveProgramBn.group)
 	TouchReceiver.addListenersBN(saveProgramBnIcon.pathE, saveProgramBn)
 	const saveProgramBnAdd = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdAdd, this.iconColor, this.bnIcon2H, saveProgramBn.group)
 	GuiElements.update.stroke(saveProgramBnAdd.pathE, this.iconColor, 3)
@@ -233,18 +243,84 @@ HLFileDrawer.prototype.displayCreateFileMenu = function() {
 	const trashBnIcon = new VectorIcon(this.bnIconM, this.bnIconY, VP.bdTrash, this.iconColor, this.bnIconH, trashBn.group)
 	TouchReceiver.addListenersBN(trashBnIcon.pathE, trashBn)
 	const trashBnOpen = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdOpen, this.iconColor, this.bnIcon2H, trashBn.group)
-	GuiElements.update.stroke(trashBnOpen.pathE, this.iconColor, 3)
 	TouchReceiver.addListenersBN(trashBnOpen.pathE, trashBn)
 }
 
 HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile) {
+	const VP = VectorPaths
 	this.resetTab(2)
+	
+	let y = 0
+	if (shouldCreateFile) {
+		//Add the star at the top if this is in the create file tab
+		const iconP = VP.bdSaveProgramStar
+		const iconH = this.bnH * 4/5
+		const iconW = VectorIcon.computeWidth(iconP, iconH)
+		const iconX = (this.bnW - iconW)/2
+		const spsIcon = new VectorIcon(iconX, y, iconP, this.iconColor, iconH, this.menuContainer)
 
-	this.group.appendChild(this.saveProgramIcon.group)
+		y += iconH + 10
+	} else {
+		//Add the star on the tab if it is its own menu
+		this.group.appendChild(this.saveProgramIcon.group)
+	}
+
+	//Make the editable text box
+	const bgRect = GuiElements.draw.rect(0, y, this.bnW, this.bnH, Colors.white, this.bnR/2, this.bnR/2)
+	GuiElements.update.stroke(bgRect, Colors.ballyGray, 1)
+	this.menuContainer.appendChild(bgRect)
+	const font = Font.uiFont(16)
+	this.editableText = GuiElements.create.editableText(font, this.textColor, 0, y + 10, this.bnW, this.bnH - 20, this.menuContainer)
+  	if (this.currentName != null) {
+    	this.editableText.textContent = this.currentName;
+  	}
+
+  	TouchReceiver.addListenersEditText(this.editableText, this);
+
+	y += this.bnH + 20
+
+	this.addConfirmCancelBns(y, function() {
+		const LM = LevelManager
+		if (this.editableText == null ||
+			this.editableText.textContent == null ||
+		    this.editableText.textContent == "") {
+		    //console.log("confirm button pressed without a name");
+		    return;
+		}
+
+		let fileName = this.editableText.textContent
+
+		if (fileName == SaveManager.fileName) {
+		    //console.log("confirm button pressed without changing the name.")
+		    return;
+		}
+
+		//console.log("Name file " + fileName);
+		LM.saveAs(fileName, (SaveManager.fileName != LM.savePointFileNames[LM.currentLevel]));
+
+		this.displaySuccess()
+	
+	}.bind(this))
+
+	this.editText()
 }
 
 HLFileDrawer.prototype.displayTrashMenu = function() {
 	this.resetTab(2)
+
+	//Add the trash icon
+	const iconP = VectorPaths.bdTrash
+	const iconH = 100
+	const iconW = VectorIcon.computeWidth(iconP, iconH)
+	const iconX = (this.bnW - iconW)/2
+	const trashIcon = new VectorIcon(iconX, 0, iconP, this.iconColor, iconH, this.menuContainer)
+
+	//Buttons
+	this.addConfirmCancelBns(iconH + 40, function() {
+		LevelManager.userDeleteFile(SaveManager.fileName)
+		LevelManager.loadLevelSavePoint()
+		this.displaySuccess()
+	}.bind(this))
 
 
 }
@@ -255,3 +331,38 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 	this.group.appendChild(this.savedFilesIcon.group)
 }
 
+HLFileDrawer.prototype.displaySuccess = function() {
+	this.resetTab(2)
+
+	const m = this.bnW/6
+	const h = this.bnW - 2*m 
+	const r = h/2
+	const center = m + r 
+	const circle = GuiElements.draw.circle(center, center, r, Colors.white, this.menuContainer)
+	const icon = new VectorIcon(m, m, VectorPaths.bdCheck, Colors.ballyGreen, h, this.menuContainer)
+}
+
+HLFileDrawer.prototype.editText = function() {
+	if (this.editableText == null) { return }
+
+	FBPopup.isEditingText = true; //TODO!
+	this.editableText.focus();
+
+}
+
+HLFileDrawer.prototype.addConfirmCancelBns = function(y, callback) {
+	const VP = VectorPaths
+	const m = 10
+	const w = (this.bnW - m)/2
+	const h = this.bnH * 2/3
+	const iH = h * 4/5
+	const cancelBn = new Button(0, y, w, h, this.menuContainer, Colors.ballyRed, this.bnR, this.bnR)
+	cancelBn.addColorIcon(VP.bdClose, iH, Colors.ballyRedLight)
+	cancelBn.markAsOverlayPart(this)
+	cancelBn.setCallbackFunction(this.displayMainMenu.bind(this), true)
+	const confirmBn = new Button(w + m, y, w, h, this.menuContainer, Colors.ballyGreen, this.bnR, this.bnR)
+	confirmBn.addColorIcon(VP.bdConnected, iH, Colors.ballyGreenLight)
+	GuiElements.update.stroke(confirmBn.icon.pathE, Colors.ballyGreenLight, 3)
+	confirmBn.markAsOverlayPart(this)
+	confirmBn.setCallbackFunction(callback, true)
+}

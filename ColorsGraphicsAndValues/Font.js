@@ -1,7 +1,7 @@
 /**
  * Contains data about a font.  Immutable and typically generated using the Font.uiFont(size) function.
  * Properties are accessed directly to be read, but should not be assigned.  charHeight is a computed property that
- * indicates how tall the text will be when it appears on the screen and is used for centring text vertically.
+ * indicates how tall the text will be when it appears on the screen and is used for centering text vertically.
  * @param {string} fontFamily - The font to use.  So far, everything is Arial
  * @param {number} fontSize
  * @param {string} fontWeight - ["bold", "normal"]

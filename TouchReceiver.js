@@ -195,6 +195,9 @@ TouchReceiver.touchstart = function(e, preventD) {
   if (Comment.currentlyEditing) {
     Comment.currentlyEditing.editableText.blur()
   }
+  if (Hatchling && TitleBar.editableFileName.isEditing) {
+    TitleBar.editableFileName.editableText.blur()
+  }
   if (preventD == null) {
     preventD = true;
   }
@@ -317,6 +320,9 @@ TouchReceiver.multiTouchStart = function(e, target, targetType) {
   if (Comment.currentlyEditing) {
     Comment.currentlyEditing.editableText.blur()
   }
+  if (Hatchling && TitleBar.editableFileName.isEditing) {
+    TitleBar.editableFileName.editableText.blur()
+  }
 
   Overlay.closeOverlays();
   for (var i = 0; i < e.changedTouches.length; i++) {
@@ -425,6 +431,8 @@ TouchReceiver.multiTouchEnd = function(e) {
             } else { //the comment was tapped
               mto.target.editText();
             }
+          } else if (mto.targetType === "editableFileName") {
+            mto.target.editText()
           } else if (mto.targetType === "slot") {
             // If a Slot is pressed and released without dragging, it is time to edit its value.
             mto.target.onTap();
@@ -484,6 +492,24 @@ TouchReceiver.touchStartComment = function(target, e) {
     }
   } else {
     TR.multiTouchStart(e, target, "comment")
+  }
+}
+/**
+ * Handles new touch events for Hatchling's editable file name. 
+ * @param {EditableFileName} target - The editable file name.
+ * @param {event} e - passed event arguments.
+ */
+TouchReceiver.touchStartEditableFN = function(target, e) {
+  const TR = TouchReceiver;
+  if (e.type.startsWith("mouse")) {
+    TR.checkStartZoom(e);
+    if (TR.touchstart(e)) {
+      Overlay.closeOverlays(); // Close any visible overlays.
+      TR.target = target; // Store target.
+      TR.targetType = "editableFileName"
+    }
+  } else {
+    TR.multiTouchStart(e, target, "editableFileName")
   }
 }
 /**
@@ -908,6 +934,8 @@ TouchReceiver.touchend = function(e) {
       } else { //the comment was tapped
         TR.target.editText()
       }
+    } else if (TR.targetType === "editableFileName") {
+      TR.target.editText()
     }
   } else {
     TR.touchDown = false;
@@ -1030,6 +1058,18 @@ TouchReceiver.addListenersComment = function(element, comment) {
   TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
     // When it is touched, the SVG element will tell the TouchReceiver its Comment.
     TouchReceiver.touchStartComment(comment, e);
+  }, false);
+};
+/**
+ * Adds handlerDown listeners to the EditableFileName.
+ * @param {Element} element - The part of the EditableFileName the listeners are being applied to.
+ * @param {Comment} comment - The EditableFileName the SVG element belongs to.
+ */
+TouchReceiver.addListenersEditableFN = function(element, comment) {
+  const TR = TouchReceiver;
+  TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+    // When it is touched, the SVG element will tell the TouchReceiver its EditableFileName.
+    TouchReceiver.touchStartEditableFN(comment, e);
   }, false);
 };
 /**

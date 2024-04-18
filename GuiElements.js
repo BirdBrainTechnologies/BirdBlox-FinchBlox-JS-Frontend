@@ -460,7 +460,7 @@ GuiElements.create.rect = function(group) {
  * @param  {number} w         text box width
  * @param  {number} h         text box height
  * @param  {Element} group     svg group to add the box to
- * @param  {Object} parent  Parent object (ususally a Comment or null)
+ * @param  {Object} parent  Parent object (usually a Comment or null)
  * @return {Element}         editable text box element created
  */
 GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, parent) {

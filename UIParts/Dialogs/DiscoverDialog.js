@@ -223,7 +223,6 @@ DiscoverDialog.prototype.selectDevice = function(device) {
  * Stops the update timer and discover
  */
 DiscoverDialog.prototype.closeDialog = function() {
-  console.error("*** closDialog: " + new Error().stack)
   RowDialog.prototype.closeDialog.call(this);
   this.updateTimer.stop();
   this.deviceClass.getManager().stopDiscover();

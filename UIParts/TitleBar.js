@@ -311,6 +311,10 @@ TitleBar.makeButtons = function() {
         TabManager.activeTab.recenter()
       }, false)
 
+      //Add the filename to the title bar
+      const etW = TB.width - 2*TB.sideWidth
+      TB.editableFileName = new HLEditableFileName(TB.sideWidth, 5, etW, TBLayer)
+
     }
 
     TB.updateStatus = function(status) {
