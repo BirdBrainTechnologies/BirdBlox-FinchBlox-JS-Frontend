@@ -13,7 +13,6 @@ function HLEditableFileName(x, y, w, group) {
 
 	const etX = this.iconH + this.iconM
 	this.editableText = GuiElements.create.editableText(this.font, this.color, etX, 0, w - etX, this.height, this.group)
-	this.editableText.textContent = this.defaultText
 	this.editableText.addEventListener("keyup", function(event) {
 		this.positionIcon()
 	}.bind(this))
@@ -34,7 +33,7 @@ function HLEditableFileName(x, y, w, group) {
 	}.bind(this))
 	TouchReceiver.addListenersEditableFN(this.editableText, this);
 
-	this.updateIcon()
+	this.updateFileName()
 }
 
 HLEditableFileName.prototype.updateIcon = function() {
@@ -81,12 +80,17 @@ HLEditableFileName.prototype.editText = function() {
 
 HLEditableFileName.prototype.updateFileName = function() {
 	let displayname = this.defaultText
-	if (SaveManager.fileName != LevelManager.savePointFileNames[LevelManager.currentLevel]) {
+	if ((SaveManager.fileName != null) && 
+		(SaveManager.fileName != LevelManager.savePointFileNames[LevelManager.currentLevel])) {
 		displayname = SaveManager.fileName.slice(0, -2)
-	}
+	} 
 
 	this.editableText.textContent = displayname
 
 	this.updateIcon()
+}
+
+HLEditableFileName.prototype.remove = function() {
+	this.group.remove()
 }
 

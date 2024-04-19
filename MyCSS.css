@@ -87,6 +87,7 @@ transition:
         transform .5s ease-in-out, 
         opacity .5s linear;
 */
+/* Will use svg animate instead
 .slideLeft {
     transform: translateX(-100vw);
     transition: transform 1s ease-in;
@@ -107,6 +108,20 @@ transition:
     opacity: 1;
     transform: translateX(0);
     transition: transform 1s ease-out;
+}
+*/
+
+.hatchlingScroll {
+    ::-webkit-scrollbar {
+        width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #EEEEF4;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #99A5B1;
+        border-radius: 2.5px;
+    }
 }
 
 

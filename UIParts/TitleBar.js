@@ -456,6 +456,10 @@ TitleBar.removeButtons = function() {
     //if (!Hatchling) { TB.levelButton.remove(); }
     TB.levelButton.remove();
     //  TB.trashButton.remove();
+    if (Hatchling) {
+      TB.editableFileName.remove()
+      TB.zoomBnGroup.remove()
+    }
   } else {
     TB.viewBn.remove();
     TB.hummingbirdBn.remove();

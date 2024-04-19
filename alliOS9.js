@@ -7797,6 +7797,19 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
     div.classList.add("noScroll");
   }
 
+  console.log("*** smoothScrollSet " + width + " " + innerWidth + " " + div.offsetWidth)
+  console.log(div.parentNode.parentNode)
+  if (div.parentNode.parentNode.nodeName.toLowerCase() == "foreignobject") {
+    div.style.top = y + "px";
+    div.style.left = x + "px";
+    div.style.width = width + "px";
+    div.style.height = height+ "px";
+
+    svg.setAttribute('width', innerWidth);
+    svg.setAttribute('height', innerHeight);
+    return
+  }
+
   var zoom = GuiElements.zoomFactor;
 
   div.style.top = y + "px";
@@ -13234,6 +13247,10 @@ TitleBar.removeButtons = function() {
     //if (!Hatchling) { TB.levelButton.remove(); }
     TB.levelButton.remove();
     //  TB.trashButton.remove();
+    if (Hatchling) {
+      TB.editableFileName.remove()
+      TB.zoomBnGroup.remove()
+    }
   } else {
     TB.viewBn.remove();
     TB.hummingbirdBn.remove();
@@ -16868,7 +16885,6 @@ function HLEditableFileName(x, y, w, group) {
 
 	var etX = this.iconH + this.iconM
 	this.editableText = GuiElements.create.editableText(this.font, this.color, etX, 0, w - etX, this.height, this.group)
-	this.editableText.textContent = this.defaultText
 	this.editableText.addEventListener("keyup", function(event) {
 		this.positionIcon()
 	}.bind(this))
@@ -16889,7 +16905,7 @@ function HLEditableFileName(x, y, w, group) {
 	}.bind(this))
 	TouchReceiver.addListenersEditableFN(this.editableText, this);
 
-	this.updateIcon()
+	this.updateFileName()
 }
 
 HLEditableFileName.prototype.updateIcon = function() {
@@ -16936,13 +16952,18 @@ HLEditableFileName.prototype.editText = function() {
 
 HLEditableFileName.prototype.updateFileName = function() {
 	var displayname = this.defaultText
-	if (SaveManager.fileName != LevelManager.savePointFileNames[LevelManager.currentLevel]) {
+	if ((SaveManager.fileName != null) && 
+		(SaveManager.fileName != LevelManager.savePointFileNames[LevelManager.currentLevel])) {
 		displayname = SaveManager.fileName.slice(0, -2)
-	}
+	} 
 
 	this.editableText.textContent = displayname
 
 	this.updateIcon()
+}
+
+HLEditableFileName.prototype.remove = function() {
+	this.group.remove()
 }
 
 
@@ -21185,6 +21206,9 @@ function SmoothScrollBox(group, layer, absX, absY, width, height, innerWidth, in
   this.visible = false;
   this.currentZoom = GuiElements.zoomFactor;
   this.partOfOverlay = partOfOverlay;
+
+  console.log("*** SmoothScrollBox " + this.scrollDiv.offsetWidth)
+  console.log(this.scrollDiv)
 }
 
 /**
@@ -21195,8 +21219,10 @@ SmoothScrollBox.prototype.updateScrollSet = function() {
     var realX = GuiElements.relToAbsX(this.x);
     var realY = GuiElements.relToAbsY(this.y);
 
+    console.log("*** before update smoothScrollSet " + this.scrollDiv.offsetWidth)
     GuiElements.update.smoothScrollSet(this.scrollDiv, this.contentSvg, this.contentGroup, realX, realY, this.width,
       this.height, this.innerWidth, this.innerHeight);
+    console.log("*** after update smoothScrollSet " + this.scrollDiv.offsetWidth)
   }
 };
 
@@ -21250,11 +21276,15 @@ SmoothScrollBox.prototype.move = function(absX, absY) {
  */
 SmoothScrollBox.prototype.show = function() {
   if (!this.visible) {
+    console.log("*** about to show " + this.scrollDiv.offsetWidth)
     this.visible = true;
     this.layer.appendChild(this.scrollDiv);
+    console.log("*** appended " + this.scrollDiv.offsetWidth)
     this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
+    console.log("*** scrollfixtimer created " + this.scrollDiv.offsetWidth)
     this.updateScrollSet();
     TouchReceiver.setInitialScrollFix(this.scrollDiv);
+    console.log("*** showing " + this.scrollDiv.offsetWidth)
   }
 };
 
@@ -22528,7 +22558,6 @@ HLFileDrawer.prototype.open = function() {
 	this.menuGroupX = menuBnX 
 	this.menuGroupY = this.menuY + tabH
 	this.menuGroup = GuiElements.create.group(this.menuGroupX, this.menuGroupY, this.group)
-	this.innerHeight = this.menuH - 2*tabH //Height of menu content area
 	this.displayMainMenu()
 
 
@@ -22550,6 +22579,7 @@ HLFileDrawer.prototype.close = function() {
 
 		if (this.scrollBox != null) {
 		  this.scrollBox.hide();
+		  this.scrollFO.remove()
 		}
 	}.bind(this), this.slideDuration*1000)
 
@@ -22586,6 +22616,7 @@ HLFileDrawer.prototype.resetTab = function(tab) {
 
 	if (this.scrollBox != null) {
 	  this.scrollBox.hide();
+	  this.scrollFO.remove()
 	}
 }
 
@@ -22770,29 +22801,47 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 
 	var bnM = 10 
 	this.fileBnH = 50
-	var scrollHeight = this.rowCount*(bnM + this.fileBnH) - bnM;
+	var scrollHeight = this.rowCount*(RowDialog.bnHeight + RowDialog.bnMargin)//this.rowCount*(bnM + this.fileBnH)
 
 	//Calculations for the scrollbox
-	var availableHeight = this.innerHeight
-	this.contentWidth = this.menuW2 - this.menuW/12
+	var availableHeight = this.menuH - this.menuW/6
+	this.contentWidth = this.menuW2 - this.menuW/10
 	this.hintText = "";
+	console.log("*** contentWidth " + this.contentWidth)
 
-	var scrollBoxX = GuiElements.width - this.menuW2 + this.menuW/24 //GuiElements.width - this.menuW + this.menuGroupX
+	//var scrollBoxX = GuiElements.width - this.menuW2 + this.menuW/24 //GuiElements.width - this.menuW + this.menuGroupX
 	//var scrollBoxX2 = GuiElements.width - this.menuW2 + this.menuGroupX
+	//var scrollBoxY = this.menuY + this.menuW/12
+	var scrollBoxX = this.menuW/20
 	var scrollBoxY = this.menuY + this.menuW/12
-	var scrollBoxWidth = this.contentWidth;
+	var scrollBoxWidth = this.contentWidth + 10; //Add space for scroll bar
 	var scrollBoxHeight = Math.min(availableHeight, scrollHeight);
 	//console.log("making content. sx=" + scrollBoxX + " sy=" + scrollBoxY + " this.y=" + this.y + " sh=" + scrollHeight + " ah=" + availableHeight + " sbh=" + scrollBoxHeight + " rc=" + this.rowCount + " bnh=" + RD.bnHeight);
 	//Create the rows to display and the scrollbox to contain them
 	if (this.rowCount != 0) {
-	  var rowGroup = RowDialog.prototype.createContent.call(this);
-	  this.scrollBox = new SmoothScrollBox(rowGroup, GuiElements.layers.frontScroll,
-	    scrollBoxX, scrollBoxY, scrollBoxWidth, scrollBoxHeight, scrollBoxWidth, scrollHeight);
-	  this.scrollBox.partOfOverlay = this
+	  //embed the scroll box in a foreign object so it can slide in with the menu
+	  this.scrollFO = document.createElementNS('http://www.w3.org/2000/svg', "foreignObject");
+	  this.scrollFO.setAttribute('width', scrollBoxWidth);
+	  this.scrollFO.setAttribute('height', scrollBoxHeight);
+	  this.scrollFO.setAttribute("x", scrollBoxX);
+	  this.scrollFO.setAttribute("y", scrollBoxY);
+	  this.group.appendChild(this.scrollFO)
 
-	  setTimeout(function() {
+	  var scrollDiv = document.createElement('div');
+	  //scrollDiv.setAttribute('class', "divLayer")
+	  scrollDiv.classList.add("divLayer")
+	  scrollDiv.classList.add("hatchlingScroll")
+	  this.scrollFO.appendChild(scrollDiv)
+
+	  var rowGroup = RowDialog.prototype.createContent.call(this);
+	  this.scrollBox = new SmoothScrollBox(rowGroup, scrollDiv,
+	    0, 0, scrollBoxWidth, scrollBoxHeight, scrollBoxWidth, scrollHeight, this);
+
+	  //this.scrollBox.scrollDiv.classList.add("hatchlingScroll")
+
+	  //setTimeout(function() {
 	  	this.scrollBox.show();
-	  }.bind(this), this.slideDuration)
+	  //}.bind(this), this.slideDuration)
 	  
 	  //GuiElements.animate.move(this.scrollBox.scrollDiv, scrollBoxX2 - scrollBoxX, 0, this.slideDuration) //couldn't animate well
 	}
@@ -22807,6 +22856,7 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup) {
 	var VP = VectorPaths
 	var displayName = this.fileList[index].slice(0, -2)
 	var level = this.fileList[index].slice(-1)
+	console.log("*** createRow width=" + width)
 
 	var button = new Button(0, y, width, this.fileBnH, contentGroup, Colors.white, 10, 10);
 	button.markAsOverlayPart(this)
@@ -22829,9 +22879,9 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup) {
 	TouchReceiver.addListenersBN(textE, button)
 
 	//Level indicator
-	var liX = textX + textW + 2*m 
-	var liY = starY 
 	var liH = 18
+	var liX = textX + textW + 2*m 
+	var liY = (this.fileBnH - liH)/2
 	var liRect = GuiElements.draw.rect(liX, liY, liH, liH, this.textColor, 2, 2)
 	button.group.appendChild(liRect)
 	TouchReceiver.addListenersBN(liRect, button)
@@ -22847,7 +22897,7 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup) {
 	//Arrow 
 	var m2 = 8
 	var arrowH = 30
-	var arrowX = width - m2 - arrowH 
+	var arrowX = width - m2 - arrowH
 	var arrowY = (this.fileBnH - arrowH)/2
 	var arrow = new VectorIcon(arrowX, arrowY, VP.bdOpen, this.iconColor, arrowH, button.group)
 	TouchReceiver.addListenersBN(arrow.pathE, button)

@@ -1132,6 +1132,19 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
     div.classList.add("noScroll");
   }
 
+  console.log("*** smoothScrollSet " + width + " " + innerWidth + " " + div.offsetWidth)
+  console.log(div.parentNode.parentNode)
+  if (div.parentNode.parentNode.nodeName.toLowerCase() == "foreignobject") {
+    div.style.top = y + "px";
+    div.style.left = x + "px";
+    div.style.width = width + "px";
+    div.style.height = height+ "px";
+
+    svg.setAttribute('width', innerWidth);
+    svg.setAttribute('height', innerHeight);
+    return
+  }
+
   const zoom = GuiElements.zoomFactor;
 
   div.style.top = y + "px";

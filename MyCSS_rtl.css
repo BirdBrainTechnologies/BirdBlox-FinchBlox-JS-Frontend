@@ -87,6 +87,19 @@ path{
     pointer-events: auto;
 }
 
+.hatchlingScroll {
+    ::-webkit-scrollbar {
+        width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #EEEEF4;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #99A5B1;
+        border-radius: 2.5px;
+    }
+}
+
 @font-face {
   font-family: AvenirHeavy;
   src: url(Fonts/AEH.ttf);

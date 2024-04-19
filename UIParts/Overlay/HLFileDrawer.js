@@ -128,7 +128,6 @@ HLFileDrawer.prototype.open = function() {
 	this.menuGroupX = menuBnX 
 	this.menuGroupY = this.menuY + tabH
 	this.menuGroup = GuiElements.create.group(this.menuGroupX, this.menuGroupY, this.group)
-	this.innerHeight = this.menuH - 2*tabH //Height of menu content area
 	this.displayMainMenu()
 
 
@@ -150,6 +149,7 @@ HLFileDrawer.prototype.close = function() {
 
 		if (this.scrollBox != null) {
 		  this.scrollBox.hide();
+		  this.scrollFO.remove()
 		}
 	}.bind(this), this.slideDuration*1000)
 
@@ -186,6 +186,7 @@ HLFileDrawer.prototype.resetTab = function(tab) {
 
 	if (this.scrollBox != null) {
 	  this.scrollBox.hide();
+	  this.scrollFO.remove()
 	}
 }
 
@@ -370,29 +371,47 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 
 	const bnM = 10 
 	this.fileBnH = 50
-	const scrollHeight = this.rowCount*(bnM + this.fileBnH) - bnM;
+	const scrollHeight = this.rowCount*(RowDialog.bnHeight + RowDialog.bnMargin)//this.rowCount*(bnM + this.fileBnH)
 
 	//Calculations for the scrollbox
-	const availableHeight = this.innerHeight
-	this.contentWidth = this.menuW2 - this.menuW/12
+	const availableHeight = this.menuH - this.menuW/6
+	this.contentWidth = this.menuW2 - this.menuW/10
 	this.hintText = "";
+	console.log("*** contentWidth " + this.contentWidth)
 
-	const scrollBoxX = GuiElements.width - this.menuW2 + this.menuW/24 //GuiElements.width - this.menuW + this.menuGroupX
+	//const scrollBoxX = GuiElements.width - this.menuW2 + this.menuW/24 //GuiElements.width - this.menuW + this.menuGroupX
 	//const scrollBoxX2 = GuiElements.width - this.menuW2 + this.menuGroupX
+	//const scrollBoxY = this.menuY + this.menuW/12
+	const scrollBoxX = this.menuW/20
 	const scrollBoxY = this.menuY + this.menuW/12
-	const scrollBoxWidth = this.contentWidth;
+	const scrollBoxWidth = this.contentWidth + 10; //Add space for scroll bar
 	const scrollBoxHeight = Math.min(availableHeight, scrollHeight);
 	//console.log("making content. sx=" + scrollBoxX + " sy=" + scrollBoxY + " this.y=" + this.y + " sh=" + scrollHeight + " ah=" + availableHeight + " sbh=" + scrollBoxHeight + " rc=" + this.rowCount + " bnh=" + RD.bnHeight);
 	//Create the rows to display and the scrollbox to contain them
 	if (this.rowCount != 0) {
-	  const rowGroup = RowDialog.prototype.createContent.call(this);
-	  this.scrollBox = new SmoothScrollBox(rowGroup, GuiElements.layers.frontScroll,
-	    scrollBoxX, scrollBoxY, scrollBoxWidth, scrollBoxHeight, scrollBoxWidth, scrollHeight);
-	  this.scrollBox.partOfOverlay = this
+	  //embed the scroll box in a foreign object so it can slide in with the menu
+	  this.scrollFO = document.createElementNS('http://www.w3.org/2000/svg', "foreignObject");
+	  this.scrollFO.setAttribute('width', scrollBoxWidth);
+	  this.scrollFO.setAttribute('height', scrollBoxHeight);
+	  this.scrollFO.setAttribute("x", scrollBoxX);
+	  this.scrollFO.setAttribute("y", scrollBoxY);
+	  this.group.appendChild(this.scrollFO)
 
-	  setTimeout(function() {
+	  const scrollDiv = document.createElement('div');
+	  //scrollDiv.setAttribute('class', "divLayer")
+	  scrollDiv.classList.add("divLayer")
+	  scrollDiv.classList.add("hatchlingScroll")
+	  this.scrollFO.appendChild(scrollDiv)
+
+	  const rowGroup = RowDialog.prototype.createContent.call(this);
+	  this.scrollBox = new SmoothScrollBox(rowGroup, scrollDiv,
+	    0, 0, scrollBoxWidth, scrollBoxHeight, scrollBoxWidth, scrollHeight, this);
+
+	  //this.scrollBox.scrollDiv.classList.add("hatchlingScroll")
+
+	  //setTimeout(function() {
 	  	this.scrollBox.show();
-	  }.bind(this), this.slideDuration)
+	  //}.bind(this), this.slideDuration)
 	  
 	  //GuiElements.animate.move(this.scrollBox.scrollDiv, scrollBoxX2 - scrollBoxX, 0, this.slideDuration) //couldn't animate well
 	}
@@ -407,6 +426,7 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup) {
 	const VP = VectorPaths
 	const displayName = this.fileList[index].slice(0, -2)
 	const level = this.fileList[index].slice(-1)
+	console.log("*** createRow width=" + width)
 
 	const button = new Button(0, y, width, this.fileBnH, contentGroup, Colors.white, 10, 10);
 	button.markAsOverlayPart(this)
@@ -429,9 +449,9 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup) {
 	TouchReceiver.addListenersBN(textE, button)
 
 	//Level indicator
-	const liX = textX + textW + 2*m 
-	const liY = starY 
 	const liH = 18
+	const liX = textX + textW + 2*m 
+	const liY = (this.fileBnH - liH)/2
 	const liRect = GuiElements.draw.rect(liX, liY, liH, liH, this.textColor, 2, 2)
 	button.group.appendChild(liRect)
 	TouchReceiver.addListenersBN(liRect, button)
@@ -447,7 +467,7 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup) {
 	//Arrow 
 	const m2 = 8
 	const arrowH = 30
-	const arrowX = width - m2 - arrowH 
+	const arrowX = width - m2 - arrowH
 	const arrowY = (this.fileBnH - arrowH)/2
 	const arrow = new VectorIcon(arrowX, arrowY, VP.bdOpen, this.iconColor, arrowH, button.group)
 	TouchReceiver.addListenersBN(arrow.pathE, button)
