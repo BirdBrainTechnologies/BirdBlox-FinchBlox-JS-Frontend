@@ -1132,7 +1132,6 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
     div.classList.add("noScroll");
   }
 
-  console.log("*** smoothScrollSet " + width + " " + innerWidth + " " + div.offsetWidth)
   console.log(div.parentNode.parentNode)
   if (div.parentNode.parentNode.nodeName.toLowerCase() == "foreignobject") {
     div.style.top = y + "px";

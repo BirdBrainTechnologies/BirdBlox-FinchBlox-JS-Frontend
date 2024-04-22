@@ -174,9 +174,13 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
   //In this case we will present the option to start a scan
   if (Hatchling && deviceList.length == 0) { 
     const iconH = button.height * 0.6
+    /* This is how it was in the design files
     button.addSideTextAndIcon(VectorPaths.bdAdd, iconH, "CONNECT ANOTHER ROBOT", Button.defaultFont, Colors.ballyBrandBlueDark, Colors.ballyBrandBlue, false, true)
     GuiElements.update.stroke(button.icon.pathE, Colors.ballyBrandBlue, 3)
-    button.updateBgColor(Colors.white, Colors.ballyBrandBlue)
+    button.updateBgColor(Colors.white, Colors.ballyBrandBlue)*/
+    button.addColorIcon(VectorPaths.bdAdd, iconH, Colors.ballyBrandBlueLight)
+    GuiElements.update.stroke(button.icon.pathE, Colors.ballyBrandBlueLight, 3)
+    button.updateBgColor(Colors.ballyBrandBlue)
     button.setCallbackFunction(function() {
       console.log("Clicked CONNECT ANOTHER ROBOT")
       this.discoverDevices()

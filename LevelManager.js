@@ -184,3 +184,16 @@ LevelManager.userDeleteFile = function(fileName) {
   SaveManager.delete(false, fileName);
   if (!deletingCurrentFile) GuiElements.unblockInteraction();
 }
+
+/**
+ * Returns true if the current file is the level save point and has been modified.
+ */
+LevelManager.currentFileIsUnsaved = function() {
+  const stackList = TabManager.activeTab.stackList
+  return (SaveManager.fileName != undefined && 
+      SaveManager.fileName == LevelManager.savePointFileNames[LevelManager.currentLevel] &&
+      (stackList.length > 1 || !(stackList.length != 0 &&
+          stackList[0].firstBlock.isStartBlock && 
+          stackList[0].firstBlock.nextBlock == null))) 
+}
+

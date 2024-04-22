@@ -12,7 +12,7 @@ function HLFileDrawer() {
 	this.textColor = Colors.ballyBrandBlueDark
 	this.visible = false
 	this.slideDuration = 0.33
-
+	this.isExtended = false
 	
 	
 
@@ -146,17 +146,23 @@ HLFileDrawer.prototype.close = function() {
 		this.group.remove()
 		Overlay.removeOverlay(this)
 		GuiElements.unblockInteraction();
-
-		if (this.scrollBox != null) {
-		  this.scrollBox.hide();
-		  this.scrollFO.remove()
-		}
 	}.bind(this), this.slideDuration*1000)
 
 	GuiElements.animate.move(this.group, GuiElements.width, 0, this.slideDuration)
 }
 
-HLFileDrawer.prototype.resetTab = function(tab) {
+HLFileDrawer.prototype.resetTab = function(tab, extend, embed) {
+
+	if (embed) {
+		if (this.insetGroup != null) {
+			this.insetGroup.remove()
+		}
+		const m = (this.menuW2 - this.bnW)/2 - this.menuW/20
+		const y = RowDialog.bnHeight + RowDialog.bnMargin + m
+		this.insetGroup = GuiElements.create.group(m, y, this.menuContainer)
+		return
+	}
+
 	if (this.menuContainer != null) {
 		this.menuContainer.remove()
 	}
@@ -185,9 +191,31 @@ HLFileDrawer.prototype.resetTab = function(tab) {
 	}
 
 	if (this.scrollBox != null) {
-	  this.scrollBox.hide();
-	  this.scrollFO.remove()
+		this.scrollBox.hide();
+		this.scrollFO.remove()
 	}
+
+
+	//Extend or shorten the drawer, but only if needed.
+	if ( (extend && this.isExtended) || (!extend && !this.isExtended) ) {
+		return
+	}
+
+	if (extend) {
+		this.isExtended = true
+		GuiElements.update.rect(this.menuTopRect, this.menuX, this.menuY, this.menuW2 - this.menuOutlineW, this.menuH - 15)
+		this.closeBn.move(this.closeBnX2, this.closeBnY)
+		GuiElements.animate.move(this.group, this.x - this.menuBonus, 0, this.slideDuration)
+
+	} else {
+		this.isExtended = false
+		GuiElements.animate.move(this.group, this.x, 0, this.slideDuration)
+		setTimeout(function() {
+			GuiElements.update.rect(this.menuTopRect, this.menuX, this.menuY, this.menuW - this.menuOutlineW, this.menuH - 15)
+			this.closeBn.move(this.closeBnX, this.closeBnY)
+		}.bind(this), this.slideDuration*1000)
+	}
+
 }
 
 HLFileDrawer.prototype.displayMainMenu = function() {
@@ -196,13 +224,8 @@ HLFileDrawer.prototype.displayMainMenu = function() {
 
 	const createFileBn = new Button(0, 0, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
 	createFileBn.setCallbackFunction(function() {
-		const stackList = TabManager.activeTab.stackList
-		if (SaveManager.fileName != undefined && 
-			SaveManager.fileName == LevelManager.savePointFileNames[LevelManager.currentLevel] &&
-			(stackList.length > 1 || !(stackList.length != 0 &&
-        	stackList[0].firstBlock.isStartBlock && 
-        	stackList[0].firstBlock.nextBlock == null))) {
-			this.displayCreateFileMenu()
+		if (LevelManager.currentFileIsUnsaved()) {
+			this.displaySaveOrDeleteMenu()
 		} else {
 			if (SaveManager.fileName != LevelManager.savePointFileNames[LevelManager.currentLevel]) {
 				LevelManager.loadLevelSavePoint();
@@ -240,14 +263,19 @@ HLFileDrawer.prototype.displayMainMenu = function() {
 
 }
 
-HLFileDrawer.prototype.displayCreateFileMenu = function() {
+HLFileDrawer.prototype.displaySaveOrDeleteMenu = function(embed) {
 	const VP = VectorPaths
-	this.resetTab(2)
 
-	this.group.appendChild(this.createFileIcon.group)
-
-	const saveProgramBn = new Button(0, 0, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
-	saveProgramBn.setCallbackFunction(function() { this.displaySaveProgramMenu(true) }.bind(this), true)
+	this.resetTab(2, null, embed)
+	if (!embed) {
+		this.group.appendChild(this.createFileIcon.group)
+	}
+	const group = embed ? this.insetGroup : this.menuContainer
+	
+	const saveProgramBn = new Button(0, 0, this.bnW, this.bnH, group, Colors.white, this.bnR, this.bnR, this.iconColor)
+	saveProgramBn.setCallbackFunction(function() { 
+		this.displaySaveProgramMenu(!embed, embed) 
+	}.bind(this), true)
 	saveProgramBn.markAsOverlayPart(this)
 	const saveProgramBnIcon = new VectorIcon(this.bnIconM - this.bnIconH/8, this.bnIconY - this.bnIconH/8, VP.bdSaveProgramStar, this.iconColor, this.bnIconH*5/4, saveProgramBn.group)
 	TouchReceiver.addListenersBN(saveProgramBnIcon.pathE, saveProgramBn)
@@ -255,8 +283,10 @@ HLFileDrawer.prototype.displayCreateFileMenu = function() {
 	GuiElements.update.stroke(saveProgramBnAdd.pathE, this.iconColor, 3)
 	TouchReceiver.addListenersBN(saveProgramBnAdd.pathE, saveProgramBn)
 
-	const trashBn = new Button(0, this.bnH + this.bnM, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
-	trashBn.setCallbackFunction(this.displayTrashMenu.bind(this), true)
+	const trashBn = new Button(0, this.bnH + this.bnM, this.bnW, this.bnH, group, Colors.white, this.bnR, this.bnR, this.iconColor)
+	trashBn.setCallbackFunction(function() {
+		this.displayTrashMenu(embed)
+	}.bind(this), true)
 	trashBn.markAsOverlayPart(this)
 	const trashBnIcon = new VectorIcon(this.bnIconM, this.bnIconY, VP.bdTrash, this.iconColor, this.bnIconH, trashBn.group)
 	TouchReceiver.addListenersBN(trashBnIcon.pathE, trashBn)
@@ -264,9 +294,12 @@ HLFileDrawer.prototype.displayCreateFileMenu = function() {
 	TouchReceiver.addListenersBN(trashBnOpen.pathE, trashBn)
 }
 
-HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile) {
+HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile, embed) {
 	const VP = VectorPaths
-	this.resetTab(2)
+
+	this.resetTab(2, null, embed)
+
+	const group = embed ? this.insetGroup : this.menuContainer
 	
 	let y = 0
 	if (shouldCreateFile) {
@@ -275,10 +308,10 @@ HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile) {
 		const iconH = this.bnH * 4/5
 		const iconW = VectorIcon.computeWidth(iconP, iconH)
 		const iconX = (this.bnW - iconW)/2
-		const spsIcon = new VectorIcon(iconX, y, iconP, this.iconColor, iconH, this.menuContainer)
+		const spsIcon = new VectorIcon(iconX, y, iconP, this.iconColor, iconH, group)
 
 		y += iconH + 10
-	} else {
+	} else if (!embed) {
 		//Add the star on the tab if it is its own menu
 		this.group.appendChild(this.saveProgramIcon.group)
 	}
@@ -286,9 +319,9 @@ HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile) {
 	//Make the editable text box
 	const bgRect = GuiElements.draw.rect(0, y, this.bnW, this.bnH, Colors.white, this.bnR/2, this.bnR/2)
 	GuiElements.update.stroke(bgRect, Colors.ballyGray, 1)
-	this.menuContainer.appendChild(bgRect)
+	group.appendChild(bgRect)
 	const font = Font.uiFont(16)
-	this.editableText = GuiElements.create.editableText(font, this.textColor, 0, y + 10, this.bnW, this.bnH - 20, this.menuContainer)
+	this.editableText = GuiElements.create.editableText(font, this.textColor, 0, y + 10, this.bnW, this.bnH - 20, group)
   	if (this.currentName != null) {
     	this.editableText.textContent = this.currentName;
   	}
@@ -316,41 +349,52 @@ HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile) {
 		//console.log("Name file " + fileName);
 		LM.saveAs(fileName, (SaveManager.fileName != LM.savePointFileNames[LM.currentLevel]));
 
-		this.displaySuccess()
+		this.displaySuccess(embed)
 	
-	}.bind(this))
+	}.bind(this), function() {
+		if (embed) {
+			this.displaySaveOrDeleteMenu(embed)
+		} else if (shouldCreateFile) {
+			this.displaySaveOrDeleteMenu()
+		} else {
+			this.displayMainMenu()
+		}
+	}.bind(this), embed)
 
 	this.editText()
 }
 
-HLFileDrawer.prototype.displayTrashMenu = function() {
-	this.resetTab(2)
+HLFileDrawer.prototype.displayTrashMenu = function(embed) {
+
+	this.resetTab(2, null, embed)
+	
+	const group = embed ? this.insetGroup : this.menuContainer
 
 	//Add the trash icon
 	const iconP = VectorPaths.bdTrash
 	const iconH = 100
 	const iconW = VectorIcon.computeWidth(iconP, iconH)
 	const iconX = (this.bnW - iconW)/2
-	const trashIcon = new VectorIcon(iconX, 0, iconP, this.iconColor, iconH, this.menuContainer)
+	const trashIcon = new VectorIcon(iconX, 0, iconP, this.iconColor, iconH, group)
 
 	//Buttons
 	this.addConfirmCancelBns(iconH + 40, function() {
 		LevelManager.userDeleteFile(SaveManager.fileName)
 		LevelManager.loadLevelSavePoint()
-		this.displaySuccess()
-	}.bind(this))
+		this.displaySuccess(embed)
+	}.bind(this), function() {
+		this.displaySaveOrDeleteMenu(embed)
+	}.bind(this), embed)
 
 
 }
 
 HLFileDrawer.prototype.displaySavedFilesMenu = function() {
-	this.resetTab(2)
+	this.resetTab(2, true)
 
 	this.group.appendChild(this.savedFilesIcon.group)
 
-	GuiElements.update.rect(this.menuTopRect, this.menuX, this.menuY, this.menuW2 - this.menuOutlineW, this.menuH - 15)
-	this.closeBn.move(this.closeBnX2, this.closeBnY)
-
+	//this.updateDrawer(true)
 
 
 	//Get the list of files to display and determine how much space that will take
@@ -407,29 +451,34 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 	  this.scrollBox = new SmoothScrollBox(rowGroup, scrollDiv,
 	    0, 0, scrollBoxWidth, scrollBoxHeight, scrollBoxWidth, scrollHeight, this);
 
-	  //this.scrollBox.scrollDiv.classList.add("hatchlingScroll")
-
-	  //setTimeout(function() {
-	  	this.scrollBox.show();
-	  //}.bind(this), this.slideDuration)
-	  
-	  //GuiElements.animate.move(this.scrollBox.scrollDiv, scrollBoxX2 - scrollBoxX, 0, this.slideDuration) //couldn't animate well
+	  this.scrollBox.show();
 	}
-
-	GuiElements.animate.move(this.group, this.x - this.menuBonus, 0, this.slideDuration)
 	
 }
 /**
  * Create one row to display one filename in the saved files menu
  */
-HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup) {
+HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup, embed) {
 	const VP = VectorPaths
-	const displayName = this.fileList[index].slice(0, -2)
-	const level = this.fileList[index].slice(-1)
+	const fileName = this.fileList[index]
+	const displayName = fileName.slice(0, -2)
+	const level = fileName.slice(-1)
+	const isOpen = fileName == SaveManager.fileName
 	console.log("*** createRow width=" + width)
 
-	const button = new Button(0, y, width, this.fileBnH, contentGroup, Colors.white, 10, 10);
+	const bgColor = (isOpen || embed) ? Colors.ballyBrandBlueLight : Colors.white
+	const outlineColor = (isOpen || embed) ? Colors.ballyBrandBlue : null
+	const button = new Button(0, y, width, this.fileBnH, contentGroup, bgColor, 10, 10, outlineColor);
+	button.setCallbackFunction(function() {
+		if (LevelManager.currentFileIsUnsaved()) {
+			this.displayEmbededSaveOrDeleteMenu(fileName)
+		} else {
+			LevelManager.openFile(fileName)
+			this.close()
+		}
+	}.bind(this), true)
 	button.markAsOverlayPart(this)
+	if (embed) { button.disable(true) }
 
 	//Star
 	const m = 5
@@ -478,21 +527,48 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup) {
 	const trashY = (this.fileBnH - trashH)/2
 	const trash = new Button(trashX, trashY, trashH, trashH, button.group, Colors.white, trashH/2, trashH/2)
 	trash.addColorIcon(VP.bdDelete, trashH, Colors.ballyRed)
+	trash.setCallbackFunction(function() {
+		LevelManager.userDeleteFile(fileName)
+		if (fileName == SaveManager.fileName) {
+			LevelManager.loadLevelSavePoint()
+		}
+		this.displaySavedFilesMenu()
+	}.bind(this), true)
 	trash.markAsOverlayPart(this)
+	if (embed) { trash.disable(true) }
 
 
 
 }
 
-HLFileDrawer.prototype.displaySuccess = function() {
-	this.resetTab(2)
+HLFileDrawer.prototype.displayEmbededSaveOrDeleteMenu = function(fileName) {
+	this.resetTab(2, true)
+
+	this.menuContainer = GuiElements.create.group(this.menuW/20, this.menuY + this.menuW/12, this.group)
+	const w = this.contentWidth
+	const h = this.menuH - this.menuW/3 - RowDialog.bnHeight - RowDialog.bnMargin
+
+	this.createRow(this.fileList.indexOf(fileName), 0, w, this.menuContainer, true)
+
+	const insetRect = GuiElements.draw.rect(0, (RowDialog.bnHeight + RowDialog.bnMargin), w, h, Colors.white, 10, 10)
+	GuiElements.update.stroke(insetRect, Colors.ballyGray, 3)
+	this.menuContainer.appendChild(insetRect)
+
+	this.displaySaveOrDeleteMenu(true)
+}
+
+HLFileDrawer.prototype.displaySuccess = function(embed) {
+
+	this.resetTab(2, null, embed)
+
+	const group = embed ? this.insetGroup : this.menuContainer
 
 	const m = this.bnW/6
 	const h = this.bnW - 2*m 
 	const r = h/2
 	const center = m + r 
-	const circle = GuiElements.draw.circle(center, center, r, Colors.white, this.menuContainer)
-	const icon = new VectorIcon(m, m, VectorPaths.bdCheck, Colors.ballyGreen, h, this.menuContainer)
+	const circle = GuiElements.draw.circle(center, center, r, Colors.white, group)
+	const icon = new VectorIcon(m, m, VectorPaths.bdCheck, Colors.ballyGreen, h, group)
 }
 
 HLFileDrawer.prototype.editText = function() {
@@ -503,19 +579,20 @@ HLFileDrawer.prototype.editText = function() {
 
 }
 
-HLFileDrawer.prototype.addConfirmCancelBns = function(y, callback) {
+HLFileDrawer.prototype.addConfirmCancelBns = function(y, confirmCallback, cancelCallback, embed) {
+	const group = embed ? this.insetGroup : this.menuContainer
 	const VP = VectorPaths
 	const m = 10
 	const w = (this.bnW - m)/2
 	const h = this.bnH * 2/3
 	const iH = h * 4/5
-	const cancelBn = new Button(0, y, w, h, this.menuContainer, Colors.ballyRed, this.bnR, this.bnR)
+	const cancelBn = new Button(0, y, w, h, group, Colors.ballyRed, this.bnR, this.bnR)
 	cancelBn.addColorIcon(VP.bdClose, iH, Colors.ballyRedLight)
 	cancelBn.markAsOverlayPart(this)
-	cancelBn.setCallbackFunction(this.displayMainMenu.bind(this), true)
-	const confirmBn = new Button(w + m, y, w, h, this.menuContainer, Colors.ballyGreen, this.bnR, this.bnR)
+	cancelBn.setCallbackFunction(cancelCallback, true)
+	const confirmBn = new Button(w + m, y, w, h, group, Colors.ballyGreen, this.bnR, this.bnR)
 	confirmBn.addColorIcon(VP.bdConnected, iH, Colors.ballyGreenLight)
 	GuiElements.update.stroke(confirmBn.icon.pathE, Colors.ballyGreenLight, 3)
 	confirmBn.markAsOverlayPart(this)
-	confirmBn.setCallbackFunction(callback, true)
+	confirmBn.setCallbackFunction(confirmCallback, true)
 }

@@ -7797,7 +7797,6 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
     div.classList.add("noScroll");
   }
 
-  console.log("*** smoothScrollSet " + width + " " + innerWidth + " " + div.offsetWidth)
   console.log(div.parentNode.parentNode)
   if (div.parentNode.parentNode.nodeName.toLowerCase() == "foreignobject") {
     div.style.top = y + "px";
@@ -20930,24 +20929,22 @@ FBFileSelect.prototype.createRow = function(index, y, width, contentGroup) {
   //trashBn.partOfOverlay = this.bubbleOverlay;
 
   //Add level number
-  if (!Hatchling) {
-    var levelFont = Font.uiFont(18)
-    var levelRectH = levelFont.charHeight * 3 / 2;
-    var levelRectW = levelRectH * 8 / 7;
-    var levelRectY = (button.height - levelRectH) / 2;
-    var levelRectX = trashX - 2 * FBPopup.bubbleMargin - levelRectW;
-    var lr = 4; //corner rounding of level label
-    var levelRect = GuiElements.draw.rect(levelRectX, levelRectY, levelRectW, levelRectH, Colors.seance, lr, lr);
-    button.group.appendChild(levelRect);
-    TouchReceiver.addListenersBN(levelRect, button);
-    var levelE = GuiElements.draw.text(0, 0, fileLevel, levelFont, Colors.white);
-    var levelW = GuiElements.measure.textWidth(levelE);
-    var levelX = levelRectX + (levelRectW - levelW) / 2; //trashX - FBPopup.bubbleMargin - levelW;
-    var levelY = textY;
-    GuiElements.move.text(levelE, levelX, levelY);
-    button.group.appendChild(levelE);
-    TouchReceiver.addListenersBN(levelE, button);
-  }
+  var levelFont = Font.uiFont(18)
+  var levelRectH = levelFont.charHeight * 3 / 2;
+  var levelRectW = levelRectH * 8 / 7;
+  var levelRectY = (button.height - levelRectH) / 2;
+  var levelRectX = trashX - 2 * FBPopup.bubbleMargin - levelRectW;
+  var lr = 4; //corner rounding of level label
+  var levelRect = GuiElements.draw.rect(levelRectX, levelRectY, levelRectW, levelRectH, Colors.seance, lr, lr);
+  button.group.appendChild(levelRect);
+  TouchReceiver.addListenersBN(levelRect, button);
+  var levelE = GuiElements.draw.text(0, 0, fileLevel, levelFont, Colors.white);
+  var levelW = GuiElements.measure.textWidth(levelE);
+  var levelX = levelRectX + (levelRectW - levelW) / 2; //trashX - FBPopup.bubbleMargin - levelW;
+  var levelY = textY;
+  GuiElements.move.text(levelE, levelX, levelY);
+  button.group.appendChild(levelE);
+  TouchReceiver.addListenersBN(levelE, button);
 
 
   button.setCallbackFunction(function() {
@@ -21206,9 +21203,6 @@ function SmoothScrollBox(group, layer, absX, absY, width, height, innerWidth, in
   this.visible = false;
   this.currentZoom = GuiElements.zoomFactor;
   this.partOfOverlay = partOfOverlay;
-
-  console.log("*** SmoothScrollBox " + this.scrollDiv.offsetWidth)
-  console.log(this.scrollDiv)
 }
 
 /**
@@ -21219,10 +21213,8 @@ SmoothScrollBox.prototype.updateScrollSet = function() {
     var realX = GuiElements.relToAbsX(this.x);
     var realY = GuiElements.relToAbsY(this.y);
 
-    console.log("*** before update smoothScrollSet " + this.scrollDiv.offsetWidth)
     GuiElements.update.smoothScrollSet(this.scrollDiv, this.contentSvg, this.contentGroup, realX, realY, this.width,
       this.height, this.innerWidth, this.innerHeight);
-    console.log("*** after update smoothScrollSet " + this.scrollDiv.offsetWidth)
   }
 };
 
@@ -21276,15 +21268,11 @@ SmoothScrollBox.prototype.move = function(absX, absY) {
  */
 SmoothScrollBox.prototype.show = function() {
   if (!this.visible) {
-    console.log("*** about to show " + this.scrollDiv.offsetWidth)
     this.visible = true;
     this.layer.appendChild(this.scrollDiv);
-    console.log("*** appended " + this.scrollDiv.offsetWidth)
     this.fixScrollTimer = TouchReceiver.createScrollFixTimer(this.scrollDiv);
-    console.log("*** scrollfixtimer created " + this.scrollDiv.offsetWidth)
     this.updateScrollSet();
     TouchReceiver.setInitialScrollFix(this.scrollDiv);
-    console.log("*** showing " + this.scrollDiv.offsetWidth)
   }
 };
 
@@ -22442,7 +22430,7 @@ function HLFileDrawer() {
 	this.textColor = Colors.ballyBrandBlueDark
 	this.visible = false
 	this.slideDuration = 0.33
-
+	this.isExtended = false
 	
 	
 
@@ -22576,17 +22564,23 @@ HLFileDrawer.prototype.close = function() {
 		this.group.remove()
 		Overlay.removeOverlay(this)
 		GuiElements.unblockInteraction();
-
-		if (this.scrollBox != null) {
-		  this.scrollBox.hide();
-		  this.scrollFO.remove()
-		}
 	}.bind(this), this.slideDuration*1000)
 
 	GuiElements.animate.move(this.group, GuiElements.width, 0, this.slideDuration)
 }
 
-HLFileDrawer.prototype.resetTab = function(tab) {
+HLFileDrawer.prototype.resetTab = function(tab, extend, embed) {
+
+	if (embed) {
+		if (this.insetGroup != null) {
+			this.insetGroup.remove()
+		}
+		var m = (this.menuW2 - this.bnW)/2 - this.menuW/20
+		var y = RowDialog.bnHeight + RowDialog.bnMargin + m
+		this.insetGroup = GuiElements.create.group(m, y, this.menuContainer)
+		return
+	}
+
 	if (this.menuContainer != null) {
 		this.menuContainer.remove()
 	}
@@ -22615,9 +22609,31 @@ HLFileDrawer.prototype.resetTab = function(tab) {
 	}
 
 	if (this.scrollBox != null) {
-	  this.scrollBox.hide();
-	  this.scrollFO.remove()
+		this.scrollBox.hide();
+		this.scrollFO.remove()
 	}
+
+
+	//Extend or shorten the drawer, but only if needed.
+	if ( (extend && this.isExtended) || (!extend && !this.isExtended) ) {
+		return
+	}
+
+	if (extend) {
+		this.isExtended = true
+		GuiElements.update.rect(this.menuTopRect, this.menuX, this.menuY, this.menuW2 - this.menuOutlineW, this.menuH - 15)
+		this.closeBn.move(this.closeBnX2, this.closeBnY)
+		GuiElements.animate.move(this.group, this.x - this.menuBonus, 0, this.slideDuration)
+
+	} else {
+		this.isExtended = false
+		GuiElements.animate.move(this.group, this.x, 0, this.slideDuration)
+		setTimeout(function() {
+			GuiElements.update.rect(this.menuTopRect, this.menuX, this.menuY, this.menuW - this.menuOutlineW, this.menuH - 15)
+			this.closeBn.move(this.closeBnX, this.closeBnY)
+		}.bind(this), this.slideDuration*1000)
+	}
+
 }
 
 HLFileDrawer.prototype.displayMainMenu = function() {
@@ -22626,13 +22642,8 @@ HLFileDrawer.prototype.displayMainMenu = function() {
 
 	var createFileBn = new Button(0, 0, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
 	createFileBn.setCallbackFunction(function() {
-		var stackList = TabManager.activeTab.stackList
-		if (SaveManager.fileName != undefined && 
-			SaveManager.fileName == LevelManager.savePointFileNames[LevelManager.currentLevel] &&
-			(stackList.length > 1 || !(stackList.length != 0 &&
-        	stackList[0].firstBlock.isStartBlock && 
-        	stackList[0].firstBlock.nextBlock == null))) {
-			this.displayCreateFileMenu()
+		if (LevelManager.currentFileIsUnsaved()) {
+			this.displaySaveOrDeleteMenu()
 		} else {
 			if (SaveManager.fileName != LevelManager.savePointFileNames[LevelManager.currentLevel]) {
 				LevelManager.loadLevelSavePoint();
@@ -22670,14 +22681,19 @@ HLFileDrawer.prototype.displayMainMenu = function() {
 
 }
 
-HLFileDrawer.prototype.displayCreateFileMenu = function() {
+HLFileDrawer.prototype.displaySaveOrDeleteMenu = function(embed) {
 	var VP = VectorPaths
-	this.resetTab(2)
 
-	this.group.appendChild(this.createFileIcon.group)
-
-	var saveProgramBn = new Button(0, 0, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
-	saveProgramBn.setCallbackFunction(function() { this.displaySaveProgramMenu(true) }.bind(this), true)
+	this.resetTab(2, null, embed)
+	if (!embed) {
+		this.group.appendChild(this.createFileIcon.group)
+	}
+	var group = embed ? this.insetGroup : this.menuContainer
+	
+	var saveProgramBn = new Button(0, 0, this.bnW, this.bnH, group, Colors.white, this.bnR, this.bnR, this.iconColor)
+	saveProgramBn.setCallbackFunction(function() { 
+		this.displaySaveProgramMenu(!embed, embed) 
+	}.bind(this), true)
 	saveProgramBn.markAsOverlayPart(this)
 	var saveProgramBnIcon = new VectorIcon(this.bnIconM - this.bnIconH/8, this.bnIconY - this.bnIconH/8, VP.bdSaveProgramStar, this.iconColor, this.bnIconH*5/4, saveProgramBn.group)
 	TouchReceiver.addListenersBN(saveProgramBnIcon.pathE, saveProgramBn)
@@ -22685,8 +22701,10 @@ HLFileDrawer.prototype.displayCreateFileMenu = function() {
 	GuiElements.update.stroke(saveProgramBnAdd.pathE, this.iconColor, 3)
 	TouchReceiver.addListenersBN(saveProgramBnAdd.pathE, saveProgramBn)
 
-	var trashBn = new Button(0, this.bnH + this.bnM, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
-	trashBn.setCallbackFunction(this.displayTrashMenu.bind(this), true)
+	var trashBn = new Button(0, this.bnH + this.bnM, this.bnW, this.bnH, group, Colors.white, this.bnR, this.bnR, this.iconColor)
+	trashBn.setCallbackFunction(function() {
+		this.displayTrashMenu(embed)
+	}.bind(this), true)
 	trashBn.markAsOverlayPart(this)
 	var trashBnIcon = new VectorIcon(this.bnIconM, this.bnIconY, VP.bdTrash, this.iconColor, this.bnIconH, trashBn.group)
 	TouchReceiver.addListenersBN(trashBnIcon.pathE, trashBn)
@@ -22694,9 +22712,12 @@ HLFileDrawer.prototype.displayCreateFileMenu = function() {
 	TouchReceiver.addListenersBN(trashBnOpen.pathE, trashBn)
 }
 
-HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile) {
+HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile, embed) {
 	var VP = VectorPaths
-	this.resetTab(2)
+
+	this.resetTab(2, null, embed)
+
+	var group = embed ? this.insetGroup : this.menuContainer
 	
 	var y = 0
 	if (shouldCreateFile) {
@@ -22705,10 +22726,10 @@ HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile) {
 		var iconH = this.bnH * 4/5
 		var iconW = VectorIcon.computeWidth(iconP, iconH)
 		var iconX = (this.bnW - iconW)/2
-		var spsIcon = new VectorIcon(iconX, y, iconP, this.iconColor, iconH, this.menuContainer)
+		var spsIcon = new VectorIcon(iconX, y, iconP, this.iconColor, iconH, group)
 
 		y += iconH + 10
-	} else {
+	} else if (!embed) {
 		//Add the star on the tab if it is its own menu
 		this.group.appendChild(this.saveProgramIcon.group)
 	}
@@ -22716,9 +22737,9 @@ HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile) {
 	//Make the editable text box
 	var bgRect = GuiElements.draw.rect(0, y, this.bnW, this.bnH, Colors.white, this.bnR/2, this.bnR/2)
 	GuiElements.update.stroke(bgRect, Colors.ballyGray, 1)
-	this.menuContainer.appendChild(bgRect)
+	group.appendChild(bgRect)
 	var font = Font.uiFont(16)
-	this.editableText = GuiElements.create.editableText(font, this.textColor, 0, y + 10, this.bnW, this.bnH - 20, this.menuContainer)
+	this.editableText = GuiElements.create.editableText(font, this.textColor, 0, y + 10, this.bnW, this.bnH - 20, group)
   	if (this.currentName != null) {
     	this.editableText.textContent = this.currentName;
   	}
@@ -22746,41 +22767,52 @@ HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile) {
 		//console.log("Name file " + fileName);
 		LM.saveAs(fileName, (SaveManager.fileName != LM.savePointFileNames[LM.currentLevel]));
 
-		this.displaySuccess()
+		this.displaySuccess(embed)
 	
-	}.bind(this))
+	}.bind(this), function() {
+		if (embed) {
+			this.displaySaveOrDeleteMenu(embed)
+		} else if (shouldCreateFile) {
+			this.displaySaveOrDeleteMenu()
+		} else {
+			this.displayMainMenu()
+		}
+	}.bind(this), embed)
 
 	this.editText()
 }
 
-HLFileDrawer.prototype.displayTrashMenu = function() {
-	this.resetTab(2)
+HLFileDrawer.prototype.displayTrashMenu = function(embed) {
+
+	this.resetTab(2, null, embed)
+	
+	var group = embed ? this.insetGroup : this.menuContainer
 
 	//Add the trash icon
 	var iconP = VectorPaths.bdTrash
 	var iconH = 100
 	var iconW = VectorIcon.computeWidth(iconP, iconH)
 	var iconX = (this.bnW - iconW)/2
-	var trashIcon = new VectorIcon(iconX, 0, iconP, this.iconColor, iconH, this.menuContainer)
+	var trashIcon = new VectorIcon(iconX, 0, iconP, this.iconColor, iconH, group)
 
 	//Buttons
 	this.addConfirmCancelBns(iconH + 40, function() {
 		LevelManager.userDeleteFile(SaveManager.fileName)
 		LevelManager.loadLevelSavePoint()
-		this.displaySuccess()
-	}.bind(this))
+		this.displaySuccess(embed)
+	}.bind(this), function() {
+		this.displaySaveOrDeleteMenu(embed)
+	}.bind(this), embed)
 
 
 }
 
 HLFileDrawer.prototype.displaySavedFilesMenu = function() {
-	this.resetTab(2)
+	this.resetTab(2, true)
 
 	this.group.appendChild(this.savedFilesIcon.group)
 
-	GuiElements.update.rect(this.menuTopRect, this.menuX, this.menuY, this.menuW2 - this.menuOutlineW, this.menuH - 15)
-	this.closeBn.move(this.closeBnX2, this.closeBnY)
-
+	//this.updateDrawer(true)
 
 
 	//Get the list of files to display and determine how much space that will take
@@ -22837,29 +22869,34 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 	  this.scrollBox = new SmoothScrollBox(rowGroup, scrollDiv,
 	    0, 0, scrollBoxWidth, scrollBoxHeight, scrollBoxWidth, scrollHeight, this);
 
-	  //this.scrollBox.scrollDiv.classList.add("hatchlingScroll")
-
-	  //setTimeout(function() {
-	  	this.scrollBox.show();
-	  //}.bind(this), this.slideDuration)
-	  
-	  //GuiElements.animate.move(this.scrollBox.scrollDiv, scrollBoxX2 - scrollBoxX, 0, this.slideDuration) //couldn't animate well
+	  this.scrollBox.show();
 	}
-
-	GuiElements.animate.move(this.group, this.x - this.menuBonus, 0, this.slideDuration)
 	
 }
 /**
  * Create one row to display one filename in the saved files menu
  */
-HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup) {
+HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup, embed) {
 	var VP = VectorPaths
-	var displayName = this.fileList[index].slice(0, -2)
-	var level = this.fileList[index].slice(-1)
+	var fileName = this.fileList[index]
+	var displayName = fileName.slice(0, -2)
+	var level = fileName.slice(-1)
+	var isOpen = fileName == SaveManager.fileName
 	console.log("*** createRow width=" + width)
 
-	var button = new Button(0, y, width, this.fileBnH, contentGroup, Colors.white, 10, 10);
+	var bgColor = (isOpen || embed) ? Colors.ballyBrandBlueLight : Colors.white
+	var outlineColor = (isOpen || embed) ? Colors.ballyBrandBlue : null
+	var button = new Button(0, y, width, this.fileBnH, contentGroup, bgColor, 10, 10, outlineColor);
+	button.setCallbackFunction(function() {
+		if (LevelManager.currentFileIsUnsaved()) {
+			this.displayEmbededSaveOrDeleteMenu(fileName)
+		} else {
+			LevelManager.openFile(fileName)
+			this.close()
+		}
+	}.bind(this), true)
 	button.markAsOverlayPart(this)
+	if (embed) { button.disable(true) }
 
 	//Star
 	var m = 5
@@ -22908,21 +22945,48 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup) {
 	var trashY = (this.fileBnH - trashH)/2
 	var trash = new Button(trashX, trashY, trashH, trashH, button.group, Colors.white, trashH/2, trashH/2)
 	trash.addColorIcon(VP.bdDelete, trashH, Colors.ballyRed)
+	trash.setCallbackFunction(function() {
+		LevelManager.userDeleteFile(fileName)
+		if (fileName == SaveManager.fileName) {
+			LevelManager.loadLevelSavePoint()
+		}
+		this.displaySavedFilesMenu()
+	}.bind(this), true)
 	trash.markAsOverlayPart(this)
+	if (embed) { trash.disable(true) }
 
 
 
 }
 
-HLFileDrawer.prototype.displaySuccess = function() {
-	this.resetTab(2)
+HLFileDrawer.prototype.displayEmbededSaveOrDeleteMenu = function(fileName) {
+	this.resetTab(2, true)
+
+	this.menuContainer = GuiElements.create.group(this.menuW/20, this.menuY + this.menuW/12, this.group)
+	var w = this.contentWidth
+	var h = this.menuH - this.menuW/3 - RowDialog.bnHeight - RowDialog.bnMargin
+
+	this.createRow(this.fileList.indexOf(fileName), 0, w, this.menuContainer, true)
+
+	var insetRect = GuiElements.draw.rect(0, (RowDialog.bnHeight + RowDialog.bnMargin), w, h, Colors.white, 10, 10)
+	GuiElements.update.stroke(insetRect, Colors.ballyGray, 3)
+	this.menuContainer.appendChild(insetRect)
+
+	this.displaySaveOrDeleteMenu(true)
+}
+
+HLFileDrawer.prototype.displaySuccess = function(embed) {
+
+	this.resetTab(2, null, embed)
+
+	var group = embed ? this.insetGroup : this.menuContainer
 
 	var m = this.bnW/6
 	var h = this.bnW - 2*m 
 	var r = h/2
 	var center = m + r 
-	var circle = GuiElements.draw.circle(center, center, r, Colors.white, this.menuContainer)
-	var icon = new VectorIcon(m, m, VectorPaths.bdCheck, Colors.ballyGreen, h, this.menuContainer)
+	var circle = GuiElements.draw.circle(center, center, r, Colors.white, group)
+	var icon = new VectorIcon(m, m, VectorPaths.bdCheck, Colors.ballyGreen, h, group)
 }
 
 HLFileDrawer.prototype.editText = function() {
@@ -22933,21 +22997,22 @@ HLFileDrawer.prototype.editText = function() {
 
 }
 
-HLFileDrawer.prototype.addConfirmCancelBns = function(y, callback) {
+HLFileDrawer.prototype.addConfirmCancelBns = function(y, confirmCallback, cancelCallback, embed) {
+	var group = embed ? this.insetGroup : this.menuContainer
 	var VP = VectorPaths
 	var m = 10
 	var w = (this.bnW - m)/2
 	var h = this.bnH * 2/3
 	var iH = h * 4/5
-	var cancelBn = new Button(0, y, w, h, this.menuContainer, Colors.ballyRed, this.bnR, this.bnR)
+	var cancelBn = new Button(0, y, w, h, group, Colors.ballyRed, this.bnR, this.bnR)
 	cancelBn.addColorIcon(VP.bdClose, iH, Colors.ballyRedLight)
 	cancelBn.markAsOverlayPart(this)
-	cancelBn.setCallbackFunction(this.displayMainMenu.bind(this), true)
-	var confirmBn = new Button(w + m, y, w, h, this.menuContainer, Colors.ballyGreen, this.bnR, this.bnR)
+	cancelBn.setCallbackFunction(cancelCallback, true)
+	var confirmBn = new Button(w + m, y, w, h, group, Colors.ballyGreen, this.bnR, this.bnR)
 	confirmBn.addColorIcon(VP.bdConnected, iH, Colors.ballyGreenLight)
 	GuiElements.update.stroke(confirmBn.icon.pathE, Colors.ballyGreenLight, 3)
 	confirmBn.markAsOverlayPart(this)
-	confirmBn.setCallbackFunction(callback, true)
+	confirmBn.setCallbackFunction(confirmCallback, true)
 }
 
 /**
@@ -28376,9 +28441,13 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
   //In this case we will present the option to start a scan
   if (Hatchling && deviceList.length == 0) { 
     var iconH = button.height * 0.6
+    /* This is how it was in the design files
     button.addSideTextAndIcon(VectorPaths.bdAdd, iconH, "CONNECT ANOTHER ROBOT", Button.defaultFont, Colors.ballyBrandBlueDark, Colors.ballyBrandBlue, false, true)
     GuiElements.update.stroke(button.icon.pathE, Colors.ballyBrandBlue, 3)
-    button.updateBgColor(Colors.white, Colors.ballyBrandBlue)
+    button.updateBgColor(Colors.white, Colors.ballyBrandBlue)*/
+    button.addColorIcon(VectorPaths.bdAdd, iconH, Colors.ballyBrandBlueLight)
+    GuiElements.update.stroke(button.icon.pathE, Colors.ballyBrandBlueLight, 3)
+    button.updateBgColor(Colors.ballyBrandBlue)
     button.setCallbackFunction(function() {
       console.log("Clicked CONNECT ANOTHER ROBOT")
       this.discoverDevices()
@@ -31988,6 +32057,19 @@ LevelManager.userDeleteFile = function(fileName) {
   SaveManager.delete(false, fileName);
   if (!deletingCurrentFile) GuiElements.unblockInteraction();
 }
+
+/**
+ * Returns true if the current file is the level save point and has been modified.
+ */
+LevelManager.currentFileIsUnsaved = function() {
+  var stackList = TabManager.activeTab.stackList
+  return (SaveManager.fileName != undefined && 
+      SaveManager.fileName == LevelManager.savePointFileNames[LevelManager.currentLevel] &&
+      (stackList.length > 1 || !(stackList.length != 0 &&
+          stackList[0].firstBlock.isStartBlock && 
+          stackList[0].firstBlock.nextBlock == null))) 
+}
+
 
 
 /**
