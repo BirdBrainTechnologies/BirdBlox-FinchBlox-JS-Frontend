@@ -7797,7 +7797,6 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
     div.classList.add("noScroll");
   }
 
-  console.log(div.parentNode.parentNode)
   if (div.parentNode.parentNode.nodeName.toLowerCase() == "foreignobject") {
     div.style.top = y + "px";
     div.style.left = x + "px";
@@ -22558,6 +22557,8 @@ HLFileDrawer.prototype.close = function() {
 	if (!this.visible) { return }
 
 	this.visible = false
+	TabManager.activeTab.removeOutline()
+	BlockPalette.hideTrash()
 
 	//Must wait until the animation is complete to remove the overlay
 	setTimeout(function() {
@@ -22566,10 +22567,14 @@ HLFileDrawer.prototype.close = function() {
 		GuiElements.unblockInteraction();
 	}.bind(this), this.slideDuration*1000)
 
+	var duration = this.isExtended ? this.slideDuration*2 : this.slideDuration
 	GuiElements.animate.move(this.group, GuiElements.width, 0, this.slideDuration)
 }
 
 HLFileDrawer.prototype.resetTab = function(tab, extend, embed) {
+
+	TabManager.activeTab.removeOutline()
+	BlockPalette.hideTrash()
 
 	if (embed) {
 		if (this.insetGroup != null) {
@@ -22671,13 +22676,17 @@ HLFileDrawer.prototype.displayMainMenu = function() {
 		y += this.bnH + this.bnM
 	}
 
-	var savedFilesBn = new Button(0, y, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
-	savedFilesBn.setCallbackFunction(this.displaySavedFilesMenu.bind(this), true)
-	savedFilesBn.markAsOverlayPart(this)
-	var savedFilesBnIcon = new VectorIcon(this.bnIconM, this.bnIconY, VP.bdSavedFiles, this.iconColor, this.bnIconH, savedFilesBn.group)
-	TouchReceiver.addListenersBN(savedFilesBnIcon.pathE, savedFilesBn)
-	var savedFilesBnOpen = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdOpen, this.iconColor, this.bnIcon2H, savedFilesBn.group)
-	TouchReceiver.addListenersBN(savedFilesBnOpen.pathE, savedFilesBn)
+
+	var list = [].concat(LevelManager.levelFileList[1], LevelManager.levelFileList[2])
+	if (list.length > 0) {
+		var savedFilesBn = new Button(0, y, this.bnW, this.bnH, this.menuContainer, Colors.white, this.bnR, this.bnR, this.iconColor)
+		savedFilesBn.setCallbackFunction(this.displaySavedFilesMenu.bind(this), true)
+		savedFilesBn.markAsOverlayPart(this)
+		var savedFilesBnIcon = new VectorIcon(this.bnIconM, this.bnIconY, VP.bdSavedFiles, this.iconColor, this.bnIconH, savedFilesBn.group)
+		TouchReceiver.addListenersBN(savedFilesBnIcon.pathE, savedFilesBn)
+		var savedFilesBnOpen = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdOpen, this.iconColor, this.bnIcon2H, savedFilesBn.group)
+		TouchReceiver.addListenersBN(savedFilesBnOpen.pathE, savedFilesBn)
+	}
 
 }
 
@@ -22767,6 +22776,10 @@ HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile, embed
 		//console.log("Name file " + fileName);
 		LM.saveAs(fileName, (SaveManager.fileName != LM.savePointFileNames[LM.currentLevel]));
 
+		if (shouldCreateFile) {
+			LevelManager.loadLevelSavePoint();
+		}
+
 		this.displaySuccess(embed)
 	
 	}.bind(this), function() {
@@ -22779,12 +22792,14 @@ HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile, embed
 		}
 	}.bind(this), embed)
 
+	TabManager.activeTab.outlineCode()
 	this.editText()
 }
 
-HLFileDrawer.prototype.displayTrashMenu = function(embed) {
+HLFileDrawer.prototype.displayTrashMenu = function(embed, fileName) {
+	var fileSpecified = (fileName != null)
 
-	this.resetTab(2, null, embed)
+	this.resetTab(2, fileSpecified, embed)
 	
 	var group = embed ? this.insetGroup : this.menuContainer
 
@@ -22793,17 +22808,41 @@ HLFileDrawer.prototype.displayTrashMenu = function(embed) {
 	var iconH = 100
 	var iconW = VectorIcon.computeWidth(iconP, iconH)
 	var iconX = (this.bnW - iconW)/2
+	if (fileSpecified) { iconX += this.menuBonus/2 }
 	var trashIcon = new VectorIcon(iconX, 0, iconP, this.iconColor, iconH, group)
+
+	if (fileSpecified) {
+		this.fileToOpen = SaveManager.fileName
+		LevelManager.openFile(fileName)
+	} else {
+		fileName = SaveManager.fileName
+	}
 
 	//Buttons
 	this.addConfirmCancelBns(iconH + 40, function() {
-		LevelManager.userDeleteFile(SaveManager.fileName)
-		LevelManager.loadLevelSavePoint()
-		this.displaySuccess(embed)
+		LevelManager.userDeleteFile(fileName)
+		if (this.fileToOpen == null) {
+			LevelManager.loadLevelSavePoint()
+		}
+		if (fileSpecified) {
+			LevelManager.openFile(this.fileToOpen)
+			this.fileToOpen = null
+			this.displaySavedFilesMenu()
+		} else {
+			this.displaySuccess(embed, fileSpecified)
+		}
 	}.bind(this), function() {
-		this.displaySaveOrDeleteMenu(embed)
+		if (fileSpecified) {
+			LevelManager.openFile(this.fileToOpen)
+			this.fileToOpen = null
+			this.displaySavedFilesMenu()
+		} else {
+			this.displaySaveOrDeleteMenu(embed)
+		}
 	}.bind(this), embed)
 
+	TabManager.activeTab.outlineCode(true)
+	BlockPalette.showTrash()
 
 }
 
@@ -22888,11 +22927,11 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup, embed
 	var outlineColor = (isOpen || embed) ? Colors.ballyBrandBlue : null
 	var button = new Button(0, y, width, this.fileBnH, contentGroup, bgColor, 10, 10, outlineColor);
 	button.setCallbackFunction(function() {
+		this.fileToOpen = fileName
 		if (LevelManager.currentFileIsUnsaved()) {
 			this.displayEmbededSaveOrDeleteMenu(fileName)
 		} else {
-			LevelManager.openFile(fileName)
-			this.close()
+			this.displaySuccess(false, true)
 		}
 	}.bind(this), true)
 	button.markAsOverlayPart(this)
@@ -22946,11 +22985,12 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup, embed
 	var trash = new Button(trashX, trashY, trashH, trashH, button.group, Colors.white, trashH/2, trashH/2)
 	trash.addColorIcon(VP.bdDelete, trashH, Colors.ballyRed)
 	trash.setCallbackFunction(function() {
-		LevelManager.userDeleteFile(fileName)
+		/*LevelManager.userDeleteFile(fileName)
 		if (fileName == SaveManager.fileName) {
 			LevelManager.loadLevelSavePoint()
 		}
-		this.displaySavedFilesMenu()
+		this.displaySavedFilesMenu()*/
+		this.displayTrashMenu(false, fileName)
 	}.bind(this), true)
 	trash.markAsOverlayPart(this)
 	if (embed) { trash.disable(true) }
@@ -22975,18 +23015,27 @@ HLFileDrawer.prototype.displayEmbededSaveOrDeleteMenu = function(fileName) {
 	this.displaySaveOrDeleteMenu(true)
 }
 
-HLFileDrawer.prototype.displaySuccess = function(embed) {
+HLFileDrawer.prototype.displaySuccess = function(embed, extend) {
 
-	this.resetTab(2, null, embed)
+	this.resetTab(2, extend, embed)
 
 	var group = embed ? this.insetGroup : this.menuContainer
+	var addBonus = (extend && !embed)
 
 	var m = this.bnW/6
 	var h = this.bnW - 2*m 
 	var r = h/2
-	var center = m + r 
-	var circle = GuiElements.draw.circle(center, center, r, Colors.white, group)
-	var icon = new VectorIcon(m, m, VectorPaths.bdCheck, Colors.ballyGreen, h, group)
+	var cx = addBonus ? this.menuBonus/2 + m + r : m + r 
+	var cy = m + r 
+	var iconX = addBonus ? this.menuBonus/2 + m : m
+	var circle = GuiElements.draw.circle(cx, cy, r, Colors.white, group)
+	var icon = new VectorIcon(iconX, m, VectorPaths.bdCheck, Colors.ballyGreen, h, group)
+
+	if (this.fileToOpen != null) {
+		LevelManager.openFile(this.fileToOpen)
+	}
+
+	setTimeout(this.close.bind(this), 1000)
 }
 
 HLFileDrawer.prototype.editText = function() {
@@ -23004,11 +23053,13 @@ HLFileDrawer.prototype.addConfirmCancelBns = function(y, confirmCallback, cancel
 	var w = (this.bnW - m)/2
 	var h = this.bnH * 2/3
 	var iH = h * 4/5
-	var cancelBn = new Button(0, y, w, h, group, Colors.ballyRed, this.bnR, this.bnR)
+	var x1 = (this.isExtended && !embed) ? this.menuBonus/2 : 0
+	var x2 = x1 + w + m
+	var cancelBn = new Button(x1, y, w, h, group, Colors.ballyRed, this.bnR, this.bnR)
 	cancelBn.addColorIcon(VP.bdClose, iH, Colors.ballyRedLight)
 	cancelBn.markAsOverlayPart(this)
 	cancelBn.setCallbackFunction(cancelCallback, true)
-	var confirmBn = new Button(w + m, y, w, h, group, Colors.ballyGreen, this.bnR, this.bnR)
+	var confirmBn = new Button(x2, y, w, h, group, Colors.ballyGreen, this.bnR, this.bnR)
 	confirmBn.addColorIcon(VP.bdConnected, iH, Colors.ballyGreenLight)
 	GuiElements.update.stroke(confirmBn.icon.pathE, Colors.ballyGreenLight, 3)
 	confirmBn.markAsOverlayPart(this)
@@ -25851,6 +25902,51 @@ Tab.prototype.updateArrowsShift = function() {
   var y2 = this.relToAbsY(this.dim.y2);
   this.overFlowArr.setArrows(x1, x2, y1, y2);
 };
+
+/**
+ * For Hatchling - Outline all code on this tab in gray or red. Used when saving or deleting files.
+ */
+Tab.prototype.outlineCode = function(inRed) {
+  console.log("*** outlineCode " + this.stackList.length)
+  if (this.outlineVisible) { return }
+  var color = inRed ? Colors.ballyRed : Colors.ballyGray
+  this.outlineGroup = GuiElements.create.group(0, 0)
+  this.outlineVisible = true
+
+  for (var i = 0; i < this.stackList.length; i++) {
+    var stack = this.stackList[i]
+    var stackX = this.absToRelX(stack.getAbsX())
+    var stackY = this.absToRelY(stack.getAbsY())
+
+    var block = stack.firstBlock
+    var outlineW = 0;
+    while (block != null) {
+      var group = GuiElements.create.group(0, 0, this.outlineGroup);
+      var pathE = GuiElements.create.path(group);
+      GuiElements.update.color(pathE, color);
+      GuiElements.update.stroke(pathE, color, 22)
+      GuiElements.move.group(group, stackX + block.x, stackY + block.y);
+      var pathD = block.path.getAttribute("d");
+      pathE.setAttributeNS(null, "d", pathD);
+      outlineW += block.width + BlockGraphics.command.fbBumpDepth;
+      block = block.nextBlock
+    }
+  }
+
+  this.mainG.insertBefore(this.outlineGroup, this.mainG.children[0])
+  console.log(this.outlineGroup)
+}
+
+/**
+ * For Hatchling - remove the outline created with outlineCode.
+ */
+Tab.prototype.removeOutline = function() {
+  if (this.outlineVisible) {
+    this.outlineGroup.remove()
+    this.outlineGroup = null
+    this.outlineVisible = false
+  }
+}
 
 /**
  * A static class that manages making recordings
@@ -32020,6 +32116,7 @@ LevelManager.saveAs = function(name, rename) {
     //console.log("Renamed " + currentLevelFile + " to " + fileName);
     console.log("Renamed " + currentFile + " to " + fileName);
     console.log(LM.filesSavedLocally);
+    console.log(LM.levelFileList)
     if (Hatchling) {
       TitleBar.editableFileName.updateFileName()
     } else {

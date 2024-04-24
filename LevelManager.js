@@ -147,6 +147,7 @@ LevelManager.saveAs = function(name, rename) {
     //console.log("Renamed " + currentLevelFile + " to " + fileName);
     console.log("Renamed " + currentFile + " to " + fileName);
     console.log(LM.filesSavedLocally);
+    console.log(LM.levelFileList)
     if (Hatchling) {
       TitleBar.editableFileName.updateFileName()
     } else {

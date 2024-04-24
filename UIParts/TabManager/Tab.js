@@ -679,3 +679,48 @@ Tab.prototype.updateArrowsShift = function() {
   const y2 = this.relToAbsY(this.dim.y2);
   this.overFlowArr.setArrows(x1, x2, y1, y2);
 };
+
+/**
+ * For Hatchling - Outline all code on this tab in gray or red. Used when saving or deleting files.
+ */
+Tab.prototype.outlineCode = function(inRed) {
+  console.log("*** outlineCode " + this.stackList.length)
+  if (this.outlineVisible) { return }
+  const color = inRed ? Colors.ballyRed : Colors.ballyGray
+  this.outlineGroup = GuiElements.create.group(0, 0)
+  this.outlineVisible = true
+
+  for (let i = 0; i < this.stackList.length; i++) {
+    const stack = this.stackList[i]
+    const stackX = this.absToRelX(stack.getAbsX())
+    const stackY = this.absToRelY(stack.getAbsY())
+
+    let block = stack.firstBlock
+    let outlineW = 0;
+    while (block != null) {
+      let group = GuiElements.create.group(0, 0, this.outlineGroup);
+      let pathE = GuiElements.create.path(group);
+      GuiElements.update.color(pathE, color);
+      GuiElements.update.stroke(pathE, color, 22)
+      GuiElements.move.group(group, stackX + block.x, stackY + block.y);
+      let pathD = block.path.getAttribute("d");
+      pathE.setAttributeNS(null, "d", pathD);
+      outlineW += block.width + BlockGraphics.command.fbBumpDepth;
+      block = block.nextBlock
+    }
+  }
+
+  this.mainG.insertBefore(this.outlineGroup, this.mainG.children[0])
+  console.log(this.outlineGroup)
+}
+
+/**
+ * For Hatchling - remove the outline created with outlineCode.
+ */
+Tab.prototype.removeOutline = function() {
+  if (this.outlineVisible) {
+    this.outlineGroup.remove()
+    this.outlineGroup = null
+    this.outlineVisible = false
+  }
+}
