@@ -16778,8 +16778,8 @@ function HLLevelSwitch(x, y) {
   	this.cx2 = this.w - m - cr
   	var cy = iconH + 2.5*m + cr
   	var font = Font.uiFont(22)
-  	var text1X = (2*cr - GuiElements.measure.stringWidth("1", font))/2
-  	var text2X = this.w - 1.5*m - 2*cr + (2*cr - GuiElements.measure.stringWidth("2", font))/2 
+  	var text1X = 0.25*m + (2*cr - GuiElements.measure.stringWidth("1", font))/2
+  	var text2X = this.w - 1.25*m - 2*cr + (2*cr - GuiElements.measure.stringWidth("2", font))/2 
   	var textY = iconH + 2.5*m + ((2*cr + font.charHeight) / 2)
 
   	this.group = GuiElements.create.group(this.x, this.y, TBLayer)
@@ -17619,6 +17619,10 @@ InputPad.prototype.close = function() {
     widget.close();
   });
   this.bubbleOverlay.close();
+
+  if (Hatchling) {
+    TabManager.activeTab.uncenterAroundBlock()
+  }
 };
 
 /**
@@ -20092,12 +20096,17 @@ InputWidget.Buttons = function(type, valueDictionary, startVal, iconPath, iconCo
 
 	this.buttons = {}
 
-
-	//TODO: Make a constants function?
 	this.width = InputPad.width 
-	this.height = this.width * 1/3
+	if (type == "ledArray") {
+		this.height = this.width * 1/3
+		this.bnH = this.height * 1/5
+	} else {
+		this.height = this.width * 1/4
+		this.bnH = this.height * 1/4
+	}
+	
 	this.hMargin = 20 
-	this.bnH = this.height * 1/5
+	
 	this.font = Font.secondaryUiFont(18)
 }
 InputWidget.Buttons.prototype = Object.create(InputWidget.prototype)
@@ -20124,7 +20133,7 @@ InputWidget.Buttons.prototype.show = function(x, y, parentGroup, overlay, slotSh
 
 
 	//Add a button and preview for each option 
-	var bnY = this.height * 2/5
+	var bnY = (this.type == "ledArray") ? this.height * 2/5 : this.height * 3/5
 	var keys = Object.keys(this.valueDictionary)
 	var bnX = this.hMargin
 	var bnMargin = (1/4) * (this.width - 2*this.hMargin)/(keys.length - 1)
@@ -20687,7 +20696,8 @@ FBBubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHe
   GuiElements.move.group(this.innerGroup, this.margin, this.margin);
 
   //Determine whether the overlay should go on the bottom or top
-  var preferBottom = (this.block == null) || (y1 > (this.block.y + (this.block.stack ? this.block.stack.y : 0) + this.block.height/3))
+  //var preferBottom = (this.block == null) || (y1 > (this.block.y + (this.block.stack ? this.block.stack.y : 0) + this.block.height/3))
+  var preferBottom = (this.block == null) || (y1 > (this.block.getAbsY() + this.block.height/3))
   var longH = height + BO.triangleH;
   var attemptB = Math.max(0, y2 + longH - GuiElements.height);
   var attemptT = Math.max(0, longH - y1);
@@ -20704,7 +20714,7 @@ FBBubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHe
   }
   // Convert the triangle's coords from abs to rel coords
   this.x = (GuiElements.width - width) / 2;
-  if (Hatchling) {
+  if (Hatchling && (width < GuiElements.width/2)) {
     var maxX = GuiElements.width - this.margin - width 
     var minX = this.margin
     this.x = Math.min(Math.max(minX, (triangleX - width/2)), maxX)
@@ -25348,6 +25358,40 @@ Tab.prototype.recenter = function() {
     this.fitBox(this.dim)
   }
 }
+/**
+ * Centers the view around one particular block
+ */
+Tab.prototype.centerAroundBlock = function(block) {
+  var x = this.absToRelX(block.getAbsX()) //block.stack.absToRelX(block.getAbsX()) //block.stack.relToAbsX(block.x);
+  var y = this.absToRelY(block.getAbsY()) //block.stack.absToRelY(block.getAbsY()) //block.stack.relToAbsY(block.y);
+  var dim = {
+    x1: x,
+    y1: y + block.height, //want block above center
+    x2: x + block.width,
+    y2: y + block.height * 2
+  }
+  this.fitBox(dim)
+
+  this.centeredAroundBlock = true
+}
+/**
+ * Undo centering done by centerAroundBlock. 
+ */
+Tab.prototype.uncenterAroundBlock = function() {
+  if (this.lastScrollX == null || this.lastScrollY == null || !this.centeredAroundBlock) {
+    return
+  }
+  this.scrollX = this.lastScrollX
+  this.scrollY = this.lastScrollY
+  GuiElements.move.group(this.mainG, this.scrollX, this.scrollY, this.zoomFactor);
+  this.updateTabDim();
+  this.updateTransform();
+  this.updateArrowsShift();
+
+  this.lastScrollX = null
+  this.lastScrollY = null
+  this.centeredAroundBlock = false
+}
 Tab.prototype.fitBox = function(box) {
   var oa = this.overFlowArr
   var left = this.relToAbsX(box.x1);
@@ -25366,6 +25410,8 @@ Tab.prototype.fitBox = function(box) {
   } else {
     var leftOverflow = oa.left - left
     var topOverflow = oa.top - top
+    this.lastScrollX = this.scrollX
+    this.lastScrollY = this.scrollY
     this.scrollX = this.scrollX + leftOverflow - (horizontalOverflow < 0 ? horizontalOverflow / 2 : 0)
     this.scrollY = this.scrollY + topOverflow - (verticalOverflow < 0 ? verticalOverflow / 2 : 0)
     GuiElements.move.group(this.mainG, this.scrollX, this.scrollY, this.zoomFactor);
@@ -31887,7 +31933,8 @@ UndoManager.deleteStack = function(stack) {
   var UM = UndoManager;
   var doc = XmlWriter.newDoc("undoData");
   var stackData;
-  if (FinchBlox && (LevelManager.currentLevel != 3) && stack.firstBlock.isStartBlock) {
+  var maxLevel = Hatchling ? 2 : 3
+  if (FinchBlox && (LevelManager.currentLevel != maxLevel) && stack.firstBlock.isStartBlock) {
     TabManager.activeTab.addStartBlock();
     if (stack.firstBlock.nextBlock != null) {
       stackData = stack.createXml(doc, true);
@@ -37758,6 +37805,10 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
  * Creates the input pad for this button. Adds the necessary widgets.
  */
 BlockButton.prototype.createInputSystem = function() {
+  if (Hatchling && !this.widgets[0].type.startsWith("hatchling")) {
+    TabManager.activeTab.centerAroundBlock(this.parent)
+  }
+
   var x1 = this.getAbsX();
   var y1 = this.getAbsY();
   var x2 = this.relToAbsX(this.width);

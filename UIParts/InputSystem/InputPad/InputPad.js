@@ -144,6 +144,10 @@ InputPad.prototype.close = function() {
     widget.close();
   });
   this.bubbleOverlay.close();
+
+  if (Hatchling) {
+    TabManager.activeTab.uncenterAroundBlock()
+  }
 };
 
 /**

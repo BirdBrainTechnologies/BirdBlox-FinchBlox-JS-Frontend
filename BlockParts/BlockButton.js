@@ -306,6 +306,10 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
  * Creates the input pad for this button. Adds the necessary widgets.
  */
 BlockButton.prototype.createInputSystem = function() {
+  if (Hatchling && !this.widgets[0].type.startsWith("hatchling")) {
+    TabManager.activeTab.centerAroundBlock(this.parent)
+  }
+
   const x1 = this.getAbsX();
   const y1 = this.getAbsY();
   const x2 = this.relToAbsX(this.width);

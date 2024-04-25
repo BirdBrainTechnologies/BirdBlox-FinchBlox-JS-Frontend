@@ -48,7 +48,8 @@ UndoManager.deleteStack = function(stack) {
   const UM = UndoManager;
   const doc = XmlWriter.newDoc("undoData");
   var stackData;
-  if (FinchBlox && (LevelManager.currentLevel != 3) && stack.firstBlock.isStartBlock) {
+  const maxLevel = Hatchling ? 2 : 3
+  if (FinchBlox && (LevelManager.currentLevel != maxLevel) && stack.firstBlock.isStartBlock) {
     TabManager.activeTab.addStartBlock();
     if (stack.firstBlock.nextBlock != null) {
       stackData = stack.createXml(doc, true);

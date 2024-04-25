@@ -68,7 +68,8 @@ FBBubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHe
   GuiElements.move.group(this.innerGroup, this.margin, this.margin);
 
   //Determine whether the overlay should go on the bottom or top
-  const preferBottom = (this.block == null) || (y1 > (this.block.y + (this.block.stack ? this.block.stack.y : 0) + this.block.height/3))
+  //const preferBottom = (this.block == null) || (y1 > (this.block.y + (this.block.stack ? this.block.stack.y : 0) + this.block.height/3))
+  const preferBottom = (this.block == null) || (y1 > (this.block.getAbsY() + this.block.height/3))
   const longH = height + BO.triangleH;
   const attemptB = Math.max(0, y2 + longH - GuiElements.height);
   const attemptT = Math.max(0, longH - y1);
@@ -85,7 +86,7 @@ FBBubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHe
   }
   // Convert the triangle's coords from abs to rel coords
   this.x = (GuiElements.width - width) / 2;
-  if (Hatchling) {
+  if (Hatchling && (width < GuiElements.width/2)) {
     let maxX = GuiElements.width - this.margin - width 
     let minX = this.margin
     this.x = Math.min(Math.max(minX, (triangleX - width/2)), maxX)

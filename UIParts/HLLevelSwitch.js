@@ -23,8 +23,8 @@ function HLLevelSwitch(x, y) {
   	this.cx2 = this.w - m - cr
   	const cy = iconH + 2.5*m + cr
   	const font = Font.uiFont(22)
-  	const text1X = (2*cr - GuiElements.measure.stringWidth("1", font))/2
-  	const text2X = this.w - 1.5*m - 2*cr + (2*cr - GuiElements.measure.stringWidth("2", font))/2 
+  	const text1X = 0.25*m + (2*cr - GuiElements.measure.stringWidth("1", font))/2
+  	const text2X = this.w - 1.25*m - 2*cr + (2*cr - GuiElements.measure.stringWidth("2", font))/2 
   	const textY = iconH + 2.5*m + ((2*cr + font.charHeight) / 2)
 
   	this.group = GuiElements.create.group(this.x, this.y, TBLayer)

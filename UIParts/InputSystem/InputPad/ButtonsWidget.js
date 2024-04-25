@@ -14,12 +14,17 @@ InputWidget.Buttons = function(type, valueDictionary, startVal, iconPath, iconCo
 
 	this.buttons = {}
 
-
-	//TODO: Make a constants function?
 	this.width = InputPad.width 
-	this.height = this.width * 1/3
+	if (type == "ledArray") {
+		this.height = this.width * 1/3
+		this.bnH = this.height * 1/5
+	} else {
+		this.height = this.width * 1/4
+		this.bnH = this.height * 1/4
+	}
+	
 	this.hMargin = 20 
-	this.bnH = this.height * 1/5
+	
 	this.font = Font.secondaryUiFont(18)
 }
 InputWidget.Buttons.prototype = Object.create(InputWidget.prototype)
@@ -46,7 +51,7 @@ InputWidget.Buttons.prototype.show = function(x, y, parentGroup, overlay, slotSh
 
 
 	//Add a button and preview for each option 
-	const bnY = this.height * 2/5
+	const bnY = (this.type == "ledArray") ? this.height * 2/5 : this.height * 3/5
 	const keys = Object.keys(this.valueDictionary)
 	let bnX = this.hMargin
 	const bnMargin = (1/4) * (this.width - 2*this.hMargin)/(keys.length - 1)

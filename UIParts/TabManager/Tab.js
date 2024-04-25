@@ -124,6 +124,40 @@ Tab.prototype.recenter = function() {
     this.fitBox(this.dim)
   }
 }
+/**
+ * Centers the view around one particular block
+ */
+Tab.prototype.centerAroundBlock = function(block) {
+  const x = this.absToRelX(block.getAbsX()) //block.stack.absToRelX(block.getAbsX()) //block.stack.relToAbsX(block.x);
+  const y = this.absToRelY(block.getAbsY()) //block.stack.absToRelY(block.getAbsY()) //block.stack.relToAbsY(block.y);
+  const dim = {
+    x1: x,
+    y1: y + block.height, //want block above center
+    x2: x + block.width,
+    y2: y + block.height * 2
+  }
+  this.fitBox(dim)
+
+  this.centeredAroundBlock = true
+}
+/**
+ * Undo centering done by centerAroundBlock. 
+ */
+Tab.prototype.uncenterAroundBlock = function() {
+  if (this.lastScrollX == null || this.lastScrollY == null || !this.centeredAroundBlock) {
+    return
+  }
+  this.scrollX = this.lastScrollX
+  this.scrollY = this.lastScrollY
+  GuiElements.move.group(this.mainG, this.scrollX, this.scrollY, this.zoomFactor);
+  this.updateTabDim();
+  this.updateTransform();
+  this.updateArrowsShift();
+
+  this.lastScrollX = null
+  this.lastScrollY = null
+  this.centeredAroundBlock = false
+}
 Tab.prototype.fitBox = function(box) {
   const oa = this.overFlowArr
   let left = this.relToAbsX(box.x1);
@@ -142,6 +176,8 @@ Tab.prototype.fitBox = function(box) {
   } else {
     let leftOverflow = oa.left - left
     let topOverflow = oa.top - top
+    this.lastScrollX = this.scrollX
+    this.lastScrollY = this.scrollY
     this.scrollX = this.scrollX + leftOverflow - (horizontalOverflow < 0 ? horizontalOverflow / 2 : 0)
     this.scrollY = this.scrollY + topOverflow - (verticalOverflow < 0 ? verticalOverflow / 2 : 0)
     GuiElements.move.group(this.mainG, this.scrollX, this.scrollY, this.zoomFactor);
