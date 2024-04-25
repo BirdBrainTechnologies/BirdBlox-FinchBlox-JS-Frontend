@@ -149,6 +149,7 @@ InputWidget.HLPortWidget.prototype.updatePorts = function() {
       this.buttons[i].setCallbackFunction(function() {
         this.value = HL_Utils.portNames[i]
         this.updateFn(this.value, 0)
+        this.parent.parent.userSelectedPort = i
 
         for (let j = 0; j < this.buttons.length; j++) {
           let pName = HL_Utils.portNames[j]

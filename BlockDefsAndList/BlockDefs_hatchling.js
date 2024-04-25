@@ -65,27 +65,44 @@ HL_Utils.updatePort = function(block) {
   if (block.hlButton != null) {
     block.port = HL_Utils.portNames.indexOf(block.hlButton.values[0])//HL_Utils.portColors.indexOf(block.hlButton.values[0])
     //console.log("update port for " + block.constructor.name + " to " + block.port)
+
+    //If the block is on the canvas, and a port has not been selected by the user, set this port as the user selected port
+    if ((block.userSelectedPort == null) && (block.port >= 0) && (block.stack != null) && !block.stack.isDisplayStack) {
+      block.userSelectedPort = block.port
+      console.log("updatePort " + ((block.stack != null) ? !block.stack.isDisplayStack : false) + " set user port to " + block.userSelectedPort)
+    }
     block.updateActive()
   }
 }
 HL_Utils.findPorts = function(block) {
-  //console.log("findPorts for " + block.constructor.name + " " + block.portType + " " + ((block.stack != null) ? block.stack.isDisplayStack : ""))
+  const blockOnCanvas = ((block.stack != null) ? !block.stack.isDisplayStack : false)
+  console.log("findPorts for " + block.constructor.name + " " + block.portType + " " + blockOnCanvas)
   let device = DeviceHatchling.getManager().getDevice(0);
   if (block.hlButton != null && device != null) {
-    if (block.hlButton.values[0] == HL_Utils.unknownPort) {
+    /*if (block.hlButton.values[0] == HL_Utils.unknownPort) {
       block.hlButton.button.show()
-    }
+    }*/
 
     let ports = device.getPortsByType(block.portType)
-    //console.log("findPorts found:")
-    //console.log(ports)
+    console.log("findPorts " + blockOnCanvas + " found: " + ports)
     if (ports.length >= 1) {
-      block.hlButton.updateValue(HL_Utils.portNames[ports[0]], 0) //HL_Utils.portColors[ports[0]], 0)
-      //block.port = ports[0]
+      let p = ports[0]
       if (ports.length > 1) {
         //block.hlButton.callbackFunction()
         block.shouldShowPortsPopup = true
+
+        if (block.userSelectedPort != null) {
+          console.log("findPorts " + blockOnCanvas + " userSelectedPort == " + block.userSelectedPort)
+          let index = ports.indexOf(block.userSelectedPort)
+          if (index > 0) { //we have already set to index zero above
+            p = ports[index]
+          }
+        }
       }
+
+      console.log("findPorts " + blockOnCanvas + " using port " + p)
+      block.hlButton.updateValue(HL_Utils.portNames[p], 0)
+      
     }
 
     if (ports.length == 0) {
@@ -225,15 +242,28 @@ HL_Utils.replaceBlock = function(block, currentState) {
 
   block.stack.category.replaceBlock(block, blockName)
 }
-HL_Utils.createXml = function(block, xmlDoc) {
+HL_Utils.BBcreateXml = function(block, xmlDoc) {
   let blockXml = Block.prototype.createXml.call(block, xmlDoc)
   XmlWriter.setAttribute(blockXml, "port", block.port)
   return blockXml
 }
-HL_Utils.importXml = function(blockNode) {
+HL_Utils.BBimportXml = function(blockNode) {
   const type = XmlWriter.getAttribute(blockNode, "type");
   const port = XmlWriter.getAttribute(blockNode, "port")
   let block = new window[type](0, 0, port)
+  block.copyFromXml(blockNode)
+  return block
+}
+HL_Utils.createXml = function(block, xmlDoc) {
+  let blockXml = Block.prototype.createXml.call(block, xmlDoc)
+  XmlWriter.setAttribute(blockXml, "userPort", block.userSelectedPort)
+  return blockXml
+}
+HL_Utils.importXml = function(blockNode) {
+  const type = XmlWriter.getAttribute(blockNode, "type");
+  const userSelectedPort = parseInt(XmlWriter.getAttribute(blockNode, "userPort"))
+  console.log("*** found user true port " + userSelectedPort)
+  let block = new window[type](0, 0, userSelectedPort)
   block.copyFromXml(blockNode)
   return block
 }
@@ -241,9 +271,13 @@ HL_Utils.importXml = function(blockNode) {
 
 
 
-function B_HLOutputBase(x, y, category, outputType, portType) {
+function B_HLOutputBase(x, y, category, outputType, portType, userSelectedPort) {
   this.outputType = outputType
   this.portType = portType
+  this.userSelectedPort = userSelectedPort
+  //if ((this.stack != null) && !this.stack.isDisplayStack) {
+    console.log("*** Set user port true for " + this.constructor.name + " to " + this.userSelectedPort)
+  //}
   CommandBlock.call(this, x, y, category);
 
   HL_Utils.addHLButton(this, portType)
@@ -338,11 +372,14 @@ B_HLOutputBase.prototype.updateValues = function() {
 B_HLOutputBase.prototype.checkActive = function() {
   return HL_Utils.checkActive(this)
 }
+B_HLOutputBase.prototype.createXml = function(xmlDoc) {
+  return HL_Utils.createXml(this, xmlDoc)
+}
 
-function B_HLPositionServo(x, y, defaultAngle) {
+function B_HLPositionServo(x, y, defaultAngle, userSelectedPort) {
   this.value = defaultAngle //90; //defaultAngle
   this.valueKey = "angle"
-  B_HLOutputBase.call(this, x, y, "motion_2", "positionServo", 3);
+  B_HLOutputBase.call(this, x, y, "motion_2", "positionServo", 3, userSelectedPort);
 
   let icon = VectorPaths["bdPosition"];
   switch (defaultAngle) {
@@ -361,8 +398,8 @@ function B_HLPositionServo(x, y, defaultAngle) {
 B_HLPositionServo.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLPositionServo.prototype.constructor = B_HLPositionServo;
 
-function B_HL_PS_L1(x, y, defaultAngle) {
-  B_HLPositionServo.call(this, x, y, defaultAngle)
+function B_HL_PS_L1(x, y, defaultAngle, userSelectedPort) {
+  B_HLPositionServo.call(this, x, y, defaultAngle, userSelectedPort)
 
   this.blockIcon.addText(defaultAngle.toString() + "°", 28 - (defaultAngle/11.25), 40);
 }
@@ -389,26 +426,29 @@ B_HL_PS_L1.prototype.argList = function() {
 }*/
 
 
-function B_HL_PS_L1_0(x, y) {
-  B_HL_PS_L1.call(this, x, y, 0)
+function B_HL_PS_L1_0(x, y, userSelectedPort) {
+  B_HL_PS_L1.call(this, x, y, 0, userSelectedPort)
 }
 B_HL_PS_L1_0.prototype = Object.create(B_HL_PS_L1.prototype)
 B_HL_PS_L1_0.prototype.constructor = B_HL_PS_L1_0
+B_HL_PS_L1_0.importXml = HL_Utils.importXml
 
-function B_HL_PS_L1_90(x, y) {
-  B_HL_PS_L1.call(this, x, y, 90)
+function B_HL_PS_L1_90(x, y, userSelectedPort) {
+  B_HL_PS_L1.call(this, x, y, 90, userSelectedPort)
 }
 B_HL_PS_L1_90.prototype = Object.create(B_HL_PS_L1.prototype)
 B_HL_PS_L1_90.prototype.constructor = B_HL_PS_L1_90
+B_HL_PS_L1_90.importXml = HL_Utils.importXml
 
-function B_HL_PS_L1_180(x, y) {
-  B_HL_PS_L1.call(this, x, y, 180)
+function B_HL_PS_L1_180(x, y, userSelectedPort) {
+  B_HL_PS_L1.call(this, x, y, 180, userSelectedPort)
 }
 B_HL_PS_L1_180.prototype = Object.create(B_HL_PS_L1.prototype)
 B_HL_PS_L1_180.prototype.constructor = B_HL_PS_L1_180
+B_HL_PS_L1_180.importXml = HL_Utils.importXml
 
-function B_HL_PS_L2(x, y) {
-  B_HLPositionServo.call(this, x, y, 90)
+function B_HL_PS_L2(x, y, userSelectedPort) {
+  B_HLPositionServo.call(this, x, y, 90, userSelectedPort)
 
   this.valueBN = new BlockButton(this);
   this.valueBN.addSlider("servo", this.value, [0, 180]);
@@ -416,6 +456,7 @@ function B_HL_PS_L2(x, y) {
 }
 B_HL_PS_L2.prototype = Object.create(B_HLPositionServo.prototype)
 B_HL_PS_L2.prototype.constructor = B_HL_PS_L2
+B_HL_PS_L2.importXml = HL_Utils.importXml
 //MicroBlocks functions
 B_HL_PS_L2.prototype.primName = function() { return "[h:psv]" }
 B_HL_PS_L2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
@@ -423,8 +464,8 @@ B_HL_PS_L2.prototype.argList = function() { return [HL_Utils.portNames[this.port
 /**
  * Wave a position servo
  */
-function B_HLWave(x, y) {
-  B_HLOutputBase.call(this, x, y, "motion_2", "wave", 3);
+function B_HLWave(x, y, userSelectedPort) {
+  B_HLOutputBase.call(this, x, y, "motion_2", "wave", 3, userSelectedPort);
 
   const icon = VectorPaths["bdPositionWW"];
   this.blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 40);
@@ -433,6 +474,7 @@ function B_HLWave(x, y) {
 }
 B_HLWave.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLWave.prototype.constructor = B_HLWave;
+B_HLWave.importXml = HL_Utils.importXml
 //MicroBlocks functions
 B_HLWave.prototype.primName = function() { return "blockList" }
 B_HLWave.prototype.argList = function() { 
@@ -447,12 +489,12 @@ B_HLWave.prototype.argList = function() {
 }
 
 
-function B_HLRotationServo(x, y, flip) {
+function B_HLRotationServo(x, y, flip, userSelectedPort) {
   this.value = 0 //255 //off signal
   this.defaultSpeed = 50;
   this.valueKey = "value"
   this.flip = flip
-  B_HLOutputBase.call(this, x, y, "motion_2", "rotationServo", 1);
+  B_HLOutputBase.call(this, x, y, "motion_2", "rotationServo", 1, userSelectedPort);
 
   const icon = flip ? VectorPaths["bdRotateRight"] : VectorPaths["bdRotateLeft"];
   let blockIcon = new BlockIcon(this, icon, Colors.white, "rServo", 45);
@@ -464,8 +506,8 @@ B_HLRotationServo.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLRotationServo.prototype.constructor = B_HLRotationServo;
 
 
-function B_HL_RS_L1(x, y, flip) {
-  B_HLRotationServo.call(this, x, y, flip)
+function B_HL_RS_L1(x, y, flip, userSelectedPort) {
+  B_HLRotationServo.call(this, x, y, flip, userSelectedPort)
 
   this.value = this.flip ? -60 : 45
 }
@@ -490,20 +532,22 @@ B_HL_RS_L1.prototype.argList = function() {
     new BlockArg(prim, [port, 0])] 
 }*/
 
-function B_HL_RS_L1_CW(x, y) {
-  B_HL_RS_L1.call(this, x, y, false)
+function B_HL_RS_L1_CW(x, y, userSelectedPort) {
+  B_HL_RS_L1.call(this, x, y, false, userSelectedPort)
 }
 B_HL_RS_L1_CW.prototype = Object.create(B_HL_RS_L1.prototype);
 B_HL_RS_L1_CW.prototype.constructor = B_HL_RS_L1_CW;
+B_HL_RS_L1_CW.importXml = HL_Utils.importXml
 
-function B_HL_RS_L1_CC(x, y) {
-  B_HL_RS_L1.call(this, x, y, true)
+function B_HL_RS_L1_CC(x, y, userSelectedPort) {
+  B_HL_RS_L1.call(this, x, y, true, userSelectedPort)
 }
 B_HL_RS_L1_CC.prototype = Object.create(B_HL_RS_L1.prototype);
 B_HL_RS_L1_CC.prototype.constructor = B_HL_RS_L1_CC;
+B_HL_RS_L1_CC.importXml = HL_Utils.importXml
 
-function B_HL_RS_L2(x, y, flip) {
-  B_HLRotationServo.call(this, x, y, flip)
+function B_HL_RS_L2(x, y, flip, userSelectedPort) {
+  B_HLRotationServo.call(this, x, y, flip, userSelectedPort)
 
   this.valueBN = new BlockButton(this);
   this.valueBN.addSlider("motor_" + flip, this.defaultSpeed, [0, 100]);
@@ -515,26 +559,28 @@ B_HL_RS_L2.prototype.constructor = B_HL_RS_L2;
 B_HL_RS_L2.prototype.primName = function() { return "[h:rsv]" }
 B_HL_RS_L2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
 
-function B_HL_RS_L2_CW(x, y) {
-  B_HL_RS_L2.call(this, x, y, false)
+function B_HL_RS_L2_CW(x, y, userSelectedPort) {
+  B_HL_RS_L2.call(this, x, y, false, userSelectedPort)
 }
 B_HL_RS_L2_CW.prototype = Object.create(B_HL_RS_L2.prototype);
 B_HL_RS_L2_CW.prototype.constructor = B_HL_RS_L2_CW;
+B_HL_RS_L2_CW.importXml = HL_Utils.importXml
 
-function B_HL_RS_L2_CC(x, y) {
-  B_HL_RS_L2.call(this, x, y, true)
+function B_HL_RS_L2_CC(x, y, userSelectedPort) {
+  B_HL_RS_L2.call(this, x, y, true, userSelectedPort)
 }
 B_HL_RS_L2_CC.prototype = Object.create(B_HL_RS_L2.prototype);
 B_HL_RS_L2_CC.prototype.constructor = B_HL_RS_L2_CC;
+B_HL_RS_L2_CC.importXml = HL_Utils.importXml
 
 
-function B_HLSingleNeopix(x, y, defaultColor) {
+function B_HLSingleNeopix(x, y, defaultColor, userSelectedPort) {
   this.value = defaultColor //"#FFFFFF"
   this.valueKey = "color"
   /*this.red = 100;
   this.green = 100;
   this.blue = 100;*/
-  B_HLOutputBase.call(this, x, y, "color_2", "singleNeopix", 9);
+  B_HLOutputBase.call(this, x, y, "color_2", "singleNeopix", 9, userSelectedPort);
 
   const icon = VectorPaths["bdLightBulb"];
   this.blockIcon = new BlockIcon(this, icon, Colors.white, "sNeopix", 45);
@@ -552,8 +598,8 @@ B_HLSingleNeopix.prototype.updateColor = function() {
   GuiElements.update.color(this.blockIcon.icon.pathE, this.value)
 }
 
-function B_HL_SN_L1(x, y, color) {
-  B_HLSingleNeopix.call(this, x, y, color)
+function B_HL_SN_L1(x, y, color, userSelectedPort) {
+  B_HLSingleNeopix.call(this, x, y, color, userSelectedPort)
 
   //this.updateColor()
   this.blockIcon.addIndicatorCircle(this.value, 40, 50)
@@ -581,32 +627,37 @@ B_HL_SN_L1.prototype.argList = function() {
     new BlockArg(prim, [port, 0, 0, 0])] 
 }*/
 
-function B_HL_SN_L1_Red(x, y) {
-  B_HL_SN_L1.call(this, x, y, "#FF0000")
+function B_HL_SN_L1_Red(x, y, userSelectedPort) {
+  console.log("call SN RED with true user port " + userSelectedPort)
+  B_HL_SN_L1.call(this, x, y, "#FF0000", userSelectedPort)
 }
 B_HL_SN_L1_Red.prototype = Object.create(B_HL_SN_L1.prototype);
 B_HL_SN_L1_Red.prototype.constructor = B_HL_SN_L1_Red
+B_HL_SN_L1_Red.importXml = HL_Utils.importXml
 
-function B_HL_SN_L1_Green(x, y) {
-  B_HL_SN_L1.call(this, x, y, "#00FF00")
+function B_HL_SN_L1_Green(x, y, userSelectedPort) {
+  B_HL_SN_L1.call(this, x, y, "#00FF00", userSelectedPort)
 }
 B_HL_SN_L1_Green.prototype = Object.create(B_HL_SN_L1.prototype);
 B_HL_SN_L1_Green.prototype.constructor = B_HL_SN_L1_Green
+B_HL_SN_L1_Green.importXml = HL_Utils.importXml
 
-function B_HL_SN_L1_Blue(x, y) {
-  B_HL_SN_L1.call(this, x, y, "#0000FF")
+function B_HL_SN_L1_Blue(x, y, userSelectedPort) {
+  B_HL_SN_L1.call(this, x, y, "#0000FF", userSelectedPort)
 }
 B_HL_SN_L1_Blue.prototype = Object.create(B_HL_SN_L1.prototype);
 B_HL_SN_L1_Blue.prototype.constructor = B_HL_SN_L1_Blue
+B_HL_SN_L1_Blue.importXml = HL_Utils.importXml
 
-function B_HL_SN_L1_White(x, y) {
-  B_HL_SN_L1.call(this, x, y, "#FFFFFF")
+function B_HL_SN_L1_White(x, y, userSelectedPort) {
+  B_HL_SN_L1.call(this, x, y, "#FFFFFF", userSelectedPort)
 }
 B_HL_SN_L1_White.prototype = Object.create(B_HL_SN_L1.prototype);
 B_HL_SN_L1_White.prototype.constructor = B_HL_SN_L1_White
+B_HL_SN_L1_White.importXml = HL_Utils.importXml
 
-function B_HL_SN_L2(x, y) {
-  B_HLSingleNeopix.call(this, x, y, "#FFFFFF")
+function B_HL_SN_L2(x, y, userSelectedPort) {
+  B_HLSingleNeopix.call(this, x, y, "#FFFFFF", userSelectedPort)
 
   //this.colorButton = new BlockButton(this);
   //this.colorButton.addSlider("color", { r: this.red, g: this.green, b: this.blue });
@@ -619,6 +670,7 @@ function B_HL_SN_L2(x, y) {
 }
 B_HL_SN_L2.prototype = Object.create(B_HLSingleNeopix.prototype);
 B_HL_SN_L2.prototype.constructor = B_HL_SN_L2;
+B_HL_SN_L2.importXml = HL_Utils.importXml
 //MicroBlocks functions
 B_HL_SN_L2.prototype.primName = function() { return "[h:np]" }
 B_HL_SN_L2.prototype.argList = function() { 
@@ -635,7 +687,7 @@ B_HL_SN_L2.prototype.argList = function() {
 
 
 
-function B_HLNeopixStrip(x, y) {
+function B_HLNeopixStrip(x, y, userSelectedPort) {
   this.value = ""
   this.valueKey = "colors"
   this.red = 100;
@@ -644,7 +696,7 @@ function B_HLNeopixStrip(x, y) {
   this.blockIcons = []
   this.colorButtons = []
 
-  B_HLOutputBase.call(this, x, y, "color_2", "neopixStrip", 10);
+  B_HLOutputBase.call(this, x, y, "color_2", "neopixStrip", 10, userSelectedPort);
 
   const icon = VectorPaths["faLightbulb"];
   /*this.blockIcon1 = new BlockIcon(this, icon, Colors.white, "neopix1", 27);
@@ -687,15 +739,16 @@ function B_HLNeopixStrip(x, y) {
 }
 B_HLNeopixStrip.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLNeopixStrip.prototype.constructor = B_HLNeopixStrip;
+B_HLNeopixStrip.importXml = HL_Utils.importXml
 //MicroBlocks functions
 B_HLNeopixStrip.prototype.primName = function() { return "[h:nps]" }
 B_HLNeopixStrip.prototype.argList = function() { return [HL_Utils.portNames[this.port], 'all', this.red, this.green, this.blue] }
 
-function B_HLFairyLights(x, y) {
+function B_HLFairyLights(x, y, userSelectedPort) {
   this.value = 254
   this.valueKey = "value"
 
-  B_HLOutputBase.call(this, x, y, "color_2", "fairyLights", 8);
+  B_HLOutputBase.call(this, x, y, "color_2", "fairyLights", 8, userSelectedPort);
 
   const icon = VectorPaths["bdFairyLights"];
   this.blockIcon = new BlockIcon(this, icon, Colors.white, "fairyLights", 45);
@@ -706,11 +759,12 @@ function B_HLFairyLights(x, y) {
 B_HLFairyLights.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLFairyLights.prototype.constructor = B_HLFairyLights;
 
-function B_HLFairyLightsL1(x, y) {
-  B_HLFairyLights.call(this, x, y)
+function B_HLFairyLightsL1(x, y, userSelectedPort) {
+  B_HLFairyLights.call(this, x, y, userSelectedPort)
 }
 B_HLFairyLightsL1.prototype = Object.create(B_HLFairyLights.prototype);
 B_HLFairyLightsL1.prototype.constructor = B_HLFairyLightsL1;
+B_HLFairyLightsL1.importXml = HL_Utils.importXml
 //MicroBlocks functions
 B_HLFairyLightsL1.prototype.primName = function() { return "hatchlingFairyLightWithDelay" }
 B_HLFairyLightsL1.prototype.argList = function() { 
@@ -730,8 +784,8 @@ B_HLFairyLightsL1.prototype.argList = function() {
     new BlockArg(prim, [port, 0])] 
 }*/
 
-function B_HLFairyLightsL2(x, y) {
-  B_HLFairyLights.call(this, x, y)
+function B_HLFairyLightsL2(x, y, userSelectedPort) {
+  B_HLFairyLights.call(this, x, y, userSelectedPort)
 
   this.valueBN = new BlockButton(this);
   this.valueBN.addSlider("light", 100, [0, 100]);
@@ -739,6 +793,7 @@ function B_HLFairyLightsL2(x, y) {
 }
 B_HLFairyLightsL2.prototype = Object.create(B_HLFairyLights.prototype);
 B_HLFairyLightsL2.prototype.constructor = B_HLFairyLightsL2;
+B_HLFairyLightsL2.importXml = HL_Utils.importXml
 //MicroBlocks functions
 B_HLFairyLightsL2.prototype.primName = function() { return "[h:fl]" }
 B_HLFairyLightsL2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
@@ -753,13 +808,14 @@ B_HLAlphabet.prototype = Object.create(B_FBLedArrayL2.prototype);
 B_HLAlphabet.prototype.constructor = B_HLAlphabet;
 
 // Wait until sensor reaches threshold
-function B_HLWaitUntil(x, y, usePort, sensor) {
+function B_HLWaitUntil(x, y, usePort, sensor, userSelectedPort) {
   CommandBlock.call(this, x, y, "sensor_2");
   this.usePort = usePort
   this.sensor = sensor
 
   if (usePort) {
     HL_Utils.addHLButton(this, this.portType)
+    this.userSelectedPort = userSelectedPort
     //const blockIcon = new BlockIcon(this, VectorPaths.faClockSolid, Colors.white, "clock", 20);
     //this.addPart(blockIcon);
     /*const blockIcon2 = new BlockIcon(this, VectorPaths.faRuler, Colors.white, "ruler", 35);//20);
@@ -919,9 +975,9 @@ B_HLWaitUntilLight.prototype.constructor = B_HLWaitUntilLight;
 
 
 //Wait until for port connected sensors
-function B_HLWaitUntilPort(x, y, sensor) {
+function B_HLWaitUntilPort(x, y, sensor, userSelectedPort) {
 
-  B_HLWaitUntil.call(this, x, y, true, sensor)
+  B_HLWaitUntil.call(this, x, y, true, sensor, userSelectedPort)
 
   this.thresholdBN = new BlockButton(this);
   this.thresholdBN.addSlider(this.sensorType, this.threshold, this.blockOptions);
@@ -940,28 +996,31 @@ B_HLWaitUntilPort.prototype.checkActive = function() {
   return HL_Utils.checkActive(this)
 }
 
-function B_HLWaitUntilDistance(x, y) {
+function B_HLWaitUntilDistance(x, y, userSelectedPort) {
   this.portType = 14
   this.sensorType = "distance"
   this.threshold = 10 //How close something has to be to trigger the block
   this.blockOptions = [5, 100]
 
-  B_HLWaitUntilPort.call(this, x, y, "distance")
+  B_HLWaitUntilPort.call(this, x, y, "distance", userSelectedPort)
 }
 B_HLWaitUntilDistance.prototype = Object.create(B_HLWaitUntilPort.prototype);
 B_HLWaitUntilDistance.prototype.constructor = B_HLWaitUntilDistance;
+B_HLWaitUntilDistance.importXml = HL_Utils.importXml
 
-function B_HLWaitUntilDial(x, y) {
+function B_HLWaitUntilDial(x, y, userSelectedPort) {
 
 }
 B_HLWaitUntilDial.prototype = Object.create(B_HLWaitUntilPort.prototype);
 B_HLWaitUntilDial.prototype.constructor = B_HLWaitUntilDial;
+B_HLWaitUntilDial.importXml = HL_Utils.importXml
 
-function B_HLWaitUntilButton(x, y) {
+function B_HLWaitUntilButton(x, y, userSelectedPort) {
 
 }
 B_HLWaitUntilButton.prototype = Object.create(B_HLWaitUntilPort.prototype);
 B_HLWaitUntilButton.prototype.constructor = B_HLWaitUntilButton;
+B_HLWaitUntilButton.importXml = HL_Utils.importXml
 
 
 // function B_HLPortBlock(x, y, port) {
@@ -1343,7 +1402,7 @@ B_HLBirdBloxOutput.prototype.checkActive = function() {
   return HL_Utils.birdBloxCheckActive(this)
 }
 B_HLBirdBloxOutput.prototype.createXml = function(xmlDoc) {
-  return HL_Utils.createXml(this, xmlDoc)
+  return HL_Utils.BBcreateXml(this, xmlDoc)
 }
 
 
@@ -1360,7 +1419,7 @@ function B_HLBBRotationServo(x, y, port) {
 }
 B_HLBBRotationServo.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBRotationServo.prototype.constructor = B_HLBBRotationServo;
-B_HLBBRotationServo.importXml = HL_Utils.importXml
+B_HLBBRotationServo.importXml = HL_Utils.BBimportXml
 
 function B_HLBBPositionServo(x, y, port) {
   this.value = 90; //defaultAngle
@@ -1374,7 +1433,7 @@ function B_HLBBPositionServo(x, y, port) {
 }
 B_HLBBPositionServo.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBPositionServo.prototype.constructor = B_HLBBPositionServo;
-B_HLBBPositionServo.importXml = HL_Utils.importXml
+B_HLBBPositionServo.importXml = HL_Utils.BBimportXml
 
 function B_HLBBFairyLights(x, y, port) {
   this.value = ""
@@ -1390,7 +1449,7 @@ function B_HLBBFairyLights(x, y, port) {
 }
 B_HLBBFairyLights.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBFairyLights.prototype.constructor = B_HLBBFairyLights;
-B_HLBBFairyLights.importXml = HL_Utils.importXml
+B_HLBBFairyLights.importXml = HL_Utils.BBimportXml
 
 function B_HLBBSingleNeopix(x, y, port) {
   this.value = ""
@@ -1413,7 +1472,7 @@ function B_HLBBSingleNeopix(x, y, port) {
 }
 B_HLBBSingleNeopix.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBSingleNeopix.prototype.constructor = B_HLBBSingleNeopix;
-B_HLBBSingleNeopix.importXml = HL_Utils.importXml
+B_HLBBSingleNeopix.importXml = HL_Utils.BBimportXml
 
 function B_HLBBNeopixStrip(x, y, port) {
   this.value = ""
@@ -1446,7 +1505,7 @@ function B_HLBBNeopixStrip(x, y, port) {
 }
 B_HLBBNeopixStrip.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBNeopixStrip.prototype.constructor = B_HLBBNeopixStrip;
-B_HLBBNeopixStrip.importXml = HL_Utils.importXml
+B_HLBBNeopixStrip.importXml = HL_Utils.BBimportXml
 
 
 
@@ -1473,7 +1532,7 @@ B_HLBirdBloxSensor.prototype.checkActive = function() {
   return HL_Utils.birdBloxCheckActive(this)
 }
 B_HLBirdBloxSensor.prototype.createXml = function(xmlDoc) {
-  return HL_Utils.createXml(this, xmlDoc)
+  return HL_Utils.BBcreateXml(this, xmlDoc)
 }
 
 function B_HLBBDistance(x, y, port) {
@@ -1483,7 +1542,7 @@ function B_HLBBDistance(x, y, port) {
 }
 B_HLBBDistance.prototype = Object.create(B_HLBirdBloxSensor.prototype);
 B_HLBBDistance.prototype.constructor = B_HLBBDistance
-B_HLBBDistance.importXml = HL_Utils.importXml
+B_HLBBDistance.importXml = HL_Utils.BBimportXml
 
 
 
