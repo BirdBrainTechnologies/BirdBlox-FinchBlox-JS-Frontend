@@ -7044,6 +7044,22 @@ GuiElements.create.stop = function(color, offset) {
   stop.setAttributeNS(null, "style", "stop-color:" + color + ";stop-opacity:1");
   return stop;
 }
+
+GuiElements.create.shadow = function(id) {
+  var shadow = document.createElementNS("http://www.w3.org/2000/svg", 'filter')
+  shadow.setAttributeNS(null, "id", id)
+  var dropShadow = document.createElementNS("http://www.w3.org/2000/svg", 'feDropShadow')
+  dropShadow.setAttributeNS(null, "dx", 3)
+  dropShadow.setAttributeNS(null, "dy", 3)
+  dropShadow.setAttributeNS(null, "stdDeviation", 0.1)
+  dropShadow.setAttributeNS(null, "flood-opacity", 0.3)
+  dropShadow.setAttributeNS(null, "flood-color", Colors.ballyGrayDark)
+  shadow.appendChild(dropShadow)
+
+  GuiElements.defs.appendChild(shadow)
+  console.log("*** added a shadow to the defs")
+  console.log(GuiElements.defs)
+}
 /**
  * Creates an SVG path element and returns it.
  * @param {Element} [group] - The parent group to add the element to.
@@ -9259,6 +9275,17 @@ Colors.setCategory = function() {
       "sensor_2": Colors.ballyPinkDark,
       "inactive": Colors.ballyGrayDark
     }
+    Colors.dragColors = {
+      "motion_1": Colors.ballyBlueOnDrag,
+      "color_1": Colors.ballyOrangeOnDrag,
+      "sound_1": Colors.ballyPurpleOnDrag,
+      "motion_2": Colors.ballyBlueOnDrag,
+      "color_2": Colors.ballyOrangeOnDrag,
+      "sound_2": Colors.ballyPurpleOnDrag,
+      "control_2": Colors.ballyGreenYellowOnDrag,
+      "sensor_2": Colors.ballyPinkOnDrag,
+      "inactive": Colors.ballyGray
+    }
   }
 };
 
@@ -10442,6 +10469,11 @@ BlockGraphics.SetHighlight = function() {
   BlockGraphics.highlight.strokeDarkC = Colors.black;
   BlockGraphics.highlight.strokeW = 3;
   BlockGraphics.highlight.commandL = 10;
+  if (Hatchling) {
+    BlockGraphics.highlight.strokeC = Colors.ballyGreen
+    BlockGraphics.highlight.strokeDarkC = Colors.ballyGreenDark
+    BlockGraphics.highlight.strokeW = 5;
+  }
 };
 
 /* Constants for Slot hit box */
@@ -10454,8 +10486,8 @@ BlockGraphics.SetHitBox = function() {
 /* Constants for outline on running Blocks */
 BlockGraphics.SetGlow = function() {
   BlockGraphics.glow = function() {};
-  BlockGraphics.glow.color = Hatchling ? Colors.flagGreen : Colors.white;
-  BlockGraphics.glow.strokeW = 2;
+  BlockGraphics.glow.color = Hatchling ? Colors.ballyGreen : Colors.white;
+  BlockGraphics.glow.strokeW = Hatchling ? 3 : 2;
 };
 
 /* Computes intermediate values from constants */
@@ -10681,6 +10713,7 @@ BlockGraphics.buildPath.commandTopHalf = function(x, y, width, height) {
  * @return {string}
  */
 BlockGraphics.buildPath.highlightCommand = function(x, y, height) {
+  console.log("*** highlightCommand " + x + " " + y + " " + height)
   var path = "";
   if (FinchBlox) {
     var lineLength = 5;
@@ -16806,7 +16839,9 @@ function HLLevelSwitch(x, y) {
 
 HLLevelSwitch.prototype.press = function() {
 
-	var duration = 0.5
+	this.oldTab = TabManager.activeTab
+	this.oldTab.dontDelete = true
+	var duration = 1//0.5
 	var tB = this.text1 
 	var tW = this.text2
 	var x = this.dcx
@@ -16816,25 +16851,65 @@ HLLevelSwitch.prototype.press = function() {
 		tW = this.text1
 		x = -this.dcx
 	}
+	this.animationInProgress = true
+	var m = 0
 
-	setTimeout(function() {
-		LevelManager.setLevel(level); //will call setSwitch
-		LevelManager.loadLevelSavePoint();
-	}.bind(this), 475)
+	LevelManager.setLevel(level); //will call setSwitch
+	LevelManager.loadLevelSavePoint();
+
+	//Create a temporary group to hold both old and new programs. This allows for the animation of switching files.
+	this.tempG = GuiElements.create.group(0, 0, GuiElements.layers.activeTab)
+	var clipPathOldTab = GuiElements.clip(m, m, GuiElements.width-2*m, GuiElements.height-2*m, this.oldTab.mainG)
+	this.tempG.appendChild(this.oldTab.mainG)
+
+	var newTabX = (level == 1) ? GuiElements.width : -GuiElements.width 
+	var clipPathNewTab = GuiElements.clip(m, m, GuiElements.width-2*m, GuiElements.height-2*m, TabManager.activeTab.mainG)
+	GuiElements.move.group(TabManager.activeTab.mainG, newTabX, 0)
+	this.tempG.appendChild(TabManager.activeTab.mainG)
+	
+	var oldTabX = (level == 1) ? -GuiElements.width : GuiElements.width
+    
+    var rect = GuiElements.draw.rect(m, m, GuiElements.width-2*m, GuiElements.height-2*m, "none")
+    GuiElements.update.stroke(rect, Colors.ballyGray, 1)
+    this.tempG.appendChild(rect)
 
 
 	this.animations[0] = GuiElements.animate.updateColor(tB, Colors.white, duration)
 	this.animations[1] = GuiElements.animate.updateColor(tW, this.textColor, duration)
 	this.animations[2] = GuiElements.animate.move(this.circleE, x, 0, duration)
+	this.animations[3] = GuiElements.animate.move(this.tempG, oldTabX, 0, duration)
+
 	
+	setTimeout(function() {
+		this.animationInProgress = false
+	}.bind(this), duration*1000)
+
 }
 
 HLLevelSwitch.prototype.setSwitch = function(level) {
+
+	if (this.animationInProgress) {
+		console.log("*** animation in progress - delaying...")
+		setTimeout(function() {
+			this.setSwitch(level)
+		}.bind(this), 50)
+		return
+	}
+	console.log("*** setting switch to " + level)
 
 
 	for (var i = 0; i < this.animations.length; i++) {
 		this.animations[i].remove()
 	}
+
+	this.oldTab.dontDelete = false
+	this.oldTab.delete()
+	TabManager.activeTab.mainG.removeAttributeNS(null, "clip-path")
+	GuiElements.move.group(TabManager.activeTab.mainG, 0, 0)
+	GuiElements.layers.activeTab.appendChild(TabManager.activeTab.mainG)
+	this.tempG.remove()
+	this.tempG = null
+	console.log(TabManager.activeTab.mainG)
 	
 
 	switch(level){
@@ -23612,14 +23687,19 @@ Highlighter.showShadow = function(fit, stack) {
     myY = fit.stack.tab.absToRelY(fit.getAbsY());
     myX = fit.stack.tab.absToRelX(fit.relToAbsX(fit.width));
   }
-  var color = Colors.iron;
+  var color = Hatchling ? Colors.ballyGrayDark : Colors.iron;
 
   var block = stack.firstBlock;
   var shadowW = 0;
   while (block != null) {
     var group = GuiElements.create.group(0, 0, this.shadowGroup);
     var pathE = GuiElements.create.path(group);
-    GuiElements.update.color(pathE, color);
+    if (Hatchling) {
+      GuiElements.update.color(pathE, Colors.white);
+      GuiElements.update.stroke(pathE, color, 1)
+    } else {
+      GuiElements.update.color(pathE, color);
+    }
     GuiElements.move.group(group, block.x + BlockGraphics.command.fbBumpDepth, block.y);
     var pathD = block.path.getAttribute("d");
     pathE.setAttributeNS(null, "d", pathD);
@@ -25810,6 +25890,7 @@ Tab.importXml = function(tabNode) {
  * Removes the tab
  */
 Tab.prototype.delete = function() {
+  if (this.dontDelete) { return }
   this.passRecursively("remove");
   this.mainG.remove();
 };
@@ -29577,6 +29658,7 @@ BlockStack.prototype.snap = function(block) {
   this.startRunIfAutoExec();
 
   if (Hatchling) { 
+    block.land()
     HL_Utils.showPortsPopup(block) 
     mbRuntime.saveChunk(this.firstBlock)
   }
@@ -29586,7 +29668,8 @@ BlockStack.prototype.snap = function(block) {
  * Adds an indicator showing that the moving BlockStack will snap onto the top of this BlockStack if released.
  */
 BlockStack.prototype.highlight = function() {
-  Highlighter.highlight(this.getAbsX(), this.getAbsY(), 0, this.firstBlock.height, 0, false, this.isRunning);
+  var x = FinchBlox ? (this.getAbsX() - BlockGraphics.command.fbBumpDepth) : this.getAbsX()
+  Highlighter.highlight(x, this.getAbsY(), 0, this.firstBlock.height, 0, false, this.isRunning);
 };
 
 /**
@@ -29618,7 +29701,7 @@ BlockStack.prototype.getTab = function() {
 };
 
 /**
- * Moves this BlockStack out of the Tab's group and into the drag layer about other Blocks.
+ * Moves this BlockStack out of the Tab's group and into the drag layer above other Blocks.
  */
 BlockStack.prototype.fly = function() {
   // Remove group from Tab (visually only).
@@ -29633,6 +29716,10 @@ BlockStack.prototype.fly = function() {
   // Move to ensure that position on screen does not change.
   this.move(CodeManager.dragAbsToRelX(absX), CodeManager.dragAbsToRelY(absY));
   this.tab.updateArrows();
+
+  if (Hatchling) {
+    this.passRecursivelyDown("fly")
+  }
 };
 
 /**
@@ -29648,7 +29735,10 @@ BlockStack.prototype.land = function() {
   this.move(this.tab.absToRelX(absX), this.tab.absToRelY(absY));
   this.tab.updateArrows();
 
-  if (Hatchling) { HL_Utils.showPortsPopup(this.firstBlock) }
+  if (Hatchling) { 
+    this.passRecursivelyDown("land")
+    HL_Utils.showPortsPopup(this.firstBlock) 
+  }
 };
 
 /**
@@ -32301,6 +32391,11 @@ Block.setConstants = function() {
   Block.returnTypes.list = 4;
 
   Block.count = 0;
+
+  if (Hatchling) {
+    Block.shadowId = "blockShadow"
+    GuiElements.create.shadow(Block.shadowId)
+  }
 };
 
 /**
@@ -33105,11 +33200,12 @@ Block.prototype.snap = function(block) {
   if (this.stack != null) {
     //Update the dimensions now that the movement is complete.
     this.stack.updateDim();
-    //Update the arros on the sides of the screen in case the new block now extends beyond the edge
+    //Update the arrows on the sides of the screen in case the new block now extends beyond the edge
     this.stack.tab.updateArrows();
   }
 
   if (Hatchling) { 
+    block.land()
     HL_Utils.showPortsPopup(block) 
     if (this.stack != null) { mbRuntime.saveChunk(this.stack.firstBlock) }
   }
@@ -33597,6 +33693,44 @@ Block.prototype.renameList = function(list) {
 Block.prototype.deleteList = function(list) {
   this.passRecursively("deleteList", list);
 };
+
+/**
+ * Change block color while flying.
+ * Recursively notifies the Block that this stack is flying.
+ * Hatchling only.
+ */
+Block.prototype.fly = function() {
+  //Add a drop shadow while flying
+  this.group.setAttributeNS(null, "filter", "url(#" + Block.shadowId + ")")
+  console.log("*** added shadow") 
+  console.log(this.group)
+
+  //Change color while flying
+  if (!this.hasHat) {  //color change does not apply to hat blocks
+    var cat = this.category
+    if (!this.active) { cat = "inactive" }
+    GuiElements.update.color(this.path, Colors.dragColors[cat]);
+  }
+  //TODO: deal with topPath?
+  this.passRecursively("fly")
+}
+
+/**
+ * Change block color back now that the block has landed.
+ * Recursively notifies the Block that this stack is landing.
+ * Hatchling only.
+ */
+Block.prototype.land = function() {
+  this.group.removeAttributeNS(null, "filter")
+
+  if (!this.hasHat) {
+    var cat = this.category
+    if (!this.active) { cat = "inactive" }
+    GuiElements.update.color(this.path, Colors.categoryColors[cat]);
+  }
+  //TODO: deal with topPath?
+  this.passRecursively("land")
+}
 
 /**
  * Recursively determines if a variable is in use
@@ -36802,6 +36936,7 @@ BlockSlot.prototype.updateDim = function() {
     this.width = BlockGraphics.loop.armW;
     if (FinchBlox) {
       this.width = BlockGraphics.command.width;
+      this.height = BlockGraphics.command.height
     }
   }
 };
@@ -36860,7 +36995,11 @@ BlockSlot.prototype.snap = function(block) {
   if (stack != null) {
     // Update the positions of everything
     this.parent.stack.updateDim();
-    if (Hatchling) { mbRuntime.saveChunk(this.parent.stack.firstBlock) }
+    if (Hatchling) { 
+      block.land()
+      HL_Utils.showPortsPopup(block) 
+      mbRuntime.saveChunk(this.parent.stack.firstBlock) 
+    }
   }
 };
 
@@ -36928,7 +37067,12 @@ BlockSlot.prototype.findBestFit = function(moveManager) {
  * Adds indicator that moving Block will snap to this BlockSlot if released
  */
 BlockSlot.prototype.highlight = function() {
-  Highlighter.highlight(this.getAbsX(), this.getAbsY(), 0, 0, 0, false, this.parent.isGlowing);
+  if (FinchBlox) {
+    Highlighter.highlight(this.getAbsX() - BlockGraphics.command.fbBumpDepth, this.getAbsY(), 0, this.height, 0, false, this.parent.isGlowing);
+  } else {
+    Highlighter.highlight(this.getAbsX(), this.getAbsY(), 0, 0, 0, false, this.parent.isGlowing);
+  }
+
 };
 
 /**
@@ -37097,6 +37241,22 @@ BlockSlot.prototype.renameList = function(list) {
 BlockSlot.prototype.deleteList = function(list) {
   this.passRecursively("deleteList", list);
 };
+
+/**
+ * Recursively notifies the Block that this stack is flying.
+ * Hatchling only.
+ */
+BlockSlot.prototype.fly = function() {
+  this.passRecursively("fly")
+}
+
+/**
+ * Recursively notifies the Block that this stack is landing.
+ * Hatchling only.
+ */
+BlockSlot.prototype.land = function() {
+  this.passRecursively("land")
+}
 
 /**
  * @param {Variable} variable

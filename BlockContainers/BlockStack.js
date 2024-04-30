@@ -441,6 +441,7 @@ BlockStack.prototype.snap = function(block) {
   this.startRunIfAutoExec();
 
   if (Hatchling) { 
+    block.land()
     HL_Utils.showPortsPopup(block) 
     mbRuntime.saveChunk(this.firstBlock)
   }
@@ -450,7 +451,8 @@ BlockStack.prototype.snap = function(block) {
  * Adds an indicator showing that the moving BlockStack will snap onto the top of this BlockStack if released.
  */
 BlockStack.prototype.highlight = function() {
-  Highlighter.highlight(this.getAbsX(), this.getAbsY(), 0, this.firstBlock.height, 0, false, this.isRunning);
+  let x = FinchBlox ? (this.getAbsX() - BlockGraphics.command.fbBumpDepth) : this.getAbsX()
+  Highlighter.highlight(x, this.getAbsY(), 0, this.firstBlock.height, 0, false, this.isRunning);
 };
 
 /**
@@ -482,7 +484,7 @@ BlockStack.prototype.getTab = function() {
 };
 
 /**
- * Moves this BlockStack out of the Tab's group and into the drag layer about other Blocks.
+ * Moves this BlockStack out of the Tab's group and into the drag layer above other Blocks.
  */
 BlockStack.prototype.fly = function() {
   // Remove group from Tab (visually only).
@@ -497,6 +499,10 @@ BlockStack.prototype.fly = function() {
   // Move to ensure that position on screen does not change.
   this.move(CodeManager.dragAbsToRelX(absX), CodeManager.dragAbsToRelY(absY));
   this.tab.updateArrows();
+
+  if (Hatchling) {
+    this.passRecursivelyDown("fly")
+  }
 };
 
 /**
@@ -512,7 +518,10 @@ BlockStack.prototype.land = function() {
   this.move(this.tab.absToRelX(absX), this.tab.absToRelY(absY));
   this.tab.updateArrows();
 
-  if (Hatchling) { HL_Utils.showPortsPopup(this.firstBlock) }
+  if (Hatchling) { 
+    this.passRecursivelyDown("land")
+    HL_Utils.showPortsPopup(this.firstBlock) 
+  }
 };
 
 /**

@@ -379,6 +379,22 @@ GuiElements.create.stop = function(color, offset) {
   stop.setAttributeNS(null, "style", "stop-color:" + color + ";stop-opacity:1");
   return stop;
 }
+
+GuiElements.create.shadow = function(id) {
+  const shadow = document.createElementNS("http://www.w3.org/2000/svg", 'filter')
+  shadow.setAttributeNS(null, "id", id)
+  const dropShadow = document.createElementNS("http://www.w3.org/2000/svg", 'feDropShadow')
+  dropShadow.setAttributeNS(null, "dx", 3)
+  dropShadow.setAttributeNS(null, "dy", 3)
+  dropShadow.setAttributeNS(null, "stdDeviation", 0.1)
+  dropShadow.setAttributeNS(null, "flood-opacity", 0.3)
+  dropShadow.setAttributeNS(null, "flood-color", Colors.ballyGrayDark)
+  shadow.appendChild(dropShadow)
+
+  GuiElements.defs.appendChild(shadow)
+  console.log("*** added a shadow to the defs")
+  console.log(GuiElements.defs)
+}
 /**
  * Creates an SVG path element and returns it.
  * @param {Element} [group] - The parent group to add the element to.

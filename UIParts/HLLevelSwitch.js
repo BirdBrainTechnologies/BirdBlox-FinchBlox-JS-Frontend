@@ -51,7 +51,9 @@ function HLLevelSwitch(x, y) {
 
 HLLevelSwitch.prototype.press = function() {
 
-	const duration = 0.5
+	this.oldTab = TabManager.activeTab
+	this.oldTab.dontDelete = true
+	const duration = 1//0.5
 	let tB = this.text1 
 	let tW = this.text2
 	let x = this.dcx
@@ -61,25 +63,65 @@ HLLevelSwitch.prototype.press = function() {
 		tW = this.text1
 		x = -this.dcx
 	}
+	this.animationInProgress = true
+	let m = 0
 
-	setTimeout(function() {
-		LevelManager.setLevel(level); //will call setSwitch
-		LevelManager.loadLevelSavePoint();
-	}.bind(this), 475)
+	LevelManager.setLevel(level); //will call setSwitch
+	LevelManager.loadLevelSavePoint();
+
+	//Create a temporary group to hold both old and new programs. This allows for the animation of switching files.
+	this.tempG = GuiElements.create.group(0, 0, GuiElements.layers.activeTab)
+	const clipPathOldTab = GuiElements.clip(m, m, GuiElements.width-2*m, GuiElements.height-2*m, this.oldTab.mainG)
+	this.tempG.appendChild(this.oldTab.mainG)
+
+	const newTabX = (level == 1) ? GuiElements.width : -GuiElements.width 
+	const clipPathNewTab = GuiElements.clip(m, m, GuiElements.width-2*m, GuiElements.height-2*m, TabManager.activeTab.mainG)
+	GuiElements.move.group(TabManager.activeTab.mainG, newTabX, 0)
+	this.tempG.appendChild(TabManager.activeTab.mainG)
+	
+	const oldTabX = (level == 1) ? -GuiElements.width : GuiElements.width
+    
+    const rect = GuiElements.draw.rect(m, m, GuiElements.width-2*m, GuiElements.height-2*m, "none")
+    GuiElements.update.stroke(rect, Colors.ballyGray, 1)
+    this.tempG.appendChild(rect)
 
 
 	this.animations[0] = GuiElements.animate.updateColor(tB, Colors.white, duration)
 	this.animations[1] = GuiElements.animate.updateColor(tW, this.textColor, duration)
 	this.animations[2] = GuiElements.animate.move(this.circleE, x, 0, duration)
+	this.animations[3] = GuiElements.animate.move(this.tempG, oldTabX, 0, duration)
+
 	
+	setTimeout(function() {
+		this.animationInProgress = false
+	}.bind(this), duration*1000)
+
 }
 
 HLLevelSwitch.prototype.setSwitch = function(level) {
+
+	if (this.animationInProgress) {
+		console.log("*** animation in progress - delaying...")
+		setTimeout(function() {
+			this.setSwitch(level)
+		}.bind(this), 50)
+		return
+	}
+	console.log("*** setting switch to " + level)
 
 
 	for (let i = 0; i < this.animations.length; i++) {
 		this.animations[i].remove()
 	}
+
+	this.oldTab.dontDelete = false
+	this.oldTab.delete()
+	TabManager.activeTab.mainG.removeAttributeNS(null, "clip-path")
+	GuiElements.move.group(TabManager.activeTab.mainG, 0, 0)
+	GuiElements.layers.activeTab.appendChild(TabManager.activeTab.mainG)
+	this.tempG.remove()
+	this.tempG = null
+	console.log(TabManager.activeTab.mainG)
 	
 
 	switch(level){

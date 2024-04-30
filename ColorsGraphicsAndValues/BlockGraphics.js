@@ -225,6 +225,11 @@ BlockGraphics.SetHighlight = function() {
   BlockGraphics.highlight.strokeDarkC = Colors.black;
   BlockGraphics.highlight.strokeW = 3;
   BlockGraphics.highlight.commandL = 10;
+  if (Hatchling) {
+    BlockGraphics.highlight.strokeC = Colors.ballyGreen
+    BlockGraphics.highlight.strokeDarkC = Colors.ballyGreenDark
+    BlockGraphics.highlight.strokeW = 5;
+  }
 };
 
 /* Constants for Slot hit box */
@@ -237,8 +242,8 @@ BlockGraphics.SetHitBox = function() {
 /* Constants for outline on running Blocks */
 BlockGraphics.SetGlow = function() {
   BlockGraphics.glow = function() {};
-  BlockGraphics.glow.color = Hatchling ? Colors.flagGreen : Colors.white;
-  BlockGraphics.glow.strokeW = 2;
+  BlockGraphics.glow.color = Hatchling ? Colors.ballyGreen : Colors.white;
+  BlockGraphics.glow.strokeW = Hatchling ? 3 : 2;
 };
 
 /* Computes intermediate values from constants */
@@ -464,6 +469,7 @@ BlockGraphics.buildPath.commandTopHalf = function(x, y, width, height) {
  * @return {string}
  */
 BlockGraphics.buildPath.highlightCommand = function(x, y, height) {
+  console.log("*** highlightCommand " + x + " " + y + " " + height)
   let path = "";
   if (FinchBlox) {
     var lineLength = 5;

@@ -77,14 +77,19 @@ Highlighter.showShadow = function(fit, stack) {
     myY = fit.stack.tab.absToRelY(fit.getAbsY());
     myX = fit.stack.tab.absToRelX(fit.relToAbsX(fit.width));
   }
-  const color = Colors.iron;
+  const color = Hatchling ? Colors.ballyGrayDark : Colors.iron;
 
   let block = stack.firstBlock;
   let shadowW = 0;
   while (block != null) {
     let group = GuiElements.create.group(0, 0, this.shadowGroup);
     let pathE = GuiElements.create.path(group);
-    GuiElements.update.color(pathE, color);
+    if (Hatchling) {
+      GuiElements.update.color(pathE, Colors.white);
+      GuiElements.update.stroke(pathE, color, 1)
+    } else {
+      GuiElements.update.color(pathE, color);
+    }
     GuiElements.move.group(group, block.x + BlockGraphics.command.fbBumpDepth, block.y);
     let pathD = block.path.getAttribute("d");
     pathE.setAttributeNS(null, "d", pathD);

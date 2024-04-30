@@ -83,6 +83,11 @@ Block.setConstants = function() {
   Block.returnTypes.list = 4;
 
   Block.count = 0;
+
+  if (Hatchling) {
+    Block.shadowId = "blockShadow"
+    GuiElements.create.shadow(Block.shadowId)
+  }
 };
 
 /**
@@ -887,11 +892,12 @@ Block.prototype.snap = function(block) {
   if (this.stack != null) {
     //Update the dimensions now that the movement is complete.
     this.stack.updateDim();
-    //Update the arros on the sides of the screen in case the new block now extends beyond the edge
+    //Update the arrows on the sides of the screen in case the new block now extends beyond the edge
     this.stack.tab.updateArrows();
   }
 
   if (Hatchling) { 
+    block.land()
     HL_Utils.showPortsPopup(block) 
     if (this.stack != null) { mbRuntime.saveChunk(this.stack.firstBlock) }
   }
@@ -1215,6 +1221,7 @@ Block.prototype.writeToXml = function(xmlDoc, xmlBlocks) {
  * @return {Node}
  */
 Block.prototype.createXml = function(xmlDoc) {
+  console.log("*** createXml " + this.blockTypeName)
   let block = XmlWriter.createElement(xmlDoc, "block");
   XmlWriter.setAttribute(block, "type", this.blockTypeName);
   XmlWriter.setAttribute(block, "id", this.id);
@@ -1256,6 +1263,7 @@ Block.prototype.createXml = function(xmlDoc) {
 Block.importXml = function(blockNode) {
   // Get the correct class of the Block
   let type = XmlWriter.getAttribute(blockNode, "type");
+  console.log("*** importXml " + type)
   let block;
   try {
     // All classes start with "B_"
@@ -1377,6 +1385,44 @@ Block.prototype.renameList = function(list) {
 Block.prototype.deleteList = function(list) {
   this.passRecursively("deleteList", list);
 };
+
+/**
+ * Change block color while flying.
+ * Recursively notifies the Block that this stack is flying.
+ * Hatchling only.
+ */
+Block.prototype.fly = function() {
+  //Add a drop shadow while flying
+  this.group.setAttributeNS(null, "filter", "url(#" + Block.shadowId + ")")
+  console.log("*** added shadow") 
+  console.log(this.group)
+
+  //Change color while flying
+  if (!this.hasHat) {  //color change does not apply to hat blocks
+    let cat = this.category
+    if (!this.active) { cat = "inactive" }
+    GuiElements.update.color(this.path, Colors.dragColors[cat]);
+  }
+  //TODO: deal with topPath?
+  this.passRecursively("fly")
+}
+
+/**
+ * Change block color back now that the block has landed.
+ * Recursively notifies the Block that this stack is landing.
+ * Hatchling only.
+ */
+Block.prototype.land = function() {
+  this.group.removeAttributeNS(null, "filter")
+
+  if (!this.hasHat) {
+    let cat = this.category
+    if (!this.active) { cat = "inactive" }
+    GuiElements.update.color(this.path, Colors.categoryColors[cat]);
+  }
+  //TODO: deal with topPath?
+  this.passRecursively("land")
+}
 
 /**
  * Recursively determines if a variable is in use

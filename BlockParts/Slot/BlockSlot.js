@@ -47,6 +47,7 @@ BlockSlot.prototype.updateDim = function() {
     this.width = BlockGraphics.loop.armW;
     if (FinchBlox) {
       this.width = BlockGraphics.command.width;
+      this.height = BlockGraphics.command.height
     }
   }
 };
@@ -105,7 +106,11 @@ BlockSlot.prototype.snap = function(block) {
   if (stack != null) {
     // Update the positions of everything
     this.parent.stack.updateDim();
-    if (Hatchling) { mbRuntime.saveChunk(this.parent.stack.firstBlock) }
+    if (Hatchling) { 
+      block.land()
+      HL_Utils.showPortsPopup(block) 
+      mbRuntime.saveChunk(this.parent.stack.firstBlock) 
+    }
   }
 };
 
@@ -173,7 +178,12 @@ BlockSlot.prototype.findBestFit = function(moveManager) {
  * Adds indicator that moving Block will snap to this BlockSlot if released
  */
 BlockSlot.prototype.highlight = function() {
-  Highlighter.highlight(this.getAbsX(), this.getAbsY(), 0, 0, 0, false, this.parent.isGlowing);
+  if (FinchBlox) {
+    Highlighter.highlight(this.getAbsX() - BlockGraphics.command.fbBumpDepth, this.getAbsY(), 0, this.height, 0, false, this.parent.isGlowing);
+  } else {
+    Highlighter.highlight(this.getAbsX(), this.getAbsY(), 0, 0, 0, false, this.parent.isGlowing);
+  }
+
 };
 
 /**
@@ -342,6 +352,22 @@ BlockSlot.prototype.renameList = function(list) {
 BlockSlot.prototype.deleteList = function(list) {
   this.passRecursively("deleteList", list);
 };
+
+/**
+ * Recursively notifies the Block that this stack is flying.
+ * Hatchling only.
+ */
+BlockSlot.prototype.fly = function() {
+  this.passRecursively("fly")
+}
+
+/**
+ * Recursively notifies the Block that this stack is landing.
+ * Hatchling only.
+ */
+BlockSlot.prototype.land = function() {
+  this.passRecursively("land")
+}
 
 /**
  * @param {Variable} variable

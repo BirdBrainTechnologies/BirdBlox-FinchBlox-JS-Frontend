@@ -207,6 +207,17 @@ Colors.setCategory = function() {
       "sensor_2": Colors.ballyPinkDark,
       "inactive": Colors.ballyGrayDark
     }
+    Colors.dragColors = {
+      "motion_1": Colors.ballyBlueOnDrag,
+      "color_1": Colors.ballyOrangeOnDrag,
+      "sound_1": Colors.ballyPurpleOnDrag,
+      "motion_2": Colors.ballyBlueOnDrag,
+      "color_2": Colors.ballyOrangeOnDrag,
+      "sound_2": Colors.ballyPurpleOnDrag,
+      "control_2": Colors.ballyGreenYellowOnDrag,
+      "sensor_2": Colors.ballyPinkOnDrag,
+      "inactive": Colors.ballyGray
+    }
   }
 };
 

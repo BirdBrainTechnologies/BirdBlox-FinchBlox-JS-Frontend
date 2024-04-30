@@ -576,6 +576,7 @@ Tab.importXml = function(tabNode) {
  * Removes the tab
  */
 Tab.prototype.delete = function() {
+  if (this.dontDelete) { return }
   this.passRecursively("remove");
   this.mainG.remove();
 };
