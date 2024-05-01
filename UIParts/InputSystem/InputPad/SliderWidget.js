@@ -189,6 +189,7 @@ InputWidget.Slider.prototype.updateDim = function(x, y) {
   const S = InputWidget.Slider;
   this.height = S.height;
   if (this.type.startsWith("color_")) { this.height = S.height / 2; }
+  if (Hatchling && this.index != 0) { this.height = S.height * 2/3 }
   this.width = S.width;
 }
 
@@ -209,7 +210,8 @@ InputWidget.Slider.prototype.makeSlider = function() {
   this.position = 0;
   this.range = 100;
 
-  const hatchFact = 4/3
+  //For index 0 sliders, need space for top icon.
+  const hatchFact = (this.index == 0) ? 4/3 : 1
 
   this.barX = S.hMargin;
   this.barY = Hatchling ? (hatchFact*this.height - S.barHeight)/2 : (this.height - S.barHeight)/2;
@@ -469,7 +471,17 @@ InputWidget.Slider.prototype.addHatchlingIcons = function() {
   case "servo":
     iconLowPath = VectorPaths.bd0Deg 
     iconHighPath = VectorPaths.bd180Deg  
-    iconPath = VectorPaths.bd90Deg 
+    iconPath = VectorPaths.bdDegBlank//VectorPaths.bd90Deg 
+
+    this.cX = this.width/2
+    this.cY = 63
+    this.cR = 42
+    this.degreeWedge = GuiElements.draw.wedge(this.cX, this.cY, this.cR, this.value, this.sliderColor)
+    this.degreeWedge.setAttributeNS(null, "transform", "rotate(270, " + this.cX + ", " + this.cY + ")")
+    this.group.appendChild(this.degreeWedge)
+
+    this.degreeTriangle = new VectorIcon(0, 0, VectorPaths.bdPlay, this.sliderColor, 15, this.group)
+    this.updateDegree()
     break;
   case "motor_true":
   case "motor_false":
@@ -506,7 +518,11 @@ InputWidget.Slider.prototype.addHatchlingIcons = function() {
   const iconH = 80//40
   const iconW = VectorIcon.computeWidth(iconPath, iconH)
   const iconX = (this.width - iconW)/2
-  const icon = new VectorIcon(iconX, 0, iconPath, this.sliderColor, iconH, this.group)
+
+  //Only add top icon if this is the first widget.
+  if (this.index == 0) {
+    const icon = new VectorIcon(iconX, 0, iconPath, this.sliderColor, iconH, this.group)
+  }
 }
 
 /**
@@ -660,6 +676,9 @@ InputWidget.Slider.prototype.drag = function(x) {
       this.value = Math.round(this.value / rv) * rv; //round off to the nearest 5 or 15 degrees
       this.updateAngle();
     }
+    if (this.type == "servo") {
+      this.updateDegree()
+    }
 
     this.updateLabel();
     this.updateFn(this.value, this.index);
@@ -782,6 +801,9 @@ InputWidget.Slider.prototype.moveToOption = function(optionIndex) {
   if (this.type.startsWith("angle")) {
     this.updateAngle();
   }
+  if (this.type == "servo") {
+      this.updateDegree()
+  }
   this.updateLabel();
   this.updateFn(this.value, this.index);
 }
@@ -822,6 +844,9 @@ InputWidget.Slider.prototype.moveToValue = function() {
   }
   if (this.type.startsWith("angle")) {
     this.updateAngle();
+  }
+  if (this.type == "servo") {
+    this.updateDegree()
   }
   this.updateLabel();
 }
@@ -875,6 +900,25 @@ InputWidget.Slider.prototype.updateAngle = function() {
     }
     this.angleIcon.setRotation(rotation);
   }
+}
+
+/**
+ * For sliders for servos. Hatchling only.
+ */
+InputWidget.Slider.prototype.updateDegree = function() {
+  if (this.degreeWedge == null) { return }
+
+  GuiElements.update.wedge(this.degreeWedge, this.cX, this.cY, this.cR, this.value)
+
+  const rad = this.value * Math.PI/180
+  const cX = this.cX - 6
+  const cY = this.cY - 6
+  const oX = cX - this.cR - 15
+  const oY = cY
+  const x = cX + (oX - cX)*Math.cos(rad) + (cY - oY)*Math.sin(rad)
+  const y = cY + (oY - cY)*Math.cos(rad) + (oX - cX)*Math.sin(rad)
+  this.degreeTriangle.move(x, y)
+  this.degreeTriangle.setRotation((this.value + 180)%360)
 }
 
 /**

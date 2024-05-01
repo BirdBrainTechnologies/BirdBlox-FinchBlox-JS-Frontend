@@ -89,7 +89,7 @@ HLLevelSwitch.prototype.press = function() {
 	this.animations[0] = GuiElements.animate.updateColor(tB, Colors.white, duration)
 	this.animations[1] = GuiElements.animate.updateColor(tW, this.textColor, duration)
 	this.animations[2] = GuiElements.animate.move(this.circleE, x, 0, duration)
-	this.animations[3] = GuiElements.animate.move(this.tempG, oldTabX, 0, duration)
+	this.animations[3] = GuiElements.animate.move(this.tempG, oldTabX, 0, duration, true)
 
 	
 	setTimeout(function() {
@@ -114,15 +114,18 @@ HLLevelSwitch.prototype.setSwitch = function(level) {
 		this.animations[i].remove()
 	}
 
-	this.oldTab.dontDelete = false
-	this.oldTab.delete()
+	if (this.oldTab != null) {
+		this.oldTab.dontDelete = false
+		this.oldTab.delete()
+	}
+	
 	TabManager.activeTab.mainG.removeAttributeNS(null, "clip-path")
 	GuiElements.move.group(TabManager.activeTab.mainG, 0, 0)
 	GuiElements.layers.activeTab.appendChild(TabManager.activeTab.mainG)
-	this.tempG.remove()
-	this.tempG = null
-	console.log(TabManager.activeTab.mainG)
-	
+	if (this.tempG != null) {
+		this.tempG.remove()
+		this.tempG = null
+	}
 
 	switch(level){
 	case 1:

@@ -380,15 +380,15 @@ GuiElements.create.stop = function(color, offset) {
   return stop;
 }
 
-GuiElements.create.shadow = function(id) {
+GuiElements.create.shadow = function(id, color, opacity) {
   const shadow = document.createElementNS("http://www.w3.org/2000/svg", 'filter')
   shadow.setAttributeNS(null, "id", id)
   const dropShadow = document.createElementNS("http://www.w3.org/2000/svg", 'feDropShadow')
   dropShadow.setAttributeNS(null, "dx", 3)
   dropShadow.setAttributeNS(null, "dy", 3)
   dropShadow.setAttributeNS(null, "stdDeviation", 0.1)
-  dropShadow.setAttributeNS(null, "flood-opacity", 0.3)
-  dropShadow.setAttributeNS(null, "flood-color", Colors.ballyGrayDark)
+  dropShadow.setAttributeNS(null, "flood-opacity", opacity)
+  dropShadow.setAttributeNS(null, "flood-color", color)
   shadow.appendChild(dropShadow)
 
   GuiElements.defs.appendChild(shadow)
@@ -1436,10 +1436,16 @@ GuiElements.animate = {}
  * @param {number} y - y coordinate of destination
  * @param {number} duration - duration of animation in seconds 
  */
-GuiElements.animate.move = function(element, x, y, duration) {
+GuiElements.animate.move = function(element, x, y, duration, useEasing) {
   let animate = document.createElementNS("http://www.w3.org/2000/svg", 'animateTransform');
   animate.setAttributeNS(null, "attributeName", "transform");
-  animate.setAttributeNS(null, "to", x + " " + y) 
+  if (useEasing) {
+    animate.setAttributeNS(null, "calcMode", "spline")
+    animate.setAttributeNS(null, "keySplines", "0.9 0.1 0.1 0.9")
+    animate.setAttributeNS(null, "values", "0 0;" + x + " " + y)
+  } else {
+    animate.setAttributeNS(null, "to", x + " " + y) 
+  }
   animate.setAttributeNS(null, "dur", duration + "s");
   animate.setAttributeNS(null, "repeatCount", "1");
   animate.setAttributeNS(null, "fill", "freeze");

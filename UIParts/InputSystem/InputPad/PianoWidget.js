@@ -12,7 +12,10 @@ InputWidget.Piano.prototype.constructor = InputWidget.Piano;
 
 InputWidget.Piano.setConstants = function() {
   const P = InputWidget.Piano;
-  //P.bnMargin = InputPad.margin;
+
+  P.grayOutline = Hatchling ? Colors.ballyGrayLight : Colors.iron 
+  P.purpleOutline = Hatchling ? Colors.ballyPurpleDark : Colors.fbPurpleBorder
+
   P.bnMargin = 2;
   P.firstNote = 48;
   P.numWhiteKeys = 14;
@@ -161,7 +164,7 @@ InputWidget.Piano.prototype.makeWhiteKey = function(x, y, num) {
   let button = this.makeKey(x, y, num, P.whiteKeyW, P.whiteKeyH);
   button.addColorIcon(VectorPaths.mvPianoWhiteKey, P.whiteKeyH, Colors.white);
   button.iconInverts = true;
-  GuiElements.update.stroke(button.icon.pathE, Colors.iron, 1);
+  GuiElements.update.stroke(button.icon.pathE, P.grayOutline, 1);
 }
 
 InputWidget.Piano.prototype.makeBlackKey = function(x, y, num) {
@@ -217,6 +220,7 @@ InputWidget.Piano.prototype.keyPressed = function(num) {
 };
 
 InputWidget.Piano.prototype.updatePressed = function(num) {
+  const P = InputWidget.Piano;
   if (this.pressedKey != null && num != this.pressedKey) {
     const oldPressed = this.keys[this.pressedKey];
     oldPressed.unToggle();
@@ -225,11 +229,11 @@ InputWidget.Piano.prototype.updatePressed = function(num) {
     if (isBlack) {
       GuiElements.update.stroke(oldPressed.icon.pathE, Colors.black, 0);
     } else {
-      GuiElements.update.stroke(oldPressed.icon.pathE, Colors.iron, 1);
+      GuiElements.update.stroke(oldPressed.icon.pathE, P.grayOutline, 1);
     }
   }
   this.pressedKey = num;
   const newPressed = this.keys[this.pressedKey];
-  GuiElements.update.stroke(newPressed.icon.pathE, Colors.fbPurpleBorder, 1);
+  GuiElements.update.stroke(newPressed.icon.pathE, P.purpleOutline, 1);
 
 }

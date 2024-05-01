@@ -85,8 +85,10 @@ Block.setConstants = function() {
   Block.count = 0;
 
   if (Hatchling) {
-    Block.shadowId = "blockShadow"
-    GuiElements.create.shadow(Block.shadowId)
+    Block.shadowId = "blockShadowId"
+    GuiElements.create.shadow(Block.shadowId, Colors.ballyGrayDark, 0.3)
+    Block.redShadowId = "redShadowId"
+    GuiElements.create.shadow(Block.redShadowId, Colors.ballyRed, 1.0)
   }
 };
 
@@ -1221,7 +1223,7 @@ Block.prototype.writeToXml = function(xmlDoc, xmlBlocks) {
  * @return {Node}
  */
 Block.prototype.createXml = function(xmlDoc) {
-  console.log("*** createXml " + this.blockTypeName)
+  //console.log("*** createXml " + this.blockTypeName)
   let block = XmlWriter.createElement(xmlDoc, "block");
   XmlWriter.setAttribute(block, "type", this.blockTypeName);
   XmlWriter.setAttribute(block, "id", this.id);
@@ -1263,7 +1265,7 @@ Block.prototype.createXml = function(xmlDoc) {
 Block.importXml = function(blockNode) {
   // Get the correct class of the Block
   let type = XmlWriter.getAttribute(blockNode, "type");
-  console.log("*** importXml " + type)
+  //console.log("*** importXml " + type)
   let block;
   try {
     // All classes start with "B_"
@@ -1394,6 +1396,7 @@ Block.prototype.deleteList = function(list) {
 Block.prototype.fly = function() {
   //Add a drop shadow while flying
   this.group.setAttributeNS(null, "filter", "url(#" + Block.shadowId + ")")
+  this.currentShadow = Block.shadowId
   console.log("*** added shadow") 
   console.log(this.group)
 
@@ -1408,11 +1411,26 @@ Block.prototype.fly = function() {
 }
 
 /**
+ * Update the shadow to be red or gray. Used in Hatchling to turn the 
+ * shadow red when over trash.
+ * @param {string} useRed - true if the shadow should be red.
+ */
+Block.prototype.updateShadow = function(useRed) {
+  let id = (useRed == "true") ? Block.redShadowId : Block.shadowId
+
+  if (this.currentShadow != null && this.currentShadow != id) {
+    this.group.setAttributeNS(null, "filter", "url(#" + id + ")")
+    this.currentShadow = id
+  }
+}
+
+/**
  * Change block color back now that the block has landed.
  * Recursively notifies the Block that this stack is landing.
  * Hatchling only.
  */
 Block.prototype.land = function() {
+  this.currentShadow = null
   this.group.removeAttributeNS(null, "filter")
 
   if (!this.hasHat) {

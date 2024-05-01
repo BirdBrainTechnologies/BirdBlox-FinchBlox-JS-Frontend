@@ -86,13 +86,14 @@ B_FBSound.prototype.updateAction = function() {
 }
 B_FBSound.prototype.updateValues = function() {
   if (this.noteButton != null) {
+    const oldMidiNote = this.midiNote
     this.midiNote = this.noteButton.values[0];
 
     if (this.noteButton.widgets.length == 2) {
       this.beats = this.noteButton.values[1];
     }
 
-    if (this.blockButton.popupIsDisplayed) {
+    if (this.blockButton.popupIsDisplayed && (this.midiNote != oldMidiNote)) {
       HtmlServer.sendTabletSoundRequest(this.midiNote, 100 * this.beats);
     }
   }

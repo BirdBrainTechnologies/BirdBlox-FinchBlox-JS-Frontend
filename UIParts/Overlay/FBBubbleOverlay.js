@@ -62,7 +62,7 @@ FBBubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHe
 
   const height = innerHeight + 2 * this.margin;
   const width = this.width || innerWidth + 2 * this.margin;
-  const overlap = 2; //how much should the triangle overlap the button?
+  const overlap = Hatchling ? -1 : 2; //how much should the triangle overlap the button?
 
   /* Center the content in the bubble */
   GuiElements.move.group(this.innerGroup, this.margin, this.margin);

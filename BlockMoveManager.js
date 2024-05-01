@@ -67,10 +67,14 @@ BlockMoveManager.prototype.update = function(x, y) {
     Highlighter.hide(); // Hide any existing highlight.
     if (!move.startedFromPalette) {
       BlockPalette.showTrash();
+      if (Hatchling) {
+        move.stack.updateShadow(true)
+      }
     }
   } else {
     if (Hatchling) {
       BlockPalette.showTrash()
+      move.stack.updateShadow(false)
     } else {
       BlockPalette.hideTrash();
     }

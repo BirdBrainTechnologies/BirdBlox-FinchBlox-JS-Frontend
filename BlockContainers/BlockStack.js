@@ -505,6 +505,10 @@ BlockStack.prototype.fly = function() {
   }
 };
 
+BlockStack.prototype.updateShadow = function(useRed) {
+  this.passRecursivelyDown("updateShadow", useRed)
+}
+
 /**
  * Moves this BlockStack back into its Tab's group.
  */

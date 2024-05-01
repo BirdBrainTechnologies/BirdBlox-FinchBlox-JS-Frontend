@@ -31,8 +31,8 @@ BubbleOverlay.prototype.constructor = BubbleOverlay;
 
 BubbleOverlay.setGraphics = function() {
   if (FinchBlox) {
-    BubbleOverlay.triangleW = 40;
-    BubbleOverlay.triangleH = 10;
+    BubbleOverlay.triangleW = Hatchling ? 30 : 40;
+    BubbleOverlay.triangleH = Hatchling ? 15 : 10;
   } else {
     BubbleOverlay.triangleW = 15;
     BubbleOverlay.triangleH = 7;

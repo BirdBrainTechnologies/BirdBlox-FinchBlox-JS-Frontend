@@ -42,21 +42,25 @@ InputWidget.Buttons.prototype.show = function(x, y, parentGroup, overlay, slotSh
 
 	this.value = data[this.index];
 
-
 	//Add top icon 
 	const iconH = 80
 	const iconW = VectorIcon.computeWidth(this.iconPath, iconH)
 	const iconX = (this.width - iconW)/2
 	const icon = new VectorIcon(iconX, 0, this.iconPath, this.iconColor, iconH, this.group)
 
+	//Will need 2 rows if there are more than 15 buttons. If there are ever more than 30, this section will need to be updated.
+	const keys = Object.keys(this.valueDictionary)
+	const maxBns = 15
+	const rowCount = Math.ceil(keys.length/maxBns)
+	const bnsPerRow = Math.ceil(keys.length/rowCount)
+	if (rowCount > 1) { this.bnH /= 2}
 
 	//Add a button and preview for each option 
-	const bnY = (this.type == "ledArray") ? this.height * 2/5 : this.height * 3/5
-	const keys = Object.keys(this.valueDictionary)
+	let bnY = (this.type == "ledArray") ? this.height * 2/5 : this.height * 3/5
 	let bnX = this.hMargin
-	const bnMargin = (1/4) * (this.width - 2*this.hMargin)/(keys.length - 1)
-	const bnW = (this.width - 2*this.hMargin - bnMargin * (keys.length - 1))/keys.length
-	const previewY = bnY + this.bnH + bnMargin*3/4
+	const bnMargin = (1/4) * (this.width - 2*this.hMargin)/(bnsPerRow - 1)
+	const bnW = (this.width - 2*this.hMargin - bnMargin * rowCount * (bnsPerRow - 1))/bnsPerRow
+	let previewY = bnY + this.bnH + bnMargin*3/4
 	for (var i = 0; i < keys.length; i++) {
 		//option button
 		const bn = new Button(bnX, bnY, bnW, this.bnH, this.group, this.bgColor, 3, 3, this.iconColor)
@@ -76,7 +80,15 @@ InputWidget.Buttons.prototype.show = function(x, y, parentGroup, overlay, slotSh
 		}
 
       	//set x for next option
-		bnX += bnW + bnMargin
+		bnX += bnW + bnMargin*rowCount
+
+		//move to next row if necessary
+		if (i + 1 == bnsPerRow) {
+			bnX = this.hMargin
+			let offset = this.bnH + bnMargin*3/4 + bnW + bnMargin
+			bnY += offset
+			previewY += offset
+		}
 	}
 
 	this.updateBns()

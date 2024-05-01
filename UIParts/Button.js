@@ -708,7 +708,7 @@ Button.prototype.move = function(x, y) {
 Button.prototype.setColor = function(isPressed) {
   if (isPressed && FinchBlox) {
     if (this.toggles && this.hasIcon) {
-      this.icon.setColor(Colors.blockPaletteSound);
+      this.icon.setColor(Hatchling ? Colors.ballyPurpleLight : Colors.blockPaletteSound);
     } else {
       let darkColor = Colors.darkenColor(this.bg, 0.8);
       this.bgRect.setAttributeNS(null, "fill", darkColor);

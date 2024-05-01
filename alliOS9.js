@@ -7045,15 +7045,15 @@ GuiElements.create.stop = function(color, offset) {
   return stop;
 }
 
-GuiElements.create.shadow = function(id) {
+GuiElements.create.shadow = function(id, color, opacity) {
   var shadow = document.createElementNS("http://www.w3.org/2000/svg", 'filter')
   shadow.setAttributeNS(null, "id", id)
   var dropShadow = document.createElementNS("http://www.w3.org/2000/svg", 'feDropShadow')
   dropShadow.setAttributeNS(null, "dx", 3)
   dropShadow.setAttributeNS(null, "dy", 3)
   dropShadow.setAttributeNS(null, "stdDeviation", 0.1)
-  dropShadow.setAttributeNS(null, "flood-opacity", 0.3)
-  dropShadow.setAttributeNS(null, "flood-color", Colors.ballyGrayDark)
+  dropShadow.setAttributeNS(null, "flood-opacity", opacity)
+  dropShadow.setAttributeNS(null, "flood-color", color)
   shadow.appendChild(dropShadow)
 
   GuiElements.defs.appendChild(shadow)
@@ -8101,10 +8101,16 @@ GuiElements.animate = {}
  * @param {number} y - y coordinate of destination
  * @param {number} duration - duration of animation in seconds 
  */
-GuiElements.animate.move = function(element, x, y, duration) {
+GuiElements.animate.move = function(element, x, y, duration, useEasing) {
   var animate = document.createElementNS("http://www.w3.org/2000/svg", 'animateTransform');
   animate.setAttributeNS(null, "attributeName", "transform");
-  animate.setAttributeNS(null, "to", x + " " + y) 
+  if (useEasing) {
+    animate.setAttributeNS(null, "calcMode", "spline")
+    animate.setAttributeNS(null, "keySplines", "0.9 0.1 0.1 0.9")
+    animate.setAttributeNS(null, "values", "0 0;" + x + " " + y)
+  } else {
+    animate.setAttributeNS(null, "to", x + " " + y) 
+  }
   animate.setAttributeNS(null, "dur", duration + "s");
   animate.setAttributeNS(null, "repeatCount", "1");
   animate.setAttributeNS(null, "fill", "freeze");
@@ -9517,6 +9523,12 @@ function VectorPaths(){
     VP.bd90Deg.path="M35.0206 8.75C34.8281 8.41667 34.347 8.41667 34.1546 8.75L30.1816 15.6314C29.9892 15.9647 30.2297 16.3814 30.6146 16.3814H38.5605C38.9454 16.3814 39.186 15.9647 38.9935 15.6314L35.0206 8.75Z M10.0824 40.5536C10.3716 37.0643 11.4164 33.6947 13.1247 30.6629C14.2465 28.672 15.6544 26.8268 17.3223 25.1892C21.7745 20.8179 27.7331 18.2657 34.0001 18.0196C34.0029 18.0195 34.0057 18.0194 34.0085 18.0193C34.3382 18.0065 34.6688 18 35 18C41.6304 18 47.9893 20.5861 52.6777 25.1892C57.1255 29.5562 59.7243 35.3992 59.9793 41.5456C60.0022 42.0974 59.5523 42.5455 59 42.5455L11 42.5455C10.4477 42.5455 9.99783 42.0974 10.0207 41.5456C10.0345 41.214 10.0551 40.8832 10.0824 40.5536ZM43.756 30.8229L48.0689 26.4636C44.3778 23.5924 39.7778 22 35 22L35 38.5455L55.5982 38.5455C54.8699 34.9564 53.1694 31.5978 50.643 28.8384L46.244 33.2845C45.5643 33.9716 44.4562 33.9775 43.7692 33.2977C43.0821 32.6179 43.0762 31.5099 43.756 30.8229ZM20.7859 27.7397C20.0898 28.4102 20.0691 29.518 20.7396 30.2141L23.6812 33.2678C24.3517 33.9638 25.4596 33.9846 26.1556 33.314C26.8517 32.6435 26.8724 31.5357 26.2019 30.8396L23.2604 27.7859C22.5898 27.0899 21.482 27.0691 20.7859 27.7397Z"
     VP.bd90Deg.width=70
     VP.bd90Deg.height=50
+    VP.bdDegBlank={} //Not really from bally
+    //VP.bdDegBlank.path="M 35 35 m 32 0 a 32 32 0 1 0 -64 0 Z M 35 35 m 27.5 -4 a 27.75 27.75 0 0 0 -55 0 Z"
+    VP.bdDegBlank.path="M 35 40 m 30 0 a 30 30 0 1 0 -60 0 Z M 35 40 m 25.5 -4 a 25.75 25.75 0 0 0 -51 0 Z"
+    VP.bdDegBlank.width=70
+    VP.bdDegBlank.height=50
+    VP.bdDegBlank.fillRule="evenodd"
     VP.bdAdd={} //Circle added manually, plus original included a 3px stroke that was not added
     VP.bdAdd.path="M 40 40 m 38.6 0 a 38.6 38.6 0 1 0 -77.2 0 a 38.6 38.6 0 1 0 77.2 0 Z m -0.2 0 a 38.4 38.4 0 1 0 -76.8 0 a 38.4 38.4 0 1 0 76.8 0 Z M23.8273 36.3083C21.6901 36.3319 19.9767 38.0835 20.0002 40.2207C20.0238 42.358 21.7755 44.0714 23.9127 44.0478L36.1729 43.9125L36.3083 56.1727C36.3319 58.3099 38.0835 60.0233 40.2207 59.9998C42.358 59.9762 44.0714 58.2245 44.0478 56.0873L43.9125 43.8271L56.1727 43.6917C58.3099 43.6681 60.0233 41.9165 59.9998 39.7792C59.9762 37.642 58.2245 35.9286 56.0873 35.9522L43.8271 36.0875L43.6917 23.8273C43.6681 21.6901 41.9165 19.9766 39.7792 20.0002C37.642 20.0238 35.9286 21.7755 35.9522 23.9127L36.0875 36.1729L23.8273 36.3083Z"
     VP.bdAdd.width=80
@@ -16030,7 +16042,7 @@ Button.prototype.move = function(x, y) {
 Button.prototype.setColor = function(isPressed) {
   if (isPressed && FinchBlox) {
     if (this.toggles && this.hasIcon) {
-      this.icon.setColor(Colors.blockPaletteSound);
+      this.icon.setColor(Hatchling ? Colors.ballyPurpleLight : Colors.blockPaletteSound);
     } else {
       var darkColor = Colors.darkenColor(this.bg, 0.8);
       this.bgRect.setAttributeNS(null, "fill", darkColor);
@@ -16877,7 +16889,7 @@ HLLevelSwitch.prototype.press = function() {
 	this.animations[0] = GuiElements.animate.updateColor(tB, Colors.white, duration)
 	this.animations[1] = GuiElements.animate.updateColor(tW, this.textColor, duration)
 	this.animations[2] = GuiElements.animate.move(this.circleE, x, 0, duration)
-	this.animations[3] = GuiElements.animate.move(this.tempG, oldTabX, 0, duration)
+	this.animations[3] = GuiElements.animate.move(this.tempG, oldTabX, 0, duration, true)
 
 	
 	setTimeout(function() {
@@ -16902,15 +16914,18 @@ HLLevelSwitch.prototype.setSwitch = function(level) {
 		this.animations[i].remove()
 	}
 
-	this.oldTab.dontDelete = false
-	this.oldTab.delete()
+	if (this.oldTab != null) {
+		this.oldTab.dontDelete = false
+		this.oldTab.delete()
+	}
+	
 	TabManager.activeTab.mainG.removeAttributeNS(null, "clip-path")
 	GuiElements.move.group(TabManager.activeTab.mainG, 0, 0)
 	GuiElements.layers.activeTab.appendChild(TabManager.activeTab.mainG)
-	this.tempG.remove()
-	this.tempG = null
-	console.log(TabManager.activeTab.mainG)
-	
+	if (this.tempG != null) {
+		this.tempG.remove()
+		this.tempG = null
+	}
 
 	switch(level){
 	case 1:
@@ -18564,6 +18579,7 @@ InputWidget.Slider.prototype.updateDim = function(x, y) {
   var S = InputWidget.Slider;
   this.height = S.height;
   if (this.type.startsWith("color_")) { this.height = S.height / 2; }
+  if (Hatchling && this.index != 0) { this.height = S.height * 2/3 }
   this.width = S.width;
 }
 
@@ -18584,7 +18600,8 @@ InputWidget.Slider.prototype.makeSlider = function() {
   this.position = 0;
   this.range = 100;
 
-  var hatchFact = 4/3
+  //For index 0 sliders, need space for top icon.
+  var hatchFact = (this.index == 0) ? 4/3 : 1
 
   this.barX = S.hMargin;
   this.barY = Hatchling ? (hatchFact*this.height - S.barHeight)/2 : (this.height - S.barHeight)/2;
@@ -18844,7 +18861,17 @@ InputWidget.Slider.prototype.addHatchlingIcons = function() {
   case "servo":
     iconLowPath = VectorPaths.bd0Deg 
     iconHighPath = VectorPaths.bd180Deg  
-    iconPath = VectorPaths.bd90Deg 
+    iconPath = VectorPaths.bdDegBlank//VectorPaths.bd90Deg 
+
+    this.cX = this.width/2
+    this.cY = 63
+    this.cR = 42
+    this.degreeWedge = GuiElements.draw.wedge(this.cX, this.cY, this.cR, this.value, this.sliderColor)
+    this.degreeWedge.setAttributeNS(null, "transform", "rotate(270, " + this.cX + ", " + this.cY + ")")
+    this.group.appendChild(this.degreeWedge)
+
+    this.degreeTriangle = new VectorIcon(0, 0, VectorPaths.bdPlay, this.sliderColor, 15, this.group)
+    this.updateDegree()
     break;
   case "motor_true":
   case "motor_false":
@@ -18881,7 +18908,11 @@ InputWidget.Slider.prototype.addHatchlingIcons = function() {
   var iconH = 80//40
   var iconW = VectorIcon.computeWidth(iconPath, iconH)
   var iconX = (this.width - iconW)/2
-  var icon = new VectorIcon(iconX, 0, iconPath, this.sliderColor, iconH, this.group)
+
+  //Only add top icon if this is the first widget.
+  if (this.index == 0) {
+    var icon = new VectorIcon(iconX, 0, iconPath, this.sliderColor, iconH, this.group)
+  }
 }
 
 /**
@@ -19035,6 +19066,9 @@ InputWidget.Slider.prototype.drag = function(x) {
       this.value = Math.round(this.value / rv) * rv; //round off to the nearest 5 or 15 degrees
       this.updateAngle();
     }
+    if (this.type == "servo") {
+      this.updateDegree()
+    }
 
     this.updateLabel();
     this.updateFn(this.value, this.index);
@@ -19157,6 +19191,9 @@ InputWidget.Slider.prototype.moveToOption = function(optionIndex) {
   if (this.type.startsWith("angle")) {
     this.updateAngle();
   }
+  if (this.type == "servo") {
+      this.updateDegree()
+  }
   this.updateLabel();
   this.updateFn(this.value, this.index);
 }
@@ -19197,6 +19234,9 @@ InputWidget.Slider.prototype.moveToValue = function() {
   }
   if (this.type.startsWith("angle")) {
     this.updateAngle();
+  }
+  if (this.type == "servo") {
+    this.updateDegree()
   }
   this.updateLabel();
 }
@@ -19250,6 +19290,25 @@ InputWidget.Slider.prototype.updateAngle = function() {
     }
     this.angleIcon.setRotation(rotation);
   }
+}
+
+/**
+ * For sliders for servos. Hatchling only.
+ */
+InputWidget.Slider.prototype.updateDegree = function() {
+  if (this.degreeWedge == null) { return }
+
+  GuiElements.update.wedge(this.degreeWedge, this.cX, this.cY, this.cR, this.value)
+
+  var rad = this.value * Math.PI/180
+  var cX = this.cX - 6
+  var cY = this.cY - 6
+  var oX = cX - this.cR - 15
+  var oY = cY
+  var x = cX + (oX - cX)*Math.cos(rad) + (cY - oY)*Math.sin(rad)
+  var y = cY + (oY - cY)*Math.cos(rad) + (oX - cX)*Math.sin(rad)
+  this.degreeTriangle.move(x, y)
+  this.degreeTriangle.setRotation((this.value + 180)%360)
 }
 
 /**
@@ -19345,7 +19404,10 @@ InputWidget.Piano.prototype.constructor = InputWidget.Piano;
 
 InputWidget.Piano.setConstants = function() {
   var P = InputWidget.Piano;
-  //P.bnMargin = InputPad.margin;
+
+  P.grayOutline = Hatchling ? Colors.ballyGrayLight : Colors.iron 
+  P.purpleOutline = Hatchling ? Colors.ballyPurpleDark : Colors.fbPurpleBorder
+
   P.bnMargin = 2;
   P.firstNote = 48;
   P.numWhiteKeys = 14;
@@ -19494,7 +19556,7 @@ InputWidget.Piano.prototype.makeWhiteKey = function(x, y, num) {
   var button = this.makeKey(x, y, num, P.whiteKeyW, P.whiteKeyH);
   button.addColorIcon(VectorPaths.mvPianoWhiteKey, P.whiteKeyH, Colors.white);
   button.iconInverts = true;
-  GuiElements.update.stroke(button.icon.pathE, Colors.iron, 1);
+  GuiElements.update.stroke(button.icon.pathE, P.grayOutline, 1);
 }
 
 InputWidget.Piano.prototype.makeBlackKey = function(x, y, num) {
@@ -19550,6 +19612,7 @@ InputWidget.Piano.prototype.keyPressed = function(num) {
 };
 
 InputWidget.Piano.prototype.updatePressed = function(num) {
+  var P = InputWidget.Piano;
   if (this.pressedKey != null && num != this.pressedKey) {
     var oldPressed = this.keys[this.pressedKey];
     oldPressed.unToggle();
@@ -19558,12 +19621,12 @@ InputWidget.Piano.prototype.updatePressed = function(num) {
     if (isBlack) {
       GuiElements.update.stroke(oldPressed.icon.pathE, Colors.black, 0);
     } else {
-      GuiElements.update.stroke(oldPressed.icon.pathE, Colors.iron, 1);
+      GuiElements.update.stroke(oldPressed.icon.pathE, P.grayOutline, 1);
     }
   }
   this.pressedKey = num;
   var newPressed = this.keys[this.pressedKey];
-  GuiElements.update.stroke(newPressed.icon.pathE, Colors.fbPurpleBorder, 1);
+  GuiElements.update.stroke(newPressed.icon.pathE, P.purpleOutline, 1);
 
 }
 
@@ -20199,20 +20262,24 @@ InputWidget.Buttons.prototype.show = function(x, y, parentGroup, overlay, slotSh
 
 	this.value = data[this.index];
 
-
 	//Add top icon 
 	var iconH = 80
 	var iconW = VectorIcon.computeWidth(this.iconPath, iconH)
 	var iconX = (this.width - iconW)/2
 	var icon = new VectorIcon(iconX, 0, this.iconPath, this.iconColor, iconH, this.group)
 
+	//Will need 2 rows if there are more than 15 buttons. If there are ever more than 30, this section will need to be updated.
+	var keys = Object.keys(this.valueDictionary)
+	var maxBns = 15
+	var rowCount = Math.ceil(keys.length/maxBns)
+	var bnsPerRow = Math.ceil(keys.length/rowCount)
+	if (rowCount > 1) { this.bnH /= 2}
 
 	//Add a button and preview for each option 
 	var bnY = (this.type == "ledArray") ? this.height * 2/5 : this.height * 3/5
-	var keys = Object.keys(this.valueDictionary)
 	var bnX = this.hMargin
-	var bnMargin = (1/4) * (this.width - 2*this.hMargin)/(keys.length - 1)
-	var bnW = (this.width - 2*this.hMargin - bnMargin * (keys.length - 1))/keys.length
+	var bnMargin = (1/4) * (this.width - 2*this.hMargin)/(bnsPerRow - 1)
+	var bnW = (this.width - 2*this.hMargin - bnMargin * rowCount * (bnsPerRow - 1))/bnsPerRow
 	var previewY = bnY + this.bnH + bnMargin*3/4
 	for (var i = 0; i < keys.length; i++) {
 		//option button
@@ -20233,7 +20300,15 @@ InputWidget.Buttons.prototype.show = function(x, y, parentGroup, overlay, slotSh
 		}
 
       	//set x for next option
-		bnX += bnW + bnMargin
+		bnX += bnW + bnMargin*rowCount
+
+		//move to next row if necessary
+		if (i + 1 == bnsPerRow) {
+			bnX = this.hMargin
+			var offset = this.bnH + bnMargin*3/4 + bnW + bnMargin
+			bnY += offset
+			previewY += offset
+		}
 	}
 
 	this.updateBns()
@@ -20503,8 +20578,8 @@ BubbleOverlay.prototype.constructor = BubbleOverlay;
 
 BubbleOverlay.setGraphics = function() {
   if (FinchBlox) {
-    BubbleOverlay.triangleW = 40;
-    BubbleOverlay.triangleH = 10;
+    BubbleOverlay.triangleW = Hatchling ? 30 : 40;
+    BubbleOverlay.triangleH = Hatchling ? 15 : 10;
   } else {
     BubbleOverlay.triangleW = 15;
     BubbleOverlay.triangleH = 7;
@@ -20765,7 +20840,7 @@ FBBubbleOverlay.prototype.display = function(x1, x2, y1, y2, innerWidth, innerHe
 
   var height = innerHeight + 2 * this.margin;
   var width = this.width || innerWidth + 2 * this.margin;
-  var overlap = 2; //how much should the triangle overlap the button?
+  var overlap = Hatchling ? -1 : 2; //how much should the triangle overlap the button?
 
   /* Center the content in the bubble */
   GuiElements.move.group(this.innerGroup, this.margin, this.margin);
@@ -24015,10 +24090,14 @@ CodeManager.move.update = function(x, y) {
       Highlighter.hide(); // Hide any existing highlight.
       if (!move.startedFromPalette) {
         BlockPalette.showTrash();
+        if (Hatchling) {
+          move.stack.updateShadow(true)
+        }
       }
     } else {
       if (Hatchling) {
         BlockPalette.showTrash()
+        move.stack.updateShadow(false)
       } else {
         BlockPalette.hideTrash();
       }
@@ -24804,10 +24883,14 @@ BlockMoveManager.prototype.update = function(x, y) {
     Highlighter.hide(); // Hide any existing highlight.
     if (!move.startedFromPalette) {
       BlockPalette.showTrash();
+      if (Hatchling) {
+        move.stack.updateShadow(true)
+      }
     }
   } else {
     if (Hatchling) {
       BlockPalette.showTrash()
+      move.stack.updateShadow(false)
     } else {
       BlockPalette.hideTrash();
     }
@@ -29722,6 +29805,10 @@ BlockStack.prototype.fly = function() {
   }
 };
 
+BlockStack.prototype.updateShadow = function(useRed) {
+  this.passRecursivelyDown("updateShadow", useRed)
+}
+
 /**
  * Moves this BlockStack back into its Tab's group.
  */
@@ -32393,8 +32480,10 @@ Block.setConstants = function() {
   Block.count = 0;
 
   if (Hatchling) {
-    Block.shadowId = "blockShadow"
-    GuiElements.create.shadow(Block.shadowId)
+    Block.shadowId = "blockShadowId"
+    GuiElements.create.shadow(Block.shadowId, Colors.ballyGrayDark, 0.3)
+    Block.redShadowId = "redShadowId"
+    GuiElements.create.shadow(Block.redShadowId, Colors.ballyRed, 1.0)
   }
 };
 
@@ -33529,7 +33618,7 @@ Block.prototype.writeToXml = function(xmlDoc, xmlBlocks) {
  * @return {Node}
  */
 Block.prototype.createXml = function(xmlDoc) {
-  console.log("*** createXml " + this.blockTypeName)
+  //console.log("*** createXml " + this.blockTypeName)
   var block = XmlWriter.createElement(xmlDoc, "block");
   XmlWriter.setAttribute(block, "type", this.blockTypeName);
   XmlWriter.setAttribute(block, "id", this.id);
@@ -33571,7 +33660,7 @@ Block.prototype.createXml = function(xmlDoc) {
 Block.importXml = function(blockNode) {
   // Get the correct class of the Block
   var type = XmlWriter.getAttribute(blockNode, "type");
-  console.log("*** importXml " + type)
+  //console.log("*** importXml " + type)
   var block;
   try {
     // All classes start with "B_"
@@ -33702,6 +33791,7 @@ Block.prototype.deleteList = function(list) {
 Block.prototype.fly = function() {
   //Add a drop shadow while flying
   this.group.setAttributeNS(null, "filter", "url(#" + Block.shadowId + ")")
+  this.currentShadow = Block.shadowId
   console.log("*** added shadow") 
   console.log(this.group)
 
@@ -33716,11 +33806,26 @@ Block.prototype.fly = function() {
 }
 
 /**
+ * Update the shadow to be red or gray. Used in Hatchling to turn the 
+ * shadow red when over trash.
+ * @param {string} useRed - true if the shadow should be red.
+ */
+Block.prototype.updateShadow = function(useRed) {
+  var id = (useRed == "true") ? Block.redShadowId : Block.shadowId
+
+  if (this.currentShadow != null && this.currentShadow != id) {
+    this.group.setAttributeNS(null, "filter", "url(#" + id + ")")
+    this.currentShadow = id
+  }
+}
+
+/**
  * Change block color back now that the block has landed.
  * Recursively notifies the Block that this stack is landing.
  * Hatchling only.
  */
 Block.prototype.land = function() {
+  this.currentShadow = null
   this.group.removeAttributeNS(null, "filter")
 
   if (!this.hasHat) {
@@ -41247,13 +41352,14 @@ B_FBSound.prototype.updateAction = function() {
 }
 B_FBSound.prototype.updateValues = function() {
   if (this.noteButton != null) {
+    var oldMidiNote = this.midiNote
     this.midiNote = this.noteButton.values[0];
 
     if (this.noteButton.widgets.length == 2) {
       this.beats = this.noteButton.values[1];
     }
 
-    if (this.blockButton.popupIsDisplayed) {
+    if (this.blockButton.popupIsDisplayed && (this.midiNote != oldMidiNote)) {
       HtmlServer.sendTabletSoundRequest(this.midiNote, 100 * this.beats);
     }
   }
