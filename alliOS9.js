@@ -7057,8 +7057,6 @@ GuiElements.create.shadow = function(id, color, opacity) {
   shadow.appendChild(dropShadow)
 
   GuiElements.defs.appendChild(shadow)
-  console.log("*** added a shadow to the defs")
-  console.log(GuiElements.defs)
 }
 /**
  * Creates an SVG path element and returns it.
@@ -10725,7 +10723,6 @@ BlockGraphics.buildPath.commandTopHalf = function(x, y, width, height) {
  * @return {string}
  */
 BlockGraphics.buildPath.highlightCommand = function(x, y, height) {
-  console.log("*** highlightCommand " + x + " " + y + " " + height)
   var path = "";
   if (FinchBlox) {
     var lineLength = 5;
@@ -13153,7 +13150,7 @@ TitleBar.makeButtons = function() {
 
     TB.updateStatus = function(status) {
       //GuiElements.alert("TitleBar update status to " + status);
-      console.log("TitleBar update status to " + status)
+      //console.log("TitleBar update status to " + status)
       var finchBn = TitleBar.finchButton;
       var color = Hatchling ? Colors.ballyGrayLight : Colors.stopRed;
       var outlineColor = Hatchling ? Colors.ballyRed : Colors.darkenColor(Colors.stopRed, 0.5);
@@ -13948,7 +13945,7 @@ function DisplayStack(firstBlock, group, category) {
  */
 DisplayStack.prototype.updateGlowForMicroBlocks = function() {
   var chunkID = mbRuntime.lookupChunkID(this.firstBlock)
-  console.log("update called for chunkID " + chunkID)
+  //console.log("update called for chunkID " + chunkID)
   if (mbRuntime.chunkRunning[chunkID]) {
     this.firstBlock.glow() 
   } else {
@@ -16901,13 +16898,11 @@ HLLevelSwitch.prototype.press = function() {
 HLLevelSwitch.prototype.setSwitch = function(level) {
 
 	if (this.animationInProgress) {
-		console.log("*** animation in progress - delaying...")
 		setTimeout(function() {
 			this.setSwitch(level)
 		}.bind(this), 50)
 		return
 	}
-	console.log("*** setting switch to " + level)
 
 
 	for (var i = 0; i < this.animations.length; i++) {
@@ -19649,15 +19644,15 @@ InputWidget.Color.prototype.constructor = InputWidget.Color
 
 //Global color history
 InputWidget.Color.recentColors = [
-    "#FFFFFF", //white
-    "#FF0000", 
     "#FF8800", 
     "#FFFF00",
-    "#00FF00", 
-    "#00FFFF", 
-    "#0000FF", 
+    "#88FF00",
+    "#00FF88", 
+    "#00FFFF",
+    "#0088FF", 
     "#8800FF", 
-    "#FF00FF", 
+    "#FF00FF",
+    "#FF0088",
     "#FF8888",
     "#FFCC88",
     "#FFFF88",
@@ -19666,7 +19661,20 @@ InputWidget.Color.recentColors = [
     "#8888FF",
     "#FF88FF"
     ]
+InputWidget.Color.staticColors = [
+    "#000000",
+    "#FFFFFF",
+    "#FF0000", 
+    "#00FF00",
+    "#0000FF"
+    ]
 InputWidget.Color.addRecentColor = function(color) {
+
+    //Do not add colors from the static color list
+    if (InputWidget.Color.staticColors.indexOf(color) != -1) {
+        return
+    }
+
     var rcs = InputWidget.Color.recentColors
 
     //Remove first instance of color or pop last item
@@ -19809,6 +19817,38 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
         }
     }
 
+    //Add the static color buttons
+    this.staticColorButtons = []
+    var staticCs = InputWidget.Color.staticColors
+    bnX = this.width/2 - bnH - bnM/2
+    bnY = this.height/2
+    for (var i = 0; i < staticCs.length; i++) {
+        var color = staticCs[i]
+        var bn = new Button(bnX, bnY, bnH, bnH, this.group, color, 6, 6)
+        bn.markAsOverlayPart(this.overlay)
+        this.updateColorBn(bn, color)
+        this.staticColorButtons.push(bn)
+
+        bnX += bnH + bnM
+        if (i == 1) {
+            bnX = this.width/2 - 1.5*bnH - bnM
+            bnY += bnH + bnM
+        }
+    }
+
+    /*
+    this.addStaticColorButton(bnX, bnY, bnH, Colors.black)
+    bnX += bnH + bnM
+    this.addStaticColorButton(bnX, bnY, bnH, Colors.white)
+    bnX = this.width/2 - 1.5*bnH - bnM
+    bnY += bnH + bnM
+    this.addStaticColorButton(bnX, bnY, bnH, Colors.red)
+    bnX += bnH + bnM
+    this.addStaticColorButton(bnX, bnY, bnH, Colors.green)
+    bnX += bnH + bnM
+    this.addStaticColorButton(bnX, bnY, bnH, Colors.blue)*/
+
+
     this.updateRecentBns()
 }
 
@@ -19819,28 +19859,38 @@ InputWidget.Color.prototype.updateRecentBns = function() {
         var bn = this.recentColorButtons[i]
         var color = recentCs[i]
         
-        bn.updateBgColor(color)
-
-        bn.setCallbackFunction(function() {
-            //this.updateSlider()
-            this.setColor(color)
-            this.updateFn(this.getHex(), this.index)
-            this.updatePreview()
-            this.selectRecent()
-            InputWidget.Color.addRecentColor(color)
-        }.bind(this), true)
+        this.updateColorBn(bn, color)
     }
 
-    this.selectRecent()
+    this.selectBns()
 }
 
-InputWidget.Color.prototype.selectRecent = function () {
+InputWidget.Color.prototype.updateColorBn = function(bn, color) {
+    bn.updateBgColor(color)
+
+    bn.setCallbackFunction(function() {
+        //this.updateSlider()
+        this.setColor(color)
+        this.updateFn(this.getHex(), this.index)
+        this.updatePreview()
+        this.selectBns()
+        InputWidget.Color.addRecentColor(color)
+    }.bind(this), true)
+}
+
+InputWidget.Color.prototype.selectBns = function () {
     var currentColor = this.getHex()
 
-    for (var i = 0; i < this.recentColorButtons.length; i++) {
-        var bn = this.recentColorButtons[i]
+    function setOutline(bn) {
         var outlineW = (bn.bg == currentColor) ? 6 : 3
         GuiElements.update.stroke(bn.bgRect, Colors.ballyGray, outlineW)
+    }
+
+    for (var i = 0; i < this.recentColorButtons.length; i++) {
+        setOutline(this.recentColorButtons[i])
+    }
+    for (var i = 0; i < this.staticColorButtons.length; i++) {
+        setOutline(this.staticColorButtons[i])
     }
 }
 
@@ -19902,6 +19952,7 @@ InputWidget.Color.prototype.dragColor = function(x, y) {
         // calculate hue and saturation values based on thumb position
     this.hue = angle;
     this.saturation = Math.min(100, Math.ceil(scale_length / r * 100));
+    this.brightness = 100
 
     console.log("dragColor hue=" + this.hue + "; saturation=" + this.saturation + "; x=" + relX + "; y=" + relY + "; r=" + r)
 
@@ -20152,7 +20203,6 @@ InputWidget.HLPortWidget.prototype.show = function(x, y, parentGroup, overlay, s
 }
 
 InputWidget.HLPortWidget.prototype.updatePorts = function() {
-  console.log("**** update ports this.value=" + this.value)
   var portStates = [0, 0, 0, 0, 0, 0]
 
 	var device = DeviceHatchling.getManager().getDevice(0);
@@ -20206,7 +20256,6 @@ InputWidget.HLPortWidget.prototype.updatePorts = function() {
   //If we are showing this popup as though there is no accessory plugged in
   // and the appropriate accessory was just added, we can close the popup
   if (this.plug != null && this.value != HL_Utils.noPort) {
-    console.log("**** about to close popup " + this.value)
     setTimeout( function() { 
       this.parent.closeInputSystem() 
     }.bind(this), 1000 )
@@ -23039,7 +23088,6 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 	var availableHeight = this.menuH - this.menuW/6
 	this.contentWidth = this.menuW2 - this.menuW/10
 	this.hintText = "";
-	console.log("*** contentWidth " + this.contentWidth)
 
 	//var scrollBoxX = GuiElements.width - this.menuW2 + this.menuW/24 //GuiElements.width - this.menuW + this.menuGroupX
 	//var scrollBoxX2 = GuiElements.width - this.menuW2 + this.menuGroupX
@@ -23082,7 +23130,6 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup, embed
 	var displayName = fileName.slice(0, -2)
 	var level = fileName.slice(-1)
 	var isOpen = fileName == SaveManager.fileName
-	console.log("*** createRow width=" + width)
 
 	var bgColor = (isOpen || embed) ? Colors.ballyBrandBlueLight : Colors.white
 	var outlineColor = (isOpen || embed) ? Colors.ballyBrandBlue : null
@@ -26118,7 +26165,6 @@ Tab.prototype.updateArrowsShift = function() {
  * For Hatchling - Outline all code on this tab in gray or red. Used when saving or deleting files.
  */
 Tab.prototype.outlineCode = function(inRed) {
-  console.log("*** outlineCode " + this.stackList.length)
   if (this.outlineVisible) { return }
   var color = inRed ? Colors.ballyRed : Colors.ballyGray
   this.outlineGroup = GuiElements.create.group(0, 0)
@@ -26708,7 +26754,6 @@ RowDialog.prototype.createCenteredBn = function(y, entry) {
  * @return {SmoothScrollBox}
  */
 RowDialog.prototype.createScrollBox = function() {
-  console.log("*** " + this.scrollBoxWidth + " " + this.scrollBoxHeight + " " + this.rowCount)
   if (this.rowCount === 0) return null;
   var x = this.x + this.scrollBoxX;
   var y = this.y + this.scrollBoxY;
@@ -26807,7 +26852,6 @@ RowDialog.prototype.hide = function() {
  * @param {number} rowCount - The new number of rows
  */
 RowDialog.prototype.reloadRows = function(rowCount) {
-  console.log("*** reloadRows " + rowCount)
   this.rowCount = rowCount;
   if (this.visible) {
     var scroll = this.getScroll();
@@ -28615,12 +28659,8 @@ DiscoverDialog.prototype.show = function() {
   var DD = DiscoverDialog;
   if (Hatchling && GuiElements.isPWA) {
     var device = DeviceHatchling.getManager().getDevice(0)
-    console.log("*** DiscoverDialog show " + this.rowCount)
-    console.log(device)
-    console.log(this.discoveredDevices)
     if (device != null && device.connected) {
       //Show the connected device - user can scan if they disconnect
-      console.log("***** skip the scan")
       this.connectedDevices = [device]
       this.discoveredDevices = []
       this.rowCount = 1
@@ -28629,14 +28669,12 @@ DiscoverDialog.prototype.show = function() {
       return
     } else if (this.discoveredDevices.length == 0 && this.hasBeenShown) {
       //No devices. Show new scan button
-      console.log("*** display new scan button")
       this.connectedDevices = []
       this.rowCount = 1
       RowDialog.prototype.show.call(this);
       return
     } else if (this.discoveredDevices.length == 1) {
       //This is a weird case where the back end sends the device you are connecting before it is connected.
-      console.log("*** one discovered device")
       RowDialog.prototype.show.call(this);
       return
     }
@@ -28651,7 +28689,6 @@ DiscoverDialog.prototype.show = function() {
  * Starts the scan for devices and registers the dialog to receive updates when devices are detected
  */
 DiscoverDialog.prototype.discoverDevices = function() {
-  console.log("*** DiscoverDialog discoverDevices")
   var me = this;
   // Start the discover, and if the DeviceManager wants to know if it should ever restart a scan...
   this.deviceClass.getManager().startDiscover(function() {
@@ -28770,13 +28807,11 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
   }
   var me = this;
   if (device.connected) {
-    console.log("*** setting disconnect callback")
     button.setCallbackFunction(function() {
       //me.closeDialog()
       device.disconnect()
     }, true)
   } else {
-    console.log("*** setting selectDevice callback")
     button.setCallbackFunction(function() {
       me.selectDevice(device);
     }, true);
@@ -31498,7 +31533,7 @@ SaveManager.setConstants = function() {
  * @param {boolean} named - false if the user should be prompted to name the file when they try to use the OpenDialog
  */
 SaveManager.backendOpen = function(fileName, data) {
-  console.log("*** backendOpen " + fileName + ": " + data)
+  //console.log("*** backendOpen " + fileName + ": " + data)
   SaveManager.fileName = fileName;
   SaveManager.loadData(data);
   if (FinchBlox) {
@@ -31761,7 +31796,7 @@ SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, 
  * @param {function} nextAction
  */
 SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction) {
-  console.log("*** sanitizeRename")
+  //console.log("*** sanitizeRename")
   if (proposedName === "") {
     var message = Language.getStr("Name_error_blank");
     SaveManager.promptRename(isRecording, oldFilename, title, message, nextAction);
@@ -31797,7 +31832,7 @@ SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedN
  * @param {function} nextAction
  */
 SaveManager.renameSoft = function(isRecording, oldFilename, title, newName, nextAction) {
-  console.log("*** renameSoft")
+  //console.log("*** renameSoft")
   var request = new HttpRequestBuilder("data/rename");
   request.addParam("oldFilename", oldFilename);
   request.addParam("newFilename", newName);
@@ -33792,8 +33827,6 @@ Block.prototype.fly = function() {
   //Add a drop shadow while flying
   this.group.setAttributeNS(null, "filter", "url(#" + Block.shadowId + ")")
   this.currentShadow = Block.shadowId
-  console.log("*** added shadow") 
-  console.log(this.group)
 
   //Change color while flying
   if (!this.hasHat) {  //color change does not apply to hat blocks
@@ -44067,14 +44100,14 @@ HL_Utils.updatePort = function(block) {
     //If the block is on the canvas, and a port has not been selected by the user, set this port as the user selected port
     if ((block.userSelectedPort == null) && (block.port >= 0) && (block.stack != null) && !block.stack.isDisplayStack) {
       block.userSelectedPort = block.port
-      console.log("updatePort " + ((block.stack != null) ? !block.stack.isDisplayStack : false) + " set user port to " + block.userSelectedPort)
+      //console.log("updatePort " + ((block.stack != null) ? !block.stack.isDisplayStack : false) + " set user port to " + block.userSelectedPort)
     }
     block.updateActive()
   }
 }
 HL_Utils.findPorts = function(block) {
   var blockOnCanvas = ((block.stack != null) ? !block.stack.isDisplayStack : false)
-  console.log("findPorts for " + block.constructor.name + " " + block.portType + " " + blockOnCanvas)
+  //console.log("findPorts for " + block.constructor.name + " " + block.portType + " " + blockOnCanvas)
   var device = DeviceHatchling.getManager().getDevice(0);
   if (block.hlButton != null && device != null) {
     /*if (block.hlButton.values[0] == HL_Utils.unknownPort) {
@@ -44082,7 +44115,7 @@ HL_Utils.findPorts = function(block) {
     }*/
 
     var ports = device.getPortsByType(block.portType)
-    console.log("findPorts " + blockOnCanvas + " found: " + ports)
+    //console.log("findPorts " + blockOnCanvas + " found: " + ports)
     if (ports.length >= 1) {
       var p = ports[0]
       if (ports.length > 1) {
@@ -44090,7 +44123,7 @@ HL_Utils.findPorts = function(block) {
         block.shouldShowPortsPopup = true
 
         if (block.userSelectedPort != null) {
-          console.log("findPorts " + blockOnCanvas + " userSelectedPort == " + block.userSelectedPort)
+          //console.log("findPorts " + blockOnCanvas + " userSelectedPort == " + block.userSelectedPort)
           var index = ports.indexOf(block.userSelectedPort)
           if (index > 0) { //we have already set to index zero above
             p = ports[index]
@@ -44098,7 +44131,7 @@ HL_Utils.findPorts = function(block) {
         }
       }
 
-      console.log("findPorts " + blockOnCanvas + " using port " + p)
+      //console.log("findPorts " + blockOnCanvas + " using port " + p)
       block.hlButton.updateValue(HL_Utils.portNames[p], 0)
       
     }
@@ -44260,7 +44293,7 @@ HL_Utils.createXml = function(block, xmlDoc) {
 HL_Utils.importXml = function(blockNode) {
   var type = XmlWriter.getAttribute(blockNode, "type");
   var userSelectedPort = parseInt(XmlWriter.getAttribute(blockNode, "userPort"))
-  console.log("*** found user true port " + userSelectedPort)
+  //console.log("*** found user true port " + userSelectedPort)
   var block = new window[type](0, 0, userSelectedPort)
   block.copyFromXml(blockNode)
   return block
@@ -44274,7 +44307,7 @@ function B_HLOutputBase(x, y, category, outputType, portType, userSelectedPort) 
   this.portType = portType
   this.userSelectedPort = userSelectedPort
   //if ((this.stack != null) && !this.stack.isDisplayStack) {
-    console.log("*** Set user port true for " + this.constructor.name + " to " + this.userSelectedPort)
+    //console.log("*** Set user port true for " + this.constructor.name + " to " + this.userSelectedPort)
   //}
   CommandBlock.call(this, x, y, category);
 
@@ -44626,7 +44659,6 @@ B_HL_SN_L1.prototype.argList = function() {
 }*/
 
 function B_HL_SN_L1_Red(x, y, userSelectedPort) {
-  console.log("call SN RED with true user port " + userSelectedPort)
   B_HL_SN_L1.call(this, x, y, "#FF0000", userSelectedPort)
 }
 B_HL_SN_L1_Red.prototype = Object.create(B_HL_SN_L1.prototype);
@@ -47917,7 +47949,7 @@ MicroBlocksRuntime.prototype.saveChunk = async function(aBlockOrFunction, skipHi
 		}
 	//}
 
-	console.log("saveChunk [" + entry + "] \nCurrent src:\n" + currentSrc)
+	//console.log("saveChunk [" + entry + "] \nCurrent src:\n" + currentSrc)
 
 	if (currentSrc == entry[3]) { return false } // source hasn't changed; save not needed
 	entry[3] = currentSrc // remember the source of the code we're about to save

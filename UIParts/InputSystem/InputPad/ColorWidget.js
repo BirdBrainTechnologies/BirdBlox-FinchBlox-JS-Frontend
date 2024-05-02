@@ -17,15 +17,15 @@ InputWidget.Color.prototype.constructor = InputWidget.Color
 
 //Global color history
 InputWidget.Color.recentColors = [
-    "#FFFFFF", //white
-    "#FF0000", 
     "#FF8800", 
     "#FFFF00",
-    "#00FF00", 
-    "#00FFFF", 
-    "#0000FF", 
+    "#88FF00",
+    "#00FF88", 
+    "#00FFFF",
+    "#0088FF", 
     "#8800FF", 
-    "#FF00FF", 
+    "#FF00FF",
+    "#FF0088",
     "#FF8888",
     "#FFCC88",
     "#FFFF88",
@@ -34,7 +34,20 @@ InputWidget.Color.recentColors = [
     "#8888FF",
     "#FF88FF"
     ]
+InputWidget.Color.staticColors = [
+    "#000000",
+    "#FFFFFF",
+    "#FF0000", 
+    "#00FF00",
+    "#0000FF"
+    ]
 InputWidget.Color.addRecentColor = function(color) {
+
+    //Do not add colors from the static color list
+    if (InputWidget.Color.staticColors.indexOf(color) != -1) {
+        return
+    }
+
     const rcs = InputWidget.Color.recentColors
 
     //Remove first instance of color or pop last item
@@ -177,6 +190,38 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
         }
     }
 
+    //Add the static color buttons
+    this.staticColorButtons = []
+    const staticCs = InputWidget.Color.staticColors
+    bnX = this.width/2 - bnH - bnM/2
+    bnY = this.height/2
+    for (let i = 0; i < staticCs.length; i++) {
+        const color = staticCs[i]
+        const bn = new Button(bnX, bnY, bnH, bnH, this.group, color, 6, 6)
+        bn.markAsOverlayPart(this.overlay)
+        this.updateColorBn(bn, color)
+        this.staticColorButtons.push(bn)
+
+        bnX += bnH + bnM
+        if (i == 1) {
+            bnX = this.width/2 - 1.5*bnH - bnM
+            bnY += bnH + bnM
+        }
+    }
+
+    /*
+    this.addStaticColorButton(bnX, bnY, bnH, Colors.black)
+    bnX += bnH + bnM
+    this.addStaticColorButton(bnX, bnY, bnH, Colors.white)
+    bnX = this.width/2 - 1.5*bnH - bnM
+    bnY += bnH + bnM
+    this.addStaticColorButton(bnX, bnY, bnH, Colors.red)
+    bnX += bnH + bnM
+    this.addStaticColorButton(bnX, bnY, bnH, Colors.green)
+    bnX += bnH + bnM
+    this.addStaticColorButton(bnX, bnY, bnH, Colors.blue)*/
+
+
     this.updateRecentBns()
 }
 
@@ -187,28 +232,38 @@ InputWidget.Color.prototype.updateRecentBns = function() {
         const bn = this.recentColorButtons[i]
         const color = recentCs[i]
         
-        bn.updateBgColor(color)
-
-        bn.setCallbackFunction(function() {
-            //this.updateSlider()
-            this.setColor(color)
-            this.updateFn(this.getHex(), this.index)
-            this.updatePreview()
-            this.selectRecent()
-            InputWidget.Color.addRecentColor(color)
-        }.bind(this), true)
+        this.updateColorBn(bn, color)
     }
 
-    this.selectRecent()
+    this.selectBns()
 }
 
-InputWidget.Color.prototype.selectRecent = function () {
+InputWidget.Color.prototype.updateColorBn = function(bn, color) {
+    bn.updateBgColor(color)
+
+    bn.setCallbackFunction(function() {
+        //this.updateSlider()
+        this.setColor(color)
+        this.updateFn(this.getHex(), this.index)
+        this.updatePreview()
+        this.selectBns()
+        InputWidget.Color.addRecentColor(color)
+    }.bind(this), true)
+}
+
+InputWidget.Color.prototype.selectBns = function () {
     const currentColor = this.getHex()
 
-    for (let i = 0; i < this.recentColorButtons.length; i++) {
-        const bn = this.recentColorButtons[i]
+    function setOutline(bn) {
         const outlineW = (bn.bg == currentColor) ? 6 : 3
         GuiElements.update.stroke(bn.bgRect, Colors.ballyGray, outlineW)
+    }
+
+    for (let i = 0; i < this.recentColorButtons.length; i++) {
+        setOutline(this.recentColorButtons[i])
+    }
+    for (let i = 0; i < this.staticColorButtons.length; i++) {
+        setOutline(this.staticColorButtons[i])
     }
 }
 
@@ -270,6 +325,7 @@ InputWidget.Color.prototype.dragColor = function(x, y) {
         // calculate hue and saturation values based on thumb position
     this.hue = angle;
     this.saturation = Math.min(100, Math.ceil(scale_length / r * 100));
+    this.brightness = 100
 
     console.log("dragColor hue=" + this.hue + "; saturation=" + this.saturation + "; x=" + relX + "; y=" + relY + "; r=" + r)
 

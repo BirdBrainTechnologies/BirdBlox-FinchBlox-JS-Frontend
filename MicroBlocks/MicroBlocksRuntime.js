@@ -1504,7 +1504,7 @@ MicroBlocksRuntime.prototype.saveChunk = async function(aBlockOrFunction, skipHi
 		}
 	//}
 
-	console.log("saveChunk [" + entry + "] \nCurrent src:\n" + currentSrc)
+	//console.log("saveChunk [" + entry + "] \nCurrent src:\n" + currentSrc)
 
 	if (currentSrc == entry[3]) { return false } // source hasn't changed; save not needed
 	entry[3] = currentSrc // remember the source of the code we're about to save

@@ -319,7 +319,7 @@ TitleBar.makeButtons = function() {
 
     TB.updateStatus = function(status) {
       //GuiElements.alert("TitleBar update status to " + status);
-      console.log("TitleBar update status to " + status)
+      //console.log("TitleBar update status to " + status)
       const finchBn = TitleBar.finchButton;
       let color = Hatchling ? Colors.ballyGrayLight : Colors.stopRed;
       let outlineColor = Hatchling ? Colors.ballyRed : Colors.darkenColor(Colors.stopRed, 0.5);

@@ -101,13 +101,11 @@ HLLevelSwitch.prototype.press = function() {
 HLLevelSwitch.prototype.setSwitch = function(level) {
 
 	if (this.animationInProgress) {
-		console.log("*** animation in progress - delaying...")
 		setTimeout(function() {
 			this.setSwitch(level)
 		}.bind(this), 50)
 		return
 	}
-	console.log("*** setting switch to " + level)
 
 
 	for (let i = 0; i < this.animations.length; i++) {

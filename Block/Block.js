@@ -1397,8 +1397,6 @@ Block.prototype.fly = function() {
   //Add a drop shadow while flying
   this.group.setAttributeNS(null, "filter", "url(#" + Block.shadowId + ")")
   this.currentShadow = Block.shadowId
-  console.log("*** added shadow") 
-  console.log(this.group)
 
   //Change color while flying
   if (!this.hasHat) {  //color change does not apply to hat blocks

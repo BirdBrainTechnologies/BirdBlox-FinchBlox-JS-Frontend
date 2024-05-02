@@ -69,14 +69,14 @@ HL_Utils.updatePort = function(block) {
     //If the block is on the canvas, and a port has not been selected by the user, set this port as the user selected port
     if ((block.userSelectedPort == null) && (block.port >= 0) && (block.stack != null) && !block.stack.isDisplayStack) {
       block.userSelectedPort = block.port
-      console.log("updatePort " + ((block.stack != null) ? !block.stack.isDisplayStack : false) + " set user port to " + block.userSelectedPort)
+      //console.log("updatePort " + ((block.stack != null) ? !block.stack.isDisplayStack : false) + " set user port to " + block.userSelectedPort)
     }
     block.updateActive()
   }
 }
 HL_Utils.findPorts = function(block) {
   const blockOnCanvas = ((block.stack != null) ? !block.stack.isDisplayStack : false)
-  console.log("findPorts for " + block.constructor.name + " " + block.portType + " " + blockOnCanvas)
+  //console.log("findPorts for " + block.constructor.name + " " + block.portType + " " + blockOnCanvas)
   let device = DeviceHatchling.getManager().getDevice(0);
   if (block.hlButton != null && device != null) {
     /*if (block.hlButton.values[0] == HL_Utils.unknownPort) {
@@ -84,7 +84,7 @@ HL_Utils.findPorts = function(block) {
     }*/
 
     let ports = device.getPortsByType(block.portType)
-    console.log("findPorts " + blockOnCanvas + " found: " + ports)
+    //console.log("findPorts " + blockOnCanvas + " found: " + ports)
     if (ports.length >= 1) {
       let p = ports[0]
       if (ports.length > 1) {
@@ -92,7 +92,7 @@ HL_Utils.findPorts = function(block) {
         block.shouldShowPortsPopup = true
 
         if (block.userSelectedPort != null) {
-          console.log("findPorts " + blockOnCanvas + " userSelectedPort == " + block.userSelectedPort)
+          //console.log("findPorts " + blockOnCanvas + " userSelectedPort == " + block.userSelectedPort)
           let index = ports.indexOf(block.userSelectedPort)
           if (index > 0) { //we have already set to index zero above
             p = ports[index]
@@ -100,7 +100,7 @@ HL_Utils.findPorts = function(block) {
         }
       }
 
-      console.log("findPorts " + blockOnCanvas + " using port " + p)
+      //console.log("findPorts " + blockOnCanvas + " using port " + p)
       block.hlButton.updateValue(HL_Utils.portNames[p], 0)
       
     }
@@ -262,7 +262,7 @@ HL_Utils.createXml = function(block, xmlDoc) {
 HL_Utils.importXml = function(blockNode) {
   const type = XmlWriter.getAttribute(blockNode, "type");
   const userSelectedPort = parseInt(XmlWriter.getAttribute(blockNode, "userPort"))
-  console.log("*** found user true port " + userSelectedPort)
+  //console.log("*** found user true port " + userSelectedPort)
   let block = new window[type](0, 0, userSelectedPort)
   block.copyFromXml(blockNode)
   return block
@@ -276,7 +276,7 @@ function B_HLOutputBase(x, y, category, outputType, portType, userSelectedPort) 
   this.portType = portType
   this.userSelectedPort = userSelectedPort
   //if ((this.stack != null) && !this.stack.isDisplayStack) {
-    console.log("*** Set user port true for " + this.constructor.name + " to " + this.userSelectedPort)
+    //console.log("*** Set user port true for " + this.constructor.name + " to " + this.userSelectedPort)
   //}
   CommandBlock.call(this, x, y, category);
 
@@ -628,7 +628,6 @@ B_HL_SN_L1.prototype.argList = function() {
 }*/
 
 function B_HL_SN_L1_Red(x, y, userSelectedPort) {
-  console.log("call SN RED with true user port " + userSelectedPort)
   B_HL_SN_L1.call(this, x, y, "#FF0000", userSelectedPort)
 }
 B_HL_SN_L1_Red.prototype = Object.create(B_HL_SN_L1.prototype);

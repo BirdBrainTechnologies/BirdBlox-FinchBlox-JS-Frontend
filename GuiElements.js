@@ -392,8 +392,6 @@ GuiElements.create.shadow = function(id, color, opacity) {
   shadow.appendChild(dropShadow)
 
   GuiElements.defs.appendChild(shadow)
-  console.log("*** added a shadow to the defs")
-  console.log(GuiElements.defs)
 }
 /**
  * Creates an SVG path element and returns it.

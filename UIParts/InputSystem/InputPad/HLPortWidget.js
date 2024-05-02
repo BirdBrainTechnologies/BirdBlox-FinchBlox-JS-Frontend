@@ -119,7 +119,6 @@ InputWidget.HLPortWidget.prototype.show = function(x, y, parentGroup, overlay, s
 }
 
 InputWidget.HLPortWidget.prototype.updatePorts = function() {
-  console.log("**** update ports this.value=" + this.value)
   let portStates = [0, 0, 0, 0, 0, 0]
 
 	let device = DeviceHatchling.getManager().getDevice(0);
@@ -173,7 +172,6 @@ InputWidget.HLPortWidget.prototype.updatePorts = function() {
   //If we are showing this popup as though there is no accessory plugged in
   // and the appropriate accessory was just added, we can close the popup
   if (this.plug != null && this.value != HL_Utils.noPort) {
-    console.log("**** about to close popup " + this.value)
     setTimeout( function() { 
       this.parent.closeInputSystem() 
     }.bind(this), 1000 )

@@ -721,7 +721,6 @@ Tab.prototype.updateArrowsShift = function() {
  * For Hatchling - Outline all code on this tab in gray or red. Used when saving or deleting files.
  */
 Tab.prototype.outlineCode = function(inRed) {
-  console.log("*** outlineCode " + this.stackList.length)
   if (this.outlineVisible) { return }
   const color = inRed ? Colors.ballyRed : Colors.ballyGray
   this.outlineGroup = GuiElements.create.group(0, 0)

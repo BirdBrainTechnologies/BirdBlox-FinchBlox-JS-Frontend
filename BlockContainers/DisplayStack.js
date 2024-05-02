@@ -46,7 +46,7 @@ function DisplayStack(firstBlock, group, category) {
  */
 DisplayStack.prototype.updateGlowForMicroBlocks = function() {
   let chunkID = mbRuntime.lookupChunkID(this.firstBlock)
-  console.log("update called for chunkID " + chunkID)
+  //console.log("update called for chunkID " + chunkID)
   if (mbRuntime.chunkRunning[chunkID]) {
     this.firstBlock.glow() 
   } else {

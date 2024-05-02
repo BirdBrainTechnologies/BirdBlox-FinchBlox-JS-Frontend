@@ -469,7 +469,6 @@ BlockGraphics.buildPath.commandTopHalf = function(x, y, width, height) {
  * @return {string}
  */
 BlockGraphics.buildPath.highlightCommand = function(x, y, height) {
-  console.log("*** highlightCommand " + x + " " + y + " " + height)
   let path = "";
   if (FinchBlox) {
     var lineLength = 5;

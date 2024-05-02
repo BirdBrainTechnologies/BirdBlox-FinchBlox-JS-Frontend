@@ -41,12 +41,8 @@ DiscoverDialog.prototype.show = function() {
   const DD = DiscoverDialog;
   if (Hatchling && GuiElements.isPWA) {
     let device = DeviceHatchling.getManager().getDevice(0)
-    console.log("*** DiscoverDialog show " + this.rowCount)
-    console.log(device)
-    console.log(this.discoveredDevices)
     if (device != null && device.connected) {
       //Show the connected device - user can scan if they disconnect
-      console.log("***** skip the scan")
       this.connectedDevices = [device]
       this.discoveredDevices = []
       this.rowCount = 1
@@ -55,14 +51,12 @@ DiscoverDialog.prototype.show = function() {
       return
     } else if (this.discoveredDevices.length == 0 && this.hasBeenShown) {
       //No devices. Show new scan button
-      console.log("*** display new scan button")
       this.connectedDevices = []
       this.rowCount = 1
       RowDialog.prototype.show.call(this);
       return
     } else if (this.discoveredDevices.length == 1) {
       //This is a weird case where the back end sends the device you are connecting before it is connected.
-      console.log("*** one discovered device")
       RowDialog.prototype.show.call(this);
       return
     }
@@ -77,7 +71,6 @@ DiscoverDialog.prototype.show = function() {
  * Starts the scan for devices and registers the dialog to receive updates when devices are detected
  */
 DiscoverDialog.prototype.discoverDevices = function() {
-  console.log("*** DiscoverDialog discoverDevices")
   let me = this;
   // Start the discover, and if the DeviceManager wants to know if it should ever restart a scan...
   this.deviceClass.getManager().startDiscover(function() {
@@ -196,13 +189,11 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
   }
   const me = this;
   if (device.connected) {
-    console.log("*** setting disconnect callback")
     button.setCallbackFunction(function() {
       //me.closeDialog()
       device.disconnect()
     }, true)
   } else {
-    console.log("*** setting selectDevice callback")
     button.setCallbackFunction(function() {
       me.selectDevice(device);
     }, true);

@@ -348,7 +348,6 @@ RowDialog.prototype.createCenteredBn = function(y, entry) {
  * @return {SmoothScrollBox}
  */
 RowDialog.prototype.createScrollBox = function() {
-  console.log("*** " + this.scrollBoxWidth + " " + this.scrollBoxHeight + " " + this.rowCount)
   if (this.rowCount === 0) return null;
   let x = this.x + this.scrollBoxX;
   let y = this.y + this.scrollBoxY;
@@ -447,7 +446,6 @@ RowDialog.prototype.hide = function() {
  * @param {number} rowCount - The new number of rows
  */
 RowDialog.prototype.reloadRows = function(rowCount) {
-  console.log("*** reloadRows " + rowCount)
   this.rowCount = rowCount;
   if (this.visible) {
     let scroll = this.getScroll();

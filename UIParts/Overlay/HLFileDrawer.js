@@ -461,7 +461,6 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 	const availableHeight = this.menuH - this.menuW/6
 	this.contentWidth = this.menuW2 - this.menuW/10
 	this.hintText = "";
-	console.log("*** contentWidth " + this.contentWidth)
 
 	//const scrollBoxX = GuiElements.width - this.menuW2 + this.menuW/24 //GuiElements.width - this.menuW + this.menuGroupX
 	//const scrollBoxX2 = GuiElements.width - this.menuW2 + this.menuGroupX
@@ -504,7 +503,6 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup, embed
 	const displayName = fileName.slice(0, -2)
 	const level = fileName.slice(-1)
 	const isOpen = fileName == SaveManager.fileName
-	console.log("*** createRow width=" + width)
 
 	const bgColor = (isOpen || embed) ? Colors.ballyBrandBlueLight : Colors.white
 	const outlineColor = (isOpen || embed) ? Colors.ballyBrandBlue : null
