@@ -1430,19 +1430,24 @@ GuiElements.animate = {}
  * animation. Applies a transform that stays in place until the animation 
  * is removed.
  * @param {Element} element - element to move
- * @param {number} x - x coordinate of destination
- * @param {number} y - y coordinate of destination
+ * @param {number} x2 - x coordinate of destination
+ * @param {number} y2 - y coordinate of destination
  * @param {number} duration - duration of animation in seconds 
+ * @param {boolean} useEasing - (Optional) true if the motion should be eased
+ * @param {number} x1 - (Optional) starting x coordinate
+ * @param {number} y1 - (Optional) starting y coordinate
  */
-GuiElements.animate.move = function(element, x, y, duration, useEasing) {
+GuiElements.animate.move = function(element, x2, y2, duration, useEasing, x1, y1) {
+  if (x1 == null) { x1 = 0 }
+  if (y1 == null) { y1 = 0 }
   let animate = document.createElementNS("http://www.w3.org/2000/svg", 'animateTransform');
   animate.setAttributeNS(null, "attributeName", "transform");
   if (useEasing) {
     animate.setAttributeNS(null, "calcMode", "spline")
     animate.setAttributeNS(null, "keySplines", "0.9 0.1 0.1 0.9")
-    animate.setAttributeNS(null, "values", "0 0;" + x + " " + y)
+    animate.setAttributeNS(null, "values", x1 + " " + y1 + ";" + x2 + " " + y2)
   } else {
-    animate.setAttributeNS(null, "to", x + " " + y) 
+    animate.setAttributeNS(null, "to", x2 + " " + y2) 
   }
   animate.setAttributeNS(null, "dur", duration + "s");
   animate.setAttributeNS(null, "repeatCount", "1");

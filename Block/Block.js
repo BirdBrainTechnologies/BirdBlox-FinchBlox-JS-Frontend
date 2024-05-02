@@ -69,6 +69,10 @@ function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Comm
   this.comment = null;
   this.id = Block.count;
   Block.count++;
+
+  //For Hatchling
+  this.distanceDisplaced = 0
+  this.animations = []
 }
 
 /**
@@ -828,7 +832,7 @@ Block.prototype.findBestFit = function(moveManager) {
 /**
  * Adds an indicator showing that the moving BlockStack will snap onto this Block if released.
  * The indicator is a different color/shape depending on the Block's type and if it is running.
- * If it is a Comment snaping onto a block instead of a BlockStack, the highlight is modified.
+ * If it is a Comment snapping onto a block instead of a BlockStack, the highlight is modified.
  * @param {boolean} forComment  - True if it is a Comment that will snap on
  */
 Block.prototype.highlight = function(forComment) {
@@ -844,6 +848,45 @@ Block.prototype.highlight = function(forComment) {
     DebugOptions.throw("Attempt to highlight block that has bottomOpen = false");
   }
 };
+
+/**
+ * For Hatchling - slide blocks temporarily out of the way when highlighting 
+ * the block before.
+ */
+Block.prototype.tempSlide = function(distance) {
+  if (this.distanceDisplaced == distance) { return }
+  if (this.distanceDisplaced != 0 && this.distanceDisplaced != distance) {
+    console.error("Trying to slide blocks by two different distances: " + this.distanceDisplaced + " and " + distance)
+  }
+  if (this.animations.length != 0) {
+    for (let i = 0; i < this.animations.length; i++) {
+      this.animations[i].remove()
+    }
+    this.animations = []
+  }
+  this.distanceDisplaced = distance
+  this.animations.push(GuiElements.animate.move(this.group, this.x + distance, 0, 0.1, true, this.x))
+  if (this.nextBlock != null) {
+    this.nextBlock.tempSlide(distance)
+  }
+}
+
+Block.prototype.unSlide = function(animate) {
+  if (animate && this.distanceDisplaced != 0) {
+    this.animations.push(GuiElements.animate.move(this.group, this.x, 0, 0.1, true, this.x + this.distanceDisplaced))
+  }
+  this.distanceDisplaced = 0
+  setTimeout(function() {
+    if (this.distanceDisplaced != 0) { return }
+    for (let i = 0; i < this.animations.length; i++) {
+      this.animations[i].remove()
+    }
+    this.animations = []
+  }.bind(this), 500)
+  if (this.nextBlock != null) {
+    this.nextBlock.unSlide(animate)
+  }
+}
 
 /**
  * Attaches the provided Block (and all subsequent Block's) to the bottom of this Block. Then runs updateDim();
@@ -900,6 +943,7 @@ Block.prototype.snap = function(block) {
 
   if (Hatchling) { 
     block.land()
+    if (lowerBlock != null) { lowerBlock.unSlide(false) }
     HL_Utils.showPortsPopup(block) 
     if (this.stack != null) { mbRuntime.saveChunk(this.stack.firstBlock) }
   }

@@ -64,24 +64,30 @@ HLLevelSwitch.prototype.press = function() {
 		x = -this.dcx
 	}
 	this.animationInProgress = true
-	let m = 0
 
 	LevelManager.setLevel(level); //will call setSwitch
 	LevelManager.loadLevelSavePoint();
 
 	//Create a temporary group to hold both old and new programs. This allows for the animation of switching files.
 	this.tempG = GuiElements.create.group(0, 0, GuiElements.layers.activeTab)
-	const clipPathOldTab = GuiElements.clip(m, m, GuiElements.width-2*m, GuiElements.height-2*m, this.oldTab.mainG)
+
+	//Add the current tab
+	const otX = this.oldTab.absToRelX(0) //-this.oldTab.scrollX
+	const otY = this.oldTab.absToRelY(0) //-this.oldTab.scrollY
+	const otW = GuiElements.width / this.oldTab.zoomFactor
+	const otH = GuiElements.height / this.oldTab.zoomFactor
+	const clipPathOldTab = GuiElements.clip(otX, otY, otW, otH, this.oldTab.mainG)
 	this.tempG.appendChild(this.oldTab.mainG)
 
+	//Add the new tab off screen
 	const newTabX = (level == 1) ? GuiElements.width : -GuiElements.width 
-	const clipPathNewTab = GuiElements.clip(m, m, GuiElements.width-2*m, GuiElements.height-2*m, TabManager.activeTab.mainG)
+	const clipPathNewTab = GuiElements.clip(0, 0, GuiElements.width, GuiElements.height, TabManager.activeTab.mainG)
 	GuiElements.move.group(TabManager.activeTab.mainG, newTabX, 0)
 	this.tempG.appendChild(TabManager.activeTab.mainG)
 	
 	const oldTabX = (level == 1) ? -GuiElements.width : GuiElements.width
     
-    const rect = GuiElements.draw.rect(m, m, GuiElements.width-2*m, GuiElements.height-2*m, "none")
+    const rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height, "none")
     GuiElements.update.stroke(rect, Colors.ballyGray, 1)
     this.tempG.appendChild(rect)
 

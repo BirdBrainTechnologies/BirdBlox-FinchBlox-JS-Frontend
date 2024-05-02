@@ -8095,19 +8095,24 @@ GuiElements.animate = {}
  * animation. Applies a transform that stays in place until the animation 
  * is removed.
  * @param {Element} element - element to move
- * @param {number} x - x coordinate of destination
- * @param {number} y - y coordinate of destination
+ * @param {number} x2 - x coordinate of destination
+ * @param {number} y2 - y coordinate of destination
  * @param {number} duration - duration of animation in seconds 
+ * @param {boolean} useEasing - (Optional) true if the motion should be eased
+ * @param {number} x1 - (Optional) starting x coordinate
+ * @param {number} y1 - (Optional) starting y coordinate
  */
-GuiElements.animate.move = function(element, x, y, duration, useEasing) {
+GuiElements.animate.move = function(element, x2, y2, duration, useEasing, x1, y1) {
+  if (x1 == null) { x1 = 0 }
+  if (y1 == null) { y1 = 0 }
   var animate = document.createElementNS("http://www.w3.org/2000/svg", 'animateTransform');
   animate.setAttributeNS(null, "attributeName", "transform");
   if (useEasing) {
     animate.setAttributeNS(null, "calcMode", "spline")
     animate.setAttributeNS(null, "keySplines", "0.9 0.1 0.1 0.9")
-    animate.setAttributeNS(null, "values", "0 0;" + x + " " + y)
+    animate.setAttributeNS(null, "values", x1 + " " + y1 + ";" + x2 + " " + y2)
   } else {
-    animate.setAttributeNS(null, "to", x + " " + y) 
+    animate.setAttributeNS(null, "to", x2 + " " + y2) 
   }
   animate.setAttributeNS(null, "dur", duration + "s");
   animate.setAttributeNS(null, "repeatCount", "1");
@@ -16861,24 +16866,30 @@ HLLevelSwitch.prototype.press = function() {
 		x = -this.dcx
 	}
 	this.animationInProgress = true
-	var m = 0
 
 	LevelManager.setLevel(level); //will call setSwitch
 	LevelManager.loadLevelSavePoint();
 
 	//Create a temporary group to hold both old and new programs. This allows for the animation of switching files.
 	this.tempG = GuiElements.create.group(0, 0, GuiElements.layers.activeTab)
-	var clipPathOldTab = GuiElements.clip(m, m, GuiElements.width-2*m, GuiElements.height-2*m, this.oldTab.mainG)
+
+	//Add the current tab
+	var otX = this.oldTab.absToRelX(0) //-this.oldTab.scrollX
+	var otY = this.oldTab.absToRelY(0) //-this.oldTab.scrollY
+	var otW = GuiElements.width / this.oldTab.zoomFactor
+	var otH = GuiElements.height / this.oldTab.zoomFactor
+	var clipPathOldTab = GuiElements.clip(otX, otY, otW, otH, this.oldTab.mainG)
 	this.tempG.appendChild(this.oldTab.mainG)
 
+	//Add the new tab off screen
 	var newTabX = (level == 1) ? GuiElements.width : -GuiElements.width 
-	var clipPathNewTab = GuiElements.clip(m, m, GuiElements.width-2*m, GuiElements.height-2*m, TabManager.activeTab.mainG)
+	var clipPathNewTab = GuiElements.clip(0, 0, GuiElements.width, GuiElements.height, TabManager.activeTab.mainG)
 	GuiElements.move.group(TabManager.activeTab.mainG, newTabX, 0)
 	this.tempG.appendChild(TabManager.activeTab.mainG)
 	
 	var oldTabX = (level == 1) ? -GuiElements.width : GuiElements.width
     
-    var rect = GuiElements.draw.rect(m, m, GuiElements.width-2*m, GuiElements.height-2*m, "none")
+    var rect = GuiElements.draw.rect(0, 0, GuiElements.width, GuiElements.height, "none")
     GuiElements.update.stroke(rect, Colors.ballyGray, 1)
     this.tempG.appendChild(rect)
 
@@ -23738,6 +23749,7 @@ function Highlighter() {
   Highlighter.path = Highlighter.createPath();
   Highlighter.shadowGroup = GuiElements.create.group(0, 0);
   Highlighter.visible = false;
+  Highlighter.currentlyDisplaced = null //For Hatchling, keep track of blocks temporarily moved
 }
 
 /**
@@ -23784,16 +23796,17 @@ Highlighter.highlight = function(x, y, width, height, type, isSlot, isGlowing, i
 
 /**
  * Creates a flat grey version of the stack. Used in FinchBlox instead of a
- * highlight line.
- * @param x
- * @param y
- * @param stack
+ * highlight line. Hatchling makes it just an outline, and slides any following blocks 
+ * out of the way.
+ * @param {Object} fit - The current best fit. May be a BlockStack, a BlockSlot, or a Block.
+ * @param {BlockStack} stack - The moving stack that is looking for a place to snap
  */
 Highlighter.showShadow = function(fit, stack) {
   var myX = 0;
   //var myY = CodeManager.dragAbsToRelX(fit.getAbsY());
   var myY = 0;
   var snapFront = false;
+  var firstDisplaced = null
   if (fit instanceof BlockStack) {
     myY = fit.tab.absToRelY(fit.getAbsY());
     //myX = CodeManager.dragAbsToRelX(fit.getAbsX());
@@ -23804,10 +23817,12 @@ Highlighter.showShadow = function(fit, stack) {
     myY = fit.parent.stack.tab.absToRelY(fit.getAbsY());
     //myX = CodeManager.dragAbsToRelX(fit.getAbsX()) - BlockGraphics.command.fbBumpDepth;
     myX = fit.parent.stack.tab.absToRelX(fit.getAbsX()) - BlockGraphics.command.fbBumpDepth;
+    firstDisplaced = fit.child
   } else {
     //myX = CodeManager.dragAbsToRelX(fit.relToAbsX(fit.width));
     myY = fit.stack.tab.absToRelY(fit.getAbsY());
     myX = fit.stack.tab.absToRelX(fit.relToAbsX(fit.width));
+    firstDisplaced = fit.nextBlock
   }
   var color = Hatchling ? Colors.ballyGrayDark : Colors.iron;
 
@@ -23832,6 +23847,17 @@ Highlighter.showShadow = function(fit, stack) {
     myX -= shadowW + BlockGraphics.command.fbBumpDepth;
   }
 
+  if (Hatchling) {
+    if (Highlighter.currentlyDisplaced != null && 
+      firstDisplaced != Highlighter.currentlyDisplaced) {
+      Highlighter.currentlyDisplaced.unSlide(true)
+    }
+    Highlighter.currentlyDisplaced = firstDisplaced
+    if (firstDisplaced != null) {
+      firstDisplaced.tempSlide(shadowW)
+    }
+  }
+
   GuiElements.move.group(this.shadowGroup, myX, myY);
 
   if (!Highlighter.visible) {
@@ -23854,6 +23880,10 @@ Highlighter.hide = function() {
       this.shadowGroup.removeChild(this.shadowGroup.firstChild);
     }
     Highlighter.shadowGroup.remove();
+    if (Highlighter.currentlyDisplaced != null) {
+      Highlighter.currentlyDisplaced.unSlide(true)
+      Highlighter.currentlyDisplaced = null
+    }
     Highlighter.visible = false;
   }
 };
@@ -32499,6 +32529,10 @@ function Block(type, returnType, x, y, category, autoExecute) { //Type: 0 = Comm
   this.comment = null;
   this.id = Block.count;
   Block.count++;
+
+  //For Hatchling
+  this.distanceDisplaced = 0
+  this.animations = []
 }
 
 /**
@@ -33258,7 +33292,7 @@ Block.prototype.findBestFit = function(moveManager) {
 /**
  * Adds an indicator showing that the moving BlockStack will snap onto this Block if released.
  * The indicator is a different color/shape depending on the Block's type and if it is running.
- * If it is a Comment snaping onto a block instead of a BlockStack, the highlight is modified.
+ * If it is a Comment snapping onto a block instead of a BlockStack, the highlight is modified.
  * @param {boolean} forComment  - True if it is a Comment that will snap on
  */
 Block.prototype.highlight = function(forComment) {
@@ -33274,6 +33308,45 @@ Block.prototype.highlight = function(forComment) {
     DebugOptions.throw("Attempt to highlight block that has bottomOpen = false");
   }
 };
+
+/**
+ * For Hatchling - slide blocks temporarily out of the way when highlighting 
+ * the block before.
+ */
+Block.prototype.tempSlide = function(distance) {
+  if (this.distanceDisplaced == distance) { return }
+  if (this.distanceDisplaced != 0 && this.distanceDisplaced != distance) {
+    console.error("Trying to slide blocks by two different distances: " + this.distanceDisplaced + " and " + distance)
+  }
+  if (this.animations.length != 0) {
+    for (var i = 0; i < this.animations.length; i++) {
+      this.animations[i].remove()
+    }
+    this.animations = []
+  }
+  this.distanceDisplaced = distance
+  this.animations.push(GuiElements.animate.move(this.group, this.x + distance, 0, 0.1, true, this.x))
+  if (this.nextBlock != null) {
+    this.nextBlock.tempSlide(distance)
+  }
+}
+
+Block.prototype.unSlide = function(animate) {
+  if (animate && this.distanceDisplaced != 0) {
+    this.animations.push(GuiElements.animate.move(this.group, this.x, 0, 0.1, true, this.x + this.distanceDisplaced))
+  }
+  this.distanceDisplaced = 0
+  setTimeout(function() {
+    if (this.distanceDisplaced != 0) { return }
+    for (var i = 0; i < this.animations.length; i++) {
+      this.animations[i].remove()
+    }
+    this.animations = []
+  }.bind(this), 500)
+  if (this.nextBlock != null) {
+    this.nextBlock.unSlide(animate)
+  }
+}
 
 /**
  * Attaches the provided Block (and all subsequent Block's) to the bottom of this Block. Then runs updateDim();
@@ -33330,6 +33403,7 @@ Block.prototype.snap = function(block) {
 
   if (Hatchling) { 
     block.land()
+    if (lowerBlock != null) { lowerBlock.unSlide(false) }
     HL_Utils.showPortsPopup(block) 
     if (this.stack != null) { mbRuntime.saveChunk(this.stack.firstBlock) }
   }
@@ -51349,7 +51423,7 @@ PrettyPrinter.prototype.printValue = function(block) {
       this.printCmd(block)
       this.gen.closeParen()
     //}
-  } else if (block instanceof CommandBlock) {
+  } else if (block instanceof CommandBlock || block instanceof LoopBlock) {
     this.printCmdList(block)
   } else if (typeof block == 'string') {
     this.gen.const(block)//(printString block)

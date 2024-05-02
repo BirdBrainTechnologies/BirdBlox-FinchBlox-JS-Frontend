@@ -182,7 +182,7 @@ PrettyPrinter.prototype.printValue = function(block) {
       this.printCmd(block)
       this.gen.closeParen()
     //}
-  } else if (block instanceof CommandBlock) {
+  } else if (block instanceof CommandBlock || block instanceof LoopBlock) {
     this.printCmdList(block)
   } else if (typeof block == 'string') {
     this.gen.const(block)//(printString block)

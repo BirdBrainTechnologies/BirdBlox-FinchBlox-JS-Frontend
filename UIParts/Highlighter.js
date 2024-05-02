@@ -6,6 +6,7 @@ function Highlighter() {
   Highlighter.path = Highlighter.createPath();
   Highlighter.shadowGroup = GuiElements.create.group(0, 0);
   Highlighter.visible = false;
+  Highlighter.currentlyDisplaced = null //For Hatchling, keep track of blocks temporarily moved
 }
 
 /**
@@ -52,16 +53,17 @@ Highlighter.highlight = function(x, y, width, height, type, isSlot, isGlowing, i
 
 /**
  * Creates a flat grey version of the stack. Used in FinchBlox instead of a
- * highlight line.
- * @param x
- * @param y
- * @param stack
+ * highlight line. Hatchling makes it just an outline, and slides any following blocks 
+ * out of the way.
+ * @param {Object} fit - The current best fit. May be a BlockStack, a BlockSlot, or a Block.
+ * @param {BlockStack} stack - The moving stack that is looking for a place to snap
  */
 Highlighter.showShadow = function(fit, stack) {
   let myX = 0;
   //let myY = CodeManager.dragAbsToRelX(fit.getAbsY());
   let myY = 0;
   let snapFront = false;
+  let firstDisplaced = null
   if (fit instanceof BlockStack) {
     myY = fit.tab.absToRelY(fit.getAbsY());
     //myX = CodeManager.dragAbsToRelX(fit.getAbsX());
@@ -72,10 +74,12 @@ Highlighter.showShadow = function(fit, stack) {
     myY = fit.parent.stack.tab.absToRelY(fit.getAbsY());
     //myX = CodeManager.dragAbsToRelX(fit.getAbsX()) - BlockGraphics.command.fbBumpDepth;
     myX = fit.parent.stack.tab.absToRelX(fit.getAbsX()) - BlockGraphics.command.fbBumpDepth;
+    firstDisplaced = fit.child
   } else {
     //myX = CodeManager.dragAbsToRelX(fit.relToAbsX(fit.width));
     myY = fit.stack.tab.absToRelY(fit.getAbsY());
     myX = fit.stack.tab.absToRelX(fit.relToAbsX(fit.width));
+    firstDisplaced = fit.nextBlock
   }
   const color = Hatchling ? Colors.ballyGrayDark : Colors.iron;
 
@@ -100,6 +104,17 @@ Highlighter.showShadow = function(fit, stack) {
     myX -= shadowW + BlockGraphics.command.fbBumpDepth;
   }
 
+  if (Hatchling) {
+    if (Highlighter.currentlyDisplaced != null && 
+      firstDisplaced != Highlighter.currentlyDisplaced) {
+      Highlighter.currentlyDisplaced.unSlide(true)
+    }
+    Highlighter.currentlyDisplaced = firstDisplaced
+    if (firstDisplaced != null) {
+      firstDisplaced.tempSlide(shadowW)
+    }
+  }
+
   GuiElements.move.group(this.shadowGroup, myX, myY);
 
   if (!Highlighter.visible) {
@@ -122,6 +137,10 @@ Highlighter.hide = function() {
       this.shadowGroup.removeChild(this.shadowGroup.firstChild);
     }
     Highlighter.shadowGroup.remove();
+    if (Highlighter.currentlyDisplaced != null) {
+      Highlighter.currentlyDisplaced.unSlide(true)
+      Highlighter.currentlyDisplaced = null
+    }
     Highlighter.visible = false;
   }
 };
