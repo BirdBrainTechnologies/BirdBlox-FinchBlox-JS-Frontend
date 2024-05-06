@@ -6,8 +6,16 @@
  * controls the Blocks inside it and the CategoryBN that brings it into the foreground.
  */
 function BlockPalette() {
+
+  //Hatchling 
+  BlockPalette.currentLevel = 1
+
+
   BlockPalette.categories = []; // List of categories
   BlockPalette.selectedCat = null; // category in the foreground
+  if (Hatchling) {
+    BlockPalette.selectedCat2 = null //For Hatchling, there will be a cat selected for each level
+  }
   BlockPalette.createCatBg(); // Black bar along left side of screen
   BlockPalette.createPalBg(); // Dark gray rectangle behind the CategoryBNs
   BlockPalette.createCategories();
@@ -88,8 +96,10 @@ BlockPalette.updateZoom = function() {
   if (FinchBlox) {
     if (Hatchling) { 
       const CBN = CategoryBN
+      GuiElements.update.rect(BP.palRect2, BP.x - GuiElements.width, BP.y, BP.width, BP.height);
       GuiElements.move.group(GuiElements.layers.catBg, (GuiElements.width - (CBN.width * 5))/2, BP.y - CBN.height);
       BP.updateOutline()
+      console.log("*** updateZoom " + BP.catX + " " + BP.catY)
     } else {
       BP.updatePath(); 
     }
@@ -120,10 +130,10 @@ BlockPalette.createCatBg = function() {
       const widthL1 = CBN.width * 3 // 3 categories in level 1
       const widthL2 = CBN.width * 5 // 5 categories in level 2
       BP.level1CatRect = GuiElements.draw.tab(CBN.width, 0, widthL1, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
-      BP.level2CatRect = GuiElements.draw.tab(0, 0, widthL2, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
+      BP.level2CatRect = GuiElements.draw.tab(-GuiElements.width, 0, widthL2, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
       GuiElements.layers.catBg.appendChild(BP.level1CatRect);
       GuiElements.layers.catBg.appendChild(BP.level2CatRect);
-      GuiElements.update.opacity(BlockPalette.level2CatRect, 0)
+      //GuiElements.update.opacity(BlockPalette.level2CatRect, 0)
       GuiElements.move.group(GuiElements.layers.catBg, BP.catX, BP.catY);
     }
   }
@@ -145,13 +155,18 @@ BlockPalette.createPalBg = function() {
   BP.palRect = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
   if (Hatchling) {
     BP.palRect = GuiElements.draw.rect(BP.x, BP.y, BP.width, BP.height, BP.bg, BP.hl, BP.hl)
+    BP.palRect2 = GuiElements.draw.rect(BP.x - GuiElements.width, BP.y, BP.width, BP.height, BP.bg, BP.hl, BP.hl)
+    GuiElements.layers.paletteBG.appendChild(BP.palRect2)
   }
   GuiElements.layers.paletteBG.appendChild(BP.palRect);
   if (FinchBlox) {
     
     if (Hatchling) {
-      BP.shape = GuiElements.create.path(GuiElements.layers.titlebar);
-      BP.shape.setAttributeNS(null, "fill", "none");
+      BP.shape = GuiElements.create.group(0, 0, GuiElements.layers.titlebar)
+      BP.outline1 = GuiElements.create.path(BP.shape);
+      BP.outline1.setAttributeNS(null, "fill", "none");
+      BP.outline2 = GuiElements.create.path(BP.shape);
+      BP.outline2.setAttributeNS(null, "fill", "none");
     } else {
       BP.shape = GuiElements.create.path(GuiElements.layers.paletteBG);
       BP.shape.setAttributeNS(null, "fill", BP.bg);
@@ -167,32 +182,45 @@ BlockPalette.createPalBg = function() {
   }
 };
 
+/**
+ * Hatchling only
+ */
 BlockPalette.updateOutline = function() {
-  let selectedCatButton = BlockPalette.selectedCat.button
+  //let selectedCatButton = BlockPalette.selectedCat.button
   const BP = BlockPalette;
   const CBN = CategoryBN
-  const color = Colors.getColor(selectedCatButton.catId)
+  //const color = Colors.getColor(selectedCatButton.catId)
   const bnR = CBN.cornerRadius
 
-  var path = "m " + BP.x + "," + GuiElements.height;
-  path += " v " + (2*BP.hl - BP.height);
-  path += " a " + BP.hl + " " + BP.hl + " 0 0 1 " + BP.hl + " " + (-BP.hl);
-  path += " h " + ((GuiElements.width-BlockPalette.catW)/ 2 + selectedCatButton.x - bnR - 3*BP.hl);
-  path += " a " + bnR + " " + bnR + " 0 0 0 " + bnR + " " + (-bnR);
-  path += " v " + (2*bnR - CBN.height);
-  path += " a " + bnR + " " + bnR + " 0 0 1 " + bnR + " " + (-bnR);
-  path += " h " + (CBN.width - 2*bnR);
-  path += " a " + bnR + " " + bnR + " 0 0 1 " + bnR + " " + bnR;
-  path += " v " + (CBN.height - 2*bnR);
-  path += " a " + bnR + " " + bnR + " 0 0 0 " + bnR + " " + bnR;
-  path += " h " + ((GuiElements.width-BlockPalette.catW)/ 2 + (BlockPalette.catW - selectedCatButton.x - CBN.width) - bnR - 3*BP.hl);
-  path += " a " + BP.hl + " " + BP.hl + " 0 0 1 " + BP.hl + " " + BP.hl;
-  path += " v " + (BP.height - 2*BP.hl);
+  function getPath(bn, offset) {
+    var path = "m " + (BP.x - offset) + "," + GuiElements.height; //start at lower left corner
+    path += " v " + (2*BP.hl - BP.height);
+    path += " a " + BP.hl + " " + BP.hl + " 0 0 1 " + BP.hl + " " + (-BP.hl);
+    path += " h " + ((GuiElements.width-BP.catW)/ 2 + bn.x - bnR - 3*BP.hl + offset);
+    path += " a " + bnR + " " + bnR + " 0 0 0 " + bnR + " " + (-bnR);
+    path += " v " + (2*bnR - CBN.height);
+    path += " a " + bnR + " " + bnR + " 0 0 1 " + bnR + " " + (-bnR);
+    path += " h " + (CBN.width - 2*bnR);
+    path += " a " + bnR + " " + bnR + " 0 0 1 " + bnR + " " + bnR;
+    path += " v " + (CBN.height - 2*bnR);
+    path += " a " + bnR + " " + bnR + " 0 0 0 " + bnR + " " + bnR;
+    path += " h " + ((GuiElements.width-BP.catW)/ 2 + (BP.catW - bn.x - CBN.width) - bnR - 3*BP.hl - offset);
+    path += " a " + BP.hl + " " + BP.hl + " 0 0 1 " + BP.hl + " " + BP.hl;
+    path += " v " + (BP.height - 2*BP.hl);
+    return path
+  }
 
-  BP.shape.setAttributeNS(null, "d", path);
-  GuiElements.update.stroke(BP.shape, color, 2)
+  BP.outline1.setAttributeNS(null, "d", getPath(BP.selectedCat.button, 0))
+  GuiElements.update.stroke(BP.outline1, Colors.getColor(BP.selectedCat.id), 2)
+  if (BP.selectedCat2 != null) {
+    BP.outline2.setAttributeNS(null, "d", getPath(BP.selectedCat2.button, GuiElements.width))
+    GuiElements.update.stroke(BP.outline2, Colors.getColor(BP.selectedCat2.id), 2)
+  }
 }
 
+/**
+ * FinchBlox only (not used in Hatchling)
+ */
 BlockPalette.updatePath = function() {
   let BP = BlockPalette;
   const shapeH = 20;
@@ -240,10 +268,17 @@ BlockPalette.updatePath = function(pathE) {
   pathE.setAttributeNS(null, "d", path);
 }*/
 BlockPalette.updatePaletteColor = function(color) {
-  GuiElements.update.color(BlockPalette.palRect, color);
-  //GuiElements.update.color(BlockPalette.leftShape, color);
-  //GuiElements.update.color(BlockPalette.rightShape, color);
-  if (!Hatchling) { GuiElements.update.color(BlockPalette.shape, color); }
+  console.log("*** updatePaletteColor " + color + " " + BlockPalette.currentLevel)
+  if (Hatchling) { 
+    if (BlockPalette.currentLevel == 1) {
+      GuiElements.update.color(BlockPalette.palRect, color);
+    } else {
+      GuiElements.update.color(BlockPalette.palRect2, color);
+    }
+  } else {
+    GuiElements.update.color(BlockPalette.palRect, color);
+    GuiElements.update.color(BlockPalette.shape, color); 
+  }
 }
 
 /**
@@ -264,8 +299,8 @@ BlockPalette.createCategories = function() {
       BlockPalette.categories.push(currentCat);
       if (i == 2) { //&& !Hatchling) {
         if (Hatchling) {
-          //5 level 2 categories
-          currentX = BlockPalette.catW / 2 - 2.5 * CategoryBN.width - 2 * CategoryBN.hMargin;
+          //5 level 2 categories, offset to the left
+          currentX = BlockPalette.catW / 2 - 2.5 * CategoryBN.width - 2 * CategoryBN.hMargin - GuiElements.width;
         } else {
           //3 level 2 categories
           currentX = BlockPalette.catW / 2 - 1.5 * CategoryBN.width - CategoryBN.hMargin;
@@ -323,6 +358,10 @@ BlockPalette.getCategory = function(id) {
  */
 BlockPalette.selectFirstCat = function() {
   BlockPalette.categories[0].select();
+  if (Hatchling) {
+    BlockPalette.categories[3].select()
+    GuiElements.update.color(BlockPalette.palRect2, Colors.blockPalette[BlockPalette.categories[3].id]);
+  }
 };
 
 /**
@@ -341,6 +380,7 @@ BlockPalette.isStackOverPalette = function(x, y) {
  * Makes a trash can icon appear over the Palette to indicate that the Blocks being dragged will be deleted
  */
 BlockPalette.showTrash = function() {
+  console.log("*** showTrash")
   let BP = BlockPalette;
   // If the trash is not visible
   if (!BP.trash) {
@@ -440,21 +480,37 @@ BlockPalette.refresh = function() {
  * For FinchBlox. Shows/hides appropriate categories for selected level.
  */
 BlockPalette.setLevel = function() {
-  BlockPalette.categories.forEach(function(category) {
+  const BP = BlockPalette;
+
+  if (Hatchling) {
+    if (BP.currentLevel != LevelManager.currentLevel) {
+      const offsetTo = (LevelManager.currentLevel == 2) ? GuiElements.width : 0 
+      const offsetFrom = (LevelManager.currentLevel == 1) ? GuiElements.width : 0
+      console.log("*** animating " + offsetTo + " " + offsetFrom)
+      GuiElements.animate.move(GuiElements.layers.catBg, BP.catX + offsetTo, BP.catY, 1, true, BP.catX + offsetFrom, BP.catY)
+      GuiElements.animate.move(GuiElements.layers.categories, BP.catX + offsetTo, BP.catY, 1, true, BP.catX + offsetFrom, BP.catY)
+      GuiElements.animate.move(GuiElements.layers.paletteBG, offsetTo, 0, 1, true, offsetFrom, 0)
+      GuiElements.animate.move(BP.shape, offsetTo, 0, 1, true, offsetFrom, 0)
+
+      BP.currentLevel = LevelManager.currentLevel
+    }
+    return
+  }
+
+
+  BP.categories.forEach(function(category) {
     category.button.setHidden();
   })
-  //  switch (LevelMenu.currentLevel){
+
   switch (LevelManager.currentLevel) {
     case 1:
-      BlockPalette.getCategory("motion_1").select();
-      if (Hatchling) { GuiElements.update.opacity(BlockPalette.level2CatRect, 0) }
+      BP.getCategory("motion_1").select();
       break;
     case 2:
-      BlockPalette.getCategory("motion_2").select();
-      if (Hatchling) { GuiElements.update.opacity(BlockPalette.level2CatRect, 1) }
+      BP.getCategory("motion_2").select();
       break;
     case 3:
-      BlockPalette.getCategory("motion_3").select();
+      BP.getCategory("motion_3").select();
       break;
   }
 }

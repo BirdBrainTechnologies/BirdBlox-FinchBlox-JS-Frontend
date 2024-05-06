@@ -28,8 +28,15 @@ function Category(buttonX, buttonY, name, id) {
   }
 
   this.group = GuiElements.create.group(0, 0);
-  this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, BlockPalette.x, BlockPalette.y,
-    BlockPalette.width, BlockPalette.height, 0, 0);
+  if (Hatchling) {
+    this.layer = GuiElements.layers.paletteBG
+    //this.layer.appendChild(this.group)
+    this.x = BlockPalette.x 
+    this.y = BlockPalette.y
+  } else {
+    this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, BlockPalette.x, BlockPalette.y,
+      BlockPalette.width, BlockPalette.height, 0, 0);
+  }
   this.button = new CategoryBN(this.buttonX, this.buttonY, this);
 
   //When the screen is flipped for right to left languages, the categories will
@@ -278,13 +285,42 @@ Category.prototype.trimBottom = function() {
 Category.prototype.centerBlocks = function() {
   this.computeWidth();
   const newX = BlockPalette.x + (BlockPalette.width - this.width) / 2;
-  this.smoothScrollBox.move(newX, BlockPalette.y);
+  if (Hatchling) {
+    const x = (this.level == 2) ? newX - GuiElements.width : newX
+    GuiElements.move.group(this.group, x, BlockPalette.y)
+    this.x = x
+  } else {
+    this.smoothScrollBox.move(newX, BlockPalette.y);
+  }
 }
 
 /**
  * Brings the category to the foreground and marks it as selected in the BlockPalette
  */
 Category.prototype.select = function() {
+  if (Hatchling) {
+    switch(this.level) {
+    case 1:
+      if (BlockPalette.selectedCat === this) { return }
+      if (BlockPalette.selectedCat != null) {
+        BlockPalette.selectedCat.deselect()
+      }
+      BlockPalette.selectedCat = this
+      break;
+    case 2:
+      if (BlockPalette.selectedCat2 === this) { return }
+      if (BlockPalette.selectedCat2 != null) {
+        BlockPalette.selectedCat2.deselect()
+      }
+      BlockPalette.selectedCat2 = this
+      break;
+    default:
+      console.error("Hatchling category should not be level " + this.level)
+    }
+    this.button.select();
+    this.layer.appendChild(this.group)
+    return
+  }
   if (BlockPalette.selectedCat === this) {
     return;
   }
@@ -300,8 +336,17 @@ Category.prototype.select = function() {
  * Removes the category from the foreground
  */
 Category.prototype.deselect = function() {
-  BlockPalette.selectedCat = null;
-  this.smoothScrollBox.hide();
+  if (Hatchling) {
+    if (this.level == 1) {
+      BlockPalette.selectedCat = null;
+    } else {
+      BlockPalette.selectedCat2 = null;
+    }
+    this.group.remove()
+  } else {
+    BlockPalette.selectedCat = null;
+    this.smoothScrollBox.hide();
+  }
   this.button.deselect();
 };
 
@@ -340,7 +385,9 @@ Category.prototype.computeWidth = function() {
 Category.prototype.updateWidth = function() {
   if (!this.finalized) return;
   this.computeWidth();
-  this.smoothScrollBox.setContentDims(this.width, this.height);
+  if (!Hatchling) {
+    this.smoothScrollBox.setContentDims(this.width, this.height);
+  }
 };
 
 /**
@@ -358,7 +405,9 @@ Category.prototype.updateDimSet = function() {
   currentH -= BlockPalette.blockMargin;
   currentH += BlockPalette.mainVMargin;
   this.height = currentH;
-  this.smoothScrollBox.setContentDims(this.width, this.height);
+  if (!Hatchling) {
+    this.smoothScrollBox.setContentDims(this.width, this.height);
+  }
 };
 
 /**
@@ -377,6 +426,9 @@ Category.prototype.markOpen = function() {
  */
 Category.prototype.relToAbsX = function(x) {
   if (!this.finalized) return x;
+  if (Hatchling) {
+    return this.x + x
+  }
   return this.smoothScrollBox.relToAbsX(x);
 };
 /**
@@ -385,6 +437,9 @@ Category.prototype.relToAbsX = function(x) {
  */
 Category.prototype.relToAbsY = function(y) {
   if (!this.finalized) return y;
+  if (Hatchling) {
+    return this.y + y
+  }
   return this.smoothScrollBox.relToAbsY(y);
 };
 /**
@@ -393,6 +448,9 @@ Category.prototype.relToAbsY = function(y) {
  */
 Category.prototype.absToRelX = function(x) {
   if (!this.finalized) return x;
+  if (Hatchling) {
+    return x - this.x
+  }
   return this.smoothScrollBox.absToRelX(x);
 };
 /**
@@ -401,6 +459,9 @@ Category.prototype.absToRelX = function(x) {
  */
 Category.prototype.absToRelY = function(y) {
   if (!this.finalized) return y;
+  if (Hatchling) {
+    return y - this.y
+  }
   return this.smoothScrollBox.absToRelY(y);
 };
 /**
@@ -444,8 +505,16 @@ Category.prototype.updateZoom = function() {
   if (!this.finalized) return;
   if (FinchBlox) {
     let newX = (BlockPalette.width - this.width) / 2;
-    if (Hatchling) { newX += BlockPalette.x }
-    this.smoothScrollBox.move(newX, BlockPalette.y);
+    if (Hatchling) { 
+      newX += BlockPalette.x 
+      if (this.level == 2) {
+        newX -= GuiElements.width
+      }
+      GuiElements.move.group(this.group, newX, BlockPalette.y)
+      return
+    } else {
+      this.smoothScrollBox.move(newX, BlockPalette.y);
+    }
   } else {
     this.smoothScrollBox.move(0, BlockPalette.y);
   }

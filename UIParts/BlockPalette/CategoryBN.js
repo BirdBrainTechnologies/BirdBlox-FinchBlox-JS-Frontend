@@ -162,6 +162,7 @@ CategoryBN.prototype.addListeners = function() {
  * difficulty level.
  */
 CategoryBN.prototype.setHidden = function() {
+  if (Hatchling) { return } //Hatchling stores hidden buttons off screen
   const level = this.category.level;
   //if (level != LevelMenu.currentLevel && this.group.parentNode != null) {
   if (level != LevelManager.currentLevel && this.group.parentNode != null) {

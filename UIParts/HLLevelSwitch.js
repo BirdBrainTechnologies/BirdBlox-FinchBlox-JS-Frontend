@@ -47,6 +47,9 @@ function HLLevelSwitch(x, y) {
   	TouchReceiver.addListenersBN(this.text2, this)
 
   	this.animations = []
+
+  	console.log("*** new level switch. current level is " + LevelManager.currentLevel)
+  	this.setSwitch(LevelManager.currentLevel) //Necessary when the window is resized
   }
 
 HLLevelSwitch.prototype.press = function() {
@@ -123,9 +126,12 @@ HLLevelSwitch.prototype.setSwitch = function(level) {
 		this.oldTab.delete()
 	}
 	
-	TabManager.activeTab.mainG.removeAttributeNS(null, "clip-path")
-	GuiElements.move.group(TabManager.activeTab.mainG, 0, 0)
-	GuiElements.layers.activeTab.appendChild(TabManager.activeTab.mainG)
+	if (TabManager.activeTab != null) {
+		TabManager.activeTab.mainG.removeAttributeNS(null, "clip-path")
+		GuiElements.move.group(TabManager.activeTab.mainG, 0, 0)
+		GuiElements.layers.activeTab.appendChild(TabManager.activeTab.mainG)
+	}
+	
 	if (this.tempG != null) {
 		this.tempG.remove()
 		this.tempG = null

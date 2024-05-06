@@ -238,6 +238,10 @@ DisplayStack.prototype.duplicate = function(x, y) {
   const firstCopyBlock = this.firstBlock.duplicate(x, y);
   let stack = new BlockStack(firstCopyBlock, tab);
   if (Hatchling) {
+    if (LevelManager.currentLevel == 2) {
+      //Level 2 block palette is offset in hatchling
+      stack.move(x + GuiElements.width, y)
+    }
     HL_Utils.findPorts(firstCopyBlock)
     if (firstCopyBlock.updateBlockType) { 
       firstCopyBlock.updateBlockType(this.firstBlock.portType) 

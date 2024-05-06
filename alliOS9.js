@@ -13043,82 +13043,7 @@ TitleBar.makeButtons = function() {
       TB.levelButton = new Button(TB.levelBnX, y, levelBnW, h, TBLayer, levelBnColor, r, r);
       TB.levelButton.addText(LevelManager.currentLevel, LevelManager.levelButtonFont, Colors.white);
       TB.levelButton.setCallbackFunction(function() {
-        if (Hatchling) {
-
-          var level = (LevelManager.currentLevel == 1) ? 2 : 1
-          LevelManager.setLevel(level);
-          LevelManager.loadLevelSavePoint();
-
-          //When I try to animate the svg group, it travels off screen fine, but
-          //reappears on the screen rather than animating. This happens if I use
-          //css on the group too.
-          /*var code = TabManager.activeTab.mainG
-          var w = TB.width.toString()
-          var animate = document.createElementNS("http://www.w3.org/2000/svg", 'animateTransform');
-          animate.setAttributeNS(null, "attributeName", "transform");
-          animate.setAttributeNS(null, "from", "0 0");
-          animate.setAttributeNS(null, "to", "-" + w + " 0");
-          animate.setAttributeNS(null, "begin", "0s");
-          animate.setAttributeNS(null, "dur", "1s");
-          animate.setAttributeNS(null, "repeatCount", "1");
-          code.appendChild(animate)
-          console.log(code)
-          animate.beginElement()
-
-          setTimeout(()=>{
-            animate.remove()
-
-            GuiElements.move.group(code, w, 0)
-
-            var level = (LevelManager.currentLevel == 1) ? 2 : 1
-            LevelManager.setLevel(level);
-            LevelManager.loadLevelSavePoint();
-
-            animate = document.createElementNS("http://www.w3.org/2000/svg", 'animateTransform');
-            animate.setAttributeNS(null, "attributeName", "transform");
-            animate.setAttributeNS(null, "from", w +" 0");
-            animate.setAttributeNS(null, "to", "0 0");
-            animate.setAttributeNS(null, "begin", "0s");
-            animate.setAttributeNS(null, "dur", "1s");
-            animate.setAttributeNS(null, "repeatCount", "1");
-            code.appendChild(animate)
-            console.log(code)
-            animate.beginElement()
-          }, 1000)*/
-
-
-          //Slide the whole interface out of view and back
-          /*var b = document.body//TabManager.activeTab.mainG //document.body
-          var up = (LevelManager.currentLevel == 1)
-          var class1 = up ? "slideLeft" : "slideRight"
-          var class2 = up ? "popRight" : "popLeft"
-          var class3 = "center"
-          b.classList.add(class1)
-          
-          setTimeout(()=>{
-            console.log("popping over...")
-            b.classList.remove(class1)
-            b.classList.add(class2)
-
-            var level = up ? 2 : 1
-            LevelManager.setLevel(level);
-            LevelManager.loadLevelSavePoint();
-            
-          }, 1000)
-          setTimeout(()=>{
-            console.log("sliding back in")
-            b.classList.remove(class2)
-            b.classList.add(class3)
-          }, 1050)
-          setTimeout(()=>{
-            
-            b.classList.remove(class3)
-          }, 2100)*/
-
-          
-        } else {
-          (new LevelDialog()).show();
-        }
+        (new LevelDialog()).show();
       }, true);
     //}
     if (Hatchling) {
@@ -13449,8 +13374,16 @@ TitleBar.flashFinchButton = function() {
  * controls the Blocks inside it and the CategoryBN that brings it into the foreground.
  */
 function BlockPalette() {
+
+  //Hatchling 
+  BlockPalette.currentLevel = 1
+
+
   BlockPalette.categories = []; // List of categories
   BlockPalette.selectedCat = null; // category in the foreground
+  if (Hatchling) {
+    BlockPalette.selectedCat2 = null //For Hatchling, there will be a cat selected for each level
+  }
   BlockPalette.createCatBg(); // Black bar along left side of screen
   BlockPalette.createPalBg(); // Dark gray rectangle behind the CategoryBNs
   BlockPalette.createCategories();
@@ -13531,8 +13464,10 @@ BlockPalette.updateZoom = function() {
   if (FinchBlox) {
     if (Hatchling) { 
       var CBN = CategoryBN
+      GuiElements.update.rect(BP.palRect2, BP.x - GuiElements.width, BP.y, BP.width, BP.height);
       GuiElements.move.group(GuiElements.layers.catBg, (GuiElements.width - (CBN.width * 5))/2, BP.y - CBN.height);
       BP.updateOutline()
+      console.log("*** updateZoom " + BP.catX + " " + BP.catY)
     } else {
       BP.updatePath(); 
     }
@@ -13563,10 +13498,10 @@ BlockPalette.createCatBg = function() {
       var widthL1 = CBN.width * 3 // 3 categories in level 1
       var widthL2 = CBN.width * 5 // 5 categories in level 2
       BP.level1CatRect = GuiElements.draw.tab(CBN.width, 0, widthL1, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
-      BP.level2CatRect = GuiElements.draw.tab(0, 0, widthL2, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
+      BP.level2CatRect = GuiElements.draw.tab(-GuiElements.width, 0, widthL2, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
       GuiElements.layers.catBg.appendChild(BP.level1CatRect);
       GuiElements.layers.catBg.appendChild(BP.level2CatRect);
-      GuiElements.update.opacity(BlockPalette.level2CatRect, 0)
+      //GuiElements.update.opacity(BlockPalette.level2CatRect, 0)
       GuiElements.move.group(GuiElements.layers.catBg, BP.catX, BP.catY);
     }
   }
@@ -13588,13 +13523,18 @@ BlockPalette.createPalBg = function() {
   BP.palRect = GuiElements.draw.rect(0, BP.y, BP.width, BP.height, BP.bg);
   if (Hatchling) {
     BP.palRect = GuiElements.draw.rect(BP.x, BP.y, BP.width, BP.height, BP.bg, BP.hl, BP.hl)
+    BP.palRect2 = GuiElements.draw.rect(BP.x - GuiElements.width, BP.y, BP.width, BP.height, BP.bg, BP.hl, BP.hl)
+    GuiElements.layers.paletteBG.appendChild(BP.palRect2)
   }
   GuiElements.layers.paletteBG.appendChild(BP.palRect);
   if (FinchBlox) {
     
     if (Hatchling) {
-      BP.shape = GuiElements.create.path(GuiElements.layers.titlebar);
-      BP.shape.setAttributeNS(null, "fill", "none");
+      BP.shape = GuiElements.create.group(0, 0, GuiElements.layers.titlebar)
+      BP.outline1 = GuiElements.create.path(BP.shape);
+      BP.outline1.setAttributeNS(null, "fill", "none");
+      BP.outline2 = GuiElements.create.path(BP.shape);
+      BP.outline2.setAttributeNS(null, "fill", "none");
     } else {
       BP.shape = GuiElements.create.path(GuiElements.layers.paletteBG);
       BP.shape.setAttributeNS(null, "fill", BP.bg);
@@ -13610,32 +13550,45 @@ BlockPalette.createPalBg = function() {
   }
 };
 
+/**
+ * Hatchling only
+ */
 BlockPalette.updateOutline = function() {
-  var selectedCatButton = BlockPalette.selectedCat.button
+  //var selectedCatButton = BlockPalette.selectedCat.button
   var BP = BlockPalette;
   var CBN = CategoryBN
-  var color = Colors.getColor(selectedCatButton.catId)
+  //var color = Colors.getColor(selectedCatButton.catId)
   var bnR = CBN.cornerRadius
 
-  var path = "m " + BP.x + "," + GuiElements.height;
-  path += " v " + (2*BP.hl - BP.height);
-  path += " a " + BP.hl + " " + BP.hl + " 0 0 1 " + BP.hl + " " + (-BP.hl);
-  path += " h " + ((GuiElements.width-BlockPalette.catW)/ 2 + selectedCatButton.x - bnR - 3*BP.hl);
-  path += " a " + bnR + " " + bnR + " 0 0 0 " + bnR + " " + (-bnR);
-  path += " v " + (2*bnR - CBN.height);
-  path += " a " + bnR + " " + bnR + " 0 0 1 " + bnR + " " + (-bnR);
-  path += " h " + (CBN.width - 2*bnR);
-  path += " a " + bnR + " " + bnR + " 0 0 1 " + bnR + " " + bnR;
-  path += " v " + (CBN.height - 2*bnR);
-  path += " a " + bnR + " " + bnR + " 0 0 0 " + bnR + " " + bnR;
-  path += " h " + ((GuiElements.width-BlockPalette.catW)/ 2 + (BlockPalette.catW - selectedCatButton.x - CBN.width) - bnR - 3*BP.hl);
-  path += " a " + BP.hl + " " + BP.hl + " 0 0 1 " + BP.hl + " " + BP.hl;
-  path += " v " + (BP.height - 2*BP.hl);
+  function getPath(bn, offset) {
+    var path = "m " + (BP.x - offset) + "," + GuiElements.height; //start at lower left corner
+    path += " v " + (2*BP.hl - BP.height);
+    path += " a " + BP.hl + " " + BP.hl + " 0 0 1 " + BP.hl + " " + (-BP.hl);
+    path += " h " + ((GuiElements.width-BP.catW)/ 2 + bn.x - bnR - 3*BP.hl + offset);
+    path += " a " + bnR + " " + bnR + " 0 0 0 " + bnR + " " + (-bnR);
+    path += " v " + (2*bnR - CBN.height);
+    path += " a " + bnR + " " + bnR + " 0 0 1 " + bnR + " " + (-bnR);
+    path += " h " + (CBN.width - 2*bnR);
+    path += " a " + bnR + " " + bnR + " 0 0 1 " + bnR + " " + bnR;
+    path += " v " + (CBN.height - 2*bnR);
+    path += " a " + bnR + " " + bnR + " 0 0 0 " + bnR + " " + bnR;
+    path += " h " + ((GuiElements.width-BP.catW)/ 2 + (BP.catW - bn.x - CBN.width) - bnR - 3*BP.hl - offset);
+    path += " a " + BP.hl + " " + BP.hl + " 0 0 1 " + BP.hl + " " + BP.hl;
+    path += " v " + (BP.height - 2*BP.hl);
+    return path
+  }
 
-  BP.shape.setAttributeNS(null, "d", path);
-  GuiElements.update.stroke(BP.shape, color, 2)
+  BP.outline1.setAttributeNS(null, "d", getPath(BP.selectedCat.button, 0))
+  GuiElements.update.stroke(BP.outline1, Colors.getColor(BP.selectedCat.id), 2)
+  if (BP.selectedCat2 != null) {
+    BP.outline2.setAttributeNS(null, "d", getPath(BP.selectedCat2.button, GuiElements.width))
+    GuiElements.update.stroke(BP.outline2, Colors.getColor(BP.selectedCat2.id), 2)
+  }
 }
 
+/**
+ * FinchBlox only (not used in Hatchling)
+ */
 BlockPalette.updatePath = function() {
   var BP = BlockPalette;
   var shapeH = 20;
@@ -13683,10 +13636,17 @@ BlockPalette.updatePath = function(pathE) {
   pathE.setAttributeNS(null, "d", path);
 }*/
 BlockPalette.updatePaletteColor = function(color) {
-  GuiElements.update.color(BlockPalette.palRect, color);
-  //GuiElements.update.color(BlockPalette.leftShape, color);
-  //GuiElements.update.color(BlockPalette.rightShape, color);
-  if (!Hatchling) { GuiElements.update.color(BlockPalette.shape, color); }
+  console.log("*** updatePaletteColor " + color + " " + BlockPalette.currentLevel)
+  if (Hatchling) { 
+    if (BlockPalette.currentLevel == 1) {
+      GuiElements.update.color(BlockPalette.palRect, color);
+    } else {
+      GuiElements.update.color(BlockPalette.palRect2, color);
+    }
+  } else {
+    GuiElements.update.color(BlockPalette.palRect, color);
+    GuiElements.update.color(BlockPalette.shape, color); 
+  }
 }
 
 /**
@@ -13707,8 +13667,8 @@ BlockPalette.createCategories = function() {
       BlockPalette.categories.push(currentCat);
       if (i == 2) { //&& !Hatchling) {
         if (Hatchling) {
-          //5 level 2 categories
-          currentX = BlockPalette.catW / 2 - 2.5 * CategoryBN.width - 2 * CategoryBN.hMargin;
+          //5 level 2 categories, offset to the left
+          currentX = BlockPalette.catW / 2 - 2.5 * CategoryBN.width - 2 * CategoryBN.hMargin - GuiElements.width;
         } else {
           //3 level 2 categories
           currentX = BlockPalette.catW / 2 - 1.5 * CategoryBN.width - CategoryBN.hMargin;
@@ -13766,6 +13726,10 @@ BlockPalette.getCategory = function(id) {
  */
 BlockPalette.selectFirstCat = function() {
   BlockPalette.categories[0].select();
+  if (Hatchling) {
+    BlockPalette.categories[3].select()
+    GuiElements.update.color(BlockPalette.palRect2, Colors.blockPalette[BlockPalette.categories[3].id]);
+  }
 };
 
 /**
@@ -13784,6 +13748,7 @@ BlockPalette.isStackOverPalette = function(x, y) {
  * Makes a trash can icon appear over the Palette to indicate that the Blocks being dragged will be deleted
  */
 BlockPalette.showTrash = function() {
+  console.log("*** showTrash")
   var BP = BlockPalette;
   // If the trash is not visible
   if (!BP.trash) {
@@ -13883,21 +13848,37 @@ BlockPalette.refresh = function() {
  * For FinchBlox. Shows/hides appropriate categories for selected level.
  */
 BlockPalette.setLevel = function() {
-  BlockPalette.categories.forEach(function(category) {
+  var BP = BlockPalette;
+
+  if (Hatchling) {
+    if (BP.currentLevel != LevelManager.currentLevel) {
+      var offsetTo = (LevelManager.currentLevel == 2) ? GuiElements.width : 0 
+      var offsetFrom = (LevelManager.currentLevel == 1) ? GuiElements.width : 0
+      console.log("*** animating " + offsetTo + " " + offsetFrom)
+      GuiElements.animate.move(GuiElements.layers.catBg, BP.catX + offsetTo, BP.catY, 1, true, BP.catX + offsetFrom, BP.catY)
+      GuiElements.animate.move(GuiElements.layers.categories, BP.catX + offsetTo, BP.catY, 1, true, BP.catX + offsetFrom, BP.catY)
+      GuiElements.animate.move(GuiElements.layers.paletteBG, offsetTo, 0, 1, true, offsetFrom, 0)
+      GuiElements.animate.move(BP.shape, offsetTo, 0, 1, true, offsetFrom, 0)
+
+      BP.currentLevel = LevelManager.currentLevel
+    }
+    return
+  }
+
+
+  BP.categories.forEach(function(category) {
     category.button.setHidden();
   })
-  //  switch (LevelMenu.currentLevel){
+
   switch (LevelManager.currentLevel) {
     case 1:
-      BlockPalette.getCategory("motion_1").select();
-      if (Hatchling) { GuiElements.update.opacity(BlockPalette.level2CatRect, 0) }
+      BP.getCategory("motion_1").select();
       break;
     case 2:
-      BlockPalette.getCategory("motion_2").select();
-      if (Hatchling) { GuiElements.update.opacity(BlockPalette.level2CatRect, 1) }
+      BP.getCategory("motion_2").select();
       break;
     case 3:
-      BlockPalette.getCategory("motion_3").select();
+      BP.getCategory("motion_3").select();
       break;
   }
 }
@@ -14142,6 +14123,10 @@ DisplayStack.prototype.duplicate = function(x, y) {
   var firstCopyBlock = this.firstBlock.duplicate(x, y);
   var stack = new BlockStack(firstCopyBlock, tab);
   if (Hatchling) {
+    if (LevelManager.currentLevel == 2) {
+      //Level 2 block palette is offset in hatchling
+      stack.move(x + GuiElements.width, y)
+    }
     HL_Utils.findPorts(firstCopyBlock)
     if (firstCopyBlock.updateBlockType) { 
       firstCopyBlock.updateBlockType(this.firstBlock.portType) 
@@ -14365,6 +14350,7 @@ CategoryBN.prototype.addListeners = function() {
  * difficulty level.
  */
 CategoryBN.prototype.setHidden = function() {
+  if (Hatchling) { return } //Hatchling stores hidden buttons off screen
   var level = this.category.level;
   //if (level != LevelMenu.currentLevel && this.group.parentNode != null) {
   if (level != LevelManager.currentLevel && this.group.parentNode != null) {
@@ -14405,8 +14391,15 @@ function Category(buttonX, buttonY, name, id) {
   }
 
   this.group = GuiElements.create.group(0, 0);
-  this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, BlockPalette.x, BlockPalette.y,
-    BlockPalette.width, BlockPalette.height, 0, 0);
+  if (Hatchling) {
+    this.layer = GuiElements.layers.paletteBG
+    //this.layer.appendChild(this.group)
+    this.x = BlockPalette.x 
+    this.y = BlockPalette.y
+  } else {
+    this.smoothScrollBox = new SmoothScrollBox(this.group, GuiElements.layers.paletteScroll, BlockPalette.x, BlockPalette.y,
+      BlockPalette.width, BlockPalette.height, 0, 0);
+  }
   this.button = new CategoryBN(this.buttonX, this.buttonY, this);
 
   //When the screen is flipped for right to left languages, the categories will
@@ -14655,13 +14648,42 @@ Category.prototype.trimBottom = function() {
 Category.prototype.centerBlocks = function() {
   this.computeWidth();
   var newX = BlockPalette.x + (BlockPalette.width - this.width) / 2;
-  this.smoothScrollBox.move(newX, BlockPalette.y);
+  if (Hatchling) {
+    var x = (this.level == 2) ? newX - GuiElements.width : newX
+    GuiElements.move.group(this.group, x, BlockPalette.y)
+    this.x = x
+  } else {
+    this.smoothScrollBox.move(newX, BlockPalette.y);
+  }
 }
 
 /**
  * Brings the category to the foreground and marks it as selected in the BlockPalette
  */
 Category.prototype.select = function() {
+  if (Hatchling) {
+    switch(this.level) {
+    case 1:
+      if (BlockPalette.selectedCat === this) { return }
+      if (BlockPalette.selectedCat != null) {
+        BlockPalette.selectedCat.deselect()
+      }
+      BlockPalette.selectedCat = this
+      break;
+    case 2:
+      if (BlockPalette.selectedCat2 === this) { return }
+      if (BlockPalette.selectedCat2 != null) {
+        BlockPalette.selectedCat2.deselect()
+      }
+      BlockPalette.selectedCat2 = this
+      break;
+    default:
+      console.error("Hatchling category should not be level " + this.level)
+    }
+    this.button.select();
+    this.layer.appendChild(this.group)
+    return
+  }
   if (BlockPalette.selectedCat === this) {
     return;
   }
@@ -14677,8 +14699,17 @@ Category.prototype.select = function() {
  * Removes the category from the foreground
  */
 Category.prototype.deselect = function() {
-  BlockPalette.selectedCat = null;
-  this.smoothScrollBox.hide();
+  if (Hatchling) {
+    if (this.level == 1) {
+      BlockPalette.selectedCat = null;
+    } else {
+      BlockPalette.selectedCat2 = null;
+    }
+    this.group.remove()
+  } else {
+    BlockPalette.selectedCat = null;
+    this.smoothScrollBox.hide();
+  }
   this.button.deselect();
 };
 
@@ -14717,7 +14748,9 @@ Category.prototype.computeWidth = function() {
 Category.prototype.updateWidth = function() {
   if (!this.finalized) return;
   this.computeWidth();
-  this.smoothScrollBox.setContentDims(this.width, this.height);
+  if (!Hatchling) {
+    this.smoothScrollBox.setContentDims(this.width, this.height);
+  }
 };
 
 /**
@@ -14735,7 +14768,9 @@ Category.prototype.updateDimSet = function() {
   currentH -= BlockPalette.blockMargin;
   currentH += BlockPalette.mainVMargin;
   this.height = currentH;
-  this.smoothScrollBox.setContentDims(this.width, this.height);
+  if (!Hatchling) {
+    this.smoothScrollBox.setContentDims(this.width, this.height);
+  }
 };
 
 /**
@@ -14754,6 +14789,9 @@ Category.prototype.markOpen = function() {
  */
 Category.prototype.relToAbsX = function(x) {
   if (!this.finalized) return x;
+  if (Hatchling) {
+    return this.x + x
+  }
   return this.smoothScrollBox.relToAbsX(x);
 };
 /**
@@ -14762,6 +14800,9 @@ Category.prototype.relToAbsX = function(x) {
  */
 Category.prototype.relToAbsY = function(y) {
   if (!this.finalized) return y;
+  if (Hatchling) {
+    return this.y + y
+  }
   return this.smoothScrollBox.relToAbsY(y);
 };
 /**
@@ -14770,6 +14811,9 @@ Category.prototype.relToAbsY = function(y) {
  */
 Category.prototype.absToRelX = function(x) {
   if (!this.finalized) return x;
+  if (Hatchling) {
+    return x - this.x
+  }
   return this.smoothScrollBox.absToRelX(x);
 };
 /**
@@ -14778,6 +14822,9 @@ Category.prototype.absToRelX = function(x) {
  */
 Category.prototype.absToRelY = function(y) {
   if (!this.finalized) return y;
+  if (Hatchling) {
+    return y - this.y
+  }
   return this.smoothScrollBox.absToRelY(y);
 };
 /**
@@ -14821,8 +14868,16 @@ Category.prototype.updateZoom = function() {
   if (!this.finalized) return;
   if (FinchBlox) {
     var newX = (BlockPalette.width - this.width) / 2;
-    if (Hatchling) { newX += BlockPalette.x }
-    this.smoothScrollBox.move(newX, BlockPalette.y);
+    if (Hatchling) { 
+      newX += BlockPalette.x 
+      if (this.level == 2) {
+        newX -= GuiElements.width
+      }
+      GuiElements.move.group(this.group, newX, BlockPalette.y)
+      return
+    } else {
+      this.smoothScrollBox.move(newX, BlockPalette.y);
+    }
   } else {
     this.smoothScrollBox.move(0, BlockPalette.y);
   }
@@ -16849,6 +16904,9 @@ function HLLevelSwitch(x, y) {
   	TouchReceiver.addListenersBN(this.text2, this)
 
   	this.animations = []
+
+  	console.log("*** new level switch. current level is " + LevelManager.currentLevel)
+  	this.setSwitch(LevelManager.currentLevel) //Necessary when the window is resized
   }
 
 HLLevelSwitch.prototype.press = function() {
@@ -16925,9 +16983,12 @@ HLLevelSwitch.prototype.setSwitch = function(level) {
 		this.oldTab.delete()
 	}
 	
-	TabManager.activeTab.mainG.removeAttributeNS(null, "clip-path")
-	GuiElements.move.group(TabManager.activeTab.mainG, 0, 0)
-	GuiElements.layers.activeTab.appendChild(TabManager.activeTab.mainG)
+	if (TabManager.activeTab != null) {
+		TabManager.activeTab.mainG.removeAttributeNS(null, "clip-path")
+		GuiElements.move.group(TabManager.activeTab.mainG, 0, 0)
+		GuiElements.layers.activeTab.appendChild(TabManager.activeTab.mainG)
+	}
+	
 	if (this.tempG != null) {
 		this.tempG.remove()
 		this.tempG = null
