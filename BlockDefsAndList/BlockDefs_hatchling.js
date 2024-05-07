@@ -459,7 +459,7 @@ B_HL_PS_L2.prototype.constructor = B_HL_PS_L2
 B_HL_PS_L2.importXml = HL_Utils.importXml
 //MicroBlocks functions
 B_HL_PS_L2.prototype.primName = function() { return "[h:psv]" }
-B_HL_PS_L2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
+B_HL_PS_L2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value + 2] }
 
 /**
  * Wave a position servo
