@@ -13465,18 +13465,22 @@ BlockPalette.updateZoom = function() {
     if (Hatchling) { 
       var CBN = CategoryBN
       GuiElements.update.rect(BP.palRect2, BP.x - GuiElements.width, BP.y, BP.width, BP.height);
-      GuiElements.move.group(GuiElements.layers.catBg, (GuiElements.width - (CBN.width * 5))/2, BP.y - CBN.height);
+      GuiElements.move.group(BP.catRectGroup, BP.catX, BP.catY)
+      GuiElements.move.group(BP.catBnGroup, BP.catX, BP.catY)
       BP.updateOutline()
       console.log("*** updateZoom " + BP.catX + " " + BP.catY)
+      console.log(BP.catBnGroup)
     } else {
-      BP.updatePath(); 
+      BP.updatePath();
     }
     GuiElements.update.rect(BP.catRect, 0, BP.catY, 0, BP.catH);
   } else {
     GuiElements.update.rect(BP.catRect, 0, BP.catY, BP.width, BP.catH);
   }
-  //GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
-  GuiElements.move.group(GuiElements.layers.categories, BP.catX, BP.catY);
+
+  if (!Hatchling) {
+    GuiElements.move.group(GuiElements.layers.categories, BP.catX, BP.catY);
+  }
   for (var i = 0; i < BlockPalette.categories.length; i++) {
     BlockPalette.categories[i].updateZoom();
   }
@@ -13497,12 +13501,15 @@ BlockPalette.createCatBg = function() {
       var color = Colors.ballyGrayLight
       var widthL1 = CBN.width * 3 // 3 categories in level 1
       var widthL2 = CBN.width * 5 // 5 categories in level 2
-      BP.level1CatRect = GuiElements.draw.tab(CBN.width, 0, widthL1, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
-      BP.level2CatRect = GuiElements.draw.tab(-GuiElements.width, 0, widthL2, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
-      GuiElements.layers.catBg.appendChild(BP.level1CatRect);
-      GuiElements.layers.catBg.appendChild(BP.level2CatRect);
+      BP.catRectGroup = GuiElements.create.group(BP.catX, BP.catY, GuiElements.layers.catBg)
+      var level1CatRect = GuiElements.draw.tab(CBN.width, 0, widthL1, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
+      var level2CatRect = GuiElements.draw.tab(-GuiElements.width, 0, widthL2, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
+      BP.catRectGroup.appendChild(level1CatRect)
+      BP.catRectGroup.appendChild(level2CatRect)
+      //GuiElements.layers.catBg.appendChild(BP.level1CatRect);
+      //GuiElements.layers.catBg.appendChild(BP.level2CatRect);
       //GuiElements.update.opacity(BlockPalette.level2CatRect, 0)
-      GuiElements.move.group(GuiElements.layers.catBg, BP.catX, BP.catY);
+      //GuiElements.move.group(GuiElements.layers.catBg, BP.catX, BP.catY);
     }
   }
   //BP.catRect = GuiElements.draw.rect(0, BP.catY, BP.width, BP.catH, BP.catBg);
@@ -13510,7 +13517,9 @@ BlockPalette.createCatBg = function() {
   BP.catRect = GuiElements.draw.rect(BP.catX, BP.catY, bgW, BP.catH, BP.catBg);
   GuiElements.layers.catBg.appendChild(BP.catRect);
   //GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
-  GuiElements.move.group(GuiElements.layers.categories, BP.catX, BP.catY);
+  if (!Hatchling) {
+    GuiElements.move.group(GuiElements.layers.categories, BP.catX, BP.catY);
+  }
   //}
 
 };
@@ -13636,7 +13645,6 @@ BlockPalette.updatePath = function(pathE) {
   pathE.setAttributeNS(null, "d", path);
 }*/
 BlockPalette.updatePaletteColor = function(color) {
-  console.log("*** updatePaletteColor " + color + " " + BlockPalette.currentLevel)
   if (Hatchling) { 
     if (BlockPalette.currentLevel == 1) {
       GuiElements.update.color(BlockPalette.palRect, color);
@@ -13654,6 +13662,10 @@ BlockPalette.updatePaletteColor = function(color) {
  */
 BlockPalette.createCategories = function() {
   var catCount = BlockList.catCount();
+
+  if (Hatchling) {
+    BlockPalette.catBnGroup = GuiElements.create.group(BlockPalette.catX, BlockPalette.catY, GuiElements.layers.categories)
+  }
 
   if (FinchBlox) {
     var currentY = 0;
@@ -13855,8 +13867,10 @@ BlockPalette.setLevel = function() {
       var offsetTo = (LevelManager.currentLevel == 2) ? GuiElements.width : 0 
       var offsetFrom = (LevelManager.currentLevel == 1) ? GuiElements.width : 0
       console.log("*** animating " + offsetTo + " " + offsetFrom)
-      GuiElements.animate.move(GuiElements.layers.catBg, BP.catX + offsetTo, BP.catY, 1, true, BP.catX + offsetFrom, BP.catY)
-      GuiElements.animate.move(GuiElements.layers.categories, BP.catX + offsetTo, BP.catY, 1, true, BP.catX + offsetFrom, BP.catY)
+      //GuiElements.animate.move(GuiElements.layers.catBg, BP.catX + offsetTo, BP.catY, 1, true, BP.catX + offsetFrom, BP.catY)
+      GuiElements.animate.move(GuiElements.layers.catBg, offsetTo, 0, 1, true, offsetFrom, 0)
+      //GuiElements.animate.move(GuiElements.layers.categories, BP.catX + offsetTo, BP.catY, 1, true, BP.catX + offsetFrom, BP.catY)
+      GuiElements.animate.move(GuiElements.layers.categories, offsetTo, 0, 1, true, offsetFrom, 0)
       GuiElements.animate.move(GuiElements.layers.paletteBG, offsetTo, 0, 1, true, offsetFrom, 0)
       GuiElements.animate.move(BP.shape, offsetTo, 0, 1, true, offsetFrom, 0)
 
@@ -14278,6 +14292,9 @@ CategoryBN.prototype.buildGraphics = function() {
     this.group.appendChild(this.label);
   }
   GuiElements.layers.categories.appendChild(this.group);
+  if (Hatchling) {
+    BlockPalette.catBnGroup.appendChild(this.group)
+  }
   this.addListeners();
 };
 
@@ -31624,7 +31641,7 @@ SaveManager.setConstants = function() {
  * @param {boolean} named - false if the user should be prompted to name the file when they try to use the OpenDialog
  */
 SaveManager.backendOpen = function(fileName, data) {
-  //console.log("*** backendOpen " + fileName + ": " + data)
+  console.log("*** backendOpen " + fileName + ": " + data)
   SaveManager.fileName = fileName;
   SaveManager.loadData(data);
   if (FinchBlox) {
@@ -32409,6 +32426,7 @@ LevelManager.loadLevelSavePoint = function() {
   GuiElements.blockInteraction();
   var levelFileName = LM.savePointFileNames[LM.currentLevel];
   console.log("loadLevelSavePoint for level " + LM.currentLevel + ": " + levelFileName);
+  console.log(LM.filesSavedLocally)
   if (!LM.fileListRetreived) {
     setTimeout(function() {
       LevelManager.loadLevelSavePoint();
@@ -44625,7 +44643,7 @@ B_HL_PS_L2.prototype.constructor = B_HL_PS_L2
 B_HL_PS_L2.importXml = HL_Utils.importXml
 //MicroBlocks functions
 B_HL_PS_L2.prototype.primName = function() { return "[h:psv]" }
-B_HL_PS_L2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
+B_HL_PS_L2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value + 2] }
 
 /**
  * Wave a position servo

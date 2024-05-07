@@ -90,6 +90,9 @@ CategoryBN.prototype.buildGraphics = function() {
     this.group.appendChild(this.label);
   }
   GuiElements.layers.categories.appendChild(this.group);
+  if (Hatchling) {
+    BlockPalette.catBnGroup.appendChild(this.group)
+  }
   this.addListeners();
 };
 

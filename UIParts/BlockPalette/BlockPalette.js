@@ -97,18 +97,22 @@ BlockPalette.updateZoom = function() {
     if (Hatchling) { 
       const CBN = CategoryBN
       GuiElements.update.rect(BP.palRect2, BP.x - GuiElements.width, BP.y, BP.width, BP.height);
-      GuiElements.move.group(GuiElements.layers.catBg, (GuiElements.width - (CBN.width * 5))/2, BP.y - CBN.height);
+      GuiElements.move.group(BP.catRectGroup, BP.catX, BP.catY)
+      GuiElements.move.group(BP.catBnGroup, BP.catX, BP.catY)
       BP.updateOutline()
       console.log("*** updateZoom " + BP.catX + " " + BP.catY)
+      console.log(BP.catBnGroup)
     } else {
-      BP.updatePath(); 
+      BP.updatePath();
     }
     GuiElements.update.rect(BP.catRect, 0, BP.catY, 0, BP.catH);
   } else {
     GuiElements.update.rect(BP.catRect, 0, BP.catY, BP.width, BP.catH);
   }
-  //GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
-  GuiElements.move.group(GuiElements.layers.categories, BP.catX, BP.catY);
+
+  if (!Hatchling) {
+    GuiElements.move.group(GuiElements.layers.categories, BP.catX, BP.catY);
+  }
   for (let i = 0; i < BlockPalette.categories.length; i++) {
     BlockPalette.categories[i].updateZoom();
   }
@@ -129,12 +133,15 @@ BlockPalette.createCatBg = function() {
       const color = Colors.ballyGrayLight
       const widthL1 = CBN.width * 3 // 3 categories in level 1
       const widthL2 = CBN.width * 5 // 5 categories in level 2
-      BP.level1CatRect = GuiElements.draw.tab(CBN.width, 0, widthL1, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
-      BP.level2CatRect = GuiElements.draw.tab(-GuiElements.width, 0, widthL2, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
-      GuiElements.layers.catBg.appendChild(BP.level1CatRect);
-      GuiElements.layers.catBg.appendChild(BP.level2CatRect);
+      BP.catRectGroup = GuiElements.create.group(BP.catX, BP.catY, GuiElements.layers.catBg)
+      const level1CatRect = GuiElements.draw.tab(CBN.width, 0, widthL1, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
+      const level2CatRect = GuiElements.draw.tab(-GuiElements.width, 0, widthL2, CBN.height, Colors.ballyGrayLight, CBN.cornerRadius);
+      BP.catRectGroup.appendChild(level1CatRect)
+      BP.catRectGroup.appendChild(level2CatRect)
+      //GuiElements.layers.catBg.appendChild(BP.level1CatRect);
+      //GuiElements.layers.catBg.appendChild(BP.level2CatRect);
       //GuiElements.update.opacity(BlockPalette.level2CatRect, 0)
-      GuiElements.move.group(GuiElements.layers.catBg, BP.catX, BP.catY);
+      //GuiElements.move.group(GuiElements.layers.catBg, BP.catX, BP.catY);
     }
   }
   //BP.catRect = GuiElements.draw.rect(0, BP.catY, BP.width, BP.catH, BP.catBg);
@@ -142,7 +149,9 @@ BlockPalette.createCatBg = function() {
   BP.catRect = GuiElements.draw.rect(BP.catX, BP.catY, bgW, BP.catH, BP.catBg);
   GuiElements.layers.catBg.appendChild(BP.catRect);
   //GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
-  GuiElements.move.group(GuiElements.layers.categories, BP.catX, BP.catY);
+  if (!Hatchling) {
+    GuiElements.move.group(GuiElements.layers.categories, BP.catX, BP.catY);
+  }
   //}
 
 };
@@ -268,7 +277,6 @@ BlockPalette.updatePath = function(pathE) {
   pathE.setAttributeNS(null, "d", path);
 }*/
 BlockPalette.updatePaletteColor = function(color) {
-  console.log("*** updatePaletteColor " + color + " " + BlockPalette.currentLevel)
   if (Hatchling) { 
     if (BlockPalette.currentLevel == 1) {
       GuiElements.update.color(BlockPalette.palRect, color);
@@ -286,6 +294,10 @@ BlockPalette.updatePaletteColor = function(color) {
  */
 BlockPalette.createCategories = function() {
   const catCount = BlockList.catCount();
+
+  if (Hatchling) {
+    BlockPalette.catBnGroup = GuiElements.create.group(BlockPalette.catX, BlockPalette.catY, GuiElements.layers.categories)
+  }
 
   if (FinchBlox) {
     let currentY = 0;
@@ -487,8 +499,10 @@ BlockPalette.setLevel = function() {
       const offsetTo = (LevelManager.currentLevel == 2) ? GuiElements.width : 0 
       const offsetFrom = (LevelManager.currentLevel == 1) ? GuiElements.width : 0
       console.log("*** animating " + offsetTo + " " + offsetFrom)
-      GuiElements.animate.move(GuiElements.layers.catBg, BP.catX + offsetTo, BP.catY, 1, true, BP.catX + offsetFrom, BP.catY)
-      GuiElements.animate.move(GuiElements.layers.categories, BP.catX + offsetTo, BP.catY, 1, true, BP.catX + offsetFrom, BP.catY)
+      //GuiElements.animate.move(GuiElements.layers.catBg, BP.catX + offsetTo, BP.catY, 1, true, BP.catX + offsetFrom, BP.catY)
+      GuiElements.animate.move(GuiElements.layers.catBg, offsetTo, 0, 1, true, offsetFrom, 0)
+      //GuiElements.animate.move(GuiElements.layers.categories, BP.catX + offsetTo, BP.catY, 1, true, BP.catX + offsetFrom, BP.catY)
+      GuiElements.animate.move(GuiElements.layers.categories, offsetTo, 0, 1, true, offsetFrom, 0)
       GuiElements.animate.move(GuiElements.layers.paletteBG, offsetTo, 0, 1, true, offsetFrom, 0)
       GuiElements.animate.move(BP.shape, offsetTo, 0, 1, true, offsetFrom, 0)
 
