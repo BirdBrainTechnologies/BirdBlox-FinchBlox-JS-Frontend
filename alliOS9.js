@@ -1,5 +1,5 @@
-//var FinchBlox = true;
-//var Hatchling = false;
+var FinchBlox = true;
+var Hatchling = true;
 if (Hatchling) { FinchBlox = true; }
 var FrontendVersion = 393;
 
@@ -8105,13 +8105,16 @@ GuiElements.animate = {}
 GuiElements.animate.move = function(element, x2, y2, duration, useEasing, x1, y1) {
   if (x1 == null) { x1 = 0 }
   if (y1 == null) { y1 = 0 }
-  var animate = document.createElementNS("http://www.w3.org/2000/svg", 'animateTransform');
+  var animate = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
   animate.setAttributeNS(null, "attributeName", "transform");
+  animate.setAttributeNS(null, "type", "translate");
   if (useEasing) {
     animate.setAttributeNS(null, "calcMode", "spline")
     animate.setAttributeNS(null, "keySplines", "0.9 0.1 0.1 0.9")
     animate.setAttributeNS(null, "values", x1 + " " + y1 + ";" + x2 + " " + y2)
+    animate.setAttributeNS(null, "keyTimes", "0; 1")
   } else {
+    animate.setAttributeNS(null, "from", x1 + " " + y1)
     animate.setAttributeNS(null, "to", x2 + " " + y2) 
   }
   animate.setAttributeNS(null, "dur", duration + "s");
@@ -8120,6 +8123,9 @@ GuiElements.animate.move = function(element, x2, y2, duration, useEasing, x1, y1
 
   element.appendChild(animate)
   animate.beginElement()
+
+  console.log("*** animate move ")
+  console.log(animate)
 
   return animate
 }
@@ -14139,7 +14145,7 @@ DisplayStack.prototype.duplicate = function(x, y) {
   if (Hatchling) {
     if (LevelManager.currentLevel == 2) {
       //Level 2 block palette is offset in hatchling
-      stack.move(x + GuiElements.width, y)
+      stack.move(stack.x + GuiElements.width/TabManager.getActiveZoom(), stack.y)
     }
     HL_Utils.findPorts(firstCopyBlock)
     if (firstCopyBlock.updateBlockType) { 
@@ -16971,7 +16977,7 @@ HLLevelSwitch.prototype.press = function() {
 
 	this.animations[0] = GuiElements.animate.updateColor(tB, Colors.white, duration)
 	this.animations[1] = GuiElements.animate.updateColor(tW, this.textColor, duration)
-	this.animations[2] = GuiElements.animate.move(this.circleE, x, 0, duration)
+	this.animations[2] = GuiElements.animate.move(this.circleE, x, 0, duration, false, this.circleE.getAttribute("x"))
 	this.animations[3] = GuiElements.animate.move(this.tempG, oldTabX, 0, duration, true)
 
 	
@@ -22848,7 +22854,7 @@ HLFileDrawer.prototype.open = function() {
 
 
 	//Slide the drawer into view
-	GuiElements.animate.move(this.group, this.x, 0, this.slideDuration)
+	GuiElements.animate.move(this.group, this.x, 0, this.slideDuration, false, GuiElements.width)
 
 }
 
@@ -22867,7 +22873,7 @@ HLFileDrawer.prototype.close = function() {
 	}.bind(this), this.slideDuration*1000)
 
 	var duration = this.isExtended ? this.slideDuration*2 : this.slideDuration
-	GuiElements.animate.move(this.group, GuiElements.width, 0, this.slideDuration)
+	GuiElements.animate.move(this.group, GuiElements.width, 0, this.slideDuration, false, this.x)
 }
 
 HLFileDrawer.prototype.resetTab = function(tab, extend, embed) {
@@ -22927,11 +22933,11 @@ HLFileDrawer.prototype.resetTab = function(tab, extend, embed) {
 		this.isExtended = true
 		GuiElements.update.rect(this.menuTopRect, this.menuX, this.menuY, this.menuW2 - this.menuOutlineW, this.menuH - 15)
 		this.closeBn.move(this.closeBnX2, this.closeBnY)
-		GuiElements.animate.move(this.group, this.x - this.menuBonus, 0, this.slideDuration)
+		GuiElements.animate.move(this.group, this.x - this.menuBonus, 0, this.slideDuration, false, this.x)
 
 	} else {
 		this.isExtended = false
-		GuiElements.animate.move(this.group, this.x, 0, this.slideDuration)
+		GuiElements.animate.move(this.group, this.x, 0, this.slideDuration, false, this.x - this.menuBonus)
 		setTimeout(function() {
 			GuiElements.update.rect(this.menuTopRect, this.menuX, this.menuY, this.menuW - this.menuOutlineW, this.menuH - 15)
 			this.closeBn.move(this.closeBnX, this.closeBnY)
@@ -33404,7 +33410,7 @@ Block.prototype.tempSlide = function(distance) {
     this.animations = []
   }
   this.distanceDisplaced = distance
-  this.animations.push(GuiElements.animate.move(this.group, this.x + distance, 0, 0.1, true, this.x))
+  this.animations.push(GuiElements.animate.move(this.group, this.x + distance, this.y, 0.1, true, this.x, this.y))
   if (this.nextBlock != null) {
     this.nextBlock.tempSlide(distance)
   }
@@ -33412,7 +33418,7 @@ Block.prototype.tempSlide = function(distance) {
 
 Block.prototype.unSlide = function(animate) {
   if (animate && this.distanceDisplaced != 0) {
-    this.animations.push(GuiElements.animate.move(this.group, this.x, 0, 0.1, true, this.x + this.distanceDisplaced))
+    this.animations.push(GuiElements.animate.move(this.group, this.x, this.y, 0.1, true, this.x + this.distanceDisplaced, this.y))
   }
   this.distanceDisplaced = 0
   setTimeout(function() {

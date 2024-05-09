@@ -240,7 +240,7 @@ DisplayStack.prototype.duplicate = function(x, y) {
   if (Hatchling) {
     if (LevelManager.currentLevel == 2) {
       //Level 2 block palette is offset in hatchling
-      stack.move(x + GuiElements.width, y)
+      stack.move(stack.x + GuiElements.width/TabManager.getActiveZoom(), stack.y)
     }
     HL_Utils.findPorts(firstCopyBlock)
     if (firstCopyBlock.updateBlockType) { 

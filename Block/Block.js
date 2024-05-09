@@ -865,7 +865,7 @@ Block.prototype.tempSlide = function(distance) {
     this.animations = []
   }
   this.distanceDisplaced = distance
-  this.animations.push(GuiElements.animate.move(this.group, this.x + distance, 0, 0.1, true, this.x))
+  this.animations.push(GuiElements.animate.move(this.group, this.x + distance, this.y, 0.1, true, this.x, this.y))
   if (this.nextBlock != null) {
     this.nextBlock.tempSlide(distance)
   }
@@ -873,7 +873,7 @@ Block.prototype.tempSlide = function(distance) {
 
 Block.prototype.unSlide = function(animate) {
   if (animate && this.distanceDisplaced != 0) {
-    this.animations.push(GuiElements.animate.move(this.group, this.x, 0, 0.1, true, this.x + this.distanceDisplaced))
+    this.animations.push(GuiElements.animate.move(this.group, this.x, this.y, 0.1, true, this.x + this.distanceDisplaced, this.y))
   }
   this.distanceDisplaced = 0
   setTimeout(function() {

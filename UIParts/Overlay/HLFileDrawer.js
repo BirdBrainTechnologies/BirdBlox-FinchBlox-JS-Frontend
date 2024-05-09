@@ -132,7 +132,7 @@ HLFileDrawer.prototype.open = function() {
 
 
 	//Slide the drawer into view
-	GuiElements.animate.move(this.group, this.x, 0, this.slideDuration)
+	GuiElements.animate.move(this.group, this.x, 0, this.slideDuration, false, GuiElements.width)
 
 }
 
@@ -151,7 +151,7 @@ HLFileDrawer.prototype.close = function() {
 	}.bind(this), this.slideDuration*1000)
 
 	const duration = this.isExtended ? this.slideDuration*2 : this.slideDuration
-	GuiElements.animate.move(this.group, GuiElements.width, 0, this.slideDuration)
+	GuiElements.animate.move(this.group, GuiElements.width, 0, this.slideDuration, false, this.x)
 }
 
 HLFileDrawer.prototype.resetTab = function(tab, extend, embed) {
@@ -211,11 +211,11 @@ HLFileDrawer.prototype.resetTab = function(tab, extend, embed) {
 		this.isExtended = true
 		GuiElements.update.rect(this.menuTopRect, this.menuX, this.menuY, this.menuW2 - this.menuOutlineW, this.menuH - 15)
 		this.closeBn.move(this.closeBnX2, this.closeBnY)
-		GuiElements.animate.move(this.group, this.x - this.menuBonus, 0, this.slideDuration)
+		GuiElements.animate.move(this.group, this.x - this.menuBonus, 0, this.slideDuration, false, this.x)
 
 	} else {
 		this.isExtended = false
-		GuiElements.animate.move(this.group, this.x, 0, this.slideDuration)
+		GuiElements.animate.move(this.group, this.x, 0, this.slideDuration, false, this.x - this.menuBonus)
 		setTimeout(function() {
 			GuiElements.update.rect(this.menuTopRect, this.menuX, this.menuY, this.menuW - this.menuOutlineW, this.menuH - 15)
 			this.closeBn.move(this.closeBnX, this.closeBnY)

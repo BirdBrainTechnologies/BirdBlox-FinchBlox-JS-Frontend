@@ -1440,13 +1440,16 @@ GuiElements.animate = {}
 GuiElements.animate.move = function(element, x2, y2, duration, useEasing, x1, y1) {
   if (x1 == null) { x1 = 0 }
   if (y1 == null) { y1 = 0 }
-  let animate = document.createElementNS("http://www.w3.org/2000/svg", 'animateTransform');
+  let animate = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
   animate.setAttributeNS(null, "attributeName", "transform");
+  animate.setAttributeNS(null, "type", "translate");
   if (useEasing) {
     animate.setAttributeNS(null, "calcMode", "spline")
     animate.setAttributeNS(null, "keySplines", "0.9 0.1 0.1 0.9")
     animate.setAttributeNS(null, "values", x1 + " " + y1 + ";" + x2 + " " + y2)
+    animate.setAttributeNS(null, "keyTimes", "0; 1")
   } else {
+    animate.setAttributeNS(null, "from", x1 + " " + y1)
     animate.setAttributeNS(null, "to", x2 + " " + y2) 
   }
   animate.setAttributeNS(null, "dur", duration + "s");
@@ -1455,6 +1458,9 @@ GuiElements.animate.move = function(element, x2, y2, duration, useEasing, x1, y1
 
   element.appendChild(animate)
   animate.beginElement()
+
+  console.log("*** animate move ")
+  console.log(animate)
 
   return animate
 }
