@@ -1455,12 +1455,14 @@ GuiElements.animate.move = function(element, x2, y2, duration, useEasing, x1, y1
   animate.setAttributeNS(null, "dur", duration + "s");
   animate.setAttributeNS(null, "repeatCount", "1");
   animate.setAttributeNS(null, "fill", "freeze");
+  animate.setAttributeNS(null, "begin", "indefinite");
 
   element.appendChild(animate)
   animate.beginElement()
+  
 
-  console.log("*** animate move ")
-  console.log(animate)
+  //console.log("*** animate move ")
+  //console.log(animate)
 
   return animate
 }

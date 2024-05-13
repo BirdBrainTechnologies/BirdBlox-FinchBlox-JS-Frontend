@@ -53,6 +53,7 @@ function HLLevelSwitch(x, y) {
   }
 
 HLLevelSwitch.prototype.press = function() {
+	console.log("*** press level switch")
 
 	this.oldTab = TabManager.activeTab
 	this.oldTab.dontDelete = true
@@ -68,9 +69,8 @@ HLLevelSwitch.prototype.press = function() {
 	}
 	this.animationInProgress = true
 
-	LevelManager.setLevel(level); //will call setSwitch
-	LevelManager.loadLevelSavePoint();
 
+	console.log("*** about to create level switch tempG")
 	//Create a temporary group to hold both old and new programs. This allows for the animation of switching files.
 	this.tempG = GuiElements.create.group(0, 0, GuiElements.layers.activeTab)
 
@@ -82,11 +82,14 @@ HLLevelSwitch.prototype.press = function() {
 	const clipPathOldTab = GuiElements.clip(otX, otY, otW, otH, this.oldTab.mainG)
 	this.tempG.appendChild(this.oldTab.mainG)
 
+	LevelManager.setLevel(level); //will call setSwitch
+	LevelManager.loadLevelSavePoint();
+
 	//Add the new tab off screen
-	const newTabX = (level == 1) ? GuiElements.width : -GuiElements.width 
+	/*const newTabX = (level == 1) ? GuiElements.width : -GuiElements.width 
 	const clipPathNewTab = GuiElements.clip(0, 0, GuiElements.width, GuiElements.height, TabManager.activeTab.mainG)
 	GuiElements.move.group(TabManager.activeTab.mainG, newTabX, 0)
-	this.tempG.appendChild(TabManager.activeTab.mainG)
+	this.tempG.appendChild(TabManager.activeTab.mainG)*/
 	
 	const oldTabX = (level == 1) ? -GuiElements.width : GuiElements.width
     
@@ -94,7 +97,7 @@ HLLevelSwitch.prototype.press = function() {
     GuiElements.update.stroke(rect, Colors.ballyGray, 1)
     this.tempG.appendChild(rect)
 
-
+    console.log("*** adding animations")
 	this.animations[0] = GuiElements.animate.updateColor(tB, Colors.white, duration)
 	this.animations[1] = GuiElements.animate.updateColor(tW, this.textColor, duration)
 	this.animations[2] = GuiElements.animate.move(this.circleE, x, 0, duration, false, this.circleE.getAttribute("x"))
@@ -126,16 +129,18 @@ HLLevelSwitch.prototype.setSwitch = function(level) {
 		this.oldTab.delete()
 	}
 	
+	console.log("*** HLLevelSwitch setSwitch - about to delete tempG")
+	if (this.tempG != null) {
+		this.tempG.remove()
+		this.tempG = null
+	}
+
 	if (TabManager.activeTab != null) {
 		TabManager.activeTab.mainG.removeAttributeNS(null, "clip-path")
 		GuiElements.move.group(TabManager.activeTab.mainG, 0, 0)
 		GuiElements.layers.activeTab.appendChild(TabManager.activeTab.mainG)
 	}
 	
-	if (this.tempG != null) {
-		this.tempG.remove()
-		this.tempG = null
-	}
 
 	switch(level){
 	case 1:

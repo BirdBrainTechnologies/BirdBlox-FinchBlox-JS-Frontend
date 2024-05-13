@@ -47,8 +47,18 @@ function Tab() {
  * Brings the tab to the foreground.  Called by TabManager.
  */
 Tab.prototype.activate = function() {
-  GuiElements.layers.activeTab.appendChild(this.mainG);
-  this.overFlowArr.show();
+  if (Hatchling && TitleBar.levelButton.tempG != null) {
+    //The hatchling app is in the process of switching levels, so add to that
+    const clipPathNewTab = GuiElements.clip(0, 0, GuiElements.width, GuiElements.height, this.mainG)
+    const newX = (LevelManager.currentLevel == 1) ? GuiElements.width : -GuiElements.width 
+    GuiElements.move.group(this.mainG, newX, 0)
+    TitleBar.levelButton.tempG.appendChild(this.mainG)
+    console.log("*** Tab activate - added a newly activated tab to level switch tempG")
+  } else {
+    GuiElements.layers.activeTab.appendChild(this.mainG);
+    this.overFlowArr.show();
+  }
+  
   if (FinchBlox) {
     const stacks = this.stackList;
     var startBlockFound = false;
@@ -576,6 +586,7 @@ Tab.importXml = function(tabNode) {
  * Removes the tab
  */
 Tab.prototype.delete = function() {
+  console.log("*** Tab delete " + this.dontDelete)
   if (this.dontDelete) { return }
   this.passRecursively("remove");
   this.mainG.remove();

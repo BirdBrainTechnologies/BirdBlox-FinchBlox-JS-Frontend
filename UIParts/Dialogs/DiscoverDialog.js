@@ -39,31 +39,38 @@ DiscoverDialog.prototype.constructor = DiscoverDialog;
  */
 DiscoverDialog.prototype.show = function() {
   const DD = DiscoverDialog;
-  if (Hatchling && GuiElements.isPWA) {
+  let shouldDiscover = true
+  if (Hatchling) {
     let device = DeviceHatchling.getManager().getDevice(0)
     if (device != null && device.connected) {
       //Show the connected device - user can scan if they disconnect
       this.connectedDevices = [device]
-      this.discoveredDevices = []
-      this.rowCount = 1
-      RowDialog.prototype.show.call(this);
       this.hasBeenShown = true
-      return
+      const index = this.discoveredDevices.indexOf(device)
+      if (GuiElements.isPWA) { 
+        this.discoveredDevices = []
+        this.rowCount = 1
+        shouldDiscover = false 
+      } else if (index != -1) {
+        console.log("*** removing connected device from discovery list")
+        this.discoveredDevices.splice(index, 1) 
+      }
     } else if (this.discoveredDevices.length == 0 && this.hasBeenShown) {
       //No devices. Show new scan button
       this.connectedDevices = []
       this.rowCount = 1
-      RowDialog.prototype.show.call(this);
-      return
+      if (GuiElements.isPWA) { shouldDiscover = false }
     } else if (this.discoveredDevices.length == 1) {
       //This is a weird case where the back end sends the device you are connecting before it is connected.
-      RowDialog.prototype.show.call(this);
-      return
+      if (GuiElements.isPWA) { shouldDiscover = false }
+    } else {
+      this.hasBeenShown = true
     }
-    this.hasBeenShown = true
   }
   RowDialog.prototype.show.call(this);
-  this.discoverDevices();
+  if (shouldDiscover) {
+    this.discoverDevices();
+  }
 
 };
 
@@ -99,6 +106,7 @@ DiscoverDialog.prototype.checkPendingUpdate = function() {
 var updateDeviceListCounter = 0;
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
+  console.log("*** updateDeviceList " + deviceList)
   updateDeviceListCounter += 1;
   if (!this.visible) {
     return;
@@ -126,6 +134,8 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
   }
 
   //if ((updateDeviceListCounter % 40) == 0){
+  console.log("*** updateDeviceList about to reload " + (this.discoveredDevicesRSSISorted.length + this.connectedDevices.length) + " rows")
+  console.log(this.discoveredDevices)
   this.reloadRows(this.discoveredDevicesRSSISorted.length + this.connectedDevices.length);
   //};
 
@@ -141,7 +151,9 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
  * @param {Element} contentGroup
  */
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
-
+  console.log("*** create row " + index)
+  console.log(this.connectedDevices)
+  console.log(this.discoveredDevices)
   const deviceList = this.connectedDevices.concat(this.discoveredDevices)
   const device = deviceList[index]
   console.log(deviceList)

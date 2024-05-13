@@ -8120,12 +8120,14 @@ GuiElements.animate.move = function(element, x2, y2, duration, useEasing, x1, y1
   animate.setAttributeNS(null, "dur", duration + "s");
   animate.setAttributeNS(null, "repeatCount", "1");
   animate.setAttributeNS(null, "fill", "freeze");
+  animate.setAttributeNS(null, "begin", "indefinite");
 
   element.appendChild(animate)
   animate.beginElement()
+  
 
-  console.log("*** animate move ")
-  console.log(animate)
+  //console.log("*** animate move ")
+  //console.log(animate)
 
   return animate
 }
@@ -16933,6 +16935,7 @@ function HLLevelSwitch(x, y) {
   }
 
 HLLevelSwitch.prototype.press = function() {
+	console.log("*** press level switch")
 
 	this.oldTab = TabManager.activeTab
 	this.oldTab.dontDelete = true
@@ -16948,9 +16951,8 @@ HLLevelSwitch.prototype.press = function() {
 	}
 	this.animationInProgress = true
 
-	LevelManager.setLevel(level); //will call setSwitch
-	LevelManager.loadLevelSavePoint();
 
+	console.log("*** about to create level switch tempG")
 	//Create a temporary group to hold both old and new programs. This allows for the animation of switching files.
 	this.tempG = GuiElements.create.group(0, 0, GuiElements.layers.activeTab)
 
@@ -16962,11 +16964,14 @@ HLLevelSwitch.prototype.press = function() {
 	var clipPathOldTab = GuiElements.clip(otX, otY, otW, otH, this.oldTab.mainG)
 	this.tempG.appendChild(this.oldTab.mainG)
 
+	LevelManager.setLevel(level); //will call setSwitch
+	LevelManager.loadLevelSavePoint();
+
 	//Add the new tab off screen
-	var newTabX = (level == 1) ? GuiElements.width : -GuiElements.width 
+	/*var newTabX = (level == 1) ? GuiElements.width : -GuiElements.width 
 	var clipPathNewTab = GuiElements.clip(0, 0, GuiElements.width, GuiElements.height, TabManager.activeTab.mainG)
 	GuiElements.move.group(TabManager.activeTab.mainG, newTabX, 0)
-	this.tempG.appendChild(TabManager.activeTab.mainG)
+	this.tempG.appendChild(TabManager.activeTab.mainG)*/
 	
 	var oldTabX = (level == 1) ? -GuiElements.width : GuiElements.width
     
@@ -16974,7 +16979,7 @@ HLLevelSwitch.prototype.press = function() {
     GuiElements.update.stroke(rect, Colors.ballyGray, 1)
     this.tempG.appendChild(rect)
 
-
+    console.log("*** adding animations")
 	this.animations[0] = GuiElements.animate.updateColor(tB, Colors.white, duration)
 	this.animations[1] = GuiElements.animate.updateColor(tW, this.textColor, duration)
 	this.animations[2] = GuiElements.animate.move(this.circleE, x, 0, duration, false, this.circleE.getAttribute("x"))
@@ -17006,16 +17011,18 @@ HLLevelSwitch.prototype.setSwitch = function(level) {
 		this.oldTab.delete()
 	}
 	
+	console.log("*** HLLevelSwitch setSwitch - about to delete tempG")
+	if (this.tempG != null) {
+		this.tempG.remove()
+		this.tempG = null
+	}
+
 	if (TabManager.activeTab != null) {
 		TabManager.activeTab.mainG.removeAttributeNS(null, "clip-path")
 		GuiElements.move.group(TabManager.activeTab.mainG, 0, 0)
 		GuiElements.layers.activeTab.appendChild(TabManager.activeTab.mainG)
 	}
 	
-	if (this.tempG != null) {
-		this.tempG.remove()
-		this.tempG = null
-	}
 
 	switch(level){
 	case 1:
@@ -25605,8 +25612,18 @@ function Tab() {
  * Brings the tab to the foreground.  Called by TabManager.
  */
 Tab.prototype.activate = function() {
-  GuiElements.layers.activeTab.appendChild(this.mainG);
-  this.overFlowArr.show();
+  if (Hatchling && TitleBar.levelButton.tempG != null) {
+    //The hatchling app is in the process of switching levels, so add to that
+    var clipPathNewTab = GuiElements.clip(0, 0, GuiElements.width, GuiElements.height, this.mainG)
+    var newX = (LevelManager.currentLevel == 1) ? GuiElements.width : -GuiElements.width 
+    GuiElements.move.group(this.mainG, newX, 0)
+    TitleBar.levelButton.tempG.appendChild(this.mainG)
+    console.log("*** Tab activate - added a newly activated tab to level switch tempG")
+  } else {
+    GuiElements.layers.activeTab.appendChild(this.mainG);
+    this.overFlowArr.show();
+  }
+  
   if (FinchBlox) {
     var stacks = this.stackList;
     var startBlockFound = false;
@@ -26134,6 +26151,7 @@ Tab.importXml = function(tabNode) {
  * Removes the tab
  */
 Tab.prototype.delete = function() {
+  console.log("*** Tab delete " + this.dontDelete)
   if (this.dontDelete) { return }
   this.passRecursively("remove");
   this.mainG.remove();
@@ -26800,6 +26818,8 @@ RowDialog.prototype.createTitleIcon = function(pathId) {
  * @return {Element} the SVG group element containing the rows
  */
 RowDialog.prototype.createContent = function() {
+  console.log("*** createContent ")
+  console.log(this.discoveredDevices)
   var RD = RowDialog;
   var y = 0;
   var rowGroup = GuiElements.create.group(0, 0);
@@ -28771,31 +28791,38 @@ DiscoverDialog.prototype.constructor = DiscoverDialog;
  */
 DiscoverDialog.prototype.show = function() {
   var DD = DiscoverDialog;
-  if (Hatchling && GuiElements.isPWA) {
+  var shouldDiscover = true
+  if (Hatchling) {
     var device = DeviceHatchling.getManager().getDevice(0)
     if (device != null && device.connected) {
       //Show the connected device - user can scan if they disconnect
       this.connectedDevices = [device]
-      this.discoveredDevices = []
-      this.rowCount = 1
-      RowDialog.prototype.show.call(this);
       this.hasBeenShown = true
-      return
+      var index = this.discoveredDevices.indexOf(device)
+      if (GuiElements.isPWA) { 
+        this.discoveredDevices = []
+        this.rowCount = 1
+        shouldDiscover = false 
+      } else if (index != -1) {
+        console.log("*** removing connected device from discovery list")
+        this.discoveredDevices.splice(index, 1) 
+      }
     } else if (this.discoveredDevices.length == 0 && this.hasBeenShown) {
       //No devices. Show new scan button
       this.connectedDevices = []
       this.rowCount = 1
-      RowDialog.prototype.show.call(this);
-      return
+      if (GuiElements.isPWA) { shouldDiscover = false }
     } else if (this.discoveredDevices.length == 1) {
       //This is a weird case where the back end sends the device you are connecting before it is connected.
-      RowDialog.prototype.show.call(this);
-      return
+      if (GuiElements.isPWA) { shouldDiscover = false }
+    } else {
+      this.hasBeenShown = true
     }
-    this.hasBeenShown = true
   }
   RowDialog.prototype.show.call(this);
-  this.discoverDevices();
+  if (shouldDiscover) {
+    this.discoverDevices();
+  }
 
 };
 
@@ -28831,6 +28858,7 @@ DiscoverDialog.prototype.checkPendingUpdate = function() {
 var updateDeviceListCounter = 0;
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
+  console.log("*** updateDeviceList " + deviceList)
   updateDeviceListCounter += 1;
   if (!this.visible) {
     return;
@@ -28858,6 +28886,8 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
   }
 
   //if ((updateDeviceListCounter % 40) == 0){
+  console.log("*** updateDeviceList about to reload " + (this.discoveredDevicesRSSISorted.length + this.connectedDevices.length) + " rows")
+  console.log(this.discoveredDevices)
   this.reloadRows(this.discoveredDevicesRSSISorted.length + this.connectedDevices.length);
   //};
 
@@ -28873,7 +28903,9 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
  * @param {Element} contentGroup
  */
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
-
+  console.log("*** create row " + index)
+  console.log(this.connectedDevices)
+  console.log(this.discoveredDevices)
   var deviceList = this.connectedDevices.concat(this.discoveredDevices)
   var device = deviceList[index]
   console.log(deviceList)
@@ -31673,7 +31705,7 @@ SaveManager.backendOpen = function(fileName, data) {
 SaveManager.loadData = function(data) {
   if (data.length > 0) {
     if (data.charAt(0) === "%") {
-      // The data haas an extra layer of encoding that needs to be removed
+      // The data has an extra layer of encoding that needs to be removed
       data = decodeURIComponent(data);
     }
     var xmlDoc = XmlWriter.openDoc(data);
@@ -31840,6 +31872,7 @@ SaveManager.autoSave = function(nextAction) {
  * @param {string} fileName - The file to open
  */
 SaveManager.userOpenFile = function(fileName) {
+  console.log("*** SaveManager.userOpenFile " + fileName)
   SaveManager.fileName = fileName;
   var request = new HttpRequestBuilder("data/open");
   request.addParam("filename", fileName);
@@ -32429,7 +32462,7 @@ LevelManager.checkSavedFiles = function() {
 
 LevelManager.loadLevelSavePoint = function() {
   var LM = LevelManager;
-  GuiElements.blockInteraction();
+  GuiElements.blockInteraction(Hatchling);
   var levelFileName = LM.savePointFileNames[LM.currentLevel];
   console.log("loadLevelSavePoint for level " + LM.currentLevel + ": " + levelFileName);
   console.log(LM.filesSavedLocally)
