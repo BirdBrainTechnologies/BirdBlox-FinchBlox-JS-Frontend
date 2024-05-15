@@ -7,7 +7,7 @@
 InputWidget.HLPortWidget = function(portType, parent) {
 
 	this.index = 0 //This widget cannot currently be combined with other widgets
-	this.standardWidth = 275
+	this.standardWidth = 200//275
   this.plugAreaWidth = this.standardWidth * 1/2
   this.width = this.standardWidth
 	this.height = this.standardWidth * 3/4 
@@ -16,8 +16,8 @@ InputWidget.HLPortWidget = function(portType, parent) {
 	this.portType = portType
 	this.type = "hatchling_" + portType
   this.buttons = []
-  this.iconH = 20
-  this.font = Font.secondaryUiFont(18)
+  this.iconH = 18//20
+  this.font = Font.secondaryUiFont(16)//18)
   this.showPlug = false
   this.parent = parent
 
@@ -60,9 +60,9 @@ InputWidget.HLPortWidget.prototype.show = function(x, y, parentGroup, overlay, s
   //Draw the plug icon if needed
   if (this.showPlug) {
     const plugPath = VectorPaths.bdPlug
-    const plugH = this.height * 3/5
+    const plugH = this.height * 0.69 //3/5
     const plugX = 20
-    const plugY = this.height - plugH
+    const plugY = this.height - plugH + InputPad.margin
     this.plug = new VectorIcon(plugX, plugY, plugPath, Colors.ballyBrandBlueDark, plugH, this.group)
   } else {
     this.plug = null
@@ -71,7 +71,7 @@ InputWidget.HLPortWidget.prototype.show = function(x, y, parentGroup, overlay, s
   //Draw the egg
   const eggPath = VectorPaths.bdHatchling
   const eggColor = this.showPlug ? Colors.ballyRed : Colors.ballyBrandBlue
-  const eggH = this.height * 5/7
+  const eggH = this.height * 3/4 //5/7
   const eggW = VectorIcon.computeWidth(eggPath, eggH)
   const eggX = this.showPlug ? (this.plugAreaWidth + (this.standardWidth - eggW)/2) : (this.width - eggW)/2
   const eggY = (this.height - eggH)/2

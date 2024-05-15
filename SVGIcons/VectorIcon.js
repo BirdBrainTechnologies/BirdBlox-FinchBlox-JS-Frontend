@@ -60,7 +60,7 @@ VectorIcon.prototype.draw = function() {
     this.pathE.setAttributeNS(null, "transform", this.pathId.transform);
   }
   if (this.pathId.fillRule != null) {
-  	this.pathE.setAttributeNS(null, "fill-rule", this.pathId.fillRule);
+  	this.pathE.setAttributeNS(null, "style", "fill-rule: " + this.pathId.fillRule + ";")
   }
 	this.group.appendChild(this.pathE);
 };
@@ -177,7 +177,7 @@ VectorIcon.prototype.addPath = function(pathId, color){
     pathE.setAttributeNS(null, "transform", pathId.transform);
   }
   if (pathId.fillRule != null) {
-  	pathE.setAttributeNS(null, "fill-rule", pathId.fillRule);
+  	this.pathE.setAttributeNS(null, "style", "fill-rule: " + this.pathId.fillRule + ";")
   }
 	return pathE
 }

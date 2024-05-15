@@ -168,6 +168,9 @@ Device.prototype.setConnected = function(isConnected) {
   this.connected = isConnected;
   if (this.statusListener != null) this.statusListener(this.getStatus());
   DeviceManager.updateStatus();
+  if (Hatchling) { 
+    CodeManager.updateAvailablePorts(-1)
+  }
 };
 Device.prototype.setBatteryStatus = function(batteryStatus) {
   this.batteryState = batteryStatus;

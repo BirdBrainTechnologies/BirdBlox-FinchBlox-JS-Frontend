@@ -56,7 +56,6 @@ HL_Utils.alphaDict = {
 HL_Utils.addHLButton = function(block, portType) {
   block.port = -1 //unknown
   block.hlButton = new BlockButton(block, 14)//14, 10)//12)//10)//15)//20);
-  //block.hlButton.addSlider("hatchling_" + portType, HL_Utils.noPort, HL_Utils.portNames)// Colors.bbtDarkGray, HL_Utils.portColors)
   block.hlButton.addPortWidget(portType)
   //block.hlButton.button.unbutton()
   HL_Utils.findPorts(block)
@@ -75,20 +74,19 @@ HL_Utils.updatePort = function(block) {
   }
 }
 HL_Utils.findPorts = function(block) {
+  if (block.hlButton == null) {
+    return //No point if there is nothing to update
+  }
+
   const blockOnCanvas = ((block.stack != null) ? !block.stack.isDisplayStack : false)
   //console.log("findPorts for " + block.constructor.name + " " + block.portType + " " + blockOnCanvas)
   let device = DeviceHatchling.getManager().getDevice(0);
-  if (block.hlButton != null && device != null) {
-    /*if (block.hlButton.values[0] == HL_Utils.unknownPort) {
-      block.hlButton.button.show()
-    }*/
+  if (device != null && device.connected) {
 
     let ports = device.getPortsByType(block.portType)
-    //console.log("findPorts " + blockOnCanvas + " found: " + ports)
     if (ports.length >= 1) {
       let p = ports[0]
       if (ports.length > 1) {
-        //block.hlButton.callbackFunction()
         block.shouldShowPortsPopup = true
 
         if (block.userSelectedPort != null) {
@@ -119,7 +117,7 @@ HL_Utils.findPorts = function(block) {
     if (device.updateListener != null && device.updateListener.parent == block.hlButton) {
       device.updateListener.value = device.updateListener.parent.values[0]
     }
-  } else if (block.hlButton != null) {
+  } else {
     block.hlButton.button.rebutton()
     block.hlButton.updateValue(HL_Utils.unknownPort, 0)
     //block.hlButton.button.unbutton()
@@ -172,9 +170,7 @@ HL_Utils.checkActive = function(block) {
 HL_Utils.checkAction = function(block) {
   if (block.port == -1) {
     if (block.hlButton != null) {
-      block.hlButton.widgets[0].addPlugArea()
       block.hlButton.callbackFunction()
-      block.hlButton.widgets[0].removePlugArea()
     }
 
     console.error("Accessory not connected " + block.constructor.name)
@@ -265,6 +261,7 @@ HL_Utils.importXml = function(blockNode) {
   //console.log("*** found user true port " + userSelectedPort)
   let block = new window[type](0, 0, userSelectedPort)
   block.copyFromXml(blockNode)
+  HL_Utils.findPorts(block)
   return block
 }
 

@@ -391,7 +391,19 @@ BlockButton.prototype.addColorPicker = function(startingValue) {
  * Adds port chooser widget to this button. Hatchling only.
  */
 BlockButton.prototype.addPortWidget = function(portType) {
-  this.addWidget(new InputWidget.HLPortWidget(portType, this), "", HL_Utils.unknownPort)
+  const widget = new InputWidget.HLPortWidget(portType, this)
+  this.addWidget(widget, "", HL_Utils.unknownPort)
+  const oldCallback = this.callbackFunction
+  this.callbackFunction = function() {
+    const val = this.values[widget.index]
+    if (val == HL_Utils.noPort) {
+      widget.addPlugArea()
+    } else {
+      widget.removePlugArea()
+    }
+    oldCallback()
+  }.bind(this)
+  this.button.setCallbackFunction(this.callbackFunction, true);
 }
 
 /**
