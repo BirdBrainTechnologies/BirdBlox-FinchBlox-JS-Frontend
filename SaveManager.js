@@ -25,7 +25,7 @@ SaveManager.setConstants = function() {
  * @param {boolean} named - false if the user should be prompted to name the file when they try to use the OpenDialog
  */
 SaveManager.backendOpen = function(fileName, data) {
-  //console.log("*** backendOpen " + fileName + ": " + data)
+  console.log("*** backendOpen " + fileName + ": " + data)
   SaveManager.fileName = fileName;
   SaveManager.loadData(data);
   if (FinchBlox) {
@@ -51,7 +51,7 @@ SaveManager.backendOpen = function(fileName, data) {
 SaveManager.loadData = function(data) {
   if (data.length > 0) {
     if (data.charAt(0) === "%") {
-      // The data haas an extra layer of encoding that needs to be removed
+      // The data has an extra layer of encoding that needs to be removed
       data = decodeURIComponent(data);
     }
     const xmlDoc = XmlWriter.openDoc(data);
@@ -218,6 +218,7 @@ SaveManager.autoSave = function(nextAction) {
  * @param {string} fileName - The file to open
  */
 SaveManager.userOpenFile = function(fileName) {
+  console.log("*** SaveManager.userOpenFile " + fileName)
   SaveManager.fileName = fileName;
   const request = new HttpRequestBuilder("data/open");
   request.addParam("filename", fileName);

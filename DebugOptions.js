@@ -247,4 +247,5 @@ function UserException(message) {
   this.message = message;
   this.name = 'UserException';
   this.stack = (new Error()).stack; // Get the call stack
+  console.error("*** Created UserException '" + this.message + "': " + this.stack)
 }

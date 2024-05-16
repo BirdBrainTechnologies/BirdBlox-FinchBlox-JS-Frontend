@@ -42,7 +42,7 @@ LevelManager.setLevel = function(level) {
   //console.log("Setting level to " + level);
   if (LM.currentLevel != level) {
     LM.currentLevel = level;
-    GuiElements.blockInteraction();
+    GuiElements.blockInteraction(Hatchling);
     //SaveManager.userClose(); //necessary? maybe add callback?
     BlockPalette.setLevel();
     //TabManager.activeTab.clear();
@@ -86,7 +86,7 @@ LevelManager.checkSavedFiles = function() {
 
 LevelManager.loadLevelSavePoint = function() {
   const LM = LevelManager;
-  GuiElements.blockInteraction();
+  GuiElements.blockInteraction(Hatchling);
   const levelFileName = LM.savePointFileNames[LM.currentLevel];
   console.log("loadLevelSavePoint for level " + LM.currentLevel + ": " + levelFileName);
   if (!LM.fileListRetreived) {
@@ -139,7 +139,7 @@ LevelManager.saveAs = function(name, rename) {
     return;
   }
   //console.log("Rename " + currentLevelFile + " to " + fileName);
-  GuiElements.blockInteraction();
+  GuiElements.blockInteraction(Hatchling);
   console.log("Rename " + currentFile + " to " + fileName);
   //SaveManager.sanitizeRename(false, currentLevelFile, "", fileName, function () {
   SaveManager.sanitizeRename(false, currentFile, "", fileName, function() {
@@ -166,7 +166,7 @@ LevelManager.openFile = function(fileName) {
     console.error("Unsupported level  " + fileLevel);
     return;
   }
-  GuiElements.blockInteraction();
+  GuiElements.blockInteraction(Hatchling);
   LevelManager.setLevel(fileLevel);
   SaveManager.userOpenFile(fileName);
 }
@@ -176,7 +176,7 @@ LevelManager.userDeleteFile = function(fileName) {
     LevelManager.loadLevelSavePoint();
   }*/
   let deletingCurrentFile = (fileName == SaveManager.fileName)
-  GuiElements.blockInteraction();
+  GuiElements.blockInteraction(Hatchling);
   for (let i = 0; i < LevelManager.filesSavedLocally.length; i++) {
     if (LevelManager.filesSavedLocally[i] == fileName) {
       LevelManager.filesSavedLocally.splice(i, 1);

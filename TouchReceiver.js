@@ -573,14 +573,27 @@ TouchReceiver.touchStartBN = function(target, e) {
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchStartScrollBox = function(target, e) {
-  //console.log("touchstartscrollbox")
-  //console.log(target)
-  //console.log(e)
   const TR = TouchReceiver;
   if (TR.touchstart(e, false)) {
     Overlay.closeOverlaysExcept(target.partOfOverlay);
     TR.targetType = "scrollBox";
     TR.target = target;
+    e.stopPropagation();
+  }
+};
+/**
+ * @param {SvgScrollBox} target
+ * @param {event} e - passed event arguments.
+ */
+TouchReceiver.touchStartScrollBar = function(target, e, horizontal) {
+  //console.log("touchstartscrollbox")
+  //console.log(target)
+  //console.log(e)
+  const TR = TouchReceiver;
+  if (TR.touchstart(e, false)) {
+    TR.targetType = "scrollBar";
+    TR.target = target;
+    target.scrollStart(horizontal, TR.getX(e), TR.getY(e))
     e.stopPropagation();
   }
 };
@@ -778,6 +791,10 @@ TouchReceiver.touchmove = function(e) {
           TR.blocksMoving = true;
         }
       }
+      // SvgScrollBox
+      if (TR.targetType == "scrollBar") {
+        TR.target.updateScroll(TR.getX(e), TR.getY(e))
+      }
       // Pick a new color based on the touch
       if (TR.targetType === "colorWheel") {
         TR.target.dragColor(TR.getX(e), TR.getY(e));
@@ -921,6 +938,8 @@ TouchReceiver.touchend = function(e) {
 						execStatus = TR.target.updateRun();
             TR.target.displayResult(execStatus.getResult());
         }, 100);*/
+    } else if (TR.targetType === "scrollBar") {
+      TR.target.scrollEnd()
     } else if (TR.targetType === "colorWheel") {
       //TR.target.drop(TR.getX(e));
       TR.target.dropColor();
@@ -1105,6 +1124,19 @@ TouchReceiver.addListenersScrollBox = function(element, parent) {
   TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
     // When it is touched, the SVG element will tell the TouchReceiver.
     TouchReceiver.touchStartScrollBox(parent, e);
+  }, false);
+};
+/**
+ * Listeners for the scroll bars of an SvgScrollBox
+ * @param {Element} element
+ * @param {SvgScrollBox} parent
+ * @param {boolean} horizontal
+ */
+TouchReceiver.addListenersScrollBar = function(element, parent, horizontal) {
+  const TR = TouchReceiver;
+  TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+    // When it is touched, the SVG element will tell the TouchReceiver.
+    TouchReceiver.touchStartScrollBar(parent, e, horizontal);
   }, false);
 };
 /**

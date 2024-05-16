@@ -198,7 +198,8 @@ HLFileDrawer.prototype.resetTab = function(tab, extend, embed) {
 
 	if (this.scrollBox != null) {
 		this.scrollBox.hide();
-		this.scrollFO.remove()
+		this.scrollBox = null //will remake the scroll box to show it again
+		//this.scrollFO.remove()
 	}
 
 
@@ -472,6 +473,7 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 	//console.log("making content. sx=" + scrollBoxX + " sy=" + scrollBoxY + " this.y=" + this.y + " sh=" + scrollHeight + " ah=" + availableHeight + " sbh=" + scrollBoxHeight + " rc=" + this.rowCount + " bnh=" + RD.bnHeight);
 	//Create the rows to display and the scrollbox to contain them
 	if (this.rowCount != 0) {
+		/*
 	  //embed the scroll box in a foreign object so it can slide in with the menu
 	  this.scrollFO = document.createElementNS('http://www.w3.org/2000/svg', "foreignObject");
 	  this.scrollFO.setAttribute('width', scrollBoxWidth);
@@ -491,6 +493,11 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 	    0, 0, scrollBoxWidth, scrollBoxHeight, scrollBoxWidth, scrollHeight, this);
 
 	  this.scrollBox.show();
+	  */
+
+		const rowGroup = RowDialog.prototype.createContent.call(this);
+		this.scrollBox = new SvgScrollBox(rowGroup, this.group, scrollBoxX, scrollBoxY, 
+			scrollBoxWidth, scrollBoxHeight, scrollBoxWidth, scrollHeight, this)
 	}
 	
 }

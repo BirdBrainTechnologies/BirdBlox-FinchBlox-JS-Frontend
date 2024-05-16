@@ -12127,14 +12127,27 @@ TouchReceiver.touchStartBN = function(target, e) {
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchStartScrollBox = function(target, e) {
-  //console.log("touchstartscrollbox")
-  //console.log(target)
-  //console.log(e)
   var TR = TouchReceiver;
   if (TR.touchstart(e, false)) {
     Overlay.closeOverlaysExcept(target.partOfOverlay);
     TR.targetType = "scrollBox";
     TR.target = target;
+    e.stopPropagation();
+  }
+};
+/**
+ * @param {SvgScrollBox} target
+ * @param {event} e - passed event arguments.
+ */
+TouchReceiver.touchStartScrollBar = function(target, e, horizontal) {
+  //console.log("touchstartscrollbox")
+  //console.log(target)
+  //console.log(e)
+  var TR = TouchReceiver;
+  if (TR.touchstart(e, false)) {
+    TR.targetType = "scrollBar";
+    TR.target = target;
+    target.scrollStart(horizontal, TR.getX(e), TR.getY(e))
     e.stopPropagation();
   }
 };
@@ -12332,6 +12345,10 @@ TouchReceiver.touchmove = function(e) {
           TR.blocksMoving = true;
         }
       }
+      // SvgScrollBox
+      if (TR.targetType == "scrollBar") {
+        TR.target.updateScroll(TR.getX(e), TR.getY(e))
+      }
       // Pick a new color based on the touch
       if (TR.targetType === "colorWheel") {
         TR.target.dragColor(TR.getX(e), TR.getY(e));
@@ -12475,6 +12492,8 @@ TouchReceiver.touchend = function(e) {
 						execStatus = TR.target.updateRun();
             TR.target.displayResult(execStatus.getResult());
         }, 100);*/
+    } else if (TR.targetType === "scrollBar") {
+      TR.target.scrollEnd()
     } else if (TR.targetType === "colorWheel") {
       //TR.target.drop(TR.getX(e));
       TR.target.dropColor();
@@ -12659,6 +12678,19 @@ TouchReceiver.addListenersScrollBox = function(element, parent) {
   TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
     // When it is touched, the SVG element will tell the TouchReceiver.
     TouchReceiver.touchStartScrollBox(parent, e);
+  }, false);
+};
+/**
+ * Listeners for the scroll bars of an SvgScrollBox
+ * @param {Element} element
+ * @param {SvgScrollBox} parent
+ * @param {boolean} horizontal
+ */
+TouchReceiver.addListenersScrollBar = function(element, parent, horizontal) {
+  var TR = TouchReceiver;
+  TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+    // When it is touched, the SVG element will tell the TouchReceiver.
+    TouchReceiver.touchStartScrollBar(parent, e, horizontal);
   }, false);
 };
 /**
@@ -22006,6 +22038,129 @@ SmoothMenuBnList.previewHeight = function(count, maxHeight) {
 };
 
 /**
+ * Create a scroll box similar to SmoothScrollBox, except that this one is made entirely 
+ * from svg elements. 
+ * @param {Element} contentGroup - The group that should be within the scrollBox
+ * @param {Element} parentGroup - Group to add this scroll box to
+ * @param {number} x - The x coord for the scroll box
+ * @param {number} y - The y coord for the scroll box
+ * @param {number} width - The width the scroll box should have
+ * @param {number} height - The height the scroll box should have
+ * @param {number} innerWidth - The width of the content within the scroll box.  If larger, the scroll box will scroll
+ * @param {number} innerHeight - The height of the content within the scroll box.  If larger, the scroll box will scroll
+ * @param {Overlay|null} [partOfOverlay=null] - The Overlay this SvgScrollBox is a part of, or null if N/A
+ */
+function SvgScrollBox(contentGroup, parentGroup, x, y, width, height, innerWidth, innerHeight, overlay) {
+	this.contentGroup = contentGroup
+	this.parentGroup = parentGroup
+	this.width = width
+	this.height = height
+	this.innerWidth = innerWidth
+	this.innerHeight = innerHeight
+	this.partOfOverlay = overlay
+
+	this.visible = true
+	this.group = GuiElements.create.group(x, y, this.parentGroup)
+	this.group.appendChild(this.contentGroup)
+	GuiElements.clip(0, 0, width, height, this.group)
+
+	this.contentX = 0
+	this.contentY = 0
+
+	this.barW = 5
+	var color = Colors.ballyGray
+	if (innerHeight > height) {
+		var barX = this.width - this.barW
+		this.verticalBarY = this.barW/2 //make room for line cap
+		this.verticalBarH = height*2/5
+		var y2 = this.verticalBarY + this.verticalBarH
+		this.verticalScrollBar = GuiElements.draw.line(barX, this.verticalBarY, barX, y2, color, this.barW, true)
+		TouchReceiver.addListenersScrollBar(this.verticalScrollBar, this, false)
+		this.group.appendChild(this.verticalScrollBar)
+	}
+	if (innerWidth > width) {
+		var barY = this.height - this.barW
+		this.horizontalBarX = this.barW/2 //make room for line cap
+		this.horizontalBarW = width*2/5
+		var x2 = this.horizontalBarX + this.horizontalBarW
+		this.horizontalScrollBar = GuiElements.draw.line(this.horizontalBarX, barY, x2, barY, color, this.barW, true)
+		TouchReceiver.addListenersScrollBar(this.horizontalScrollBar, this, true)
+		this.group.appendChild(this.horizontalScrollBar)
+	}
+}
+
+SvgScrollBox.prototype.scrollStart = function(horizontal, x, y) {
+	if (horizontal) {
+		this.scrollStartX = x
+	} else {
+		this.scrollStartY = y
+	}
+	
+}
+SvgScrollBox.prototype.updateScroll = function(x, y) {
+	if (this.scrollStartX != null) {
+		var barX = this.horizontalBarX + x - this.scrollStartX
+		if (barX > this.barW/2 && barX < (this.width - this.horizontalBarW - this.barW/2)) {
+
+			var overflow = this.innerWidth - this.width
+			var barSpace = this.width - this.horizontalBarW - this.barW
+			var scale = overflow/barSpace
+			var barDist = x - this.scrollStartX
+			var contentDist = -barDist * scale
+
+			this.horizontalBarX = barX
+			this.horizontalScrollBar.setAttributeNS(null, "x1", this.horizontalBarX)
+			this.horizontalScrollBar.setAttributeNS(null, "x2", this.horizontalBarX + this.horizontalBarW)
+			this.scrollStartX = x
+
+			this.contentX += contentDist
+			GuiElements.move.group(this.contentGroup, this.contentX, this.contentY)
+		}
+	}
+
+	if (this.scrollStartY != null) {
+		var barY = this.verticalBarY + y - this.scrollStartY
+		if (barY > this.barW/2 && barY < (this.height - this.verticalBarH - this.barW/2)) {
+
+			var overflow = this.innerHeight - this.height
+			var barSpace = this.height - this.verticalBarH - this.barW
+			var scale = overflow/barSpace
+			var barDist = y - this.scrollStartY
+			var contentDist = -barDist * scale
+
+			this.verticalBarY = barY
+			this.verticalScrollBar.setAttributeNS(null, "y1", this.verticalBarY)
+			this.verticalScrollBar.setAttributeNS(null, "y2", this.verticalBarY + this.verticalBarH)
+			this.scrollStartY = y
+
+			this.contentY += contentDist
+			GuiElements.move.group(this.contentGroup, this.contentX, this.contentY)			
+
+		}
+		
+	}
+
+}
+SvgScrollBox.prototype.scrollEnd = function() {
+	this.scrollStartX = null 
+	this.scrollStartY = null
+}
+
+
+SvgScrollBox.prototype.show = function() {
+	if (!this.visible) {
+		this.visible = true
+		this.parentGroup.appendChild(this.group)
+	}
+}
+
+SvgScrollBox.prototype.hide = function() {
+	if (this.visible) {
+		this.visible = false
+		this.parentGroup.removeChild(this.group)
+	}
+}
+/**
  * Abstract class that represents a menu displayed when a Button in the TitleBar is tapped.  The Menu requires a button
  * to attach to, which it automatically configures the callbacks for.  Subclasses override the loadOptions function
  * which is called every time the Menu is open and should call addOption() to determine which options to show. If the
@@ -22922,7 +23077,8 @@ HLFileDrawer.prototype.resetTab = function(tab, extend, embed) {
 
 	if (this.scrollBox != null) {
 		this.scrollBox.hide();
-		this.scrollFO.remove()
+		this.scrollBox = null //will remake the scroll box to show it again
+		//this.scrollFO.remove()
 	}
 
 
@@ -23196,6 +23352,7 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 	//console.log("making content. sx=" + scrollBoxX + " sy=" + scrollBoxY + " this.y=" + this.y + " sh=" + scrollHeight + " ah=" + availableHeight + " sbh=" + scrollBoxHeight + " rc=" + this.rowCount + " bnh=" + RD.bnHeight);
 	//Create the rows to display and the scrollbox to contain them
 	if (this.rowCount != 0) {
+		/*
 	  //embed the scroll box in a foreign object so it can slide in with the menu
 	  this.scrollFO = document.createElementNS('http://www.w3.org/2000/svg', "foreignObject");
 	  this.scrollFO.setAttribute('width', scrollBoxWidth);
@@ -23215,6 +23372,11 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 	    0, 0, scrollBoxWidth, scrollBoxHeight, scrollBoxWidth, scrollHeight, this);
 
 	  this.scrollBox.show();
+	  */
+
+		var rowGroup = RowDialog.prototype.createContent.call(this);
+		this.scrollBox = new SvgScrollBox(rowGroup, this.group, scrollBoxX, scrollBoxY, 
+			scrollBoxWidth, scrollBoxHeight, scrollBoxWidth, scrollHeight, this)
 	}
 	
 }
@@ -32413,7 +32575,7 @@ LevelManager.setLevel = function(level) {
   //console.log("Setting level to " + level);
   if (LM.currentLevel != level) {
     LM.currentLevel = level;
-    GuiElements.blockInteraction();
+    GuiElements.blockInteraction(Hatchling);
     //SaveManager.userClose(); //necessary? maybe add callback?
     BlockPalette.setLevel();
     //TabManager.activeTab.clear();
@@ -32460,7 +32622,6 @@ LevelManager.loadLevelSavePoint = function() {
   GuiElements.blockInteraction(Hatchling);
   var levelFileName = LM.savePointFileNames[LM.currentLevel];
   console.log("loadLevelSavePoint for level " + LM.currentLevel + ": " + levelFileName);
-  console.log(LM.filesSavedLocally)
   if (!LM.fileListRetreived) {
     setTimeout(function() {
       LevelManager.loadLevelSavePoint();
@@ -32511,7 +32672,7 @@ LevelManager.saveAs = function(name, rename) {
     return;
   }
   //console.log("Rename " + currentLevelFile + " to " + fileName);
-  GuiElements.blockInteraction();
+  GuiElements.blockInteraction(Hatchling);
   console.log("Rename " + currentFile + " to " + fileName);
   //SaveManager.sanitizeRename(false, currentLevelFile, "", fileName, function () {
   SaveManager.sanitizeRename(false, currentFile, "", fileName, function() {
@@ -32538,7 +32699,7 @@ LevelManager.openFile = function(fileName) {
     console.error("Unsupported level  " + fileLevel);
     return;
   }
-  GuiElements.blockInteraction();
+  GuiElements.blockInteraction(Hatchling);
   LevelManager.setLevel(fileLevel);
   SaveManager.userOpenFile(fileName);
 }
@@ -32548,7 +32709,7 @@ LevelManager.userDeleteFile = function(fileName) {
     LevelManager.loadLevelSavePoint();
   }*/
   var deletingCurrentFile = (fileName == SaveManager.fileName)
-  GuiElements.blockInteraction();
+  GuiElements.blockInteraction(Hatchling);
   for (var i = 0; i < LevelManager.filesSavedLocally.length; i++) {
     if (LevelManager.filesSavedLocally[i] == fileName) {
       LevelManager.filesSavedLocally.splice(i, 1);
