@@ -501,16 +501,16 @@ TouchReceiver.touchStartComment = function(target, e) {
  */
 TouchReceiver.touchStartEditableFN = function(target, e) {
   const TR = TouchReceiver;
-  if (e.type.startsWith("mouse")) {
-    TR.checkStartZoom(e);
+//  if (e.type.startsWith("mouse")) {
+//    TR.checkStartZoom(e);
     if (TR.touchstart(e)) {
       Overlay.closeOverlays(); // Close any visible overlays.
       TR.target = target; // Store target.
       TR.targetType = "editableFileName"
     }
-  } else {
-    TR.multiTouchStart(e, target, "editableFileName")
-  }
+//  } else {
+//    TR.multiTouchStart(e, target, "editableFileName")
+//  }
 }
 /**
  * Handles new touch events for Slots.  Stores the target Slot.
@@ -597,6 +597,20 @@ TouchReceiver.touchStartScrollBar = function(target, e, horizontal) {
     e.stopPropagation();
   }
 };
+/**
+ * @param {SvgScrollBox} target
+ * @param {event} e - passed event arguments.
+ */
+TouchReceiver.touchStartSvgScrollBox = function(target, e) {
+  console.log("*** touchStartSvgScrollBox")
+  const TR = TouchReceiver;
+  if (TR.touchstart(e, false)) {
+    TR.targetType = "svgScrollBox";
+    TR.target = target;
+    target.startDrag(TR.getX(e), TR.getY(e))
+    e.stopPropagation();
+  }
+}
 /**
  * @param {ColorWidget} target
  * @param {event} e - passed event arguments.
@@ -795,6 +809,9 @@ TouchReceiver.touchmove = function(e) {
       if (TR.targetType == "scrollBar") {
         TR.target.updateScroll(TR.getX(e), TR.getY(e))
       }
+      if (TR.targetType == "svgScrollBox") {
+        TR.target.updateDrag(TR.getX(e), TR.getY(e))
+      }
       // Pick a new color based on the touch
       if (TR.targetType === "colorWheel") {
         TR.target.dragColor(TR.getX(e), TR.getY(e));
@@ -940,6 +957,8 @@ TouchReceiver.touchend = function(e) {
         }, 100);*/
     } else if (TR.targetType === "scrollBar") {
       TR.target.scrollEnd()
+    } else if (TR.targetType === "svgScrollBox") {
+      TR.target.stopDrag()
     } else if (TR.targetType === "colorWheel") {
       //TR.target.drop(TR.getX(e));
       TR.target.dropColor();
@@ -1082,14 +1101,27 @@ TouchReceiver.addListenersComment = function(element, comment) {
 /**
  * Adds handlerDown listeners to the EditableFileName.
  * @param {Element} element - The part of the EditableFileName the listeners are being applied to.
- * @param {Comment} comment - The EditableFileName the SVG element belongs to.
+ * @param {EditableFileName} parent - The EditableFileName the SVG element belongs to.
  */
-TouchReceiver.addListenersEditableFN = function(element, comment) {
+TouchReceiver.addListenersEditableFN = function(element, parent) {
   const TR = TouchReceiver;
   TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
     // When it is touched, the SVG element will tell the TouchReceiver its EditableFileName.
-    TouchReceiver.touchStartEditableFN(comment, e);
+    TouchReceiver.touchStartEditableFN(parent, e);
   }, false);
+};
+/**
+ * Adds handlerDown listeners to an SvgScrollBox.
+ * @param {Element} element - The part of the SvgScrollBox the listeners are being applied to.
+ * @param {SvgScrollBox} parent - The SvgScrollBox the SVG element belongs to.
+ */
+TouchReceiver.addListenersSvgScrollBox = function(element, parent) {
+  const TR = TouchReceiver;
+  TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+    // When it is touched, the SVG element will tell the TouchReceiver its EditableFileName.
+    TouchReceiver.touchStartSvgScrollBox(parent, e);
+  }, false);
+  TR.addEventListenerSafe(element, ["wheel"], parent.wheelScroll.bind(parent), false)
 };
 /**
  * Adds handlerDown listeners to the parts of a Slot.

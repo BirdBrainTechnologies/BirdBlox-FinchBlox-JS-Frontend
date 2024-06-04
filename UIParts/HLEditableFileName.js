@@ -26,7 +26,7 @@ function HLEditableFileName(x, y, w, group) {
 		if (txt == this.defaultText || txt == "") { 
 			//Cannot rename a file to the default text or empty string. Set back to current.
 			this.updateFileName()
-		} else {
+		} else if (txt != this.oldName) {
 			LM.saveAs(this.editableText.textContent, rename) 
 		}
 		
@@ -71,9 +71,10 @@ HLEditableFileName.prototype.positionIcon = function() {
 }
 
 HLEditableFileName.prototype.editText = function() {
+	this.oldName = this.editableText.textContent
 	if (this.editableText.textContent == this.defaultText) {
 		this.editableText.textContent = ""
-	}
+	} 
 	this.isEditing = true
 	this.editableText.focus()
 }

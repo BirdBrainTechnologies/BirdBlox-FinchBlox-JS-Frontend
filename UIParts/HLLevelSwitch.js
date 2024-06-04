@@ -54,6 +54,10 @@ function HLLevelSwitch(x, y) {
 
 HLLevelSwitch.prototype.press = function() {
 	console.log("*** press level switch")
+	if (this.switchPressed) {
+		return
+	}
+	this.switchPressed = true
 
 	this.oldTab = TabManager.activeTab
 	this.oldTab.dontDelete = true
@@ -156,8 +160,10 @@ HLLevelSwitch.prototype.setSwitch = function(level) {
 	default:
 		console.error("Level Switch does not support level " + level)
 	}
+	
+	this.switchPressed = false
 }
-
+	
 HLLevelSwitch.prototype.release = function() {
 
 }

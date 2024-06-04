@@ -1,5 +1,5 @@
-var FinchBlox = true;
-var Hatchling = true;
+//var FinchBlox = true;
+//var Hatchling = true;
 if (Hatchling) { FinchBlox = true; }
 var FrontendVersion = 393;
 
@@ -7814,7 +7814,7 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
     div.classList.add("noScroll");
   }
 
-  if (div.parentNode.parentNode.nodeName.toLowerCase() == "foreignobject") {
+  /*if (div.parentNode.parentNode.nodeName.toLowerCase() == "foreignobject") {
     div.style.top = y + "px";
     div.style.left = x + "px";
     div.style.width = width + "px";
@@ -7823,7 +7823,7 @@ GuiElements.update.smoothScrollSet = function(div, svg, zoomG, x, y, width, heig
     svg.setAttribute('width', innerWidth);
     svg.setAttribute('height', innerHeight);
     return
-  }
+  }*/
 
   var zoom = GuiElements.zoomFactor;
 
@@ -12055,16 +12055,16 @@ TouchReceiver.touchStartComment = function(target, e) {
  */
 TouchReceiver.touchStartEditableFN = function(target, e) {
   var TR = TouchReceiver;
-  if (e.type.startsWith("mouse")) {
-    TR.checkStartZoom(e);
+//  if (e.type.startsWith("mouse")) {
+//    TR.checkStartZoom(e);
     if (TR.touchstart(e)) {
       Overlay.closeOverlays(); // Close any visible overlays.
       TR.target = target; // Store target.
       TR.targetType = "editableFileName"
     }
-  } else {
-    TR.multiTouchStart(e, target, "editableFileName")
-  }
+//  } else {
+//    TR.multiTouchStart(e, target, "editableFileName")
+//  }
 }
 /**
  * Handles new touch events for Slots.  Stores the target Slot.
@@ -12151,6 +12151,20 @@ TouchReceiver.touchStartScrollBar = function(target, e, horizontal) {
     e.stopPropagation();
   }
 };
+/**
+ * @param {SvgScrollBox} target
+ * @param {event} e - passed event arguments.
+ */
+TouchReceiver.touchStartSvgScrollBox = function(target, e) {
+  console.log("*** touchStartSvgScrollBox")
+  var TR = TouchReceiver;
+  if (TR.touchstart(e, false)) {
+    TR.targetType = "svgScrollBox";
+    TR.target = target;
+    target.startDrag(TR.getX(e), TR.getY(e))
+    e.stopPropagation();
+  }
+}
 /**
  * @param {ColorWidget} target
  * @param {event} e - passed event arguments.
@@ -12349,6 +12363,9 @@ TouchReceiver.touchmove = function(e) {
       if (TR.targetType == "scrollBar") {
         TR.target.updateScroll(TR.getX(e), TR.getY(e))
       }
+      if (TR.targetType == "svgScrollBox") {
+        TR.target.updateDrag(TR.getX(e), TR.getY(e))
+      }
       // Pick a new color based on the touch
       if (TR.targetType === "colorWheel") {
         TR.target.dragColor(TR.getX(e), TR.getY(e));
@@ -12494,6 +12511,8 @@ TouchReceiver.touchend = function(e) {
         }, 100);*/
     } else if (TR.targetType === "scrollBar") {
       TR.target.scrollEnd()
+    } else if (TR.targetType === "svgScrollBox") {
+      TR.target.stopDrag()
     } else if (TR.targetType === "colorWheel") {
       //TR.target.drop(TR.getX(e));
       TR.target.dropColor();
@@ -12636,14 +12655,27 @@ TouchReceiver.addListenersComment = function(element, comment) {
 /**
  * Adds handlerDown listeners to the EditableFileName.
  * @param {Element} element - The part of the EditableFileName the listeners are being applied to.
- * @param {Comment} comment - The EditableFileName the SVG element belongs to.
+ * @param {EditableFileName} parent - The EditableFileName the SVG element belongs to.
  */
-TouchReceiver.addListenersEditableFN = function(element, comment) {
+TouchReceiver.addListenersEditableFN = function(element, parent) {
   var TR = TouchReceiver;
   TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
     // When it is touched, the SVG element will tell the TouchReceiver its EditableFileName.
-    TouchReceiver.touchStartEditableFN(comment, e);
+    TouchReceiver.touchStartEditableFN(parent, e);
   }, false);
+};
+/**
+ * Adds handlerDown listeners to an SvgScrollBox.
+ * @param {Element} element - The part of the SvgScrollBox the listeners are being applied to.
+ * @param {SvgScrollBox} parent - The SvgScrollBox the SVG element belongs to.
+ */
+TouchReceiver.addListenersSvgScrollBox = function(element, parent) {
+  var TR = TouchReceiver;
+  TR.addEventListenerSafe(element, TR.handlerDown, function(e) {
+    // When it is touched, the SVG element will tell the TouchReceiver its EditableFileName.
+    TouchReceiver.touchStartSvgScrollBox(parent, e);
+  }, false);
+  TR.addEventListenerSafe(element, ["wheel"], parent.wheelScroll.bind(parent), false)
 };
 /**
  * Adds handlerDown listeners to the parts of a Slot.
@@ -14925,7 +14957,9 @@ Category.prototype.updateZoom = function() {
       if (this.level == 2) {
         newX -= GuiElements.width
       }
-      GuiElements.move.group(this.group, newX, BlockPalette.y)
+      this.x = newX
+      this.y = BlockPalette.y
+      GuiElements.move.group(this.group, this.x, this.y)
       return
     } else {
       this.smoothScrollBox.move(newX, BlockPalette.y);
@@ -16963,6 +16997,10 @@ function HLLevelSwitch(x, y) {
 
 HLLevelSwitch.prototype.press = function() {
 	console.log("*** press level switch")
+	if (this.switchPressed) {
+		return
+	}
+	this.switchPressed = true
 
 	this.oldTab = TabManager.activeTab
 	this.oldTab.dontDelete = true
@@ -17065,8 +17103,10 @@ HLLevelSwitch.prototype.setSwitch = function(level) {
 	default:
 		console.error("Level Switch does not support level " + level)
 	}
+	
+	this.switchPressed = false
 }
-
+	
 HLLevelSwitch.prototype.release = function() {
 
 }
@@ -17110,7 +17150,7 @@ function HLEditableFileName(x, y, w, group) {
 		if (txt == this.defaultText || txt == "") { 
 			//Cannot rename a file to the default text or empty string. Set back to current.
 			this.updateFileName()
-		} else {
+		} else if (txt != this.oldName) {
 			LM.saveAs(this.editableText.textContent, rename) 
 		}
 		
@@ -17155,9 +17195,10 @@ HLEditableFileName.prototype.positionIcon = function() {
 }
 
 HLEditableFileName.prototype.editText = function() {
+	this.oldName = this.editableText.textContent
 	if (this.editableText.textContent == this.defaultText) {
 		this.editableText.textContent = ""
-	}
+	} 
 	this.isEditing = true
 	this.editableText.focus()
 }
@@ -22061,6 +22102,8 @@ function SvgScrollBox(contentGroup, parentGroup, x, y, width, height, innerWidth
 
 	this.visible = true
 	this.group = GuiElements.create.group(x, y, this.parentGroup)
+	var bgRect = GuiElements.draw.rect(0, 0, width, height, Colors.ballyGrayLight)
+	this.group.appendChild(bgRect) //necessary to capture touch/wheel events
 	this.group.appendChild(this.contentGroup)
 	GuiElements.clip(0, 0, width, height, this.group)
 
@@ -22069,23 +22112,67 @@ function SvgScrollBox(contentGroup, parentGroup, x, y, width, height, innerWidth
 
 	this.barW = 5
 	var color = Colors.ballyGray
+	var minScale = 1/5
+	var maxScale = 4/5
 	if (innerHeight > height) {
+		var percentOver = (innerHeight - height)/height
+		var scale = Math.max(minScale, Math.min(maxScale, (100 - percentOver)))
 		var barX = this.width - this.barW
 		this.verticalBarY = this.barW/2 //make room for line cap
-		this.verticalBarH = height*2/5
+		this.verticalBarH = height*scale //2/5
 		var y2 = this.verticalBarY + this.verticalBarH
 		this.verticalScrollBar = GuiElements.draw.line(barX, this.verticalBarY, barX, y2, color, this.barW, true)
 		TouchReceiver.addListenersScrollBar(this.verticalScrollBar, this, false)
 		this.group.appendChild(this.verticalScrollBar)
 	}
 	if (innerWidth > width) {
+		var percentOver = (innerWidth - width)/width
+		var scale = Math.max(minScale, Math.min(maxScale, (100 - percentOver)))
 		var barY = this.height - this.barW
 		this.horizontalBarX = this.barW/2 //make room for line cap
-		this.horizontalBarW = width*2/5
+		this.horizontalBarW = width*scale //2/5
 		var x2 = this.horizontalBarX + this.horizontalBarW
 		this.horizontalScrollBar = GuiElements.draw.line(this.horizontalBarX, barY, x2, barY, color, this.barW, true)
 		TouchReceiver.addListenersScrollBar(this.horizontalScrollBar, this, true)
 		this.group.appendChild(this.horizontalScrollBar)
+	}
+
+	this.hScale = (this.innerWidth - this.width)/(this.width - this.horizontalBarW - this.barW)
+
+	this.vScale = (this.innerHeight - this.height)/(this.height - this.verticalBarH - this.barW)
+
+	console.log("*** adding addListenersSvgScrollBox " + this.verticalBarY)
+	TouchReceiver.addListenersSvgScrollBox(this.group, this)
+}
+
+SvgScrollBox.prototype.moveHorizontal = function(dx) {
+	if (this.horizontalScrollBar == null) { return false }
+
+	var barX = this.horizontalBarX + dx 
+	var canMove = ( (barX > this.barW/2) && (barX < (this.width - this.horizontalBarW - this.barW/2)) ) 
+
+	if (canMove) {
+		this.horizontalBarX += dx
+		this.contentX += -dx * this.hScale 
+		this.update()
+		return true
+	} else {
+		return false
+	}
+}
+SvgScrollBox.prototype.moveVertical = function(dy) {
+	if (this.verticalScrollBar == null) { return false }
+
+	var barY = this.verticalBarY + dy
+	var canMove = ( (barY > this.barW/2) && (barY < (this.height - this.verticalBarH - this.barW/2)) )
+
+	if (canMove) {
+		this.verticalBarY += dy
+		this.contentY += -dy * this.vScale
+		this.update()
+		return true
+	} else {
+		return false
 	}
 }
 
@@ -22099,53 +22186,68 @@ SvgScrollBox.prototype.scrollStart = function(horizontal, x, y) {
 }
 SvgScrollBox.prototype.updateScroll = function(x, y) {
 	if (this.scrollStartX != null) {
-		var barX = this.horizontalBarX + x - this.scrollStartX
-		if (barX > this.barW/2 && barX < (this.width - this.horizontalBarW - this.barW/2)) {
-
-			var overflow = this.innerWidth - this.width
-			var barSpace = this.width - this.horizontalBarW - this.barW
-			var scale = overflow/barSpace
-			var barDist = x - this.scrollStartX
-			var contentDist = -barDist * scale
-
-			this.horizontalBarX = barX
-			this.horizontalScrollBar.setAttributeNS(null, "x1", this.horizontalBarX)
-			this.horizontalScrollBar.setAttributeNS(null, "x2", this.horizontalBarX + this.horizontalBarW)
+		var dx = x - this.scrollStartX
+		if (this.moveHorizontal(dx)) {
 			this.scrollStartX = x
-
-			this.contentX += contentDist
-			GuiElements.move.group(this.contentGroup, this.contentX, this.contentY)
 		}
 	}
 
 	if (this.scrollStartY != null) {
-		var barY = this.verticalBarY + y - this.scrollStartY
-		if (barY > this.barW/2 && barY < (this.height - this.verticalBarH - this.barW/2)) {
-
-			var overflow = this.innerHeight - this.height
-			var barSpace = this.height - this.verticalBarH - this.barW
-			var scale = overflow/barSpace
-			var barDist = y - this.scrollStartY
-			var contentDist = -barDist * scale
-
-			this.verticalBarY = barY
-			this.verticalScrollBar.setAttributeNS(null, "y1", this.verticalBarY)
-			this.verticalScrollBar.setAttributeNS(null, "y2", this.verticalBarY + this.verticalBarH)
+		var dy = y - this.scrollStartY
+		if (this.moveVertical(dy)) {
 			this.scrollStartY = y
-
-			this.contentY += contentDist
-			GuiElements.move.group(this.contentGroup, this.contentX, this.contentY)			
-
 		}
-		
 	}
-
 }
 SvgScrollBox.prototype.scrollEnd = function() {
 	this.scrollStartX = null 
 	this.scrollStartY = null
 }
 
+SvgScrollBox.prototype.wheelScroll = function(e) {
+	e.stopPropagation() //Need this?
+	var scroll = (e.deltaY < 0) ? 10 : -10
+	this.moveVertical(scroll)
+}
+
+SvgScrollBox.prototype.startDrag = function(x, y) {
+	this.isDragging = true 
+	this.dragStartX = x 
+	this.dragStartY = y
+}
+
+SvgScrollBox.prototype.updateDrag = function(x, y) {
+	if (!this.isDragging) { return }
+
+	var dx = (this.dragStartX - x)/this.hScale
+	var dy = (this.dragStartY - y)/this.vScale 
+
+	if (this.moveHorizontal(dx)) {
+		this.dragStartX = x 
+	}
+	if (this.moveVertical(dy)) {
+		this.dragStartY = y
+	}
+}
+
+SvgScrollBox.prototype.stopDrag = function() {
+	this.isDragging = false
+	this.dragStartX = null
+	this.dragStartY = null
+}
+
+SvgScrollBox.prototype.update = function() {
+	GuiElements.move.group(this.contentGroup, this.contentX, this.contentY)
+
+	if (this.horizontalScrollBar != null) {
+		this.horizontalScrollBar.setAttributeNS(null, "x1", this.horizontalBarX)
+		this.horizontalScrollBar.setAttributeNS(null, "x2", this.horizontalBarX + this.horizontalBarW)
+	}
+	if (this.verticalScrollBar != null) {
+		this.verticalScrollBar.setAttributeNS(null, "y1", this.verticalBarY)
+		this.verticalScrollBar.setAttributeNS(null, "y2", this.verticalBarY + this.verticalBarH)
+	}	
+}
 
 SvgScrollBox.prototype.show = function() {
 	if (!this.visible) {
@@ -22930,6 +23032,7 @@ HLFileDrawer.prototype.open = function() {
 
 
 	this.group = GuiElements.create.group(GuiElements.width, 0, GuiElements.layers.overlay)
+	this.group.setAttributeNS(null, "shape-rendering", "crispEdges")
 
 	this.bgRect = GuiElements.draw.rect(0, this.vMargin, this.width, this.height, this.bgColor, r, r)
 	this.group.appendChild(this.bgRect)
@@ -23316,7 +23419,8 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 
 	//this.updateDrawer(true)
 
-
+	console.log("*** displaySavedFilesMenu filesSavedLocally")
+	console.log(LevelManager.filesSavedLocally)
 	//Get the list of files to display and determine how much space that will take
 	var list = []
 	for (var i = 0; i < LevelManager.filesSavedLocally.length; i++) {
@@ -23325,7 +23429,6 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 	  switch (suffix) {
 	    case LevelManager.fileLevelSuffixes[1]:
 	    case LevelManager.fileLevelSuffixes[2]:
-	    case LevelManager.fileLevelSuffixes[3]:
 	      list.push(file);
 	  }
 	}
@@ -32100,7 +32203,7 @@ SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, 
  * @param {function} nextAction
  */
 SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction) {
-  //console.log("*** sanitizeRename")
+  console.log("*** sanitizeRename from '" + oldFilename + "' to '" + proposedName + "'")
   if (proposedName === "") {
     var message = Language.getStr("Name_error_blank");
     SaveManager.promptRename(isRecording, oldFilename, title, message, nextAction);
@@ -32545,7 +32648,7 @@ function LevelManager() {
 
 LevelManager.setConstants = function() {
   var LM = LevelManager;
-  LM.totalLevels = 3;
+  LM.totalLevels = Hatchling ? 2 : 3;
   LM.levelButtonFont = Font.uiFont(35);
 
   LM.savePointFileNames = {
@@ -32553,25 +32656,34 @@ LevelManager.setConstants = function() {
     2: "FinchBloxSavePoint_Level2",
     3: "FinchBloxSavePoint_Level3"
   }
-  if (Hatchling) {
-    LM.savePointFileNames = {
-      1: "HatchlingSavePoint_Level1",
-      2: "HatchlingSavePoint_Level2",
-      3: "HatchlingSavePoint_Level3"
-    }
-  }
-
   //Suffixes must be 2 characters to show correctly in FBFileSelect
   LM.fileLevelSuffixes = {
     1: "_1",
     2: "_2",
     3: "_3"
   }
+  if (Hatchling) {
+    LM.savePointFileNames = {
+      1: "HatchlingSavePoint-Level1",
+      2: "HatchlingSavePoint-Level2"
+    }
+    LM.fileLevelSuffixes = {
+      1: "-1",
+      2: "-2"
+    }
+  }
+
+  
 }
 
 LevelManager.setLevel = function(level) {
   var LM = LevelManager;
   level = parseInt(level);
+
+  if (level > LM.totalLevels) {
+    console.error("Level " + level + " is greater than the max (" + LM.totalLevels + ").")
+    return
+  }
   //console.log("Setting level to " + level);
   if (LM.currentLevel != level) {
     LM.currentLevel = level;
@@ -32605,7 +32717,8 @@ LevelManager.checkSavedFiles = function() {
 
     fileList.localFiles.forEach(function(file) {
       //console.log(file);
-      var suffix = file.split("_").pop();
+      var token = Hatchling ? "-" : "_"
+      var suffix = file.split(token).pop();
       if (LevelManager.levelFileList[suffix]) {
         LevelManager.levelFileList[suffix].push(file);
       }
@@ -44846,8 +44959,17 @@ B_HL_PS_L2.prototype = Object.create(B_HLPositionServo.prototype)
 B_HL_PS_L2.prototype.constructor = B_HL_PS_L2
 B_HL_PS_L2.importXml = HL_Utils.importXml
 //MicroBlocks functions
-B_HL_PS_L2.prototype.primName = function() { return "[h:psv]" }
+B_HL_PS_L2.prototype.primName = function() { return "hatchlingServoWithDelay" }
+B_HL_PS_L2.prototype.argList = function() { 
+  var port = HL_Utils.portNames[this.port]
+  var duration = 0 //duration < 10 causes the servo to stay on
+  var val = this.value + 2 //0 and 1 are off commands
+
+  return [port, val, duration] 
+}
+/*B_HL_PS_L2.prototype.primName = function() { return "[h:psv]" }
 B_HL_PS_L2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value + 2] }
+*/
 
 /**
  * Wave a position servo
@@ -44866,6 +44988,14 @@ B_HLWave.importXml = HL_Utils.importXml
 //MicroBlocks functions
 B_HLWave.prototype.primName = function() { return "blockList" }
 B_HLWave.prototype.argList = function() { 
+  var prim = "hatchlingServoWithDelay"
+  var port = HL_Utils.portNames[this.port]
+  var duration = 1000
+  return [new BlockArg(prim, [port, 92, duration]),  
+    new BlockArg(prim, [port, 182, duration])] 
+}
+/*B_HLWave.prototype.primName = function() { return "blockList" }
+B_HLWave.prototype.argList = function() { 
   var prim = "[h:psv]" 
   var port = HL_Utils.portNames[this.port]
   var waitTime = 1000
@@ -44874,7 +45004,7 @@ B_HLWave.prototype.argList = function() {
     new BlockArg("waitMillis", [waitTime]), 
     new BlockArg(prim, [port, 182]),
     new BlockArg("waitMillis", [waitTime])] 
-}
+}*/
 
 
 function B_HLRotationServo(x, y, flip, userSelectedPort) {
@@ -44944,8 +45074,16 @@ function B_HL_RS_L2(x, y, flip, userSelectedPort) {
 B_HL_RS_L2.prototype = Object.create(B_HLRotationServo.prototype);
 B_HL_RS_L2.prototype.constructor = B_HL_RS_L2;
 //MicroBlocks functions
-B_HL_RS_L2.prototype.primName = function() { return "[h:rsv]" }
+B_HL_RS_L2.prototype.primName = function() { return "hatchlingMotorWithDelay" }
+B_HL_RS_L2.prototype.argList = function() { 
+  var port = HL_Utils.portNames[this.port]
+  var duration = 0 //duration < 10 causes the motor to stay on
+
+  return [port, this.value, duration]
+}
+/*B_HL_RS_L2.prototype.primName = function() { return "[h:rsv]" }
 B_HL_RS_L2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
+*/
 
 function B_HL_RS_L2_CW(x, y, userSelectedPort) {
   B_HL_RS_L2.call(this, x, y, false, userSelectedPort)
@@ -45059,18 +45197,24 @@ B_HL_SN_L2.prototype = Object.create(B_HLSingleNeopix.prototype);
 B_HL_SN_L2.prototype.constructor = B_HL_SN_L2;
 B_HL_SN_L2.importXml = HL_Utils.importXml
 //MicroBlocks functions
-B_HL_SN_L2.prototype.primName = function() { return "[h:np]" }
+B_HL_SN_L2.prototype.primName = function() { return "hatchlingNeopixelWithDelay" }
 B_HL_SN_L2.prototype.argList = function() { 
-  /*var hex = this.value.slice(1).toLowerCase()
-  var r = hex.charAt(0) + '' + hex.charAt(1);
-  var g = hex.charAt(2) + '' + hex.charAt(3);
-  var b = hex.charAt(4) + '' + hex.charAt(5);
-  r = parseInt(r, 16);
-  g = parseInt(g, 16);
-  b = parseInt(b, 16);*/
+  var duration = 0 //duration < 10 causes the neopix to stay on
   var rgb = Colors.hexToRgb(this.value)
-  return [HL_Utils.portNames[this.port], rgb[0], rgb[1], rgb[2]] 
+  return [HL_Utils.portNames[this.port], rgb[0], rgb[1], rgb[2], duration] 
 }
+// B_HL_SN_L2.prototype.primName = function() { return "[h:np]" }
+// B_HL_SN_L2.prototype.argList = function() { 
+//   /*var hex = this.value.slice(1).toLowerCase()
+//   var r = hex.charAt(0) + '' + hex.charAt(1);
+//   var g = hex.charAt(2) + '' + hex.charAt(3);
+//   var b = hex.charAt(4) + '' + hex.charAt(5);
+//   r = parseInt(r, 16);
+//   g = parseInt(g, 16);
+//   b = parseInt(b, 16);*/
+//   var rgb = Colors.hexToRgb(this.value)
+//   return [HL_Utils.portNames[this.port], rgb[0], rgb[1], rgb[2]] 
+// }
 
 
 
@@ -45128,7 +45272,7 @@ B_HLNeopixStrip.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLNeopixStrip.prototype.constructor = B_HLNeopixStrip;
 B_HLNeopixStrip.importXml = HL_Utils.importXml
 //MicroBlocks functions
-B_HLNeopixStrip.prototype.primName = function() { return "[h:nps]" }
+B_HLNeopixStrip.prototype.primName = function() { return "[h:nps]" } //TODO: update to new format
 B_HLNeopixStrip.prototype.argList = function() { return [HL_Utils.portNames[this.port], 'all', this.red, this.green, this.blue] }
 
 function B_HLFairyLights(x, y, userSelectedPort) {
@@ -45182,8 +45326,12 @@ B_HLFairyLightsL2.prototype = Object.create(B_HLFairyLights.prototype);
 B_HLFairyLightsL2.prototype.constructor = B_HLFairyLightsL2;
 B_HLFairyLightsL2.importXml = HL_Utils.importXml
 //MicroBlocks functions
-B_HLFairyLightsL2.prototype.primName = function() { return "[h:fl]" }
-B_HLFairyLightsL2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
+B_HLFairyLightsL2.prototype.primName = function() { return "hatchlingFairyLightWithDelay" }
+B_HLFairyLightsL2.prototype.argList = function() { 
+  return [HL_Utils.portNames[this.port], this.value, 0] 
+}
+//B_HLFairyLightsL2.prototype.primName = function() { return "[h:fl]" }
+//B_HLFairyLightsL2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
 
 
 function B_HLAlphabet(x, y) {

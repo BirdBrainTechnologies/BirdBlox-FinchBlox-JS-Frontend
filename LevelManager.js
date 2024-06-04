@@ -12,7 +12,7 @@ function LevelManager() {
 
 LevelManager.setConstants = function() {
   const LM = LevelManager;
-  LM.totalLevels = 3;
+  LM.totalLevels = Hatchling ? 2 : 3;
   LM.levelButtonFont = Font.uiFont(35);
 
   LM.savePointFileNames = {
@@ -20,25 +20,34 @@ LevelManager.setConstants = function() {
     2: "FinchBloxSavePoint_Level2",
     3: "FinchBloxSavePoint_Level3"
   }
-  if (Hatchling) {
-    LM.savePointFileNames = {
-      1: "HatchlingSavePoint_Level1",
-      2: "HatchlingSavePoint_Level2",
-      3: "HatchlingSavePoint_Level3"
-    }
-  }
-
   //Suffixes must be 2 characters to show correctly in FBFileSelect
   LM.fileLevelSuffixes = {
     1: "_1",
     2: "_2",
     3: "_3"
   }
+  if (Hatchling) {
+    LM.savePointFileNames = {
+      1: "HatchlingSavePoint-Level1",
+      2: "HatchlingSavePoint-Level2"
+    }
+    LM.fileLevelSuffixes = {
+      1: "-1",
+      2: "-2"
+    }
+  }
+
+  
 }
 
 LevelManager.setLevel = function(level) {
   const LM = LevelManager;
   level = parseInt(level);
+
+  if (level > LM.totalLevels) {
+    console.error("Level " + level + " is greater than the max (" + LM.totalLevels + ").")
+    return
+  }
   //console.log("Setting level to " + level);
   if (LM.currentLevel != level) {
     LM.currentLevel = level;
@@ -72,7 +81,8 @@ LevelManager.checkSavedFiles = function() {
 
     fileList.localFiles.forEach(function(file) {
       //console.log(file);
-      const suffix = file.split("_").pop();
+      const token = Hatchling ? "-" : "_"
+      const suffix = file.split(token).pop();
       if (LevelManager.levelFileList[suffix]) {
         LevelManager.levelFileList[suffix].push(file);
       }

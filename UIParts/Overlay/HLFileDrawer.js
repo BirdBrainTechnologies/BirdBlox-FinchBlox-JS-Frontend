@@ -51,6 +51,7 @@ HLFileDrawer.prototype.open = function() {
 
 
 	this.group = GuiElements.create.group(GuiElements.width, 0, GuiElements.layers.overlay)
+	this.group.setAttributeNS(null, "shape-rendering", "crispEdges")
 
 	this.bgRect = GuiElements.draw.rect(0, this.vMargin, this.width, this.height, this.bgColor, r, r)
 	this.group.appendChild(this.bgRect)
@@ -437,7 +438,8 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 
 	//this.updateDrawer(true)
 
-
+	console.log("*** displaySavedFilesMenu filesSavedLocally")
+	console.log(LevelManager.filesSavedLocally)
 	//Get the list of files to display and determine how much space that will take
 	const list = []
 	for (let i = 0; i < LevelManager.filesSavedLocally.length; i++) {
@@ -446,7 +448,6 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 	  switch (suffix) {
 	    case LevelManager.fileLevelSuffixes[1]:
 	    case LevelManager.fileLevelSuffixes[2]:
-	    case LevelManager.fileLevelSuffixes[3]:
 	      list.push(file);
 	  }
 	}

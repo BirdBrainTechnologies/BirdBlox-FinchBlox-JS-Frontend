@@ -510,7 +510,9 @@ Category.prototype.updateZoom = function() {
       if (this.level == 2) {
         newX -= GuiElements.width
       }
-      GuiElements.move.group(this.group, newX, BlockPalette.y)
+      this.x = newX
+      this.y = BlockPalette.y
+      GuiElements.move.group(this.group, this.x, this.y)
       return
     } else {
       this.smoothScrollBox.move(newX, BlockPalette.y);

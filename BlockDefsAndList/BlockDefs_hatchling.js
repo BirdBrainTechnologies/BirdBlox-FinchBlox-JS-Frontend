@@ -455,8 +455,17 @@ B_HL_PS_L2.prototype = Object.create(B_HLPositionServo.prototype)
 B_HL_PS_L2.prototype.constructor = B_HL_PS_L2
 B_HL_PS_L2.importXml = HL_Utils.importXml
 //MicroBlocks functions
-B_HL_PS_L2.prototype.primName = function() { return "[h:psv]" }
+B_HL_PS_L2.prototype.primName = function() { return "hatchlingServoWithDelay" }
+B_HL_PS_L2.prototype.argList = function() { 
+  let port = HL_Utils.portNames[this.port]
+  let duration = 0 //duration < 10 causes the servo to stay on
+  let val = this.value + 2 //0 and 1 are off commands
+
+  return [port, val, duration] 
+}
+/*B_HL_PS_L2.prototype.primName = function() { return "[h:psv]" }
 B_HL_PS_L2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value + 2] }
+*/
 
 /**
  * Wave a position servo
@@ -475,6 +484,14 @@ B_HLWave.importXml = HL_Utils.importXml
 //MicroBlocks functions
 B_HLWave.prototype.primName = function() { return "blockList" }
 B_HLWave.prototype.argList = function() { 
+  let prim = "hatchlingServoWithDelay"
+  let port = HL_Utils.portNames[this.port]
+  let duration = 1000
+  return [new BlockArg(prim, [port, 92, duration]),  
+    new BlockArg(prim, [port, 182, duration])] 
+}
+/*B_HLWave.prototype.primName = function() { return "blockList" }
+B_HLWave.prototype.argList = function() { 
   let prim = "[h:psv]" 
   let port = HL_Utils.portNames[this.port]
   let waitTime = 1000
@@ -483,7 +500,7 @@ B_HLWave.prototype.argList = function() {
     new BlockArg("waitMillis", [waitTime]), 
     new BlockArg(prim, [port, 182]),
     new BlockArg("waitMillis", [waitTime])] 
-}
+}*/
 
 
 function B_HLRotationServo(x, y, flip, userSelectedPort) {
@@ -553,8 +570,16 @@ function B_HL_RS_L2(x, y, flip, userSelectedPort) {
 B_HL_RS_L2.prototype = Object.create(B_HLRotationServo.prototype);
 B_HL_RS_L2.prototype.constructor = B_HL_RS_L2;
 //MicroBlocks functions
-B_HL_RS_L2.prototype.primName = function() { return "[h:rsv]" }
+B_HL_RS_L2.prototype.primName = function() { return "hatchlingMotorWithDelay" }
+B_HL_RS_L2.prototype.argList = function() { 
+  let port = HL_Utils.portNames[this.port]
+  let duration = 0 //duration < 10 causes the motor to stay on
+
+  return [port, this.value, duration]
+}
+/*B_HL_RS_L2.prototype.primName = function() { return "[h:rsv]" }
 B_HL_RS_L2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
+*/
 
 function B_HL_RS_L2_CW(x, y, userSelectedPort) {
   B_HL_RS_L2.call(this, x, y, false, userSelectedPort)
@@ -668,18 +693,24 @@ B_HL_SN_L2.prototype = Object.create(B_HLSingleNeopix.prototype);
 B_HL_SN_L2.prototype.constructor = B_HL_SN_L2;
 B_HL_SN_L2.importXml = HL_Utils.importXml
 //MicroBlocks functions
-B_HL_SN_L2.prototype.primName = function() { return "[h:np]" }
+B_HL_SN_L2.prototype.primName = function() { return "hatchlingNeopixelWithDelay" }
 B_HL_SN_L2.prototype.argList = function() { 
-  /*let hex = this.value.slice(1).toLowerCase()
-  let r = hex.charAt(0) + '' + hex.charAt(1);
-  let g = hex.charAt(2) + '' + hex.charAt(3);
-  let b = hex.charAt(4) + '' + hex.charAt(5);
-  r = parseInt(r, 16);
-  g = parseInt(g, 16);
-  b = parseInt(b, 16);*/
+  let duration = 0 //duration < 10 causes the neopix to stay on
   let rgb = Colors.hexToRgb(this.value)
-  return [HL_Utils.portNames[this.port], rgb[0], rgb[1], rgb[2]] 
+  return [HL_Utils.portNames[this.port], rgb[0], rgb[1], rgb[2], duration] 
 }
+// B_HL_SN_L2.prototype.primName = function() { return "[h:np]" }
+// B_HL_SN_L2.prototype.argList = function() { 
+//   /*let hex = this.value.slice(1).toLowerCase()
+//   let r = hex.charAt(0) + '' + hex.charAt(1);
+//   let g = hex.charAt(2) + '' + hex.charAt(3);
+//   let b = hex.charAt(4) + '' + hex.charAt(5);
+//   r = parseInt(r, 16);
+//   g = parseInt(g, 16);
+//   b = parseInt(b, 16);*/
+//   let rgb = Colors.hexToRgb(this.value)
+//   return [HL_Utils.portNames[this.port], rgb[0], rgb[1], rgb[2]] 
+// }
 
 
 
@@ -737,7 +768,7 @@ B_HLNeopixStrip.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLNeopixStrip.prototype.constructor = B_HLNeopixStrip;
 B_HLNeopixStrip.importXml = HL_Utils.importXml
 //MicroBlocks functions
-B_HLNeopixStrip.prototype.primName = function() { return "[h:nps]" }
+B_HLNeopixStrip.prototype.primName = function() { return "[h:nps]" } //TODO: update to new format
 B_HLNeopixStrip.prototype.argList = function() { return [HL_Utils.portNames[this.port], 'all', this.red, this.green, this.blue] }
 
 function B_HLFairyLights(x, y, userSelectedPort) {
@@ -791,8 +822,12 @@ B_HLFairyLightsL2.prototype = Object.create(B_HLFairyLights.prototype);
 B_HLFairyLightsL2.prototype.constructor = B_HLFairyLightsL2;
 B_HLFairyLightsL2.importXml = HL_Utils.importXml
 //MicroBlocks functions
-B_HLFairyLightsL2.prototype.primName = function() { return "[h:fl]" }
-B_HLFairyLightsL2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
+B_HLFairyLightsL2.prototype.primName = function() { return "hatchlingFairyLightWithDelay" }
+B_HLFairyLightsL2.prototype.argList = function() { 
+  return [HL_Utils.portNames[this.port], this.value, 0] 
+}
+//B_HLFairyLightsL2.prototype.primName = function() { return "[h:fl]" }
+//B_HLFairyLightsL2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value] }
 
 
 function B_HLAlphabet(x, y) {
