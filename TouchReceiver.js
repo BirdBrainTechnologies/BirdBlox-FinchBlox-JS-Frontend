@@ -809,9 +809,7 @@ TouchReceiver.touchmove = function(e) {
       if (TR.targetType == "scrollBar") {
         TR.target.updateScroll(TR.getX(e), TR.getY(e))
       }
-      if (TR.targetType == "svgScrollBox") {
-        TR.target.updateDrag(TR.getX(e), TR.getY(e))
-      }
+      
       // Pick a new color based on the touch
       if (TR.targetType === "colorWheel") {
         TR.target.dragColor(TR.getX(e), TR.getY(e));
@@ -840,6 +838,21 @@ TouchReceiver.touchmove = function(e) {
           TR.target.interrupt();
           TR.target = null;
         }
+        if (Hatchling && TR.target.svgScrollable && 
+          HLFileDrawer.currentDrawer != null && 
+          HLFileDrawer.currentDrawer.scrollBox != null) {
+          console.log("*** SVG SCROLLABLE")
+          const sb = HLFileDrawer.currentDrawer.scrollBox
+          if (sb.isDragging) {
+            TR.targetType = "svgScrollBox"
+            TR.target = sb
+          } else {
+            sb.startDrag(TR.getX(e), TR.getY(e))
+          }
+        }
+      }
+      if (TR.targetType == "svgScrollBox") {
+        TR.target.updateDrag(TR.getX(e), TR.getY(e))
       }
       // If the user drags a smoothMenuBnList, it should scroll.
       if (TR.targetType === "smoothMenuBnList") {

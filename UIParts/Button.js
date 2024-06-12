@@ -50,6 +50,7 @@ function Button(x, y, width, height, parent, color, rx, ry, outlineColor, outlin
   this.toggled = false; // Whether the button is currently stuck in the pressed state (only if it toggles)
   this.partOfOverlay = null; // The overlay the button is a part of (if any)
   this.scrollable = false; // Whether the button is part of something that scrolls and shouldn't prevent scrolling
+  this.svgScrollable = false // Whether the button is part of an svgScrollBox and shouldn't prevent scrolling
 }
 
 Button.setGraphics = function() {
@@ -790,8 +791,13 @@ Button.prototype.flash = function() {
 /**
  * Marks that the Button is part of something that scrolls so it doesn't stop scrolling when it is tapped
  * (using preventDefault in TouchReceiver)
+ * @param {boolean} svg - true if scrollable within svgScrollBox
  */
-Button.prototype.makeScrollable = function() {
+Button.prototype.makeScrollable = function(svg) {
+  if (svg) {
+    this.svgScrollable = true
+    return
+  }
   this.scrollable = true;
 };
 

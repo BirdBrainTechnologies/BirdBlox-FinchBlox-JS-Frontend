@@ -830,6 +830,7 @@ GuiElements.draw.tab = function(x, y, width, height, color, r, isDown) {
   const tab = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
   GuiElements.update.tab(tab, x, y, width, height, r, isDown); //Set its path description (points).
   tab.setAttributeNS(null, "fill", color); //Set the fill.
+  tab.setAttributeNS(null, "shape-rendering", "crispEdges")
   return tab; //Return the finished button shape.
 };
 /**

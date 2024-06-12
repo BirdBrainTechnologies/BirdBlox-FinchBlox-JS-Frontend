@@ -27,6 +27,7 @@ HLFileDrawer.prototype.open = function() {
 
 	this.visible = true
 	Overlay.addOverlay(this)
+	HLFileDrawer.currentDrawer = this
 	GuiElements.blockInteraction(true);
 	
 	//Basic measurements
@@ -141,6 +142,7 @@ HLFileDrawer.prototype.close = function() {
 	if (!this.visible) { return }
 
 	this.visible = false
+	HLFileDrawer.currentDrawer = null
 	TabManager.activeTab.removeOutline()
 	BlockPalette.hideTrash()
 
@@ -304,6 +306,8 @@ HLFileDrawer.prototype.displaySaveOrDeleteMenu = function(embed) {
 	TouchReceiver.addListenersBN(trashBnIcon.pathE, trashBn)
 	const trashBnOpen = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdOpen, this.iconColor, this.bnIcon2H, trashBn.group)
 	TouchReceiver.addListenersBN(trashBnOpen.pathE, trashBn)
+
+	TabManager.activeTab.outlineCode()
 }
 
 HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile, embed) {
@@ -469,7 +473,7 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 	//const scrollBoxY = this.menuY + this.menuW/12
 	const scrollBoxX = this.menuW/20
 	const scrollBoxY = this.menuY + this.menuW/12
-	const scrollBoxWidth = this.contentWidth + 10; //Add space for scroll bar
+	const scrollBoxWidth = this.menuW2 - this.menuW/20 //this.contentWidth + 10; //Add space for scroll bar
 	const scrollBoxHeight = Math.min(availableHeight, scrollHeight);
 	//console.log("making content. sx=" + scrollBoxX + " sy=" + scrollBoxY + " this.y=" + this.y + " sh=" + scrollHeight + " ah=" + availableHeight + " sbh=" + scrollBoxHeight + " rc=" + this.rowCount + " bnh=" + RD.bnHeight);
 	//Create the rows to display and the scrollbox to contain them
@@ -514,7 +518,10 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup, embed
 
 	const bgColor = (isOpen || embed) ? Colors.ballyBrandBlueLight : Colors.white
 	const outlineColor = (isOpen || embed) ? Colors.ballyBrandBlue : null
-	const button = new Button(0, y, width, this.fileBnH, contentGroup, bgColor, 10, 10, outlineColor);
+	const bnX = Math.ceil(Button.strokeW/2) //make room for potential outline
+	const bnY = y + bnX
+	const bnW = width - 2*bnX
+	const button = new Button(bnX, bnY, bnW, this.fileBnH, contentGroup, bgColor, 10, 10, outlineColor);
 	button.setCallbackFunction(function() {
 		this.fileToOpen = fileName
 		if (LevelManager.currentFileIsUnsaved()) {
@@ -524,6 +531,7 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup, embed
 		}
 	}.bind(this), true)
 	button.markAsOverlayPart(this)
+	button.makeScrollable(true)
 	if (embed) { button.disable(true) }
 
 	//Star
@@ -562,7 +570,7 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup, embed
 	//Arrow 
 	const m2 = 8
 	const arrowH = 30
-	const arrowX = width - m2 - arrowH
+	const arrowX = bnW - m2 - arrowH
 	const arrowY = (this.fileBnH - arrowH)/2
 	const arrow = new VectorIcon(arrowX, arrowY, VP.bdOpen, this.iconColor, arrowH, button.group)
 	TouchReceiver.addListenersBN(arrow.pathE, button)
@@ -582,6 +590,7 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup, embed
 		this.displayTrashMenu(false, fileName)
 	}.bind(this), true)
 	trash.markAsOverlayPart(this)
+	trash.makeScrollable(true)
 	if (embed) { trash.disable(true) }
 
 

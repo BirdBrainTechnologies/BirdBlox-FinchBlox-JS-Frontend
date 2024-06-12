@@ -165,6 +165,8 @@ BlockPalette.createPalBg = function() {
   if (Hatchling) {
     BP.palRect = GuiElements.draw.rect(BP.x, BP.y, BP.width, BP.height, BP.bg, BP.hl, BP.hl)
     BP.palRect2 = GuiElements.draw.rect(BP.x - GuiElements.width, BP.y, BP.width, BP.height, BP.bg, BP.hl, BP.hl)
+    BP.palRect.setAttributeNS(null, "shape-rendering", "crispEdges")
+    BP.palRect2.setAttributeNS(null, "shape-rendering", "crispEdges")
     GuiElements.layers.paletteBG.appendChild(BP.palRect2)
   }
   GuiElements.layers.paletteBG.appendChild(BP.palRect);

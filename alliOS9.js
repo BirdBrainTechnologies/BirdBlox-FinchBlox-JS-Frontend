@@ -7498,6 +7498,7 @@ GuiElements.draw.tab = function(x, y, width, height, color, r, isDown) {
   var tab = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create the path.
   GuiElements.update.tab(tab, x, y, width, height, r, isDown); //Set its path description (points).
   tab.setAttributeNS(null, "fill", color); //Set the fill.
+  tab.setAttributeNS(null, "shape-rendering", "crispEdges")
   return tab; //Return the finished button shape.
 };
 /**
@@ -12363,9 +12364,7 @@ TouchReceiver.touchmove = function(e) {
       if (TR.targetType == "scrollBar") {
         TR.target.updateScroll(TR.getX(e), TR.getY(e))
       }
-      if (TR.targetType == "svgScrollBox") {
-        TR.target.updateDrag(TR.getX(e), TR.getY(e))
-      }
+      
       // Pick a new color based on the touch
       if (TR.targetType === "colorWheel") {
         TR.target.dragColor(TR.getX(e), TR.getY(e));
@@ -12394,6 +12393,21 @@ TouchReceiver.touchmove = function(e) {
           TR.target.interrupt();
           TR.target = null;
         }
+        if (Hatchling && TR.target.svgScrollable && 
+          HLFileDrawer.currentDrawer != null && 
+          HLFileDrawer.currentDrawer.scrollBox != null) {
+          console.log("*** SVG SCROLLABLE")
+          var sb = HLFileDrawer.currentDrawer.scrollBox
+          if (sb.isDragging) {
+            TR.targetType = "svgScrollBox"
+            TR.target = sb
+          } else {
+            sb.startDrag(TR.getX(e), TR.getY(e))
+          }
+        }
+      }
+      if (TR.targetType == "svgScrollBox") {
+        TR.target.updateDrag(TR.getX(e), TR.getY(e))
       }
       // If the user drags a smoothMenuBnList, it should scroll.
       if (TR.targetType === "smoothMenuBnList") {
@@ -13600,6 +13614,8 @@ BlockPalette.createPalBg = function() {
   if (Hatchling) {
     BP.palRect = GuiElements.draw.rect(BP.x, BP.y, BP.width, BP.height, BP.bg, BP.hl, BP.hl)
     BP.palRect2 = GuiElements.draw.rect(BP.x - GuiElements.width, BP.y, BP.width, BP.height, BP.bg, BP.hl, BP.hl)
+    BP.palRect.setAttributeNS(null, "shape-rendering", "crispEdges")
+    BP.palRect2.setAttributeNS(null, "shape-rendering", "crispEdges")
     GuiElements.layers.paletteBG.appendChild(BP.palRect2)
   }
   GuiElements.layers.paletteBG.appendChild(BP.palRect);
@@ -15527,6 +15543,7 @@ function Button(x, y, width, height, parent, color, rx, ry, outlineColor, outlin
   this.toggled = false; // Whether the button is currently stuck in the pressed state (only if it toggles)
   this.partOfOverlay = null; // The overlay the button is a part of (if any)
   this.scrollable = false; // Whether the button is part of something that scrolls and shouldn't prevent scrolling
+  this.svgScrollable = false // Whether the button is part of an svgScrollBox and shouldn't prevent scrolling
 }
 
 Button.setGraphics = function() {
@@ -16267,8 +16284,13 @@ Button.prototype.flash = function() {
 /**
  * Marks that the Button is part of something that scrolls so it doesn't stop scrolling when it is tapped
  * (using preventDefault in TouchReceiver)
+ * @param {boolean} svg - true if scrollable within svgScrollBox
  */
-Button.prototype.makeScrollable = function() {
+Button.prototype.makeScrollable = function(svg) {
+  if (svg) {
+    this.svgScrollable = true
+    return
+  }
   this.scrollable = true;
 };
 
@@ -23008,6 +23030,7 @@ HLFileDrawer.prototype.open = function() {
 
 	this.visible = true
 	Overlay.addOverlay(this)
+	HLFileDrawer.currentDrawer = this
 	GuiElements.blockInteraction(true);
 	
 	//Basic measurements
@@ -23122,6 +23145,7 @@ HLFileDrawer.prototype.close = function() {
 	if (!this.visible) { return }
 
 	this.visible = false
+	HLFileDrawer.currentDrawer = null
 	TabManager.activeTab.removeOutline()
 	BlockPalette.hideTrash()
 
@@ -23285,6 +23309,8 @@ HLFileDrawer.prototype.displaySaveOrDeleteMenu = function(embed) {
 	TouchReceiver.addListenersBN(trashBnIcon.pathE, trashBn)
 	var trashBnOpen = new VectorIcon(this.bnIcon2X, this.bnIcon2Y, VP.bdOpen, this.iconColor, this.bnIcon2H, trashBn.group)
 	TouchReceiver.addListenersBN(trashBnOpen.pathE, trashBn)
+
+	TabManager.activeTab.outlineCode()
 }
 
 HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile, embed) {
@@ -23450,7 +23476,7 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 	//var scrollBoxY = this.menuY + this.menuW/12
 	var scrollBoxX = this.menuW/20
 	var scrollBoxY = this.menuY + this.menuW/12
-	var scrollBoxWidth = this.contentWidth + 10; //Add space for scroll bar
+	var scrollBoxWidth = this.menuW2 - this.menuW/20 //this.contentWidth + 10; //Add space for scroll bar
 	var scrollBoxHeight = Math.min(availableHeight, scrollHeight);
 	//console.log("making content. sx=" + scrollBoxX + " sy=" + scrollBoxY + " this.y=" + this.y + " sh=" + scrollHeight + " ah=" + availableHeight + " sbh=" + scrollBoxHeight + " rc=" + this.rowCount + " bnh=" + RD.bnHeight);
 	//Create the rows to display and the scrollbox to contain them
@@ -23495,7 +23521,10 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup, embed
 
 	var bgColor = (isOpen || embed) ? Colors.ballyBrandBlueLight : Colors.white
 	var outlineColor = (isOpen || embed) ? Colors.ballyBrandBlue : null
-	var button = new Button(0, y, width, this.fileBnH, contentGroup, bgColor, 10, 10, outlineColor);
+	var bnX = Math.ceil(Button.strokeW/2) //make room for potential outline
+	var bnY = y + bnX
+	var bnW = width - 2*bnX
+	var button = new Button(bnX, bnY, bnW, this.fileBnH, contentGroup, bgColor, 10, 10, outlineColor);
 	button.setCallbackFunction(function() {
 		this.fileToOpen = fileName
 		if (LevelManager.currentFileIsUnsaved()) {
@@ -23505,6 +23534,7 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup, embed
 		}
 	}.bind(this), true)
 	button.markAsOverlayPart(this)
+	button.makeScrollable(true)
 	if (embed) { button.disable(true) }
 
 	//Star
@@ -23543,7 +23573,7 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup, embed
 	//Arrow 
 	var m2 = 8
 	var arrowH = 30
-	var arrowX = width - m2 - arrowH
+	var arrowX = bnW - m2 - arrowH
 	var arrowY = (this.fileBnH - arrowH)/2
 	var arrow = new VectorIcon(arrowX, arrowY, VP.bdOpen, this.iconColor, arrowH, button.group)
 	TouchReceiver.addListenersBN(arrow.pathE, button)
@@ -23563,6 +23593,7 @@ HLFileDrawer.prototype.createRow = function(index, y, width, contentGroup, embed
 		this.displayTrashMenu(false, fileName)
 	}.bind(this), true)
 	trash.markAsOverlayPart(this)
+	trash.makeScrollable(true)
 	if (embed) { trash.disable(true) }
 
 
@@ -45100,9 +45131,10 @@ B_HL_RS_L2_CC.prototype.constructor = B_HL_RS_L2_CC;
 B_HL_RS_L2_CC.importXml = HL_Utils.importXml
 
 
-function B_HLSingleNeopix(x, y, defaultColor, userSelectedPort) {
+function B_HLSingleNeopix(x, y, defaultColor, userSelectedPort, duration) {
   this.value = defaultColor //"#FFFFFF"
   this.valueKey = "color"
+  this.duration = duration
   /*this.red = 100;
   this.green = 100;
   this.blue = 100;*/
@@ -45116,6 +45148,13 @@ function B_HLSingleNeopix(x, y, defaultColor, userSelectedPort) {
 }
 B_HLSingleNeopix.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLSingleNeopix.prototype.constructor = B_HLSingleNeopix;
+//MicroBlocks functions
+B_HLSingleNeopix.prototype.primName = function() { return "hatchlingNeopixelWithDelay" }
+B_HLSingleNeopix.prototype.argList = function() { 
+  var port = HL_Utils.portNames[this.port]
+  var rgb = Colors.hexToRgb(this.value)
+  return [port, rgb[0], rgb[1], rgb[2], this.duration]
+}
 
 B_HLSingleNeopix.prototype.updateColor = function() {
   /*var s = 255 / 100;
@@ -45125,7 +45164,7 @@ B_HLSingleNeopix.prototype.updateColor = function() {
 }
 
 function B_HL_SN_L1(x, y, color, userSelectedPort) {
-  B_HLSingleNeopix.call(this, x, y, color, userSelectedPort)
+  B_HLSingleNeopix.call(this, x, y, color, userSelectedPort, 1000)
 
   //this.updateColor()
   this.blockIcon.addIndicatorCircle(this.value, 40, 50)
@@ -45133,14 +45172,14 @@ function B_HL_SN_L1(x, y, color, userSelectedPort) {
 B_HL_SN_L1.prototype = Object.create(B_HLSingleNeopix.prototype);
 B_HL_SN_L1.prototype.constructor = B_HL_SN_L1;
 //MicroBlocks functions
-B_HL_SN_L1.prototype.primName = function() { return "hatchlingNeopixelWithDelay" }
+/*B_HL_SN_L1.prototype.primName = function() { return "hatchlingNeopixelWithDelay" }
 B_HL_SN_L1.prototype.argList = function() { 
   var port = HL_Utils.portNames[this.port]
   var duration = 1000
   var rgb = Colors.hexToRgb(this.value)
 
   return [port, rgb[0], rgb[1], rgb[2], duration]
-}
+}*/
 /*B_HL_SN_L1.prototype.primName = function() { return "blockList" }
 B_HL_SN_L1.prototype.argList = function() { 
   var prim = "[h:np]"
@@ -45182,7 +45221,7 @@ B_HL_SN_L1_White.prototype.constructor = B_HL_SN_L1_White
 B_HL_SN_L1_White.importXml = HL_Utils.importXml
 
 function B_HL_SN_L2(x, y, userSelectedPort) {
-  B_HLSingleNeopix.call(this, x, y, "#FFFFFF", userSelectedPort)
+  B_HLSingleNeopix.call(this, x, y, "#FFFFFF", userSelectedPort, 0)
 
   //this.colorButton = new BlockButton(this);
   //this.colorButton.addSlider("color", { r: this.red, g: this.green, b: this.blue });
@@ -45197,12 +45236,12 @@ B_HL_SN_L2.prototype = Object.create(B_HLSingleNeopix.prototype);
 B_HL_SN_L2.prototype.constructor = B_HL_SN_L2;
 B_HL_SN_L2.importXml = HL_Utils.importXml
 //MicroBlocks functions
-B_HL_SN_L2.prototype.primName = function() { return "hatchlingNeopixelWithDelay" }
+/*B_HL_SN_L2.prototype.primName = function() { return "hatchlingNeopixelWithDelay" }
 B_HL_SN_L2.prototype.argList = function() { 
   var duration = 0 //duration < 10 causes the neopix to stay on
   var rgb = Colors.hexToRgb(this.value)
   return [HL_Utils.portNames[this.port], rgb[0], rgb[1], rgb[2], duration] 
-}
+}*/
 // B_HL_SN_L2.prototype.primName = function() { return "[h:np]" }
 // B_HL_SN_L2.prototype.argList = function() { 
 //   /*var hex = this.value.slice(1).toLowerCase()

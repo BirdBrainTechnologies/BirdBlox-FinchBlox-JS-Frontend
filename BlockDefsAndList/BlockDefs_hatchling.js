@@ -596,9 +596,10 @@ B_HL_RS_L2_CC.prototype.constructor = B_HL_RS_L2_CC;
 B_HL_RS_L2_CC.importXml = HL_Utils.importXml
 
 
-function B_HLSingleNeopix(x, y, defaultColor, userSelectedPort) {
+function B_HLSingleNeopix(x, y, defaultColor, userSelectedPort, duration) {
   this.value = defaultColor //"#FFFFFF"
   this.valueKey = "color"
+  this.duration = duration
   /*this.red = 100;
   this.green = 100;
   this.blue = 100;*/
@@ -612,6 +613,13 @@ function B_HLSingleNeopix(x, y, defaultColor, userSelectedPort) {
 }
 B_HLSingleNeopix.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLSingleNeopix.prototype.constructor = B_HLSingleNeopix;
+//MicroBlocks functions
+B_HLSingleNeopix.prototype.primName = function() { return "hatchlingNeopixelWithDelay" }
+B_HLSingleNeopix.prototype.argList = function() { 
+  let port = HL_Utils.portNames[this.port]
+  let rgb = Colors.hexToRgb(this.value)
+  return [port, rgb[0], rgb[1], rgb[2], this.duration]
+}
 
 B_HLSingleNeopix.prototype.updateColor = function() {
   /*const s = 255 / 100;
@@ -621,7 +629,7 @@ B_HLSingleNeopix.prototype.updateColor = function() {
 }
 
 function B_HL_SN_L1(x, y, color, userSelectedPort) {
-  B_HLSingleNeopix.call(this, x, y, color, userSelectedPort)
+  B_HLSingleNeopix.call(this, x, y, color, userSelectedPort, 1000)
 
   //this.updateColor()
   this.blockIcon.addIndicatorCircle(this.value, 40, 50)
@@ -629,14 +637,14 @@ function B_HL_SN_L1(x, y, color, userSelectedPort) {
 B_HL_SN_L1.prototype = Object.create(B_HLSingleNeopix.prototype);
 B_HL_SN_L1.prototype.constructor = B_HL_SN_L1;
 //MicroBlocks functions
-B_HL_SN_L1.prototype.primName = function() { return "hatchlingNeopixelWithDelay" }
+/*B_HL_SN_L1.prototype.primName = function() { return "hatchlingNeopixelWithDelay" }
 B_HL_SN_L1.prototype.argList = function() { 
   let port = HL_Utils.portNames[this.port]
   let duration = 1000
   let rgb = Colors.hexToRgb(this.value)
 
   return [port, rgb[0], rgb[1], rgb[2], duration]
-}
+}*/
 /*B_HL_SN_L1.prototype.primName = function() { return "blockList" }
 B_HL_SN_L1.prototype.argList = function() { 
   let prim = "[h:np]"
@@ -678,7 +686,7 @@ B_HL_SN_L1_White.prototype.constructor = B_HL_SN_L1_White
 B_HL_SN_L1_White.importXml = HL_Utils.importXml
 
 function B_HL_SN_L2(x, y, userSelectedPort) {
-  B_HLSingleNeopix.call(this, x, y, "#FFFFFF", userSelectedPort)
+  B_HLSingleNeopix.call(this, x, y, "#FFFFFF", userSelectedPort, 0)
 
   //this.colorButton = new BlockButton(this);
   //this.colorButton.addSlider("color", { r: this.red, g: this.green, b: this.blue });
@@ -693,12 +701,12 @@ B_HL_SN_L2.prototype = Object.create(B_HLSingleNeopix.prototype);
 B_HL_SN_L2.prototype.constructor = B_HL_SN_L2;
 B_HL_SN_L2.importXml = HL_Utils.importXml
 //MicroBlocks functions
-B_HL_SN_L2.prototype.primName = function() { return "hatchlingNeopixelWithDelay" }
+/*B_HL_SN_L2.prototype.primName = function() { return "hatchlingNeopixelWithDelay" }
 B_HL_SN_L2.prototype.argList = function() { 
   let duration = 0 //duration < 10 causes the neopix to stay on
   let rgb = Colors.hexToRgb(this.value)
   return [HL_Utils.portNames[this.port], rgb[0], rgb[1], rgb[2], duration] 
-}
+}*/
 // B_HL_SN_L2.prototype.primName = function() { return "[h:np]" }
 // B_HL_SN_L2.prototype.argList = function() { 
 //   /*let hex = this.value.slice(1).toLowerCase()
