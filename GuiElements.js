@@ -558,6 +558,9 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, p
       range.collapse(false); //collapse the range to the end point. false means collapse to end rather than the start
       range.select(); //Select the range (make it the visible selection
     }
+
+    //In case the name has changed in the mean time
+    this.charCount = this.textContent.length
   }
 
   editableText.onblur = function() {

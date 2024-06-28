@@ -602,7 +602,7 @@ TouchReceiver.touchStartScrollBar = function(target, e, horizontal) {
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchStartSvgScrollBox = function(target, e) {
-  console.log("*** touchStartSvgScrollBox")
+  //console.log("*** touchStartSvgScrollBox")
   const TR = TouchReceiver;
   if (TR.touchstart(e, false)) {
     TR.targetType = "svgScrollBox";

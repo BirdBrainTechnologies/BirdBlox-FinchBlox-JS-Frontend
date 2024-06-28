@@ -1,5 +1,5 @@
-//var FinchBlox = true;
-//var Hatchling = true;
+var FinchBlox = true;
+var Hatchling = true;
 if (Hatchling) { FinchBlox = true; }
 var FrontendVersion = 393;
 
@@ -7226,6 +7226,9 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, p
       range.collapse(false); //collapse the range to the end point. false means collapse to end rather than the start
       range.select(); //Select the range (make it the visible selection
     }
+
+    //In case the name has changed in the mean time
+    this.charCount = this.textContent.length
   }
 
   editableText.onblur = function() {
@@ -12157,7 +12160,7 @@ TouchReceiver.touchStartScrollBar = function(target, e, horizontal) {
  * @param {event} e - passed event arguments.
  */
 TouchReceiver.touchStartSvgScrollBox = function(target, e) {
-  console.log("*** touchStartSvgScrollBox")
+  //console.log("*** touchStartSvgScrollBox")
   var TR = TouchReceiver;
   if (TR.touchstart(e, false)) {
     TR.targetType = "svgScrollBox";
@@ -13549,7 +13552,7 @@ BlockPalette.updateZoom = function() {
       GuiElements.move.group(BP.catRectGroup, BP.catX, BP.catY)
       GuiElements.move.group(BP.catBnGroup, BP.catX, BP.catY)
       BP.updateOutline()
-      console.log("*** updateZoom " + BP.catX + " " + BP.catY)
+      //console.log("*** updateZoom " + BP.catX + " " + BP.catY)
       console.log(BP.catBnGroup)
     } else {
       BP.updatePath();
@@ -13949,7 +13952,7 @@ BlockPalette.setLevel = function() {
     if (BP.currentLevel != LevelManager.currentLevel) {
       var offsetTo = (LevelManager.currentLevel == 2) ? GuiElements.width : 0 
       var offsetFrom = (LevelManager.currentLevel == 1) ? GuiElements.width : 0
-      console.log("*** animating " + offsetTo + " " + offsetFrom)
+      //console.log("*** animating " + offsetTo + " " + offsetFrom)
       //GuiElements.animate.move(GuiElements.layers.catBg, BP.catX + offsetTo, BP.catY, 1, true, BP.catX + offsetFrom, BP.catY)
       GuiElements.animate.move(GuiElements.layers.catBg, offsetTo, 0, 1, true, offsetFrom, 0)
       //GuiElements.animate.move(GuiElements.layers.categories, BP.catX + offsetTo, BP.catY, 1, true, BP.catX + offsetFrom, BP.catY)
@@ -17013,12 +17016,10 @@ function HLLevelSwitch(x, y) {
 
   	this.animations = []
 
-  	console.log("*** new level switch. current level is " + LevelManager.currentLevel)
   	this.setSwitch(LevelManager.currentLevel) //Necessary when the window is resized
   }
 
 HLLevelSwitch.prototype.press = function() {
-	console.log("*** press level switch")
 	if (this.switchPressed) {
 		return
 	}
@@ -17039,7 +17040,6 @@ HLLevelSwitch.prototype.press = function() {
 	this.animationInProgress = true
 
 
-	console.log("*** about to create level switch tempG")
 	//Create a temporary group to hold both old and new programs. This allows for the animation of switching files.
 	this.tempG = GuiElements.create.group(0, 0, GuiElements.layers.activeTab)
 
@@ -17066,7 +17066,6 @@ HLLevelSwitch.prototype.press = function() {
     GuiElements.update.stroke(rect, Colors.ballyGray, 1)
     this.tempG.appendChild(rect)
 
-    console.log("*** adding animations")
 	this.animations[0] = GuiElements.animate.updateColor(tB, Colors.white, duration)
 	this.animations[1] = GuiElements.animate.updateColor(tW, this.textColor, duration)
 	this.animations[2] = GuiElements.animate.move(this.circleE, x, 0, duration, false, this.circleE.getAttribute("x"))
@@ -17088,7 +17087,6 @@ HLLevelSwitch.prototype.setSwitch = function(level) {
 		return
 	}
 
-
 	for (var i = 0; i < this.animations.length; i++) {
 		this.animations[i].remove()
 	}
@@ -17098,7 +17096,6 @@ HLLevelSwitch.prototype.setSwitch = function(level) {
 		this.oldTab.delete()
 	}
 	
-	console.log("*** HLLevelSwitch setSwitch - about to delete tempG")
 	if (this.tempG != null) {
 		this.tempG.remove()
 		this.tempG = null
@@ -17168,7 +17165,7 @@ function HLEditableFileName(x, y, w, group) {
 		var LM = LevelManager
 		var rename = SaveManager.fileName != LM.savePointFileNames[LM.currentLevel]
 		var displayname = SaveManager.fileName.slice(0, -2)
-		console.log("use editableText to rename " + displayname + " to " + txt)
+		//console.log("use editableText to rename " + displayname + " to " + txt)
 		if (txt == this.defaultText || txt == "") { 
 			//Cannot rename a file to the default text or empty string. Set back to current.
 			this.updateFileName()
@@ -22163,7 +22160,7 @@ function SvgScrollBox(contentGroup, parentGroup, x, y, width, height, innerWidth
 
 	this.vScale = (this.innerHeight - this.height)/(this.height - this.verticalBarH - this.barW)
 
-	console.log("*** adding addListenersSvgScrollBox " + this.verticalBarY)
+	//console.log("*** adding addListenersSvgScrollBox " + this.verticalBarY)
 	TouchReceiver.addListenersSvgScrollBox(this.group, this)
 }
 
@@ -23445,8 +23442,8 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 
 	//this.updateDrawer(true)
 
-	console.log("*** displaySavedFilesMenu filesSavedLocally")
-	console.log(LevelManager.filesSavedLocally)
+	//console.log("*** displaySavedFilesMenu filesSavedLocally")
+	//console.log(LevelManager.filesSavedLocally)
 	//Get the list of files to display and determine how much space that will take
 	var list = []
 	for (var i = 0; i < LevelManager.filesSavedLocally.length; i++) {
@@ -25909,7 +25906,7 @@ Tab.prototype.activate = function() {
     var newX = (LevelManager.currentLevel == 1) ? GuiElements.width : -GuiElements.width 
     GuiElements.move.group(this.mainG, newX, 0)
     TitleBar.levelButton.tempG.appendChild(this.mainG)
-    console.log("*** Tab activate - added a newly activated tab to level switch tempG")
+    //console.log("*** Tab activate - added a newly activated tab to level switch tempG")
   } else {
     GuiElements.layers.activeTab.appendChild(this.mainG);
     this.overFlowArr.show();
@@ -26442,7 +26439,7 @@ Tab.importXml = function(tabNode) {
  * Removes the tab
  */
 Tab.prototype.delete = function() {
-  console.log("*** Tab delete " + this.dontDelete)
+  //console.log("*** Tab delete " + this.dontDelete)
   if (this.dontDelete) { return }
   this.passRecursively("remove");
   this.mainG.remove();
@@ -27109,8 +27106,8 @@ RowDialog.prototype.createTitleIcon = function(pathId) {
  * @return {Element} the SVG group element containing the rows
  */
 RowDialog.prototype.createContent = function() {
-  console.log("*** createContent ")
-  console.log(this.discoveredDevices)
+  //console.log("*** createContent ")
+  //console.log(this.discoveredDevices)
   var RD = RowDialog;
   var y = 0;
   var rowGroup = GuiElements.create.group(0, 0);
@@ -29095,7 +29092,7 @@ DiscoverDialog.prototype.show = function() {
         this.rowCount = 1
         shouldDiscover = false 
       } else if (index != -1) {
-        console.log("*** removing connected device from discovery list")
+        //console.log("*** removing connected device from discovery list")
         this.discoveredDevices.splice(index, 1) 
       }
     } else if (this.discoveredDevices.length == 0 && this.hasBeenShown) {
@@ -29149,7 +29146,7 @@ DiscoverDialog.prototype.checkPendingUpdate = function() {
 var updateDeviceListCounter = 0;
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
-  console.log("*** updateDeviceList " + deviceList)
+  //console.log("*** updateDeviceList " + deviceList)
   updateDeviceListCounter += 1;
   if (!this.visible) {
     return;
@@ -29177,8 +29174,8 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
   }
 
   //if ((updateDeviceListCounter % 40) == 0){
-  console.log("*** updateDeviceList about to reload " + (this.discoveredDevicesRSSISorted.length + this.connectedDevices.length) + " rows")
-  console.log(this.discoveredDevices)
+  //console.log("*** updateDeviceList about to reload " + (this.discoveredDevicesRSSISorted.length + this.connectedDevices.length) + " rows")
+  //console.log(this.discoveredDevices)
   this.reloadRows(this.discoveredDevicesRSSISorted.length + this.connectedDevices.length);
   //};
 
@@ -29194,12 +29191,12 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
  * @param {Element} contentGroup
  */
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
-  console.log("*** create row " + index)
-  console.log(this.connectedDevices)
-  console.log(this.discoveredDevices)
+  //console.log("*** create row " + index)
+  //console.log(this.connectedDevices)
+  //console.log(this.discoveredDevices)
   var deviceList = this.connectedDevices.concat(this.discoveredDevices)
   var device = deviceList[index]
-  console.log(deviceList)
+  //console.log(deviceList)
 
 
   var color = Button.bg;
@@ -31970,7 +31967,7 @@ SaveManager.setConstants = function() {
  * @param {boolean} named - false if the user should be prompted to name the file when they try to use the OpenDialog
  */
 SaveManager.backendOpen = function(fileName, data) {
-  console.log("*** backendOpen " + fileName + ": " + data)
+  //console.log("*** backendOpen " + fileName + ": " + data)
   SaveManager.fileName = fileName;
   SaveManager.loadData(data);
   if (FinchBlox) {
@@ -32163,7 +32160,7 @@ SaveManager.autoSave = function(nextAction) {
  * @param {string} fileName - The file to open
  */
 SaveManager.userOpenFile = function(fileName) {
-  console.log("*** SaveManager.userOpenFile " + fileName)
+  //console.log("*** SaveManager.userOpenFile " + fileName)
   SaveManager.fileName = fileName;
   var request = new HttpRequestBuilder("data/open");
   request.addParam("filename", fileName);
@@ -32234,7 +32231,7 @@ SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, 
  * @param {function} nextAction
  */
 SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction) {
-  console.log("*** sanitizeRename from '" + oldFilename + "' to '" + proposedName + "'")
+  //console.log("*** sanitizeRename from '" + oldFilename + "' to '" + proposedName + "'")
   if (proposedName === "") {
     var message = Language.getStr("Name_error_blank");
     SaveManager.promptRename(isRecording, oldFilename, title, message, nextAction);
@@ -48678,8 +48675,8 @@ MicroBlocksRuntime.prototype.verifyCRCs = async function() {
 			//showDownloadProgress editor 3 (processedCount / totalCount)
 		} else if (sourceItem == null) {
 			console.error("crcDict contains unknown chunk " + chunkID)
-		} else {
-			console.log("CRCs match for chunkID " + chunkID + "!")
+		/*} else {
+			console.log("CRCs match for chunkID " + chunkID + "!")*/
 		}
 		processedCount += 1
 	}
@@ -49302,7 +49299,7 @@ MicroBlocksRuntime.prototype.handleMessage = function(msg) {
 		this.updateRunning(chunkID, false)
 	} else if (op == this.msgNameToID('outputValueMsg')) {
 		if (chunkID == 255) { //TODO: What is this for?
-			console.log(this.bleDevice().name + " Says: " + this.returnedValue(msg))
+			console.log(this.bleDevice().shortName + " says: " + this.returnedValue(msg))
 		/*} (chunkID == 254) { //For making graphs
 			this.addLoggedData(this.returnedValue(msg).toString())*/
 		} else {

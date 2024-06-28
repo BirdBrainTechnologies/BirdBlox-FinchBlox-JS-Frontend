@@ -22,7 +22,7 @@ function HLEditableFileName(x, y, w, group) {
 		const LM = LevelManager
 		const rename = SaveManager.fileName != LM.savePointFileNames[LM.currentLevel]
 		const displayname = SaveManager.fileName.slice(0, -2)
-		console.log("use editableText to rename " + displayname + " to " + txt)
+		//console.log("use editableText to rename " + displayname + " to " + txt)
 		if (txt == this.defaultText || txt == "") { 
 			//Cannot rename a file to the default text or empty string. Set back to current.
 			this.updateFileName()

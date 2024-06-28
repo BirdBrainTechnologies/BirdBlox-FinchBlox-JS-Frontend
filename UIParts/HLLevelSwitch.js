@@ -48,12 +48,10 @@ function HLLevelSwitch(x, y) {
 
   	this.animations = []
 
-  	console.log("*** new level switch. current level is " + LevelManager.currentLevel)
   	this.setSwitch(LevelManager.currentLevel) //Necessary when the window is resized
   }
 
 HLLevelSwitch.prototype.press = function() {
-	console.log("*** press level switch")
 	if (this.switchPressed) {
 		return
 	}
@@ -74,7 +72,6 @@ HLLevelSwitch.prototype.press = function() {
 	this.animationInProgress = true
 
 
-	console.log("*** about to create level switch tempG")
 	//Create a temporary group to hold both old and new programs. This allows for the animation of switching files.
 	this.tempG = GuiElements.create.group(0, 0, GuiElements.layers.activeTab)
 
@@ -101,7 +98,6 @@ HLLevelSwitch.prototype.press = function() {
     GuiElements.update.stroke(rect, Colors.ballyGray, 1)
     this.tempG.appendChild(rect)
 
-    console.log("*** adding animations")
 	this.animations[0] = GuiElements.animate.updateColor(tB, Colors.white, duration)
 	this.animations[1] = GuiElements.animate.updateColor(tW, this.textColor, duration)
 	this.animations[2] = GuiElements.animate.move(this.circleE, x, 0, duration, false, this.circleE.getAttribute("x"))
@@ -123,7 +119,6 @@ HLLevelSwitch.prototype.setSwitch = function(level) {
 		return
 	}
 
-
 	for (let i = 0; i < this.animations.length; i++) {
 		this.animations[i].remove()
 	}
@@ -133,7 +128,6 @@ HLLevelSwitch.prototype.setSwitch = function(level) {
 		this.oldTab.delete()
 	}
 	
-	console.log("*** HLLevelSwitch setSwitch - about to delete tempG")
 	if (this.tempG != null) {
 		this.tempG.remove()
 		this.tempG = null

@@ -100,7 +100,7 @@ BlockPalette.updateZoom = function() {
       GuiElements.move.group(BP.catRectGroup, BP.catX, BP.catY)
       GuiElements.move.group(BP.catBnGroup, BP.catX, BP.catY)
       BP.updateOutline()
-      console.log("*** updateZoom " + BP.catX + " " + BP.catY)
+      //console.log("*** updateZoom " + BP.catX + " " + BP.catY)
       console.log(BP.catBnGroup)
     } else {
       BP.updatePath();
@@ -500,7 +500,7 @@ BlockPalette.setLevel = function() {
     if (BP.currentLevel != LevelManager.currentLevel) {
       const offsetTo = (LevelManager.currentLevel == 2) ? GuiElements.width : 0 
       const offsetFrom = (LevelManager.currentLevel == 1) ? GuiElements.width : 0
-      console.log("*** animating " + offsetTo + " " + offsetFrom)
+      //console.log("*** animating " + offsetTo + " " + offsetFrom)
       //GuiElements.animate.move(GuiElements.layers.catBg, BP.catX + offsetTo, BP.catY, 1, true, BP.catX + offsetFrom, BP.catY)
       GuiElements.animate.move(GuiElements.layers.catBg, offsetTo, 0, 1, true, offsetFrom, 0)
       //GuiElements.animate.move(GuiElements.layers.categories, BP.catX + offsetTo, BP.catY, 1, true, BP.catX + offsetFrom, BP.catY)

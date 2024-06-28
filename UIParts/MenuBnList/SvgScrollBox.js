@@ -61,7 +61,7 @@ function SvgScrollBox(contentGroup, parentGroup, x, y, width, height, innerWidth
 
 	this.vScale = (this.innerHeight - this.height)/(this.height - this.verticalBarH - this.barW)
 
-	console.log("*** adding addListenersSvgScrollBox " + this.verticalBarY)
+	//console.log("*** adding addListenersSvgScrollBox " + this.verticalBarY)
 	TouchReceiver.addListenersSvgScrollBox(this.group, this)
 }
 

@@ -442,8 +442,8 @@ HLFileDrawer.prototype.displaySavedFilesMenu = function() {
 
 	//this.updateDrawer(true)
 
-	console.log("*** displaySavedFilesMenu filesSavedLocally")
-	console.log(LevelManager.filesSavedLocally)
+	//console.log("*** displaySavedFilesMenu filesSavedLocally")
+	//console.log(LevelManager.filesSavedLocally)
 	//Get the list of files to display and determine how much space that will take
 	const list = []
 	for (let i = 0; i < LevelManager.filesSavedLocally.length; i++) {

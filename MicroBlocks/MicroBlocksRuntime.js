@@ -1689,8 +1689,8 @@ MicroBlocksRuntime.prototype.verifyCRCs = async function() {
 			//showDownloadProgress editor 3 (processedCount / totalCount)
 		} else if (sourceItem == null) {
 			console.error("crcDict contains unknown chunk " + chunkID)
-		} else {
-			console.log("CRCs match for chunkID " + chunkID + "!")
+		/*} else {
+			console.log("CRCs match for chunkID " + chunkID + "!")*/
 		}
 		processedCount += 1
 	}
@@ -2313,7 +2313,7 @@ MicroBlocksRuntime.prototype.handleMessage = function(msg) {
 		this.updateRunning(chunkID, false)
 	} else if (op == this.msgNameToID('outputValueMsg')) {
 		if (chunkID == 255) { //TODO: What is this for?
-			console.log(this.bleDevice().name + " Says: " + this.returnedValue(msg))
+			console.log(this.bleDevice().shortName + " says: " + this.returnedValue(msg))
 		/*} (chunkID == 254) { //For making graphs
 			this.addLoggedData(this.returnedValue(msg).toString())*/
 		} else {

@@ -52,7 +52,7 @@ DiscoverDialog.prototype.show = function() {
         this.rowCount = 1
         shouldDiscover = false 
       } else if (index != -1) {
-        console.log("*** removing connected device from discovery list")
+        //console.log("*** removing connected device from discovery list")
         this.discoveredDevices.splice(index, 1) 
       }
     } else if (this.discoveredDevices.length == 0 && this.hasBeenShown) {
@@ -106,7 +106,7 @@ DiscoverDialog.prototype.checkPendingUpdate = function() {
 var updateDeviceListCounter = 0;
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
-  console.log("*** updateDeviceList " + deviceList)
+  //console.log("*** updateDeviceList " + deviceList)
   updateDeviceListCounter += 1;
   if (!this.visible) {
     return;
@@ -134,8 +134,8 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
   }
 
   //if ((updateDeviceListCounter % 40) == 0){
-  console.log("*** updateDeviceList about to reload " + (this.discoveredDevicesRSSISorted.length + this.connectedDevices.length) + " rows")
-  console.log(this.discoveredDevices)
+  //console.log("*** updateDeviceList about to reload " + (this.discoveredDevicesRSSISorted.length + this.connectedDevices.length) + " rows")
+  //console.log(this.discoveredDevices)
   this.reloadRows(this.discoveredDevicesRSSISorted.length + this.connectedDevices.length);
   //};
 
@@ -151,12 +151,12 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
  * @param {Element} contentGroup
  */
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
-  console.log("*** create row " + index)
-  console.log(this.connectedDevices)
-  console.log(this.discoveredDevices)
+  //console.log("*** create row " + index)
+  //console.log(this.connectedDevices)
+  //console.log(this.discoveredDevices)
   const deviceList = this.connectedDevices.concat(this.discoveredDevices)
   const device = deviceList[index]
-  console.log(deviceList)
+  //console.log(deviceList)
 
 
   var color = Button.bg;

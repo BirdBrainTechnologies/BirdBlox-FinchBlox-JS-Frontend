@@ -280,6 +280,8 @@ RowDialog.prototype.createTitleIcon = function(pathId) {
  * @return {Element} the SVG group element containing the rows
  */
 RowDialog.prototype.createContent = function() {
+  //console.log("*** createContent ")
+  //console.log(this.discoveredDevices)
   const RD = RowDialog;
   let y = 0;
   const rowGroup = GuiElements.create.group(0, 0);

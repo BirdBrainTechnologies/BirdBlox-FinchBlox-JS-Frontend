@@ -25,7 +25,7 @@ SaveManager.setConstants = function() {
  * @param {boolean} named - false if the user should be prompted to name the file when they try to use the OpenDialog
  */
 SaveManager.backendOpen = function(fileName, data) {
-  console.log("*** backendOpen " + fileName + ": " + data)
+  //console.log("*** backendOpen " + fileName + ": " + data)
   SaveManager.fileName = fileName;
   SaveManager.loadData(data);
   if (FinchBlox) {
@@ -218,7 +218,7 @@ SaveManager.autoSave = function(nextAction) {
  * @param {string} fileName - The file to open
  */
 SaveManager.userOpenFile = function(fileName) {
-  console.log("*** SaveManager.userOpenFile " + fileName)
+  //console.log("*** SaveManager.userOpenFile " + fileName)
   SaveManager.fileName = fileName;
   const request = new HttpRequestBuilder("data/open");
   request.addParam("filename", fileName);
@@ -289,7 +289,7 @@ SaveManager.promptRenameWithDefault = function(isRecording, oldFilename, title, 
  * @param {function} nextAction
  */
 SaveManager.sanitizeRename = function(isRecording, oldFilename, title, proposedName, nextAction) {
-  //console.log("*** sanitizeRename")
+  //console.log("*** sanitizeRename from '" + oldFilename + "' to '" + proposedName + "'")
   if (proposedName === "") {
     const message = Language.getStr("Name_error_blank");
     SaveManager.promptRename(isRecording, oldFilename, title, message, nextAction);
