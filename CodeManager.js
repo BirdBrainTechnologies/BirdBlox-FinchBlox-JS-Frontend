@@ -111,12 +111,12 @@ CodeManager.move.update = function(x, y) {
       Highlighter.hide(); // Hide any existing highlight.
       if (!move.startedFromPalette) {
         BlockPalette.showTrash();
-        if (Hatchling) {
+        if (Hatchling || HatchPlus) {
           move.stack.updateShadow(true)
         }
       }
     } else {
-      if (Hatchling) {
+      if (Hatchling || HatchPlus) {
         BlockPalette.showTrash()
         move.stack.updateShadow(false)
       } else {
@@ -125,7 +125,7 @@ CodeManager.move.update = function(x, y) {
       // The slot which fits it best (if any) will be stored in CodeManager.fit.bestFit.
       CodeManager.findBestFit();
       if (CodeManager.fit.found) {
-        if (FinchBlox) {
+        if (FinchBlox || HatchPlus) {
           let fit = CodeManager.fit.bestFit;
           Highlighter.showShadow(fit, move.stack);
         } else {

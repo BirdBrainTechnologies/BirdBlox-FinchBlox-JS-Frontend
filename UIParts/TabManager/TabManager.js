@@ -33,7 +33,7 @@ TabManager.setGraphics = function() {
   /* No longer different from tabArea since tab bar was removed */
   TM.tabSpaceX = TM.tabAreaX;
   TM.tabSpaceY = TitleBar.height;
-  if (FinchBlox) {
+  if (FinchBlox || HatchPlus) {
     TM.tabSpaceY = TitleBar.solidHeight;
   } //TitleBar.buttonMargin; }
   TM.tabSpaceWidth = GuiElements.width - TM.tabSpaceX;
@@ -49,7 +49,7 @@ TabManager.setGraphics = function() {
 TabManager.createTabSpaceBg = function() {
   const TM = TabManager;
   var canvasColor = Colors.canvasGray;
-  if (FinchBlox) {
+  if (FinchBlox || HatchPlus) {
     canvasColor = Colors.white;
   }
   TM.bgRect = GuiElements.draw.rect(TM.tabSpaceX, TM.tabSpaceY, TM.tabSpaceWidth, TM.tabSpaceHeight, canvasColor);

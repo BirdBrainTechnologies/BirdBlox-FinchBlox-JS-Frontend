@@ -52,6 +52,14 @@ RowDialog.setConstants = function() {
     RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
     RowDialog.titleBarH = RowDialog.bnHeight * 2;
     RowDialog.outlineColor = Colors.flagGreen;
+  } else if (HatchPlus) {
+    RowDialog.titleBarColor = Colors.ballyBrandBlue;
+    RowDialog.bgColor = Colors.ballyBrandBlueLight;
+    RowDialog.bnMargin = 5;
+    RowDialog.cornerR = 5;
+    RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
+    RowDialog.titleBarH = RowDialog.bnHeight + RowDialog.bnMargin;
+    RowDialog.outlineColor = Colors.ballyBrandBlue;
   } else {
     RowDialog.titleBarColor = Colors.lightGray;
     RowDialog.bgColor = Colors.lightLightGray;

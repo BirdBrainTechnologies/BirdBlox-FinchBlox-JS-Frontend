@@ -3,7 +3,7 @@
  * @param {Button} button
  * @constructor
  */
-function FileMenu(button) {
+/*function FileMenu(button) {
   Menu.call(this, button);
 }
 FileMenu.prototype = Object.create(Menu.prototype);
@@ -37,4 +37,4 @@ FileMenu.prototype.optionExit = function() {
   SaveManager.checkPromptSave(function() {
     HtmlServer.sendRequest("tablet/exit");
   });
-};
+};*/

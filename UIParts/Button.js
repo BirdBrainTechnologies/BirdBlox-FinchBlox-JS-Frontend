@@ -29,8 +29,8 @@ function Button(x, y, width, height, parent, color, rx, ry, outlineColor, outlin
   } else {
     this.bg = Button.bg;
   }
-  this.rx = rx;
-  this.ry = ry;
+  this.rx = rx || Button.defaultR;
+  this.ry = ry || Button.defaultR;
   this.strokeColor = outlineColor;
   this.strokeW = outlineW
   this.buildBg();
@@ -83,6 +83,18 @@ Button.setGraphics = function() {
 
   //Hatchling
   Button.strokeW = 1.5
+
+  if (HatchPlus) {
+    console.log("*** BUTTON SETUP")
+    Button.bg = Colors.white
+    Button.foreground = Colors.ballyBrandBlue
+    Button.highlightBg = Colors.ballyGray
+    Button.highlightFore = Colors.ballyBrandBlueDark
+    Button.defaultMargin = 15
+    Button.defaultR = 5
+    Button.disabledBg = Colors.ballyGrayLight
+    Button.disabledFore = Colors.white
+  }
 };
 
 /**

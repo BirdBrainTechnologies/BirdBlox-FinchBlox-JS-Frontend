@@ -230,6 +230,10 @@ BlockGraphics.SetHighlight = function() {
     BlockGraphics.highlight.strokeDarkC = Colors.ballyGreenDark
     BlockGraphics.highlight.strokeW = 5;
   }
+  if (HatchPlus) {
+    BlockGraphics.highlight.strokeC = Colors.ballyGreen
+    BlockGraphics.highlight.strokeDarkC = Colors.ballyGreenDark
+  }
 };
 
 /* Constants for Slot hit box */
@@ -244,6 +248,9 @@ BlockGraphics.SetGlow = function() {
   BlockGraphics.glow = function() {};
   BlockGraphics.glow.color = Hatchling ? Colors.ballyGreen : Colors.white;
   BlockGraphics.glow.strokeW = Hatchling ? 3 : 2;
+  if (HatchPlus) {
+    BlockGraphics.glow.color = Colors.ballyGreen
+  }
 };
 
 /* Computes intermediate values from constants */
@@ -284,6 +291,16 @@ BlockGraphics.CalcPaths = function() {
   let path5 = "";
   path5 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + com.cornerRadius + " " + (0 - com.cornerRadius);
   path5 += " z";
+
+  //*** HatchPlus Bumps ***//
+  let hpr = com.bumpSlantWidth + com.bumpBottomWidth/2 //bump radius
+  let hPpath1 = " " + com.bumpOffset + ",0";
+  hPpath1 += " a " + hpr + " " + hpr + " 0 0 0 " + (2*hpr) + " " + 0 + " l ";
+  let hPpath4 = ",0";
+  hPpath4 += " a " + hpr + " " + hpr + " 0 0 1 " + (-2*hpr) + " " + 0 + " l ";
+  hPpath4 += " " + (0 - com.bumpOffset) + ",0";
+  hPpath4 += " a " + com.cornerRadius + " " + com.cornerRadius + " 0 0 1 " + (0 - com.cornerRadius) + " " + (0 - com.cornerRadius);
+  hPpath4 += " ";
 
   //*** FinchBlox Bumps ***//
   let r = 2; //2; //bump corner radius
@@ -326,10 +343,10 @@ BlockGraphics.CalcPaths = function() {
   let hBumpOut = "a " + hr + " " + hr + " 0 0 1 " + 0 + " " + (2*hr) + " l ";
   let hBumpIn = "a " + hr + " " + hr + " 0 0 0 " + 0 + " " + (-2*hr) + " l ";
 
-  com.path1 = path1; //Top edge
+  com.path1 = HatchPlus ? hPpath1 : path1; //Top edge
   com.path2 = path2; //top right corner
   com.path3 = path3; //bottom right corner
-  com.path4 = path4; //Bottom edge and bottom left corner
+  com.path4 = HatchPlus ? hPpath4 : path4; //Bottom edge and bottom left corner
   com.path4NoBump = path4NoBump;
   com.path5 = path5; //top left corner
   com.fbBumpOut = Hatchling ? hBumpOut : fbBumpOut; //FinchBlox right side bump out
@@ -759,7 +776,7 @@ BlockGraphics.create.block = function(category, group, returnsValue, active) {
 
   if (!active) category = "inactive";
   var fill = Colors.getGradient(category);
-  if (FinchBlox) {
+  if (FinchBlox || HatchPlus) {
     fill = Colors.getColor(category)
   }
   path.setAttributeNS(null, "fill", fill);
@@ -921,10 +938,10 @@ BlockGraphics.update.glow = function(path) {
  */
 BlockGraphics.update.stroke = function(path, category, returnsValue, active) {
   if (!active) category = "inactive";
-  if (returnsValue || FinchBlox) {
+  if (returnsValue || FinchBlox || HatchPlus) {
     var outline = Colors.getColor(category);
     //if (FinchBlox) { outline = Colors.darkenColor(outline, 0.75); }
-    if (FinchBlox) {
+    if (FinchBlox || HatchPlus) {
       outline = Colors.blockOutline[category];
     }
     path.setAttributeNS(null, "stroke", outline);

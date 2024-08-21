@@ -64,8 +64,14 @@ BubbleOverlay.prototype.buildGroups = function() {
  * Makes a rectangle and triangle for the background.  Position is not important yet.
  */
 BubbleOverlay.prototype.makeBg = function() {
-  this.bgRect = GuiElements.create.rect(this.bgGroup);
-  GuiElements.update.color(this.bgRect, this.bgColor);
+  if (HatchPlus) {
+    this.bgRect = GuiElements.draw.rect(0, 0, 0, 0, this.bgColor, Button.defaultR, Button.defaultR)
+    this.bgGroup.appendChild(this.bgRect)
+  } else {
+    this.bgRect = GuiElements.create.rect(this.bgGroup);
+    GuiElements.update.color(this.bgRect, this.bgColor);
+  }
+  
   this.triangle = GuiElements.create.path(this.bgGroup);
   GuiElements.update.color(this.triangle, this.bgColor);
 };

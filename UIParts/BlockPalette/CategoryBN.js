@@ -14,7 +14,7 @@ function CategoryBN(x, y, category) {
   if (FinchBlox) {
     this.fill = Hatchling ? Colors.blockPalette[this.catId] : Colors.getColor(this.catId);
   } else {
-    this.fill = Colors.getGradient(this.catId);
+    this.fill = HatchPlus ? Colors.getColor(this.catId) : Colors.getGradient(this.catId);
   }
   this.buildGraphics();
   if (FinchBlox) { //&& !Hatchling) {
@@ -46,7 +46,7 @@ CategoryBN.setGraphics = function() {
     CBN.height = 30;
     CBN.width = (BP.width - 2 * BP.catHMargin - CBN.hMargin) / 2;
     const numberOfRows = Math.ceil(BlockList.catCount() / 2);
-    CBN.vMargin = (BP.catH - BP.catVMargin - numberOfRows * CBN.height) / (numberOfRows - 1);
+    CBN.vMargin = (BP.catH - BP.catVMargin*2 - numberOfRows * CBN.height) / (numberOfRows - 1);
     CBN.labelX = CBN.colorW + CBN.labelLMargin;
     CBN.labelY = (CBN.height + CBN.font.charHeight) / 2;
   }
@@ -64,6 +64,8 @@ CategoryBN.prototype.buildGraphics = function() {
     this.bgRect = GuiElements.draw.tab(0, 0, CBN.width, CBN.height, this.fill, CBN.cornerRadius);
     if (Hatchling) { GuiElements.update.opacity(this.bgRect, 0) }
   } else {
+    //let r = HatchPlus ? Button.defaultR : null
+    //this.bgRect = GuiElements.draw.rect(0, 0, CBN.width, CBN.height, CBN.bg, r, r);
     this.bgRect = GuiElements.draw.rect(0, 0, CBN.width, CBN.height, CBN.bg);
   }
 

@@ -29,6 +29,10 @@ TitleBar.setGraphicsPart1 = function() {
       TB.solidHeight = Hatchling ? 25 : 5; //height that is solid blue all the way across
     } else {
       TB.height = 54;
+      if (HatchPlus) { 
+        TB.height = 75 
+        TB.solidHeight = 5
+      }
     }
     TB.buttonMargin = Hatchling ? Button.defaultMargin * 2 : Button.defaultMargin;
   }
@@ -62,11 +66,15 @@ TitleBar.setGraphicsPart1 = function() {
     TB.bnIconH = TB.buttonH - 2 * TB.bnIconMargin;
     const maxIconHeight = maxBnWidth * 0.7;
     TB.bnIconH = Math.min(maxIconHeight, TB.bnIconH);
-  }
+    if (HatchPlus) {
+      TB.bg = Colors.ballyGrayLight
+      TB.buttonW = TB.buttonH  * 5/4
+    }
+   }
   TB.flagFill = Colors.green;
   TB.batteryFill = Colors.lightGray;
   TB.stopFill = Colors.red;
-  TB.titleColor = Colors.white;
+  TB.titleColor = HatchPlus ? Colors.ballyBrandBlue : Colors.white;
   TB.font = Font.uiFont(16).bold();
 
   TB.shortButtonW = TB.buttonH;
@@ -92,9 +100,14 @@ TitleBar.setGraphicsPart2 = function() {
   TB.fileBnX = TB.buttonMargin;
   TB.viewBnX = TB.fileBnX + TB.buttonMargin + TB.buttonW;
   TB.hummingbirdBnX = TB.viewBnX + TB.buttonMargin + TB.buttonW;
+  if (HatchPlus) { TB.undoBnX = TB.hummingbirdBnX + TB.buttonMargin + TB.longButtonW }
 
   TB.titleLeftX = BlockPalette.width;
   TB.titleRightX = TB.undoBnX - TB.buttonMargin;
+  if (HatchPlus) {
+    TB.titleLeftX = TB.undoBnX + TB.buttonW + TB.buttonMargin
+    TB.titleRightX = TB.flagBnX - TB.buttonMargin*3; //TODO: check 
+  }
   TB.titleWidth = TB.titleRightX - TB.titleLeftX;
 
   let suggestedUndoBnX = TB.hummingbirdBnX + TB.buttonW + TB.buttonMargin;
@@ -109,14 +122,14 @@ TitleBar.setGraphicsPart2 = function() {
  */
 TitleBar.createBar = function() {
   const TB = TitleBar;
-  if (FinchBlox) {
+  if (FinchBlox || HatchPlus) {
     TB.bgRect = GuiElements.draw.rect(0, 0, TB.width, TB.solidHeight, TB.bg); //TB.buttonMargin, TB.bg);
   } else {
     TB.bgRect = GuiElements.draw.rect(0, 0, TB.width, TB.height, TB.bg);
   }
 
   GuiElements.layers.titleBg.appendChild(TB.bgRect);
-  if (FinchBlox) {
+  if (FinchBlox || HatchPlus) {
     TB.bgShape = GuiElements.create.path(GuiElements.layers.titleBg);
     TB.bgShape.setAttributeNS(null, "fill", TB.bg);
     TB.updateShapePath();
@@ -124,25 +137,34 @@ TitleBar.createBar = function() {
 };
 TitleBar.updateShapePath = function() {
   const TB = TitleBar;
-  const r = Hatchling ? ((TB.height - TB.solidHeight) / 6) : ((TB.height - TB.solidHeight) / 2); //TB.buttonMargin)/2;
+  const r = (Hatchling || HatchPlus) ? ((TB.height - TB.solidHeight) / 6) : ((TB.height - TB.solidHeight) / 2); //TB.buttonMargin)/2;
   const shapeW = Hatchling ? (TB.width * 2/7 - r) : (TB.width / 2 - TB.longButtonW - 2 * r);
   const midW = Hatchling ? (TB.width * 3/7 - 2*r) : (2 * TB.longButtonW)
-
+  const solidW = TB.width - TB.buttonW*2 - TB.buttonMargin*4 - r
+  
   var path = " m 0,0";
-  path += " l " + TB.width + ",0 0," + TB.height + " " + (-shapeW) + ",0";
-  path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + (-r);
-  if (Hatchling) { path += " v " + -r*4 }
-  path += " a " + r + " " + r + " 0 0 0 " + (-r) + " " + (-r);
-  path += " l " + (-midW) + ",0";
-  path += " a " + r + " " + r + " 0 0 0 " + (-r) + " " + r;
-  if (Hatchling) { path += " v " + r*4 }
-  path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + r;
-  path += " l " + (-shapeW) + ",0";
+  if (FinchBlox) {
+    path += " l " + TB.width + ",0 0," + TB.height + " " + (-shapeW) + ",0";
+    path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + (-r);
+    if (Hatchling) { path += " v " + -r*4 }
+    path += " a " + r + " " + r + " 0 0 0 " + (-r) + " " + (-r);
+    path += " l " + (-midW) + ",0";
+    path += " a " + r + " " + r + " 0 0 0 " + (-r) + " " + r;
+    if (Hatchling) { path += " v " + r*4 }
+    path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + r;
+    path += " l " + (-shapeW) + ",0";
+  } else {
+    path += " l " + (solidW + 2*r) + ",0 0," + TB.solidHeight;
+    path += " a " + r + " " + r + " 0 0 0 " + (-r) + " " + r;
+    path += " v " + r*4;
+    path += " a " + r + " " + r + " 0 0 1 " + (-r) + " " + r;
+    path += " l " + (-solidW) + ",0";
+  }
   path += " z ";
 
   TB.bgShape.setAttributeNS(null, "d", path);
 
-  TB.sideWidth = shapeW + r;
+  TB.sideWidth = HatchPlus ? solidW + r : shapeW + r;
 }
 
 /**
@@ -327,24 +349,42 @@ TitleBar.makeButtons = function() {
     }
 
   } else {
-    TB.flagBn = new Button(TB.flagBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-    TB.flagBn.addColorIcon(VectorPaths.flag, TB.bnIconH, TB.flagFill);
+    let flagBnColor = HatchPlus ? Colors.ballyGreenLight : null
+    let flagBnOutline = HatchPlus ? Colors.ballyGreen : null
+    TB.flagBn = new Button(TB.flagBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer, flagBnColor, null, null, flagBnOutline);
+    let flagBnPathId = HatchPlus ? VectorPaths.bdStart : VectorPaths.flag
+    let flagBnIconColor = HatchPlus ? Colors.ballyGreen : TB.flagFill
+    TB.flagBn.addColorIcon(flagBnPathId, TB.bnIconH, flagBnIconColor);
     TB.flagBn.setCallbackFunction(CodeManager.eventFlagClicked, false);
-    TB.stopBn = new Button(TB.stopBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-    TB.stopBn.addColorIcon(VectorPaths.stop, TB.bnIconH, TB.stopFill);
+
+    let stopBnColor = HatchPlus ? Colors.ballyRedLight : null
+    let stopBnOutline = HatchPlus ? Colors.ballyRed : null
+    TB.stopBn = new Button(TB.stopBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer, stopBnColor, null, null, stopBnOutline);
+    let stopBnPathId = HatchPlus ? VectorPaths.bdStop : VectorPaths.stop
+    let stopBnIconColor = HatchPlus ? Colors.ballyRed : TB.stopFill
+    TB.stopBn.addColorIcon(stopBnPathId, TB.bnIconH, stopBnIconColor);
     TB.stopBn.setCallbackFunction(CodeManager.stop, false);
-    TB.batteryBn = new Button(TB.batteryBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-    TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
-    TB.batteryMenu = new BatteryMenu(TB.batteryBn);
+
+    if (!HatchPlus) {
+      TB.batteryBn = new Button(TB.batteryBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
+      TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
+      TB.batteryMenu = new BatteryMenu(TB.batteryBn);
+    }
 
     TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.longButtonW, TB.buttonH, TBLayer);
-    const hbBnIconOffset = 2 * TB.buttonMargin;
-    TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8, hbBnIconOffset);
-    TB.hummingbirdMenu = new DeviceMenu(TB.hummingbirdBn);
-    TB.deviceStatusLight = new DeviceStatusLight(TB.statusX, TB.height / 2, TBLayer, DeviceManager);
+    if (HatchPlus) {
+      TB.hummingbirdBn.addIcon(VectorPaths.faBluetoothB, TB.bnIconH)
+    } else {
+      const hbBnIconOffset = 2 * TB.buttonMargin;
+      TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8, hbBnIconOffset);
+      TB.hummingbirdMenu = new DeviceMenu(TB.hummingbirdBn);
+      TB.deviceStatusLight = new DeviceStatusLight(TB.statusX, TB.height / 2, TBLayer, DeviceManager);
+    }
 
     TB.fileBn = new Button(TB.fileBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
-    TB.fileBn.addIcon(VectorPaths.file, TB.bnIconH);
+    const fileIconPath = HatchPlus ? VectorPaths.bdCreateFilePage : VectorPaths.file
+    const fileIconH = HatchPlus ? TB.bnIconH*0.8 : TB.bnIconH
+    TB.fileBn.addIcon(fileIconPath, fileIconH);
     TB.fileBn.setCallbackFunction(OpenDialog.closeFileAndShowDialog, true);
 
     TB.viewBn = new Button(TB.viewBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
@@ -378,7 +418,6 @@ TitleBar.removeButtons = function() {
   TB.undoButton.remove();
   if (FinchBlox) {
     TB.finchButton.remove();
-    //if (!Hatchling) { TB.levelButton.remove(); }
     TB.levelButton.remove();
     //  TB.trashButton.remove();
     if (Hatchling) {
@@ -388,8 +427,11 @@ TitleBar.removeButtons = function() {
   } else {
     TB.viewBn.remove();
     TB.hummingbirdBn.remove();
-    TB.batteryBn.remove();
-    TB.deviceStatusLight.remove();
+    if (!HatchPlus) {
+      TB.batteryBn.remove();
+      TB.deviceStatusLight.remove();
+    }
+    
   }
   if (TB.debugBn != null) TB.debugBn.remove();
   if (TB.showHideBn != null) TB.showHideBn.remove();
@@ -489,7 +531,7 @@ TitleBar.updateZoomPart2 = function() {
     viewShowing = TB.viewBn.toggled;
   }
   TB.setGraphicsPart2();
-  if (FinchBlox) {
+  if (FinchBlox || HatchPlus) {
     GuiElements.update.rect(TB.bgRect, 0, 0, TB.width, TB.solidHeight); //TB.buttonMargin);
     TB.updateShapePath();
   } else {

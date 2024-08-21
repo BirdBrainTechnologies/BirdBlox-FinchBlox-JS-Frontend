@@ -106,7 +106,7 @@ BlockSlot.prototype.snap = function(block) {
   if (stack != null) {
     // Update the positions of everything
     this.parent.stack.updateDim();
-    if (Hatchling) { 
+    if (Hatchling || HatchPlus) { 
       block.land()
       HL_Utils.showPortsPopup(block) 
       mbRuntime.saveChunk(this.parent.stack.firstBlock) 

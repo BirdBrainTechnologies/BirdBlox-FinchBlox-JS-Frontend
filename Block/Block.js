@@ -850,7 +850,7 @@ Block.prototype.highlight = function(forComment) {
 };
 
 /**
- * For Hatchling - slide blocks temporarily out of the way when highlighting 
+ * For Hatchling and HatchPlus - slide blocks temporarily out of the way when highlighting 
  * the block before.
  */
 Block.prototype.tempSlide = function(distance) {
@@ -865,7 +865,11 @@ Block.prototype.tempSlide = function(distance) {
     this.animations = []
   }
   this.distanceDisplaced = distance
-  this.animations.push(GuiElements.animate.move(this.group, this.x + distance, this.y, 0.1, true, this.x, this.y))
+  if (HatchPlus) { //slide down
+    this.animations.push(GuiElements.animate.move(this.group, this.x, this.y + distance, 0.1, true, this.x, this.y))
+  } else { //slide right
+    this.animations.push(GuiElements.animate.move(this.group, this.x + distance, this.y, 0.1, true, this.x, this.y))
+  }
   if (this.nextBlock != null) {
     this.nextBlock.tempSlide(distance)
   }
@@ -941,7 +945,7 @@ Block.prototype.snap = function(block) {
     this.stack.tab.updateArrows();
   }
 
-  if (Hatchling) { 
+  if (Hatchling || HatchPlus) { 
     block.land()
     if (lowerBlock != null) { lowerBlock.unSlide(false) }
     HL_Utils.showPortsPopup(block) 
@@ -1443,7 +1447,7 @@ Block.prototype.fly = function() {
   this.currentShadow = Block.shadowId
 
   //Change color while flying
-  if (!this.hasHat) {  //color change does not apply to hat blocks
+  if (!this.hasHat || HatchPlus) {  //color change does not apply to hat blocks for Hatchling
     let cat = this.category
     if (!this.active) { cat = "inactive" }
     GuiElements.update.color(this.path, Colors.dragColors[cat]);
@@ -1475,7 +1479,7 @@ Block.prototype.land = function() {
   this.currentShadow = null
   this.group.removeAttributeNS(null, "filter")
 
-  if (!this.hasHat) {
+  if (!this.hasHat || HatchPlus) {
     let cat = this.category
     if (!this.active) { cat = "inactive" }
     GuiElements.update.color(this.path, Colors.categoryColors[cat]);

@@ -31,7 +31,7 @@ FileContextMenu.setGraphics = function() {
   };
 
   FCM.bnMargin = Button.defaultMargin;
-  FCM.bgColor = Colors.lightGray;
+  FCM.bgColor = HatchPlus ? Colors.ballyBrandBlue : Colors.lightGray;
   FCM.blockShift = 20;
   FCM.width = 115;
 };

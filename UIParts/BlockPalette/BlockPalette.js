@@ -37,8 +37,8 @@ BlockPalette.setGraphics = function() {
   BlockPalette.insideBnH = 38; // Height of buttons within a category (such as Create Variable button)
   BlockPalette.insideBnW = 150; // Width of buttons within a category
 
-  BlockPalette.catVMargin = Button.defaultMargin; // Margins between buttons
-  BlockPalette.catHMargin = Button.defaultMargin;
+  BlockPalette.catVMargin = HatchPlus ? 5 : Button.defaultMargin; // Margins between buttons
+  BlockPalette.catHMargin = HatchPlus ? 5 : Button.defaultMargin;
 
   // Dimensions for the region with CategoryBNs
   if (FinchBlox) {
@@ -72,9 +72,9 @@ BlockPalette.setGraphics = function() {
     BlockPalette.catX = 0;
     BlockPalette.blockMargin = 5; // The vertical spacing between Blocks
     BlockPalette.trashHeight = 120;
-    BlockPalette.trashIconVP = VectorPaths.trash;
-    BlockPalette.trashOpacity = 0.8;
-    BlockPalette.trashColor = Colors.black;
+    BlockPalette.trashIconVP = HatchPlus ? VectorPaths.bdTrash : VectorPaths.trash;
+    BlockPalette.trashOpacity = HatchPlus ? 1 : 0.8;
+    BlockPalette.trashColor = HatchPlus ? Colors.ballyRed : Colors.black;
   }
 
   BlockPalette.x = Hatchling ? 20 : 0
@@ -411,7 +411,8 @@ BlockPalette.showTrash = function() {
     }
 
     BP.trash = GuiElements.create.group(0, 0);
-    let trashBg = GuiElements.draw.rect(BP.x, BP.y, BP.width, BP.height, BP.bg, r, r);
+    let trashBgColor = HatchPlus ? Colors.ballyRedLight : BP.bg
+    let trashBg = GuiElements.draw.rect(BP.x, BP.y, BP.width, BP.height, trashBgColor, r, r);
     GuiElements.update.opacity(trashBg, BP.trashOpacity);
     BP.trash.appendChild(trashBg);
 

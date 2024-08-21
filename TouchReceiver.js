@@ -724,7 +724,9 @@ TouchReceiver.touchEndDialogBlock = function(e) {
     if (OpenDialog.lastOpenFile != null) {
       SaveManager.userOpenFile(OpenDialog.lastOpenFile);
       OpenDialog.lastOpenFile = null;
-      RowDialog.currentDialog.closeDialog();
+      if (RowDialog.currentDialog != null) {
+        RowDialog.currentDialog.closeDialog();
+      }
     } else {
       SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
         SaveManager.newSoft(availableName, RowDialog.currentDialog.closeDialog());

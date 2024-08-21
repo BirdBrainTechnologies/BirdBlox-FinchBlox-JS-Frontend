@@ -56,6 +56,7 @@ DialogManager.showChoiceDialog = function(title, question, option1, option2, swa
   TouchReceiver.touchInterrupt();
   DM.dialogVisible = true;
   if (DebugOptions.shouldUseJSDialogs()) { //Kept for debugging on a PC
+    console.log("use js dialogs")
     let result = confirm(question);
     DM.dialogVisible = false;
     if (swapIfMouse) {
@@ -67,6 +68,7 @@ DialogManager.showChoiceDialog = function(title, question, option1, option2, swa
       callbackFn("2");
     }
   } else {
+    console.log("regular dialogs")
     const HS = HtmlServer;
     const request = new HttpRequestBuilder("tablet/choice");
     request.addParam("title", title);
@@ -134,7 +136,7 @@ DialogManager.showPromptDialog = function(title, question, prefill, shouldPrefil
     DM.dialogVisible = false;
     callbackFn(newText == null, newText);
   } else {
-    const HS = HtmlServer;
+    /*const HS = HtmlServer;
     const request = new HttpRequestBuilder("tablet/dialog");
     request.addParam("title", title);
     request.addParam("question", question);
@@ -155,7 +157,10 @@ DialogManager.showPromptDialog = function(title, question, prefill, shouldPrefil
         callbackErr();
       }
     };
-    HS.sendRequestWithCallback(request.toString(), onDialogPresented, onDialogPresented);
+    HS.sendRequestWithCallback(request.toString(), onDialogPresented, onDialogPresented);*/
+    console.log("about to show a prompt dialog")
+    const dialog = new PromptDialog(title, question, prefill, shouldPrefill, callbackFn)
+    dialog.show()
   }
 };
 

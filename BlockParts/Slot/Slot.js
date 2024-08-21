@@ -625,3 +625,9 @@ Slot.prototype.onTap = function() {
 Slot.prototype.isEditable = function() {
   return false;
 };
+
+/**
+ * Called when block is flying (HatchPlus only)
+ */
+Slot.prototype.fly = function() {}
+Slot.prototype.land = function() {}

@@ -68,6 +68,7 @@ Highlighter.showShadow = function(fit, stack) {
     myY = fit.tab.absToRelY(fit.getAbsY());
     //myX = CodeManager.dragAbsToRelX(fit.getAbsX());
     myX = fit.tab.absToRelX(fit.getAbsX());
+    if (HatchPlus) { myX = myX - BlockGraphics.command.bumpOffset - BlockGraphics.command.cornerRadius; }
     snapFront = true;
   } else if (fit instanceof BlockSlot) {
     //myY = CodeManager.dragAbsToRelY(fit.getAbsY());
@@ -79,16 +80,21 @@ Highlighter.showShadow = function(fit, stack) {
     //myX = CodeManager.dragAbsToRelX(fit.relToAbsX(fit.width));
     myY = fit.stack.tab.absToRelY(fit.getAbsY());
     myX = fit.stack.tab.absToRelX(fit.relToAbsX(fit.width));
+    if (HatchPlus) {
+      myY = fit.stack.tab.absToRelY(fit.relToAbsY(fit.height));
+      myX = fit.stack.tab.absToRelX(fit.getAbsX()) - BlockGraphics.command.bumpOffset - BlockGraphics.command.cornerRadius;
+    }
     firstDisplaced = fit.nextBlock
   }
-  const color = Hatchling ? Colors.ballyGrayDark : Colors.iron;
+  const color = (Hatchling || HatchPlus) ? Colors.ballyGrayDark : Colors.iron;
 
   let block = stack.firstBlock;
   let shadowW = 0;
+  let shadowH = 0;
   while (block != null) {
     let group = GuiElements.create.group(0, 0, this.shadowGroup);
     let pathE = GuiElements.create.path(group);
-    if (Hatchling) {
+    if (Hatchling || HatchPlus) {
       GuiElements.update.color(pathE, Colors.white);
       GuiElements.update.stroke(pathE, color, 1)
     } else {
@@ -98,20 +104,29 @@ Highlighter.showShadow = function(fit, stack) {
     let pathD = block.path.getAttribute("d");
     pathE.setAttributeNS(null, "d", pathD);
     shadowW += block.width + BlockGraphics.command.fbBumpDepth;
+    shadowH += block.height
     block = block.nextBlock;
   }
   if (snapFront) {
-    myX -= shadowW + BlockGraphics.command.fbBumpDepth;
+    if (HatchPlus) {
+      myY -= shadowH
+    } else {
+      myX -= shadowW + BlockGraphics.command.fbBumpDepth;
+    }
   }
 
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     if (Highlighter.currentlyDisplaced != null && 
       firstDisplaced != Highlighter.currentlyDisplaced) {
       Highlighter.currentlyDisplaced.unSlide(true)
     }
     Highlighter.currentlyDisplaced = firstDisplaced
     if (firstDisplaced != null) {
-      firstDisplaced.tempSlide(shadowW)
+      if (HatchPlus) {
+        firstDisplaced.tempSlide(shadowH)
+      } else {
+        firstDisplaced.tempSlide(shadowW)
+      }
     }
   }
 

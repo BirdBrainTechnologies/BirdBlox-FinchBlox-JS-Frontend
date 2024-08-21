@@ -16,8 +16,10 @@ function B_WhenFlagTapped(x, y) {
   
   } else {
     HatBlock.call(this, x, y, "control");
+    const iconPath = HatchPlus ? VectorPaths.bdStart : VectorPaths.flag
+    const iconColor = HatchPlus ? Colors.white : TitleBar.flagFill
     // Add flag icon with height 15
-    this.addPart(new BlockIcon(this, VectorPaths.flag, TitleBar.flagFill, "flag", 15));
+    this.addPart(new BlockIcon(this, iconPath, iconColor, "flag", 15));
     this.parseTranslation(Language.getStr("block_when_flag_tapped"));
   }
 }

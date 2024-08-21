@@ -328,6 +328,11 @@ Category.prototype.select = function() {
     BlockPalette.selectedCat.deselect();
   }
   BlockPalette.selectedCat = this;
+  if (HatchPlus) {
+    const color = Colors.blockPalette[this.id]
+    GuiElements.update.color(BlockPalette.catRect, color)
+    GuiElements.update.color(BlockPalette.palRect, color)
+  }
   this.button.select();
   this.smoothScrollBox.show();
 };

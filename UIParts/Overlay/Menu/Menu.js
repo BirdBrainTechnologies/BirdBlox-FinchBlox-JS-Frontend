@@ -21,8 +21,13 @@ function Menu(button, width) {
   this.y = button.y + button.height;
   this.group = GuiElements.create.group(this.x, this.y);
   TouchReceiver.addListenersOverlayPart(this.group);
-  this.bgRect = GuiElements.create.rect(this.group);
-  GuiElements.update.color(this.bgRect, Menu.bgColor);
+  if (HatchPlus) {
+    this.bgRect = GuiElements.draw.rect(0, 0, 0, 0, Menu.bgColor, Button.defaultR, Button.defaultR)
+    this.group.appendChild(this.bgRect)
+  } else {
+    this.bgRect = GuiElements.create.rect(this.group);
+    GuiElements.update.color(this.bgRect, Menu.bgColor);
+  }
   this.menuBnList = null;
   this.visible = false;
 
@@ -42,7 +47,7 @@ Menu.prototype.constructor = Menu;
 Menu.setGraphics = function() {
   Menu.defaultWidth = 170;
   Menu.bnMargin = Button.defaultMargin;
-  Menu.bgColor = Colors.lightGray;
+  Menu.bgColor = HatchPlus ? Colors.ballyBrandBlue : Colors.lightGray;
 };
 
 /**

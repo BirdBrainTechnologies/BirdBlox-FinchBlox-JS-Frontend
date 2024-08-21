@@ -440,7 +440,7 @@ BlockStack.prototype.snap = function(block) {
   this.updateDim();
   this.startRunIfAutoExec();
 
-  if (Hatchling) { 
+  if (Hatchling || HatchPlus) { 
     block.land()
     HL_Utils.showPortsPopup(block) 
     mbRuntime.saveChunk(this.firstBlock)
@@ -500,7 +500,7 @@ BlockStack.prototype.fly = function() {
   this.move(CodeManager.dragAbsToRelX(absX), CodeManager.dragAbsToRelY(absY));
   this.tab.updateArrows();
 
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     this.passRecursivelyDown("fly")
   }
 };
@@ -522,7 +522,7 @@ BlockStack.prototype.land = function() {
   this.move(this.tab.absToRelX(absX), this.tab.absToRelY(absY));
   this.tab.updateArrows();
 
-  if (Hatchling) { 
+  if (Hatchling || HatchPlus) { 
     this.passRecursivelyDown("land")
     HL_Utils.showPortsPopup(this.firstBlock) 
   }

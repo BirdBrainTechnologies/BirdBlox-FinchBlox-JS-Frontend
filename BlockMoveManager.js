@@ -67,12 +67,12 @@ BlockMoveManager.prototype.update = function(x, y) {
     Highlighter.hide(); // Hide any existing highlight.
     if (!move.startedFromPalette) {
       BlockPalette.showTrash();
-      if (Hatchling) {
+      if (Hatchling || HatchPlus) {
         move.stack.updateShadow(true)
       }
     }
   } else {
-    if (Hatchling) {
+    if (Hatchling || HatchPlus) {
       BlockPalette.showTrash()
       move.stack.updateShadow(false)
     } else {
@@ -81,7 +81,7 @@ BlockMoveManager.prototype.update = function(x, y) {
     // The slot which fits it best (if any) will be stored in BlockMoveManager.fit.bestFit.
     this.findBestFit();
     if (this.fit.found) {
-      if (FinchBlox) {
+      if (FinchBlox || HatchPlus) {
         let fit = this.fit.bestFit;
         Highlighter.showShadow(fit, move.stack);
       } else {
