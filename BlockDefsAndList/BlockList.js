@@ -54,7 +54,11 @@ function BlockList() {
       cat.push("Control_3");
     }
   } else {
-    cat.push("Robots");
+    if (HatchPlus) {
+      cat.push("Hatchling");
+    } else {
+      cat.push("Robots");
+    }
     cat.push("Operators");
     cat.push("Sound");
     cat.push("Tablet");
@@ -562,8 +566,33 @@ BlockList.populateItem_finch = function(collapsibleItem) {
 };
 
 /**
+ * HatchPlus Hatchling category
+ * @param {Category} category
+ */
+BlockList.populateCat_hatchling = function(category) {
+  category.addBlockByName("B_HLEmptyPortA");
+  category.addBlockByName("B_HLEmptyPortB");
+  category.addBlockByName("B_HLEmptyPortC");
+  category.addBlockByName("B_HLEmptyPortD");
+  category.addBlockByName("B_HLEmptyPortE");
+  category.addBlockByName("B_HLEmptyPortF");
+  category.addSpace();
+  category.addBlockByName("B_HLLedArray");
+  category.addBlockByName("B_HLPrint");
+  category.addBlockByName("B_HLBuzzer");
+  category.addSpace();
+  category.addBlockByName("B_HLMagnetometer");
+  category.addBlockByName("B_HLButton");
+  category.addBlockByName("B_HLOrientation");
+  category.addBlockByName("B_HLCompass");
+  category.addBlockByName("B_HLV2Sensor");
+  category.trimBottom();
+}
+
+/**
  * @param {CollapsibleItem} collapsibleItem
  */
+/*
 BlockList.populateItem_hatchling = function(collapsibleItem) {
   collapsibleItem.addBlockByName("B_HLEmptyPortA");
   collapsibleItem.addBlockByName("B_HLEmptyPortB");
@@ -584,6 +613,7 @@ BlockList.populateItem_hatchling = function(collapsibleItem) {
   collapsibleItem.trimBottom();
   collapsibleItem.finalize();
 }
+*/
 
 /**
  * @param {CollapsibleItem} collapsibleItem

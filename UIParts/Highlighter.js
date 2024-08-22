@@ -76,6 +76,8 @@ Highlighter.showShadow = function(fit, stack) {
     //myX = CodeManager.dragAbsToRelX(fit.getAbsX()) - BlockGraphics.command.fbBumpDepth;
     myX = fit.parent.stack.tab.absToRelX(fit.getAbsX()) - BlockGraphics.command.fbBumpDepth;
     firstDisplaced = fit.child
+  } else if (fit instanceof Slot) {
+    fit.highlight()
   } else {
     //myX = CodeManager.dragAbsToRelX(fit.relToAbsX(fit.width));
     myY = fit.stack.tab.absToRelY(fit.getAbsY());

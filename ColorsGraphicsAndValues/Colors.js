@@ -221,12 +221,6 @@ Colors.setCategory = function() {
   }
   if (HatchPlus) {
     Colors.categoryColors = {
-      "robots": Colors.ballyBrandBlue,
-      "hummingbird": Colors.ballyBrandBlue,
-      "hummingbirdbit": Colors.ballyBrandBlue,
-      "microbit": Colors.ballyBrandBlue,
-      "flutter": Colors.ballyBrandBlue,
-      "finch": Colors.ballyBrandBlue,
       "hatchling": Colors.ballyBrandBlue,
       "tablet": Colors.ballyOrange,
       "operators": Colors.ballyBlue,
@@ -237,7 +231,7 @@ Colors.setCategory = function() {
       "inactive": Colors.ballyGray
     }
     Colors.blockPalette = {
-      "robots": Colors.ballyBrandBlueLight,
+      "hatchling": Colors.ballyBrandBlueLight,
       "tablet": Colors.ballyOrangeLight,
       "operators": Colors.ballyBlueLight,
       "sound": Colors.ballyPurpleLight,
@@ -245,12 +239,6 @@ Colors.setCategory = function() {
       "variables": Colors.ballyPinkLight,
     }
     Colors.blockOutline = {
-      "robots": Colors.ballyBrandBlueDark,
-      "hummingbird": Colors.ballyBrandBlueDark,
-      "hummingbirdbit": Colors.ballyBrandBlueDark,
-      "microbit": Colors.ballyBrandBlueDark,
-      "flutter": Colors.ballyBrandBlueDark,
-      "finch": Colors.ballyBrandBlueDark,
       "hatchling": Colors.ballyBrandBlueDark,
       "tablet": Colors.ballyOrangeDark,
       "operators": Colors.ballyBlueDark,
@@ -262,12 +250,6 @@ Colors.setCategory = function() {
     }
     Colors.dragColors = {
       //TODO: Make an onDrag color for brand blue
-      "robots": Colors.ballyBrandBlue,
-      "hummingbird": Colors.ballyBrandBlue,
-      "hummingbirdbit": Colors.ballyBrandBlue,
-      "microbit": Colors.ballyBrandBlue,
-      "flutter": Colors.ballyBrandBlue,
-      "finch": Colors.ballyBrandBlue,
       "hatchling": Colors.ballyBrandBlue,
       "tablet": Colors.ballyOrangeOnDrag,
       "operators": Colors.ballyBlueOnDrag,

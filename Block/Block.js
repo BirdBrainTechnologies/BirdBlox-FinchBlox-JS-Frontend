@@ -88,7 +88,7 @@ Block.setConstants = function() {
 
   Block.count = 0;
 
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     Block.shadowId = "blockShadowId"
     GuiElements.create.shadow(Block.shadowId, Colors.ballyGrayDark, 0.3)
     Block.redShadowId = "redShadowId"
@@ -744,7 +744,7 @@ Block.prototype.resize = function(width, height) {
 };
 
 /**
- * Recursively searches for the Block with best fits the currently moving BlockStack.
+ * Recursively searches for the Block which best fits the currently moving BlockStack.
  * Stores information about any matches in CodeManager.fit and uses data from CodeManager.move.
  * A command block attempts to find a connection between its bottom and the moving stack's top.
  * Connections to the top of the stack's findBestFit.

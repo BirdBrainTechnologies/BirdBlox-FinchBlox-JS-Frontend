@@ -166,7 +166,7 @@ BlockGraphics.SetLoop = function() {
   // Minimum width of loop blocks
   BlockGraphics.loop.width = 40;
   //BirdBlox
-  BlockGraphics.loop.bottomH = 7; //Height of the bottom arm
+  BlockGraphics.loop.bottomH = HatchPlus ? 14 : 7; //Height of the bottom arm
   BlockGraphics.loop.side = 7; //width of the bit that connects the main block to the bottom arm.
   //FinchBlox
   BlockGraphics.loop.armW = 5 + 2 * BlockGraphics.command.cornerRadius; //Width of the loop arm.
@@ -231,8 +231,8 @@ BlockGraphics.SetHighlight = function() {
     BlockGraphics.highlight.strokeW = 5;
   }
   if (HatchPlus) {
-    BlockGraphics.highlight.strokeC = Colors.ballyGreen
-    BlockGraphics.highlight.strokeDarkC = Colors.ballyGreenDark
+    BlockGraphics.highlight.strokeC = Colors.white
+    BlockGraphics.highlight.strokeDarkC = Colors.ballyGray
   }
 };
 
@@ -686,14 +686,26 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerDim, bottomOpe
     path += height - innerDim - 2 * comm.cornerRadius - loop.bottomH;
     path += comm.path3;
     path += (comm.extraWidth - width + loop.side) + ",0";
-    path += " " + (0 - comm.bumpSlantWidth) + "," + comm.bumpDepth;
-    path += " " + (0 - comm.bumpBottomWidth) + ",0";
-    path += " " + (0 - comm.bumpSlantWidth) + "," + (0 - comm.bumpDepth);
+    if (HatchPlus) {
+      let hpr = comm.bumpSlantWidth + comm.bumpBottomWidth/2
+      path += " a " + hpr + " " + hpr + " 0 0 1 " + (-2*hpr) + " " + 0 + " l "
+    } else {
+      path += " " + (0 - comm.bumpSlantWidth) + "," + comm.bumpDepth;
+      path += " " + (0 - comm.bumpBottomWidth) + ",0";
+      path += " " + (0 - comm.bumpSlantWidth) + "," + (0 - comm.bumpDepth);
+    }
     path += " " + (0 - comm.bumpOffset) + ",0";
     path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + comm.cornerRadius;
     path += " l 0," + (innerDim - 2 * comm.cornerRadius);
     path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + comm.cornerRadius + " " + comm.cornerRadius;
-    path += " l " + (width - 2 * comm.cornerRadius - loop.side);
+    if (HatchPlus) {
+      let hpr = comm.bumpSlantWidth + comm.bumpBottomWidth/2
+      path += " l " + comm.bumpOffset + ",0";
+      path += " a " + hpr + " " + hpr + " 0 0 0 " + (2*hpr) + " " + 0 ;
+      path += " l " + (width - 2 * comm.cornerRadius - loop.side - comm.bumpOffset - 2*hpr);
+    } else {
+      path += " l " + (width - 2 * comm.cornerRadius - loop.side);
+    }
     path += comm.path2;
     path += loop.bottomH - 2 * comm.cornerRadius;
     path += comm.path3;
@@ -734,14 +746,26 @@ BlockGraphics.buildPath.doubleLoop = function(x, y, width, height, innerHeight1,
     path += currentH;
     path += comm.path3;
     path += (comm.extraWidth - width + loop.side) + ",0";
-    path += " " + (0 - comm.bumpSlantWidth) + "," + comm.bumpDepth;
-    path += " " + (0 - comm.bumpBottomWidth) + ",0";
-    path += " " + (0 - comm.bumpSlantWidth) + "," + (0 - comm.bumpDepth);
+    if (HatchPlus) {
+      let hpr = comm.bumpSlantWidth + comm.bumpBottomWidth/2
+      path += " a " + hpr + " " + hpr + " 0 0 1 " + (-2*hpr) + " " + 0 + " l "
+    } else {
+      path += " " + (0 - comm.bumpSlantWidth) + "," + comm.bumpDepth;
+      path += " " + (0 - comm.bumpBottomWidth) + ",0";
+      path += " " + (0 - comm.bumpSlantWidth) + "," + (0 - comm.bumpDepth);
+    }
     path += " " + (0 - comm.bumpOffset) + ",0";
     path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + comm.cornerRadius;
     path += " l 0," + (innerHeight - 2 * comm.cornerRadius);
     path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + comm.cornerRadius + " " + comm.cornerRadius;
-    path += " l " + (width - 2 * comm.cornerRadius - loop.side);
+    if (HatchPlus) {
+      let hpr = comm.bumpSlantWidth + comm.bumpBottomWidth/2
+      path += " l " + comm.bumpOffset + ",0";
+      path += " a " + hpr + " " + hpr + " 0 0 0 " + (2*hpr) + " " + 0 ;
+      path += " l " + (width - 2 * comm.cornerRadius - loop.side - comm.bumpOffset - 2*hpr);
+    } else {
+      path += " l " + (width - 2 * comm.cornerRadius - loop.side);
+    }
     innerHeight = innerHeight2;
     currentH = midHeight - 2 * comm.cornerRadius;
   }

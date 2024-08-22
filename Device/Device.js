@@ -339,11 +339,12 @@ Device.fromJsonArrayString = function(deviceList) {
 
 /**
  * Returns an array of concrete subclasses of Device, each representing a type of robot.
+ * For use in BirdBlox only.
  * @return {Array}
  */
 Device.getTypeList = function() {
   //return [DeviceHummingbird, DeviceFlutter, DeviceFinch];
-  return [DeviceHummingbird, DeviceHummingbirdBit, DeviceMicroBit, DeviceFinch, DeviceHatchling];
+  return [DeviceHummingbird, DeviceHummingbirdBit, DeviceMicroBit, DeviceFinch] //, DeviceHatchling];
 };
 
 /**

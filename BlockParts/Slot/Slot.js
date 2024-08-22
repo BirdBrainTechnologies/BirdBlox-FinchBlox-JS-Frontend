@@ -122,6 +122,11 @@ Slot.prototype.snap = function(block) {
   }
   if (this.parent.stack != null) {
     this.parent.stack.updateDim(); //Update parent's dimensions.
+    if (HatchPlus) {
+      block.land()
+      HL_Utils.showPortsPopup(block) 
+      mbRuntime.saveChunk(this.parent.stack.firstBlock) 
+    }
   }
 };
 

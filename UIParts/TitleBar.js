@@ -74,7 +74,7 @@ TitleBar.setGraphicsPart1 = function() {
   TB.flagFill = Colors.green;
   TB.batteryFill = Colors.lightGray;
   TB.stopFill = Colors.red;
-  TB.titleColor = HatchPlus ? Colors.ballyBrandBlue : Colors.white;
+  TB.titleColor = HatchPlus ? Colors.ballyBrandBlueDark : Colors.white;
   TB.font = Font.uiFont(16).bold();
 
   TB.shortButtonW = TB.buttonH;

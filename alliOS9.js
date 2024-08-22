@@ -2528,7 +2528,8 @@ Language.en = {
 "is_empty":"is empty",
 "block_Fairy_Lights":"Fairy Lights (Slot 1) (Slot 2) %",
 "block_Neopixel_Strip":"Neopixel (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
-"block_Single_Neopixel":"Neopixel R (Slot 1) % G (Slot 2) % B (Slot 3) %"
+"block_Single_Neopixel":"Neopixel R (Slot 1) % G (Slot 2) % B (Slot 3) %",
+"Hatchling":"Hatchling"
 }
 
 //Spanish Translation
@@ -5168,11 +5169,12 @@ Device.fromJsonArrayString = function(deviceList) {
 
 /**
  * Returns an array of concrete subclasses of Device, each representing a type of robot.
+ * For use in BirdBlox only.
  * @return {Array}
  */
 Device.getTypeList = function() {
   //return [DeviceHummingbird, DeviceFlutter, DeviceFinch];
-  return [DeviceHummingbird, DeviceHummingbirdBit, DeviceMicroBit, DeviceFinch, DeviceHatchling];
+  return [DeviceHummingbird, DeviceHummingbirdBit, DeviceMicroBit, DeviceFinch] //, DeviceHatchling];
 };
 
 /**
@@ -8540,7 +8542,11 @@ function BlockList() {
       cat.push("Control_3");
     }
   } else {
-    cat.push("Robots");
+    if (HatchPlus) {
+      cat.push("Hatchling");
+    } else {
+      cat.push("Robots");
+    }
     cat.push("Operators");
     cat.push("Sound");
     cat.push("Tablet");
@@ -9048,8 +9054,33 @@ BlockList.populateItem_finch = function(collapsibleItem) {
 };
 
 /**
+ * HatchPlus Hatchling category
+ * @param {Category} category
+ */
+BlockList.populateCat_hatchling = function(category) {
+  category.addBlockByName("B_HLEmptyPortA");
+  category.addBlockByName("B_HLEmptyPortB");
+  category.addBlockByName("B_HLEmptyPortC");
+  category.addBlockByName("B_HLEmptyPortD");
+  category.addBlockByName("B_HLEmptyPortE");
+  category.addBlockByName("B_HLEmptyPortF");
+  category.addSpace();
+  category.addBlockByName("B_HLLedArray");
+  category.addBlockByName("B_HLPrint");
+  category.addBlockByName("B_HLBuzzer");
+  category.addSpace();
+  category.addBlockByName("B_HLMagnetometer");
+  category.addBlockByName("B_HLButton");
+  category.addBlockByName("B_HLOrientation");
+  category.addBlockByName("B_HLCompass");
+  category.addBlockByName("B_HLV2Sensor");
+  category.trimBottom();
+}
+
+/**
  * @param {CollapsibleItem} collapsibleItem
  */
+/*
 BlockList.populateItem_hatchling = function(collapsibleItem) {
   collapsibleItem.addBlockByName("B_HLEmptyPortA");
   collapsibleItem.addBlockByName("B_HLEmptyPortB");
@@ -9070,6 +9101,7 @@ BlockList.populateItem_hatchling = function(collapsibleItem) {
   collapsibleItem.trimBottom();
   collapsibleItem.finalize();
 }
+*/
 
 /**
  * @param {CollapsibleItem} collapsibleItem
@@ -9315,12 +9347,6 @@ Colors.setCategory = function() {
   }
   if (HatchPlus) {
     Colors.categoryColors = {
-      "robots": Colors.ballyBrandBlue,
-      "hummingbird": Colors.ballyBrandBlue,
-      "hummingbirdbit": Colors.ballyBrandBlue,
-      "microbit": Colors.ballyBrandBlue,
-      "flutter": Colors.ballyBrandBlue,
-      "finch": Colors.ballyBrandBlue,
       "hatchling": Colors.ballyBrandBlue,
       "tablet": Colors.ballyOrange,
       "operators": Colors.ballyBlue,
@@ -9331,7 +9357,7 @@ Colors.setCategory = function() {
       "inactive": Colors.ballyGray
     }
     Colors.blockPalette = {
-      "robots": Colors.ballyBrandBlueLight,
+      "hatchling": Colors.ballyBrandBlueLight,
       "tablet": Colors.ballyOrangeLight,
       "operators": Colors.ballyBlueLight,
       "sound": Colors.ballyPurpleLight,
@@ -9339,12 +9365,6 @@ Colors.setCategory = function() {
       "variables": Colors.ballyPinkLight,
     }
     Colors.blockOutline = {
-      "robots": Colors.ballyBrandBlueDark,
-      "hummingbird": Colors.ballyBrandBlueDark,
-      "hummingbirdbit": Colors.ballyBrandBlueDark,
-      "microbit": Colors.ballyBrandBlueDark,
-      "flutter": Colors.ballyBrandBlueDark,
-      "finch": Colors.ballyBrandBlueDark,
       "hatchling": Colors.ballyBrandBlueDark,
       "tablet": Colors.ballyOrangeDark,
       "operators": Colors.ballyBlueDark,
@@ -9356,12 +9376,6 @@ Colors.setCategory = function() {
     }
     Colors.dragColors = {
       //TODO: Make an onDrag color for brand blue
-      "robots": Colors.ballyBrandBlue,
-      "hummingbird": Colors.ballyBrandBlue,
-      "hummingbirdbit": Colors.ballyBrandBlue,
-      "microbit": Colors.ballyBrandBlue,
-      "flutter": Colors.ballyBrandBlue,
-      "finch": Colors.ballyBrandBlue,
       "hatchling": Colors.ballyBrandBlue,
       "tablet": Colors.ballyOrangeOnDrag,
       "operators": Colors.ballyBlueOnDrag,
@@ -10497,7 +10511,7 @@ BlockGraphics.SetLoop = function() {
   // Minimum width of loop blocks
   BlockGraphics.loop.width = 40;
   //BirdBlox
-  BlockGraphics.loop.bottomH = 7; //Height of the bottom arm
+  BlockGraphics.loop.bottomH = HatchPlus ? 14 : 7; //Height of the bottom arm
   BlockGraphics.loop.side = 7; //width of the bit that connects the main block to the bottom arm.
   //FinchBlox
   BlockGraphics.loop.armW = 5 + 2 * BlockGraphics.command.cornerRadius; //Width of the loop arm.
@@ -10562,8 +10576,8 @@ BlockGraphics.SetHighlight = function() {
     BlockGraphics.highlight.strokeW = 5;
   }
   if (HatchPlus) {
-    BlockGraphics.highlight.strokeC = Colors.ballyGreen
-    BlockGraphics.highlight.strokeDarkC = Colors.ballyGreenDark
+    BlockGraphics.highlight.strokeC = Colors.white
+    BlockGraphics.highlight.strokeDarkC = Colors.ballyGray
   }
 };
 
@@ -11017,14 +11031,26 @@ BlockGraphics.buildPath.loop = function(x, y, width, height, innerDim, bottomOpe
     path += height - innerDim - 2 * comm.cornerRadius - loop.bottomH;
     path += comm.path3;
     path += (comm.extraWidth - width + loop.side) + ",0";
-    path += " " + (0 - comm.bumpSlantWidth) + "," + comm.bumpDepth;
-    path += " " + (0 - comm.bumpBottomWidth) + ",0";
-    path += " " + (0 - comm.bumpSlantWidth) + "," + (0 - comm.bumpDepth);
+    if (HatchPlus) {
+      var hpr = comm.bumpSlantWidth + comm.bumpBottomWidth/2
+      path += " a " + hpr + " " + hpr + " 0 0 1 " + (-2*hpr) + " " + 0 + " l "
+    } else {
+      path += " " + (0 - comm.bumpSlantWidth) + "," + comm.bumpDepth;
+      path += " " + (0 - comm.bumpBottomWidth) + ",0";
+      path += " " + (0 - comm.bumpSlantWidth) + "," + (0 - comm.bumpDepth);
+    }
     path += " " + (0 - comm.bumpOffset) + ",0";
     path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + comm.cornerRadius;
     path += " l 0," + (innerDim - 2 * comm.cornerRadius);
     path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + comm.cornerRadius + " " + comm.cornerRadius;
-    path += " l " + (width - 2 * comm.cornerRadius - loop.side);
+    if (HatchPlus) {
+      var hpr = comm.bumpSlantWidth + comm.bumpBottomWidth/2
+      path += " l " + comm.bumpOffset + ",0";
+      path += " a " + hpr + " " + hpr + " 0 0 0 " + (2*hpr) + " " + 0 ;
+      path += " l " + (width - 2 * comm.cornerRadius - loop.side - comm.bumpOffset - 2*hpr);
+    } else {
+      path += " l " + (width - 2 * comm.cornerRadius - loop.side);
+    }
     path += comm.path2;
     path += loop.bottomH - 2 * comm.cornerRadius;
     path += comm.path3;
@@ -11065,14 +11091,26 @@ BlockGraphics.buildPath.doubleLoop = function(x, y, width, height, innerHeight1,
     path += currentH;
     path += comm.path3;
     path += (comm.extraWidth - width + loop.side) + ",0";
-    path += " " + (0 - comm.bumpSlantWidth) + "," + comm.bumpDepth;
-    path += " " + (0 - comm.bumpBottomWidth) + ",0";
-    path += " " + (0 - comm.bumpSlantWidth) + "," + (0 - comm.bumpDepth);
+    if (HatchPlus) {
+      var hpr = comm.bumpSlantWidth + comm.bumpBottomWidth/2
+      path += " a " + hpr + " " + hpr + " 0 0 1 " + (-2*hpr) + " " + 0 + " l "
+    } else {
+      path += " " + (0 - comm.bumpSlantWidth) + "," + comm.bumpDepth;
+      path += " " + (0 - comm.bumpBottomWidth) + ",0";
+      path += " " + (0 - comm.bumpSlantWidth) + "," + (0 - comm.bumpDepth);
+    }
     path += " " + (0 - comm.bumpOffset) + ",0";
     path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + (0 - comm.cornerRadius) + " " + comm.cornerRadius;
     path += " l 0," + (innerHeight - 2 * comm.cornerRadius);
     path += " a " + comm.cornerRadius + " " + comm.cornerRadius + " 0 0 0 " + comm.cornerRadius + " " + comm.cornerRadius;
-    path += " l " + (width - 2 * comm.cornerRadius - loop.side);
+    if (HatchPlus) {
+      var hpr = comm.bumpSlantWidth + comm.bumpBottomWidth/2
+      path += " l " + comm.bumpOffset + ",0";
+      path += " a " + hpr + " " + hpr + " 0 0 0 " + (2*hpr) + " " + 0 ;
+      path += " l " + (width - 2 * comm.cornerRadius - loop.side - comm.bumpOffset - 2*hpr);
+    } else {
+      path += " l " + (width - 2 * comm.cornerRadius - loop.side);
+    }
     innerHeight = innerHeight2;
     currentH = midHeight - 2 * comm.cornerRadius;
   }
@@ -13078,7 +13116,7 @@ TitleBar.setGraphicsPart1 = function() {
   TB.flagFill = Colors.green;
   TB.batteryFill = Colors.lightGray;
   TB.stopFill = Colors.red;
-  TB.titleColor = HatchPlus ? Colors.ballyBrandBlue : Colors.white;
+  TB.titleColor = HatchPlus ? Colors.ballyBrandBlueDark : Colors.white;
   TB.font = Font.uiFont(16).bold();
 
   TB.shortButtonW = TB.buttonH;
@@ -17929,7 +17967,7 @@ InputPad.setConstants = function() {
       IP.width = GuiElements.width * 7/8 - 2*IP.margin
     }
   } else {
-    IP.background = Colors.lightGray;
+    IP.background = HatchPlus ? Colors.ballyGray : Colors.lightGray;
     IP.margin = Button.defaultMargin;
     IP.width = 160;
   }
@@ -24355,6 +24393,8 @@ Highlighter.showShadow = function(fit, stack) {
     //myX = CodeManager.dragAbsToRelX(fit.getAbsX()) - BlockGraphics.command.fbBumpDepth;
     myX = fit.parent.stack.tab.absToRelX(fit.getAbsX()) - BlockGraphics.command.fbBumpDepth;
     firstDisplaced = fit.child
+  } else if (fit instanceof Slot) {
+    fit.highlight()
   } else {
     //myX = CodeManager.dragAbsToRelX(fit.relToAbsX(fit.width));
     myY = fit.stack.tab.absToRelY(fit.getAbsY());
@@ -33260,7 +33300,7 @@ Block.setConstants = function() {
 
   Block.count = 0;
 
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     Block.shadowId = "blockShadowId"
     GuiElements.create.shadow(Block.shadowId, Colors.ballyGrayDark, 0.3)
     Block.redShadowId = "redShadowId"
@@ -33916,7 +33956,7 @@ Block.prototype.resize = function(width, height) {
 };
 
 /**
- * Recursively searches for the Block with best fits the currently moving BlockStack.
+ * Recursively searches for the Block which best fits the currently moving BlockStack.
  * Stores information about any matches in CodeManager.fit and uses data from CodeManager.move.
  * A command block attempts to find a connection between its bottom and the moving stack's top.
  * Connections to the top of the stack's findBestFit.
@@ -35785,6 +35825,11 @@ Slot.prototype.snap = function(block) {
   }
   if (this.parent.stack != null) {
     this.parent.stack.updateDim(); //Update parent's dimensions.
+    if (HatchPlus) {
+      block.land()
+      HL_Utils.showPortsPopup(block) 
+      mbRuntime.saveChunk(this.parent.stack.firstBlock) 
+    }
   }
 };
 
