@@ -27,7 +27,7 @@ CategoryBN.setGraphics = function() {
   const CBN = CategoryBN;
   CBN.bg = Colors.white;
   CBN.font = Font.uiFont(15);
-  CBN.foreground = Colors.black;
+  CBN.foreground = HatchPlus ? Colors.ballyBrandBlueDark : Colors.black;
   CBN.colorW = 8; // The width of the band of color on the left
   CBN.labelLMargin = 6; // The amount of space between the text of the button and the band of color
 
@@ -120,6 +120,10 @@ CategoryBN.prototype.select = function() {
     let iconY = (CategoryBN.selectedH - iconH) / 2;
     this.icon.update(iconX, iconY, iconH);
   } else {
+    if (HatchPlus) {
+      const color = Colors.blockPalette[this.catId]
+      BlockPalette.updatePaletteColor(color)
+    }
     this.bgRect.setAttributeNS(null, "fill", this.fill);
     this.label.setAttributeNS(null, "fill", Colors.white);
   }
@@ -143,7 +147,7 @@ CategoryBN.prototype.deselect = function() {
     this.icon.update(iconX, iconY, iconH);
   } else {
     this.bgRect.setAttributeNS(null, "fill", CategoryBN.bg);
-    this.label.setAttributeNS(null, "fill", Colors.black);
+    this.label.setAttributeNS(null, "fill", CategoryBN.foreground);
   }
 };
 

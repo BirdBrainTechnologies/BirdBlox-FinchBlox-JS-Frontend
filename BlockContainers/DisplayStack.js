@@ -33,7 +33,7 @@ function DisplayStack(firstBlock, group, category) {
 
   this.updateTimer = null;
 
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     if (DisplayStack.count == null) { DisplayStack.count = 0 }
     this.mbId = "ds" + DisplayStack.count
     DisplayStack.count++
@@ -202,7 +202,7 @@ DisplayStack.prototype.updateRun = function() {
  * Starts execution of the DisplayStack. Makes BlockStack glow, too.
  */
 DisplayStack.prototype.startRun = function() {
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     mbRuntime.startRun(this.firstBlock, false)
     return
   }

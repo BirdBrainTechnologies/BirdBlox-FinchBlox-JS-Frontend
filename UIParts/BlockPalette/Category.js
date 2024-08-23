@@ -187,6 +187,26 @@ Category.prototype.addBlock = function(block) {
 };
 
 /**
+ * Replace a given block with a new block 
+ * @param {Block} block - block to be replaced
+ * @param {string} newBlockName - name of type of block to replace block with
+ */
+Category.prototype.replaceBlock = function(block, newBlockName) {
+  //console.log("*** replace block at " + block.x + "," + block.y + "  " + block.stack.x + "," + block.stack.y + " port " + block.port + " to " + newBlockName)
+  const blockIndex = this.blocks.indexOf(block)
+  const stackIndex = this.displayStacks.indexOf(block.stack)
+
+  const newBlock = new window[newBlockName](block.stack.x, block.stack.y, block.port); //Hatchling blocks may specify port
+  const newStack = new DisplayStack(newBlock, this.group, this);
+
+  //remove the old block from the window
+  block.stack.remove()
+
+  if (blockIndex != -1) { this.blocks[blockIndex] = newBlock }
+  if (stackIndex != -1) { this.displayStacks[stackIndex] = newStack}
+}
+
+/**
  * Creates and adds a CollapsibleSet with a CollapsibleItem for each entry in the nameIdList.
  * Used in the Robots category
  * @param {Array<object>} nameIdList - An array or objects, each with fields for name and id
@@ -328,11 +348,6 @@ Category.prototype.select = function() {
     BlockPalette.selectedCat.deselect();
   }
   BlockPalette.selectedCat = this;
-  if (HatchPlus) {
-    const color = Colors.blockPalette[this.id]
-    GuiElements.update.color(BlockPalette.catRect, color)
-    GuiElements.update.color(BlockPalette.palRect, color)
-  }
   this.button.select();
   this.smoothScrollBox.show();
 };

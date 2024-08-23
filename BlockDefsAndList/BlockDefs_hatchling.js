@@ -1326,13 +1326,14 @@ function B_HLEmptyPort(x, y, port) {
   this.isStatic = true //This block cannot be dragged from the block palette
 
   const labelText = "( " + Language.getStr("port") + " " + HL_Utils.portNames[this.port] + " " + Language.getStr("is_empty") + " )"
-  const label = new LabelText(this, labelText, Colors.lightGray)
+  const label = new LabelText(this, labelText, Colors.ballyGray)
   this.addPart(label)
 }
 B_HLEmptyPort.prototype = Object.create(ReporterBlock.prototype);
 B_HLEmptyPort.prototype.constructor = B_HLEmptyPort;
 B_HLEmptyPort.prototype.checkActive = function() {
   return HL_Utils.birdBloxCheckActive(this)
+  //return true //empty ports don't do anything but should not be marked inactive either
 }
 
 function B_HLEmptyPortA(x, y) {
@@ -1390,7 +1391,7 @@ function B_HLBirdBloxOutput(x, y, outputType, portType, port, minVal, maxVal) {
 B_HLBirdBloxOutput.prototype = Object.create(CommandBlock.prototype);
 B_HLBirdBloxOutput.prototype.constructor = B_HLBirdBloxOutput;
 
-B_HLBirdBloxOutput.prototype.startAction = function() {
+/*B_HLBirdBloxOutput.prototype.startAction = function() {
   let device = HL_Utils.setupAction(this);
   if (device == null || !this.active) {
     return new ExecutionStatusError();
@@ -1447,7 +1448,7 @@ B_HLBirdBloxOutput.prototype.updateAction = function() {
   } else {
     return new ExecutionStatusRunning();
   }
-};
+};*/
 B_HLBirdBloxOutput.prototype.checkActive = function() {
   return HL_Utils.birdBloxCheckActive(this)
 }
@@ -1457,7 +1458,6 @@ B_HLBirdBloxOutput.prototype.createXml = function(xmlDoc) {
 
 
 function B_HLBBRotationServo(x, y, port) {
-  this.value = 255 //off signal
   this.defaultSpeed = 50;
   this.valueKey = "value"
   B_HLBirdBloxOutput.call(this, x, y, "rotationServo", 1, port, -100, 100);
@@ -1470,6 +1470,18 @@ function B_HLBBRotationServo(x, y, port) {
 B_HLBBRotationServo.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBRotationServo.prototype.constructor = B_HLBBRotationServo;
 B_HLBBRotationServo.importXml = HL_Utils.BBimportXml
+//MicroBlocks functions
+B_HLBBRotationServo.prototype.primName = function() { return "hatchlingMotorWithDelay" }
+B_HLBBRotationServo.prototype.argList = function() { 
+  let port = HL_Utils.portNames[this.port]
+  let value = this.slots[1].getData().getValueInR(this.minVal, this.maxVal, this.positive, true); 
+  value = value * 0.9
+  if (value < 5 || value > -5) { value = 0 }
+  if (value < 0) { value = value - 15 }
+  let duration = 0 //duration < 10 causes the motor to stay on
+
+  return [port, value, duration]
+}
 
 function B_HLBBPositionServo(x, y, port) {
   this.value = 90; //defaultAngle
@@ -1484,6 +1496,15 @@ function B_HLBBPositionServo(x, y, port) {
 B_HLBBPositionServo.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBPositionServo.prototype.constructor = B_HLBBPositionServo;
 B_HLBBPositionServo.importXml = HL_Utils.BBimportXml
+//MicroBlocks functions
+B_HLBBPositionServo.prototype.primName = function() { return "hatchlingServoWithDelay" }
+B_HLBBPositionServo.prototype.argList = function() { 
+  let port = HL_Utils.portNames[this.port]
+  let duration = 0 //duration < 10 causes the servo to stay on
+  let value = this.slots[1].getData().getValueInR(this.minVal, this.maxVal, this.positive, true) + 2 //0 and 1 are off commands
+
+  return [port, value, duration] 
+}
 
 function B_HLBBFairyLights(x, y, port) {
   this.value = ""
@@ -1500,6 +1521,22 @@ function B_HLBBFairyLights(x, y, port) {
 B_HLBBFairyLights.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBFairyLights.prototype.constructor = B_HLBBFairyLights;
 B_HLBBFairyLights.importXml = HL_Utils.BBimportXml
+//MicroBlocks functions
+B_HLBBFairyLights.prototype.primName = function() { return "hatchlingFairyLightWithDelay" }
+B_HLBBFairyLights.prototype.argList = function() { 
+  let slot = this.slots[1]
+  if (slot.hasChild) {
+    console.error("SLOT CHILDREN NOT IMPLEMENTED!")
+    return []
+  } else {
+    let value = slot.getDataNotFromChild().getValueInR(this.minVal, this.maxVal, this.positive, true)
+    value = Math.round(value * 254/100)
+
+    return [HL_Utils.portNames[this.port], value, 0] 
+  }
+
+  
+}
 
 function B_HLBBSingleNeopix(x, y, port) {
   this.value = ""

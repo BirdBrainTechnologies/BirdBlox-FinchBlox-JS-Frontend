@@ -79,7 +79,7 @@ DeviceManager.checkBattery = function() {
   if (worstBatteryStatus === "3") {
     worstBatteryStatus = "2" //Status 3 is full charge for finch
   }
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     if (worstBatteryStatus === "4") {
       TitleBar.finchButton.battIcon.removeAddedPaths()
       return
@@ -349,7 +349,7 @@ DeviceManager.prototype.devicesChanged = function(deviceClass, multiple) {
   DeviceManager.updateStatus();
   CodeManager.updateConnectionStatus();
   DeviceManager.checkBattery();
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     CodeManager.updateAvailablePorts(-1)
   }
 };
@@ -441,6 +441,7 @@ DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeC
 };
 
 DeviceManager.prototype.backendDiscovered = function(robotList) {
+  console.log("DeviceManager.prototype.backendDiscovered " + robotList)
   this.discoverCache = robotList;
   if (this.deviceDiscoverCallback != null) this.deviceDiscoverCallback(robotList);
 };
@@ -616,6 +617,7 @@ DeviceManager.updateSelectableDevices = function() {
  * @param {boolean} isConnected - Whether the robot is in good communication with the backend
  */
 DeviceManager.updateConnectionStatus = function(deviceId, isConnected) {
+  console.log("*** DeviceManager.updateConnectionStatus " + deviceId + " " + isConnected)
   DeviceManager.forEach(function(manager) {
     manager.updateConnectionStatus(deviceId, isConnected);
   });
@@ -721,6 +723,7 @@ DeviceManager.setStatusListener = function(callbackFn) {
  * @param {string} robotList - A JSON Array as a string representing the discovered devices
  */
 DeviceManager.backendDiscovered = function(robotList) {
+  console.log("*** DeviceManager.backendDiscovered")
   DeviceManager.forEach(function(manager) {
     manager.backendDiscovered(robotList);
   });

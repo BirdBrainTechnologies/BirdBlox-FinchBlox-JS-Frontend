@@ -44,7 +44,7 @@ function BlockStack(firstBlock, tab) {
 
   this.startRunIfAutoExec();
 
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     if (BlockStack.count == null) { BlockStack.count = 0 }
     this.mbId = "bs" + BlockStack.count
     BlockStack.count++
@@ -319,7 +319,7 @@ BlockStack.prototype.startRun = function(startBlock, broadcastMessage, flagTappe
     startBlock = this.firstBlock;
   }
 
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     mbRuntime.startRun(this.firstBlock, flagTapped) //TODO: use startBlock?
     return;
   }

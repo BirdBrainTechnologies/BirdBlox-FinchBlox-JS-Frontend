@@ -134,7 +134,7 @@ CollapsibleItem.prototype.addBlock = function(block) {
  * @param {Block} block - block to be replaced
  * @param {string} newBlockName - name of type of block to replace block with
  */
-CollapsibleItem.prototype.replaceBlock = function(block, newBlockName) {
+/*CollapsibleItem.prototype.replaceBlock = function(block, newBlockName) {
   console.log("replace block at " + block.x + "," + block.y + "  " + block.stack.x + "," + block.stack.y + " port " + block.port + " to " + newBlockName)
   const blockIndex = this.blocks.indexOf(block)
   const stackIndex = this.displayStacks.indexOf(block.stack)
@@ -147,7 +147,7 @@ CollapsibleItem.prototype.replaceBlock = function(block, newBlockName) {
 
   if (blockIndex != -1) { this.blocks[blockIndex] = newBlock }
   if (stackIndex != -1) { this.displayStacks[stackIndex] = newStack}
-}
+}*/
 
 /**
  * Adds space between Blocks to denote sections

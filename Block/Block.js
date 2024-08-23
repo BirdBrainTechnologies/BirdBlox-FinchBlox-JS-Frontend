@@ -963,11 +963,11 @@ Block.prototype.unsnap = function() {
     if (this.parent.isSlot || this.parent.isBlockSlot) { //Checks if it is attached to a Slot not another Block.
       this.parent.removeChild(); //Leave the Slot.
       this.parent.parent.stack.updateDim(); //Tell the stack the Slot belongs to to update its dimensions.
-      if (Hatchling) { mbRuntime.saveChunk(this.parent.parent.stack.firstBlock) }
+      if (Hatchling || HatchPlus) { mbRuntime.saveChunk(this.parent.parent.stack.firstBlock) }
     } else { //This Block is connected to another Block.
       this.parent.nextBlock = null; //Disconnect from parent Block.
       this.parent.stack.updateDim(); //Tell parent's stack to update dimensions.
-      if (Hatchling) { mbRuntime.saveChunk(this.parent.stack.firstBlock) }
+      if (Hatchling || HatchPlus) { mbRuntime.saveChunk(this.parent.stack.firstBlock) }
     }
     this.parent = null; //Delete reference to parent Block/Slot/BlockSlot.
     //Make a new BlockStack with this Block in current Tab.  Also moves over any subsequent Blocks.
@@ -1185,6 +1185,7 @@ Block.prototype.glow = function() {
  * Recursively removes the outline.
  */
 Block.prototype.stopGlow = function() {
+  if (this.category == null) { return } //Ghost blocks can't glow
   BlockGraphics.update.stroke(this.path, this.category, this.returnsValue, this.active);
   this.isGlowing = false;
   if (this.blockSlot1 != null) {
@@ -1439,7 +1440,7 @@ Block.prototype.deleteList = function(list) {
 /**
  * Change block color while flying.
  * Recursively notifies the Block that this stack is flying.
- * Hatchling only.
+ * Hatchling  and HatchPlus only.
  */
 Block.prototype.fly = function() {
   //Add a drop shadow while flying
@@ -1473,7 +1474,7 @@ Block.prototype.updateShadow = function(useRed) {
 /**
  * Change block color back now that the block has landed.
  * Recursively notifies the Block that this stack is landing.
- * Hatchling only.
+ * Hatchling and HatchPlus only.
  */
 Block.prototype.land = function() {
   this.currentShadow = null
@@ -1578,7 +1579,7 @@ Block.prototype.updateAvailableSensors = function() {
 };
 
 /**
- * Hatchling only - called when port types change.
+ * Hatchling and HatchPlus only - called when port types change.
  */
 Block.prototype.updateAvailablePorts = function(args) {
   let port = args[0]

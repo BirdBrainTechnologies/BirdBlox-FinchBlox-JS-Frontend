@@ -83,7 +83,9 @@ BlockPalette.setGraphics = function() {
   BlockPalette.labelFont = Font.uiFont(13);
   BlockPalette.labelColor = Colors.black;
 
-
+  if (HatchPlus) {
+    BlockPalette.currentColor = Colors.ballyBrandBlueLight //Used for ghost blocks
+  }
 };
 
 /**
@@ -279,7 +281,11 @@ BlockPalette.updatePath = function(pathE) {
   pathE.setAttributeNS(null, "d", path);
 }*/
 BlockPalette.updatePaletteColor = function(color) {
-  if (Hatchling) { 
+  if (HatchPlus) {
+    BlockPalette.currentColor = color //Used for ghost blocks
+    GuiElements.update.color(BlockPalette.catRect, color)
+    GuiElements.update.color(BlockPalette.palRect, color)
+  } else if (Hatchling) { 
     if (BlockPalette.currentLevel == 1) {
       GuiElements.update.color(BlockPalette.palRect, color);
     } else {
@@ -394,7 +400,6 @@ BlockPalette.isStackOverPalette = function(x, y) {
  * Makes a trash can icon appear over the Palette to indicate that the Blocks being dragged will be deleted
  */
 BlockPalette.showTrash = function() {
-  console.log("*** showTrash")
   let BP = BlockPalette;
   // If the trash is not visible
   if (!BP.trash) {

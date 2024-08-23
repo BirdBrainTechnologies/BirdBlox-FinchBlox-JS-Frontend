@@ -33,6 +33,10 @@ function Button(x, y, width, height, parent, color, rx, ry, outlineColor, outlin
   this.ry = ry || Button.defaultR;
   this.strokeColor = outlineColor;
   this.strokeW = outlineW
+  if (HatchPlus) {
+    if (this.strokeColor == null) { this.strokeColor = Colors.ballyBrandBlue }
+    if (this.strokeW == null) { this.strokeW = 2 }
+  }
   this.buildBg();
   this.pressed = false;
   this.enabled = true;
@@ -85,8 +89,7 @@ Button.setGraphics = function() {
   Button.strokeW = 1.5
 
   if (HatchPlus) {
-    console.log("*** BUTTON SETUP")
-    Button.bg = Colors.white
+    Button.bg = Colors.ballyGrayLight//Colors.white
     Button.foreground = Colors.ballyBrandBlue
     Button.highlightBg = Colors.ballyGray
     Button.highlightFore = Colors.ballyBrandBlueDark
@@ -380,7 +383,7 @@ Button.prototype.addDeviceInfo = function(device) {
   const textX = textY;
   this.removeContent();
 
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     const dIconH = 25
     const dIconY = (this.height - dIconH)/2 
     const dIconX = margin
@@ -406,7 +409,7 @@ Button.prototype.addDeviceInfo = function(device) {
   this.group.appendChild(this.textE2);
 
   this.icon = new VectorIcon(iconX, iconY, pathId, color, iconH, this.group);
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     GuiElements.update.stroke(this.icon.pathE, color, 3)
   }
 
@@ -464,31 +467,35 @@ Button.prototype.addSecondIcon = function(pathId, height, color, rotation) {
  * Function specific to the finch button of FinchBlox
  */
 Button.prototype.addFinchBnIcons = function() {
+  const TB = TitleBar;
   let finchPathId = VectorPaths.mvFinch;
   let finchColor = Colors.white
-  if (Hatchling) { 
+  if (Hatchling || HatchPlus) { 
     finchPathId = VectorPaths.bdHatchling; 
     finchColor = Colors.ballyRed;
     this.iconColor = finchColor
   }
-  const battPathId = Hatchling ? VectorPaths.bdBatteryDisconnected : VectorPaths.battery;
-  const xPathId = Hatchling ? VectorPaths.bdHatchlingDisconnected : VectorPaths.faTimesCircle;
-  const font = Hatchling ? Font.uiFont(22) : Font.uiFont(18);
+  const battPathId = (Hatchling || HatchPlus) ? VectorPaths.bdBatteryDisconnected : VectorPaths.battery;
+  const xPathId = (Hatchling || HatchPlus) ? VectorPaths.bdHatchlingDisconnected : VectorPaths.faTimesCircle;
+  let font = Hatchling ? Font.uiFont(22) : Font.uiFont(18);
+  if (HatchPlus) {
+    font = Font.uiFont(TB.height*2/9)
+  }
 
-  const finchH = Hatchling ? TitleBar.bnIconH * 1.2 : TitleBar.bnIconH * 1.65; //the long dimension of the finch since we will rotate it
-  const battH = TitleBar.bnIconH * 0.75;
-  const xH = Hatchling ? TitleBar.bnIconH * 1.3 : TitleBar.bnIconH * 0.6;
+  const finchH = HatchPlus ? TB.bnIconH : Hatchling ? TB.bnIconH * 1.2 : TB.bnIconH * 1.65; //the long dimension of the finch since we will rotate it
+  const battH = HatchPlus ? TB.bnIconH * 0.6 : TB.bnIconH * 0.75;
+  const xH = HatchPlus ? TB.bnIconH * 1.1 : Hatchling ? TB.bnIconH * 1.3 : TB.bnIconH * 0.6;
   this.finchW = VectorIcon.computeWidth(finchPathId, finchH);
   const battW = VectorIcon.computeWidth(battPathId, battH);
   const xW = VectorIcon.computeWidth(xPathId, xH);
   this.finchX = (this.width - this.finchW) / 2;
   //const battX = finchH + 1.5*finchX;
-  const m = 10; //Margin between finch icon and battery icon.
+  const m = HatchPlus ? 5 : 10; //Margin between finch icon and battery icon.
   this.finchConnectedX = (this.width - this.finchW - battW - m) / 2;
-  const battX = Hatchling ? (this.width + this.finchW + m - battW) / 2 : (this.width + finchH + m - battW) / 2;
-  const textX = Hatchling ? (this.width - this.finchW - battW - m) / 2 + m : (this.width - finchH - battW - m) / 2 + m;
+  const battX = (Hatchling || HatchPlus) ? (this.width + this.finchW + m - battW) / 2 : (this.width + finchH + m - battW) / 2;
+  const textX = (Hatchling || HatchPlus) ? (this.width - this.finchW - battW - m) / 2 + m : (this.width - finchH - battW - m) / 2 + m;
 
-  const xX = Hatchling ? (this.finchConnectedX) : (this.width - xW) / 2; //finchX + finchH/2;
+  const xX = (Hatchling || HatchPlus) ? (this.finchConnectedX) : (this.width - xW) / 2; //finchX + finchH/2;
   this.finchY = (this.height - finchH) / 2;
   const battY = (this.height - battH) / 2;
   const textY = (this.height + font.charHeight) / 2;
@@ -499,24 +506,24 @@ Button.prototype.addFinchBnIcons = function() {
   this.iconInverts = false;
   this.hasText = true;
 
-  if (Hatchling) { 
+  if (Hatchling || HatchPlus) { 
     this.finchX = this.finchConnectedX 
   }
-  this.icon = new VectorIcon(this.finchX, this.finchY, finchPathId, finchColor, finchH, this.group, null, (Hatchling ? null : 90));
-  if (!Hatchling) { GuiElements.update.stroke(this.icon.pathE, Colors.iron, 2); }
-  this.battIcon = new VectorIcon(battX, battY, battPathId, (Hatchling ? Colors.white : Colors.iron), battH, this.group);
-  this.textE = GuiElements.draw.text(textX, textY, "", font, (Hatchling ? Colors.white : Colors.flagGreen));
+  this.icon = new VectorIcon(this.finchX, this.finchY, finchPathId, finchColor, finchH, this.group, null, ((Hatchling || HatchPlus) ? null : 90));
+  if (!(Hatchling || HatchPlus)) { GuiElements.update.stroke(this.icon.pathE, Colors.iron, 2); }
+  this.battIcon = new VectorIcon(battX, battY, battPathId, ((Hatchling || HatchPlus) ? Colors.white : Colors.iron), battH, this.group);
+  this.textE = GuiElements.draw.text(textX, textY, "", font, ((Hatchling || HatchPlus) ? Colors.white : Colors.flagGreen));
   this.group.appendChild(this.textE);
-  this.xIcon = new VectorIcon(xX, xY, xPathId, (Hatchling ? Colors.white : Colors.stopRed), xH, this.group);
+  this.xIcon = new VectorIcon(xX, xY, xPathId, ((Hatchling || HatchPlus) ? Colors.white : Colors.stopRed), xH, this.group);
 
-  if (Hatchling) { this.battIcon.group.appendChild(this.battIcon.pathE) }
+  if ((Hatchling || HatchPlus)) { this.battIcon.group.appendChild(this.battIcon.pathE) }
 
   TouchReceiver.addListenersBN(this.icon.pathE, this);
   TouchReceiver.addListenersBN(this.battIcon.pathE, this);
   TouchReceiver.addListenersBN(this.xIcon.pathE, this);
   TouchReceiver.addListenersBN(this.textE, this);
 
-  TitleBar.updateStatus(DeviceManager.getStatus());
+  TB.updateStatus(DeviceManager.getStatus());
 }
 
 /**
@@ -590,6 +597,10 @@ Button.prototype.disable = function(keepColors) {
     if (this.hasIcon && this.iconInverts) {
       this.icon.setColor(Button.disabledFore);
     }
+
+    if (HatchPlus && this.strokeColor != null) {
+      GuiElements.update.stroke(this.bgRect, "none", 0)
+    }
   }
 };
 
@@ -601,6 +612,10 @@ Button.prototype.enable = function() {
     this.enabled = true;
     this.pressed = false;
     this.setColor(false);
+
+    if (HatchPlus && this.strokeColor != null) {
+      GuiElements.update.stroke(this.bgRect, this.strokeColor, this.strokeW)
+    }
   }
 };
 
@@ -721,7 +736,7 @@ Button.prototype.move = function(x, y) {
 Button.prototype.setColor = function(isPressed) {
   if (isPressed && FinchBlox) {
     if (this.toggles && this.hasIcon) {
-      this.icon.setColor(Hatchling ? Colors.ballyPurpleLight : Colors.blockPaletteSound);
+      this.icon.setColor((Hatchling || HatchPlus) ? Colors.ballyPurpleLight : Colors.blockPaletteSound);
     } else {
       let darkColor = Colors.darkenColor(this.bg, 0.8);
       this.bgRect.setAttributeNS(null, "fill", darkColor);

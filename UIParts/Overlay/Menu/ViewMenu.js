@@ -3,7 +3,7 @@
  * @param {Button} button
  * @constructor
  */
-function ViewMenu(button) {
+/*function ViewMenu(button) {
   Menu.call(this, button);
 }
 ViewMenu.prototype = Object.create(Menu.prototype);
@@ -26,4 +26,4 @@ ViewMenu.prototype.optionZoomOut = function() {
 ViewMenu.prototype.optionResetZoom = function() {
   GuiElements.zoomMultiple = 1;
   GuiElements.updateZoom();
-};
+};*/

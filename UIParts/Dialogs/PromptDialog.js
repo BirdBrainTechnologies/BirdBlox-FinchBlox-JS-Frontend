@@ -3,12 +3,14 @@
  */
 
 function PromptDialog(title, question, defaultText, shouldPrefill, callbackFn) {
-	console.log("PromptDialog " + title + " | " + question + " | " + defaultText)
-	this.title = title//Language.getStr("Enter_file_name")
+	this.title = title
 	this.question = question
 	this.defaultText = defaultText
 	this.shouldPrefill = shouldPrefill //TODO: make hint text when necessary
 	this.callbackFn = callbackFn
+
+	this.bgColor = HatchPlus ? Colors.ballyGrayLight : RD.titleBarColor
+	this.outlineC = HatchPlus ? Colors.ballyGray : RD.titleBarColor
 
 	this.width = 300
 	this.height = 200
@@ -25,7 +27,8 @@ PromptDialog.prototype.show = function() {
 		const margin = 20
 
 		this.group = GuiElements.create.group(this.x, this.y)
-		this.bgRect = GuiElements.draw.rect(0, 0, this.width, this.height, RD.titleBarColor, RD.cornerR, RD.cornerR)
+		this.bgRect = GuiElements.draw.rect(0, 0, this.width, this.height, this.bgColor, RD.cornerR, RD.cornerR)
+		GuiElements.update.stroke(this.bgRect, this.outlineC, 3)
 		this.group.append(this.bgRect)
 
 		let titleTextE = GuiElements.draw.text(0, 0, this.title, RD.titleBarFont, RD.titleBarFontC)
@@ -42,12 +45,14 @@ PromptDialog.prototype.show = function() {
 
   		const font = RD.hintTextFont;
 		const textColor = RD.titleBarFontC;
-		const textY = this.height/2 + font.charHeight / 2; 
+		const textY = qY + margin + font.charHeight/2; //this.height/2 + font.charHeight / 2; 
 		const textX = this.width/10
 		const textW = this.width*4/5
 		const textH = this.height/3
 		this.charCount = 0;
 
+		const etbg = GuiElements.draw.rect(textX, textY, textW, textH, Colors.white)
+		this.group.append(etbg)
 		this.editableText = GuiElements.create.editableText(font, textColor, textX, textY, textW, textH, this.group)
 		if (this.defaultText != null) {
 			this.editableText.textContent = this.defaultText;
@@ -56,13 +61,13 @@ PromptDialog.prototype.show = function() {
 
 		const confirmPathId = HatchPlus ? VectorPaths.bdConnected : VectorPaths.checkmark
 		const cancelPathId = HatchPlus ? VectorPaths.bdClose : VectorPaths.letterX
-		const bnH = RD.bnHeight
-		const bnW = RD.bnHeight
-		const bnM = 5
+		const bnH = RD.bnHeight*2/3
+		const bnW = bnH
+		const bnM = 10
 		const bnY = this.height - bnH - bnM
 		const confirmX = this.width - bnW - bnM
 		const cancelX = confirmX - bnW - bnM
-		const bnColor = RD.bgColor
+		const bnColor = HatchPlus ? Button.bg : RD.bgColor
 		const iconH = bnH*3/4
 		const confirmBn = new Button(confirmX, bnY, bnW, bnH, this.group, bnColor)
 		confirmBn.addIcon(confirmPathId, iconH)

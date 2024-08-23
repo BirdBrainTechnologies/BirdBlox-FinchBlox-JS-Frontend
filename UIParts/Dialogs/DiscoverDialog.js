@@ -40,7 +40,7 @@ DiscoverDialog.prototype.constructor = DiscoverDialog;
 DiscoverDialog.prototype.show = function() {
   const DD = DiscoverDialog;
   let shouldDiscover = true
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     let device = DeviceHatchling.getManager().getDevice(0)
     if (device != null && device.connected) {
       //Show the connected device - user can scan if they disconnect
@@ -85,6 +85,7 @@ DiscoverDialog.prototype.discoverDevices = function() {
     return this.visible;
   }.bind(this));
   // When a device is detected, update the dialog
+  console.log("*** discoverDevices of type " + this.deviceClass)
   this.deviceClass.getManager().registerDiscoverCallback(this.updateDeviceList.bind(this));
 };
 
@@ -106,7 +107,7 @@ DiscoverDialog.prototype.checkPendingUpdate = function() {
 var updateDeviceListCounter = 0;
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
-  //console.log("*** updateDeviceList " + deviceList)
+  console.log("*** updateDeviceList " + deviceList)
   updateDeviceListCounter += 1;
   if (!this.visible) {
     return;
@@ -126,7 +127,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
     return parseFloat(b.RSSI) - parseFloat(a.RSSI);
   });
 
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     let device = DeviceHatchling.getManager().getDevice(0)
     if (device != null) {
       this.connectedDevices = [device]
@@ -167,17 +168,17 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
       color = Colors.fbGray;
     }
   }
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     color = Colors.white
   }
 
-  const r = Hatchling ? 7 : null
-  const m = Hatchling ? 2 : 0
+  const r = (Hatchling || HatchPlus) ? 7 : null
+  const m = (Hatchling || HatchPlus) ? 2 : 0
   // TODO: use RowDialog.createMainBnWithText instead
   const button = new Button(0 + m, y + m, width - 2*m, RowDialog.bnHeight - 2*m, contentGroup, color, r, r);
   
   //In this case we will present the option to start a scan
-  if (Hatchling && deviceList.length == 0) { 
+  if ((Hatchling || HatchPlus) && deviceList.length == 0) { 
     const iconH = button.height * 0.6
     /* This is how it was in the design files
     button.addSideTextAndIcon(VectorPaths.bdAdd, iconH, "CONNECT ANOTHER ROBOT", Button.defaultFont, Colors.ballyBrandBlueDark, Colors.ballyBrandBlue, false, true)
@@ -221,7 +222,7 @@ DiscoverDialog.prototype.selectDevice = function(device) {
   console.log(device)
   this.deviceClass = DeviceManager.getDeviceClass(device);
   this.deviceClass.getManager().setOneDevice(device);
-  if (!Hatchling) {
+  if (!Hatchling || HatchPlus) {
     this.closeDialog();
   }
 };

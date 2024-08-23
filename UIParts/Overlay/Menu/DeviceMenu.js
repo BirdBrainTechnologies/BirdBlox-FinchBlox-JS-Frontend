@@ -12,7 +12,7 @@ function DeviceMenu(button) {
   });
 }
 DeviceMenu.prototype = Object.create(Menu.prototype);
-DeviceMenu.prototype.constructor = ViewMenu;
+DeviceMenu.prototype.constructor = DeviceMenu;
 
 DeviceMenu.setGraphics = function() {
   DeviceMenu.width = 150;
