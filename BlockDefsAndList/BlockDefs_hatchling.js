@@ -874,15 +874,13 @@ function B_HLWaitUntil(x, y, usePort, sensor, userSelectedPort) {
     this.sensorBN.addSlider("sensor", this.sensorSelection, this.sensorPaths);
     this.addPart(this.sensorBN);*/
   }
-
-  let sensorPaths = [VectorPaths.bdRuler, VectorPaths.bdClap, VectorPaths.bdNoLight, VectorPaths.share]
-  let sensorTypes = ["distance", "clap", "light", "shake"]
+  let sensorPaths = [VectorPaths.bdRuler, VectorPaths.bdClap, VectorPaths.bdNoLight, VectorPaths.bdButton]
+  let sensorTypes = ["distance", "clap", "light", "button"]
   let path = sensorPaths[sensorTypes.indexOf(this.sensor)]
 
   const blockIcon = new BlockIcon(this, path, Colors.white, "sensor", 45)
   blockIcon.isEndOfLine = true;
   this.addPart(blockIcon);
-  
 }
 B_HLWaitUntil.prototype = Object.create(CommandBlock.prototype);
 B_HLWaitUntil.prototype.constructor = B_HLWaitUntil;
@@ -900,6 +898,7 @@ B_HLWaitUntil.prototype.argList = function() {
   }
   let prim = null
   let threshold = 0
+  let operator = "<"
   switch (this.sensor) {
   case "distance":
     prim = "[h:ds]"
@@ -910,15 +909,21 @@ B_HLWaitUntil.prototype.argList = function() {
     threshold = 200 //150
     break;
   case "clap":
-    //must turn on microphone first
-    //digitalWriteOp 28 true
-    //waitMillis 50
-    threshold = 150
+    prim = "[h:cl]" //number of claps since this function was last called
+    threshold = 0
+    operator = ">"
     break;
+  case "button":
+    prim = "[h:bt]" //number of times either button A or B on the micro:bit was pressed since last called
+    threshold = 0
+    operator = ">"
+    break;
+  default:
+    console.error("WaitUntil block: Unknown sensor " + this.sensor)
   }
   if (prim == null) { return [] }
 
-  return [new BlockArg("<", [new BlockArg(prim, args), threshold])]
+  return [new BlockArg(operator, [new BlockArg(prim, args), threshold])]
 
   /*return [{
     primName: function() { return "<" },
@@ -1012,6 +1017,12 @@ function B_HLWaitUntilLight(x, y) {
 B_HLWaitUntilLight.prototype = Object.create(B_HLWaitUntil.prototype);
 B_HLWaitUntilLight.prototype.constructor = B_HLWaitUntilLight;
 
+function B_HLWaitUntilButton(x, y) {
+  B_HLWaitUntil.call(this, x, y, false, "button")
+}
+B_HLWaitUntilButton.prototype = Object.create(B_HLWaitUntil.prototype);
+B_HLWaitUntilButton.prototype.constructor = B_HLWaitUntilButton;
+
 
 //Wait until for port connected sensors
 function B_HLWaitUntilPort(x, y, sensor, userSelectedPort) {
@@ -1047,19 +1058,19 @@ B_HLWaitUntilDistance.prototype = Object.create(B_HLWaitUntilPort.prototype);
 B_HLWaitUntilDistance.prototype.constructor = B_HLWaitUntilDistance;
 B_HLWaitUntilDistance.importXml = HL_Utils.importXml
 
-function B_HLWaitUntilDial(x, y, userSelectedPort) {
+/*function B_HLWaitUntilDial(x, y, userSelectedPort) {
 
 }
 B_HLWaitUntilDial.prototype = Object.create(B_HLWaitUntilPort.prototype);
 B_HLWaitUntilDial.prototype.constructor = B_HLWaitUntilDial;
-B_HLWaitUntilDial.importXml = HL_Utils.importXml
+B_HLWaitUntilDial.importXml = HL_Utils.importXml*/
 
-function B_HLWaitUntilButton(x, y, userSelectedPort) {
+/*function B_HLWaitUntilPortButton(x, y, userSelectedPort) {
 
 }
-B_HLWaitUntilButton.prototype = Object.create(B_HLWaitUntilPort.prototype);
-B_HLWaitUntilButton.prototype.constructor = B_HLWaitUntilButton;
-B_HLWaitUntilButton.importXml = HL_Utils.importXml
+B_HLWaitUntilPortButton.prototype = Object.create(B_HLWaitUntilPort.prototype);
+B_HLWaitUntilPortButton.prototype.constructor = B_HLWaitUntilPortButton;
+B_HLWaitUntilPortButton.importXml = HL_Utils.importXml*/
 
 
 // function B_HLPortBlock(x, y, port) {
