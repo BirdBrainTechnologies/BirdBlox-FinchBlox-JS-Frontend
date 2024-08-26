@@ -173,6 +173,58 @@ TitleBar.updateShapePath = function() {
 TitleBar.makeButtons = function() {
   const TB = TitleBar;
   const TBLayer = GuiElements.layers.titlebar;
+
+
+  if (FinchBlox || HatchPlus) {
+    TB.updateStatus = function(status) {
+      //GuiElements.alert("TitleBar update status to " + status);
+      //console.log("TitleBar update status to " + status)
+      const finchBn = TitleBar.finchButton;
+      let color = (Hatchling || HatchPlus) ? Colors.ballyGrayLight : Colors.stopRed;
+      let outlineColor = (Hatchling || HatchPlus) ? Colors.ballyRed : Colors.darkenColor(Colors.stopRed, 0.5);
+      let shortName = "";
+      if (status === DeviceManager.statuses.connected) {
+        color = (Hatchling || HatchPlus) ? Colors.ballyGrayLight : Colors.finchGreen;
+        outlineColor = (Hatchling || HatchPlus) ? Colors.ballyBrandBlue : Colors.flagGreen;
+        let sn = null
+        if (Hatchling || HatchPlus) {
+          sn = DeviceHatchling.getManager().connectedDevices[0].shortName;
+        } else {
+          sn = DeviceFinch.getManager().connectedDevices[0].shortName;
+        }
+        if (sn != null) {
+          shortName = sn;
+        }
+        finchBn.xIcon.pathE.remove();
+        if (!(Hatchling || HatchPlus)) { 
+          finchBn.battIcon.group.appendChild(finchBn.battIcon.pathE);
+          finchBn.icon.move(finchBn.finchConnectedX, finchBn.finchY); 
+        }
+        DeviceManager.checkBattery();
+      } else {
+        finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
+        if (Hatchling || HatchPlus) {
+          finchBn.battIcon.removeAddedPaths()
+        } else { 
+          finchBn.battIcon.pathE.remove();
+          finchBn.icon.move(finchBn.finchX, finchBn.finchY); 
+        }
+      }
+      finchBn.updateBgColor(color);
+      if (Hatchling || HatchPlus) { 
+        //GuiElements.update.color(finchBn.icon.pathE, outlineColor) 
+        finchBn.icon.setColor(outlineColor)
+        finchBn.iconColor = outlineColor
+        GuiElements.update.stroke(finchBn.bgRect, outlineColor, Button.strokeW)
+      } else {
+        GuiElements.update.stroke(finchBn.icon.pathE, outlineColor, 4);
+      }
+      GuiElements.update.text(finchBn.textE, shortName);
+    }
+    DeviceManager.setStatusListener(TB.updateStatus);
+  }
+
+
   if (FinchBlox) {
     const r = TB.defaultCornerRounding;
     const y = (TB.height / 2) - (TB.tallButtonH / 2);
@@ -264,52 +316,7 @@ TitleBar.makeButtons = function() {
 
     }
 
-    TB.updateStatus = function(status) {
-      //GuiElements.alert("TitleBar update status to " + status);
-      //console.log("TitleBar update status to " + status)
-      const finchBn = TitleBar.finchButton;
-      let color = Hatchling ? Colors.ballyGrayLight : Colors.stopRed;
-      let outlineColor = Hatchling ? Colors.ballyRed : Colors.darkenColor(Colors.stopRed, 0.5);
-      let shortName = "";
-      if (status === DeviceManager.statuses.connected) {
-        color = Hatchling ? Colors.ballyGrayLight : Colors.finchGreen;
-        outlineColor = Hatchling ? Colors.ballyBrandBlue : Colors.flagGreen;
-        let sn = null
-        if (Hatchling) {
-          sn = DeviceHatchling.getManager().connectedDevices[0].shortName;
-        } else {
-          sn = DeviceFinch.getManager().connectedDevices[0].shortName;
-        }
-        if (sn != null) {
-          shortName = sn;
-        }
-        finchBn.xIcon.pathE.remove();
-        if (!Hatchling) { 
-          finchBn.battIcon.group.appendChild(finchBn.battIcon.pathE);
-          finchBn.icon.move(finchBn.finchConnectedX, finchBn.finchY); 
-        }
-        DeviceManager.checkBattery();
-      } else {
-        finchBn.xIcon.group.appendChild(finchBn.xIcon.pathE);
-        if (Hatchling) {
-          finchBn.battIcon.removeAddedPaths()
-        } else { 
-          finchBn.battIcon.pathE.remove();
-          finchBn.icon.move(finchBn.finchX, finchBn.finchY); 
-        }
-      }
-      finchBn.updateBgColor(color);
-      if (Hatchling) { 
-        //GuiElements.update.color(finchBn.icon.pathE, outlineColor) 
-        finchBn.icon.setColor(outlineColor)
-        finchBn.iconColor = outlineColor
-        GuiElements.update.stroke(finchBn.bgRect, outlineColor, Button.strokeW)
-      } else {
-        GuiElements.update.stroke(finchBn.icon.pathE, outlineColor, 4);
-      }
-      GuiElements.update.text(finchBn.textE, shortName);
-    }
-    DeviceManager.setStatusListener(TB.updateStatus);
+  
 
     const fBnX = Hatchling ? TB.buttonMargin : ((TB.sideWidth - TB.longButtonW) / 2)
     const fBnW = Hatchling ? TB.longButtonW * 13/16 : TB.longButtonW
@@ -365,16 +372,18 @@ TitleBar.makeButtons = function() {
     TB.stopBn.addColorIcon(stopBnPathId, TB.bnIconH, stopBnIconColor);
     TB.stopBn.setCallbackFunction(CodeManager.stop, false);
 
-    if (!HatchPlus) {
+    if (HatchPlus) {
+      TB.finchButton = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.longButtonW, TB.buttonH, TBLayer);
+      TB.finchButton.addFinchBnIcons();//.addIcon(VectorPaths.faBluetoothB, TB.bnIconH)
+      TB.finchButton.setCallbackFunction(function() {
+        (new DiscoverDialog(DeviceHatchling)).show();
+      }, true)
+    } else {
       TB.batteryBn = new Button(TB.batteryBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
       TB.batteryBn.addColorIcon(VectorPaths.battery, TB.bnIconH, TB.batteryFill);
       TB.batteryMenu = new BatteryMenu(TB.batteryBn);
-    }
 
-    TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.longButtonW, TB.buttonH, TBLayer);
-    if (HatchPlus) {
-      TB.hummingbirdBn.addIcon(VectorPaths.faBluetoothB, TB.bnIconH)
-    } else {
+      TB.hummingbirdBn = new Button(TB.hummingbirdBnX, TB.buttonMargin, TB.longButtonW, TB.buttonH, TBLayer);
       const hbBnIconOffset = 2 * TB.buttonMargin;
       TB.hummingbirdBn.addIcon(VectorPaths.connect, TB.bnIconH * 0.8, hbBnIconOffset);
       TB.hummingbirdMenu = new DeviceMenu(TB.hummingbirdBn);
@@ -401,6 +410,8 @@ TitleBar.makeButtons = function() {
     UndoManager.setUndoButton(TB.undoButton);
   }
 
+  
+
   TB.debugBn = null;
   if (TB.debugEnabled) {
     TB.enableDebug();
@@ -426,8 +437,10 @@ TitleBar.removeButtons = function() {
     }
   } else {
     TB.viewBn.remove();
-    TB.hummingbirdBn.remove();
-    if (!HatchPlus) {
+    if (HatchPlus) {
+      TB.finchButton.remove();
+    } else {
+      TB.hummingbirdBn.remove();
       TB.batteryBn.remove();
       TB.deviceStatusLight.remove();
     }

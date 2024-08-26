@@ -2529,7 +2529,9 @@ Language.en = {
 "block_Fairy_Lights":"Fairy Lights (Slot 1) (Slot 2) %",
 "block_Neopixel_Strip":"Neopixel (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
 "block_Single_Neopixel":"Neopixel R (Slot 1) % G (Slot 2) % B (Slot 3) %",
-"Hatchling":"Hatchling"
+"Hatchling":"Hatchling",
+"block_Button_Presses":"Button Presses",
+"block_Claps":"Claps"
 }
 
 //Spanish Translation
@@ -9063,15 +9065,23 @@ BlockList.populateItem_finch = function(collapsibleItem) {
  */
 BlockList.populateCat_hatchling = function(category) {
   category.addBlockByName("B_HLEmptyPortA");
+  category.addSpace();
   category.addBlockByName("B_HLEmptyPortB");
+  category.addSpace();
   category.addBlockByName("B_HLEmptyPortC");
+  category.addSpace();
   category.addBlockByName("B_HLEmptyPortD");
+  category.addSpace();
   category.addBlockByName("B_HLEmptyPortE");
+  category.addSpace();
   category.addBlockByName("B_HLEmptyPortF");
   category.addSpace();
   category.addBlockByName("B_HLLedArray");
   category.addBlockByName("B_HLPrint");
   category.addBlockByName("B_HLBuzzer");
+  category.addSpace();
+  category.addBlockByName("B_HLBBClaps");
+  category.addBlockByName("B_HLBBButtonPresses");
   category.addSpace();
   category.addBlockByName("B_HLMagnetometer");
   category.addBlockByName("B_HLButton");
@@ -25294,7 +25304,7 @@ CodeManager.checkBroadcastRunning = function(message) {
  */
 CodeManager.eventFlagClicked = function() {
   TabManager.eventFlagClicked();
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     /*var device = DeviceHatchling.getManager().getDevice(0)
     if (device != null) {
       var bytes = new Uint8Array([0xFA,5,0])
@@ -42500,7 +42510,17 @@ B_Wait.prototype.constructor = B_Wait;
 //MicroBlocks functions
 B_Wait.prototype.primName = function() { return "waitMillis" }
 B_Wait.prototype.argList = function() {
-  return [(this.timeSelection * 100)]
+  if (HatchPlus) {
+    var slot = this.slots[0]
+    if (slot.hasChild) {
+      console.error("SLOT CHILDREN NOT IMPLEMENTED FOR WAIT BLOCK!")
+      return []
+    } else { 
+      return [slot.getDataNotFromChild().getValueWithC(true) * 1000]
+    }
+  } else {
+    return [(this.timeSelection * 100)]
+  }
 }
 /* Records current time. */
 B_Wait.prototype.startAction = function() {
@@ -42626,7 +42646,18 @@ B_Repeat.prototype.constructor = B_Repeat;
 //MicroBlocks functions
 B_Repeat.prototype.primName = function() { return "repeat" }
 B_Repeat.prototype.argList = function() { 
-  return [this.countSelection, this.blockSlot1.child] 
+  if (HatchPlus) {
+    var slot = this.slots[0]
+    if (slot.hasChild) {
+      console.error("SLOT CHILDREN NOT IMPLEMENTED FOR REPEAT BLOCK!")
+      return []
+    } else {
+      var count = slot.getDataNotFromChild().getValueWithC(true, true)
+      return [count, this.blockSlot1.child] 
+    }
+  } else {
+    return [this.countSelection, this.blockSlot1.child] 
+  }
 }
 /* Prepares counter and begins executing contents. */
 B_Repeat.prototype.startAction = function() {
@@ -46423,20 +46454,29 @@ B_HLBBRotationServo.importXml = HL_Utils.BBimportXml
 //MicroBlocks functions
 B_HLBBRotationServo.prototype.primName = function() { return "hatchlingMotorWithDelay" }
 B_HLBBRotationServo.prototype.argList = function() { 
-  var port = HL_Utils.portNames[this.port]
-  var value = this.slots[1].getData().getValueInR(this.minVal, this.maxVal, this.positive, true); 
-  value = value * 0.9
-  if (value < 5 || value > -5) { value = 0 }
-  if (value < 0) { value = value - 15 }
-  var duration = 0 //duration < 10 causes the motor to stay on
+  var slot = this.slots[1]
+  if (slot.hasChild) {
+    console.error("SLOT CHILDREN NOT IMPLEMENTED FOR ROTATION SERVO!")
+    return []
+  } else {
+    var port = HL_Utils.portNames[this.port]
+    var value = slot.getDataNotFromChild().getValueInR(this.minVal, this.maxVal, this.positive, true); 
+    console.log("*** rotation servo " + value)
+    value = value * 0.9
+    if (value < 5 && value > -5) { value = 0 }
+    if (value < 0) { value = value - 15 }
+    var duration = 0 //duration < 10 causes the motor to stay on
 
-  return [port, value, duration]
+    console.log("*** rotation servo final value " + value)
+    return [port, value, duration]
+  }
+  
 }
 
 function B_HLBBPositionServo(x, y, port) {
   this.value = 90; //defaultAngle
   this.valueKey = "angle"
-  B_HLBirdBloxOutput.call(this, x, y, "positionServo", 3, port, 0, 270);
+  B_HLBirdBloxOutput.call(this, x, y, "positionServo", 3, port, 0, 180);
 
   var numSlot = new NumSlot(this, "NumS_out", 90, true, true)
   numSlot.addLimits(this.minVal, this.maxVal, Language.getStr("Angle"))
@@ -46449,11 +46489,14 @@ B_HLBBPositionServo.importXml = HL_Utils.BBimportXml
 //MicroBlocks functions
 B_HLBBPositionServo.prototype.primName = function() { return "hatchlingServoWithDelay" }
 B_HLBBPositionServo.prototype.argList = function() { 
-  var port = HL_Utils.portNames[this.port]
-  var duration = 0 //duration < 10 causes the servo to stay on
-  var value = this.slots[1].getData().getValueInR(this.minVal, this.maxVal, this.positive, true) + 2 //0 and 1 are off commands
-
-  return [port, value, duration] 
+  var slot = this.slots[1]
+  if (slot.hasChild) {
+    console.error("SLOT CHILDREN NOT IMPLEMENTED FOR POSITION SERVO!")
+    return []
+  } else {
+    var value = slot.getDataNotFromChild().getValueInR(this.minVal, this.maxVal, this.positive, true) + 2 //0 and 1 are off commands
+    return [HL_Utils.portNames[this.port], value, 0] 
+  }
 }
 
 function B_HLBBFairyLights(x, y, port) {
@@ -46476,7 +46519,7 @@ B_HLBBFairyLights.prototype.primName = function() { return "hatchlingFairyLightW
 B_HLBBFairyLights.prototype.argList = function() { 
   var slot = this.slots[1]
   if (slot.hasChild) {
-    console.error("SLOT CHILDREN NOT IMPLEMENTED!")
+    console.error("SLOT CHILDREN NOT IMPLEMENTED FOR FAIRY LIGHTS!")
     return []
   } else {
     var value = slot.getDataNotFromChild().getValueInR(this.minVal, this.maxVal, this.positive, true)
@@ -46484,8 +46527,6 @@ B_HLBBFairyLights.prototype.argList = function() {
 
     return [HL_Utils.portNames[this.port], value, 0] 
   }
-
-  
 }
 
 function B_HLBBSingleNeopix(x, y, port) {
@@ -46510,8 +46551,33 @@ function B_HLBBSingleNeopix(x, y, port) {
 B_HLBBSingleNeopix.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBSingleNeopix.prototype.constructor = B_HLBBSingleNeopix;
 B_HLBBSingleNeopix.importXml = HL_Utils.BBimportXml
+//MicroBlocks functions
+B_HLBBSingleNeopix.prototype.primName = function() { return "hatchlingNeopixelWithDelay" }
+B_HLBBSingleNeopix.prototype.argList = function() { 
+  var rgb = []
+  var success = true
 
-function B_HLBBNeopixStrip(x, y, port) {
+  for (var i = 1; i <= 3; i++) {
+    var slot = this.slots[i]
+    if (slot.hasChild) {
+      console.error("SLOT CHILDREN NOT IMPLEMENTED! (slot " + i + " has a child)")
+      success = false
+    } else {
+      var value = slot.getDataNotFromChild().getValueInR(this.minVal, this.maxVal, this.positive, true)
+      rgb[i-1] = Math.round(value * 254/100) //TODO: Check scaling
+    }
+  }
+
+  if (success) {
+    return [HL_Utils.portNames[this.port], rgb[0], rgb[1], rgb[2], 0] 
+  } else {
+    return []
+  }
+  
+  
+}
+
+/*function B_HLBBNeopixStrip(x, y, port) {
   this.value = ""
   this.valueKey = "colors"
   this.red = 100;
@@ -46542,7 +46608,7 @@ function B_HLBBNeopixStrip(x, y, port) {
 }
 B_HLBBNeopixStrip.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBNeopixStrip.prototype.constructor = B_HLBBNeopixStrip;
-B_HLBBNeopixStrip.importXml = HL_Utils.BBimportXml
+B_HLBBNeopixStrip.importXml = HL_Utils.BBimportXml*/
 
 
 
@@ -46557,14 +46623,14 @@ function B_HLBirdBloxSensor(x, y, portType, port) {
 }
 B_HLBirdBloxSensor.prototype = Object.create(ReporterBlock.prototype);
 B_HLBirdBloxSensor.prototype.constructor = B_HLBirdBloxSensor
-B_HLBirdBloxSensor.prototype.startAction = function() {
+/*B_HLBirdBloxSensor.prototype.startAction = function() {
   var device = DeviceHatchling.getManager().getDevice(0)
   if (device == null) { return new ExecutionStatusError(); }
       
   var num = device.getSensorValue(this.port)
   console.log(num)
   return new ExecutionStatusResult(new NumData(num));
-};
+};*/
 B_HLBirdBloxSensor.prototype.checkActive = function() {
   return HL_Utils.birdBloxCheckActive(this)
 }
@@ -46580,6 +46646,9 @@ function B_HLBBDistance(x, y, port) {
 B_HLBBDistance.prototype = Object.create(B_HLBirdBloxSensor.prototype);
 B_HLBBDistance.prototype.constructor = B_HLBBDistance
 B_HLBBDistance.importXml = HL_Utils.BBimportXml
+//MicroBlocks functions
+B_HLBBClaps.prototype.primName = function() { return "[h:ds]" }
+B_HLBBClaps.prototype.argList = function() { return [HL_Utils.portNames[this.port]] }
 
 
 
@@ -46590,6 +46659,27 @@ function B_HLLedArray(x, y) {
 }
 B_HLLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
 B_HLLedArray.prototype.constructor = B_HLLedArray;
+//MicroBlocks functions
+B_HLLedArray.prototype.primName = function() { return "mbDisplay" } //"[display:mbDisplay]" }
+B_HLLedArray.prototype.argList = function() {
+  var success = true
+  var ledStatusString = "";
+  for (var i = 0; i < 25; i++) {
+    var slot = this.slots[i+1]
+    if (slot.hasChild) {
+      console.error("SLOTS NOT IMPLEMENTED FOR LED ARRAY!")
+      success = false
+    } else {
+      ledStatusString += (slot.getDataNotFromChild().getValue()) ? "1" : "0"
+    }
+  }
+
+  if (success) {
+    return [parseInt(ledStatusString.split("").reverse().join(""), 2)]
+  } else {
+    return []
+  }
+}
 
 
 function B_HLPrint(x, y) {
@@ -46597,6 +46687,9 @@ function B_HLPrint(x, y) {
 }
 B_HLPrint.prototype = Object.create(B_MicroBitPrint.prototype);
 B_HLPrint.prototype.constructor = B_HLPrint;
+B_HLPrint.prototype.checkActive = function() {
+  return false //Disabled for now
+}
 
 
 function B_HLBuzzer(x, y) {
@@ -46604,15 +46697,68 @@ function B_HLBuzzer(x, y) {
 };
 B_HLBuzzer.prototype = Object.create(B_DeviceWithPortsBuzzer.prototype);
 B_HLBuzzer.prototype.constructor = B_HLBuzzer;
+//MicroBlocks functions
+B_HLBuzzer.prototype.primName = function() { return "hatchlingPlayNote" }
+B_HLBuzzer.prototype.argList = function() { 
+
+  var midiNote = 0
+  if (this.slots[1].hasChild) {
+    console.error("SLOTS NOT IMPLEMENTED FOR BUZZER!")
+    return []
+  } else {
+    midiNote = this.slots[1].getDataNotFromChild().getValue()
+  }
+
+  var beats = 0
+  if (this.slots[2].hasChild) {
+    console.error("SLOTS NOT IMPLEMENTED FOR BUZZER!")
+    return []
+  } else {
+    beats = this.slots[2].getDataNotFromChild().getValue()
+  }
+
+  var frequency = 440 * Math.pow(2, (midiNote - 69)/12)
+  var duration = (100 * beats)
+  return [frequency, duration]
+}
 
 
 //MARK: micro:bit inputs
+
+function B_HLBBClaps(x, y) {
+  ReporterBlock.call(this, x, y, DeviceHatchling.getDeviceTypeId());
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  this.addPart(new LabelText(this, Language.getStr("block_Claps")));
+}
+B_HLBBClaps.prototype = Object.create(ReporterBlock.prototype)
+B_HLBBClaps.prototype.constructor = B_HLBBClaps
+//MicroBlocks functions
+B_HLBBClaps.prototype.primName = function() { return "[h:cl]" }
+B_HLBBClaps.prototype.argList = function() { return [] }
+
+
+function B_HLBBButtonPresses(x, y) {
+  ReporterBlock.call(this, x, y, DeviceHatchling.getDeviceTypeId());
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  this.addPart(new LabelText(this, Language.getStr("block_Button_Presses")));
+}
+B_HLBBButtonPresses.prototype = Object.create(ReporterBlock.prototype)
+B_HLBBButtonPresses.prototype.constructor = B_HLBBButtonPresses
+//MicroBlocks functions
+B_HLBBButtonPresses.prototype.primName = function() { return "[h:bt]" }
+B_HLBBButtonPresses.prototype.argList = function() { return [] }
+
 
 function B_HLButton(x, y) {
   B_MicroBitButton.call(this, x, y, DeviceHatchling);
 };
 B_HLButton.prototype = Object.create(B_MicroBitButton.prototype);
 B_HLButton.prototype.constructor = B_HLButton;
+B_HLButton.prototype.checkActive = function() {
+  return false //Disabled for now
+}
 
 
 function B_HLOrientation(x, y) {
@@ -46620,6 +46766,9 @@ function B_HLOrientation(x, y) {
 };
 B_HLOrientation.prototype = Object.create(B_MicroBitOrientation.prototype);
 B_HLOrientation.prototype.constructor = B_HLOrientation;
+B_HLOrientation.prototype.checkActive = function() {
+  return false //Disabled for now
+}
 
 
 function B_HLMagnetometer(x, y) {
@@ -46627,6 +46776,9 @@ function B_HLMagnetometer(x, y) {
 }
 B_HLMagnetometer.prototype = Object.create(B_MicroBitMagnetometer.prototype);
 B_HLMagnetometer.prototype.constructor = B_HLMagnetometer;
+B_HLMagnetometer.prototype.checkActive = function() {
+  return false //Disabled for now
+}
 
 
 function B_HLCompass(x, y) {
@@ -46634,12 +46786,19 @@ function B_HLCompass(x, y) {
 }
 B_HLCompass.prototype = Object.create(B_MicroBitCompass.prototype);
 B_HLCompass.prototype.constructor = B_HLCompass;
+B_HLCompass.prototype.checkActive = function() {
+  return false //Disabled for now
+}
+
 
 function B_HLV2Sensor(x, y) {
   B_MicroBitV2Sensor.call(this, x, y, DeviceHatchling);
 }
 B_HLV2Sensor.prototype = Object.create(B_MicroBitV2Sensor.prototype);
 B_HLV2Sensor.prototype.constructor = B_HLV2Sensor;
+B_HLV2Sensor.prototype.checkActive = function() {
+  return false //Disabled for now
+}
 
 
 /**

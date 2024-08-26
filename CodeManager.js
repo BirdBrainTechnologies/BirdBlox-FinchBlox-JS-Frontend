@@ -589,7 +589,7 @@ CodeManager.checkBroadcastRunning = function(message) {
  */
 CodeManager.eventFlagClicked = function() {
   TabManager.eventFlagClicked();
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     /*let device = DeviceHatchling.getManager().getDevice(0)
     if (device != null) {
       let bytes = new Uint8Array([0xFA,5,0])

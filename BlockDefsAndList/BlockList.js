@@ -571,15 +571,23 @@ BlockList.populateItem_finch = function(collapsibleItem) {
  */
 BlockList.populateCat_hatchling = function(category) {
   category.addBlockByName("B_HLEmptyPortA");
+  category.addSpace();
   category.addBlockByName("B_HLEmptyPortB");
+  category.addSpace();
   category.addBlockByName("B_HLEmptyPortC");
+  category.addSpace();
   category.addBlockByName("B_HLEmptyPortD");
+  category.addSpace();
   category.addBlockByName("B_HLEmptyPortE");
+  category.addSpace();
   category.addBlockByName("B_HLEmptyPortF");
   category.addSpace();
   category.addBlockByName("B_HLLedArray");
   category.addBlockByName("B_HLPrint");
   category.addBlockByName("B_HLBuzzer");
+  category.addSpace();
+  category.addBlockByName("B_HLBBClaps");
+  category.addBlockByName("B_HLBBButtonPresses");
   category.addSpace();
   category.addBlockByName("B_HLMagnetometer");
   category.addBlockByName("B_HLButton");

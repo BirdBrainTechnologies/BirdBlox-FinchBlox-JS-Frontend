@@ -239,5 +239,7 @@ Language.en = {
 "block_Fairy_Lights":"Fairy Lights (Slot 1) (Slot 2) %",
 "block_Neopixel_Strip":"Neopixel (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
 "block_Single_Neopixel":"Neopixel R (Slot 1) % G (Slot 2) % B (Slot 3) %",
-"Hatchling":"Hatchling"
+"Hatchling":"Hatchling",
+"block_Button_Presses":"Button Presses",
+"block_Claps":"Claps"
 }

@@ -99,7 +99,17 @@ B_Wait.prototype.constructor = B_Wait;
 //MicroBlocks functions
 B_Wait.prototype.primName = function() { return "waitMillis" }
 B_Wait.prototype.argList = function() {
-  return [(this.timeSelection * 100)]
+  if (HatchPlus) {
+    let slot = this.slots[0]
+    if (slot.hasChild) {
+      console.error("SLOT CHILDREN NOT IMPLEMENTED FOR WAIT BLOCK!")
+      return []
+    } else { 
+      return [slot.getDataNotFromChild().getValueWithC(true) * 1000]
+    }
+  } else {
+    return [(this.timeSelection * 100)]
+  }
 }
 /* Records current time. */
 B_Wait.prototype.startAction = function() {
@@ -225,7 +235,18 @@ B_Repeat.prototype.constructor = B_Repeat;
 //MicroBlocks functions
 B_Repeat.prototype.primName = function() { return "repeat" }
 B_Repeat.prototype.argList = function() { 
-  return [this.countSelection, this.blockSlot1.child] 
+  if (HatchPlus) {
+    let slot = this.slots[0]
+    if (slot.hasChild) {
+      console.error("SLOT CHILDREN NOT IMPLEMENTED FOR REPEAT BLOCK!")
+      return []
+    } else {
+      let count = slot.getDataNotFromChild().getValueWithC(true, true)
+      return [count, this.blockSlot1.child] 
+    }
+  } else {
+    return [this.countSelection, this.blockSlot1.child] 
+  }
 }
 /* Prepares counter and begins executing contents. */
 B_Repeat.prototype.startAction = function() {

@@ -36,7 +36,7 @@ RowDialog.setConstants = function() {
   //TODO: This really should be in a separate "setStatics" function, since it isn't a constant
   RowDialog.currentDialog = null;
 
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     RowDialog.titleBarColor = Colors.ballyGrayLight;
     RowDialog.bgColor = Colors.ballyGrayLight;
     RowDialog.bnMargin = 10;
@@ -52,14 +52,14 @@ RowDialog.setConstants = function() {
     RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
     RowDialog.titleBarH = RowDialog.bnHeight * 2;
     RowDialog.outlineColor = Colors.flagGreen;
-  } else if (HatchPlus) {
+  /*} else if (HatchPlus) {
     RowDialog.titleBarColor = Colors.ballyBrandBlue;
     RowDialog.bgColor = Colors.ballyBrandBlueLight;
     RowDialog.bnMargin = 5;
     RowDialog.cornerR = 5;
     RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
     RowDialog.titleBarH = RowDialog.bnHeight + RowDialog.bnMargin;
-    RowDialog.outlineColor = Colors.ballyBrandBlue;
+    RowDialog.outlineColor = Colors.ballyBrandBlue;*/
   } else {
     RowDialog.titleBarColor = Colors.lightGray;
     RowDialog.bgColor = Colors.lightLightGray;
@@ -68,12 +68,12 @@ RowDialog.setConstants = function() {
     RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
     RowDialog.titleBarH = RowDialog.bnHeight + RowDialog.bnMargin;
   }
-  RowDialog.titleBarFontC = Colors.white;
+  RowDialog.titleBarFontC = HatchPlus ? Colors.ballyBrandBlue : Colors.white;
   RowDialog.centeredBnWidth = 100;
 
 
   // The dialog tries to take up a certain ratio of the smaller of the screen's dimensions
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     RowDialog.widthRatio = 0.7//0.65;
     RowDialog.heightRatio = 0.2//0.75;
   } else if (FinchBlox) {
@@ -85,7 +85,7 @@ RowDialog.setConstants = function() {
   }
 
   // But if that is too small, it uses the min dimensions
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     RowDialog.minWidth = 500;
     RowDialog.minHeight = 400;
   } else if (FinchBlox) {
@@ -150,14 +150,12 @@ RowDialog.prototype.show = function() {
     this.bgRect = this.drawBackground();
 
 
-    this.titleRect = Hatchling ? null : this.createTitleRect();
-    if (FinchBlox) {
-      if (Hatchling) {
-        this.icon = this.createTitleIcon(VectorPaths.bdHatchling);
-        this.addCancelButton()
-      } else {
-        this.icon = this.createTitleIcon(VectorPaths.mvFinch);
-      }
+    this.titleRect = (Hatchling || HatchPlus) ? null : this.createTitleRect();
+    if (Hatchling) {
+      this.icon = this.createTitleIcon(VectorPaths.bdHatchling);
+      this.addCancelButton()
+    } else if (FinchBlox) {
+      this.icon = this.createTitleIcon(VectorPaths.mvFinch);
     } else {
       this.titleText = this.createTitleLabel(this.title);
     }
@@ -220,7 +218,7 @@ RowDialog.prototype.calcWidths = function() {
 RowDialog.prototype.drawBackground = function() {
   const RD = RowDialog;
   let rect = GuiElements.draw.rect(0, 0, this.width, this.height, RD.bgColor, RD.cornerR, RD.cornerR);
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     GuiElements.update.stroke(rect, RD.outlineColor, 2)
   }
   this.group.appendChild(rect);
@@ -267,13 +265,13 @@ RowDialog.prototype.createTitleLabel = function(title) {
 RowDialog.prototype.createTitleIcon = function(pathId) {
   var RD = RowDialog;
 
-  const iconH = Hatchling ? RD.titleBarH * 0.5 : RD.titleBarH * 0.9;
+  const iconH = (Hatchling || HatchPlus) ? RD.titleBarH * 0.5 : RD.titleBarH * 0.9;
   const iconW = VectorIcon.computeWidth(pathId, iconH);
   const iconX = (this.width - iconW) / 2;
   const iconY = (RD.titleBarH - iconH) / 2;
 
   let icon
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     icon = new VectorIcon(iconX, iconY, pathId, Colors.ballyBrandBlue, iconH, this.group)
   } else {
     icon = new VectorIcon(iconX, iconY, pathId, Colors.white, iconH, this.group, null, 90);
