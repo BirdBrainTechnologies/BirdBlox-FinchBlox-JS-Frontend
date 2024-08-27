@@ -48,6 +48,16 @@
 			  		pathE.setAttributeNS(null, "fill-rule", pathId.fillRule)
 			  	}
 
+			  	//This outline shows the view box of the icon
+			  	let outline = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+			  	outline.setAttributeNS(null, "width", pathId.width);
+  				outline.setAttributeNS(null, "height", pathId.height);
+  				outline.setAttributeNS(null, "fill", "none");
+  				outline.setAttributeNS(null, "stroke", "#AAA");
+  				outline.setAttributeNS(null, "stroke-width", 2);
+  				iconGroup.appendChild(outline)
+
+
 			  	var label = document.createElementNS("http://www.w3.org/2000/svg", 'text');
 			  	label.innerHTML = icon
 			  	label.setAttributeNS(null, "transform", "translate(0," + (iconH+margin) + ")")

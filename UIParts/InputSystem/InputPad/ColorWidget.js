@@ -35,7 +35,7 @@ InputWidget.Color.recentColors = [
     "#FF88FF"
     ]
 InputWidget.Color.staticColors = [
-    "#000000",
+    //"#000000",
     "#FFFFFF",
     "#FF0000", 
     "#00FF00",
@@ -204,7 +204,7 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
 
         bnX += bnH + bnM
         if (i == 1) {
-            bnX = this.width/2 - 1.5*bnH - bnM
+            bnX = this.width/2 - bnH - bnM/2 //this.width/2 - 1.5*bnH - bnM
             bnY += bnH + bnM
         }
     }

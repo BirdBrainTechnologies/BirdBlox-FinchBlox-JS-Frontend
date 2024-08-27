@@ -720,6 +720,29 @@ B_HL_SN_L2.prototype.argList = function() {
 //   return [HL_Utils.portNames[this.port], rgb[0], rgb[1], rgb[2]] 
 // }
 
+/**
+ * This block just turns the single neopixel off. Level 2 only
+ */
+function B_HLSingleNeopixOff(x, y, userSelectedPort) {
+  this.valueKey = "color"
+
+  let category = "color_2"
+  B_HLOutputBase.call(this, x, y, category, "singleNeopix", 9, userSelectedPort);
+
+  const icon = VectorPaths["bdLightBulb"];
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "sNeopix", 45);
+  this.blockIcon.negate(Colors.blockOutline["color_2"])
+  this.blockIcon.isEndOfLine = true;
+  this.addPart(this.blockIcon);
+
+}
+B_HLSingleNeopixOff.prototype = Object.create(B_HLOutputBase.prototype);
+B_HLSingleNeopixOff.prototype.constructor = B_HLSingleNeopixOff;
+//MicroBlocks functions
+B_HLSingleNeopixOff.prototype.primName = function() { return "hatchlingNeopixelWithDelay" }
+B_HLSingleNeopixOff.prototype.argList = function() { 
+  return [HL_Utils.portNames[this.port], 0, 0, 0, 0]
+}
 
 
 function B_HLNeopixStrip(x, y, userSelectedPort) {

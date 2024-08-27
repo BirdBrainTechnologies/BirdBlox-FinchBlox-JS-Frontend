@@ -166,6 +166,7 @@ BlockList.populateCat_motion_2 = function(category) {
 BlockList.populateCat_color_2 = function(category) {
   if (Hatchling) {
     category.addBlockByName("B_HL_SN_L2")
+    category.addBlockByName("B_HLSingleNeopixOff")
     category.addBlockByName("B_HLFairyLightsL2")
     //category.addBlockByName("B_HLNeopixStrip")
     category.addBlockByName("B_FBLedArrayL2")
