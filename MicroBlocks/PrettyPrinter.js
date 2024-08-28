@@ -188,6 +188,8 @@ PrettyPrinter.prototype.printValue = function(block) {
     this.gen.const(block)//(printString block)
   } else if (typeof block == 'number') { //'Float'
     this.gen.const(block.toString())//(toString block 20) TODO: add precision?
+  } else if (typeof block == 'boolean') {
+    this.gen.const(block.toString())
   /*} (isClass block 'Color') {
     c = block
     this.gen.const(join '(colorSwatch ' (red c) ' ' (green c) ' ' (blue c) ' ' (alpha c) ')')*/

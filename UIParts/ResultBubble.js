@@ -42,6 +42,12 @@ ResultBubble.setConstants = function() {
   RB.margin = 4;
   /*RB.lifetime=3000;*/
   RB.hMargin = 20;
+  if (HatchPlus) {
+    RB.fontColor = Colors.ballyBrandBlueDark;
+    RB.errorFontColor = Colors.white;
+    RB.bgColor = Colors.ballyGrayLight;
+    RB.errorBgColor = Colors.ballyRed;
+  }
 };
 
 /**

@@ -208,6 +208,17 @@ Slot.prototype.getDataNotFromChild = function() {
   DebugOptions.markAbstract();
 };
 
+/**
+ * Return instructions for use by the MicroBlocks virtual machine. HatchPlus only.
+ */
+Slot.prototype.getMicroBlocksInstructions = function() {
+  if (this.hasChild) {
+    return new BlockArg(this.child.primName(), this.child.argList())
+  } else {
+    return this.getDataNotFromChild().getValue()
+  }
+}
+
 /** Recursively updates the dimensions of the BlockStack. */
 Slot.prototype.updateStackDim = function() {
   if (this.hasChild) {

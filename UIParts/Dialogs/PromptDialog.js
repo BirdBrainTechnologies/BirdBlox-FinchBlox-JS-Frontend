@@ -9,8 +9,8 @@ function PromptDialog(title, question, defaultText, shouldPrefill, callbackFn) {
 	this.shouldPrefill = shouldPrefill //TODO: make hint text when necessary
 	this.callbackFn = callbackFn
 
-	this.bgColor = HatchPlus ? Colors.ballyGrayLight : RD.titleBarColor
-	this.outlineC = HatchPlus ? Colors.ballyGray : RD.titleBarColor
+	this.bgColor = HatchPlus ? Colors.ballyGrayLight : RowDialog.titleBarColor
+	this.outlineC = HatchPlus ? Colors.ballyGray : RowDialog.titleBarColor
 
 	this.width = 300
 	this.height = 200
@@ -44,7 +44,7 @@ PromptDialog.prototype.show = function() {
   		this.group.appendChild(qTextE);
 
   		const font = RD.hintTextFont;
-		const textColor = RD.titleBarFontC;
+		const textColor = HatchPlus ? RD.titleBarFontC : RD.titleBarColor
 		const textY = qY + margin + font.charHeight/2; //this.height/2 + font.charHeight / 2; 
 		const textX = this.width/10
 		const textW = this.width*4/5

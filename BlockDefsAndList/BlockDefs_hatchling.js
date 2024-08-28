@@ -1559,7 +1559,7 @@ B_HLBBFairyLights.importXml = HL_Utils.BBimportXml
 //MicroBlocks functions
 B_HLBBFairyLights.prototype.primName = function() { return "hatchlingFairyLightWithDelay" }
 B_HLBBFairyLights.prototype.argList = function() { 
-  let slot = this.slots[1]
+  /*let slot = this.slots[1]
   if (slot.hasChild) {
     console.error("SLOT CHILDREN NOT IMPLEMENTED FOR FAIRY LIGHTS!")
     return []
@@ -1568,7 +1568,13 @@ B_HLBBFairyLights.prototype.argList = function() {
     value = Math.round(value * 254/100)
 
     return [HL_Utils.portNames[this.port], value, 0] 
-  }
+  }*/
+
+  let percent = this.slots[1].getMicroBlocksInstructions()
+  console.error("Remember to scale this!")
+  let value = percent
+  
+  return [HL_Utils.portNames[this.port], value, 0] 
 }
 
 function B_HLBBSingleNeopix(x, y, port) {

@@ -322,6 +322,7 @@ Data.prototype.asSelection = function() {
  * @return {*}
  */
 Data.prototype.getValue = function() {
+  console.log("*** getValue returning value '" + this.value + "' of type " + typeof this.value + " from a " + this.constructor.name)
   return this.value;
 };
 
@@ -469,6 +470,7 @@ function NumData(value, isValid) {
     isValid = false;
   }
   Data.call(this, Data.types.num, value, isValid);
+  console.log("*** new NumData with value '" + this.value + "' of type " + typeof this.value)
 }
 NumData.prototype = Object.create(Data.prototype);
 NumData.prototype.constructor = NumData;
@@ -642,6 +644,8 @@ BoolData.importXml = function(dataNode) {
  */
 function StringData(value, isValid) {
   Data.call(this, Data.types.string, value, isValid);
+  console.log("*** new StringData with value " + value + " of type " + typeof value)
+  console.trace()
 }
 StringData.prototype = Object.create(Data.prototype);
 StringData.prototype.constructor = StringData;
@@ -21778,6 +21782,12 @@ ResultBubble.setConstants = function() {
   RB.margin = 4;
   /*RB.lifetime=3000;*/
   RB.hMargin = 20;
+  if (HatchPlus) {
+    RB.fontColor = Colors.ballyBrandBlueDark;
+    RB.errorFontColor = Colors.white;
+    RB.bgColor = Colors.ballyGrayLight;
+    RB.errorBgColor = Colors.ballyRed;
+  }
 };
 
 /**
@@ -29925,8 +29935,8 @@ function PromptDialog(title, question, defaultText, shouldPrefill, callbackFn) {
 	this.shouldPrefill = shouldPrefill //TODO: make hint text when necessary
 	this.callbackFn = callbackFn
 
-	this.bgColor = HatchPlus ? Colors.ballyGrayLight : RD.titleBarColor
-	this.outlineC = HatchPlus ? Colors.ballyGray : RD.titleBarColor
+	this.bgColor = HatchPlus ? Colors.ballyGrayLight : RowDialog.titleBarColor
+	this.outlineC = HatchPlus ? Colors.ballyGray : RowDialog.titleBarColor
 
 	this.width = 300
 	this.height = 200
@@ -29960,7 +29970,7 @@ PromptDialog.prototype.show = function() {
   		this.group.appendChild(qTextE);
 
   		var font = RD.hintTextFont;
-		var textColor = RD.titleBarFontC;
+		var textColor = HatchPlus ? RD.titleBarFontC : RD.titleBarColor
 		var textY = qY + margin + font.charHeight/2; //this.height/2 + font.charHeight / 2; 
 		var textX = this.width/10
 		var textW = this.width*4/5
@@ -33671,6 +33681,7 @@ Block.prototype.updateAction = function() {
  * Once the Block returns its value, it is done and can reset its state.
  * @return {Data} - The result of the Block's execution.
  */
+//TODO: Is this function being used? Looks like it is overwritten later in this file, and also like neither function is ever called. Both should probably be removed.
 Block.prototype.getResultData = function() {
   DebugOptions.assert(this.returnsValue);
   if (this.running === 3) { //Only return data if the Block is done running.
@@ -35986,6 +35997,17 @@ Slot.prototype.getDataNotFromChild = function() {
   DebugOptions.markAbstract();
 };
 
+/**
+ * Return instructions for use by the MicroBlocks virtual machine. HatchPlus only.
+ */
+Slot.prototype.getMicroBlocksInstructions = function() {
+  if (this.hasChild) {
+    return new BlockArg(this.child.primName(), this.child.argList())
+  } else {
+    return this.getDataNotFromChild().getValue()
+  }
+}
+
 /** Recursively updates the dimensions of the BlockStack. */
 Slot.prototype.updateStackDim = function() {
   if (this.hasChild) {
@@ -36475,11 +36497,14 @@ HexSlot.prototype.getDataNotFromChild = function() {
  * @constructor
  */
 function EditableSlot(parent, key, inputType, snapType, outputType, data) {
+  console.log("*** new EditableSlot")
   Slot.call(this, parent, key, snapType, outputType);
   this.inputType = inputType;
   this.enteredData = data;
   this.editing = false;
   //TODO: make the slotShape be an extra argument
+
+  console.log("*** new EditableSlot created")
 }
 EditableSlot.prototype = Object.create(Slot.prototype);
 EditableSlot.prototype.constructor = EditableSlot;
@@ -36537,6 +36562,7 @@ EditableSlot.prototype.createInputSystem = function() {
  * @param {string} [visibleText] - The text the Slot should display as its value. Should correspond to Data.
  */
 EditableSlot.prototype.updateEdit = function(data, visibleText) {
+  console.log("*** EditableSlot updateEdit " + data.constructor.name + " " + data.value)
   DebugOptions.assert(this.editing);
   if (visibleText == null) {
     visibleText = this.dataToString(data);
@@ -36575,6 +36601,7 @@ EditableSlot.prototype.isEditing = function() {
  * @param {boolean} updateDim - indicates if the Stack should updateDim after this
  */
 EditableSlot.prototype.setData = function(data, sanitize, updateDim) {
+  console.log("*** EditableSlot setData " + data.constructor.name + " " + data.value)
   if (sanitize) {
     data = this.sanitizeData(data);
   }
@@ -36704,9 +36731,14 @@ EditableSlot.prototype.isEditable = function() {
  * @constructor
  */
 function RectSlot(parent, key, snapType, outputType, data) {
+  console.log("*** new RectSlot")
   EditableSlot.call(this, parent, key, EditableSlot.inputTypes.string, snapType, outputType, data);
+  console.log("*** new RectSlot 1")
   this.slotShape = new RectSlotShape(this, this.dataToString(data));
+  console.log("*** new RectSlot 2")
   this.slotShape.show();
+
+  console.log("*** new RectSlot created")
 }
 RectSlot.prototype = Object.create(EditableSlot.prototype);
 RectSlot.prototype.constructor = RectSlot;
@@ -43366,6 +43398,11 @@ function B_Add(x, y) {
 }
 B_Add.prototype = Object.create(ReporterBlock.prototype);
 B_Add.prototype.constructor = B_Add;
+//MicroBlocks functions
+B_Add.prototype.primName = function() { return "+" }
+B_Add.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
 /* Returns the sum of the Slots. Result is valid only if both inputs are. */
 B_Add.prototype.startAction = function() {
   var data1 = this.slots[0].getData();
@@ -43386,6 +43423,11 @@ function B_Subtract(x, y) {
 }
 B_Subtract.prototype = Object.create(ReporterBlock.prototype);
 B_Subtract.prototype.constructor = B_Subtract;
+//MicroBlocks functions
+B_Subtract.prototype.primName = function() { return "-" }
+B_Subtract.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
 /* Sets the result to the difference between the Slots. Result is valid only if both inputs are. */
 B_Subtract.prototype.startAction = function() {
   var data1 = this.slots[0].getData();
@@ -43405,6 +43447,11 @@ function B_Multiply(x, y) {
 }
 B_Multiply.prototype = Object.create(ReporterBlock.prototype);
 B_Multiply.prototype.constructor = B_Multiply;
+//MicroBlocks functions
+B_Multiply.prototype.primName = function() { return "*" }
+B_Multiply.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
 /* Sets the result to the product of the Slots. Result is valid only if both inputs are. */
 B_Multiply.prototype.startAction = function() {
   var data1 = this.slots[0].getData();
@@ -43425,6 +43472,11 @@ function B_Divide(x, y) {
 }
 B_Divide.prototype = Object.create(ReporterBlock.prototype);
 B_Divide.prototype.constructor = B_Divide;
+//MicroBlocks functions
+B_Divide.prototype.primName = function() { return "/" }
+B_Divide.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
 /* Sets the result to the quotient of the Slots. Result is valid only if both inputs are and Slot2 != 0. */
 B_Divide.prototype.startAction = function() {
   var data1 = this.slots[0].getData();
@@ -43450,6 +43502,11 @@ function B_Mod(x, y) {
 }
 B_Mod.prototype = Object.create(ReporterBlock.prototype);
 B_Mod.prototype.constructor = B_Mod;
+//MicroBlocks functions
+B_Mod.prototype.primName = function() { return "%" }
+B_Mod.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
 /* Sets the result to the first Slot mod the second Slot. Valid if Slots are valid and second isn't 0. */
 B_Mod.prototype.startAction = function() {
   var data1 = this.slots[0].getData();
@@ -43481,6 +43538,10 @@ B_Round.prototype.startAction = function() {
   var val = data1.getValueWithC(false, true); // Integer
   return new ExecutionStatusResult(new NumData(val, isValid));
 };
+if (HatchPlus) {
+  //not supported in microblocks
+  B_Round.prototype.checkActive = function() { return false }
+}
 
 
 
@@ -43493,6 +43554,11 @@ function B_PickRandom(x, y) {
 /* Picks a random integer if both Slots are integers. Otherwise it selects a random float. Is valid if both are. */
 B_PickRandom.prototype = Object.create(ReporterBlock.prototype);
 B_PickRandom.prototype.constructor = B_PickRandom;
+//MicroBlocks functions
+B_PickRandom.prototype.primName = function() { return "random" }
+B_PickRandom.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
 B_PickRandom.prototype.startAction = function() {
   var data1 = this.slots[0].getData();
   var data2 = this.slots[1].getData();
@@ -43525,6 +43591,11 @@ function B_LessThan(x, y) {
 }
 B_LessThan.prototype = Object.create(PredicateBlock.prototype);
 B_LessThan.prototype.constructor = B_LessThan;
+//MicroBlocks functions
+B_LessThan.prototype.primName = function() { return "<" }
+B_LessThan.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
 /* Result is a valid boolean indicating is Slot1 < Slot2. */
 B_LessThan.prototype.startAction = function() {
   var val1 = this.slots[0].getData().getValue();
@@ -43542,6 +43613,11 @@ function B_EqualTo(x, y) { // needs to work with strings
 }
 B_EqualTo.prototype = Object.create(PredicateBlock.prototype);
 B_EqualTo.prototype.constructor = B_EqualTo;
+//MicroBlocks functions
+B_EqualTo.prototype.primName = function() { return "==" }
+B_EqualTo.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
 /* Compares data of any type to determine equality. Result is always valid. */
 B_EqualTo.prototype.startAction = function() {
   var data1 = this.slots[0].getData();
@@ -43559,6 +43635,11 @@ function B_GreaterThan(x, y) {
 }
 B_GreaterThan.prototype = Object.create(PredicateBlock.prototype);
 B_GreaterThan.prototype.constructor = B_GreaterThan;
+//MicroBlocks functions
+B_GreaterThan.prototype.primName = function() { return ">" }
+B_GreaterThan.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
 /* Result is a valid boolean indicating is Slot1 > Slot2. */
 B_GreaterThan.prototype.startAction = function() {
   var val1 = this.slots[0].getData().getValue();
@@ -43576,6 +43657,11 @@ function B_And(x, y) {
 }
 B_And.prototype = Object.create(PredicateBlock.prototype);
 B_And.prototype.constructor = B_And;
+//MicroBlocks functions
+B_And.prototype.primName = function() { return "jmpAnd" }
+B_And.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
 /* Result is true if both are true. Always valid. */
 B_And.prototype.startAction = function() {
   var val1 = this.slots[0].getData().getValue();
@@ -43593,6 +43679,12 @@ function B_Or(x, y) {
 }
 B_Or.prototype = Object.create(PredicateBlock.prototype);
 B_Or.prototype.constructor = B_Or;
+//MicroBlocks functions
+B_Or.prototype.primName = function() { return "jmpOr" }
+B_Or.prototype.argList = function() { 
+  console.error("*** B_Or - this isn't right")
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
 /* Result is true if either is true. Always valid. */
 B_Or.prototype.startAction = function() {
   var val1 = this.slots[0].getData().getValue();
@@ -43609,6 +43701,11 @@ function B_Not(x, y) {
 }
 B_Not.prototype = Object.create(PredicateBlock.prototype);
 B_Not.prototype.constructor = B_Not;
+//MicroBlocks functions
+B_Not.prototype.primName = function() { return "not" }
+B_Not.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions()]
+}
 /* Result is true if Slot is false. Always valid. */
 B_Not.prototype.startAction = function() {
   var val1 = this.slots[0].getData().getValue();
@@ -43623,6 +43720,11 @@ function B_True(x, y) {
 }
 B_True.prototype = Object.create(PredicateBlock.prototype);
 B_True.prototype.constructor = B_True;
+//MicroBlocks functions
+B_True.prototype.primName = function() { return "booleanConstant" }
+B_True.prototype.argList = function() { 
+  return [true]
+}
 /* Result is true. */
 B_True.prototype.startAction = function() {
   return new ExecutionStatusResult(new BoolData(true));
@@ -43636,6 +43738,11 @@ function B_False(x, y) {
 }
 B_False.prototype = Object.create(PredicateBlock.prototype);
 B_False.prototype.constructor = B_False;
+//MicroBlocks functions
+B_False.prototype.primName = function() { return "booleanConstant" }
+B_False.prototype.argList = function() { 
+  return [false]
+}
 /* Result is false. */
 B_False.prototype.startAction = function() {
   return new ExecutionStatusResult(new BoolData(false));
@@ -43653,6 +43760,11 @@ function B_LetterOf(x, y) {
 }
 B_LetterOf.prototype = Object.create(ReporterBlock.prototype);
 B_LetterOf.prototype.constructor = B_LetterOf;
+//MicroBlocks functions
+B_LetterOf.prototype.primName = function() { return "at" }
+B_LetterOf.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
 /* Result is nth letter of word. Makes n and integer in range. Always valid. */
 B_LetterOf.prototype.startAction = function() {
   var word = this.slots[1].getData().getValue();
@@ -43673,6 +43785,11 @@ function B_LengthOf(x, y) {
 }
 B_LengthOf.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOf.prototype.constructor = B_LengthOf;
+//MicroBlocks functions
+B_LengthOf.prototype.primName = function() { return "size" }
+B_LengthOf.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions()]
+}
 /* Result is length of word. Always valid. */
 B_LengthOf.prototype.startAction = function() {
   var word = this.slots[0].getData().getValue();
@@ -43689,6 +43806,11 @@ function B_join(x, y) {
 }
 B_join.prototype = Object.create(ReporterBlock.prototype);
 B_join.prototype.constructor = B_join;
+//MicroBlocks functions
+B_join.prototype.primName = function() { return "callReporterPrimitive" }
+B_join.prototype.argList = function() { 
+  return ["data", "join", this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
 /* Result is Slots concatenated. Always valid. */
 B_join.prototype.startAction = function() {
   var word1 = this.slots[0].getData().getValue();
@@ -43702,19 +43824,28 @@ function B_Split(x, y) {
   ReporterBlock.call(this, x, y, "operators", Block.returnTypes.list);
   this.addPart(new StringSlot(this, "StrS_1", ""));
 
-  var inputType = EditableSlot.inputTypes.any;
-  var snapType = Slot.snapTypes.numStrBool;
-  var data = new SelectionData(Language.getStr("whitespace"), "whitespace");
-  var dS = new DropSlot(this, "DS_separator", inputType, snapType, data);
-  dS.addEnterText(Language.getStr("Edit_text"));
-  dS.addOption(new SelectionData(Language.getStr("letter"), "letter"));
-  dS.addOption(new SelectionData(Language.getStr("whitespace"), "whitespace"));
-  this.addPart(dS);
+  if (HatchPlus) {
+    this.addPart(new StringSlot(this, "StrS_1", " "));
+  } else {
+    var inputType = EditableSlot.inputTypes.any;
+    var snapType = Slot.snapTypes.numStrBool;
+    var data = new SelectionData(Language.getStr("whitespace"), "whitespace");
+    var dS = new DropSlot(this, "DS_separator", inputType, snapType, data);
+    dS.addEnterText(Language.getStr("Edit_text"));
+    dS.addOption(new SelectionData(Language.getStr("letter"), "letter"));
+    dS.addOption(new SelectionData(Language.getStr("whitespace"), "whitespace"));
+    this.addPart(dS);
+  }
 
   this.parseTranslation(Language.getStr("block_split"));
 }
 B_Split.prototype = Object.create(ReporterBlock.prototype);
 B_Split.prototype.constructor = B_Split;
+//MicroBlocks functions
+B_Split.prototype.primName = function() { return "callReporterPrimitive" }
+B_Split.prototype.argList = function() { 
+  return ["data", "split", this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
 /* Returns a list made from splitting the string by the provided character. */
 B_Split.prototype.startAction = function() {
   var string1 = this.slots[0].getData().getValue();
@@ -43757,6 +43888,11 @@ function B_IsAType(x, y) {
 }
 B_IsAType.prototype = Object.create(PredicateBlock.prototype);
 B_IsAType.prototype.constructor = B_IsAType;
+//MicroBlocks functions
+B_IsAType.prototype.primName = function() { return "isType" }
+B_IsAType.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
 /* Returns whether the data is of the selected type */
 B_IsAType.prototype.startAction = function() {
   var data = this.slots[0].getData();
@@ -43790,7 +43926,10 @@ B_IsAType.prototype.startAction = function() {
     return new ExecutionStatusResult(new BoolData(false));
   }
 };
-
+if (HatchPlus) {
+  //Almost works, but not sure how to make sure numbers are numbers, text is text, etc.
+  B_IsAType.prototype.checkActive = function() { return false }
+}
 
 
 function B_mathOfNumber(x, y) {
@@ -43869,6 +44008,10 @@ B_mathOfNumber.prototype.startAction = function() {
   }
   return new ExecutionStatusResult(new NumData(value, isValid));
 };
+if (HatchPlus) {
+  //most options are not supported in microblocks
+  B_mathOfNumber.prototype.checkActive = function() { return false }
+}
 
 /* This file contains the implementations for Blocks in the tablet category. */
 /* TODO: remove redundancy by making these blocks subclasses of a single Block */
@@ -46541,7 +46684,7 @@ B_HLBBFairyLights.importXml = HL_Utils.BBimportXml
 //MicroBlocks functions
 B_HLBBFairyLights.prototype.primName = function() { return "hatchlingFairyLightWithDelay" }
 B_HLBBFairyLights.prototype.argList = function() { 
-  var slot = this.slots[1]
+  /*var slot = this.slots[1]
   if (slot.hasChild) {
     console.error("SLOT CHILDREN NOT IMPLEMENTED FOR FAIRY LIGHTS!")
     return []
@@ -46550,7 +46693,13 @@ B_HLBBFairyLights.prototype.argList = function() {
     value = Math.round(value * 254/100)
 
     return [HL_Utils.portNames[this.port], value, 0] 
-  }
+  }*/
+
+  var percent = this.slots[1].getMicroBlocksInstructions()
+  console.error("Remember to scale this!")
+  var value = percent
+  
+  return [HL_Utils.portNames[this.port], value, 0] 
 }
 
 function B_HLBBSingleNeopix(x, y, port) {
@@ -47070,8 +47219,12 @@ MicroBlocksCompiler.prototype.instructionsFor = function(aBlockOrFunction) {
 	} else if (aBlockOrFunction instanceof CommandBlock || aBlockOrFunction instanceof LoopBlock) {
 		result.push.apply(result, this.instructionsForCmdList(aBlockOrFunction))
 		result.push(['halt', 0])
-	} else if (aBlockOrFunction instanceof ReporterBlock) {
-		console.error("Still need to implement reporter blocks!")
+	} else if (aBlockOrFunction instanceof ReporterBlock || aBlockOrFunction instanceof PredicateBlock) {
+		var reporter = new BlockArg("return", [aBlockOrFunction])
+		result.push.apply(result, this.instructionsForCmdList(reporter))
+	} else {
+		console.error("Unhandled case in instructionsFor: ")
+		console.error(aBlockOrFunction)
 	}
 
 
@@ -47129,14 +47282,14 @@ MicroBlocksCompiler.prototype.instructionsForCmd = function(cmd) {
 	} ('+=' == op) {
 		addAll result (instructionsForExpression this (at args 2))
 		add result (incrementVar this (first args))
-	} ('return' == op) {
-		if (0 == (count args)) {
-			add result (array 'pushImmediate' zeroObj)
+	} */ if ('return' == op) {
+		if (args.length == 0) { //(0 == (count args)) {
+			result.push(['pushImmediate', 0]) //add result (array 'pushImmediate' zeroObj)
 		} else {
-			addAll result (instructionsForExpression this (at args 1))
+			result = result.concat(this.instructionsForExpression(args[0]))//addAll result (instructionsForExpression this (at args 1))
 		}
-		add result (array 'returnResult' 0)
-	} else*/ if ('stopTask' == op) {
+		result.push(['returnResult', 0]) //add result (array 'returnResult' 0)
+	} else if ('stopTask' == op) {
 		result.push(['halt', 0])
 	} else if ('forever' == op) {
 		return this.instructionsForForever(args)
@@ -47299,20 +47452,21 @@ MicroBlocksCompiler.prototype.instructionsForExpression = function(expr) {
 
 	/*if ('v' == op) { // variable
 		return (list (getVar this (first args)))
-	} else if ('booleanConstant' == op) {
-		if (first args) {
-			return (list (array 'pushImmediate' trueObj))
-		} else {
-			return (list (array 'pushImmediate' falseObj))
-		}
-	} else if ('colorSwatch' == op) {
+	} else*/ if ('booleanConstant' == op) {
+		return this.instructionsForExpression(args[0])
+		//if (first args) {
+		//	return (list (array 'pushImmediate' trueObj))
+		//} else {
+		//	return (list (array 'pushImmediate' falseObj))
+		//}
+	/*} else if ('colorSwatch' == op) {
 		c = (color (at args 1) (at args 2) (at args 3))
 		return (instructionsForExpression this (pixelRGB c))
 	} else if ('and' == op) {
 		return (instructionsForAnd this args)
 	} else if ('or' == op) {
-		return (instructionsForOr this args)
-	} else*/ if (this.isFunctionCall(op)) {
+		return (instructionsForOr this args)*/
+	} else if (this.isFunctionCall(op)) {
 		return this.instructionsForFunctionCall(op, args, false)
 	} else {
 		return this.primitive(op, args, false)
@@ -47800,6 +47954,7 @@ MicroBlocksRuntime.prototype.chunkTypeFor = function(aBlockOrFunction) {
 	if (expr instanceof CommandBlock) { return 1 }
 	if (expr instanceof LoopBlock) { return 1 }
 	if (expr instanceof ReporterBlock) { return 2 }
+	if (expr instanceof PredicateBlock) { return 2 }
 
 	console.error('Unexpected argument to chunkTypeFor: ' + op)
 	console.error(aBlockOrFunction)
@@ -49124,7 +49279,7 @@ MicroBlocksRuntime.prototype.saveChunk = async function(aBlockOrFunction, skipHi
 		currentSrc = (prettyPrintFunction pp aBlockOrFunction)
 	} else {*/
 		var expr = aBlockOrFunction//(expression aBlockOrFunction)
-		if (expr instanceof ReporterBlock) {
+		if (expr instanceof ReporterBlock || expr instanceof PredicateBlock) {
 			currentSrc = pp.prettyPrint(expr)
 		} else {
 			currentSrc = pp.prettyPrintList(expr)
@@ -50307,7 +50462,52 @@ MicroBlocksRuntime.prototype.showError = function(chunkID, msg) {
 }
 
 MicroBlocksRuntime.prototype.showResult = function(chunkID, value, isError, isResult) {
-	console.error("Still need to implement showResult. Results for chunk " + chunkID + ": '" + value + "' (isError=" + isError + ", isResult=" + isResult + ")")
+
+	//TODO: Maybe something similar when updating the run, rather than passing recursively
+	// Or, maybe something better in both cases.
+
+	var key = null
+	var keys = Object.keys(this.chunkIDs)
+	for (var i = 0; i < keys.length; i++) {
+		var k = keys[i]
+		var chunkInfo = this.chunkIDs[k]
+		if (chunkInfo[0] == chunkID) {
+			key = k
+		}
+	}
+	if (key == null) {
+		console.error("showResult could not find chunk with id " + chunkID + " (message: '" + value + "' isError: " + isError + " isResult: " + isResult + ")")
+		return
+	}
+
+
+	var block = null
+	for (var i = 0; i < TabManager.activeTab.stackList.length; i++) {
+		var stack = TabManager.activeTab.stackList[i]
+		if (stack.mbId == key) {
+			block = stack.firstBlock
+		}
+	}
+	if (block == null) {
+		for (var i = 0; i < BlockPalette.selectedCat.displayStacks.length; i++) {
+			var stack = BlockPalette.selectedCat.displayStacks[i]
+			if (stack.mbId == key) {
+				block = stack.firstBlock
+			}
+		}
+	}
+	if (block != null) {
+		if (block.returnsValue) {
+			console.log("*** showResult " + value + " " + typeof value)
+			console.log(value)
+			block.displayValue(value, isError)
+		} else {
+			console.error("showResult only implemented for reporter blocks. Results for chunk " + chunkID + ": '" + value + "' (isError=" + isError + ", isResult=" + isResult + ")")
+		}
+	} else {
+		console.error("showResult could not find block for chunk with id " + chunkID + " (message: '" + value + "' isError: " + isError + " isResult: " + isResult + ")")
+	}
+
 	/*for m (join
 			(parts (morph (scriptEditor scripter)))
 			(parts (morph (blockPalette scripter)))) {
@@ -50426,7 +50626,7 @@ MicroBlocksRuntime.prototype.readItems = function(msg) {
 		} else if (2 == itemType) { // string
 			var len = msg[i + 1]
 			if (byteCount < (i + len + 2)) { return result } // corrupted msg
-			result.push(String.fromCharCode.apply(null, msg.slice( (i + 2), (i + len + 1) ) ))
+			result.push(String.fromCharCode.apply(null, msg.slice( (i + 2), (i + len + 2) ) ))
 			i += (len + 2)
 		} else if (3 == itemType) { // boolean
 			var isTrue = (msg[i + 1] != 0)
@@ -52545,6 +52745,8 @@ PrettyPrinter.prototype.printValue = function(block) {
     this.gen.const(block)//(printString block)
   } else if (typeof block == 'number') { //'Float'
     this.gen.const(block.toString())//(toString block 20) TODO: add precision?
+  } else if (typeof block == 'boolean') {
+    this.gen.const(block.toString())
   /*} (isClass block 'Color') {
     c = block
     this.gen.const(join '(colorSwatch ' (red c) ' ' (green c) ' ' (blue c) ' ' (alpha c) ')')*/

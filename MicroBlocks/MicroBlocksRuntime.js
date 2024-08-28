@@ -165,6 +165,7 @@ MicroBlocksRuntime.prototype.chunkTypeFor = function(aBlockOrFunction) {
 	if (expr instanceof CommandBlock) { return 1 }
 	if (expr instanceof LoopBlock) { return 1 }
 	if (expr instanceof ReporterBlock) { return 2 }
+	if (expr instanceof PredicateBlock) { return 2 }
 
 	console.error('Unexpected argument to chunkTypeFor: ' + op)
 	console.error(aBlockOrFunction)
@@ -1489,7 +1490,7 @@ MicroBlocksRuntime.prototype.saveChunk = async function(aBlockOrFunction, skipHi
 		currentSrc = (prettyPrintFunction pp aBlockOrFunction)
 	} else {*/
 		let expr = aBlockOrFunction//(expression aBlockOrFunction)
-		if (expr instanceof ReporterBlock) {
+		if (expr instanceof ReporterBlock || expr instanceof PredicateBlock) {
 			currentSrc = pp.prettyPrint(expr)
 		} else {
 			currentSrc = pp.prettyPrintList(expr)
@@ -2672,7 +2673,52 @@ MicroBlocksRuntime.prototype.showError = function(chunkID, msg) {
 }
 
 MicroBlocksRuntime.prototype.showResult = function(chunkID, value, isError, isResult) {
-	console.error("Still need to implement showResult. Results for chunk " + chunkID + ": '" + value + "' (isError=" + isError + ", isResult=" + isResult + ")")
+
+	//TODO: Maybe something similar when updating the run, rather than passing recursively
+	// Or, maybe something better in both cases.
+
+	let key = null
+	let keys = Object.keys(this.chunkIDs)
+	for (let i = 0; i < keys.length; i++) {
+		let k = keys[i]
+		let chunkInfo = this.chunkIDs[k]
+		if (chunkInfo[0] == chunkID) {
+			key = k
+		}
+	}
+	if (key == null) {
+		console.error("showResult could not find chunk with id " + chunkID + " (message: '" + value + "' isError: " + isError + " isResult: " + isResult + ")")
+		return
+	}
+
+
+	let block = null
+	for (let i = 0; i < TabManager.activeTab.stackList.length; i++) {
+		let stack = TabManager.activeTab.stackList[i]
+		if (stack.mbId == key) {
+			block = stack.firstBlock
+		}
+	}
+	if (block == null) {
+		for (let i = 0; i < BlockPalette.selectedCat.displayStacks.length; i++) {
+			let stack = BlockPalette.selectedCat.displayStacks[i]
+			if (stack.mbId == key) {
+				block = stack.firstBlock
+			}
+		}
+	}
+	if (block != null) {
+		if (block.returnsValue) {
+			console.log("*** showResult " + value + " " + typeof value)
+			console.log(value)
+			block.displayValue(value, isError)
+		} else {
+			console.error("showResult only implemented for reporter blocks. Results for chunk " + chunkID + ": '" + value + "' (isError=" + isError + ", isResult=" + isResult + ")")
+		}
+	} else {
+		console.error("showResult could not find block for chunk with id " + chunkID + " (message: '" + value + "' isError: " + isError + " isResult: " + isResult + ")")
+	}
+
 	/*for m (join
 			(parts (morph (scriptEditor scripter)))
 			(parts (morph (blockPalette scripter)))) {
@@ -2791,7 +2837,7 @@ MicroBlocksRuntime.prototype.readItems = function(msg) {
 		} else if (2 == itemType) { // string
 			let len = msg[i + 1]
 			if (byteCount < (i + len + 2)) { return result } // corrupted msg
-			result.push(String.fromCharCode.apply(null, msg.slice( (i + 2), (i + len + 1) ) ))
+			result.push(String.fromCharCode.apply(null, msg.slice( (i + 2), (i + len + 2) ) ))
 			i += (len + 2)
 		} else if (3 == itemType) { // boolean
 			let isTrue = (msg[i + 1] != 0)

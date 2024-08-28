@@ -243,8 +243,12 @@ MicroBlocksCompiler.prototype.instructionsFor = function(aBlockOrFunction) {
 	} else if (aBlockOrFunction instanceof CommandBlock || aBlockOrFunction instanceof LoopBlock) {
 		result.push.apply(result, this.instructionsForCmdList(aBlockOrFunction))
 		result.push(['halt', 0])
-	} else if (aBlockOrFunction instanceof ReporterBlock) {
-		console.error("Still need to implement reporter blocks!")
+	} else if (aBlockOrFunction instanceof ReporterBlock || aBlockOrFunction instanceof PredicateBlock) {
+		let reporter = new BlockArg("return", [aBlockOrFunction])
+		result.push.apply(result, this.instructionsForCmdList(reporter))
+	} else {
+		console.error("Unhandled case in instructionsFor: ")
+		console.error(aBlockOrFunction)
 	}
 
 
@@ -302,14 +306,14 @@ MicroBlocksCompiler.prototype.instructionsForCmd = function(cmd) {
 	} ('+=' == op) {
 		addAll result (instructionsForExpression this (at args 2))
 		add result (incrementVar this (first args))
-	} ('return' == op) {
-		if (0 == (count args)) {
-			add result (array 'pushImmediate' zeroObj)
+	} */ if ('return' == op) {
+		if (args.length == 0) { //(0 == (count args)) {
+			result.push(['pushImmediate', 0]) //add result (array 'pushImmediate' zeroObj)
 		} else {
-			addAll result (instructionsForExpression this (at args 1))
+			result = result.concat(this.instructionsForExpression(args[0]))//addAll result (instructionsForExpression this (at args 1))
 		}
-		add result (array 'returnResult' 0)
-	} else*/ if ('stopTask' == op) {
+		result.push(['returnResult', 0]) //add result (array 'returnResult' 0)
+	} else if ('stopTask' == op) {
 		result.push(['halt', 0])
 	} else if ('forever' == op) {
 		return this.instructionsForForever(args)
@@ -472,20 +476,21 @@ MicroBlocksCompiler.prototype.instructionsForExpression = function(expr) {
 
 	/*if ('v' == op) { // variable
 		return (list (getVar this (first args)))
-	} else if ('booleanConstant' == op) {
-		if (first args) {
-			return (list (array 'pushImmediate' trueObj))
-		} else {
-			return (list (array 'pushImmediate' falseObj))
-		}
-	} else if ('colorSwatch' == op) {
+	} else*/ if ('booleanConstant' == op) {
+		return this.instructionsForExpression(args[0])
+		//if (first args) {
+		//	return (list (array 'pushImmediate' trueObj))
+		//} else {
+		//	return (list (array 'pushImmediate' falseObj))
+		//}
+	/*} else if ('colorSwatch' == op) {
 		c = (color (at args 1) (at args 2) (at args 3))
 		return (instructionsForExpression this (pixelRGB c))
 	} else if ('and' == op) {
 		return (instructionsForAnd this args)
 	} else if ('or' == op) {
-		return (instructionsForOr this args)
-	} else*/ if (this.isFunctionCall(op)) {
+		return (instructionsForOr this args)*/
+	} else if (this.isFunctionCall(op)) {
 		return this.instructionsForFunctionCall(op, args, false)
 	} else {
 		return this.primitive(op, args, false)

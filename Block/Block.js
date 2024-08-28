@@ -385,6 +385,7 @@ Block.prototype.updateAction = function() {
  * Once the Block returns its value, it is done and can reset its state.
  * @return {Data} - The result of the Block's execution.
  */
+//TODO: Is this function being used? Looks like it is overwritten later in this file, and also like neither function is ever called. Both should probably be removed.
 Block.prototype.getResultData = function() {
   DebugOptions.assert(this.returnsValue);
   if (this.running === 3) { //Only return data if the Block is done running.
