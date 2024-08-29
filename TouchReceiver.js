@@ -561,7 +561,9 @@ TouchReceiver.touchStartBN = function(target, e) {
     e.stopPropagation(); // Prevent other calls from preventing default
   }
   if (TR.touchstart(e, shouldPreventDefault)) {
-    Overlay.closeOverlaysExcept(target.partOfOverlay);
+    if (target.closeOverlays) {
+      Overlay.closeOverlaysExcept(target.partOfOverlay);
+    }
     TR.setLongTouchTimer();
     TR.targetType = "button";
     TR.target = target;

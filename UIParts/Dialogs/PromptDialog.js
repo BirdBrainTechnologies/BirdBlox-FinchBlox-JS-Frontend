@@ -72,9 +72,11 @@ PromptDialog.prototype.show = function() {
 		const confirmBn = new Button(confirmX, bnY, bnW, bnH, this.group, bnColor)
 		confirmBn.addIcon(confirmPathId, iconH)
 		confirmBn.setCallbackFunction(function(){ this.confirm() }.bind(this), true)
+		confirmBn.setCloseOverlays(false)
 		const cancelBn = new Button(cancelX, bnY, bnW, bnH, this.group, bnColor)
 		cancelBn.addIcon(cancelPathId, iconH)
 		cancelBn.setCallbackFunction(function(){ this.cancel() }.bind(this), true)
+		cancelBn.setCloseOverlays(false)
 
 		GuiElements.layers.overlayOverlay.appendChild(this.group);
 		FBPopup.currentPopup = this //TODO: Make a more general variable to use for this purpose

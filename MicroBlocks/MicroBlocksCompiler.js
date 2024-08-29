@@ -240,14 +240,20 @@ MicroBlocksCompiler.prototype.instructionsFor = function(aBlockOrFunction) {
 		result.push(['halt', 0])
 	} else if ('whenCondition' == op) {
 		result.push.apply(result, this.instructionsForWhenCondition(aBlockOrFunction))
-	} else if (aBlockOrFunction instanceof CommandBlock || aBlockOrFunction instanceof LoopBlock) {
+	} else if ('whenBroadcastReceived' == op) {
+		let args = aBlockOrFunction.argList()
+		result.push.apply(result, this.instructionsForExpression(args[0]))
+		result.push(['recvBroadcast', 1])
+		result.push.apply(result, this.instructionsForCmdList(aBlockOrFunction.nextBlock))
+		result.push(['halt', 0])
+	} else if (aBlockOrFunction instanceof CommandBlock || aBlockOrFunction instanceof LoopBlock || aBlockOrFunction instanceof DoubleLoopBlock) {
 		result.push.apply(result, this.instructionsForCmdList(aBlockOrFunction))
 		result.push(['halt', 0])
 	} else if (aBlockOrFunction instanceof ReporterBlock || aBlockOrFunction instanceof PredicateBlock) {
 		let reporter = new BlockArg("return", [aBlockOrFunction])
 		result.push.apply(result, this.instructionsForCmdList(reporter))
 	} else {
-		console.error("Unhandled case in instructionsFor: ")
+		console.error("Unhandled case in instructionsFor: " + op)
 		console.error(aBlockOrFunction)
 	}
 
@@ -317,12 +323,12 @@ MicroBlocksCompiler.prototype.instructionsForCmd = function(cmd) {
 		result.push(['halt', 0])
 	} else if ('forever' == op) {
 		return this.instructionsForForever(args)
-	/*} ('if' == op) {
-		return (instructionsForIf this args)*/
+	} else if ('if' == op) {
+		return this.instructionsForIf(args)
 	} else if ('repeat' == op) {
 		return this.instructionsForRepeat(args)
-	/*} ('repeatUntil' == op) {
-		return (instructionsForRepeatUntil this args)*/
+	} else if ('repeatUntil' == op) {
+		return this.instructionsForRepeatUntil(args)
 	} else if ('waitUntil' == op) {
 		return this.instructionsForWaitUntil(args)
 	/*} ('for' == op) {
@@ -363,8 +369,8 @@ MicroBlocksCompiler.prototype.instructionsForCmd = function(cmd) {
 	return result
 }
 
-/*method instructionsForIf SmallCompiler args {
-	result = (list)
+MicroBlocksCompiler.prototype.instructionsForIf = function(args) {
+	/*result = (list)
 	jumpsToFix = (list)
 	i = 1
 	while (i < (count args)) {
@@ -389,8 +395,37 @@ MicroBlocksCompiler.prototype.instructionsForCmd = function(cmd) {
 	for jumpInstruction jumpsToFix {
 		atPut jumpInstruction 2 (instructionCount - ((at jumpInstruction 2) + 1)) // fix jump offset
 	}
+	return result*/
+	let result = []
+	let jumpsToFix = []
+	let i = 0
+	while (i < args.length) {
+		let finalCase = ((i + 2) >= (args.length)) // true if this is the final case in the if statement
+		let test = args[i]
+		let body = this.instructionsForCmdList(args[i + 1])
+		if ((true != test) || (!finalCase) || (i == 0)) {
+			result = result.concat(this.instructionsForExpression(test))
+			offset = body.length
+			if (!finalCase) { offset += 1 }
+			result.push(['jmpFalse', offset])
+		}
+		result = result.concat(body)
+		if (!finalCase) {
+			let jumpToEnd = ['jmp', result.length] // jump offset to be fixed later
+			jumpsToFix.push(jumpToEnd)
+			result.push(jumpToEnd)
+		}
+		i += 2
+	}
+
+	let instructionCount = result.length
+	for (let j = 0; j < jumpsToFix.length; j++) {
+		let jumpInstruction = jumpsToFix[j]
+		jumpInstruction[1] = (instructionCount - (jumpInstruction[1] + 1)) // fix jump offset
+	}
+
 	return result
-}*/
+}
 
 MicroBlocksCompiler.prototype.instructionsForForever = function(args) {
 	let result = this.instructionsForCmdList(args[0])
@@ -413,16 +448,23 @@ MicroBlocksCompiler.prototype.instructionsForRepeat = function(args) {
 	return result
 }
 
-/*method instructionsForRepeatUntil SmallCompiler args {
-	result = (list)
+MicroBlocksCompiler.prototype.instructionsForRepeatUntil = function(args) {
+	/*result = (list)
 	conditionTest = (instructionsForExpression this (at args 1))
 	body = (instructionsForCmdList this (at args 2))
 	add result (array 'jmp' (count body))
 	addAll result body
 	addAll result conditionTest
 	add result (array 'jmpFalse' (0 - (+ (count body) (count conditionTest) 1)))
+	return result*/
+	let conditionTest = this.instructionsForExpression(args[0])
+	let body = this.instructionsForCmdList(args[1])
+	let result = [['jmp', body.length]]
+	result = result.concat(body)
+	result = result.concat(conditionTest)
+	result.push(['jmpFalse', (0 - (body.length + conditionTest.length + 1))])
 	return result
-}*/
+}
 
 MicroBlocksCompiler.prototype.instructionsForWaitUntil = function(args) {
 	let conditionTest = this.instructionsForExpression(args[0])

@@ -47,6 +47,12 @@ function B_WhenIReceive(x, y) {
 }
 B_WhenIReceive.prototype = Object.create(HatBlock.prototype);
 B_WhenIReceive.prototype.constructor = B_WhenIReceive;
+//MicroBlocks functions
+B_WhenIReceive.prototype.primName = function() { return "whenBroadcastReceived" }
+B_WhenIReceive.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions()] 
+}
+
 B_WhenIReceive.prototype.eventBroadcast = function(message) {
   // Get data from Slot (returns instantly since snapping is not allowed)
   const data = this.slots[0].getDataNotFromChild();
@@ -100,13 +106,7 @@ B_Wait.prototype.constructor = B_Wait;
 B_Wait.prototype.primName = function() { return "waitMillis" }
 B_Wait.prototype.argList = function() {
   if (HatchPlus) {
-    let slot = this.slots[0]
-    if (slot.hasChild) {
-      console.error("SLOT CHILDREN NOT IMPLEMENTED FOR WAIT BLOCK!")
-      return []
-    } else { 
-      return [slot.getDataNotFromChild().getValueWithC(true) * 1000]
-    }
+    return [new BlockArg("*", [this.slots[0].getMicroBlocksInstructions(), 1000])]
   } else {
     return [(this.timeSelection * 100)]
   }
@@ -147,6 +147,11 @@ function B_WaitUntil(x, y) {
 }
 B_WaitUntil.prototype = Object.create(CommandBlock.prototype);
 B_WaitUntil.prototype.constructor = B_WaitUntil;
+//MicroBlocks functions
+B_WaitUntil.prototype.primName = function() { return "waitUntil" }
+B_WaitUntil.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions()]
+}
 /* Checks condition. If true, stops running; if false, resets Block to check again. */
 B_WaitUntil.prototype.startAction = function() {
   const stopWaiting = this.slots[0].getData().getValue();
@@ -236,14 +241,7 @@ B_Repeat.prototype.constructor = B_Repeat;
 B_Repeat.prototype.primName = function() { return "repeat" }
 B_Repeat.prototype.argList = function() { 
   if (HatchPlus) {
-    let slot = this.slots[0]
-    if (slot.hasChild) {
-      console.error("SLOT CHILDREN NOT IMPLEMENTED FOR REPEAT BLOCK!")
-      return []
-    } else {
-      let count = slot.getDataNotFromChild().getValueWithC(true, true)
-      return [count, this.blockSlot1.child] 
-    }
+    return [this.slots[0].getMicroBlocksInstructions(), this.blockSlot1.child]
   } else {
     return [this.countSelection, this.blockSlot1.child] 
   }
@@ -301,6 +299,11 @@ function B_RepeatUntil(x, y) {
 }
 B_RepeatUntil.prototype = Object.create(LoopBlock.prototype);
 B_RepeatUntil.prototype.constructor = B_RepeatUntil;
+//MicroBlocks functions
+B_RepeatUntil.prototype.primName = function() { return "repeatUntil" }
+B_RepeatUntil.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.blockSlot1.child]
+}
 /* Checks condition and either stops running or executes contents. */
 B_RepeatUntil.prototype.startAction = function() {
   const stopRepeating = this.slots[0].getData().getValue();
@@ -334,6 +337,11 @@ function B_If(x, y) {
 }
 B_If.prototype = Object.create(LoopBlock.prototype);
 B_If.prototype.constructor = B_If;
+//MicroBlocks functions
+B_If.prototype.primName = function() { return "if" }
+B_If.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.blockSlot1.child]
+}
 /* Either stops running or executes contents. */
 B_If.prototype.startAction = function() {
   const check = this.slots[0].getData().getValue();
@@ -358,6 +366,11 @@ function B_IfElse(x, y) {
 }
 B_IfElse.prototype = Object.create(DoubleLoopBlock.prototype);
 B_IfElse.prototype.constructor = B_IfElse;
+//MicroBlocks functions
+B_IfElse.prototype.primName = function() { return "if" }
+B_IfElse.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.blockSlot1.child, true, this.blockSlot2.child]
+}
 /* Starts executing one of two BlockSlots. */
 B_IfElse.prototype.startAction = function() {
   this.runMem.check = this.slots[0].getData().getValue();
@@ -387,6 +400,11 @@ function B_Broadcast(x, y) {
 }
 B_Broadcast.prototype = Object.create(CommandBlock.prototype);
 B_Broadcast.prototype.constructor = B_Broadcast;
+//MicroBlocks functions
+B_Broadcast.prototype.primName = function() { return "sendBroadcast" }
+B_Broadcast.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions()]
+}
 /* Broadcast the message if one has been selected. */
 B_Broadcast.prototype.startAction = function() {
   this.runMem.finished = false;
@@ -443,6 +461,11 @@ B_BroadcastAndWait.prototype.updateAction = function() {
     return new ExecutionStatusDone();
   }
 };
+if (HatchPlus) {
+  B_BroadcastAndWait.prototype.checkActive = function() {
+    return false //Disabled for now. Not sure how to implement.
+  }
+}
 
 
 
@@ -452,6 +475,11 @@ function B_Message(x, y) {
 }
 B_Message.prototype = Object.create(ReporterBlock.prototype);
 B_Message.prototype.constructor = B_Message;
+//MicroBlocks functions
+B_Message.prototype.primName = function() { return "getLastBroadcast" }
+B_Message.prototype.argList = function() { 
+  return []
+}
 /* Returns the last broadcast message */
 B_Message.prototype.startAction = function() {
   return new ExecutionStatusResult(CodeManager.message);
@@ -479,8 +507,31 @@ function B_Stop(x, y) {
 B_Stop.prototype = Object.create(CommandBlock.prototype);
 B_Stop.prototype.constructor = B_Stop;
 //MicroBlocks functions
-B_Stop.prototype.primName = function() { return "stopAll" }
-B_Stop.prototype.argList = function() { return [] }
+B_Stop.prototype.primName = function() { 
+  if (Hatchling) {
+    return "stopAll"
+  } 
+  let selection = this.slots[0].getDataNotFromChild().getValue();
+  switch (selection) {
+  case "all":
+    return "blockList"
+  case "this_script":
+    return "halt"
+  case "all_but_this_script":
+    return "stopAll"
+  default:
+    console.error("Unsupported option in Stop block: " + selection)
+    return "halt"
+  }
+}
+B_Stop.prototype.argList = function() { 
+  if (HatchPlus) {
+    if (this.slots[0].getDataNotFromChild().getValue() == "all") {
+      return [new BlockArg("stopAll", []), new BlockArg("halt", [])]
+    }
+  }
+  return [] 
+}
 /* Stops whatever is selected */
 B_Stop.prototype.startAction = function() {
   let selection = FinchBlox ? "all_but_this_script" : this.slots[0].getData().getValue();
@@ -503,6 +554,11 @@ function B_When(x, y) {
 }
 B_When.prototype = Object.create(HatBlock.prototype);
 B_When.prototype.constructor = B_When;
+//MicroBlocks functions
+B_When.prototype.primName = function() { return "whenCondition" }
+B_When.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions()]
+}
 // The flag should trigger this block as well
 B_When.prototype.eventFlagClicked = function() {
   this.stack.startRun(null, null, true);
@@ -600,6 +656,12 @@ B_WhenKeyPressed.prototype.updateAction = function() {
     return new ExecutionStatusDone();
   } else {
     return new ExecutionStatusRunning();
+  }
+}
+if (HatchPlus) {
+  B_WhenKeyPressed.prototype.checkActive = function() {
+    //Disabled for now, maybe some way to do this with a broadcast?
+    return false
   }
 }
 

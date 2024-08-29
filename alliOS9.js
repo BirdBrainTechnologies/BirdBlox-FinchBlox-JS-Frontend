@@ -322,7 +322,6 @@ Data.prototype.asSelection = function() {
  * @return {*}
  */
 Data.prototype.getValue = function() {
-  console.log("*** getValue returning value '" + this.value + "' of type " + typeof this.value + " from a " + this.constructor.name)
   return this.value;
 };
 
@@ -470,7 +469,6 @@ function NumData(value, isValid) {
     isValid = false;
   }
   Data.call(this, Data.types.num, value, isValid);
-  console.log("*** new NumData with value '" + this.value + "' of type " + typeof this.value)
 }
 NumData.prototype = Object.create(Data.prototype);
 NumData.prototype.constructor = NumData;
@@ -644,8 +642,6 @@ BoolData.importXml = function(dataNode) {
  */
 function StringData(value, isValid) {
   Data.call(this, Data.types.string, value, isValid);
-  console.log("*** new StringData with value " + value + " of type " + typeof value)
-  console.trace()
 }
 StringData.prototype = Object.create(Data.prototype);
 StringData.prototype.constructor = StringData;
@@ -6452,7 +6448,12 @@ DeviceHatchling.prototype.receiveBroadcast = function(msg) {
   //The hatchling state is now sent as a broadcast message. more work will need to be done if 
   // we want to support other broadcast messages...
   if (msg[0] != 252) {
-    console.error("Unsupported broadcast message " + msg)
+    //TODO: this receives broadcast messages from the broadcast block. Do something with them?
+    var str='';
+    for (i in msg){
+        str+=String.fromCharCode(msg[i]);
+    }
+    console.error("Unsupported broadcast message " + msg + " (" + str + ")")
     return
   }
 
@@ -12258,7 +12259,9 @@ TouchReceiver.touchStartBN = function(target, e) {
     e.stopPropagation(); // Prevent other calls from preventing default
   }
   if (TR.touchstart(e, shouldPreventDefault)) {
-    Overlay.closeOverlaysExcept(target.partOfOverlay);
+    if (target.closeOverlays) {
+      Overlay.closeOverlaysExcept(target.partOfOverlay);
+    }
     TR.setLongTouchTimer();
     TR.targetType = "button";
     TR.target = target;
@@ -15779,6 +15782,7 @@ function Button(x, y, width, height, parent, color, rx, ry, outlineColor, outlin
   this.partOfOverlay = null; // The overlay the button is a part of (if any)
   this.scrollable = false; // Whether the button is part of something that scrolls and shouldn't prevent scrolling
   this.svgScrollable = false // Whether the button is part of an svgScrollBox and shouldn't prevent scrolling
+  this.closeOverlays = true // Whether the button should close any open overlays when pressed
 }
 
 Button.setGraphics = function() {
@@ -16580,6 +16584,13 @@ Button.prototype.markAsOverlayPart = function(overlay) {
 Button.prototype.unmarkAsOverlayPart = function() {
   this.partOfOverlay = null;
 };
+
+/**
+ * Sets whether this button should close open overlays
+ */
+Button.prototype.setCloseOverlays = function(closeOverlays) {
+  this.closeOverlays = closeOverlays
+}
 
 /**
  * Remove the button portion of this button - make it appear as plain text/image
@@ -18801,6 +18812,8 @@ InputWidget.SelectPad.prototype.addAction = function(text, callbackFn) {
   this.optionsList.push(option);
 };
 InputWidget.SelectPad.prototype.actionCallback = function(data, shouldClose) {
+  console.log("*** actionCallback " + shouldClose)
+  console.log(data)
   if (data != null) {
     this.updateFn(data);
   }
@@ -29998,9 +30011,11 @@ PromptDialog.prototype.show = function() {
 		var confirmBn = new Button(confirmX, bnY, bnW, bnH, this.group, bnColor)
 		confirmBn.addIcon(confirmPathId, iconH)
 		confirmBn.setCallbackFunction(function(){ this.confirm() }.bind(this), true)
+		confirmBn.setCloseOverlays(false)
 		var cancelBn = new Button(cancelX, bnY, bnW, bnH, this.group, bnColor)
 		cancelBn.addIcon(cancelPathId, iconH)
 		cancelBn.setCallbackFunction(function(){ this.cancel() }.bind(this), true)
+		cancelBn.setCloseOverlays(false)
 
 		GuiElements.layers.overlayOverlay.appendChild(this.group);
 		FBPopup.currentPopup = this //TODO: Make a more general variable to use for this purpose
@@ -36497,14 +36512,11 @@ HexSlot.prototype.getDataNotFromChild = function() {
  * @constructor
  */
 function EditableSlot(parent, key, inputType, snapType, outputType, data) {
-  console.log("*** new EditableSlot")
   Slot.call(this, parent, key, snapType, outputType);
   this.inputType = inputType;
   this.enteredData = data;
   this.editing = false;
   //TODO: make the slotShape be an extra argument
-
-  console.log("*** new EditableSlot created")
 }
 EditableSlot.prototype = Object.create(Slot.prototype);
 EditableSlot.prototype.constructor = EditableSlot;
@@ -36533,6 +36545,7 @@ EditableSlot.prototype.changeText = function(text, updateDim) {
  * Tells the Slot to display an InputSystem so it can be edited. Also sets the slotShape to appear selected
  */
 EditableSlot.prototype.edit = function() {
+  console.log("*** edit ")
   DebugOptions.assert(!this.hasChild);
   if (!this.editing) {
     this.editing = true;
@@ -36562,7 +36575,7 @@ EditableSlot.prototype.createInputSystem = function() {
  * @param {string} [visibleText] - The text the Slot should display as its value. Should correspond to Data.
  */
 EditableSlot.prototype.updateEdit = function(data, visibleText) {
-  console.log("*** EditableSlot updateEdit " + data.constructor.name + " " + data.value)
+  console.log("*** update edit ")
   DebugOptions.assert(this.editing);
   if (visibleText == null) {
     visibleText = this.dataToString(data);
@@ -36577,6 +36590,8 @@ EditableSlot.prototype.updateEdit = function(data, visibleText) {
  * @param {Data} data - The Data the Slot should be set to
  */
 EditableSlot.prototype.finishEdit = function(data) {
+  console.log("*** finish edit ")
+  console.trace()
   DebugOptions.assert(this.editing);
   if (this.editing) {
     this.setData(data, true, true); //Sanitize data, updateDims
@@ -36601,7 +36616,6 @@ EditableSlot.prototype.isEditing = function() {
  * @param {boolean} updateDim - indicates if the Stack should updateDim after this
  */
 EditableSlot.prototype.setData = function(data, sanitize, updateDim) {
-  console.log("*** EditableSlot setData " + data.constructor.name + " " + data.value)
   if (sanitize) {
     data = this.sanitizeData(data);
   }
@@ -36731,14 +36745,9 @@ EditableSlot.prototype.isEditable = function() {
  * @constructor
  */
 function RectSlot(parent, key, snapType, outputType, data) {
-  console.log("*** new RectSlot")
   EditableSlot.call(this, parent, key, EditableSlot.inputTypes.string, snapType, outputType, data);
-  console.log("*** new RectSlot 1")
   this.slotShape = new RectSlotShape(this, this.dataToString(data));
-  console.log("*** new RectSlot 2")
   this.slotShape.show();
-
-  console.log("*** new RectSlot created")
 }
 RectSlot.prototype = Object.create(EditableSlot.prototype);
 RectSlot.prototype.constructor = RectSlot;
@@ -37309,7 +37318,7 @@ function BroadcastDropSlot(parent, key, isHatBlock) {
     snapType = Slot.snapTypes.none;
   }
   DropSlot.call(this, parent, key, EditableSlot.inputTypes.any, snapType);
-  if (isHatBlock) {
+  if (isHatBlock && !HatchPlus) {
     this.addOption(new SelectionData(Language.getStr("any_message"), "any_message"));
   }
 }
@@ -42491,6 +42500,12 @@ function B_WhenIReceive(x, y) {
 }
 B_WhenIReceive.prototype = Object.create(HatBlock.prototype);
 B_WhenIReceive.prototype.constructor = B_WhenIReceive;
+//MicroBlocks functions
+B_WhenIReceive.prototype.primName = function() { return "whenBroadcastReceived" }
+B_WhenIReceive.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions()] 
+}
+
 B_WhenIReceive.prototype.eventBroadcast = function(message) {
   // Get data from Slot (returns instantly since snapping is not allowed)
   var data = this.slots[0].getDataNotFromChild();
@@ -42544,13 +42559,7 @@ B_Wait.prototype.constructor = B_Wait;
 B_Wait.prototype.primName = function() { return "waitMillis" }
 B_Wait.prototype.argList = function() {
   if (HatchPlus) {
-    var slot = this.slots[0]
-    if (slot.hasChild) {
-      console.error("SLOT CHILDREN NOT IMPLEMENTED FOR WAIT BLOCK!")
-      return []
-    } else { 
-      return [slot.getDataNotFromChild().getValueWithC(true) * 1000]
-    }
+    return [new BlockArg("*", [this.slots[0].getMicroBlocksInstructions(), 1000])]
   } else {
     return [(this.timeSelection * 100)]
   }
@@ -42591,6 +42600,11 @@ function B_WaitUntil(x, y) {
 }
 B_WaitUntil.prototype = Object.create(CommandBlock.prototype);
 B_WaitUntil.prototype.constructor = B_WaitUntil;
+//MicroBlocks functions
+B_WaitUntil.prototype.primName = function() { return "waitUntil" }
+B_WaitUntil.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions()]
+}
 /* Checks condition. If true, stops running; if false, resets Block to check again. */
 B_WaitUntil.prototype.startAction = function() {
   var stopWaiting = this.slots[0].getData().getValue();
@@ -42680,14 +42694,7 @@ B_Repeat.prototype.constructor = B_Repeat;
 B_Repeat.prototype.primName = function() { return "repeat" }
 B_Repeat.prototype.argList = function() { 
   if (HatchPlus) {
-    var slot = this.slots[0]
-    if (slot.hasChild) {
-      console.error("SLOT CHILDREN NOT IMPLEMENTED FOR REPEAT BLOCK!")
-      return []
-    } else {
-      var count = slot.getDataNotFromChild().getValueWithC(true, true)
-      return [count, this.blockSlot1.child] 
-    }
+    return [this.slots[0].getMicroBlocksInstructions(), this.blockSlot1.child]
   } else {
     return [this.countSelection, this.blockSlot1.child] 
   }
@@ -42745,6 +42752,11 @@ function B_RepeatUntil(x, y) {
 }
 B_RepeatUntil.prototype = Object.create(LoopBlock.prototype);
 B_RepeatUntil.prototype.constructor = B_RepeatUntil;
+//MicroBlocks functions
+B_RepeatUntil.prototype.primName = function() { return "repeatUntil" }
+B_RepeatUntil.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.blockSlot1.child]
+}
 /* Checks condition and either stops running or executes contents. */
 B_RepeatUntil.prototype.startAction = function() {
   var stopRepeating = this.slots[0].getData().getValue();
@@ -42778,6 +42790,11 @@ function B_If(x, y) {
 }
 B_If.prototype = Object.create(LoopBlock.prototype);
 B_If.prototype.constructor = B_If;
+//MicroBlocks functions
+B_If.prototype.primName = function() { return "if" }
+B_If.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.blockSlot1.child]
+}
 /* Either stops running or executes contents. */
 B_If.prototype.startAction = function() {
   var check = this.slots[0].getData().getValue();
@@ -42802,6 +42819,11 @@ function B_IfElse(x, y) {
 }
 B_IfElse.prototype = Object.create(DoubleLoopBlock.prototype);
 B_IfElse.prototype.constructor = B_IfElse;
+//MicroBlocks functions
+B_IfElse.prototype.primName = function() { return "if" }
+B_IfElse.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.blockSlot1.child, true, this.blockSlot2.child]
+}
 /* Starts executing one of two BlockSlots. */
 B_IfElse.prototype.startAction = function() {
   this.runMem.check = this.slots[0].getData().getValue();
@@ -42831,6 +42853,11 @@ function B_Broadcast(x, y) {
 }
 B_Broadcast.prototype = Object.create(CommandBlock.prototype);
 B_Broadcast.prototype.constructor = B_Broadcast;
+//MicroBlocks functions
+B_Broadcast.prototype.primName = function() { return "sendBroadcast" }
+B_Broadcast.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions()]
+}
 /* Broadcast the message if one has been selected. */
 B_Broadcast.prototype.startAction = function() {
   this.runMem.finished = false;
@@ -42887,6 +42914,11 @@ B_BroadcastAndWait.prototype.updateAction = function() {
     return new ExecutionStatusDone();
   }
 };
+if (HatchPlus) {
+  B_BroadcastAndWait.prototype.checkActive = function() {
+    return false //Disabled for now. Not sure how to implement.
+  }
+}
 
 
 
@@ -42896,6 +42928,11 @@ function B_Message(x, y) {
 }
 B_Message.prototype = Object.create(ReporterBlock.prototype);
 B_Message.prototype.constructor = B_Message;
+//MicroBlocks functions
+B_Message.prototype.primName = function() { return "getLastBroadcast" }
+B_Message.prototype.argList = function() { 
+  return []
+}
 /* Returns the last broadcast message */
 B_Message.prototype.startAction = function() {
   return new ExecutionStatusResult(CodeManager.message);
@@ -42923,8 +42960,31 @@ function B_Stop(x, y) {
 B_Stop.prototype = Object.create(CommandBlock.prototype);
 B_Stop.prototype.constructor = B_Stop;
 //MicroBlocks functions
-B_Stop.prototype.primName = function() { return "stopAll" }
-B_Stop.prototype.argList = function() { return [] }
+B_Stop.prototype.primName = function() { 
+  if (Hatchling) {
+    return "stopAll"
+  } 
+  var selection = this.slots[0].getDataNotFromChild().getValue();
+  switch (selection) {
+  case "all":
+    return "blockList"
+  case "this_script":
+    return "halt"
+  case "all_but_this_script":
+    return "stopAll"
+  default:
+    console.error("Unsupported option in Stop block: " + selection)
+    return "halt"
+  }
+}
+B_Stop.prototype.argList = function() { 
+  if (HatchPlus) {
+    if (this.slots[0].getDataNotFromChild().getValue() == "all") {
+      return [new BlockArg("stopAll", []), new BlockArg("halt", [])]
+    }
+  }
+  return [] 
+}
 /* Stops whatever is selected */
 B_Stop.prototype.startAction = function() {
   var selection = FinchBlox ? "all_but_this_script" : this.slots[0].getData().getValue();
@@ -42947,6 +43007,11 @@ function B_When(x, y) {
 }
 B_When.prototype = Object.create(HatBlock.prototype);
 B_When.prototype.constructor = B_When;
+//MicroBlocks functions
+B_When.prototype.primName = function() { return "whenCondition" }
+B_When.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions()]
+}
 // The flag should trigger this block as well
 B_When.prototype.eventFlagClicked = function() {
   this.stack.startRun(null, null, true);
@@ -43044,6 +43109,11 @@ B_WhenKeyPressed.prototype.updateAction = function() {
     return new ExecutionStatusDone();
   } else {
     return new ExecutionStatusRunning();
+  }
+}
+if (HatchPlus) {
+  B_WhenKeyPressed.prototype.checkActive = function() {
+    return false
   }
 }
 
@@ -47216,14 +47286,20 @@ MicroBlocksCompiler.prototype.instructionsFor = function(aBlockOrFunction) {
 		result.push(['halt', 0])
 	} else if ('whenCondition' == op) {
 		result.push.apply(result, this.instructionsForWhenCondition(aBlockOrFunction))
-	} else if (aBlockOrFunction instanceof CommandBlock || aBlockOrFunction instanceof LoopBlock) {
+	} else if ('whenBroadcastReceived' == op) {
+		var args = aBlockOrFunction.argList()
+		result.push.apply(result, this.instructionsForExpression(args[0]))
+		result.push(['recvBroadcast', 1])
+		result.push.apply(result, this.instructionsForCmdList(aBlockOrFunction.nextBlock))
+		result.push(['halt', 0])
+	} else if (aBlockOrFunction instanceof CommandBlock || aBlockOrFunction instanceof LoopBlock || aBlockOrFunction instanceof DoubleLoopBlock) {
 		result.push.apply(result, this.instructionsForCmdList(aBlockOrFunction))
 		result.push(['halt', 0])
 	} else if (aBlockOrFunction instanceof ReporterBlock || aBlockOrFunction instanceof PredicateBlock) {
 		var reporter = new BlockArg("return", [aBlockOrFunction])
 		result.push.apply(result, this.instructionsForCmdList(reporter))
 	} else {
-		console.error("Unhandled case in instructionsFor: ")
+		console.error("Unhandled case in instructionsFor: " + op)
 		console.error(aBlockOrFunction)
 	}
 
@@ -47293,12 +47369,12 @@ MicroBlocksCompiler.prototype.instructionsForCmd = function(cmd) {
 		result.push(['halt', 0])
 	} else if ('forever' == op) {
 		return this.instructionsForForever(args)
-	/*} ('if' == op) {
-		return (instructionsForIf this args)*/
+	} else if ('if' == op) {
+		return this.instructionsForIf(args)
 	} else if ('repeat' == op) {
 		return this.instructionsForRepeat(args)
-	/*} ('repeatUntil' == op) {
-		return (instructionsForRepeatUntil this args)*/
+	} else if ('repeatUntil' == op) {
+		return this.instructionsForRepeatUntil(args)
 	} else if ('waitUntil' == op) {
 		return this.instructionsForWaitUntil(args)
 	/*} ('for' == op) {
@@ -47339,8 +47415,8 @@ MicroBlocksCompiler.prototype.instructionsForCmd = function(cmd) {
 	return result
 }
 
-/*method instructionsForIf SmallCompiler args {
-	result = (list)
+MicroBlocksCompiler.prototype.instructionsForIf = function(args) {
+	/*result = (list)
 	jumpsToFix = (list)
 	i = 1
 	while (i < (count args)) {
@@ -47365,8 +47441,37 @@ MicroBlocksCompiler.prototype.instructionsForCmd = function(cmd) {
 	for jumpInstruction jumpsToFix {
 		atPut jumpInstruction 2 (instructionCount - ((at jumpInstruction 2) + 1)) // fix jump offset
 	}
+	return result*/
+	var result = []
+	var jumpsToFix = []
+	var i = 0
+	while (i < args.length) {
+		var finalCase = ((i + 2) >= (args.length)) // true if this is the final case in the if statement
+		var test = args[i]
+		var body = this.instructionsForCmdList(args[i + 1])
+		if ((true != test) || (!finalCase) || (i == 0)) {
+			result = result.concat(this.instructionsForExpression(test))
+			offset = body.length
+			if (!finalCase) { offset += 1 }
+			result.push(['jmpFalse', offset])
+		}
+		result = result.concat(body)
+		if (!finalCase) {
+			var jumpToEnd = ['jmp', result.length] // jump offset to be fixed later
+			jumpsToFix.push(jumpToEnd)
+			result.push(jumpToEnd)
+		}
+		i += 2
+	}
+
+	var instructionCount = result.length
+	for (var j = 0; j < jumpsToFix.length; j++) {
+		var jumpInstruction = jumpsToFix[j]
+		jumpInstruction[1] = (instructionCount - (jumpInstruction[1] + 1)) // fix jump offset
+	}
+
 	return result
-}*/
+}
 
 MicroBlocksCompiler.prototype.instructionsForForever = function(args) {
 	var result = this.instructionsForCmdList(args[0])
@@ -47389,16 +47494,23 @@ MicroBlocksCompiler.prototype.instructionsForRepeat = function(args) {
 	return result
 }
 
-/*method instructionsForRepeatUntil SmallCompiler args {
-	result = (list)
+MicroBlocksCompiler.prototype.instructionsForRepeatUntil = function(args) {
+	/*result = (list)
 	conditionTest = (instructionsForExpression this (at args 1))
 	body = (instructionsForCmdList this (at args 2))
 	add result (array 'jmp' (count body))
 	addAll result body
 	addAll result conditionTest
 	add result (array 'jmpFalse' (0 - (+ (count body) (count conditionTest) 1)))
+	return result*/
+	var conditionTest = this.instructionsForExpression(args[0])
+	var body = this.instructionsForCmdList(args[1])
+	var result = [['jmp', body.length]]
+	result = result.concat(body)
+	result = result.concat(conditionTest)
+	result.push(['jmpFalse', (0 - (body.length + conditionTest.length + 1))])
 	return result
-}*/
+}
 
 MicroBlocksCompiler.prototype.instructionsForWaitUntil = function(args) {
 	var conditionTest = this.instructionsForExpression(args[0])
@@ -47953,6 +48065,7 @@ MicroBlocksRuntime.prototype.chunkTypeFor = function(aBlockOrFunction) {
 	}
 	if (expr instanceof CommandBlock) { return 1 }
 	if (expr instanceof LoopBlock) { return 1 }
+	if (expr instanceof DoubleLoopBlock) { return 1 }
 	if (expr instanceof ReporterBlock) { return 2 }
 	if (expr instanceof PredicateBlock) { return 2 }
 

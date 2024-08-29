@@ -16,7 +16,7 @@ function BroadcastDropSlot(parent, key, isHatBlock) {
     snapType = Slot.snapTypes.none;
   }
   DropSlot.call(this, parent, key, EditableSlot.inputTypes.any, snapType);
-  if (isHatBlock) {
+  if (isHatBlock && !HatchPlus) {
     this.addOption(new SelectionData(Language.getStr("any_message"), "any_message"));
   }
 }

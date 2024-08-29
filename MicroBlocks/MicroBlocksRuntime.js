@@ -164,6 +164,7 @@ MicroBlocksRuntime.prototype.chunkTypeFor = function(aBlockOrFunction) {
 	}
 	if (expr instanceof CommandBlock) { return 1 }
 	if (expr instanceof LoopBlock) { return 1 }
+	if (expr instanceof DoubleLoopBlock) { return 1 }
 	if (expr instanceof ReporterBlock) { return 2 }
 	if (expr instanceof PredicateBlock) { return 2 }
 

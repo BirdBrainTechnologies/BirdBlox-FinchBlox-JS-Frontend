@@ -102,7 +102,12 @@ DeviceHatchling.prototype.receiveBroadcast = function(msg) {
   //The hatchling state is now sent as a broadcast message. more work will need to be done if 
   // we want to support other broadcast messages...
   if (msg[0] != 252) {
-    console.error("Unsupported broadcast message " + msg)
+    //TODO: this receives broadcast messages from the broadcast block. Do something with them?
+    let str='';
+    for (i in msg){
+        str+=String.fromCharCode(msg[i]);
+    }
+    console.error("Unsupported broadcast message " + msg + " (" + str + ")")
     return
   }
 

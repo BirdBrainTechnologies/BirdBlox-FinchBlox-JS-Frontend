@@ -55,6 +55,7 @@ function Button(x, y, width, height, parent, color, rx, ry, outlineColor, outlin
   this.partOfOverlay = null; // The overlay the button is a part of (if any)
   this.scrollable = false; // Whether the button is part of something that scrolls and shouldn't prevent scrolling
   this.svgScrollable = false // Whether the button is part of an svgScrollBox and shouldn't prevent scrolling
+  this.closeOverlays = true // Whether the button should close any open overlays when pressed
 }
 
 Button.setGraphics = function() {
@@ -856,6 +857,13 @@ Button.prototype.markAsOverlayPart = function(overlay) {
 Button.prototype.unmarkAsOverlayPart = function() {
   this.partOfOverlay = null;
 };
+
+/**
+ * Sets whether this button should close open overlays
+ */
+Button.prototype.setCloseOverlays = function(closeOverlays) {
+  this.closeOverlays = closeOverlays
+}
 
 /**
  * Remove the button portion of this button - make it appear as plain text/image
