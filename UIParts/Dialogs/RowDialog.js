@@ -126,7 +126,7 @@ RowDialog.prototype.addCancelButton = function() {
   const x = this.width - h - m
   const y = m
   const pathId = VectorPaths.bdClose
-  const cancel = new Button(x, y, h, h, this.group, RowDialog.titleBarColor)
+  const cancel = new Button(x, y, h, h, this.group, RowDialog.titleBarColor, null, null, Colors.ballyGrayLight)
   cancel.addColorIcon(pathId, h, Colors.ballyBrandBlueDark)
   cancel.setCallbackFunction(this.closeDialog.bind(this), true)
 }
@@ -158,6 +158,7 @@ RowDialog.prototype.show = function() {
       this.icon = this.createTitleIcon(VectorPaths.mvFinch);
     } else {
       this.titleText = this.createTitleLabel(this.title);
+      if (HatchPlus) { this.addCancelButton() }
     }
 
 

@@ -18,6 +18,9 @@ function B_Variable(x, y, variable) {
 }
 B_Variable.prototype = Object.create(ReporterBlock.prototype);
 B_Variable.prototype.constructor = B_Variable;
+//MicroBlocks functions
+B_Variable.prototype.primName = function() { return "v" }
+B_Variable.prototype.argList = function() { return [this.variable.getName()] }
 /* Return the value of the variable */
 B_Variable.prototype.startAction = function() {
   return new ExecutionStatusResult(this.variable.getData());
@@ -104,6 +107,11 @@ function B_SetTo(x, y) {
 }
 B_SetTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTo.prototype.constructor = B_SetTo;
+//MicroBlocks functions
+B_SetTo.prototype.primName = function() { return "=" }
+B_SetTo.prototype.argList = function() { 
+  return [this.slots[0].getDataNotFromChild().getValue().getName(), this.slots[1].getMicroBlocksInstructions()] 
+}
 /* Sets the variable to the provided value */
 B_SetTo.prototype.startAction = function() {
   // Get the selection data that refers to a variable
@@ -134,6 +142,11 @@ function B_ChangeBy(x, y) {
 }
 B_ChangeBy.prototype = Object.create(CommandBlock.prototype);
 B_ChangeBy.prototype.constructor = B_ChangeBy;
+//MicroBlocks functions
+B_ChangeBy.prototype.primName = function() { return "+=" }
+B_ChangeBy.prototype.argList = function() { 
+  return [this.slots[0].getDataNotFromChild().getValue().getName(), this.slots[1].getMicroBlocksInstructions()] 
+}
 /* Adds the value to the indicated variable */
 B_ChangeBy.prototype.startAction = function() {
   const variableD = this.slots[0].getData();

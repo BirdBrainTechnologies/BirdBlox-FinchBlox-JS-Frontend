@@ -14,7 +14,9 @@ function DiscoverDialog(deviceClass) {
   } else {
     let title = Language.getStr("Connect_Device");
     RowDialog.call(this, false, title, 0, 0, 0);
-    this.addCenteredButton(Language.getStr("Cancel"), this.closeDialog.bind(this));
+    if (!HatchPlus) {
+      this.addCenteredButton(Language.getStr("Cancel"), this.closeDialog.bind(this));
+    }
     this.addHintText(deviceClass.getConnectionInstructions());
   }
 
@@ -188,14 +190,13 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
     GuiElements.update.stroke(button.icon.pathE, Colors.ballyBrandBlueLight, 3)
     button.updateBgColor(Colors.ballyBrandBlue)
     button.setCallbackFunction(function() {
-      console.log("Clicked CONNECT ANOTHER ROBOT")
       this.discoverDevices()
     }.bind(this), true)
     return
   }
 
 
-  if (FinchBlox) {
+  if (FinchBlox || HatchPlus) {
     button.addDeviceInfo(device);
   } else {
     button.addText(device.listLabel);
@@ -222,7 +223,7 @@ DiscoverDialog.prototype.selectDevice = function(device) {
   console.log(device)
   this.deviceClass = DeviceManager.getDeviceClass(device);
   this.deviceClass.getManager().setOneDevice(device);
-  if (!Hatchling || HatchPlus) {
+  if (!(Hatchling || HatchPlus)) {
     this.closeDialog();
   }
 };

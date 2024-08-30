@@ -370,11 +370,11 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, c
  * @param device
  */
 Button.prototype.addDeviceInfo = function(device) {
-  const color = Hatchling ? Colors.ballyBrandBlue : Colors.flagGreen;
-  const color2 = Hatchling ? Colors.ballyBrandBlueDark : Colors.bbtDarkGray;
+  const color = (Hatchling || HatchPlus) ? Colors.ballyBrandBlue : Colors.flagGreen;
+  const color2 = (Hatchling || HatchPlus) ? Colors.ballyBrandBlueDark : Colors.bbtDarkGray;
   const font = Button.defaultFont;
   const font2 = Font.secondaryUiFont(16);
-  let pathId = Hatchling ? VectorPaths.bdAdd : VectorPaths.faPlusCircle;
+  let pathId = (Hatchling || HatchPlus) ? VectorPaths.bdAdd : VectorPaths.faPlusCircle;
   const iconH = this.height * 0.6;
   const iconW = VectorIcon.computeWidth(pathId, iconH);
   const margin = (this.height - iconH) / 2;

@@ -384,6 +384,21 @@ CodeManager.findVar = function(name) {
 };
 
 /**
+ * Returns the index of the variable in the global array. HatchPlus only.
+ * @param {string} name - The name of the variable to find
+ * @return {number} - The index of the variable, or -1 if not found
+ */
+CodeManager.getVarIndex = function(name) {
+  const variables = CodeManager.variableList;
+  for (let i = 0; i < variables.length; i++) {
+    if (variables[i].getName() === name) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+/**
  * Adds the List to the list of Lists
  * @param {List} list
  */

@@ -496,7 +496,8 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected)
   if (robot != null) {
     const wasConnected = robot.getConnected();
     robot.setConnected(isConnected);
-    if (wasConnected && !isConnected && !this.scanning && !(Hatchling && GuiElements.isPWA)) {
+    if (wasConnected && !isConnected && !this.scanning && 
+      !((Hatchling || HatchPlus) && GuiElements.isPWA)) {
       this.startDiscover(function() {
         return true;
       });
@@ -677,7 +678,7 @@ DeviceManager.updateStatus = function() {
   const DM = DeviceManager;
   let totalStatus = DM.getStatus();
   if (DM.statusListener != null) DM.statusListener(totalStatus);
-  if (Hatchling && RowDialog.currentDialog != null) {
+  if ((Hatchling || HatchPlus) && RowDialog.currentDialog != null) {
     //Update the discover dialog when connection status changes
     RowDialog.currentDialog.reloadRows((totalStatus == 3) ? 1 : 0)
   }

@@ -5861,7 +5861,8 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected)
   if (robot != null) {
     var wasConnected = robot.getConnected();
     robot.setConnected(isConnected);
-    if (wasConnected && !isConnected && !this.scanning && !(Hatchling && GuiElements.isPWA)) {
+    if (wasConnected && !isConnected && !this.scanning && 
+      !((Hatchling || HatchPlus) && GuiElements.isPWA)) {
       this.startDiscover(function() {
         return true;
       });
@@ -6042,7 +6043,7 @@ DeviceManager.updateStatus = function() {
   var DM = DeviceManager;
   var totalStatus = DM.getStatus();
   if (DM.statusListener != null) DM.statusListener(totalStatus);
-  if (Hatchling && RowDialog.currentDialog != null) {
+  if ((Hatchling || HatchPlus) && RowDialog.currentDialog != null) {
     //Update the discover dialog when connection status changes
     RowDialog.currentDialog.reloadRows((totalStatus == 3) ? 1 : 0)
   }
@@ -16097,11 +16098,11 @@ Button.prototype.addSideTextAndIcon = function(pathId, iconHeight, text, font, c
  * @param device
  */
 Button.prototype.addDeviceInfo = function(device) {
-  var color = Hatchling ? Colors.ballyBrandBlue : Colors.flagGreen;
-  var color2 = Hatchling ? Colors.ballyBrandBlueDark : Colors.bbtDarkGray;
+  var color = (Hatchling || HatchPlus) ? Colors.ballyBrandBlue : Colors.flagGreen;
+  var color2 = (Hatchling || HatchPlus) ? Colors.ballyBrandBlueDark : Colors.bbtDarkGray;
   var font = Button.defaultFont;
   var font2 = Font.secondaryUiFont(16);
-  var pathId = Hatchling ? VectorPaths.bdAdd : VectorPaths.faPlusCircle;
+  var pathId = (Hatchling || HatchPlus) ? VectorPaths.bdAdd : VectorPaths.faPlusCircle;
   var iconH = this.height * 0.6;
   var iconW = VectorIcon.computeWidth(pathId, iconH);
   var margin = (this.height - iconH) / 2;
@@ -18812,8 +18813,6 @@ InputWidget.SelectPad.prototype.addAction = function(text, callbackFn) {
   this.optionsList.push(option);
 };
 InputWidget.SelectPad.prototype.actionCallback = function(data, shouldClose) {
-  console.log("*** actionCallback " + shouldClose)
-  console.log(data)
   if (data != null) {
     this.updateFn(data);
   }
@@ -25123,6 +25122,21 @@ CodeManager.findVar = function(name) {
 };
 
 /**
+ * Returns the index of the variable in the global array. HatchPlus only.
+ * @param {string} name - The name of the variable to find
+ * @return {number} - The index of the variable, or -1 if not found
+ */
+CodeManager.getVarIndex = function(name) {
+  var variables = CodeManager.variableList;
+  for (var i = 0; i < variables.length; i++) {
+    if (variables[i].getName() === name) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+/**
  * Adds the List to the list of Lists
  * @param {List} list
  */
@@ -27256,7 +27270,7 @@ RowDialog.prototype.addCancelButton = function() {
   var x = this.width - h - m
   var y = m
   var pathId = VectorPaths.bdClose
-  var cancel = new Button(x, y, h, h, this.group, RowDialog.titleBarColor)
+  var cancel = new Button(x, y, h, h, this.group, RowDialog.titleBarColor, null, null, Colors.ballyGrayLight)
   cancel.addColorIcon(pathId, h, Colors.ballyBrandBlueDark)
   cancel.setCallbackFunction(this.closeDialog.bind(this), true)
 }
@@ -27288,6 +27302,7 @@ RowDialog.prototype.show = function() {
       this.icon = this.createTitleIcon(VectorPaths.mvFinch);
     } else {
       this.titleText = this.createTitleLabel(this.title);
+      if (HatchPlus) { this.addCancelButton() }
     }
 
 
@@ -29364,7 +29379,9 @@ function DiscoverDialog(deviceClass) {
   } else {
     var title = Language.getStr("Connect_Device");
     RowDialog.call(this, false, title, 0, 0, 0);
-    this.addCenteredButton(Language.getStr("Cancel"), this.closeDialog.bind(this));
+    if (!HatchPlus) {
+      this.addCenteredButton(Language.getStr("Cancel"), this.closeDialog.bind(this));
+    }
     this.addHintText(deviceClass.getConnectionInstructions());
   }
 
@@ -29538,14 +29555,13 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
     GuiElements.update.stroke(button.icon.pathE, Colors.ballyBrandBlueLight, 3)
     button.updateBgColor(Colors.ballyBrandBlue)
     button.setCallbackFunction(function() {
-      console.log("Clicked CONNECT ANOTHER ROBOT")
       this.discoverDevices()
     }.bind(this), true)
     return
   }
 
 
-  if (FinchBlox) {
+  if (FinchBlox || HatchPlus) {
     button.addDeviceInfo(device);
   } else {
     button.addText(device.listLabel);
@@ -29572,7 +29588,7 @@ DiscoverDialog.prototype.selectDevice = function(device) {
   console.log(device)
   this.deviceClass = DeviceManager.getDeviceClass(device);
   this.deviceClass.getManager().setOneDevice(device);
-  if (!Hatchling || HatchPlus) {
+  if (!(Hatchling || HatchPlus)) {
     this.closeDialog();
   }
 };
@@ -36545,7 +36561,6 @@ EditableSlot.prototype.changeText = function(text, updateDim) {
  * Tells the Slot to display an InputSystem so it can be edited. Also sets the slotShape to appear selected
  */
 EditableSlot.prototype.edit = function() {
-  console.log("*** edit ")
   DebugOptions.assert(!this.hasChild);
   if (!this.editing) {
     this.editing = true;
@@ -36575,7 +36590,6 @@ EditableSlot.prototype.createInputSystem = function() {
  * @param {string} [visibleText] - The text the Slot should display as its value. Should correspond to Data.
  */
 EditableSlot.prototype.updateEdit = function(data, visibleText) {
-  console.log("*** update edit ")
   DebugOptions.assert(this.editing);
   if (visibleText == null) {
     visibleText = this.dataToString(data);
@@ -36590,8 +36604,6 @@ EditableSlot.prototype.updateEdit = function(data, visibleText) {
  * @param {Data} data - The Data the Slot should be set to
  */
 EditableSlot.prototype.finishEdit = function(data) {
-  console.log("*** finish edit ")
-  console.trace()
   DebugOptions.assert(this.editing);
   if (this.editing) {
     this.setData(data, true, true); //Sanitize data, updateDims
@@ -43113,6 +43125,7 @@ B_WhenKeyPressed.prototype.updateAction = function() {
 }
 if (HatchPlus) {
   B_WhenKeyPressed.prototype.checkActive = function() {
+    //Disabled for now, maybe some way to do this with a broadcast?
     return false
   }
 }
@@ -44677,6 +44690,9 @@ function B_Variable(x, y, variable) {
 }
 B_Variable.prototype = Object.create(ReporterBlock.prototype);
 B_Variable.prototype.constructor = B_Variable;
+//MicroBlocks functions
+B_Variable.prototype.primName = function() { return "v" }
+B_Variable.prototype.argList = function() { return [this.variable.getName()] }
 /* Return the value of the variable */
 B_Variable.prototype.startAction = function() {
   return new ExecutionStatusResult(this.variable.getData());
@@ -44763,6 +44779,11 @@ function B_SetTo(x, y) {
 }
 B_SetTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTo.prototype.constructor = B_SetTo;
+//MicroBlocks functions
+B_SetTo.prototype.primName = function() { return "=" }
+B_SetTo.prototype.argList = function() { 
+  return [this.slots[0].getDataNotFromChild().getValue().getName(), this.slots[1].getMicroBlocksInstructions()] 
+}
 /* Sets the variable to the provided value */
 B_SetTo.prototype.startAction = function() {
   // Get the selection data that refers to a variable
@@ -44793,6 +44814,11 @@ function B_ChangeBy(x, y) {
 }
 B_ChangeBy.prototype = Object.create(CommandBlock.prototype);
 B_ChangeBy.prototype.constructor = B_ChangeBy;
+//MicroBlocks functions
+B_ChangeBy.prototype.primName = function() { return "+=" }
+B_ChangeBy.prototype.argList = function() { 
+  return [this.slots[0].getDataNotFromChild().getValue().getName(), this.slots[1].getMicroBlocksInstructions()] 
+}
 /* Adds the value to the indicated variable */
 B_ChangeBy.prototype.startAction = function() {
   var variableD = this.slots[0].getData();
@@ -45384,7 +45410,7 @@ HL_Utils.showPortsPopup = function(block) {
 }
 
 HL_Utils.birdBloxCheckActive = function(block) {
-  console.log("birdBloxCheckActive for " + block.constructor.name)
+  //console.log("birdBloxCheckActive for " + block.constructor.name)
   var device = DeviceHatchling.getManager().getDevice(0);
   if (device != null) {
     var currentState = device.portStates[block.port]
@@ -47352,13 +47378,13 @@ MicroBlocksCompiler.prototype.instructionsForCmd = function(cmd) {
 	var op = cmd.primName()
 	var args = cmd.argList()
 
-	/*if (isOneOf op '=' 'local') {
-		addAll result (instructionsForExpression this (at args 2))
-		add result (setVar this (first args))
-	} ('+=' == op) {
-		addAll result (instructionsForExpression this (at args 2))
-		add result (incrementVar this (first args))
-	} */ if ('return' == op) {
+	if ('=' == op) { //(isOneOf op '=' 'local') { //Local variables not currently supported
+		result = result.concat(this.instructionsForExpression(args[1]))
+		result.push(this.setVar(args[0]))
+	} else if ('+=' == op) {
+		result = result.concat(this.instructionsForExpression(args[1]))
+		result.push(this.incrementVar(args[0]))
+	} else if ('return' == op) {
 		if (args.length == 0) { //(0 == (count args)) {
 			result.push(['pushImmediate', 0]) //add result (array 'pushImmediate' zeroObj)
 		} else {
@@ -47562,9 +47588,9 @@ MicroBlocksCompiler.prototype.instructionsForExpression = function(expr) {
 	var op = expr.primName()
 	var args = expr.argList()
 
-	/*if ('v' == op) { // variable
-		return (list (getVar this (first args)))
-	} else*/ if ('booleanConstant' == op) {
+	if ('v' == op) { // variable
+		return [this.getVar(args[0])]
+	} else if ('booleanConstant' == op) {
 		return this.instructionsForExpression(args[0])
 		//if (first args) {
 		//	return (list (array 'pushImmediate' trueObj))
@@ -47703,39 +47729,66 @@ MicroBlocksCompiler.prototype.primitive = function(op, args, isCommand) {
 		}
 		if (notNil (nextBlock cmd)) { add todo (nextBlock cmd) }
 	}
-}
+}*/
 
-method getVar SmallCompiler varName {
-	if (notNil (at localVars varName)) {
+MicroBlocksCompiler.prototype.getVar = function(varName) {
+	/*if (notNil (at localVars varName)) {
 		return (array 'pushLocal' (at localVars varName))
 	} (notNil (at argNames varName)) {
 		return (array 'pushArg' (at argNames varName))
 	}
 	globalID = (globalVarIndex this varName)
-	if (notNil globalID) { return (array 'pushVar' globalID) }
+	if (notNil globalID) { return (array 'pushVar' globalID) }*/
+
+	//Only global variables are supported at this time
+	var globalID = CodeManager.getVarIndex(varName)
+	if (globalID >= 0) { 
+		return ['pushVar', globalID]
+	} else {
+		console.error("Variable '" + varName + "' not found.")
+		return []
+	}
 }
 
-method setVar SmallCompiler varName {
-	if (notNil (at localVars varName)) {
+MicroBlocksCompiler.prototype.setVar = function(varName) {
+	/*if (notNil (at localVars varName)) {
 		return (array 'storeLocal' (at localVars varName))
 	} (notNil (at argNames varName)) {
 		return (array 'storeArg' (at argNames varName))
 	}
 	globalID = (globalVarIndex this varName)
-	if (notNil globalID) { return (array 'storeVar' globalID) }
+	if (notNil globalID) { return (array 'storeVar' globalID) }*/
+
+	//Only global variables are supported at this time
+	var globalID = CodeManager.getVarIndex(varName)
+	if (globalID >= 0) { 
+		return ['storeVar', globalID]
+	} else {
+		console.error("Could not set '" + varName + "'. (variable not found)")
+		return []
+	}
 }
 
-method incrementVar SmallCompiler varName {
-	if (notNil (at localVars varName)) {
+MicroBlocksCompiler.prototype.incrementVar = function(varName) {
+	/*if (notNil (at localVars varName)) {
 		return (array 'incrementLocal' (at localVars varName))
 	} (notNil (at argNames varName)) {
 		return (array 'incrementArg' (at argNames varName))
 	}
 	globalID = (globalVarIndex this varName)
-	if (notNil globalID) { return (array 'incrementVar' globalID) }
+	if (notNil globalID) { return (array 'incrementVar' globalID) }*/
+
+	//Only global variables are supported at this time
+	var globalID = CodeManager.getVarIndex(varName)
+	if (globalID >= 0) { 
+		return ['incrementVar', globalID]
+	} else {
+		console.error("Could not increment '" + varName + "'. (variable not found)")
+		return []
+	}
 }
 
-method globalVarIndex SmallCompiler varName {
+/*method globalVarIndex SmallCompiler varName {
 	varNames = (allVariableNames (project (scripter (smallRuntime))))
 	id = (indexOf varNames varName)
 	if (isNil id) {

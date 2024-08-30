@@ -189,7 +189,7 @@ HL_Utils.showPortsPopup = function(block) {
 }
 
 HL_Utils.birdBloxCheckActive = function(block) {
-  console.log("birdBloxCheckActive for " + block.constructor.name)
+  //console.log("birdBloxCheckActive for " + block.constructor.name)
   let device = DeviceHatchling.getManager().getDevice(0);
   if (device != null) {
     const currentState = device.portStates[block.port]
