@@ -1304,6 +1304,15 @@ Block.prototype.createXml = function(xmlDoc) {
     }
     block.appendChild(blockButtons);
   }
+  if (this.hasToggles) {
+    let toggles = XmlWriter.createElement(xmlDoc, "toggles")
+    for (let i = 0; i < this.parts.length; i++) {
+      if (this.parts[i].isToggle) {
+        toggles.appendChild(this.parts[i].createXml(xmlDoc))
+      }
+    }
+    block.appendChild(toggles) 
+  }
   return block;
 };
 
@@ -1377,6 +1386,16 @@ Block.prototype.copyFromXml = function(blockNode) {
     for (let i=0; i < blockButtonNodes.length; i++) {
       this.blockButtons[i].importXml(blockButtonNodes[i])
     }
+  }
+  //Toggles - HatchPlus only
+  let togglesNode = XmlWriter.findSubElement(blockNode, "toggles")
+  if (togglesNode != null) {
+    let toggleNodes = XmlWriter.findSubElements(togglesNode, "toggle")
+    this.parts.forEach(function(part) {
+      if (part == null || !part.isToggle) { return }
+      let toggleNode = XmlWriter.findNodeByKey(toggleNodes, part.getKey())
+      part.importXml(toggleNode)
+    })
   }
 };
 

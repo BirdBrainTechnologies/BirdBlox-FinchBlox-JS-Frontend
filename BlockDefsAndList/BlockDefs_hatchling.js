@@ -1703,16 +1703,33 @@ B_HLBBClaps.prototype.argList = function() { return [HL_Utils.portNames[this.por
 //MARK: micro:bit outputs
 
 function B_HLLedArray(x, y) {
-  B_MicroBitLedArray.call(this, x, y, DeviceHatchling);
+  //B_MicroBitLedArray.call(this, x, y, DeviceHatchling);
+
+  CommandBlock.call(this, x, y, DeviceHatchling.getDeviceTypeId());
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  const label = new LabelText(this, Language.getStr("block_LED_Display"));
+  label.isEndOfLine = true;
+  this.addPart(label);
+
+  for (let i = 0; i < 5; i++) {
+    this.addPart(new Toggle(this, "Toggle_led1" + i, false));
+    this.addPart(new Toggle(this, "Toggle_led2" + i, false));
+    this.addPart(new Toggle(this, "Toggle_led3" + i, false));
+    this.addPart(new Toggle(this, "Toggle_led4" + i, false));
+    const lastLed = new Toggle(this, "Toggle_led5" + i, false);
+    lastLed.isEndOfLine = true;
+    this.addPart(lastLed);
+  }
 }
-B_HLLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
+//B_HLLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
+B_HLLedArray.prototype = Object.create(CommandBlock.prototype);
 B_HLLedArray.prototype.constructor = B_HLLedArray;
 //MicroBlocks functions
 B_HLLedArray.prototype.primName = function() { return "mbDisplay" } //"[display:mbDisplay]" }
 B_HLLedArray.prototype.argList = function() {
   let success = true
   let ledStatusString = "";
-  for (let i = 0; i < 25; i++) {
+  /*for (let i = 0; i < 25; i++) {
     let slot = this.slots[i+1]
     if (slot.hasChild) {
       console.error("SLOTS NOT IMPLEMENTED FOR LED ARRAY!")
@@ -1726,7 +1743,14 @@ B_HLLedArray.prototype.argList = function() {
     return [parseInt(ledStatusString.split("").reverse().join(""), 2)]
   } else {
     return []
+  }*/
+
+  for (let i = 0; i < 25; i++) {
+    let toggle = this.parts[i+2]
+    ledStatusString += (toggle.getData().getValue()) ? "1" : "0"
   }
+
+  return [parseInt(ledStatusString.split("").reverse().join(""), 2)]
 }
 
 

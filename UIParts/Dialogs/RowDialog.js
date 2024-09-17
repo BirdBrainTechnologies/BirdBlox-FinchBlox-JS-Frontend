@@ -128,7 +128,11 @@ RowDialog.prototype.addCancelButton = function() {
   const pathId = VectorPaths.bdClose
   const cancel = new Button(x, y, h, h, this.group, RowDialog.titleBarColor, null, null, Colors.ballyGrayLight)
   cancel.addColorIcon(pathId, h, Colors.ballyBrandBlueDark)
-  cancel.setCallbackFunction(this.closeDialog.bind(this), true)
+  //cancel.setCallbackFunction(this.closeDialog.bind(this), true)
+
+  //Make sure that closing this dialog is the same as tapping the grayed background.
+  TouchReceiver.addListenersDialogBlock(cancel.bgRect)
+  TouchReceiver.addListenersDialogBlock(cancel.icon.pathE)
 }
 
 /**

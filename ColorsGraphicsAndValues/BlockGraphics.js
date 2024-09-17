@@ -192,6 +192,7 @@ BlockGraphics.SetValueText = function() {
   BlockGraphics.valueText.fill = Colors.black;
   BlockGraphics.valueText.selectedFill = Colors.white;
   BlockGraphics.valueText.grayedFill = Colors.valueTextGrayed;
+  if (HatchPlus) { BlockGraphics.valueText.fill = Colors.ballyGrayDark }
 };
 
 /* Constants for DropSlots */

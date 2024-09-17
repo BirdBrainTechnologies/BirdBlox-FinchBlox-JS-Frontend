@@ -10558,6 +10558,7 @@ BlockGraphics.SetValueText = function() {
   BlockGraphics.valueText.fill = Colors.black;
   BlockGraphics.valueText.selectedFill = Colors.white;
   BlockGraphics.valueText.grayedFill = Colors.valueTextGrayed;
+  if (HatchPlus) { BlockGraphics.valueText.fill = Colors.ballyGrayDark }
 };
 
 /* Constants for DropSlots */
@@ -27272,7 +27273,11 @@ RowDialog.prototype.addCancelButton = function() {
   var pathId = VectorPaths.bdClose
   var cancel = new Button(x, y, h, h, this.group, RowDialog.titleBarColor, null, null, Colors.ballyGrayLight)
   cancel.addColorIcon(pathId, h, Colors.ballyBrandBlueDark)
-  cancel.setCallbackFunction(this.closeDialog.bind(this), true)
+  //cancel.setCallbackFunction(this.closeDialog.bind(this), true)
+
+  //Make sure that closing this dialog is the same as tapping the grayed background.
+  TouchReceiver.addListenersDialogBlock(cancel.bgRect)
+  TouchReceiver.addListenersDialogBlock(cancel.icon.pathE)
 }
 
 /**
@@ -34631,6 +34636,15 @@ Block.prototype.createXml = function(xmlDoc) {
     }
     block.appendChild(blockButtons);
   }
+  if (this.hasToggles) {
+    var toggles = XmlWriter.createElement(xmlDoc, "toggles")
+    for (var i = 0; i < this.parts.length; i++) {
+      if (this.parts[i].isToggle) {
+        toggles.appendChild(this.parts[i].createXml(xmlDoc))
+      }
+    }
+    block.appendChild(toggles) 
+  }
   return block;
 };
 
@@ -34704,6 +34718,16 @@ Block.prototype.copyFromXml = function(blockNode) {
     for (var i=0; i < blockButtonNodes.length; i++) {
       this.blockButtons[i].importXml(blockButtonNodes[i])
     }
+  }
+  //Toggles - HatchPlus only
+  var togglesNode = XmlWriter.findSubElement(blockNode, "toggles")
+  if (togglesNode != null) {
+    var toggleNodes = XmlWriter.findSubElements(togglesNode, "toggle")
+    this.parts.forEach(function(part) {
+      if (part == null || !part.isToggle) { return }
+      var toggleNode = XmlWriter.findNodeByKey(toggleNodes, part.getKey())
+      part.importXml(toggleNode)
+    })
   }
 };
 
@@ -39308,6 +39332,116 @@ BlockButton.prototype.importXml = function(blockButtonNode) {
 BlockButton.prototype.remove = function() {
   this.button.remove()
 }
+
+/**
+ * Similar to ToggleSlot, this block part allows the user to select a boolean value.
+ * Treated as a slot for saving purposes
+ */
+function Toggle(parent, key, data) {
+	this.x = 0;
+	this.y = 0;
+	this.parent = parent;
+	this.parent.hasToggles = true
+	this.isToggle = true
+	this.key = key 
+
+	//Toggle size is fixed
+	this.r = 12
+	this.width = 2*this.r
+	this.height = 2*this.r
+
+	this.colorOff = Colors.ballyGrayDark
+	this.colorOn = Colors.white
+
+	this.isTrue = data
+
+	var color = this.isTrue ? this.colorOn : this.colorOff
+	this.element = GuiElements.draw.circle(0, 0, this.r, color, this.parent.group)
+
+	//TODO: Maybe add to TouchReceiver?
+	var TR = TouchReceiver;
+	TR.addEventListenerSafe(this.element, TR.handlerUp, function(e) {
+	    this.toggle()
+	}.bind(this), false);
+}
+Toggle.prototype = Object.create(BlockPart.prototype)
+Toggle.prototype.constructor = Toggle
+
+
+Toggle.prototype.toggle = function() {
+	this.setValue(!this.isTrue)
+}
+
+
+Toggle.prototype.setValue = function(value) {
+	this.isTrue = value
+	GuiElements.update.color(this.element, (value ? this.colorOn : this.colorOff))
+}
+
+Toggle.prototype.getData = function() {
+	return new BoolData(this.isTrue)
+}
+
+/**
+ * Move the part to the specified location and returns where the next part should be.
+ * Called by the Block any time it has changed size/shape
+ * @param {number} x - The x coord the part should have relative to the Block it is in
+ * @param {number} y - The y coord ths part should have measured from the center of the part
+ * @return {number} - The width of the part, indicating how much the next item in the Block should be shifted over.
+ */
+Toggle.prototype.updateAlign = function(x, y) {
+  this.x = x 
+  this.y = y 
+  GuiElements.move.circle(this.element, this.x + this.r, this.y)
+  return this.width;
+};
+
+/**
+ * Toggle is a constant size.
+ */
+Toggle.prototype.updateDim = function() {
+
+};
+
+/**
+ * Creates a text representation of the part
+ * @return {string}
+ */
+Toggle.prototype.textSummary = function() {
+  return this.isTrue.toString()
+};
+
+/**
+ * Makes the part appear active
+ */
+Toggle.prototype.makeActive = function() {
+
+};
+
+/**
+ * Makes the part appear inactive
+ */
+Toggle.prototype.makeInactive = function() {
+
+};
+
+Toggle.prototype.createXml = function(xmlDoc) {
+	var toggleXml = XmlWriter.createElement(xmlDoc, "toggle");
+	XmlWriter.setAttribute(toggleXml, "key", this.key);
+	XmlWriter.setAttribute(toggleXml, "value", this.isTrue.toString());
+	return toggleXml
+}
+
+
+Toggle.prototype.importXml = function(toggleNode) {
+	var value = XmlWriter.getAttribute(toggleNode, "value") == "true"
+	this.setValue(value)
+}
+
+Toggle.prototype.getKey = function() {
+	return this.key
+}
+
 
 /* This file contains templates for Blocks that control robots.  Each robot has its own BlockDefs file, but many
  * of the defined Blocks are just subclasses of the Blocks here.
@@ -46924,16 +47058,33 @@ B_HLBBClaps.prototype.argList = function() { return [HL_Utils.portNames[this.por
 //MARK: micro:bit outputs
 
 function B_HLLedArray(x, y) {
-  B_MicroBitLedArray.call(this, x, y, DeviceHatchling);
+  //B_MicroBitLedArray.call(this, x, y, DeviceHatchling);
+
+  CommandBlock.call(this, x, y, DeviceHatchling.getDeviceTypeId());
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  var label = new LabelText(this, Language.getStr("block_LED_Display"));
+  label.isEndOfLine = true;
+  this.addPart(label);
+
+  for (var i = 0; i < 5; i++) {
+    this.addPart(new Toggle(this, "Toggle_led1" + i, false));
+    this.addPart(new Toggle(this, "Toggle_led2" + i, false));
+    this.addPart(new Toggle(this, "Toggle_led3" + i, false));
+    this.addPart(new Toggle(this, "Toggle_led4" + i, false));
+    var lastLed = new Toggle(this, "Toggle_led5" + i, false);
+    lastLed.isEndOfLine = true;
+    this.addPart(lastLed);
+  }
 }
-B_HLLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
+//B_HLLedArray.prototype = Object.create(B_MicroBitLedArray.prototype);
+B_HLLedArray.prototype = Object.create(CommandBlock.prototype);
 B_HLLedArray.prototype.constructor = B_HLLedArray;
 //MicroBlocks functions
 B_HLLedArray.prototype.primName = function() { return "mbDisplay" } //"[display:mbDisplay]" }
 B_HLLedArray.prototype.argList = function() {
   var success = true
   var ledStatusString = "";
-  for (var i = 0; i < 25; i++) {
+  /*for (var i = 0; i < 25; i++) {
     var slot = this.slots[i+1]
     if (slot.hasChild) {
       console.error("SLOTS NOT IMPLEMENTED FOR LED ARRAY!")
@@ -46947,7 +47098,14 @@ B_HLLedArray.prototype.argList = function() {
     return [parseInt(ledStatusString.split("").reverse().join(""), 2)]
   } else {
     return []
+  }*/
+
+  for (var i = 0; i < 25; i++) {
+    var toggle = this.parts[i+2]
+    ledStatusString += (toggle.getData().getValue()) ? "1" : "0"
   }
+
+  return [parseInt(ledStatusString.split("").reverse().join(""), 2)]
 }
 
 
