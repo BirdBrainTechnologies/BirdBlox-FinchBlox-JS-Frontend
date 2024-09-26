@@ -2531,7 +2531,8 @@ Language.en = {
 "block_Single_Neopixel":"Neopixel R (Slot 1) % G (Slot 2) % B (Slot 3) %",
 "Hatchling":"Hatchling",
 "block_Button_Presses":"Button Presses",
-"block_Claps":"Claps"
+"block_Claps":"Claps",
+"Import":"Import"
 }
 
 //Spanish Translation
@@ -9581,7 +9582,7 @@ Font.uiFont = function(fontSize) {
 Font.secondaryUiFont = function(fontSize) {
   //if (FinchBlox) { return new Font('FredericRegular', fontSize, "normal"); }
   //if (FinchBlox) { return new Font("NunitoSans-Regular", fontSize, "normal"); }
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     return new Font("MPLUS-Bold", fontSize, "normal");
   }
   if (FinchBlox) {
@@ -10091,6 +10092,10 @@ function VectorPaths(){
   VP.faArrowsSpin.path="M224 96c38.4 0 73.7 13.5 101.3 36.1l-32.6 32.6c-4.6 4.6-5.9 11.5-3.5 17.4s8.3 9.9 14.8 9.9H416c8.8 0 16-7.2 16-16V64c0-6.5-3.9-12.3-9.9-14.8s-12.9-1.1-17.4 3.5l-34 34C331.4 52.6 280.1 32 224 32c-10.9 0-21.5 .8-32 2.3V99.2c10.3-2.1 21-3.2 32-3.2zM100.1 154.7l32.6 32.6c4.6 4.6 11.5 5.9 17.4 3.5s9.9-8.3 9.9-14.8V64c0-8.8-7.2-16-16-16H32c-6.5 0-12.3 3.9-14.8 9.9s-1.1 12.9 3.5 17.4l34 34C20.6 148.6 0 199.9 0 256c0 10.9 .8 21.5 2.3 32H67.2c-2.1-10.3-3.2-21-3.2-32c0-38.4 13.5-73.7 36.1-101.3zM445.7 224H380.8c2.1 10.3 3.2 21 3.2 32c0 38.4-13.5 73.7-36.1 101.3l-32.6-32.6c-4.6-4.6-11.5-5.9-17.4-3.5s-9.9 8.3-9.9 14.8V448c0 8.8 7.2 16 16 16H416c6.5 0 12.3-3.9 14.8-9.9s1.1-12.9-3.5-17.4l-34-34C427.4 363.4 448 312.1 448 256c0-10.9-.8-21.5-2.3-32zM224 416c-38.4 0-73.7-13.5-101.3-36.1l32.6-32.6c4.6-4.6 5.9-11.5 3.5-17.4s-8.3-9.9-14.8-9.9H32c-8.8 0-16 7.2-16 16l0 112c0 6.5 3.9 12.3 9.9 14.8s12.9 1.1 17.4-3.5l34-34C116.6 459.4 167.9 480 224 480c10.9 0 21.5-.8 32-2.3V412.8c-10.3 2.1-21 3.2-32 3.2z"
   VP.faArrowsSpin.width=448;
   VP.faArrowsSpin.height=512;
+  VP.faFileImport={};
+  VP.faFileImport.path="M128 64c0-35.3 28.7-64 64-64L352 0l0 128c0 17.7 14.3 32 32 32l128 0 0 288c0 35.3-28.7 64-64 64l-256 0c-35.3 0-64-28.7-64-64l0-112 174.1 0-39 39c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l80-80c9.4-9.4 9.4-24.6 0-33.9l-80-80c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l39 39L128 288l0-224zm0 224l0 48L24 336c-13.3 0-24-10.7-24-24s10.7-24 24-24l104 0zM512 128l-128 0L384 0 512 128z"
+  VP.faFileImport.width=512;
+  VP.faFileImport.height=512;
   VP.faEgg={};
   //VP.faEgg.path="M192 496C86 496 0 394 0 288C0 176 64 16 192 16s192 160 192 272c0 106-86 208-192 208zM154.8 134c6.5-6 7-16.1 1-22.6s-16.1-7-22.6-1c-23.9 21.8-41.1 52.7-52.3 84.2C69.7 226.1 64 259.7 64 288c0 8.8 7.2 16 16 16s16-7.2 16-16c0-24.5 5-54.4 15.1-82.8c10.1-28.5 25-54.1 43.7-71.2z"; //original
   VP.faEgg.path="M192 496C86 496 0 394 0 288C0 176 64 16 192 16s192 160 192 272c0 106-86 208-192 208z";
@@ -13354,28 +13359,6 @@ TitleBar.makeButtons = function() {
       TB.levelButton.remove()
       TB.levelButton = new HLLevelSwitch(TB.levelBnX, y)
 
-      //Add the zoom and recenter buttons
-      var zoomBnW = 25
-      var zoomBnM = 5 
-      TB.zoomBnGroup = GuiElements.create.group(TB.width - zoomBnW - 1.5*zoomBnM, TB.height + 40, TBLayer);
-      var zoomBnBg = GuiElements.draw.rect(0, 0, zoomBnW + 3*zoomBnM, 3*zoomBnW + 6*zoomBnM, TB.bg, 10, 10);
-      TB.zoomBnGroup.appendChild(zoomBnBg);
-      var zoomPlusBn = new Button(zoomBnM, 2*zoomBnM, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
-      zoomPlusBn.addColorIcon(VectorPaths.bdZoomIn, 0.75*zoomBnW, Colors.ballyBrandBlue)
-      zoomPlusBn.setCallbackFunction(function() {
-        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, false, true)
-      }, false)
-      var zoomMinusBn = new Button(zoomBnM, 3*zoomBnM + zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
-      zoomMinusBn.addColorIcon(VectorPaths.bdZoomOut, 0.17*zoomBnW, Colors.ballyBrandBlue)
-      zoomMinusBn.setCallbackFunction(function() {
-        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, true, true)
-      }, false)
-      var recenterBn = new Button(zoomBnM, 4*zoomBnM + 2*zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
-      recenterBn.addColorIcon(VectorPaths.bdRecenter, 0.85*zoomBnW, Colors.ballyBrandBlue)
-      recenterBn.setCallbackFunction(function() {
-        TabManager.activeTab.recenter()
-      }, false)
-
       //Add the filename to the title bar
       var etW = TB.width - 2*TB.sideWidth
       TB.editableFileName = new HLEditableFileName(TB.sideWidth, 5, etW, TBLayer)
@@ -13476,6 +13459,31 @@ TitleBar.makeButtons = function() {
     UndoManager.setUndoButton(TB.undoButton);
   }
 
+
+  if (Hatchling || HatchPlus) {
+    //Add the zoom and recenter buttons
+      var zoomBnW = 25
+      var zoomBnM = 5 
+      TB.zoomBnGroup = GuiElements.create.group(TB.width - zoomBnW - 1.5*zoomBnM, TB.height + 40, TBLayer);
+      var zoomBnBg = GuiElements.draw.rect(0, 0, zoomBnW + 3*zoomBnM, 3*zoomBnW + 6*zoomBnM, TB.bg, 10, 10);
+      TB.zoomBnGroup.appendChild(zoomBnBg);
+      var zoomPlusBn = new Button(zoomBnM, 2*zoomBnM, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5, TB.bg)
+      zoomPlusBn.addColorIcon(VectorPaths.bdZoomIn, 0.75*zoomBnW, Colors.ballyBrandBlue)
+      zoomPlusBn.setCallbackFunction(function() {
+        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, false, true)
+      }, false)
+      var zoomMinusBn = new Button(zoomBnM, 3*zoomBnM + zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5, TB.bg)
+      zoomMinusBn.addColorIcon(VectorPaths.bdZoomOut, 0.17*zoomBnW, Colors.ballyBrandBlue)
+      zoomMinusBn.setCallbackFunction(function() {
+        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, true, true)
+      }, false)
+      var recenterBn = new Button(zoomBnM, 4*zoomBnM + 2*zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5, TB.bg)
+      recenterBn.addColorIcon(VectorPaths.bdRecenter, 0.85*zoomBnW, Colors.ballyBrandBlue)
+      recenterBn.setCallbackFunction(function() {
+        TabManager.activeTab.recenter()
+      }, false)
+  }
+
   
 
   TB.debugBn = null;
@@ -13505,6 +13513,7 @@ TitleBar.removeButtons = function() {
     TB.viewBn.remove();
     if (HatchPlus) {
       TB.finchButton.remove();
+      TB.zoomBnGroup.remove()
     } else {
       TB.hummingbirdBn.remove();
       TB.batteryBn.remove();
@@ -26638,7 +26647,7 @@ Tab.prototype.endZooming = function() {
  * @param {boolean} buttonPress - true if this function called by zoom button rather that wheel event
  */
 Tab.prototype.wheelZoom = function(x, y, zoomIn, buttonPress) {
-  if (this.zooming || (Hatchling && !buttonPress)) {
+  if (this.zooming || ((Hatchling || HatchPlus) && !buttonPress)) {
     return;
   }
   this.zooming = true;
@@ -27243,10 +27252,13 @@ RowDialog.setConstants = function() {
 
   RowDialog.hintMargin = 5;
   RowDialog.titleBarFont = Font.uiFont(16).bold();
-  RowDialog.hintTextFont = Font.uiFont(16);
+  RowDialog.hintTextFont = HatchPlus ? Font.secondaryUiFont(16) : Font.uiFont(16);
   RowDialog.centeredfontWeight = "bold";
   RowDialog.smallBnWidth = 45;
   RowDialog.iconH = 15;
+
+  //extra margin so that outlines aren't cut off
+  RowDialog.m = (Hatchling || HatchPlus) ? 2 : 0 
 };
 
 /**
@@ -27324,6 +27336,19 @@ RowDialog.prototype.show = function() {
     GuiElements.blockInteraction();
   }
 };
+
+RowDialog.prototype.makeInvisible = function() {
+  this.group.remove()
+  if (this.scrollBox != null) {
+    this.scrollBox.hide()
+  }
+}
+RowDialog.prototype.makeVisible = function() {
+  GuiElements.layers.overlay.appendChild(this.group);
+  if (this.scrollBox != null) {
+    this.scrollBox.show()
+  }
+}
 
 /**
  * Computes the height of the dialog and its content.
@@ -27693,7 +27718,8 @@ RowDialog.prototype.contentRelToAbsY = function(y) {
  */
 RowDialog.createMainBn = function(bnWidth, x, y, contentGroup, callbackFn) {
   var RD = RowDialog;
-  var button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
+  var color = HatchPlus ? Colors.white : null
+  var button = new Button(x, y, bnWidth, RD.bnHeight - 2*RD.m, contentGroup, color, null, null, color);
   if (callbackFn != null) {
     button.setCallbackFunction(callbackFn, true);
   }
@@ -27727,7 +27753,8 @@ RowDialog.createMainBnWithText = function(text, bnWidth, x, y, contentGroup, cal
  */
 RowDialog.createSmallBn = function(x, y, contentGroup, callbackFn) {
   var RD = RowDialog;
-  var button = new Button(x, y, RD.smallBnWidth, RD.bnHeight, contentGroup);
+  var color = HatchPlus ? Colors.white : null
+  var button = new Button(x, y, RD.smallBnWidth, RD.bnHeight - 2*RD.m, contentGroup, color, null, null, color);
   if (callbackFn != null) {
     button.setCallbackFunction(callbackFn, true);
   }
@@ -27815,11 +27842,13 @@ OpenDialog.prototype.show = function() {
 OpenDialog.prototype.createRow = function(index, y, width, contentGroup) {
   var cols = 3;
   var RD = RowDialog;
-  var largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols;
-  var file = this.files[index];
-  this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
+  var largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols - 2*RD.m;
+  y += RD.m
 
-  var currentX = largeBnWidth + RD.bnMargin;
+  var file = this.files[index];
+  this.createFileBn(file, largeBnWidth, RD.m, y, contentGroup);
+
+  var currentX = RD.m + largeBnWidth + RD.bnMargin;
   this.createRenameBn(file, currentX, y, contentGroup);
   currentX += RD.bnMargin + RD.smallBnWidth;
   //this.createDuplicateBn(file, currentX, y, contentGroup);
@@ -27965,7 +27994,19 @@ OpenDialog.prototype.createNewBn = function() {
   var OD = OpenDialog;
   var x = RD.bnMargin;
   var y = this.getExtraBottomY();
-  var button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
+  var w = this.getContentWidth()
+  if (GuiElements.isPWA) {
+    var iw = 140
+    w = w - RD.bnMargin - iw
+
+    //Web apps will also have an import button
+    var importBn = new Button((x + w + RD.bnMargin), y, iw, RD.bnHeight, this.group)
+    importBn.addSideTextAndIcon(VectorPaths.faFileImport, null, Language.getStr("Import"), null, null, null, null, null, null, true, false)
+    importBn.setCallbackFunction(function() {
+      SaveManager.userImportFile()
+    })
+  }
+  var button = new Button(x, y, w, RD.bnHeight, this.group);
   button.addText(Language.getStr("New"));
   button.setCallbackFunction(function() {
     SaveManager.userNew(this.closeDialog.bind(this))
@@ -29545,7 +29586,7 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
   }
 
   var r = (Hatchling || HatchPlus) ? 7 : null
-  var m = (Hatchling || HatchPlus) ? 2 : 0
+  var m = RowDialog.m
   // TODO: use RowDialog.createMainBnWithText instead
   var button = new Button(0 + m, y + m, width - 2*m, RowDialog.bnHeight - 2*m, contentGroup, color, r, r);
   
@@ -29642,7 +29683,7 @@ FileContextMenu.setGraphics = function() {
   FCM.bnMargin = Button.defaultMargin;
   FCM.bgColor = HatchPlus ? Colors.ballyBrandBlue : Colors.lightGray;
   FCM.blockShift = 20;
-  FCM.width = 115;
+  FCM.width = HatchPlus ? 125 : 115;
 };
 
 /**
@@ -29696,7 +29737,7 @@ FileContextMenu.prototype.addOptions = function() {
       });
       this.close();
     }
-  }.bind(this), this.createAddIconToBnFn(VectorPaths.trash, Language.getStr("Delete")));
+  }.bind(this), this.createAddIconToBnFn((HatchPlus ? VectorPaths.bdTrash : VectorPaths.trash), Language.getStr("Delete")));
 };
 
 /**
@@ -29969,20 +30010,31 @@ function PromptDialog(title, question, defaultText, shouldPrefill, callbackFn) {
 	this.shouldPrefill = shouldPrefill //TODO: make hint text when necessary
 	this.callbackFn = callbackFn
 
-	this.bgColor = HatchPlus ? Colors.ballyGrayLight : RowDialog.titleBarColor
+	this.bgColor = HatchPlus ? Colors.ballyBrandBlue : RowDialog.titleBarColor
 	this.outlineC = HatchPlus ? Colors.ballyGray : RowDialog.titleBarColor
+	this.titleFont = HatchPlus ? Font.uiFont(20) : RD.titleBarFont
+	this.questionFont = HatchPlus ? Font.secondaryUiFont(16) : RD.hintTextFont
+	this.textColor = HatchPlus ? Colors.ballyGrayLight : RD.titleBarFontC
 
-	this.width = 300
+	this.width = 350//300
 	this.height = 200
 	this.x = GuiElements.width / 2 - this.width / 2;
     this.y = GuiElements.height / 2 - this.height / 2;
 	this.visible = false
+
+	this.options = []
+}
+
+PromptDialog.prototype.addOption = function(option) {
+	this.options.push(option)
 }
 
 PromptDialog.prototype.show = function() {
 	var RD = RowDialog
 	if (!this.visible) {
 		this.visible = true
+
+		if (RowDialog.currentDialog != null) { RowDialog.currentDialog.makeInvisible() }
 
 		var margin = 20
 
@@ -29991,52 +30043,79 @@ PromptDialog.prototype.show = function() {
 		GuiElements.update.stroke(this.bgRect, this.outlineC, 3)
 		this.group.append(this.bgRect)
 
-		var titleTextE = GuiElements.draw.text(0, 0, this.title, RD.titleBarFont, RD.titleBarFontC)
+		var titleTextE = GuiElements.draw.text(0, 0, this.title, this.titleFont, this.textColor)
 		var titleX = this.width / 2 - GuiElements.measure.textWidth(titleTextE) / 2;
-		var titleY = margin + RD.titleBarFont.charHeight / 2;
+		var titleY = margin + this.titleFont.charHeight / 2;
 		GuiElements.move.text(titleTextE, titleX, titleY);
   		this.group.appendChild(titleTextE);
 
-  		var qTextE = GuiElements.draw.text(0, 0, this.question, RD.hintTextFont, RD.titleBarFontC)
+  		var qTextE = GuiElements.draw.text(0, 0, this.question, this.questionFont, this.textColor)
 		var qX = this.width / 2 - GuiElements.measure.textWidth(qTextE) / 2;
-		var qY = titleY + margin + RD.hintTextFont.charHeight / 2;
+		var qY = titleY + margin + this.questionFont.charHeight / 2;
 		GuiElements.move.text(qTextE, qX, qY);
-  		this.group.appendChild(qTextE);
+		this.group.appendChild(qTextE);
+  		
 
-  		var font = RD.hintTextFont;
-		var textColor = HatchPlus ? RD.titleBarFontC : RD.titleBarColor
-		var textY = qY + margin + font.charHeight/2; //this.height/2 + font.charHeight / 2; 
-		var textX = this.width/10
-		var textW = this.width*4/5
-		var textH = this.height/3
-		this.charCount = 0;
 
-		var etbg = GuiElements.draw.rect(textX, textY, textW, textH, Colors.white)
-		this.group.append(etbg)
-		this.editableText = GuiElements.create.editableText(font, textColor, textX, textY, textW, textH, this.group)
-		if (this.defaultText != null) {
-			this.editableText.textContent = this.defaultText;
-		}
-		TouchReceiver.addListenersEditText(this.editableText, this);
-
-		var confirmPathId = HatchPlus ? VectorPaths.bdConnected : VectorPaths.checkmark
-		var cancelPathId = HatchPlus ? VectorPaths.bdClose : VectorPaths.letterX
 		var bnH = RD.bnHeight*2/3
 		var bnW = bnH
 		var bnM = 10
 		var bnY = this.height - bnH - bnM
-		var confirmX = this.width - bnW - bnM
-		var cancelX = confirmX - bnW - bnM
 		var bnColor = HatchPlus ? Button.bg : RD.bgColor
-		var iconH = bnH*3/4
-		var confirmBn = new Button(confirmX, bnY, bnW, bnH, this.group, bnColor)
-		confirmBn.addIcon(confirmPathId, iconH)
-		confirmBn.setCallbackFunction(function(){ this.confirm() }.bind(this), true)
-		confirmBn.setCloseOverlays(false)
-		var cancelBn = new Button(cancelX, bnY, bnW, bnH, this.group, bnColor)
-		cancelBn.addIcon(cancelPathId, iconH)
-		cancelBn.setCallbackFunction(function(){ this.cancel() }.bind(this), true)
-		cancelBn.setCloseOverlays(false)
+		if (this.options.length == 0) { //The user is being prompted for text input
+			
+			var font = RD.hintTextFont;
+			var textColor = HatchPlus ? Colors.ballyBrandBlueDark : RD.titleBarColor
+			var textY = qY + margin + font.charHeight/2; //this.height/2 + font.charHeight / 2; 
+			var textX = this.width/10
+			var textW = this.width*4/5
+			var textH = this.height/3
+			this.charCount = 0;
+
+			var etbg = GuiElements.draw.rect(textX, textY, textW, textH, Colors.white)
+			this.group.append(etbg)
+			var etY = textY + margin
+			var etH = textH - 2*margin
+			this.editableText = GuiElements.create.editableText(font, textColor, textX, etY, textW, etH, this.group)
+			if (this.defaultText != null) {
+				this.editableText.textContent = this.defaultText;
+			}
+			TouchReceiver.addListenersEditText(this.editableText, this);
+
+
+			var confirmPathId = HatchPlus ? VectorPaths.bdConnected : VectorPaths.checkmark
+			var cancelPathId = HatchPlus ? VectorPaths.bdClose : VectorPaths.letterX
+			var confirmX = this.width - bnW - bnM
+			var cancelX = confirmX - bnW - bnM
+			var iconH = bnH*3/4
+			var confirmBn = new Button(confirmX, bnY, bnW, bnH, this.group, bnColor)
+			confirmBn.addIcon(confirmPathId, iconH)
+			if (HatchPlus) { GuiElements.update.stroke(confirmBn.icon.pathE, Button.foreground, 2) }
+			confirmBn.setCallbackFunction(function(){ this.confirm() }.bind(this), true)
+			confirmBn.setCloseOverlays(false)
+			var cancelBn = new Button(cancelX, bnY, bnW, bnH, this.group, bnColor)
+			cancelBn.addIcon(cancelPathId, iconH)
+			cancelBn.setCallbackFunction(function(){ this.cancel() }.bind(this), true)
+			cancelBn.setCloseOverlays(false)
+		} else {
+			
+			var bnX = this.width
+			for (var i = 0; i < this.options.length; i++) {
+
+				bnW = GuiElements.measure.stringWidth(this.options[i], Button.defaultFont) + 2*Button.defaultMargin
+				bnX -= bnW + bnM
+
+				var bn = new Button(bnX, bnY, bnW, bnH, this.group, bnColor)
+				bn.addText(this.options[i])
+				bn.setCallbackFunction(function() { 
+					this.callbackFn(String(i+1)) 
+					this.close()
+				}.bind(this))
+				bn.setCloseOverlays(false)
+
+				console.log(this.callbackFn)				
+			}
+		}
 
 		GuiElements.layers.overlayOverlay.appendChild(this.group);
 		FBPopup.currentPopup = this //TODO: Make a more general variable to use for this purpose
@@ -30045,6 +30124,7 @@ PromptDialog.prototype.show = function() {
 }
 
 PromptDialog.prototype.editText = function() {
+	if (this.editableText == null) { return }
 	this.editableText.focus();
 }
 
@@ -30072,6 +30152,8 @@ PromptDialog.prototype.close = function() {
 		DialogManager.dialogVisible = false
 		this.group.remove()
 		FBPopup.currentPopup = null
+
+		if (RowDialog.currentDialog != null) { RowDialog.currentDialog.makeVisible() }
 	}
 }
 /**
@@ -30718,12 +30800,23 @@ BlockStack.prototype.fly = function() {
   this.tab.updateArrows();
 
   if (Hatchling || HatchPlus) {
+    //Add a drop shadow while flying
+    this.group.setAttributeNS(null, "filter", "url(#" + Block.shadowId + ")")
+    this.currentShadow = Block.shadowId
+
     this.passRecursivelyDown("fly")
   }
 };
 
 BlockStack.prototype.updateShadow = function(useRed) {
-  this.passRecursivelyDown("updateShadow", useRed)
+  //this.passRecursivelyDown("updateShadow", useRed)
+
+  var id = useRed ? Block.redShadowId : Block.shadowId
+
+  if (this.currentShadow != null && this.currentShadow != id) {
+    this.group.setAttributeNS(null, "filter", "url(#" + id + ")")
+    this.currentShadow = id
+  }
 }
 
 /**
@@ -30740,6 +30833,9 @@ BlockStack.prototype.land = function() {
   this.tab.updateArrows();
 
   if (Hatchling || HatchPlus) { 
+    this.currentShadow = null
+    this.group.removeAttributeNS(null, "filter")
+
     this.passRecursivelyDown("land")
     HL_Utils.showPortsPopup(this.firstBlock) 
   }
@@ -31622,7 +31718,6 @@ DialogManager.showChoiceDialog = function(title, question, option1, option2, swa
   TouchReceiver.touchInterrupt();
   DM.dialogVisible = true;
   if (DebugOptions.shouldUseJSDialogs()) { //Kept for debugging on a PC
-    console.log("use js dialogs")
     var result = confirm(question);
     DM.dialogVisible = false;
     if (swapIfMouse) {
@@ -31634,8 +31729,7 @@ DialogManager.showChoiceDialog = function(title, question, option1, option2, swa
       callbackFn("2");
     }
   } else {
-    console.log("regular dialogs")
-    var HS = HtmlServer;
+    /*var HS = HtmlServer;
     var request = new HttpRequestBuilder("tablet/choice");
     request.addParam("title", title);
     request.addParam("question", question);
@@ -31652,7 +31746,12 @@ DialogManager.showChoiceDialog = function(title, question, option1, option2, swa
         callbackErr();
       }
     };
-    HS.sendRequestWithCallback(request.toString(), onDialogPresented, onDialogFail);
+    HS.sendRequestWithCallback(request.toString(), onDialogPresented, onDialogFail);*/
+
+    var dialog = new PromptDialog(title, question, null, false, callbackFn)
+    dialog.addOption(option1)
+    dialog.addOption(option2)
+    dialog.show()
   }
 };
 
@@ -31661,7 +31760,7 @@ DialogManager.showChoiceDialog = function(title, question, option1, option2, swa
  * @param {boolean} [cancelled] - Whether the user closed the dialog without answering
  * @param {boolean} [firstSelected] - Whether the user selected the first option
  */
-DialogManager.choiceDialogResponded = function(cancelled, firstSelected) {
+/*DialogManager.choiceDialogResponded = function(cancelled, firstSelected) {
   var DM = DialogManager;
   DM.dialogVisible = false;
   if (DM.choiceCallback != null) {
@@ -31676,7 +31775,7 @@ DialogManager.choiceDialogResponded = function(cancelled, firstSelected) {
     DM.choiceCallback(resp);
   }
   DM.choiceCallback = null;
-};
+};*/
 
 /**
  * Shows a prompt dialog that the user can enter text into
@@ -31724,7 +31823,6 @@ DialogManager.showPromptDialog = function(title, question, prefill, shouldPrefil
       }
     };
     HS.sendRequestWithCallback(request.toString(), onDialogPresented, onDialogPresented);*/
-    console.log("about to show a prompt dialog")
     var dialog = new PromptDialog(title, question, prefill, shouldPrefill, callbackFn)
     dialog.show()
   }
@@ -31735,7 +31833,7 @@ DialogManager.showPromptDialog = function(title, question, prefill, shouldPrefil
  * @param {boolean} cancelled - Whether the closed the dialog without responding
  * @param {string} [response] - The user's response to the prompt
  */
-DialogManager.promptDialogResponded = function(cancelled, response) {
+/*DialogManager.promptDialogResponded = function(cancelled, response) {
   var DM = DialogManager;
   DM.dialogVisible = false;
   DM.updateDialogDelay(); // Tell DialogManager to reset the dialog delay clock.
@@ -31743,7 +31841,7 @@ DialogManager.promptDialogResponded = function(cancelled, response) {
     DM.promptCallback(cancelled, response);
   }
   DM.promptCallback = null;
-};
+};*/
 
 /**
  * Shows a dialog with a single button to alert the user of something
@@ -32887,6 +32985,14 @@ SaveManager.duplicate = function(filename, newName, nextAction) {
   request.addParam("newFilename", newName);
   HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
+
+/**
+ * Sends a request to the backend to import a file
+ */
+SaveManager.userImportFile = function() {
+  var request = new HttpRequestBuilder("data/import");
+  HtmlServer.sendRequestWithCallback(request.toString());
+}
 
 /**
  * Handles a request from the user to export a file
@@ -34796,8 +34902,8 @@ Block.prototype.deleteList = function(list) {
  */
 Block.prototype.fly = function() {
   //Add a drop shadow while flying
-  this.group.setAttributeNS(null, "filter", "url(#" + Block.shadowId + ")")
-  this.currentShadow = Block.shadowId
+  //this.group.setAttributeNS(null, "filter", "url(#" + Block.shadowId + ")")
+  //this.currentShadow = Block.shadowId
 
   //Change color while flying
   if (!this.hasHat || HatchPlus) {  //color change does not apply to hat blocks for Hatchling
@@ -34814,14 +34920,14 @@ Block.prototype.fly = function() {
  * shadow red when over trash.
  * @param {string} useRed - true if the shadow should be red.
  */
-Block.prototype.updateShadow = function(useRed) {
+/*Block.prototype.updateShadow = function(useRed) {
   var id = (useRed == "true") ? Block.redShadowId : Block.shadowId
 
   if (this.currentShadow != null && this.currentShadow != id) {
     this.group.setAttributeNS(null, "filter", "url(#" + id + ")")
     this.currentShadow = id
   }
-}
+}*/ //Moved to BlockStack
 
 /**
  * Change block color back now that the block has landed.
@@ -34829,8 +34935,8 @@ Block.prototype.updateShadow = function(useRed) {
  * Hatchling and HatchPlus only.
  */
 Block.prototype.land = function() {
-  this.currentShadow = null
-  this.group.removeAttributeNS(null, "filter")
+  //this.currentShadow = null
+  //this.group.removeAttributeNS(null, "filter")
 
   if (!this.hasHat || HatchPlus) {
     var cat = this.category

@@ -98,10 +98,13 @@ RowDialog.setConstants = function() {
 
   RowDialog.hintMargin = 5;
   RowDialog.titleBarFont = Font.uiFont(16).bold();
-  RowDialog.hintTextFont = Font.uiFont(16);
+  RowDialog.hintTextFont = HatchPlus ? Font.secondaryUiFont(16) : Font.uiFont(16);
   RowDialog.centeredfontWeight = "bold";
   RowDialog.smallBnWidth = 45;
   RowDialog.iconH = 15;
+
+  //extra margin so that outlines aren't cut off
+  RowDialog.m = (Hatchling || HatchPlus) ? 2 : 0 
 };
 
 /**
@@ -179,6 +182,19 @@ RowDialog.prototype.show = function() {
     GuiElements.blockInteraction();
   }
 };
+
+RowDialog.prototype.makeInvisible = function() {
+  this.group.remove()
+  if (this.scrollBox != null) {
+    this.scrollBox.hide()
+  }
+}
+RowDialog.prototype.makeVisible = function() {
+  GuiElements.layers.overlay.appendChild(this.group);
+  if (this.scrollBox != null) {
+    this.scrollBox.show()
+  }
+}
 
 /**
  * Computes the height of the dialog and its content.
@@ -548,7 +564,8 @@ RowDialog.prototype.contentRelToAbsY = function(y) {
  */
 RowDialog.createMainBn = function(bnWidth, x, y, contentGroup, callbackFn) {
   const RD = RowDialog;
-  const button = new Button(x, y, bnWidth, RD.bnHeight, contentGroup);
+  const color = HatchPlus ? Colors.white : null
+  const button = new Button(x, y, bnWidth, RD.bnHeight - 2*RD.m, contentGroup, color, null, null, color);
   if (callbackFn != null) {
     button.setCallbackFunction(callbackFn, true);
   }
@@ -582,7 +599,8 @@ RowDialog.createMainBnWithText = function(text, bnWidth, x, y, contentGroup, cal
  */
 RowDialog.createSmallBn = function(x, y, contentGroup, callbackFn) {
   const RD = RowDialog;
-  const button = new Button(x, y, RD.smallBnWidth, RD.bnHeight, contentGroup);
+  const color = HatchPlus ? Colors.white : null
+  const button = new Button(x, y, RD.smallBnWidth, RD.bnHeight - 2*RD.m, contentGroup, color, null, null, color);
   if (callbackFn != null) {
     button.setCallbackFunction(callbackFn, true);
   }

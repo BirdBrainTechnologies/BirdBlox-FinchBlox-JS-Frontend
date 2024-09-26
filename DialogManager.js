@@ -56,7 +56,6 @@ DialogManager.showChoiceDialog = function(title, question, option1, option2, swa
   TouchReceiver.touchInterrupt();
   DM.dialogVisible = true;
   if (DebugOptions.shouldUseJSDialogs()) { //Kept for debugging on a PC
-    console.log("use js dialogs")
     let result = confirm(question);
     DM.dialogVisible = false;
     if (swapIfMouse) {
@@ -68,8 +67,7 @@ DialogManager.showChoiceDialog = function(title, question, option1, option2, swa
       callbackFn("2");
     }
   } else {
-    console.log("regular dialogs")
-    const HS = HtmlServer;
+    /*const HS = HtmlServer;
     const request = new HttpRequestBuilder("tablet/choice");
     request.addParam("title", title);
     request.addParam("question", question);
@@ -86,7 +84,12 @@ DialogManager.showChoiceDialog = function(title, question, option1, option2, swa
         callbackErr();
       }
     };
-    HS.sendRequestWithCallback(request.toString(), onDialogPresented, onDialogFail);
+    HS.sendRequestWithCallback(request.toString(), onDialogPresented, onDialogFail);*/
+
+    const dialog = new PromptDialog(title, question, null, false, callbackFn)
+    dialog.addOption(option1)
+    dialog.addOption(option2)
+    dialog.show()
   }
 };
 
@@ -95,7 +98,7 @@ DialogManager.showChoiceDialog = function(title, question, option1, option2, swa
  * @param {boolean} [cancelled] - Whether the user closed the dialog without answering
  * @param {boolean} [firstSelected] - Whether the user selected the first option
  */
-DialogManager.choiceDialogResponded = function(cancelled, firstSelected) {
+/*DialogManager.choiceDialogResponded = function(cancelled, firstSelected) {
   const DM = DialogManager;
   DM.dialogVisible = false;
   if (DM.choiceCallback != null) {
@@ -110,7 +113,7 @@ DialogManager.choiceDialogResponded = function(cancelled, firstSelected) {
     DM.choiceCallback(resp);
   }
   DM.choiceCallback = null;
-};
+};*/
 
 /**
  * Shows a prompt dialog that the user can enter text into
@@ -158,7 +161,6 @@ DialogManager.showPromptDialog = function(title, question, prefill, shouldPrefil
       }
     };
     HS.sendRequestWithCallback(request.toString(), onDialogPresented, onDialogPresented);*/
-    console.log("about to show a prompt dialog")
     const dialog = new PromptDialog(title, question, prefill, shouldPrefill, callbackFn)
     dialog.show()
   }
@@ -169,7 +171,7 @@ DialogManager.showPromptDialog = function(title, question, prefill, shouldPrefil
  * @param {boolean} cancelled - Whether the closed the dialog without responding
  * @param {string} [response] - The user's response to the prompt
  */
-DialogManager.promptDialogResponded = function(cancelled, response) {
+/*DialogManager.promptDialogResponded = function(cancelled, response) {
   const DM = DialogManager;
   DM.dialogVisible = false;
   DM.updateDialogDelay(); // Tell DialogManager to reset the dialog delay clock.
@@ -177,7 +179,7 @@ DialogManager.promptDialogResponded = function(cancelled, response) {
     DM.promptCallback(cancelled, response);
   }
   DM.promptCallback = null;
-};
+};*/
 
 /**
  * Shows a dialog with a single button to alert the user of something

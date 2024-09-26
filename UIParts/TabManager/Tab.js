@@ -466,7 +466,7 @@ Tab.prototype.endZooming = function() {
  * @param {boolean} buttonPress - true if this function called by zoom button rather that wheel event
  */
 Tab.prototype.wheelZoom = function(x, y, zoomIn, buttonPress) {
-  if (this.zooming || (Hatchling && !buttonPress)) {
+  if (this.zooming || ((Hatchling || HatchPlus) && !buttonPress)) {
     return;
   }
   this.zooming = true;

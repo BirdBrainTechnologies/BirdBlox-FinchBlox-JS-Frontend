@@ -1464,8 +1464,8 @@ Block.prototype.deleteList = function(list) {
  */
 Block.prototype.fly = function() {
   //Add a drop shadow while flying
-  this.group.setAttributeNS(null, "filter", "url(#" + Block.shadowId + ")")
-  this.currentShadow = Block.shadowId
+  //this.group.setAttributeNS(null, "filter", "url(#" + Block.shadowId + ")")
+  //this.currentShadow = Block.shadowId
 
   //Change color while flying
   if (!this.hasHat || HatchPlus) {  //color change does not apply to hat blocks for Hatchling
@@ -1482,14 +1482,14 @@ Block.prototype.fly = function() {
  * shadow red when over trash.
  * @param {string} useRed - true if the shadow should be red.
  */
-Block.prototype.updateShadow = function(useRed) {
+/*Block.prototype.updateShadow = function(useRed) {
   let id = (useRed == "true") ? Block.redShadowId : Block.shadowId
 
   if (this.currentShadow != null && this.currentShadow != id) {
     this.group.setAttributeNS(null, "filter", "url(#" + id + ")")
     this.currentShadow = id
   }
-}
+}*/ //Moved to BlockStack
 
 /**
  * Change block color back now that the block has landed.
@@ -1497,8 +1497,8 @@ Block.prototype.updateShadow = function(useRed) {
  * Hatchling and HatchPlus only.
  */
 Block.prototype.land = function() {
-  this.currentShadow = null
-  this.group.removeAttributeNS(null, "filter")
+  //this.currentShadow = null
+  //this.group.removeAttributeNS(null, "filter")
 
   if (!this.hasHat || HatchPlus) {
     let cat = this.category

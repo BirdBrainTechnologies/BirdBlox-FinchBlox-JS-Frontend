@@ -68,7 +68,7 @@ Font.uiFont = function(fontSize) {
 Font.secondaryUiFont = function(fontSize) {
   //if (FinchBlox) { return new Font('FredericRegular', fontSize, "normal"); }
   //if (FinchBlox) { return new Font("NunitoSans-Regular", fontSize, "normal"); }
-  if (Hatchling) {
+  if (Hatchling || HatchPlus) {
     return new Font("MPLUS-Bold", fontSize, "normal");
   }
   if (FinchBlox) {

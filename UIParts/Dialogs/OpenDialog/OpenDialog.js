@@ -62,11 +62,13 @@ OpenDialog.prototype.show = function() {
 OpenDialog.prototype.createRow = function(index, y, width, contentGroup) {
   const cols = 3;
   const RD = RowDialog;
-  let largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols;
-  const file = this.files[index];
-  this.createFileBn(file, largeBnWidth, 0, y, contentGroup);
+  let largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols - 2*RD.m;
+  y += RD.m
 
-  let currentX = largeBnWidth + RD.bnMargin;
+  const file = this.files[index];
+  this.createFileBn(file, largeBnWidth, RD.m, y, contentGroup);
+
+  let currentX = RD.m + largeBnWidth + RD.bnMargin;
   this.createRenameBn(file, currentX, y, contentGroup);
   currentX += RD.bnMargin + RD.smallBnWidth;
   //this.createDuplicateBn(file, currentX, y, contentGroup);
@@ -212,7 +214,19 @@ OpenDialog.prototype.createNewBn = function() {
   let OD = OpenDialog;
   let x = RD.bnMargin;
   let y = this.getExtraBottomY();
-  let button = new Button(x, y, this.getContentWidth(), RD.bnHeight, this.group);
+  let w = this.getContentWidth()
+  if (GuiElements.isPWA) {
+    let iw = 140
+    w = w - RD.bnMargin - iw
+
+    //Web apps will also have an import button
+    let importBn = new Button((x + w + RD.bnMargin), y, iw, RD.bnHeight, this.group)
+    importBn.addSideTextAndIcon(VectorPaths.faFileImport, null, Language.getStr("Import"), null, null, null, null, null, null, true, false)
+    importBn.setCallbackFunction(function() {
+      SaveManager.userImportFile()
+    })
+  }
+  let button = new Button(x, y, w, RD.bnHeight, this.group);
   button.addText(Language.getStr("New"));
   button.setCallbackFunction(function() {
     SaveManager.userNew(this.closeDialog.bind(this))

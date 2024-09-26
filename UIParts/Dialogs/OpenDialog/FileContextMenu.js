@@ -33,7 +33,7 @@ FileContextMenu.setGraphics = function() {
   FCM.bnMargin = Button.defaultMargin;
   FCM.bgColor = HatchPlus ? Colors.ballyBrandBlue : Colors.lightGray;
   FCM.blockShift = 20;
-  FCM.width = 115;
+  FCM.width = HatchPlus ? 125 : 115;
 };
 
 /**
@@ -87,7 +87,7 @@ FileContextMenu.prototype.addOptions = function() {
       });
       this.close();
     }
-  }.bind(this), this.createAddIconToBnFn(VectorPaths.trash, Language.getStr("Delete")));
+  }.bind(this), this.createAddIconToBnFn((HatchPlus ? VectorPaths.bdTrash : VectorPaths.trash), Language.getStr("Delete")));
 };
 
 /**

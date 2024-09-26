@@ -175,7 +175,7 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
   }
 
   const r = (Hatchling || HatchPlus) ? 7 : null
-  const m = (Hatchling || HatchPlus) ? 2 : 0
+  const m = RowDialog.m
   // TODO: use RowDialog.createMainBnWithText instead
   const button = new Button(0 + m, y + m, width - 2*m, RowDialog.bnHeight - 2*m, contentGroup, color, r, r);
   

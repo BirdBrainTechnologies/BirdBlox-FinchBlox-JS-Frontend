@@ -501,12 +501,23 @@ BlockStack.prototype.fly = function() {
   this.tab.updateArrows();
 
   if (Hatchling || HatchPlus) {
+    //Add a drop shadow while flying
+    this.group.setAttributeNS(null, "filter", "url(#" + Block.shadowId + ")")
+    this.currentShadow = Block.shadowId
+
     this.passRecursivelyDown("fly")
   }
 };
 
 BlockStack.prototype.updateShadow = function(useRed) {
-  this.passRecursivelyDown("updateShadow", useRed)
+  //this.passRecursivelyDown("updateShadow", useRed)
+
+  let id = useRed ? Block.redShadowId : Block.shadowId
+
+  if (this.currentShadow != null && this.currentShadow != id) {
+    this.group.setAttributeNS(null, "filter", "url(#" + id + ")")
+    this.currentShadow = id
+  }
 }
 
 /**
@@ -523,6 +534,9 @@ BlockStack.prototype.land = function() {
   this.tab.updateArrows();
 
   if (Hatchling || HatchPlus) { 
+    this.currentShadow = null
+    this.group.removeAttributeNS(null, "filter")
+
     this.passRecursivelyDown("land")
     HL_Utils.showPortsPopup(this.firstBlock) 
   }

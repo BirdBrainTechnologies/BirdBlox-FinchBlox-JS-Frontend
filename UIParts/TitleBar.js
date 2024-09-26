@@ -288,28 +288,6 @@ TitleBar.makeButtons = function() {
       TB.levelButton.remove()
       TB.levelButton = new HLLevelSwitch(TB.levelBnX, y)
 
-      //Add the zoom and recenter buttons
-      const zoomBnW = 25
-      const zoomBnM = 5 
-      TB.zoomBnGroup = GuiElements.create.group(TB.width - zoomBnW - 1.5*zoomBnM, TB.height + 40, TBLayer);
-      const zoomBnBg = GuiElements.draw.rect(0, 0, zoomBnW + 3*zoomBnM, 3*zoomBnW + 6*zoomBnM, TB.bg, 10, 10);
-      TB.zoomBnGroup.appendChild(zoomBnBg);
-      const zoomPlusBn = new Button(zoomBnM, 2*zoomBnM, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
-      zoomPlusBn.addColorIcon(VectorPaths.bdZoomIn, 0.75*zoomBnW, Colors.ballyBrandBlue)
-      zoomPlusBn.setCallbackFunction(function() {
-        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, false, true)
-      }, false)
-      const zoomMinusBn = new Button(zoomBnM, 3*zoomBnM + zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
-      zoomMinusBn.addColorIcon(VectorPaths.bdZoomOut, 0.17*zoomBnW, Colors.ballyBrandBlue)
-      zoomMinusBn.setCallbackFunction(function() {
-        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, true, true)
-      }, false)
-      const recenterBn = new Button(zoomBnM, 4*zoomBnM + 2*zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5)
-      recenterBn.addColorIcon(VectorPaths.bdRecenter, 0.85*zoomBnW, Colors.ballyBrandBlue)
-      recenterBn.setCallbackFunction(function() {
-        TabManager.activeTab.recenter()
-      }, false)
-
       //Add the filename to the title bar
       const etW = TB.width - 2*TB.sideWidth
       TB.editableFileName = new HLEditableFileName(TB.sideWidth, 5, etW, TBLayer)
@@ -410,6 +388,31 @@ TitleBar.makeButtons = function() {
     UndoManager.setUndoButton(TB.undoButton);
   }
 
+
+  if (Hatchling || HatchPlus) {
+    //Add the zoom and recenter buttons
+      const zoomBnW = 25
+      const zoomBnM = 5 
+      TB.zoomBnGroup = GuiElements.create.group(TB.width - zoomBnW - 1.5*zoomBnM, TB.height + 40, TBLayer);
+      const zoomBnBg = GuiElements.draw.rect(0, 0, zoomBnW + 3*zoomBnM, 3*zoomBnW + 6*zoomBnM, TB.bg, 10, 10);
+      TB.zoomBnGroup.appendChild(zoomBnBg);
+      const zoomPlusBn = new Button(zoomBnM, 2*zoomBnM, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5, TB.bg)
+      zoomPlusBn.addColorIcon(VectorPaths.bdZoomIn, 0.75*zoomBnW, Colors.ballyBrandBlue)
+      zoomPlusBn.setCallbackFunction(function() {
+        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, false, true)
+      }, false)
+      const zoomMinusBn = new Button(zoomBnM, 3*zoomBnM + zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5, TB.bg)
+      zoomMinusBn.addColorIcon(VectorPaths.bdZoomOut, 0.17*zoomBnW, Colors.ballyBrandBlue)
+      zoomMinusBn.setCallbackFunction(function() {
+        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, true, true)
+      }, false)
+      const recenterBn = new Button(zoomBnM, 4*zoomBnM + 2*zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5, TB.bg)
+      recenterBn.addColorIcon(VectorPaths.bdRecenter, 0.85*zoomBnW, Colors.ballyBrandBlue)
+      recenterBn.setCallbackFunction(function() {
+        TabManager.activeTab.recenter()
+      }, false)
+  }
+
   
 
   TB.debugBn = null;
@@ -439,6 +442,7 @@ TitleBar.removeButtons = function() {
     TB.viewBn.remove();
     if (HatchPlus) {
       TB.finchButton.remove();
+      TB.zoomBnGroup.remove()
     } else {
       TB.hummingbirdBn.remove();
       TB.batteryBn.remove();

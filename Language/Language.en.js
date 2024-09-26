@@ -241,5 +241,6 @@ Language.en = {
 "block_Single_Neopixel":"Neopixel R (Slot 1) % G (Slot 2) % B (Slot 3) %",
 "Hatchling":"Hatchling",
 "block_Button_Presses":"Button Presses",
-"block_Claps":"Claps"
+"block_Claps":"Claps",
+"Import":"Import"
 }
