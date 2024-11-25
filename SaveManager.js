@@ -131,6 +131,7 @@ SaveManager.userNew = function(nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.promptNewFile = function(message, nextAction) {
+  //console.log("*** promptNewFile")
   SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
     SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
   });
@@ -143,6 +144,7 @@ SaveManager.promptNewFile = function(message, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.promptNewFileWithDefault = function(message, defaultName, nextAction) {
+  //console.log("*** promptNewFileWithDefault")
   DialogManager.showPromptDialog(Language.getStr("New"), message, defaultName, true, function(cancelled, response) {
     if (!cancelled) {
       SaveManager.sanitizeNew(response.trim(), nextAction);
@@ -388,6 +390,7 @@ SaveManager.delete = function(isRecording, filename, nextAction) {
  * @param {boolean} [isRecording=false] - Whether the name should be compared to recordings instead of files
  */
 SaveManager.getAvailableName = function(filename, callbackFn, isRecording) {
+  //console.log("*** getAvailableName " + filename)
   if (isRecording == null) {
     isRecording = false;
   }
@@ -488,6 +491,14 @@ SaveManager.duplicate = function(filename, newName, nextAction) {
   request.addParam("newFilename", newName);
   HtmlServer.sendRequestWithCallback(request.toString(), nextAction);
 };
+
+/**
+ * Sends a request to the backend to import a file
+ */
+SaveManager.userImportFile = function() {
+  const request = new HttpRequestBuilder("data/import");
+  HtmlServer.sendRequestWithCallback(request.toString());
+}
 
 /**
  * Handles a request from the user to export a file

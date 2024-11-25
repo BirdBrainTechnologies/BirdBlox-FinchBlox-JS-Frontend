@@ -53,12 +53,17 @@ function BlockList() {
       cat.push("Sound_3");
       cat.push("Control_3");
     }
+  } else if (HatchPlus) {
+    cat.push("Ports");
+    cat.push("Display");
+    cat.push("Sound");
+    cat.push("Sensors");
+    cat.push("Control");
+    cat.push("Operators");
+    cat.push("Variables");
+    cat.push("Data");
   } else {
-    if (HatchPlus) {
-      cat.push("Hatchling");
-    } else {
-      cat.push("Robots");
-    }
+    cat.push("Robots");
     cat.push("Operators");
     cat.push("Sound");
     cat.push("Tablet");
@@ -324,8 +329,14 @@ BlockList.populateCat_operators = function(category) {
   category.addBlockByName("B_Divide");
   category.addSpace();
   category.addBlockByName("B_Mod");
-  category.addBlockByName("B_Round");
-  category.addBlockByName("B_mathOfNumber");
+  if (HatchPlus) {
+    category.addBlockByName("B_Abs");
+    category.addBlockByName("B_Min");
+    category.addBlockByName("B_Max")
+  } else {
+    category.addBlockByName("B_Round");
+    category.addBlockByName("B_mathOfNumber");
+  }
   category.addBlockByName("B_PickRandom");
   category.addSpace();
   category.addBlockByName("B_LessThan");
@@ -339,11 +350,13 @@ BlockList.populateCat_operators = function(category) {
   category.addBlockByName("B_True");
   category.addBlockByName("B_False");
   category.addSpace();
-  category.addBlockByName("B_LetterOf");
-  category.addBlockByName("B_LengthOf");
-  category.addBlockByName("B_join");
-  category.addBlockByName("B_Split");
-  category.addSpace();
+  if(!HatchPlus) {
+    category.addBlockByName("B_LetterOf");
+    category.addBlockByName("B_LengthOf");
+    category.addBlockByName("B_join");
+    category.addBlockByName("B_Split");
+    category.addSpace();
+  }
   category.addBlockByName("B_IsAType");
   category.trimBottom();
 };
@@ -356,10 +369,14 @@ BlockList.populateCat_control = function(category) {
   category.addBlockByName("B_WhenIReceive");
   category.addSpace();
   category.addBlockByName("B_When");
-  category.addBlockByName("B_WhenKeyPressed");
+  if (!HatchPlus) {
+   category.addBlockByName("B_WhenKeyPressed");
+  }
   category.addSpace();
   category.addBlockByName("B_Broadcast");
-  category.addBlockByName("B_BroadcastAndWait");
+  if (!HatchPlus) {
+   category.addBlockByName("B_BroadcastAndWait");
+  }
   category.addBlockByName("B_Message");
   category.addSpace();
   category.addBlockByName("B_Wait");
@@ -380,6 +397,14 @@ BlockList.populateCat_control = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_sound = function(category) {
+  if (HatchPlus) {
+    category.addBlockByName("B_HLBuzzer");
+    category.addBlockByName("B_ChangeTempoBy");
+    category.addBlockByName("B_SetTempoTo");
+    category.addBlockByName("B_Tempo");
+    category.trimBottom();
+    return
+  }
   const button = category.addButton(Language.getStr("Record_sound"), RecordingDialog.showDialog, true);
   button.setDisabledTabFunction(RecordingDialog.alertNotInProject);
   category.addSpace();
@@ -416,6 +441,11 @@ BlockList.populateCat_variables = function(category) {
     // These Blocks let the variable be selected from a DropSlot, so we only need one of each of them
     category.addBlockByName("B_SetTo");
     category.addBlockByName("B_ChangeBy");
+  }
+
+  if (HatchPlus) { //Hatchling gives lists their own category
+    category.trimBottom();
+    return
   }
 
   category.addSpace();
@@ -566,11 +596,100 @@ BlockList.populateItem_finch = function(collapsibleItem) {
   collapsibleItem.finalize();
 };
 
+// HatchPlus Only Categories
+
+/**
+ * HatchPlus Ports category
+ * @param {Category} category
+ */
+BlockList.populateCat_ports = function(category) {
+  category.addBlockByName("B_HLEmptyPortA");
+  category.addSpace();
+  category.addBlockByName("B_HLEmptyPortB");
+  category.addSpace();
+  category.addBlockByName("B_HLEmptyPortC");
+  category.addSpace();
+  category.addBlockByName("B_HLEmptyPortD");
+  category.addSpace();
+  category.addBlockByName("B_HLEmptyPortE");
+  category.addSpace();
+  category.addBlockByName("B_HLEmptyPortF");
+  category.addSpace();
+  category.trimBottom();
+}
+
+/**
+ * HatchPlus Display category
+ * @param {Category} category
+ */
+BlockList.populateCat_display = function(category) {
+  category.addBlockByName("B_HLLedArray");
+  category.addBlockByName("B_HLPrint");
+  category.addBlockByName("B_HLPlot");
+  category.addBlockByName("B_HLUnplot");
+  category.trimBottom();
+}
+
+/**
+ * HatchPlus Sensors category
+ * @param {Category} category
+ */
+BlockList.populateCat_sensors = function(category) {
+  category.addBlockByName("B_HLBBClaps");
+  category.addBlockByName("B_HLBBButtonPresses");
+  category.addSpace();
+  //category.addBlockByName("B_HLMagnetometer");
+  category.addBlockByName("B_HLButton");
+  category.addBlockByName("B_HLAccelerometer");
+  category.addBlockByName("B_HLSound");
+  //category.addBlockByName("B_HLOrientation");
+  //category.addBlockByName("B_HLCompass");
+  //category.addBlockByName("B_HLV2Sensor");
+  category.trimBottom();
+}
+
+/**
+ * HatchPlus Data (aka lists) category
+ * @param {Category} category
+ */
+BlockList.populateCat_data = function(category) {
+  category.addButton(Language.getStr("Create_List"), CodeManager.newList);
+  category.addSpace();
+
+  const lists = CodeManager.listList;
+  if (lists.length > 0) {
+    lists.forEach(function(list) {
+      category.addListBlock(list);
+    });
+    category.addSpace();
+    category.addBlockByName("B_AddToList");
+    category.addBlockByName("B_DeleteItemOfList");
+    category.addBlockByName("B_InsertItemAtOfList");
+    category.addBlockByName("B_ReplaceItemOfListWith");
+    category.addBlockByName("B_CopyListToList");
+  }
+
+  // These list functions can take input from the Split block, so we show them even if there are no Lists
+  category.addBlockByName("B_ItemOfList");
+  category.addBlockByName("B_LengthOfList");
+  category.addBlockByName("B_ListContainsItem");
+
+  //category.addBlockByName("B_MicroBlocksList");
+  //category.addBlockByName("B_AddToMBList");
+  category.addSpace();
+  category.addBlockByName("B_LetterOf");
+  category.addBlockByName("B_LengthOf");
+  category.addBlockByName("B_join");
+  category.addBlockByName("B_Split");
+  category.addSpace();
+  category.trimBottom();
+}
+
 /**
  * HatchPlus Hatchling category
  * @param {Category} category
  */
-BlockList.populateCat_hatchling = function(category) {
+/*BlockList.populateCat_hatchling = function(category) {
   category.addBlockByName("B_HLEmptyPortA");
   category.addSpace();
   category.addBlockByName("B_HLEmptyPortB");
@@ -596,7 +715,7 @@ BlockList.populateCat_hatchling = function(category) {
   category.addBlockByName("B_HLCompass");
   category.addBlockByName("B_HLV2Sensor");
   category.trimBottom();
-}
+}*/
 
 /**
  * @param {CollapsibleItem} collapsibleItem

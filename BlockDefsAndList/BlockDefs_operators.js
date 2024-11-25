@@ -132,6 +132,51 @@ B_Mod.prototype.startAction = function() {
 };
 
 
+///// Abs, Min, and Max are only used with the MicroBlocks VM
+
+function B_Abs(x, y) {
+  ReporterBlock.call(this, x, y, "operators");
+  this.addPart(new NumSlot(this, "NumS_1", -10));
+  this.parseTranslation(Language.getStr("abs"));
+}
+B_Abs.prototype = Object.create(ReporterBlock.prototype)
+B_Abs.prototype.constructor = B_Abs
+//MicroBlocks functions
+B_Abs.prototype.primName = function() { return "absoluteValue" }
+B_Abs.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions()]
+}
+
+function B_Min(x, y) {
+  ReporterBlock.call(this, x, y, "operators");
+  this.addPart(new NumSlot(this, "NumS_1", 1));
+  this.addPart(new NumSlot(this, "NumS_2", 2));
+  this.parseTranslation(Language.getStr("block_min"));
+}
+B_Min.prototype = Object.create(ReporterBlock.prototype)
+B_Min.prototype.constructor = B_Min
+//MicroBlocks functions
+B_Min.prototype.primName = function() { return "minimum" }
+B_Min.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
+
+function B_Max(x, y) {
+  ReporterBlock.call(this, x, y, "operators");
+  this.addPart(new NumSlot(this, "NumS_1", 1));
+  this.addPart(new NumSlot(this, "NumS_2", 2));
+  this.parseTranslation(Language.getStr("block_max"));
+}
+B_Max.prototype = Object.create(ReporterBlock.prototype)
+B_Max.prototype.constructor = B_Max
+//MicroBlocks functions
+B_Max.prototype.primName = function() { return "maximum" }
+B_Max.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
+
+///// END MicroBlocks VM blocks
+
 
 function B_Round(x, y) {
   ReporterBlock.call(this, x, y, "operators");
@@ -147,11 +192,6 @@ B_Round.prototype.startAction = function() {
   const val = data1.getValueWithC(false, true); // Integer
   return new ExecutionStatusResult(new NumData(val, isValid));
 };
-if (HatchPlus) {
-  //not supported in microblocks
-  B_Round.prototype.checkActive = function() { return false }
-}
-
 
 
 function B_PickRandom(x, y) {
@@ -487,10 +527,12 @@ function B_IsAType(x, y) {
   this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.any, Slot.outputTypes.any, new NumData(5)));
   const dS = new DropSlot(this, "DS_type", null, null, new SelectionData(Language.getStr("number"), "number"));
   dS.addOption(new SelectionData(Language.getStr("number"), "number"));
-  dS.addOption(new SelectionData(Language.getStr("text"), "text"));
+  dS.addOption(new SelectionData(Language.getStr("text"), "string"));
   dS.addOption(new SelectionData(Language.getStr("boolean"), "boolean"));
   dS.addOption(new SelectionData(Language.getStr("list"), "list"));
-  dS.addOption(new SelectionData(Language.getStr("invalid_number"), "invalid_num"));
+  if (!HatchPlus) {
+    dS.addOption(new SelectionData(Language.getStr("invalid_number"), "invalid_num"));
+  }
   this.addPart(dS);
 
   this.parseTranslation(Language.getStr("block_validate"));
@@ -500,7 +542,39 @@ B_IsAType.prototype.constructor = B_IsAType;
 //MicroBlocks functions
 B_IsAType.prototype.primName = function() { return "isType" }
 B_IsAType.prototype.argList = function() { 
-  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+  let value = this.slots[0].getMicroBlocksInstructions()
+  if (!this.slots[0].hasChild) {
+    let data = this.slots[0].getDataNotFromChild()
+    switch(data.type) {
+    case Data.types.num: 
+      if (data.isValid) {
+        value = data.getValue() 
+      } else {
+        value = "NaN"
+      }
+      break;
+    case Data.types.string:
+      if (data.isNumber()) {
+        value = data.asNum().getValue()
+      } else if (data.asBool().isValid) {
+        value = data.asBool().getValue()
+      } else {
+        value = data.getValue()
+      }
+      break;
+    case Data.types.bool:
+      if (data.isValid) {
+        value = data.getValue() 
+      } else {
+        value = false
+      }
+      break;
+    default:
+      console.error("Unhandled data type " + data.type)
+      //TODO: handle list or selection data? Should not be able to enter either into an editable slot, right?
+    }
+  }
+  return [value, this.slots[1].getMicroBlocksInstructions()]
 }
 /* Returns whether the data is of the selected type */
 B_IsAType.prototype.startAction = function() {
@@ -516,7 +590,7 @@ B_IsAType.prototype.startAction = function() {
     } else {
       return new ExecutionStatusResult(new BoolData(false));
     }
-  } else if (selection === "text") {
+  } else if (selection === "string") {
     return new ExecutionStatusResult(new BoolData(data.type === types.string && !data.isNumber()));
   } else if (selection === "boolean") {
     return new ExecutionStatusResult(new BoolData(data.type === types.bool));
@@ -535,10 +609,6 @@ B_IsAType.prototype.startAction = function() {
     return new ExecutionStatusResult(new BoolData(false));
   }
 };
-if (HatchPlus) {
-  //Almost works, but not sure how to make sure numbers are numbers, text is text, etc.
-  B_IsAType.prototype.checkActive = function() { return false }
-}
 
 
 function B_mathOfNumber(x, y) {
@@ -617,7 +687,4 @@ B_mathOfNumber.prototype.startAction = function() {
   }
   return new ExecutionStatusResult(new NumData(value, isValid));
 };
-if (HatchPlus) {
-  //most options are not supported in microblocks
-  B_mathOfNumber.prototype.checkActive = function() { return false }
-}
+

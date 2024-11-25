@@ -95,3 +95,10 @@ ListDropSlot.prototype.checkListUsed = function(list) {
   }
   return false;
 };
+
+/**
+ * Overrides Slot function 
+ */
+ListDropSlot.prototype.getMicroBlocksInstructions = function() {
+  return new BlockArg("v", [this.getDataNotFromChild().getValue().name])
+}

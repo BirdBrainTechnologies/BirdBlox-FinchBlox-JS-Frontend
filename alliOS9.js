@@ -2532,7 +2532,15 @@ Language.en = {
 "Hatchling":"Hatchling",
 "block_Button_Presses":"Button Presses",
 "block_Claps":"Claps",
-"Import":"Import"
+"Import":"Import",
+"Ports":"Ports",
+"Display":"Display", //TODO: Use block_LED_Display?
+"Sensors":"Sensors",
+"Data":"Data",
+"block_plot":"plot x (Slot 1) y (Slot 2)",
+"block_unplot":"unplot x (Slot 1) y (Slot 2)",
+"block_min":"min (Slot 1) (Slot 2)",
+"block_max":"max (Slot 1) (Slot 2)"
 }
 
 //Spanish Translation
@@ -7202,6 +7210,9 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, p
         FBPopup.currentPopup.close()
       }
     }
+    if (HatchPlus && (event.code == 'Enter' || event.keyCode === 13)) { //enter
+      FBPopup.currentPopup.confirm() //will also close the dialog
+    }
     if (event.code == 'Delete' || event.code == 'Backspace' ||
       event.keyCode === 46 || event.keyCode === 8) { //delete or backspace
       this.charCount--;
@@ -8554,12 +8565,17 @@ function BlockList() {
       cat.push("Sound_3");
       cat.push("Control_3");
     }
+  } else if (HatchPlus) {
+    cat.push("Ports");
+    cat.push("Display");
+    cat.push("Sound");
+    cat.push("Sensors");
+    cat.push("Control");
+    cat.push("Operators");
+    cat.push("Variables");
+    cat.push("Data");
   } else {
-    if (HatchPlus) {
-      cat.push("Hatchling");
-    } else {
-      cat.push("Robots");
-    }
+    cat.push("Robots");
     cat.push("Operators");
     cat.push("Sound");
     cat.push("Tablet");
@@ -8825,8 +8841,14 @@ BlockList.populateCat_operators = function(category) {
   category.addBlockByName("B_Divide");
   category.addSpace();
   category.addBlockByName("B_Mod");
-  category.addBlockByName("B_Round");
-  category.addBlockByName("B_mathOfNumber");
+  if (HatchPlus) {
+    category.addBlockByName("B_Abs");
+    category.addBlockByName("B_Min");
+    category.addBlockByName("B_Max")
+  } else {
+    category.addBlockByName("B_Round");
+    category.addBlockByName("B_mathOfNumber");
+  }
   category.addBlockByName("B_PickRandom");
   category.addSpace();
   category.addBlockByName("B_LessThan");
@@ -8840,11 +8862,13 @@ BlockList.populateCat_operators = function(category) {
   category.addBlockByName("B_True");
   category.addBlockByName("B_False");
   category.addSpace();
-  category.addBlockByName("B_LetterOf");
-  category.addBlockByName("B_LengthOf");
-  category.addBlockByName("B_join");
-  category.addBlockByName("B_Split");
-  category.addSpace();
+  if(!HatchPlus) {
+    category.addBlockByName("B_LetterOf");
+    category.addBlockByName("B_LengthOf");
+    category.addBlockByName("B_join");
+    category.addBlockByName("B_Split");
+    category.addSpace();
+  }
   category.addBlockByName("B_IsAType");
   category.trimBottom();
 };
@@ -8857,10 +8881,14 @@ BlockList.populateCat_control = function(category) {
   category.addBlockByName("B_WhenIReceive");
   category.addSpace();
   category.addBlockByName("B_When");
-  category.addBlockByName("B_WhenKeyPressed");
+  if (!HatchPlus) {
+   category.addBlockByName("B_WhenKeyPressed");
+  }
   category.addSpace();
   category.addBlockByName("B_Broadcast");
-  category.addBlockByName("B_BroadcastAndWait");
+  if (!HatchPlus) {
+   category.addBlockByName("B_BroadcastAndWait");
+  }
   category.addBlockByName("B_Message");
   category.addSpace();
   category.addBlockByName("B_Wait");
@@ -8881,6 +8909,14 @@ BlockList.populateCat_control = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_sound = function(category) {
+  if (HatchPlus) {
+    category.addBlockByName("B_HLBuzzer");
+    category.addBlockByName("B_ChangeTempoBy");
+    category.addBlockByName("B_SetTempoTo");
+    category.addBlockByName("B_Tempo");
+    category.trimBottom();
+    return
+  }
   var button = category.addButton(Language.getStr("Record_sound"), RecordingDialog.showDialog, true);
   button.setDisabledTabFunction(RecordingDialog.alertNotInProject);
   category.addSpace();
@@ -8917,6 +8953,11 @@ BlockList.populateCat_variables = function(category) {
     // These Blocks var the variable be selected from a DropSlot, so we only need one of each of them
     category.addBlockByName("B_SetTo");
     category.addBlockByName("B_ChangeBy");
+  }
+
+  if (HatchPlus) { //Hatchling gives lists their own category
+    category.trimBottom();
+    return
   }
 
   category.addSpace();
@@ -9067,11 +9108,100 @@ BlockList.populateItem_finch = function(collapsibleItem) {
   collapsibleItem.finalize();
 };
 
+// HatchPlus Only Categories
+
+/**
+ * HatchPlus Ports category
+ * @param {Category} category
+ */
+BlockList.populateCat_ports = function(category) {
+  category.addBlockByName("B_HLEmptyPortA");
+  category.addSpace();
+  category.addBlockByName("B_HLEmptyPortB");
+  category.addSpace();
+  category.addBlockByName("B_HLEmptyPortC");
+  category.addSpace();
+  category.addBlockByName("B_HLEmptyPortD");
+  category.addSpace();
+  category.addBlockByName("B_HLEmptyPortE");
+  category.addSpace();
+  category.addBlockByName("B_HLEmptyPortF");
+  category.addSpace();
+  category.trimBottom();
+}
+
+/**
+ * HatchPlus Display category
+ * @param {Category} category
+ */
+BlockList.populateCat_display = function(category) {
+  category.addBlockByName("B_HLLedArray");
+  category.addBlockByName("B_HLPrint");
+  category.addBlockByName("B_HLPlot");
+  category.addBlockByName("B_HLUnplot");
+  category.trimBottom();
+}
+
+/**
+ * HatchPlus Sensors category
+ * @param {Category} category
+ */
+BlockList.populateCat_sensors = function(category) {
+  category.addBlockByName("B_HLBBClaps");
+  category.addBlockByName("B_HLBBButtonPresses");
+  category.addSpace();
+  //category.addBlockByName("B_HLMagnetometer");
+  category.addBlockByName("B_HLButton");
+  category.addBlockByName("B_HLAccelerometer");
+  category.addBlockByName("B_HLSound");
+  //category.addBlockByName("B_HLOrientation");
+  //category.addBlockByName("B_HLCompass");
+  //category.addBlockByName("B_HLV2Sensor");
+  category.trimBottom();
+}
+
+/**
+ * HatchPlus Data (aka lists) category
+ * @param {Category} category
+ */
+BlockList.populateCat_data = function(category) {
+  category.addButton(Language.getStr("Create_List"), CodeManager.newList);
+  category.addSpace();
+
+  var lists = CodeManager.listList;
+  if (lists.length > 0) {
+    lists.forEach(function(list) {
+      category.addListBlock(list);
+    });
+    category.addSpace();
+    category.addBlockByName("B_AddToList");
+    category.addBlockByName("B_DeleteItemOfList");
+    category.addBlockByName("B_InsertItemAtOfList");
+    category.addBlockByName("B_ReplaceItemOfListWith");
+    category.addBlockByName("B_CopyListToList");
+  }
+
+  // These list functions can take input from the Split block, so we show them even if there are no Lists
+  category.addBlockByName("B_ItemOfList");
+  category.addBlockByName("B_LengthOfList");
+  category.addBlockByName("B_ListContainsItem");
+
+  //category.addBlockByName("B_MicroBlocksList");
+  //category.addBlockByName("B_AddToMBList");
+  category.addSpace();
+  category.addBlockByName("B_LetterOf");
+  category.addBlockByName("B_LengthOf");
+  category.addBlockByName("B_join");
+  category.addBlockByName("B_Split");
+  category.addSpace();
+  category.trimBottom();
+}
+
 /**
  * HatchPlus Hatchling category
  * @param {Category} category
  */
-BlockList.populateCat_hatchling = function(category) {
+/*BlockList.populateCat_hatchling = function(category) {
   category.addBlockByName("B_HLEmptyPortA");
   category.addSpace();
   category.addBlockByName("B_HLEmptyPortB");
@@ -9097,7 +9227,7 @@ BlockList.populateCat_hatchling = function(category) {
   category.addBlockByName("B_HLCompass");
   category.addBlockByName("B_HLV2Sensor");
   category.trimBottom();
-}
+}*/
 
 /**
  * @param {CollapsibleItem} collapsibleItem
@@ -9369,6 +9499,54 @@ Colors.setCategory = function() {
   }
   if (HatchPlus) {
     Colors.categoryColors = {
+      "ports": Colors.ballyBrandBlue,
+      "display": Colors.ballyOrange,
+      "operators": Colors.ballyBlue,
+      "sound": Colors.ballyPurple,
+      "control": Colors.ballyGreenYellow,
+      "variables": Colors.ballyPink,
+      "data": Colors.ballyPink,
+      "lists": Colors.ballyPink,
+      "sensors": Colors.ballyPink,
+      "inactive": Colors.ballyGray
+    }
+    Colors.blockPalette = {
+      "ports": Colors.ballyBrandBlueLight,
+      "display": Colors.ballyOrangeLight,
+      "operators": Colors.ballyBlueLight,
+      "sound": Colors.ballyPurpleLight,
+      "control": Colors.ballyGreenYellowLight,
+      "variables": Colors.ballyPinkLight,
+      "data": Colors.ballyPinkLight,
+      "lists": Colors.ballyPinkLight,
+      "sensors": Colors.ballyPinkLight,
+    }
+    Colors.blockOutline = {
+      "ports": Colors.ballyBrandBlueDark,
+      "display": Colors.ballyOrangeDark,
+      "operators": Colors.ballyBlueDark,
+      "sound": Colors.ballyPurpleDark,
+      "control": Colors.ballyGreenYellowDark,
+      "variables": Colors.ballyPinkDark,
+      "data": Colors.ballyPinkDark,
+      "lists": Colors.ballyPinkDark,
+      "sensors": Colors.ballyPinkDark,
+      "inactive": Colors.ballyGrayDark
+    }
+    Colors.dragColors = {
+      //TODO: Make an onDrag color for brand blue
+      "ports": Colors.ballyBrandBlue,
+      "display": Colors.ballyOrangeOnDrag,
+      "operators": Colors.ballyBlueOnDrag,
+      "sound": Colors.ballyPurpleOnDrag,
+      "control": Colors.ballyGreenYellowOnDrag,
+      "variables": Colors.ballyPinkOnDrag,
+      "data": Colors.ballyPinkOnDrag,
+      "lists": Colors.ballyPinkOnDrag,
+      "sensors": Colors.ballyPinkOnDrag,
+      "inactive": Colors.ballyGray //TODO: Make drag color?
+    }
+    /*Colors.categoryColors = {
       "hatchling": Colors.ballyBrandBlue,
       "tablet": Colors.ballyOrange,
       "operators": Colors.ballyBlue,
@@ -9406,7 +9584,7 @@ Colors.setCategory = function() {
       "variables": Colors.ballyPinkOnDrag,
       "lists": Colors.ballyPinkOnDrag,
       "inactive": Colors.ballyGray //TODO: Make drag color?
-    }
+    }*/
   }
 };
 
@@ -11166,7 +11344,7 @@ BlockGraphics.create = {};
 BlockGraphics.create.block = function(category, group, returnsValue, active) {
   var path = GuiElements.create.path(group);
   if (category == null) {
-    path.setAttributeNS(null, "fill", BlockPalette.currentColor);
+    path.setAttributeNS(null, "fill", Colors.ballyBrandBlueLight);
     return path
   }
 
@@ -11368,7 +11546,7 @@ BlockGraphics.update.hexSlotGradient = function(path, category, active) {
  */
 BlockGraphics.update.blockActive = function(path, category, returnsValue, active, glowing) {
   if (category == null) {
-    path.setAttributeNS(null, "fill", BlockPalette.currentColor);
+    path.setAttributeNS(null, "fill", Colors.ballyBrandBlueLight);
     return path
   }
   if (!active) category = "inactive";
@@ -13726,7 +13904,8 @@ BlockPalette.setGraphics = function() {
   } else {
     BlockPalette.width = 253;
     BlockPalette.catY = TitleBar.height;
-    BlockPalette.catH = 30 * 3 + BlockPalette.catVMargin * 3; // 3 rows of BNs, 3 margins, 30 = height per BN
+    var numRows = HatchPlus ? 4 : 3
+    BlockPalette.catH = 30 * numRows + BlockPalette.catVMargin * numRows; // 3 rows of BNs, 3 margins, 30 = height per BN
     BlockPalette.height = GuiElements.height - TitleBar.height - BlockPalette.catH;
     BlockPalette.y = BlockPalette.catY + BlockPalette.catH;
     BlockPalette.bg = Colors.white;
@@ -13745,9 +13924,6 @@ BlockPalette.setGraphics = function() {
   BlockPalette.labelFont = Font.uiFont(13);
   BlockPalette.labelColor = Colors.black;
 
-  if (HatchPlus) {
-    BlockPalette.currentColor = Colors.ballyBrandBlueLight //Used for ghost blocks
-  }
 };
 
 /**
@@ -13944,7 +14120,6 @@ BlockPalette.updatePath = function(pathE) {
 }*/
 BlockPalette.updatePaletteColor = function(color) {
   if (HatchPlus) {
-    BlockPalette.currentColor = color //Used for ghost blocks
     GuiElements.update.color(BlockPalette.catRect, color)
     GuiElements.update.color(BlockPalette.palRect, color)
   } else if (Hatchling) { 
@@ -25111,6 +25286,14 @@ CodeManager.checkVarName = function(name) {
         return false;
       }
     }
+    if (HatchPlus) { //variables cannot have same name as lists
+      var lists = CodeManager.listList;
+      for (var i = 0; i < lists.length; i++) {
+        if (lists[i].getName() === name) {
+          return false
+        }
+      }
+    }
     return true;
   }
   return false;
@@ -25133,14 +25316,22 @@ CodeManager.findVar = function(name) {
 
 /**
  * Returns the index of the variable in the global array. HatchPlus only.
+ * Even values are variables, odd values are lists
  * @param {string} name - The name of the variable to find
  * @return {number} - The index of the variable, or -1 if not found
  */
 CodeManager.getVarIndex = function(name) {
   var variables = CodeManager.variableList;
+  var lists = CodeManager.listList;
+  
   for (var i = 0; i < variables.length; i++) {
     if (variables[i].getName() === name) {
-      return i;
+      return i*2;
+    }
+  }
+  for (var i = 0; i < lists.length; i++) {
+    if (lists[i].getName() === name) {
+      return i*2+1
     }
   }
   return -1;
@@ -25174,6 +25365,7 @@ CodeManager.newList = function(callbackCreate, callbackCancel) {
       result = result.trim();
       var list = new List(result);
       SaveManager.markEdited();
+      if (HatchPlus) { BlockPalette.getCategory("data").refreshGroup(); }
       BlockPalette.getCategory("variables").refreshGroup();
       if (callbackCreate != null) callbackCreate(list);
     } else {
@@ -25194,6 +25386,14 @@ CodeManager.checkListName = function(name) {
     for (var i = 0; i < lists.length; i++) {
       if (lists[i].getName() === name) {
         return false;
+      }
+    }
+    if (HatchPlus) { //variables cannot have same name as lists
+      var variables = CodeManager.variableList;
+      for (var i = 0; i < variables.length; i++) {
+        if (variables[i].getName() === name) {
+          return false;
+        }
       }
     }
     return true;
@@ -30034,7 +30234,7 @@ PromptDialog.prototype.show = function() {
 	if (!this.visible) {
 		this.visible = true
 
-		if (RowDialog.currentDialog != null) { RowDialog.currentDialog.makeInvisible() }
+		if (RD.currentDialog != null) { RD.currentDialog.makeInvisible() }
 
 		var margin = 20
 
@@ -37411,6 +37611,13 @@ ListDropSlot.prototype.checkListUsed = function(list) {
   return false;
 };
 
+/**
+ * Overrides Slot function 
+ */
+ListDropSlot.prototype.getMicroBlocksInstructions = function() {
+  return new BlockArg("v", [this.getDataNotFromChild().getValue().name])
+}
+
 
 /**
  * PortSlots select a port for Robot input/output Blocks.  They store the Data as NumData (not SelectionData)
@@ -39763,7 +39970,8 @@ B_DeviceWithPortsTriLed.prototype.updateAction = function() {
  * @constructor
  */
 function B_DeviceWithPortsBuzzer(x, y, deviceClass) {
-  CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
+  var category = HatchPlus ? "sound" : deviceClass.getDeviceTypeId()
+  CommandBlock.call(this, x, y, category);
   this.deviceClass = deviceClass;
   this.minNote = 32
   this.maxNote = 135
@@ -39982,14 +40190,17 @@ B_MicroBitPrint.prototype.updateAction = function() {
  * @constructor
  */
 function B_MicroBitButton(x, y, deviceClass) {
-  PredicateBlock.call(this, x, y, deviceClass.getDeviceTypeId());
+  var category = HatchPlus ? "sensors" : deviceClass.getDeviceTypeId()
+  PredicateBlock.call(this, x, y, category);
   this.deviceClass = deviceClass;
   this.addPart(new DeviceDropSlot(this, "DDS_1", this.deviceClass));
 
   var choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
   choice.addOption(new SelectionData("A", "buttonA"));
   choice.addOption(new SelectionData("B", "buttonB"));
-  choice.addOption(new SelectionData(Language.getStr("logo"), "V2touch"))
+  if (!HatchPlus) {
+    choice.addOption(new SelectionData(Language.getStr("logo"), "V2touch"))
+  }
   this.addPart(choice);
   this.parseTranslation(Language.getStr("block_Button"));
 };
@@ -43166,12 +43377,6 @@ B_BroadcastAndWait.prototype.updateAction = function() {
     return new ExecutionStatusDone();
   }
 };
-if (HatchPlus) {
-  B_BroadcastAndWait.prototype.checkActive = function() {
-    return false //Disabled for now. Not sure how to implement.
-  }
-}
-
 
 
 function B_Message(x, y) {
@@ -43363,12 +43568,7 @@ B_WhenKeyPressed.prototype.updateAction = function() {
     return new ExecutionStatusRunning();
   }
 }
-if (HatchPlus) {
-  B_WhenKeyPressed.prototype.checkActive = function() {
-    //Disabled for now, maybe some way to do this with a broadcast?
-    return false
-  }
-}
+
 
 //FinchBlox and Hatchling only
 function B_FBStartWhen(x, y, sensor) {
@@ -43846,6 +44046,51 @@ B_Mod.prototype.startAction = function() {
 };
 
 
+///// Abs, Min, and Max are only used with the MicroBlocks VM
+
+function B_Abs(x, y) {
+  ReporterBlock.call(this, x, y, "operators");
+  this.addPart(new NumSlot(this, "NumS_1", -10));
+  this.parseTranslation(Language.getStr("abs"));
+}
+B_Abs.prototype = Object.create(ReporterBlock.prototype)
+B_Abs.prototype.constructor = B_Abs
+//MicroBlocks functions
+B_Abs.prototype.primName = function() { return "absoluteValue" }
+B_Abs.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions()]
+}
+
+function B_Min(x, y) {
+  ReporterBlock.call(this, x, y, "operators");
+  this.addPart(new NumSlot(this, "NumS_1", 1));
+  this.addPart(new NumSlot(this, "NumS_2", 2));
+  this.parseTranslation(Language.getStr("block_min"));
+}
+B_Min.prototype = Object.create(ReporterBlock.prototype)
+B_Min.prototype.constructor = B_Min
+//MicroBlocks functions
+B_Min.prototype.primName = function() { return "minimum" }
+B_Min.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
+
+function B_Max(x, y) {
+  ReporterBlock.call(this, x, y, "operators");
+  this.addPart(new NumSlot(this, "NumS_1", 1));
+  this.addPart(new NumSlot(this, "NumS_2", 2));
+  this.parseTranslation(Language.getStr("block_max"));
+}
+B_Max.prototype = Object.create(ReporterBlock.prototype)
+B_Max.prototype.constructor = B_Max
+//MicroBlocks functions
+B_Max.prototype.primName = function() { return "maximum" }
+B_Max.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+}
+
+///// END MicroBlocks VM blocks
+
 
 function B_Round(x, y) {
   ReporterBlock.call(this, x, y, "operators");
@@ -43861,11 +44106,6 @@ B_Round.prototype.startAction = function() {
   var val = data1.getValueWithC(false, true); // Integer
   return new ExecutionStatusResult(new NumData(val, isValid));
 };
-if (HatchPlus) {
-  //not supported in microblocks
-  B_Round.prototype.checkActive = function() { return false }
-}
-
 
 
 function B_PickRandom(x, y) {
@@ -44201,10 +44441,12 @@ function B_IsAType(x, y) {
   this.addPart(new RectSlot(this, "RectS_item", Slot.snapTypes.any, Slot.outputTypes.any, new NumData(5)));
   var dS = new DropSlot(this, "DS_type", null, null, new SelectionData(Language.getStr("number"), "number"));
   dS.addOption(new SelectionData(Language.getStr("number"), "number"));
-  dS.addOption(new SelectionData(Language.getStr("text"), "text"));
+  dS.addOption(new SelectionData(Language.getStr("text"), "string"));
   dS.addOption(new SelectionData(Language.getStr("boolean"), "boolean"));
   dS.addOption(new SelectionData(Language.getStr("list"), "list"));
-  dS.addOption(new SelectionData(Language.getStr("invalid_number"), "invalid_num"));
+  if (!HatchPlus) {
+    dS.addOption(new SelectionData(Language.getStr("invalid_number"), "invalid_num"));
+  }
   this.addPart(dS);
 
   this.parseTranslation(Language.getStr("block_validate"));
@@ -44214,7 +44456,39 @@ B_IsAType.prototype.constructor = B_IsAType;
 //MicroBlocks functions
 B_IsAType.prototype.primName = function() { return "isType" }
 B_IsAType.prototype.argList = function() { 
-  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+  var value = this.slots[0].getMicroBlocksInstructions()
+  if (!this.slots[0].hasChild) {
+    var data = this.slots[0].getDataNotFromChild()
+    switch(data.type) {
+    case Data.types.num: 
+      if (data.isValid) {
+        value = data.getValue() 
+      } else {
+        value = "NaN"
+      }
+      break;
+    case Data.types.string:
+      if (data.isNumber()) {
+        value = data.asNum().getValue()
+      } else if (data.asBool().isValid) {
+        value = data.asBool().getValue()
+      } else {
+        value = data.getValue()
+      }
+      break;
+    case Data.types.bool:
+      if (data.isValid) {
+        value = data.getValue() 
+      } else {
+        value = false
+      }
+      break;
+    default:
+      console.error("Unhandled data type " + data.type)
+      //TODO: handle list or selection data? Should not be able to enter either into an editable slot, right?
+    }
+  }
+  return [value, this.slots[1].getMicroBlocksInstructions()]
 }
 /* Returns whether the data is of the selected type */
 B_IsAType.prototype.startAction = function() {
@@ -44230,7 +44504,7 @@ B_IsAType.prototype.startAction = function() {
     } else {
       return new ExecutionStatusResult(new BoolData(false));
     }
-  } else if (selection === "text") {
+  } else if (selection === "string") {
     return new ExecutionStatusResult(new BoolData(data.type === types.string && !data.isNumber()));
   } else if (selection === "boolean") {
     return new ExecutionStatusResult(new BoolData(data.type === types.bool));
@@ -44249,10 +44523,6 @@ B_IsAType.prototype.startAction = function() {
     return new ExecutionStatusResult(new BoolData(false));
   }
 };
-if (HatchPlus) {
-  //Almost works, but not sure how to make sure numbers are numbers, text is text, etc.
-  B_IsAType.prototype.checkActive = function() { return false }
-}
 
 
 function B_mathOfNumber(x, y) {
@@ -44331,10 +44601,7 @@ B_mathOfNumber.prototype.startAction = function() {
   }
   return new ExecutionStatusResult(new NumData(value, isValid));
 };
-if (HatchPlus) {
-  //most options are not supported in microblocks
-  B_mathOfNumber.prototype.checkActive = function() { return false }
-}
+
 
 /* This file contains the implementations for Blocks in the tablet category. */
 /* TODO: remove redundancy by making these blocks subclasses of a single Block */
@@ -45089,6 +45356,9 @@ function B_List(x, y, list) {
 }
 B_List.prototype = Object.create(ReporterBlock.prototype);
 B_List.prototype.constructor = B_List;
+//MicroBlocks functions
+B_List.prototype.primName = function() { return "v" }
+B_List.prototype.argList = function() { return [this.list.getName()] }
 /* Returns a StringData representing the List's contents, comma separated */
 B_List.prototype.startAction = function() {
   return new ExecutionStatusResult(this.list.getData().asString());
@@ -45174,6 +45444,11 @@ function B_AddToList(x, y) {
 }
 B_AddToList.prototype = Object.create(CommandBlock.prototype);
 B_AddToList.prototype.constructor = B_AddToList;
+//MicroBlocks functions
+B_AddToList.prototype.primName = function() { return "[data:addLast]" }
+B_AddToList.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()] 
+}
 /* Adds the item to the list */
 B_AddToList.prototype.startAction = function() {
   /* Gets the SelectionData referring to the list */
@@ -46857,7 +47132,9 @@ B_HLEmptyPortF.prototype = Object.create(B_HLEmptyPort.prototype);
 B_HLEmptyPortF.prototype.constructor = B_HLEmptyPortF;
 
 
-
+/**
+ * Blocks for the control of hatchling accessories plugged in to ports 
+ */
 function B_HLBirdBloxOutput(x, y, outputType, portType, port, minVal, maxVal) {
   this.outputType = outputType
   this.portType = portType
@@ -46867,7 +47144,7 @@ function B_HLBirdBloxOutput(x, y, outputType, portType, port, minVal, maxVal) {
   this.positive = (this.minVal >= 0)
   if (this.port == null) { console.error("Port must be specified") }
 
-  CommandBlock.call(this, x, y, DeviceHatchling.getDeviceTypeId());
+  CommandBlock.call(this, x, y, "ports")//DeviceHatchling.getDeviceTypeId());
 
   this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
   this.addPart(new LabelText(this, (Language.getStr("port") + " " + HL_Utils.portNames[this.port]) ))
@@ -47120,12 +47397,14 @@ B_HLBBNeopixStrip.prototype.constructor = B_HLBBNeopixStrip;
 B_HLBBNeopixStrip.importXml = HL_Utils.BBimportXml*/
 
 
-
+/**
+ * Blocks for getting values from hatchling sensor plugged in to a port
+ */
 function B_HLBirdBloxSensor(x, y, portType, port) {
   this.portType = portType
   this.port = port
   if (this.port == null) { console.error("Port must be specified") }
-  ReporterBlock.call(this, x, y, DeviceHatchling.getDeviceTypeId());
+  ReporterBlock.call(this, x, y, "ports") //DeviceHatchling.getDeviceTypeId());
 
   this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
   this.addPart(new LabelText(this, (Language.getStr("port") + " " + HL_Utils.portNames[this.port]) ))
@@ -47156,8 +47435,8 @@ B_HLBBDistance.prototype = Object.create(B_HLBirdBloxSensor.prototype);
 B_HLBBDistance.prototype.constructor = B_HLBBDistance
 B_HLBBDistance.importXml = HL_Utils.BBimportXml
 //MicroBlocks functions
-B_HLBBClaps.prototype.primName = function() { return "[h:ds]" }
-B_HLBBClaps.prototype.argList = function() { return [HL_Utils.portNames[this.port]] }
+B_HLBBDistance.prototype.primName = function() { return "[h:ds]" }
+B_HLBBDistance.prototype.argList = function() { return [HL_Utils.portNames[this.port]] }
 
 
 
@@ -47166,7 +47445,7 @@ B_HLBBClaps.prototype.argList = function() { return [HL_Utils.portNames[this.por
 function B_HLLedArray(x, y) {
   //B_MicroBitLedArray.call(this, x, y, DeviceHatchling);
 
-  CommandBlock.call(this, x, y, DeviceHatchling.getDeviceTypeId());
+  CommandBlock.call(this, x, y, "display") //DeviceHatchling.getDeviceTypeId());
   this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
   var label = new LabelText(this, Language.getStr("block_LED_Display"));
   label.isEndOfLine = true;
@@ -47225,6 +47504,52 @@ B_HLPrint.prototype.checkActive = function() {
 }
 
 
+function B_HLPlot(x, y) {
+  CommandBlock.call(this, x, y, "display");
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  var xSlot = new NumSlot(this, "Num_x", 3, true, true);
+  xSlot.addLimits(1, 5);
+  this.addPart(xSlot);
+
+  var ySlot = new NumSlot(this, "Num_x", 3, true, true);
+  ySlot.addLimits(1, 5);
+  this.addPart(ySlot);
+
+  this.parseTranslation(Language.getStr("block_plot"));
+}
+B_HLPlot.prototype = Object.create(CommandBlock.prototype)
+B_HLPlot.prototype.constructor = B_HLPlot
+//MicroBlocks functions
+B_HLPlot.prototype.primName = function() { return "[display:mbPlot]" }
+B_HLPlot.prototype.argList = function() { 
+  return [this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions()] 
+}
+
+
+function B_HLUnplot(x, y) {
+  CommandBlock.call(this, x, y, "display");
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  var xSlot = new NumSlot(this, "Num_x", 3, true, true);
+  xSlot.addLimits(1, 5);
+  this.addPart(xSlot);
+
+  var ySlot = new NumSlot(this, "Num_x", 3, true, true);
+  ySlot.addLimits(1, 5);
+  this.addPart(ySlot);
+
+  this.parseTranslation(Language.getStr("block_unplot"));
+}
+B_HLUnplot.prototype = Object.create(CommandBlock.prototype)
+B_HLUnplot.prototype.constructor = B_HLUnplot
+//MicroBlocks functions
+B_HLUnplot.prototype.primName = function() { return "[display:mbUnplot]" }
+B_HLUnplot.prototype.argList = function() { 
+  return [this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions()] 
+}
+
+
 function B_HLBuzzer(x, y) {
   B_DeviceWithPortsBuzzer.call(this, x, y, DeviceHatchling);
 };
@@ -47259,7 +47584,7 @@ B_HLBuzzer.prototype.argList = function() {
 //MARK: micro:bit inputs
 
 function B_HLBBClaps(x, y) {
-  ReporterBlock.call(this, x, y, DeviceHatchling.getDeviceTypeId());
+  ReporterBlock.call(this, x, y, "sensors")// DeviceHatchling.getDeviceTypeId());
   this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
 
   this.addPart(new LabelText(this, Language.getStr("block_Claps")));
@@ -47272,7 +47597,7 @@ B_HLBBClaps.prototype.argList = function() { return [] }
 
 
 function B_HLBBButtonPresses(x, y) {
-  ReporterBlock.call(this, x, y, DeviceHatchling.getDeviceTypeId());
+  ReporterBlock.call(this, x, y, "sensors") //DeviceHatchling.getDeviceTypeId());
   this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
 
   this.addPart(new LabelText(this, Language.getStr("block_Button_Presses")));
@@ -47289,12 +47614,66 @@ function B_HLButton(x, y) {
 };
 B_HLButton.prototype = Object.create(B_MicroBitButton.prototype);
 B_HLButton.prototype.constructor = B_HLButton;
-B_HLButton.prototype.checkActive = function() {
+//MicroBlocks functions
+B_HLButton.prototype.primName = function() { return this.slots[1].getDataNotFromChild().getValue() }
+B_HLButton.prototype.argList = function() { return [] }
+
+
+/**
+ * A Block to ask for the values of the accelerometer
+ * @param {number} x
+ * @param {number} y
+ * @constructor
+ */
+function B_HLAccelerometer(x, y){
+  ReporterBlock.call(this, x, y, "sensors") //deviceClass.getDeviceTypeId());
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  var label = new LabelText(this, Language.getStr("Accelerometer"));
+  this.addPart(label);
+
+  var pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "tiltX"));
+  pickAxis.addOption(new SelectionData("X", "tiltX"));
+  pickAxis.addOption(new SelectionData("Y", "tiltY"));
+  pickAxis.addOption(new SelectionData("Z", "tiltZ"));
+  this.addPart(pickAxis);
+}
+B_HLAccelerometer.prototype = Object.create(ReporterBlock.prototype)
+B_HLAccelerometer.prototype.constructor = B_HLAccelerometer
+//MicroBlocks functions
+B_HLAccelerometer.prototype.primName = function() { 
+  return "[sensors:" + this.slots[1].getDataNotFromChild().getValue() + "]"
+}
+B_HLAccelerometer.prototype.argList = function() { return [] }
+
+Block.setDisplaySuffix(B_HLAccelerometer, "m/s" + String.fromCharCode(178));
+
+
+/** 
+ * Get the micro:bit sound 
+ * @param {number} x
+ * @param {number} y
+ * @constructor
+ */
+function B_HLSound(x, y){
+  ReporterBlock.call(this, x, y, "sensors") //deviceClass.getDeviceTypeId());
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  var label = new LabelText(this, Language.getStr("Sound"));
+  this.addPart(label);
+}
+B_HLSound.prototype = Object.create(ReporterBlock.prototype)
+B_HLSound.prototype.constructor = B_HLSound
+//MicroBlocks functions
+B_HLSound.prototype.primName = function() { console.error("NOT IMPLEMENTED") }
+B_HLSound.prototype.argList = function() { return [] }
+
+B_HLSound.prototype.checkActive = function() {
   return false //Disabled for now
 }
 
 
-function B_HLOrientation(x, y) {
+/*function B_HLOrientation(x, y) {
   B_MicroBitOrientation.call(this, x, y, DeviceHatchling);
 };
 B_HLOrientation.prototype = Object.create(B_MicroBitOrientation.prototype);
@@ -47331,7 +47710,43 @@ B_HLV2Sensor.prototype = Object.create(B_MicroBitV2Sensor.prototype);
 B_HLV2Sensor.prototype.constructor = B_HLV2Sensor;
 B_HLV2Sensor.prototype.checkActive = function() {
   return false //Disabled for now
+}*/
+
+
+/////MicroBlocks specific blocks - TODO: put elsewhere?
+
+/*function B_MicroBlocksList(x, y) {
+  ReporterBlock.call(this, x, y, "data", Block.returnTypes.list)
+
+  this.addPart(new LabelText(this, Language.getStr("list")));
+  this.addPart(new RectSlot(this, "item_1", Slot.snapTypes.any, Slot.outputTypes.any, new StringData("cat")));
+  this.addPart(new RectSlot(this, "item_2", Slot.snapTypes.any, Slot.outputTypes.any, new StringData("dog")));
 }
+B_MicroBlocksList.prototype = Object.create(ReporterBlock.prototype)
+B_MicroBlocksList.prototype.constructor = B_MicroBlocksList
+//MicroBlocks functions
+B_MicroBlocksList.prototype.primName = function() { return "[data:makeList]" }
+B_MicroBlocksList.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+} */
+
+/*function B_AddToMBList(x, y) {
+  CommandBlock.call(this, x, y, "data");
+  //Any type can be added to a list 
+  var snapType = Slot.snapTypes.numStrBool;
+  var inputType = Slot.outputTypes.any;
+  this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("")));
+  //this.addPart(new RoundSlot(this, "RoundSlot_list", EditableSlot.inputTypes.string, Slot.snapTypes.any, Slot.outputTypes.list, new ListData()))
+  this.addPart(new VarDropSlot(this, "VDS_1"))
+  this.parseTranslation(Language.getStr("block_add_to_list"));
+}
+B_AddToMBList.prototype = Object.create(CommandBlock.prototype);
+B_AddToMBList.prototype.constructor = B_AddToMBList;
+//MicroBlocks functions
+B_AddToMBList.prototype.primName = function() { return "[data:addLast]" }
+B_AddToMBList.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+} */
 
 
 /**
@@ -53172,6 +53587,7 @@ PrettyPrinter.prototype.printValue = function(block) {
   } else if (block instanceof CommandBlock || block instanceof LoopBlock) {
     this.printCmdList(block)
   } else if (typeof block == 'string') {
+    //console.log("*** got a string: " + block)
     this.gen.const(block)//(printString block)
   } else if (typeof block == 'number') { //'Float'
     this.gen.const(block.toString())//(toString block 20) TODO: add precision?

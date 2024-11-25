@@ -177,6 +177,9 @@ function B_List(x, y, list) {
 }
 B_List.prototype = Object.create(ReporterBlock.prototype);
 B_List.prototype.constructor = B_List;
+//MicroBlocks functions
+B_List.prototype.primName = function() { return "v" }
+B_List.prototype.argList = function() { return [this.list.getName()] }
 /* Returns a StringData representing the List's contents, comma separated */
 B_List.prototype.startAction = function() {
   return new ExecutionStatusResult(this.list.getData().asString());
@@ -262,6 +265,11 @@ function B_AddToList(x, y) {
 }
 B_AddToList.prototype = Object.create(CommandBlock.prototype);
 B_AddToList.prototype.constructor = B_AddToList;
+//MicroBlocks functions
+B_AddToList.prototype.primName = function() { return "[data:addLast]" }
+B_AddToList.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()] 
+}
 /* Adds the item to the list */
 B_AddToList.prototype.startAction = function() {
   /* Gets the SelectionData referring to the list */

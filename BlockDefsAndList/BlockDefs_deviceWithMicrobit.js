@@ -152,14 +152,17 @@ B_MicroBitPrint.prototype.updateAction = function() {
  * @constructor
  */
 function B_MicroBitButton(x, y, deviceClass) {
-  PredicateBlock.call(this, x, y, deviceClass.getDeviceTypeId());
+  let category = HatchPlus ? "sensors" : deviceClass.getDeviceTypeId()
+  PredicateBlock.call(this, x, y, category);
   this.deviceClass = deviceClass;
   this.addPart(new DeviceDropSlot(this, "DDS_1", this.deviceClass));
 
   const choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
   choice.addOption(new SelectionData("A", "buttonA"));
   choice.addOption(new SelectionData("B", "buttonB"));
-  choice.addOption(new SelectionData(Language.getStr("logo"), "V2touch"))
+  if (!HatchPlus) {
+    choice.addOption(new SelectionData(Language.getStr("logo"), "V2touch"))
+  }
   this.addPart(choice);
   this.parseTranslation(Language.getStr("block_Button"));
 };

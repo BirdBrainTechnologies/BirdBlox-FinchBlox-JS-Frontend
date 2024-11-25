@@ -795,7 +795,7 @@ BlockGraphics.create = {};
 BlockGraphics.create.block = function(category, group, returnsValue, active) {
   const path = GuiElements.create.path(group);
   if (category == null) {
-    path.setAttributeNS(null, "fill", BlockPalette.currentColor);
+    path.setAttributeNS(null, "fill", Colors.ballyBrandBlueLight);
     return path
   }
 
@@ -997,7 +997,7 @@ BlockGraphics.update.hexSlotGradient = function(path, category, active) {
  */
 BlockGraphics.update.blockActive = function(path, category, returnsValue, active, glowing) {
   if (category == null) {
-    path.setAttributeNS(null, "fill", BlockPalette.currentColor);
+    path.setAttributeNS(null, "fill", Colors.ballyBrandBlueLight);
     return path
   }
   if (!active) category = "inactive";

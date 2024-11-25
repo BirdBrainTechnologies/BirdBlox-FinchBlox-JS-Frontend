@@ -461,12 +461,6 @@ B_BroadcastAndWait.prototype.updateAction = function() {
     return new ExecutionStatusDone();
   }
 };
-if (HatchPlus) {
-  B_BroadcastAndWait.prototype.checkActive = function() {
-    return false //Disabled for now. Not sure how to implement.
-  }
-}
-
 
 
 function B_Message(x, y) {
@@ -658,12 +652,7 @@ B_WhenKeyPressed.prototype.updateAction = function() {
     return new ExecutionStatusRunning();
   }
 }
-if (HatchPlus) {
-  B_WhenKeyPressed.prototype.checkActive = function() {
-    //Disabled for now, maybe some way to do this with a broadcast?
-    return false
-  }
-}
+
 
 //FinchBlox and Hatchling only
 function B_FBStartWhen(x, y, sensor) {

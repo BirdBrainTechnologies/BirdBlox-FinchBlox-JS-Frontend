@@ -517,6 +517,9 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, p
         FBPopup.currentPopup.close()
       }
     }
+    if (HatchPlus && (event.code == 'Enter' || event.keyCode === 13)) { //enter
+      FBPopup.currentPopup.confirm() //will also close the dialog
+    }
     if (event.code == 'Delete' || event.code == 'Backspace' ||
       event.keyCode === 46 || event.keyCode === 8) { //delete or backspace
       this.charCount--;

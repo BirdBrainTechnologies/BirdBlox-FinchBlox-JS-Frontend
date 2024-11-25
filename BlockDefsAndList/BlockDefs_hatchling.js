@@ -1396,7 +1396,9 @@ B_HLEmptyPortF.prototype = Object.create(B_HLEmptyPort.prototype);
 B_HLEmptyPortF.prototype.constructor = B_HLEmptyPortF;
 
 
-
+/**
+ * Blocks for the control of hatchling accessories plugged in to ports 
+ */
 function B_HLBirdBloxOutput(x, y, outputType, portType, port, minVal, maxVal) {
   this.outputType = outputType
   this.portType = portType
@@ -1406,7 +1408,7 @@ function B_HLBirdBloxOutput(x, y, outputType, portType, port, minVal, maxVal) {
   this.positive = (this.minVal >= 0)
   if (this.port == null) { console.error("Port must be specified") }
 
-  CommandBlock.call(this, x, y, DeviceHatchling.getDeviceTypeId());
+  CommandBlock.call(this, x, y, "ports")//DeviceHatchling.getDeviceTypeId());
 
   this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
   this.addPart(new LabelText(this, (Language.getStr("port") + " " + HL_Utils.portNames[this.port]) ))
@@ -1659,12 +1661,14 @@ B_HLBBNeopixStrip.prototype.constructor = B_HLBBNeopixStrip;
 B_HLBBNeopixStrip.importXml = HL_Utils.BBimportXml*/
 
 
-
+/**
+ * Blocks for getting values from hatchling sensor plugged in to a port
+ */
 function B_HLBirdBloxSensor(x, y, portType, port) {
   this.portType = portType
   this.port = port
   if (this.port == null) { console.error("Port must be specified") }
-  ReporterBlock.call(this, x, y, DeviceHatchling.getDeviceTypeId());
+  ReporterBlock.call(this, x, y, "ports") //DeviceHatchling.getDeviceTypeId());
 
   this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
   this.addPart(new LabelText(this, (Language.getStr("port") + " " + HL_Utils.portNames[this.port]) ))
@@ -1695,8 +1699,8 @@ B_HLBBDistance.prototype = Object.create(B_HLBirdBloxSensor.prototype);
 B_HLBBDistance.prototype.constructor = B_HLBBDistance
 B_HLBBDistance.importXml = HL_Utils.BBimportXml
 //MicroBlocks functions
-B_HLBBClaps.prototype.primName = function() { return "[h:ds]" }
-B_HLBBClaps.prototype.argList = function() { return [HL_Utils.portNames[this.port]] }
+B_HLBBDistance.prototype.primName = function() { return "[h:ds]" }
+B_HLBBDistance.prototype.argList = function() { return [HL_Utils.portNames[this.port]] }
 
 
 
@@ -1705,7 +1709,7 @@ B_HLBBClaps.prototype.argList = function() { return [HL_Utils.portNames[this.por
 function B_HLLedArray(x, y) {
   //B_MicroBitLedArray.call(this, x, y, DeviceHatchling);
 
-  CommandBlock.call(this, x, y, DeviceHatchling.getDeviceTypeId());
+  CommandBlock.call(this, x, y, "display") //DeviceHatchling.getDeviceTypeId());
   this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
   const label = new LabelText(this, Language.getStr("block_LED_Display"));
   label.isEndOfLine = true;
@@ -1764,6 +1768,52 @@ B_HLPrint.prototype.checkActive = function() {
 }
 
 
+function B_HLPlot(x, y) {
+  CommandBlock.call(this, x, y, "display");
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  const xSlot = new NumSlot(this, "Num_x", 3, true, true);
+  xSlot.addLimits(1, 5);
+  this.addPart(xSlot);
+
+  const ySlot = new NumSlot(this, "Num_x", 3, true, true);
+  ySlot.addLimits(1, 5);
+  this.addPart(ySlot);
+
+  this.parseTranslation(Language.getStr("block_plot"));
+}
+B_HLPlot.prototype = Object.create(CommandBlock.prototype)
+B_HLPlot.prototype.constructor = B_HLPlot
+//MicroBlocks functions
+B_HLPlot.prototype.primName = function() { return "[display:mbPlot]" }
+B_HLPlot.prototype.argList = function() { 
+  return [this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions()] 
+}
+
+
+function B_HLUnplot(x, y) {
+  CommandBlock.call(this, x, y, "display");
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  const xSlot = new NumSlot(this, "Num_x", 3, true, true);
+  xSlot.addLimits(1, 5);
+  this.addPart(xSlot);
+
+  const ySlot = new NumSlot(this, "Num_x", 3, true, true);
+  ySlot.addLimits(1, 5);
+  this.addPart(ySlot);
+
+  this.parseTranslation(Language.getStr("block_unplot"));
+}
+B_HLUnplot.prototype = Object.create(CommandBlock.prototype)
+B_HLUnplot.prototype.constructor = B_HLUnplot
+//MicroBlocks functions
+B_HLUnplot.prototype.primName = function() { return "[display:mbUnplot]" }
+B_HLUnplot.prototype.argList = function() { 
+  return [this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions()] 
+}
+
+
 function B_HLBuzzer(x, y) {
   B_DeviceWithPortsBuzzer.call(this, x, y, DeviceHatchling);
 };
@@ -1798,7 +1848,7 @@ B_HLBuzzer.prototype.argList = function() {
 //MARK: micro:bit inputs
 
 function B_HLBBClaps(x, y) {
-  ReporterBlock.call(this, x, y, DeviceHatchling.getDeviceTypeId());
+  ReporterBlock.call(this, x, y, "sensors")// DeviceHatchling.getDeviceTypeId());
   this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
 
   this.addPart(new LabelText(this, Language.getStr("block_Claps")));
@@ -1811,7 +1861,7 @@ B_HLBBClaps.prototype.argList = function() { return [] }
 
 
 function B_HLBBButtonPresses(x, y) {
-  ReporterBlock.call(this, x, y, DeviceHatchling.getDeviceTypeId());
+  ReporterBlock.call(this, x, y, "sensors") //DeviceHatchling.getDeviceTypeId());
   this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
 
   this.addPart(new LabelText(this, Language.getStr("block_Button_Presses")));
@@ -1828,12 +1878,66 @@ function B_HLButton(x, y) {
 };
 B_HLButton.prototype = Object.create(B_MicroBitButton.prototype);
 B_HLButton.prototype.constructor = B_HLButton;
-B_HLButton.prototype.checkActive = function() {
+//MicroBlocks functions
+B_HLButton.prototype.primName = function() { return this.slots[1].getDataNotFromChild().getValue() }
+B_HLButton.prototype.argList = function() { return [] }
+
+
+/**
+ * A Block to ask for the values of the accelerometer
+ * @param {number} x
+ * @param {number} y
+ * @constructor
+ */
+function B_HLAccelerometer(x, y){
+  ReporterBlock.call(this, x, y, "sensors") //deviceClass.getDeviceTypeId());
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  const label = new LabelText(this, Language.getStr("Accelerometer"));
+  this.addPart(label);
+
+  const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("X", "tiltX"));
+  pickAxis.addOption(new SelectionData("X", "tiltX"));
+  pickAxis.addOption(new SelectionData("Y", "tiltY"));
+  pickAxis.addOption(new SelectionData("Z", "tiltZ"));
+  this.addPart(pickAxis);
+}
+B_HLAccelerometer.prototype = Object.create(ReporterBlock.prototype)
+B_HLAccelerometer.prototype.constructor = B_HLAccelerometer
+//MicroBlocks functions
+B_HLAccelerometer.prototype.primName = function() { 
+  return "[sensors:" + this.slots[1].getDataNotFromChild().getValue() + "]"
+}
+B_HLAccelerometer.prototype.argList = function() { return [] }
+
+Block.setDisplaySuffix(B_HLAccelerometer, "m/s" + String.fromCharCode(178));
+
+
+/** 
+ * Get the micro:bit sound 
+ * @param {number} x
+ * @param {number} y
+ * @constructor
+ */
+function B_HLSound(x, y){
+  ReporterBlock.call(this, x, y, "sensors") //deviceClass.getDeviceTypeId());
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  const label = new LabelText(this, Language.getStr("Sound"));
+  this.addPart(label);
+}
+B_HLSound.prototype = Object.create(ReporterBlock.prototype)
+B_HLSound.prototype.constructor = B_HLSound
+//MicroBlocks functions
+B_HLSound.prototype.primName = function() { console.error("NOT IMPLEMENTED") }
+B_HLSound.prototype.argList = function() { return [] }
+
+B_HLSound.prototype.checkActive = function() {
   return false //Disabled for now
 }
 
 
-function B_HLOrientation(x, y) {
+/*function B_HLOrientation(x, y) {
   B_MicroBitOrientation.call(this, x, y, DeviceHatchling);
 };
 B_HLOrientation.prototype = Object.create(B_MicroBitOrientation.prototype);
@@ -1870,5 +1974,41 @@ B_HLV2Sensor.prototype = Object.create(B_MicroBitV2Sensor.prototype);
 B_HLV2Sensor.prototype.constructor = B_HLV2Sensor;
 B_HLV2Sensor.prototype.checkActive = function() {
   return false //Disabled for now
+}*/
+
+
+/////MicroBlocks specific blocks - TODO: put elsewhere?
+
+/*function B_MicroBlocksList(x, y) {
+  ReporterBlock.call(this, x, y, "data", Block.returnTypes.list)
+
+  this.addPart(new LabelText(this, Language.getStr("list")));
+  this.addPart(new RectSlot(this, "item_1", Slot.snapTypes.any, Slot.outputTypes.any, new StringData("cat")));
+  this.addPart(new RectSlot(this, "item_2", Slot.snapTypes.any, Slot.outputTypes.any, new StringData("dog")));
 }
+B_MicroBlocksList.prototype = Object.create(ReporterBlock.prototype)
+B_MicroBlocksList.prototype.constructor = B_MicroBlocksList
+//MicroBlocks functions
+B_MicroBlocksList.prototype.primName = function() { return "[data:makeList]" }
+B_MicroBlocksList.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+} */
+
+/*function B_AddToMBList(x, y) {
+  CommandBlock.call(this, x, y, "data");
+  //Any type can be added to a list 
+  const snapType = Slot.snapTypes.numStrBool;
+  const inputType = Slot.outputTypes.any;
+  this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("")));
+  //this.addPart(new RoundSlot(this, "RoundSlot_list", EditableSlot.inputTypes.string, Slot.snapTypes.any, Slot.outputTypes.list, new ListData()))
+  this.addPart(new VarDropSlot(this, "VDS_1"))
+  this.parseTranslation(Language.getStr("block_add_to_list"));
+}
+B_AddToMBList.prototype = Object.create(CommandBlock.prototype);
+B_AddToMBList.prototype.constructor = B_AddToMBList;
+//MicroBlocks functions
+B_AddToMBList.prototype.primName = function() { return "[data:addLast]" }
+B_AddToMBList.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
+} */
 

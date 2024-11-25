@@ -64,7 +64,8 @@ BlockPalette.setGraphics = function() {
   } else {
     BlockPalette.width = 253;
     BlockPalette.catY = TitleBar.height;
-    BlockPalette.catH = 30 * 3 + BlockPalette.catVMargin * 3; // 3 rows of BNs, 3 margins, 30 = height per BN
+    let numRows = HatchPlus ? 4 : 3
+    BlockPalette.catH = 30 * numRows + BlockPalette.catVMargin * numRows; // 3 rows of BNs, 3 margins, 30 = height per BN
     BlockPalette.height = GuiElements.height - TitleBar.height - BlockPalette.catH;
     BlockPalette.y = BlockPalette.catY + BlockPalette.catH;
     BlockPalette.bg = Colors.white;
@@ -83,9 +84,6 @@ BlockPalette.setGraphics = function() {
   BlockPalette.labelFont = Font.uiFont(13);
   BlockPalette.labelColor = Colors.black;
 
-  if (HatchPlus) {
-    BlockPalette.currentColor = Colors.ballyBrandBlueLight //Used for ghost blocks
-  }
 };
 
 /**
@@ -282,7 +280,6 @@ BlockPalette.updatePath = function(pathE) {
 }*/
 BlockPalette.updatePaletteColor = function(color) {
   if (HatchPlus) {
-    BlockPalette.currentColor = color //Used for ghost blocks
     GuiElements.update.color(BlockPalette.catRect, color)
     GuiElements.update.color(BlockPalette.palRect, color)
   } else if (Hatchling) { 

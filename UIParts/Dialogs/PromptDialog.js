@@ -33,7 +33,7 @@ PromptDialog.prototype.show = function() {
 	if (!this.visible) {
 		this.visible = true
 
-		if (RowDialog.currentDialog != null) { RowDialog.currentDialog.makeInvisible() }
+		if (RD.currentDialog != null) { RD.currentDialog.makeInvisible() }
 
 		const margin = 20
 

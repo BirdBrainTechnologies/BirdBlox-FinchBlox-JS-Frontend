@@ -363,6 +363,14 @@ CodeManager.checkVarName = function(name) {
         return false;
       }
     }
+    if (HatchPlus) { //variables cannot have same name as lists
+      const lists = CodeManager.listList;
+      for (let i = 0; i < lists.length; i++) {
+        if (lists[i].getName() === name) {
+          return false
+        }
+      }
+    }
     return true;
   }
   return false;
@@ -385,14 +393,22 @@ CodeManager.findVar = function(name) {
 
 /**
  * Returns the index of the variable in the global array. HatchPlus only.
+ * Even values are variables, odd values are lists
  * @param {string} name - The name of the variable to find
  * @return {number} - The index of the variable, or -1 if not found
  */
 CodeManager.getVarIndex = function(name) {
   const variables = CodeManager.variableList;
+  const lists = CodeManager.listList;
+  
   for (let i = 0; i < variables.length; i++) {
     if (variables[i].getName() === name) {
-      return i;
+      return i*2;
+    }
+  }
+  for (let i = 0; i < lists.length; i++) {
+    if (lists[i].getName() === name) {
+      return i*2+1
     }
   }
   return -1;
@@ -426,6 +442,7 @@ CodeManager.newList = function(callbackCreate, callbackCancel) {
       result = result.trim();
       const list = new List(result);
       SaveManager.markEdited();
+      if (HatchPlus) { BlockPalette.getCategory("data").refreshGroup(); }
       BlockPalette.getCategory("variables").refreshGroup();
       if (callbackCreate != null) callbackCreate(list);
     } else {
@@ -446,6 +463,14 @@ CodeManager.checkListName = function(name) {
     for (let i = 0; i < lists.length; i++) {
       if (lists[i].getName() === name) {
         return false;
+      }
+    }
+    if (HatchPlus) { //variables cannot have same name as lists
+      const variables = CodeManager.variableList;
+      for (let i = 0; i < variables.length; i++) {
+        if (variables[i].getName() === name) {
+          return false;
+        }
       }
     }
     return true;

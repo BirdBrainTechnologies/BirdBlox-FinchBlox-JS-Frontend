@@ -221,6 +221,54 @@ Colors.setCategory = function() {
   }
   if (HatchPlus) {
     Colors.categoryColors = {
+      "ports": Colors.ballyBrandBlue,
+      "display": Colors.ballyOrange,
+      "operators": Colors.ballyBlue,
+      "sound": Colors.ballyPurple,
+      "control": Colors.ballyGreenYellow,
+      "variables": Colors.ballyPink,
+      "data": Colors.ballyPink,
+      "lists": Colors.ballyPink,
+      "sensors": Colors.ballyPink,
+      "inactive": Colors.ballyGray
+    }
+    Colors.blockPalette = {
+      "ports": Colors.ballyBrandBlueLight,
+      "display": Colors.ballyOrangeLight,
+      "operators": Colors.ballyBlueLight,
+      "sound": Colors.ballyPurpleLight,
+      "control": Colors.ballyGreenYellowLight,
+      "variables": Colors.ballyPinkLight,
+      "data": Colors.ballyPinkLight,
+      "lists": Colors.ballyPinkLight,
+      "sensors": Colors.ballyPinkLight,
+    }
+    Colors.blockOutline = {
+      "ports": Colors.ballyBrandBlueDark,
+      "display": Colors.ballyOrangeDark,
+      "operators": Colors.ballyBlueDark,
+      "sound": Colors.ballyPurpleDark,
+      "control": Colors.ballyGreenYellowDark,
+      "variables": Colors.ballyPinkDark,
+      "data": Colors.ballyPinkDark,
+      "lists": Colors.ballyPinkDark,
+      "sensors": Colors.ballyPinkDark,
+      "inactive": Colors.ballyGrayDark
+    }
+    Colors.dragColors = {
+      //TODO: Make an onDrag color for brand blue
+      "ports": Colors.ballyBrandBlue,
+      "display": Colors.ballyOrangeOnDrag,
+      "operators": Colors.ballyBlueOnDrag,
+      "sound": Colors.ballyPurpleOnDrag,
+      "control": Colors.ballyGreenYellowOnDrag,
+      "variables": Colors.ballyPinkOnDrag,
+      "data": Colors.ballyPinkOnDrag,
+      "lists": Colors.ballyPinkOnDrag,
+      "sensors": Colors.ballyPinkOnDrag,
+      "inactive": Colors.ballyGray //TODO: Make drag color?
+    }
+    /*Colors.categoryColors = {
       "hatchling": Colors.ballyBrandBlue,
       "tablet": Colors.ballyOrange,
       "operators": Colors.ballyBlue,
@@ -258,7 +306,7 @@ Colors.setCategory = function() {
       "variables": Colors.ballyPinkOnDrag,
       "lists": Colors.ballyPinkOnDrag,
       "inactive": Colors.ballyGray //TODO: Make drag color?
-    }
+    }*/
   }
 };
 
