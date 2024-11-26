@@ -117,8 +117,6 @@ Language.fr = {
 "block_set_variable":"fixez (Slot 1) à (Slot 2)",
 "Create_Variable":"Crée une variable",
 "block_change_variable":"changez (Slot 1) avec (Slot 2)",
-"Rename":"Renommez",
-"Delete":"Supprimez",
 "block_add_to_list":"ajoutez (Slot 1 = chose) à (Slot 2)",
 "Create_List":"Créez une liste",
 "block_delete_from_list":"supprimez (Slot 1) de (Slot 2)",

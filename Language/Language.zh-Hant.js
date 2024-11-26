@@ -117,8 +117,6 @@ Language.zht = {
   "block_set_variable":"設置 (Slot 1) 到 (Slot 2)",
   "Create_Variable":"創建變數",
   "block_change_variable":"(Slot 1) 改變 (Slot 2)",
-  "Rename":"改名",
-  "Delete":"刪除",
   "block_add_to_list":"添加 (Slot 1 = thing) 到 (Slot 2)",
   "Create_List":"創建列表",
   "block_delete_from_list":"從 (Slot 2) 刪除 (Slot 1)",

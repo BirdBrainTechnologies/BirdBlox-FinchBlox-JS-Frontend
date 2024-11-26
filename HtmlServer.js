@@ -25,9 +25,9 @@ HtmlServer.getIosHandler = function() {
 
 HtmlServer.createFakeIosHandler = function() {
   return "test";
-  return function(object) {
+  /*return function(object) {
     console.log("request: " + object.request + ",  body: " + object.body + ", id: " + object.id);
-  }
+  }*/
 };
 
 /**
@@ -93,12 +93,12 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
     // If we're testing on a device without a backend, we reply with a fake response
     setTimeout(function() {
       HtmlServer.unansweredCount--;
-      if (false) {
+      /*if (false) {
         // We can respond with a fake error
         if (callbackErr != null) {
           callbackErr(418, "I'm a teapot");
         }
-      } else {
+      } else {*/
         // Or with fake data
         if (callbackFn != null) {
           //callbackFn('Started');
@@ -107,7 +107,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
           //callbackFn('[{"name":"hi","id":"there"}]');
           //callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true,"files":["project1","project2"]}');
         }
-      }
+      //}
     }, 20);
     HtmlServer.unansweredCount++;
     return;

@@ -417,8 +417,9 @@ Tab.prototype.endZooming = function() {
  * @param {number} x - x coord of mouse during event
  * @param {number} y - y coord of mouse during event
  * @param {boolean} zoomIn - true if the canvas should zoom in
+ * @param {boolean} buttonPress - true if this function called by zoom button rather that wheel event
  */
-Tab.prototype.wheelZoom = function(x, y, zoomIn) {
+Tab.prototype.wheelZoom = function(x, y, zoomIn, buttonPress) {
   if (this.zooming) {
     return;
   }
@@ -428,7 +429,7 @@ Tab.prototype.wheelZoom = function(x, y, zoomIn) {
   this.startZoom = this.zoomFactor;
   this.updateTabDim();
 
-  const zoomDelta = zoomIn ? 0.9 : 1.1
+  const zoomDelta = buttonPress ? (zoomIn ? 0.75 : 1.25) : (zoomIn ? 0.985 : 1.015)
   this.zoomFactor = this.startZoom * zoomDelta;
   this.zoomFactor = Math.max(TabManager.minZoom, Math.min(TabManager.maxZoom, this.zoomFactor));
   const zoomRatio = this.zoomFactor / this.startZoom;

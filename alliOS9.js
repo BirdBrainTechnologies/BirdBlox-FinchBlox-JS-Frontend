@@ -10,7 +10,7 @@ var FrontendVersion = 393;
  */
 function DebugOptions() {
   var DO = DebugOptions;
-  DO.enabled = true;
+  DO.enabled = false;
 
   /* Whether errors should be checked for and sent to the backend.  This is the only option that persists if
    * DO is not enabled */
@@ -1503,8 +1503,6 @@ Language.ar = {
   "block_set_variable":"(Slot 2) لـــ (Slot 1) ضبط",
   "Create_Variable":"تصميم  تنوع",
   "block_change_variable":"(Slot 2) بواسطة (Slot 1) تغيير",
-  "Rename":"تغيير الاسم",
-  "Delete":"مسح",
   "block_add_to_list":"(Slot 2) لـ (Slot 1 =  شيء) إضافة",
   "Create_List":"إنشاء قائمة",
   "block_delete_from_list":"(Slot 2) من (Slot 1) مسح",
@@ -1722,8 +1720,6 @@ Language.ca = {
   "block_set_variable":"fixa (Slot 1) a (Slot 2)",
   "Create_Variable":"Crea una variable",
   "block_change_variable":"canvia (Slot 1) en (Slot 2)",
-  "Rename":"Reanomena",
-  "Delete":"Elimina",
   "block_add_to_list":"afegeix (Slot 1 = cosa) a (Slot 2)",
   "Create_List":"Crea una llista",
   "block_delete_from_list":"elimina (Slot 1) de (Slot 2)",
@@ -2173,8 +2169,6 @@ Language.de = {
   "block_set_variable":"setze (Slot 1) auf (Slot 2)",
   "Create_Variable":"Neue Variable",
   "block_change_variable":"ändere (Slot 1) um (Slot 2)",
-  "Rename":"Umbenennen",
-  "Delete":"Löschen",
   "block_add_to_list":"füge (Slot 1 = etwas) zu (Slot 2) hinzu",
   "Create_List":"Erstelle Liste",
   "block_delete_from_list":"entferne (Slot 1) aus (Slot 2)",
@@ -2647,8 +2641,6 @@ Language.es = {
   "block_set_variable":"configurar (Slot 1) a (Slot 2)",
   "Create_Variable":"Crear Variable",
   "block_change_variable":"cambiar (Slot 1) en (Slot 2)",
-  "Rename":"Cambiar nombre",
-  "Delete":"Borrar",
   "block_add_to_list":"agregar (Slot 1 = objeto) a (Slot 2)",
   "Create_List":"Crear Lista",
   "block_delete_from_list":"borrar (Slot 1) de (Slot 2) ",
@@ -2881,8 +2873,6 @@ Language.fi = {
   "block_set_variable":"aseta (Slot 1) arvoon (Slot 2)",
   "Create_Variable":"Luo Muuttuja",
   "block_change_variable":"muuta (Slot 1) (Slot 2)",
-  "Rename":"Nimeä uudelleen",
-  "Delete":"Poista",
   "block_add_to_list":"lisää (Slot 1 = thing) listaan (Slot 2)",
   "Create_List":"Luo lista",
   "block_delete_from_list":"poista (Slot 1) listasta (Slot 2)",
@@ -3100,8 +3090,6 @@ Language.fr = {
 "block_set_variable":"fixez (Slot 1) à (Slot 2)",
 "Create_Variable":"Crée une variable",
 "block_change_variable":"changez (Slot 1) avec (Slot 2)",
-"Rename":"Renommez",
-"Delete":"Supprimez",
 "block_add_to_list":"ajoutez (Slot 1 = chose) à (Slot 2)",
 "Create_List":"Créez une liste",
 "block_delete_from_list":"supprimez (Slot 1) de (Slot 2)",
@@ -3801,8 +3789,6 @@ Language.nl = {
   "block_set_variable":"maak (Slot 1) (Slot 2)",
   "Create_Variable":"Maak een Variabele",
   "block_change_variable":"verander (Slot 1) met (Slot 2)",
-  "Rename":"Hernoemen",
-  "Delete":"Verwijder",
   "block_add_to_list":"voeg (Slot 1 = ding) toe aan (Slot 2)",
   "Create_List":"Maak een Lijst",
   "block_delete_from_list":"verwijder (Slot 1) van (Slot 2)",
@@ -4036,8 +4022,6 @@ Language.pt = {
   "block_set_variable":"adcione (Slot 1) para (Slot 2)",
   "Create_Variable":"Criar uma variável",
   "block_change_variable":"mude (Slot 1) por (Slot 2)",
-  "Rename":"Renomear",
-  "Delete":"Apagar",
   "block_add_to_list":"adicionar (Slot 1 = objeto) para (Slot 2)",
   "Create_List":"Criar uma lista",
   "block_delete_from_list":"apague (Slot 1) de (Slot 2)",
@@ -4270,8 +4254,6 @@ Language.sv = {
   "block_set_variable":"sätt (Slot 1) till (Slot 2)",
   "Create_Variable":"Skapa variabel",
   "block_change_variable":"ändra (Slot 1) med (Slot 2)",
-  "Rename":"Byt namn",
-  "Delete":"Radera",
   "block_add_to_list":"lägg till (Slot 1 = objekt) till (Slot 2)",
   "Create_List":"Skapa lista",
   "block_delete_from_list":"ta bort (Slot 1) av  (Slot 2)",
@@ -4489,7 +4471,6 @@ Language.zhs = {
 "block_set_variable":"设置 (Slot 1) 到 (Slot 2)",
 "Create_Variable":"创建变数",
 "block_change_variable":"(Slot 1) 改变 (Slot 2)",
-"Rename":"改名",
 "Delete":"删除",
 "block_add_to_list":"添加 (Slot 1 = 物件) 到 (Slot 2)",
 "Create_List":"创建列表",
@@ -4723,8 +4704,6 @@ Language.zht = {
   "block_set_variable":"設置 (Slot 1) 到 (Slot 2)",
   "Create_Variable":"創建變數",
   "block_change_variable":"(Slot 1) 改變 (Slot 2)",
-  "Rename":"改名",
-  "Delete":"刪除",
   "block_add_to_list":"添加 (Slot 1 = thing) 到 (Slot 2)",
   "Create_List":"創建列表",
   "block_delete_from_list":"從 (Slot 2) 刪除 (Slot 1)",
@@ -4880,7 +4859,7 @@ function Device(name, id, RSSI, device) {
    * configure these fields so they can update when the status changes */
   this.statusListener = null;
   this.firmwareStatusListener = null;
-  this.hasV2Microbit;
+  this.hasV2Microbit = null;
 }
 
 
@@ -4933,14 +4912,14 @@ Device.setDeviceTypeName = function(deviceClass, typeId, typeName, shortTypeName
    * @return {string}
    */
   deviceClass.getNotConnectedMessage = function(errorCode, errorResult) {
-    if (errorResult == null || true) {
+    //if (errorResult == null || true) {
       //return typeName + " " + Language.getStr("not_connected");
       var translatedText = Language.getStr("not_connected");
       var returnText = translatedText.replace("(Device)", typeName);
       return returnText;
-    } else {
-      return errorResult;
-    }
+    //} else {
+    //  return errorResult;
+    //}
   };
 
   var manager = new DeviceManager(deviceClass);
@@ -8720,10 +8699,25 @@ Font.secondaryUiFont = function(fontSize) {
  *
  * Icons with names starting with mv come from Michael Verner
  * Icons with names starting with mj come from Molly Johnson
+ * 
+ * Icons with names starting with bd come from Bally Design.
+ * 
  * @static
  */
 function VectorPaths(){
 	var VP=VectorPaths;
+    VP.bdRecenter={}
+    VP.bdRecenter.path="M19.5 0C18.1193 0 17 1.11929 17 2.5V5.30005C11.1226 6.4931 6.4931 11.1226 5.30006 17H2.5C1.11929 17 0 18.1193 0 19.5V20.5C0 21.8807 1.11929 23 2.5 23H5.30006C6.4931 28.8774 11.1226 33.5069 17 34.6999V37.5C17 38.8807 18.1193 40 19.5 40H20.5C21.8807 40 23 38.8807 23 37.5V34.6999C28.8774 33.5069 33.5069 28.8774 34.6999 23H37.5C38.8807 23 40 21.8807 40 20.5V19.5C40 18.1193 38.8807 17 37.5 17H34.6999C33.5069 11.1226 28.8774 6.4931 23 5.30005V2.5C23 1.11929 21.8807 0 20.5 0H19.5ZM11.5 23H10.4578C11.4346 26.1101 13.8899 28.5654 17 29.5422V28.5C17 27.1193 18.1193 26 19.5 26H20.5C21.8807 26 23 27.1193 23 28.5V29.5422C26.1101 28.5654 28.5654 26.1101 29.5422 23H28.5C27.1193 23 26 21.8807 26 20.5V19.5C26 18.1193 27.1193 17 28.5 17H29.5422C28.5654 13.8899 26.1101 11.4346 23 10.4578V11.5C23 12.8807 21.8807 14 20.5 14H19.5C18.1193 14 17 12.8807 17 11.5V10.4578C13.8899 11.4346 11.4346 13.8899 10.4578 17H11.5C12.8807 17 14 18.1193 14 19.5V20.5C14 21.8807 12.8807 23 11.5 23ZM17 20C17 21.6569 18.3431 23 20 23C21.6569 23 23 21.6569 23 20C23 18.3431 21.6569 17 20 17C18.3431 17 17 18.3431 17 20Z"
+    VP.bdRecenter.width=40
+    VP.bdRecenter.height=40
+    VP.bdZoomIn={}
+    VP.bdZoomIn.path="M3.45454 21.3621C2.52525 21.3621 1.71717 21.0201 1.0303 20.3362C0.343435 19.6523 0 18.8477 0 17.9224V17.0776C0 16.1523 0.343435 15.3477 1.0303 14.6638C1.71717 13.9799 2.52525 13.6379 3.45454 13.6379H13.3333C13.697 13.6379 13.8788 13.4569 13.8788 13.0948V3.43966C13.8788 2.51437 14.202 1.70977 14.8485 1.02586C15.5354 0.341954 16.3434 0 17.2727 0H18.7273C19.6566 0 20.4444 0.341954 21.0909 1.02586C21.7778 1.70977 22.1212 2.51437 22.1212 3.43966V13.0948C22.1212 13.4569 22.303 13.6379 22.6667 13.6379H32.5455C33.4747 13.6379 34.2828 13.9799 34.9697 14.6638C35.6566 15.3477 36 16.1523 36 17.0776V17.9224C36 18.8477 35.6566 19.6523 34.9697 20.3362C34.2828 21.0201 33.4747 21.3621 32.5455 21.3621H22.6667C22.303 21.3621 22.1212 21.5431 22.1212 21.9052V31.5603C22.1212 32.4856 21.7778 33.2902 21.0909 33.9741C20.4444 34.658 19.6566 35 18.7273 35H17.2727C16.3434 35 15.5354 34.658 14.8485 33.9741C14.202 33.2902 13.8788 32.4856 13.8788 31.5603V21.9052C13.8788 21.5431 13.697 21.3621 13.3333 21.3621H3.45454Z"
+    VP.bdZoomIn.width=36
+    VP.bdZoomIn.height=35
+    VP.bdZoomOut={}
+    VP.bdZoomOut.path="M3.39884 8C2.46821 8 1.65896 7.64583 0.971097 6.9375C0.323698 6.22917 0 5.39583 0 4.4375V3.5625C0 2.60417 0.323698 1.77083 0.971097 1.0625C1.65896 0.354168 2.46821 0 3.39884 0H26.6012C27.5318 0 28.3208 0.354168 28.9682 1.0625C29.6561 1.77083 30 2.60417 30 3.5625V4.4375C30 5.39583 29.6561 6.22917 28.9682 6.9375C28.3208 7.64583 27.5318 8 26.6012 8H3.39884Z"
+    VP.bdZoomOut.width=30
+    VP.bdZoomOut.height=8
   VP.clap={}; //clap by Berkah Icon from the Noun Project https://thenounproject.com/term/clap/2345410/
   VP.clap.path="M53.569,27.147a4.2,4.2,0,0,0-5.839-1.73l-1.191.687a4.016,4.016,0,0,0-.882-1.653,4.167,4.167,0,0,0-2.149-1.281l.358-.358a4.294,4.294,0,0,0,.282-5.906,4.2,4.2,0,0,0-6.1-.163l-2,2.005a4.2,4.2,0,0,0-4.082-3.231h-.006A4.162,4.162,0,0,0,29,16.745l-6.861,6.86-.012.012-.766.766a5.221,5.221,0,0,0-1.631-3.233,3.123,3.123,0,0,0-4.309.12L8.2,28.5A17.213,17.213,0,0,0,7.31,52.268a17.051,17.051,0,0,0,4.278,3.388c.331.353.69.707,1.078,1.054A16.98,16.98,0,0,0,32.46,58.719l16.632-9.6a4.3,4.3,0,0,0,1.8-5.629,4.183,4.183,0,0,0-1.754-1.8l2.127-1.227a4.3,4.3,0,0,0,1.819-5.629l0,0a4.159,4.159,0,0,0-1.743-1.791l.433-.25A4.306,4.306,0,0,0,53.569,27.147ZM8.788,50.921a15.218,15.218,0,0,1,.821-21.012l7.225-7.224a1.1,1.1,0,0,1,1.526-.076,3.266,3.266,0,0,1,.083,4.691l-.005,0-6.79,6.79a1,1,0,0,0,1.415,1.414l6.778-6.779h0l0,0,0,0h0l0,0h0l0,0,10.56-10.56a2.176,2.176,0,0,1,1.549-.642h0a2.2,2.2,0,0,1,1.557,3.759L22.21,32.586A1,1,0,1,0,23.624,34L34.935,22.69l4.532-4.532a2.2,2.2,0,0,1,3.2.087,2.326,2.326,0,0,1-.21,3.153l-2.884,2.884,0,.006L26.736,37.113a1,1,0,1,0,1.414,1.414L40.977,25.7a2.06,2.06,0,0,1,1.614-.644,2.183,2.183,0,0,1,1.58.731,2.143,2.143,0,0,1,.473,1.832v0a2.365,2.365,0,0,1-.075.3c-.014.043-.028.085-.044.127-.028.074-.058.146-.092.217a2.243,2.243,0,0,1-.114.2c-.028.047-.054.094-.085.139a2.536,2.536,0,0,1-.272.327L39.7,33.207l-.006.006L31.264,41.64a1,1,0,1,0,1.414,1.414l8.412-8.413s.012-.006.017-.011a2.085,2.085,0,0,1,2.713-.306c.048.03.1.052.145.086s.095.088.144.131a2.4,2.4,0,0,1,.191.174.231.231,0,0,0,.014.019,2.314,2.314,0,0,1,.4.723,2.149,2.149,0,0,1,.091.571q0,.056,0,.111a2.492,2.492,0,0,1-.29,1.128c-.022.042-.045.084-.07.126a2.409,2.409,0,0,1-.331.436c-.011.012-.019.026-.031.038l-13.58,13.58c-.3.3-.6.575-.916.842A15.013,15.013,0,0,1,14.26,54.746q-.546-.222-1.081-.489A15.016,15.016,0,0,1,8.788,50.921Zm39.3-3.534-16.63,9.6a14.977,14.977,0,0,1-13.549.745,16.434,16.434,0,0,0,3.749.021c.1-.01.193-.031.291-.042.5-.061.988-.139,1.477-.243.173-.036.342-.085.514-.127.411-.1.818-.212,1.221-.344.192-.062.38-.132.57-.2.379-.139.752-.29,1.121-.456.191-.086.381-.173.57-.267.362-.179.716-.375,1.067-.581.179-.1.36-.206.536-.319.361-.23.709-.481,1.054-.741.151-.112.306-.216.454-.334q.649-.522,1.254-1.116c.045-.043.094-.078.138-.122l3.287-3.288.011,0a1,1,0,0,0,.5-.134l10.32-5.959.011-.009a2.207,2.207,0,0,1,3.055.927A2.325,2.325,0,0,1,48.09,47.387Zm2.18-8.66-5.23,3.02c-.006,0-.009.01-.015.013L40.3,44.49l5.21-5.21a4.409,4.409,0,0,0,.483-.586c.047-.066.088-.132.131-.2a4.451,4.451,0,0,0,.234-.421c.045-.091.093-.18.131-.273a4.72,4.72,0,0,0,.269-.982c.016-.1.032-.193.041-.29.013-.133.019-.265.019-.4,0-.1-.007-.2-.014-.3,0-.057,0-.113-.007-.169l1.436-.83h0a2.206,2.206,0,0,1,3.066.906A2.33,2.33,0,0,1,50.27,38.727Zm.5-7.67L47.233,33.1h0l-1.159.669a4.113,4.113,0,0,0-.286-.391,4.421,4.421,0,0,0-.42-.4c-.016-.013-.029-.03-.045-.043-.084-.069-.176-.124-.265-.186s-.164-.125-.252-.178a4.147,4.147,0,0,0-1.163-.47l1.744-1.743a4.66,4.66,0,0,0,.46-.562c.054-.075.1-.15.152-.227.073-.116.137-.235.2-.356a4.4,4.4,0,0,0,.283-.689c.01-.03.023-.058.032-.088l2.22-1.282a2.2,2.2,0,0,1,3.06.908A2.337,2.337,0,0,1,50.771,31.057Z    M52.793,14.207a1,1,0,0,0,1.414,0l6.5-6.5a1,1,0,1,0-1.414-1.414l-6.5,6.5A1,1,0,0,0,52.793,14.207Z   M59.485,14.143l-5,3a1,1,0,1,0,1.03,1.714l5-3a1,1,0,1,0-1.03-1.714Z    M48.553,13.9a1,1,0,0,0,1.342-.448l3-6a1,1,0,1,0-1.79-.894l-3,6A1,1,0,0,0,48.553,13.9Z    M25.081,11.394a1,1,0,0,0,1.838-.788l-3-7a1,1,0,0,0-1.838.788Z M30,12a1,1,0,0,0,1-1V5a1,1,0,0,0-2,0v6A1,1,0,0,0,30,12Z    M21.219,13.625a1,1,0,0,0,1.562-1.25l-4-5a1,1,0,0,0-1.562,1.25Z";
   VP.clap.width=64;
@@ -10370,10 +10364,10 @@ function TouchReceiver() {
  */
 TouchReceiver.addListeners = function() {
   var TR = TouchReceiver;
-  TR.addEventListenerSafe(document.body, TR.handlerMove, TR.handleMove, false);
-  TR.addEventListenerSafe(document.body, TR.handlerUp, TR.handleUp, false);
-  TR.addEventListenerSafe(document.body, TR.handlerDown, TR.handleDocumentDown, false);
-  TR.addEventListenerSafe(document.body, ["wheel"], TR.wheelZoom, false);
+  TR.addEventListenerSafe(document.body, TR.handlerMove, TR.handleMove);
+  TR.addEventListenerSafe(document.body, TR.handlerUp, TR.handleUp);
+  TR.addEventListenerSafe(document.body, TR.handlerDown, TR.handleDocumentDown);
+  TR.addEventListenerSafe(document.body, ["wheel"], TR.wheelZoom, true);
 };
 
 /**
@@ -10572,6 +10566,8 @@ TouchReceiver.checkStartZoom = function(e) {
  * @param {event} e - wheel event
  */
 TouchReceiver.wheelZoom = function(e) {
+  e.preventDefault()
+
   var zoomIn = e.deltaY < 0
   var x = e.pageX / GuiElements.zoomFactor
   if (Language.isRTL) {
@@ -11155,9 +11151,9 @@ TouchReceiver.touchend = function(e) {
       TR.targetType = "tabSpace";
       TR.target = null;
       TabManager.startScroll(TR.getX(e), TR.getY(e));
-    } else if (e.touches.length > 1) {
+    } //else if (e.touches.length > 1) {
       // No action necessary
-    }
+    //}
   } else if (TR.touchDown && !TR.longTouch) { // Prevents multitouch problems.
     TR.touchDown = false;
     TR.dragging = false;
@@ -11465,10 +11461,12 @@ TouchReceiver.addListenersDialogBlock = function(element) {
  * @param {Element} element - The element to add the listeners to
  * @param {Array<string>} types - The listeners to add
  * @param {function} func - The function to call when the listener is triggered
+ * @param {boolean} notPassive - true if listener should mark passive false
  */
-TouchReceiver.addEventListenerSafe = function(element, types, func) {
+TouchReceiver.addEventListenerSafe = function(element, types, func, notPassive) {
+  var arg = notPassive ? {passive: false} : false
   for (var i = 0; i < types.length; i++) {
-    element.addEventListener(types[i], DebugOptions.safeFunc(func), false);
+    element.addEventListener(types[i], DebugOptions.safeFunc(func), arg);//false);
   }
 };
 
@@ -11825,11 +11823,42 @@ TitleBar.makeButtons = function() {
     var rcBnH = TB.fileBn.H - TB.fileBn.margin
     var rcBnX = TB.width - rcBnW + TB.fileBn.r
     var rcBnY = TB.height + 2 * TB.fileBn.margin + TB.fileBn.H
-    TB.recenterBn = new Button(rcBnX, rcBnY, rcBnW, rcBnH, TBLayer, TB.fileBn.bgColor, TB.fileBn.r, TB.fileBn.r)
-    TB.recenterBn.addColorIcon(VectorPaths.faCrosshairs, TB.bnIconH * 0.5, Colors.bbtDarkGray)
-    TB.recenterBn.setCallbackFunction(function() {
-      TabManager.activeTab.recenter()
-    })
+    if (GuiElements.isPWA) {
+
+      //Add the zoom and recenter buttons
+      var zoomBnW = 25
+      var zoomBnM = 5 
+      var bgColor = TB.fileBn.bgColor 
+      var zoomGroupY =  (TB.height + 2 * TB.fileBn.margin + TB.fileBn.H)
+      var iconColor =  TB.bg 
+      TB.zoomBnGroup = GuiElements.create.group(TB.width - zoomBnW - 1.5*zoomBnM, zoomGroupY, TBLayer);
+      var zoomBnBg = GuiElements.draw.rect(0, 0, zoomBnW + 3*zoomBnM, 3*zoomBnW + 6*zoomBnM, bgColor, 10, 10);
+      TB.zoomBnGroup.appendChild(zoomBnBg);
+      var zoomPlusBn = new Button(zoomBnM, 2*zoomBnM, zoomBnW, zoomBnW, TB.zoomBnGroup, bgColor, 5, 5, bgColor)
+      zoomPlusBn.addColorIcon(VectorPaths.bdZoomIn, 0.75*zoomBnW, iconColor)
+      zoomPlusBn.setCallbackFunction(function() {
+        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, false, true)
+      }, false)
+      var zoomMinusBn = new Button(zoomBnM, 3*zoomBnM + zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, bgColor, 5, 5, bgColor)
+      zoomMinusBn.addColorIcon(VectorPaths.bdZoomOut, 0.17*zoomBnW, iconColor)
+      zoomMinusBn.setCallbackFunction(function() {
+        TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, true, true)
+      }, false)
+      var recenterBn = new Button(zoomBnM, 4*zoomBnM + 2*zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, bgColor, 5, 5, bgColor)
+      recenterBn.addColorIcon(VectorPaths.bdRecenter, 0.85*zoomBnW, iconColor)
+      recenterBn.setCallbackFunction(function() {
+        TabManager.activeTab.recenter()
+      }, false)
+
+    } else {
+
+      //Just add recenter button. Users will pinch to zoom
+      TB.recenterBn = new Button(rcBnX, rcBnY, rcBnW, rcBnH, TBLayer, TB.fileBn.bgColor, TB.fileBn.r, TB.fileBn.r)
+      TB.recenterBn.addColorIcon(VectorPaths.faCrosshairs, TB.bnIconH * 0.5, Colors.bbtDarkGray)
+      TB.recenterBn.setCallbackFunction(function() {
+        TabManager.activeTab.recenter()
+      })
+    }
 
   } else {
     TB.flagBn = new Button(TB.flagBnX, TB.buttonMargin, TB.buttonW, TB.buttonH, TBLayer);
@@ -21108,11 +21137,11 @@ TabManager.endZooming = function() {
  * @param {number} y
  * @param {boolean} zoomIn
  */
-TabManager.wheelZoom = function(x, y, zoomIn) {
+TabManager.wheelZoom = function(x, y, zoomIn, buttonPress) {
   var TM = TabManager;
   if (!TM.zooming) {
     TM.zooming = true;
-    TM.activeTab.wheelZoom(x, y, zoomIn);
+    TM.activeTab.wheelZoom(x, y, zoomIn, buttonPress);
     TM.zooming = false;
   }
 }
@@ -21725,8 +21754,9 @@ Tab.prototype.endZooming = function() {
  * @param {number} x - x coord of mouse during event
  * @param {number} y - y coord of mouse during event
  * @param {boolean} zoomIn - true if the canvas should zoom in
+ * @param {boolean} buttonPress - true if this function called by zoom button rather that wheel event
  */
-Tab.prototype.wheelZoom = function(x, y, zoomIn) {
+Tab.prototype.wheelZoom = function(x, y, zoomIn, buttonPress) {
   if (this.zooming) {
     return;
   }
@@ -21736,7 +21766,7 @@ Tab.prototype.wheelZoom = function(x, y, zoomIn) {
   this.startZoom = this.zoomFactor;
   this.updateTabDim();
 
-  var zoomDelta = zoomIn ? 0.9 : 1.1
+  var zoomDelta = buttonPress ? (zoomIn ? 0.75 : 1.25) : (zoomIn ? 0.985 : 1.015)
   this.zoomFactor = this.startZoom * zoomDelta;
   this.zoomFactor = Math.max(TabManager.minZoom, Math.min(TabManager.maxZoom, this.zoomFactor));
   var zoomRatio = this.zoomFactor / this.startZoom;
@@ -26018,9 +26048,9 @@ HtmlServer.getIosHandler = function() {
 
 HtmlServer.createFakeIosHandler = function() {
   return "test";
-  return function(object) {
+  /*return function(object) {
     console.log("request: " + object.request + ",  body: " + object.body + ", id: " + object.id);
-  }
+  }*/
 };
 
 /**
@@ -26086,12 +26116,12 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
     // If we're testing on a device without a backend, we reply with a fake response
     setTimeout(function() {
       HtmlServer.unansweredCount--;
-      if (false) {
+      /*if (false) {
         // We can respond with a fake error
         if (callbackErr != null) {
           callbackErr(418, "I'm a teapot");
         }
-      } else {
+      } else {*/
         // Or with fake data
         if (callbackFn != null) {
           //callbackFn('Started');
@@ -26100,7 +26130,7 @@ HtmlServer.sendRequestWithCallback = function(request, callbackFn, callbackErr, 
           //callbackFn('[{"name":"hi","id":"there"}]');
           //callbackFn('{"availableName":"test","alreadySanitized":true,"alreadyAvailable":true,"files":["project1","project2"]}');
         }
-      }
+      //}
     }, 20);
     HtmlServer.unansweredCount++;
     return;
@@ -30495,7 +30525,6 @@ Slot.prototype.getData = function() {
 
 /**
  * Returns the result if the slot has no child
- * @abstract
  */
 Slot.prototype.getDataNotFromChild = function() {
   GuiElements.markAbstract();
@@ -30870,7 +30899,6 @@ Slot.prototype.getKey = function() {
 
 /**
  * Draws a white border around the slot to indicate that the blocks being dragged will snap to it if released.
- * @abstract
  */
 Slot.prototype.highlight = function() {
   DebugOptions.markAbstract();
@@ -30879,7 +30907,6 @@ Slot.prototype.highlight = function() {
 /**
  * Creates a string representing the slot and its content
  * @return {string}
- * @abstract
  */
 Slot.prototype.textSummary = function() {
   DebugOptions.markAbstract();

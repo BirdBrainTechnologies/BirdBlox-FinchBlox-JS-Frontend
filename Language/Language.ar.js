@@ -116,8 +116,6 @@ Language.ar = {
   "block_set_variable":"(Slot 2) لـــ (Slot 1) ضبط",
   "Create_Variable":"تصميم  تنوع",
   "block_change_variable":"(Slot 2) بواسطة (Slot 1) تغيير",
-  "Rename":"تغيير الاسم",
-  "Delete":"مسح",
   "block_add_to_list":"(Slot 2) لـ (Slot 1 =  شيء) إضافة",
   "Create_List":"إنشاء قائمة",
   "block_delete_from_list":"(Slot 2) من (Slot 1) مسح",

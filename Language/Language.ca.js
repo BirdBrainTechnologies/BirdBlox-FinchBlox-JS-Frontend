@@ -117,8 +117,6 @@ Language.ca = {
   "block_set_variable":"fixa (Slot 1) a (Slot 2)",
   "Create_Variable":"Crea una variable",
   "block_change_variable":"canvia (Slot 1) en (Slot 2)",
-  "Rename":"Reanomena",
-  "Delete":"Elimina",
   "block_add_to_list":"afegeix (Slot 1 = cosa) a (Slot 2)",
   "Create_List":"Crea una llista",
   "block_delete_from_list":"elimina (Slot 1) de (Slot 2)",

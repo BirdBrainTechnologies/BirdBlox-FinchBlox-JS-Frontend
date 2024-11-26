@@ -49,10 +49,10 @@ function TouchReceiver() {
  */
 TouchReceiver.addListeners = function() {
   const TR = TouchReceiver;
-  TR.addEventListenerSafe(document.body, TR.handlerMove, TR.handleMove, false);
-  TR.addEventListenerSafe(document.body, TR.handlerUp, TR.handleUp, false);
-  TR.addEventListenerSafe(document.body, TR.handlerDown, TR.handleDocumentDown, false);
-  TR.addEventListenerSafe(document.body, ["wheel"], TR.wheelZoom, false);
+  TR.addEventListenerSafe(document.body, TR.handlerMove, TR.handleMove);
+  TR.addEventListenerSafe(document.body, TR.handlerUp, TR.handleUp);
+  TR.addEventListenerSafe(document.body, TR.handlerDown, TR.handleDocumentDown);
+  TR.addEventListenerSafe(document.body, ["wheel"], TR.wheelZoom, true);
 };
 
 /**
@@ -251,8 +251,10 @@ TouchReceiver.checkStartZoom = function(e) {
  * @param {event} e - wheel event
  */
 TouchReceiver.wheelZoom = function(e) {
+  e.preventDefault()
+
   const zoomIn = e.deltaY < 0
-  const x = e.pageX / GuiElements.zoomFactor
+  let x = e.pageX / GuiElements.zoomFactor
   if (Language.isRTL) {
     x = GuiElements.width - x;
   }
@@ -834,9 +836,9 @@ TouchReceiver.touchend = function(e) {
       TR.targetType = "tabSpace";
       TR.target = null;
       TabManager.startScroll(TR.getX(e), TR.getY(e));
-    } else if (e.touches.length > 1) {
+    } //else if (e.touches.length > 1) {
       // No action necessary
-    }
+    //}
   } else if (TR.touchDown && !TR.longTouch) { // Prevents multitouch problems.
     TR.touchDown = false;
     TR.dragging = false;
@@ -1144,10 +1146,12 @@ TouchReceiver.addListenersDialogBlock = function(element) {
  * @param {Element} element - The element to add the listeners to
  * @param {Array<string>} types - The listeners to add
  * @param {function} func - The function to call when the listener is triggered
+ * @param {boolean} notPassive - true if listener should mark passive false
  */
-TouchReceiver.addEventListenerSafe = function(element, types, func) {
+TouchReceiver.addEventListenerSafe = function(element, types, func, notPassive) {
+  let arg = notPassive ? {passive: false} : false
   for (var i = 0; i < types.length; i++) {
-    element.addEventListener(types[i], DebugOptions.safeFunc(func), false);
+    element.addEventListener(types[i], DebugOptions.safeFunc(func), arg);//false);
   }
 };
 
