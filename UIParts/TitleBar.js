@@ -326,11 +326,13 @@ TitleBar.makeButtons = function() {
       const rcBnH = TB.fileBn.H - TB.fileBn.margin
       const rcBnX = TB.width - rcBnW + TB.fileBn.r
       const rcBnY = TB.height + 2 * TB.fileBn.margin + TB.fileBn.H
-      TB.recenterBn = new Button(rcBnX, rcBnY, rcBnW, rcBnH, TBLayer, TB.fileBn.bgColor, TB.fileBn.r, TB.fileBn.r)
-      TB.recenterBn.addColorIcon(VectorPaths.faCrosshairs, TB.bnIconH * 0.5, Colors.bbtDarkGray)
-      TB.recenterBn.setCallbackFunction(function() {
-        TabManager.activeTab.recenter()
-      })
+      if (!GuiElements.isPWA) {
+        TB.recenterBn = new Button(rcBnX, rcBnY, rcBnW, rcBnH, TBLayer, TB.fileBn.bgColor, TB.fileBn.r, TB.fileBn.r)
+        TB.recenterBn.addColorIcon(VectorPaths.faCrosshairs, TB.bnIconH * 0.5, Colors.bbtDarkGray)
+        TB.recenterBn.setCallbackFunction(function() {
+          TabManager.activeTab.recenter()
+        })
+      }
     }
 
   } else {
@@ -389,25 +391,28 @@ TitleBar.makeButtons = function() {
   }
 
 
-  if (Hatchling || HatchPlus) {
+  if (Hatchling || HatchPlus || (FinchBlox && GuiElements.isPWA)) {
     //Add the zoom and recenter buttons
       const zoomBnW = 25
       const zoomBnM = 5 
-      TB.zoomBnGroup = GuiElements.create.group(TB.width - zoomBnW - 1.5*zoomBnM, TB.height + 40, TBLayer);
-      const zoomBnBg = GuiElements.draw.rect(0, 0, zoomBnW + 3*zoomBnM, 3*zoomBnW + 6*zoomBnM, TB.bg, 10, 10);
+      const bgColor = (FinchBlox && !Hatchling) ? TB.fileBn.bgColor : TB.bg
+      const zoomGroupY = (FinchBlox && !Hatchling) ? (TB.height + 2 * TB.fileBn.margin + TB.fileBn.H) : (TB.height + 40)
+      const iconColor = (FinchBlox && !Hatchling) ? TB.bg : Colors.ballyBrandBlue
+      TB.zoomBnGroup = GuiElements.create.group(TB.width - zoomBnW - 1.5*zoomBnM, zoomGroupY, TBLayer);
+      const zoomBnBg = GuiElements.draw.rect(0, 0, zoomBnW + 3*zoomBnM, 3*zoomBnW + 6*zoomBnM, bgColor, 10, 10);
       TB.zoomBnGroup.appendChild(zoomBnBg);
-      const zoomPlusBn = new Button(zoomBnM, 2*zoomBnM, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5, TB.bg)
-      zoomPlusBn.addColorIcon(VectorPaths.bdZoomIn, 0.75*zoomBnW, Colors.ballyBrandBlue)
+      const zoomPlusBn = new Button(zoomBnM, 2*zoomBnM, zoomBnW, zoomBnW, TB.zoomBnGroup, bgColor, 5, 5, bgColor)
+      zoomPlusBn.addColorIcon(VectorPaths.bdZoomIn, 0.75*zoomBnW, iconColor)
       zoomPlusBn.setCallbackFunction(function() {
         TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, false, true)
       }, false)
-      const zoomMinusBn = new Button(zoomBnM, 3*zoomBnM + zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5, TB.bg)
-      zoomMinusBn.addColorIcon(VectorPaths.bdZoomOut, 0.17*zoomBnW, Colors.ballyBrandBlue)
+      const zoomMinusBn = new Button(zoomBnM, 3*zoomBnM + zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, bgColor, 5, 5, bgColor)
+      zoomMinusBn.addColorIcon(VectorPaths.bdZoomOut, 0.17*zoomBnW, iconColor)
       zoomMinusBn.setCallbackFunction(function() {
         TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, true, true)
       }, false)
-      const recenterBn = new Button(zoomBnM, 4*zoomBnM + 2*zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5, TB.bg)
-      recenterBn.addColorIcon(VectorPaths.bdRecenter, 0.85*zoomBnW, Colors.ballyBrandBlue)
+      const recenterBn = new Button(zoomBnM, 4*zoomBnM + 2*zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, bgColor, 5, 5, bgColor)
+      recenterBn.addColorIcon(VectorPaths.bdRecenter, 0.85*zoomBnW, iconColor)
       recenterBn.setCallbackFunction(function() {
         TabManager.activeTab.recenter()
       }, false)

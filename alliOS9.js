@@ -11932,10 +11932,10 @@ function TouchReceiver() {
  */
 TouchReceiver.addListeners = function() {
   var TR = TouchReceiver;
-  TR.addEventListenerSafe(document.body, TR.handlerMove, TR.handleMove, false);
-  TR.addEventListenerSafe(document.body, TR.handlerUp, TR.handleUp, false);
-  TR.addEventListenerSafe(document.body, TR.handlerDown, TR.handleDocumentDown, false);
-  TR.addEventListenerSafe(document.body, ["wheel"], TR.wheelZoom, false);
+  TR.addEventListenerSafe(document.body, TR.handlerMove, TR.handleMove);
+  TR.addEventListenerSafe(document.body, TR.handlerUp, TR.handleUp);
+  TR.addEventListenerSafe(document.body, TR.handlerDown, TR.handleDocumentDown);
+  TR.addEventListenerSafe(document.body, ["wheel"], TR.wheelZoom, true);
 };
 
 /**
@@ -12137,6 +12137,8 @@ TouchReceiver.checkStartZoom = function(e) {
  * @param {event} e - wheel event
  */
 TouchReceiver.wheelZoom = function(e) {
+  e.preventDefault()
+
   var zoomIn = e.deltaY < 0
   var x = e.pageX / GuiElements.zoomFactor
   if (Language.isRTL) {
@@ -13183,9 +13185,10 @@ TouchReceiver.addListenersDialogBlock = function(element) {
  * @param {Array<string>} types - The listeners to add
  * @param {function} func - The function to call when the listener is triggered
  */
-TouchReceiver.addEventListenerSafe = function(element, types, func) {
+TouchReceiver.addEventListenerSafe = function(element, types, func, notPassive) {
   for (var i = 0; i < types.length; i++) {
-    element.addEventListener(types[i], DebugOptions.safeFunc(func), false);
+    var arg = notPassive ? {passive: false} : false
+    element.addEventListener(types[i], DebugOptions.safeFunc(func), arg)//false);
   }
 };
 
@@ -13575,11 +13578,13 @@ TitleBar.makeButtons = function() {
       var rcBnH = TB.fileBn.H - TB.fileBn.margin
       var rcBnX = TB.width - rcBnW + TB.fileBn.r
       var rcBnY = TB.height + 2 * TB.fileBn.margin + TB.fileBn.H
-      TB.recenterBn = new Button(rcBnX, rcBnY, rcBnW, rcBnH, TBLayer, TB.fileBn.bgColor, TB.fileBn.r, TB.fileBn.r)
-      TB.recenterBn.addColorIcon(VectorPaths.faCrosshairs, TB.bnIconH * 0.5, Colors.bbtDarkGray)
-      TB.recenterBn.setCallbackFunction(function() {
-        TabManager.activeTab.recenter()
-      })
+      if (!GuiElements.isPWA) {
+        TB.recenterBn = new Button(rcBnX, rcBnY, rcBnW, rcBnH, TBLayer, TB.fileBn.bgColor, TB.fileBn.r, TB.fileBn.r)
+        TB.recenterBn.addColorIcon(VectorPaths.faCrosshairs, TB.bnIconH * 0.5, Colors.bbtDarkGray)
+        TB.recenterBn.setCallbackFunction(function() {
+          TabManager.activeTab.recenter()
+        })
+      }
     }
 
   } else {
@@ -13638,25 +13643,28 @@ TitleBar.makeButtons = function() {
   }
 
 
-  if (Hatchling || HatchPlus) {
+  if (Hatchling || HatchPlus || (FinchBlox && GuiElements.isPWA)) {
     //Add the zoom and recenter buttons
       var zoomBnW = 25
       var zoomBnM = 5 
-      TB.zoomBnGroup = GuiElements.create.group(TB.width - zoomBnW - 1.5*zoomBnM, TB.height + 40, TBLayer);
-      var zoomBnBg = GuiElements.draw.rect(0, 0, zoomBnW + 3*zoomBnM, 3*zoomBnW + 6*zoomBnM, TB.bg, 10, 10);
+      var bgColor = (FinchBlox && !Hatchling) ? TB.fileBn.bgColor : TB.bg
+      var zoomGroupY = (FinchBlox && !Hatchling) ? (TB.height + 2 * TB.fileBn.margin + TB.fileBn.H) : (TB.height + 40)
+      var iconColor = (FinchBlox && !Hatchling) ? TB.bg : Colors.ballyBrandBlue
+      TB.zoomBnGroup = GuiElements.create.group(TB.width - zoomBnW - 1.5*zoomBnM, zoomGroupY, TBLayer);
+      var zoomBnBg = GuiElements.draw.rect(0, 0, zoomBnW + 3*zoomBnM, 3*zoomBnW + 6*zoomBnM, bgColor, 10, 10);
       TB.zoomBnGroup.appendChild(zoomBnBg);
-      var zoomPlusBn = new Button(zoomBnM, 2*zoomBnM, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5, TB.bg)
-      zoomPlusBn.addColorIcon(VectorPaths.bdZoomIn, 0.75*zoomBnW, Colors.ballyBrandBlue)
+      var zoomPlusBn = new Button(zoomBnM, 2*zoomBnM, zoomBnW, zoomBnW, TB.zoomBnGroup, bgColor, 5, 5, bgColor)
+      zoomPlusBn.addColorIcon(VectorPaths.bdZoomIn, 0.75*zoomBnW, iconColor)
       zoomPlusBn.setCallbackFunction(function() {
         TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, false, true)
       }, false)
-      var zoomMinusBn = new Button(zoomBnM, 3*zoomBnM + zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5, TB.bg)
-      zoomMinusBn.addColorIcon(VectorPaths.bdZoomOut, 0.17*zoomBnW, Colors.ballyBrandBlue)
+      var zoomMinusBn = new Button(zoomBnM, 3*zoomBnM + zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, bgColor, 5, 5, bgColor)
+      zoomMinusBn.addColorIcon(VectorPaths.bdZoomOut, 0.17*zoomBnW, iconColor)
       zoomMinusBn.setCallbackFunction(function() {
         TabManager.wheelZoom(GuiElements.width/2, GuiElements.height/2, true, true)
       }, false)
-      var recenterBn = new Button(zoomBnM, 4*zoomBnM + 2*zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, TB.bg, 5, 5, TB.bg)
-      recenterBn.addColorIcon(VectorPaths.bdRecenter, 0.85*zoomBnW, Colors.ballyBrandBlue)
+      var recenterBn = new Button(zoomBnM, 4*zoomBnM + 2*zoomBnW, zoomBnW, zoomBnW, TB.zoomBnGroup, bgColor, 5, 5, bgColor)
+      recenterBn.addColorIcon(VectorPaths.bdRecenter, 0.85*zoomBnW, iconColor)
       recenterBn.setCallbackFunction(function() {
         TabManager.activeTab.recenter()
       }, false)
@@ -26856,7 +26864,7 @@ Tab.prototype.wheelZoom = function(x, y, zoomIn, buttonPress) {
   this.startZoom = this.zoomFactor;
   this.updateTabDim();
 
-  var zoomDelta = buttonPress ? (zoomIn ? 0.75 : 1.25) : (zoomIn ? 0.975 : 1.025)
+  var zoomDelta = buttonPress ? (zoomIn ? 0.75 : 1.25) : (zoomIn ? 0.985 : 1.015)
   this.zoomFactor = this.startZoom * zoomDelta;
   this.zoomFactor = Math.max(TabManager.minZoom, Math.min(TabManager.maxZoom, this.zoomFactor));
   var zoomRatio = this.zoomFactor / this.startZoom;
@@ -32825,7 +32833,7 @@ SaveManager.userNew = function(nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.promptNewFile = function(message, nextAction) {
-  console.log("*** promptNewFile")
+  //console.log("*** promptNewFile")
   SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
     SaveManager.promptNewFileWithDefault(message, availableName, nextAction);
   });
@@ -32838,7 +32846,7 @@ SaveManager.promptNewFile = function(message, nextAction) {
  * @param {function} [nextAction]
  */
 SaveManager.promptNewFileWithDefault = function(message, defaultName, nextAction) {
-  console.log("*** promptNewFileWithDefault")
+  //console.log("*** promptNewFileWithDefault")
   DialogManager.showPromptDialog(Language.getStr("New"), message, defaultName, true, function(cancelled, response) {
     if (!cancelled) {
       SaveManager.sanitizeNew(response.trim(), nextAction);
@@ -33084,7 +33092,7 @@ SaveManager.delete = function(isRecording, filename, nextAction) {
  * @param {boolean} [isRecording=false] - Whether the name should be compared to recordings instead of files
  */
 SaveManager.getAvailableName = function(filename, callbackFn, isRecording) {
-  console.log("getAvailableName " + filename)
+  //console.log("*** getAvailableName " + filename)
   if (isRecording == null) {
     isRecording = false;
   }

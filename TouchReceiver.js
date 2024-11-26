@@ -49,10 +49,10 @@ function TouchReceiver() {
  */
 TouchReceiver.addListeners = function() {
   const TR = TouchReceiver;
-  TR.addEventListenerSafe(document.body, TR.handlerMove, TR.handleMove, false);
-  TR.addEventListenerSafe(document.body, TR.handlerUp, TR.handleUp, false);
-  TR.addEventListenerSafe(document.body, TR.handlerDown, TR.handleDocumentDown, false);
-  TR.addEventListenerSafe(document.body, ["wheel"], TR.wheelZoom, false);
+  TR.addEventListenerSafe(document.body, TR.handlerMove, TR.handleMove);
+  TR.addEventListenerSafe(document.body, TR.handlerUp, TR.handleUp);
+  TR.addEventListenerSafe(document.body, TR.handlerDown, TR.handleDocumentDown);
+  TR.addEventListenerSafe(document.body, ["wheel"], TR.wheelZoom, true);
 };
 
 /**
@@ -254,6 +254,8 @@ TouchReceiver.checkStartZoom = function(e) {
  * @param {event} e - wheel event
  */
 TouchReceiver.wheelZoom = function(e) {
+  e.preventDefault()
+
   const zoomIn = e.deltaY < 0
   let x = e.pageX / GuiElements.zoomFactor
   if (Language.isRTL) {
@@ -1300,9 +1302,10 @@ TouchReceiver.addListenersDialogBlock = function(element) {
  * @param {Array<string>} types - The listeners to add
  * @param {function} func - The function to call when the listener is triggered
  */
-TouchReceiver.addEventListenerSafe = function(element, types, func) {
+TouchReceiver.addEventListenerSafe = function(element, types, func, notPassive) {
   for (var i = 0; i < types.length; i++) {
-    element.addEventListener(types[i], DebugOptions.safeFunc(func), false);
+    let arg = notPassive ? {passive: false} : false
+    element.addEventListener(types[i], DebugOptions.safeFunc(func), arg)//false);
   }
 };
 
