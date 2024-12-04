@@ -45,6 +45,10 @@ function CodeManager() {
   // TODO: move this into SaveManager
   CodeManager.modifiedTime = new Date().getTime();
   CodeManager.createdTime = new Date().getTime();
+
+  //For HatchPlus, set max lists and variables to match microblocks vm
+  CodeManager.maxLists = 10
+  CodeManager.maxVariables = 100
 }
 
 /* CodeManager.move contains function to start, stop, and update the movement of a BlockStack.
@@ -336,6 +340,7 @@ CodeManager.removeVariable = function(variable) {
  * @param {function} [callbackCancel] - type () -> (), called if the user cancels variable creation
  */
 CodeManager.newVariable = function(callbackCreate, callbackCancel) {
+  if (HatchPlus && CodeManager.variableList.length >= CodeManager.maxVariables) { return }
   DialogManager.showPromptDialog(Language.getStr("Create_Variable"), Language.getStr("Enter_new_name"), "", true, function(cancelled, result) {
     if (!cancelled && CodeManager.checkVarName(result)) {
       result = result.trim();
@@ -343,6 +348,9 @@ CodeManager.newVariable = function(callbackCreate, callbackCancel) {
       SaveManager.markEdited();
       BlockPalette.getCategory("variables").refreshGroup();
       if (callbackCreate != null) callbackCreate(variable);
+      if (HatchPlus && CodeManager.variableList.length >= CodeManager.maxVariables) {
+        BlockPalette.createVarBn.hide()
+      }
     } else {
       if (callbackCancel != null) callbackCancel();
     }
@@ -403,12 +411,12 @@ CodeManager.getVarIndex = function(name) {
   
   for (let i = 0; i < variables.length; i++) {
     if (variables[i].getName() === name) {
-      return i*2;
+      return i;
     }
   }
   for (let i = 0; i < lists.length; i++) {
     if (lists[i].getName() === name) {
-      return i*2+1
+      return i+100 //Microblocks list indexes start at 100
     }
   }
   return -1;
@@ -437,6 +445,7 @@ CodeManager.removeList = function(list) {
  * @param {function} callbackCancel - type () -> (), called if the user cancels list creation
  */
 CodeManager.newList = function(callbackCreate, callbackCancel) {
+  if (HatchPlus && CodeManager.listList.length >= CodeManager.maxLists) { return }
   DialogManager.showPromptDialog(Language.getStr("Create_List"), Language.getStr("Enter_new_name"), "", true, function(cancelled, result) {
     if (!cancelled && CodeManager.checkListName(result)) {
       result = result.trim();
@@ -445,6 +454,9 @@ CodeManager.newList = function(callbackCreate, callbackCancel) {
       if (HatchPlus) { BlockPalette.getCategory("data").refreshGroup(); }
       BlockPalette.getCategory("variables").refreshGroup();
       if (callbackCreate != null) callbackCreate(list);
+      if (HatchPlus && CodeManager.listList.length >= CodeManager.maxLists) {
+        BlockPalette.createListBn.hide()
+      }
     } else {
       if (callbackCancel != null) callbackCancel();
     }

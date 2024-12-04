@@ -66,6 +66,9 @@ SaveManager.loadData = function(data) {
     // There's no data at all, so open an empty file
     SaveManager.loadData(SaveManager.emptyProgData);
   }
+  if (Hatchling || HatchPlus) {
+    mbRuntime.loadData()
+  }
 };
 
 /**

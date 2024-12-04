@@ -16,7 +16,9 @@ function IndexSlot(parent, key, includeAll) {
 
   // Add selectable options
   this.addOption(new SelectionData(Language.getStr("last"), "last"));
-  this.addOption(new SelectionData(Language.getStr("random"), "random"));
+  if (!HatchPlus) {
+    this.addOption(new SelectionData(Language.getStr("random"), "random"));
+  }
   if (includeAll) {
     this.addOption(new SelectionData(Language.getStr("all"), "all"));
   }

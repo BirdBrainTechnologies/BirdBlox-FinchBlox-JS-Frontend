@@ -250,5 +250,6 @@ Language.en = {
 "block_plot":"plot x (Slot 1) y (Slot 2)",
 "block_unplot":"unplot x (Slot 1) y (Slot 2)",
 "block_min":"min (Slot 1) (Slot 2)",
-"block_max":"max (Slot 1) (Slot 2)"
+"block_max":"max (Slot 1) (Slot 2)",
+"block_find_item":"find (Slot 1 = thing) in (Slot 2)"
 }

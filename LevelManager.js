@@ -59,7 +59,7 @@ LevelManager.setLevel = function(level) {
     //LM.loadLevelSavePoint();
     if (Hatchling) { 
       TitleBar.levelButton.setSwitch(level) 
-      mbRuntime.clearBoardIfConnected()
+      //mbRuntime.clearBoardIfConnected()
     }
   }
 }

@@ -30,6 +30,8 @@ ListDropSlot.prototype.populatePad = function(selectPad) {
   CodeManager.listList.forEach(function(list) {
     selectPad.addOption(list.getSelectionData());
   });
+  //The MicroBlocks VM cannot handle infinite lists
+  if (HatchPlus && CodeManager.listList.length >= CodeManager.maxLists) { return }
   // Add the Create list option
   selectPad.addAction(Language.getStr("Create_List"), function(callback) {
     // When selected, tell the CodeManager to open a dialog to create a list

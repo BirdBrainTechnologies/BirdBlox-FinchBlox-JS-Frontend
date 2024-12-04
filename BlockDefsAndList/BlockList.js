@@ -427,7 +427,7 @@ BlockList.populateCat_sound = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_variables = function(category) {
-  category.addButton(Language.getStr("Create_Variable"), CodeManager.newVariable);
+  BlockPalette.createVarBn = category.addButton(Language.getStr("Create_Variable"), CodeManager.newVariable);
   category.addSpace();
 
   const variables = CodeManager.variableList;
@@ -653,7 +653,7 @@ BlockList.populateCat_sensors = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_data = function(category) {
-  category.addButton(Language.getStr("Create_List"), CodeManager.newList);
+  BlockPalette.createListBn = category.addButton(Language.getStr("Create_List"), CodeManager.newList);
   category.addSpace();
 
   const lists = CodeManager.listList;
@@ -664,15 +664,16 @@ BlockList.populateCat_data = function(category) {
     category.addSpace();
     category.addBlockByName("B_AddToList");
     category.addBlockByName("B_DeleteItemOfList");
-    category.addBlockByName("B_InsertItemAtOfList");
+    //category.addBlockByName("B_InsertItemAtOfList"); //Not supported in MicroBlocks?
     category.addBlockByName("B_ReplaceItemOfListWith");
-    category.addBlockByName("B_CopyListToList");
+    //category.addBlockByName("B_CopyListToList"); //Not supported in MicroBlocks?
   }
 
   // These list functions can take input from the Split block, so we show them even if there are no Lists
   category.addBlockByName("B_ItemOfList");
   category.addBlockByName("B_LengthOfList");
-  category.addBlockByName("B_ListContainsItem");
+  //category.addBlockByName("B_ListContainsItem");
+  category.addBlockByName("B_FindItemInList")
 
   //category.addBlockByName("B_MicroBlocksList");
   //category.addBlockByName("B_AddToMBList");

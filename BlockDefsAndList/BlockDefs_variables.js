@@ -301,6 +301,11 @@ function B_DeleteItemOfList(x, y) {
 }
 B_DeleteItemOfList.prototype = Object.create(CommandBlock.prototype);
 B_DeleteItemOfList.prototype.constructor = B_DeleteItemOfList;
+//MicroBlocks functions
+B_DeleteItemOfList.prototype.primName = function() { return "[data:delete]" }
+B_DeleteItemOfList.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()] 
+}
 /* Deletes the item from the List if it exists */
 B_DeleteItemOfList.prototype.startAction = function() {
   const listD = this.slots[1].getData();
@@ -379,6 +384,11 @@ function B_ReplaceItemOfListWith(x, y) {
 }
 B_ReplaceItemOfListWith.prototype = Object.create(CommandBlock.prototype);
 B_ReplaceItemOfListWith.prototype.constructor = B_ReplaceItemOfListWith;
+//MicroBlocks functions
+B_ReplaceItemOfListWith.prototype.primName = function() { return "atPut" }
+B_ReplaceItemOfListWith.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions()] 
+}
 /* Replaces the item at the specified index with another one */
 B_ReplaceItemOfListWith.prototype.startAction = function() {
   const listD = this.slots[1].getData();
@@ -451,6 +461,11 @@ function B_ItemOfList(x, y) {
 }
 B_ItemOfList.prototype = Object.create(ReporterBlock.prototype);
 B_ItemOfList.prototype.constructor = B_ItemOfList;
+//MicroBlocks functions
+B_ItemOfList.prototype.primName = function() { return "at" }
+B_ItemOfList.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()] 
+}
 /* Gets the item form the list */
 B_ItemOfList.prototype.startAction = function() {
   const listD = this.slots[1].getData();
@@ -498,6 +513,11 @@ function B_LengthOfList(x, y) {
 }
 B_LengthOfList.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOfList.prototype.constructor = B_LengthOfList;
+//MicroBlocks functions
+B_LengthOfList.prototype.primName = function() { return "size" }
+B_LengthOfList.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions()] 
+}
 /* Returns the number of items in the List or ListData */
 B_LengthOfList.prototype.startAction = function() {
   const listD = this.slots[0].getData();
@@ -554,3 +574,24 @@ B_ListContainsItem.prototype.checkListContainsItem = function(listData, itemD) {
   }
   return new BoolData(false, true);
 };
+
+
+//Return index of item in list - HatchPlus Only
+function B_FindItemInList(x, y) {
+  ReporterBlock.call(this, x, y, "lists", Block.returnTypes.num);
+
+  const snapType = Slot.snapTypes.numStrBool;
+  const inputType = Slot.outputTypes.any;
+  this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("")));
+
+  // Accepts both Lists and ListData
+  this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
+  this.parseTranslation(Language.getStr("block_find_item"));
+}
+B_FindItemInList.prototype = Object.create(ReporterBlock.prototype)
+B_FindItemInList.prototype.constructor = B_FindItemInList
+//MicroBlocks functions
+B_FindItemInList.prototype.primName = function() { return "[data:find]" }
+B_FindItemInList.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()] 
+}

@@ -2540,7 +2540,8 @@ Language.en = {
 "block_plot":"plot x (Slot 1) y (Slot 2)",
 "block_unplot":"unplot x (Slot 1) y (Slot 2)",
 "block_min":"min (Slot 1) (Slot 2)",
-"block_max":"max (Slot 1) (Slot 2)"
+"block_max":"max (Slot 1) (Slot 2)",
+"block_find_item":"find (Slot 1 = thing) in (Slot 2)"
 }
 
 //Spanish Translation
@@ -5879,7 +5880,7 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected)
     if (isConnected && !wasConnected && this.scanning) {
       this.markStoppedDiscover();
     }
-    if (Hatchling && isConnected && !wasConnected) {
+    if ((Hatchling || HatchPlus) && isConnected && !wasConnected) {
       mbRuntime.justConnected()
     }
   }
@@ -8939,7 +8940,7 @@ BlockList.populateCat_sound = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_variables = function(category) {
-  category.addButton(Language.getStr("Create_Variable"), CodeManager.newVariable);
+  BlockPalette.createVarBn = category.addButton(Language.getStr("Create_Variable"), CodeManager.newVariable);
   category.addSpace();
 
   var variables = CodeManager.variableList;
@@ -9165,7 +9166,7 @@ BlockList.populateCat_sensors = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_data = function(category) {
-  category.addButton(Language.getStr("Create_List"), CodeManager.newList);
+  BlockPalette.createListBn = category.addButton(Language.getStr("Create_List"), CodeManager.newList);
   category.addSpace();
 
   var lists = CodeManager.listList;
@@ -9176,15 +9177,16 @@ BlockList.populateCat_data = function(category) {
     category.addSpace();
     category.addBlockByName("B_AddToList");
     category.addBlockByName("B_DeleteItemOfList");
-    category.addBlockByName("B_InsertItemAtOfList");
+    //category.addBlockByName("B_InsertItemAtOfList"); //Not supported in MicroBlocks?
     category.addBlockByName("B_ReplaceItemOfListWith");
-    category.addBlockByName("B_CopyListToList");
+    //category.addBlockByName("B_CopyListToList"); //Not supported in MicroBlocks?
   }
 
   // These list functions can take input from the Split block, so we show them even if there are no Lists
   category.addBlockByName("B_ItemOfList");
   category.addBlockByName("B_LengthOfList");
-  category.addBlockByName("B_ListContainsItem");
+  //category.addBlockByName("B_ListContainsItem");
+  category.addBlockByName("B_FindItemInList")
 
   //category.addBlockByName("B_MicroBlocksList");
   //category.addBlockByName("B_AddToMBList");
@@ -24976,6 +24978,10 @@ function CodeManager() {
   // TODO: move this into SaveManager
   CodeManager.modifiedTime = new Date().getTime();
   CodeManager.createdTime = new Date().getTime();
+
+  //For HatchPlus, set max lists and variables to match microblocks vm
+  CodeManager.maxLists = 10
+  CodeManager.maxVariables = 100
 }
 
 /* CodeManager.move contains function to start, stop, and update the movement of a BlockStack.
@@ -25267,6 +25273,7 @@ CodeManager.removeVariable = function(variable) {
  * @param {function} [callbackCancel] - type () -> (), called if the user cancels variable creation
  */
 CodeManager.newVariable = function(callbackCreate, callbackCancel) {
+  if (HatchPlus && CodeManager.variableList.length >= CodeManager.maxVariables) { return }
   DialogManager.showPromptDialog(Language.getStr("Create_Variable"), Language.getStr("Enter_new_name"), "", true, function(cancelled, result) {
     if (!cancelled && CodeManager.checkVarName(result)) {
       result = result.trim();
@@ -25274,6 +25281,9 @@ CodeManager.newVariable = function(callbackCreate, callbackCancel) {
       SaveManager.markEdited();
       BlockPalette.getCategory("variables").refreshGroup();
       if (callbackCreate != null) callbackCreate(variable);
+      if (HatchPlus && CodeManager.variableList.length >= CodeManager.maxVariables) {
+        BlockPalette.createVarBn.hide()
+      }
     } else {
       if (callbackCancel != null) callbackCancel();
     }
@@ -25334,12 +25344,12 @@ CodeManager.getVarIndex = function(name) {
   
   for (var i = 0; i < variables.length; i++) {
     if (variables[i].getName() === name) {
-      return i*2;
+      return i;
     }
   }
   for (var i = 0; i < lists.length; i++) {
     if (lists[i].getName() === name) {
-      return i*2+1
+      return i+100 //Microblocks list indexes start at 100
     }
   }
   return -1;
@@ -25368,6 +25378,7 @@ CodeManager.removeList = function(list) {
  * @param {function} callbackCancel - type () -> (), called if the user cancels list creation
  */
 CodeManager.newList = function(callbackCreate, callbackCancel) {
+  if (HatchPlus && CodeManager.listList.length >= CodeManager.maxLists) { return }
   DialogManager.showPromptDialog(Language.getStr("Create_List"), Language.getStr("Enter_new_name"), "", true, function(cancelled, result) {
     if (!cancelled && CodeManager.checkListName(result)) {
       result = result.trim();
@@ -25376,6 +25387,9 @@ CodeManager.newList = function(callbackCreate, callbackCancel) {
       if (HatchPlus) { BlockPalette.getCategory("data").refreshGroup(); }
       BlockPalette.getCategory("variables").refreshGroup();
       if (callbackCreate != null) callbackCreate(list);
+      if (HatchPlus && CodeManager.listList.length >= CodeManager.maxLists) {
+        BlockPalette.createListBn.hide()
+      }
     } else {
       if (callbackCancel != null) callbackCancel();
     }
@@ -32768,6 +32782,9 @@ SaveManager.loadData = function(data) {
     // There's no data at all, so open an empty file
     SaveManager.loadData(SaveManager.emptyProgData);
   }
+  if (Hatchling || HatchPlus) {
+    mbRuntime.loadData()
+  }
 };
 
 /**
@@ -33494,7 +33511,7 @@ LevelManager.setLevel = function(level) {
     //LM.loadLevelSavePoint();
     if (Hatchling) { 
       TitleBar.levelButton.setSwitch(level) 
-      mbRuntime.clearBoardIfConnected()
+      //mbRuntime.clearBoardIfConnected()
     }
   }
 }
@@ -37456,6 +37473,8 @@ VarDropSlot.prototype.populatePad = function(selectPad) {
   CodeManager.variableList.forEach(function(variable) {
     selectPad.addOption(variable.getSelectionData());
   });
+  //The MicroBlocks VM cannot handle infinite variables
+  if (HatchPlus && CodeManager.variableList.length >= CodeManager.maxVariables) { return }
   // Add the Create variable option
   selectPad.addAction(Language.getStr("Create_Variable"), function(callback) {
     // When selected, tell the CodeManager to open a dialog to create a variable
@@ -37553,6 +37572,8 @@ ListDropSlot.prototype.populatePad = function(selectPad) {
   CodeManager.listList.forEach(function(list) {
     selectPad.addOption(list.getSelectionData());
   });
+  //The MicroBlocks VM cannot handle infinite lists
+  if (HatchPlus && CodeManager.listList.length >= CodeManager.maxLists) { return }
   // Add the Create list option
   selectPad.addAction(Language.getStr("Create_List"), function(callback) {
     // When selected, tell the CodeManager to open a dialog to create a list
@@ -38219,7 +38240,9 @@ function IndexSlot(parent, key, includeAll) {
 
   // Add selectable options
   this.addOption(new SelectionData(Language.getStr("last"), "last"));
-  this.addOption(new SelectionData(Language.getStr("random"), "random"));
+  if (!HatchPlus) {
+    this.addOption(new SelectionData(Language.getStr("random"), "random"));
+  }
   if (includeAll) {
     this.addOption(new SelectionData(Language.getStr("all"), "all"));
   }
@@ -45488,6 +45511,11 @@ function B_DeleteItemOfList(x, y) {
 }
 B_DeleteItemOfList.prototype = Object.create(CommandBlock.prototype);
 B_DeleteItemOfList.prototype.constructor = B_DeleteItemOfList;
+//MicroBlocks functions
+B_DeleteItemOfList.prototype.primName = function() { return "[data:delete]" }
+B_DeleteItemOfList.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()] 
+}
 /* Deletes the item from the List if it exists */
 B_DeleteItemOfList.prototype.startAction = function() {
   var listD = this.slots[1].getData();
@@ -45566,6 +45594,11 @@ function B_ReplaceItemOfListWith(x, y) {
 }
 B_ReplaceItemOfListWith.prototype = Object.create(CommandBlock.prototype);
 B_ReplaceItemOfListWith.prototype.constructor = B_ReplaceItemOfListWith;
+//MicroBlocks functions
+B_ReplaceItemOfListWith.prototype.primName = function() { return "atPut" }
+B_ReplaceItemOfListWith.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions()] 
+}
 /* Replaces the item at the specified index with another one */
 B_ReplaceItemOfListWith.prototype.startAction = function() {
   var listD = this.slots[1].getData();
@@ -45638,6 +45671,11 @@ function B_ItemOfList(x, y) {
 }
 B_ItemOfList.prototype = Object.create(ReporterBlock.prototype);
 B_ItemOfList.prototype.constructor = B_ItemOfList;
+//MicroBlocks functions
+B_ItemOfList.prototype.primName = function() { return "at" }
+B_ItemOfList.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()] 
+}
 /* Gets the item form the list */
 B_ItemOfList.prototype.startAction = function() {
   var listD = this.slots[1].getData();
@@ -45685,6 +45723,11 @@ function B_LengthOfList(x, y) {
 }
 B_LengthOfList.prototype = Object.create(ReporterBlock.prototype);
 B_LengthOfList.prototype.constructor = B_LengthOfList;
+//MicroBlocks functions
+B_LengthOfList.prototype.primName = function() { return "size" }
+B_LengthOfList.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions()] 
+}
 /* Returns the number of items in the List or ListData */
 B_LengthOfList.prototype.startAction = function() {
   var listD = this.slots[0].getData();
@@ -45741,6 +45784,27 @@ B_ListContainsItem.prototype.checkListContainsItem = function(listData, itemD) {
   }
   return new BoolData(false, true);
 };
+
+
+//Return index of item in list - HatchPlus Only
+function B_FindItemInList(x, y) {
+  ReporterBlock.call(this, x, y, "lists", Block.returnTypes.num);
+
+  var snapType = Slot.snapTypes.numStrBool;
+  var inputType = Slot.outputTypes.any;
+  this.addPart(new RectSlot(this, "RectS_item", snapType, inputType, new StringData("")));
+
+  // Accepts both Lists and ListData
+  this.addPart(new ListDropSlot(this, "LDS_1", Slot.snapTypes.list));
+  this.parseTranslation(Language.getStr("block_find_item"));
+}
+B_FindItemInList.prototype = Object.create(ReporterBlock.prototype)
+B_FindItemInList.prototype.constructor = B_FindItemInList
+//MicroBlocks functions
+B_FindItemInList.prototype.primName = function() { return "[data:find]" }
+B_FindItemInList.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()] 
+}
 
 /*
  * This file contains the implementations of hatchling blocks that aren't taken
@@ -49354,7 +49418,7 @@ MicroBlocksRuntime.prototype.deleteChunkFor = function(key) {
 	}*/
 	var entry = this.chunkIDs[key]
 	console.log("Deleting chunkID entry [" + entry + "]")
-	if ( (entry != null) && (!this.noBleConnection) ) {//(notNil port)) {
+	if ( (entry != null) && (!this.noBleConnection()) ) {//(notNil port)) {
 		var chunkID = entry[0]
 		this.sendMsgSync('deleteChunkMsg', chunkID) //TODO: await?
 		delete this.chunkIDs[key]
@@ -49366,7 +49430,7 @@ MicroBlocksRuntime.prototype.stopAndSyncScripts = async function(alreadyStopped)
 
 	//removeHint (global 'page')
 	//if (and (notNil port) (true != alreadyStopped)) {
-	if ( (!this.noBleConnection) && (true != alreadyStopped)) {
+	if ( (!this.noBleConnection()) && (true != alreadyStopped)) {
 		this.sendStopAll()
 		this.softReset()
 	}
@@ -49649,12 +49713,12 @@ method updateConnection SmallRuntime {
 MicroBlocksRuntime.prototype.justConnected = async function() {
 	// Called when a board has just connected (browser or stand-alone).
 
-	console.log('Connected to' + this.bleDevice().name) //portName
+	console.log('Connected to' + this.bleDevice().shortName) //portName
 	this.connectionStartTime = null
 	this.vmVersion = null
 	await this.sendMsgSync('getVersionMsg')
 	this.sendStopAll()
-	this.clearRunningHighlights()
+	//this.clearRunningHighlights() //covered in sendStopAll
 	//setDefaultSerialDelay this
 	//abortFileTransfer this
 	/*processMessages this // process incoming version message
@@ -49673,6 +49737,17 @@ MicroBlocksRuntime.prototype.justConnected = async function() {
 		await this.stopAndSyncScripts(true)
 		this.softReset()
 	//}
+}
+
+//Hatchling specific method
+//Clear everything from the last file from the board and load the new file's info
+MicroBlocksRuntime.prototype.loadData = async function() {
+	this.clearBoardIfConnected(true) //will sendStopAll and clearRunningHighlights and softReset
+
+	if (!this.noBleConnection()) { 
+		await this.saveAllChunksAfterLoad()
+	}
+
 }
 
 /*
@@ -49982,13 +50057,13 @@ method reachableFunctions SmallRuntime {
 MicroBlocksRuntime.prototype.suspendCodeFileUpdates = async function() { await this.sendMsgSync('extendedMsg', 2, []) }
 MicroBlocksRuntime.prototype.resumeCodeFileUpdates = function() { this.sendMsg('extendedMsg', 3, []) }
 
-/*
-method saveAllChunksAfterLoad SmallRuntime {
-	suspendCodeFileUpdates this
-	saveAllChunks this
-	resumeCodeFileUpdates this
+
+MicroBlocksRuntime.prototype.saveAllChunksAfterLoad = async function() {
+	await this.suspendCodeFileUpdates()
+	await this.saveAllChunks()
+	this.resumeCodeFileUpdates()
 }
-*/
+
 
 MicroBlocksRuntime.prototype.saveAllChunks = async function() {
 	// Save the code for all scripts and user-defined functions.

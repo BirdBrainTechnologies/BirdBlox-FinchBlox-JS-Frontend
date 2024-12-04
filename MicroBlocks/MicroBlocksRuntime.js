@@ -713,7 +713,7 @@ MicroBlocksRuntime.prototype.deleteChunkFor = function(key) {
 	}*/
 	let entry = this.chunkIDs[key]
 	console.log("Deleting chunkID entry [" + entry + "]")
-	if ( (entry != null) && (!this.noBleConnection) ) {//(notNil port)) {
+	if ( (entry != null) && (!this.noBleConnection()) ) {//(notNil port)) {
 		let chunkID = entry[0]
 		this.sendMsgSync('deleteChunkMsg', chunkID) //TODO: await?
 		delete this.chunkIDs[key]
@@ -725,7 +725,7 @@ MicroBlocksRuntime.prototype.stopAndSyncScripts = async function(alreadyStopped)
 
 	//removeHint (global 'page')
 	//if (and (notNil port) (true != alreadyStopped)) {
-	if ( (!this.noBleConnection) && (true != alreadyStopped)) {
+	if ( (!this.noBleConnection()) && (true != alreadyStopped)) {
 		this.sendStopAll()
 		this.softReset()
 	}
@@ -1008,12 +1008,12 @@ method updateConnection SmallRuntime {
 MicroBlocksRuntime.prototype.justConnected = async function() {
 	// Called when a board has just connected (browser or stand-alone).
 
-	console.log('Connected to' + this.bleDevice().name) //portName
+	console.log('Connected to' + this.bleDevice().shortName) //portName
 	this.connectionStartTime = null
 	this.vmVersion = null
 	await this.sendMsgSync('getVersionMsg')
 	this.sendStopAll()
-	this.clearRunningHighlights()
+	//this.clearRunningHighlights() //covered in sendStopAll
 	//setDefaultSerialDelay this
 	//abortFileTransfer this
 	/*processMessages this // process incoming version message
@@ -1032,6 +1032,17 @@ MicroBlocksRuntime.prototype.justConnected = async function() {
 		await this.stopAndSyncScripts(true)
 		this.softReset()
 	//}
+}
+
+//Hatchling specific method
+//Clear everything from the last file from the board and load the new file's info
+MicroBlocksRuntime.prototype.loadData = async function() {
+	this.clearBoardIfConnected(true) //will sendStopAll and clearRunningHighlights and softReset
+
+	if (!this.noBleConnection()) { 
+		await this.saveAllChunksAfterLoad()
+	}
+
 }
 
 /*
@@ -1341,13 +1352,13 @@ method reachableFunctions SmallRuntime {
 MicroBlocksRuntime.prototype.suspendCodeFileUpdates = async function() { await this.sendMsgSync('extendedMsg', 2, []) }
 MicroBlocksRuntime.prototype.resumeCodeFileUpdates = function() { this.sendMsg('extendedMsg', 3, []) }
 
-/*
-method saveAllChunksAfterLoad SmallRuntime {
-	suspendCodeFileUpdates this
-	saveAllChunks this
-	resumeCodeFileUpdates this
+
+MicroBlocksRuntime.prototype.saveAllChunksAfterLoad = async function() {
+	await this.suspendCodeFileUpdates()
+	await this.saveAllChunks()
+	this.resumeCodeFileUpdates()
 }
-*/
+
 
 MicroBlocksRuntime.prototype.saveAllChunks = async function() {
 	// Save the code for all scripts and user-defined functions.

@@ -27,6 +27,8 @@ VarDropSlot.prototype.populatePad = function(selectPad) {
   CodeManager.variableList.forEach(function(variable) {
     selectPad.addOption(variable.getSelectionData());
   });
+  //The MicroBlocks VM cannot handle infinite variables
+  if (HatchPlus && CodeManager.variableList.length >= CodeManager.maxVariables) { return }
   // Add the Create variable option
   selectPad.addAction(Language.getStr("Create_Variable"), function(callback) {
     // When selected, tell the CodeManager to open a dialog to create a variable
