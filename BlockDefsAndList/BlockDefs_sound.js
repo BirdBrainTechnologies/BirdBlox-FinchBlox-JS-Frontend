@@ -213,6 +213,11 @@ function B_SetTempoTo(x, y) {
 }
 B_SetTempoTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTempoTo.prototype.constructor = B_SetTempoTo;
+//MicroBlocks functions
+B_SetTempoTo.prototype.primName = function() { return "[h:st]" }
+B_SetTempoTo.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions()]
+}
 /* Sets the tempo stored in CodeManager */
 B_SetTempoTo.prototype.startAction = function() {
   const slotData = this.slots[0].getData();
@@ -231,6 +236,9 @@ function B_Tempo(x, y) {
 }
 B_Tempo.prototype = Object.create(ReporterBlock.prototype);
 B_Tempo.prototype.constructor = B_Tempo;
+//MicroBlocks functions
+B_Tempo.prototype.primName = function() { return "[h:gt]" }
+B_Tempo.prototype.argList = function() { return [] }
 /* Retrieve the tempo */
 B_Tempo.prototype.startAction = function() {
   return new ExecutionStatusResult(new NumData(CodeManager.sound.tempo));

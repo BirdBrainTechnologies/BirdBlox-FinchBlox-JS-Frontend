@@ -399,7 +399,10 @@ BlockList.populateCat_control = function(category) {
 BlockList.populateCat_sound = function(category) {
   if (HatchPlus) {
     category.addBlockByName("B_HLBuzzer");
-    category.addBlockByName("B_ChangeTempoBy");
+    category.addBlockByName("B_HLTone");
+    category.addBlockByName("B_HLRest");
+    category.addSpace();
+    //category.addBlockByName("B_ChangeTempoBy");
     category.addBlockByName("B_SetTempoTo");
     category.addBlockByName("B_Tempo");
     category.trimBottom();

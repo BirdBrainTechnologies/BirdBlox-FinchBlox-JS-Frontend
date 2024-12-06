@@ -2541,7 +2541,18 @@ Language.en = {
 "block_unplot":"unplot x (Slot 1) y (Slot 2)",
 "block_min":"min (Slot 1) (Slot 2)",
 "block_max":"max (Slot 1) (Slot 2)",
-"block_find_item":"find (Slot 1 = thing) in (Slot 2)"
+"block_find_item":"find (Slot 1 = thing) in (Slot 2)",
+"block_play_note_type":"play (Slot 1) for one (Slot 2) note",
+"block_play_tone":"play (Slot 1) Hz for (Slot 2) ms",
+"block_rest":"rest for one (Slot 1) note",
+"whole":"whole",
+"dotted_half":"dotted half",
+"half":"half",
+"dotted_quarter":"dotted quarter",
+"quarter":"quarter",
+"dotted_eighth":"dotted eighth",
+"eighth":"eighth",
+"sixteenth":"sixteenth"
 }
 
 //Spanish Translation
@@ -8912,7 +8923,10 @@ BlockList.populateCat_control = function(category) {
 BlockList.populateCat_sound = function(category) {
   if (HatchPlus) {
     category.addBlockByName("B_HLBuzzer");
-    category.addBlockByName("B_ChangeTempoBy");
+    category.addBlockByName("B_HLTone");
+    category.addBlockByName("B_HLRest");
+    category.addSpace();
+    //category.addBlockByName("B_ChangeTempoBy");
     category.addBlockByName("B_SetTempoTo");
     category.addBlockByName("B_Tempo");
     category.trimBottom();
@@ -9380,6 +9394,20 @@ Colors.setCommon = function() {
   Colors.ballyBlueLight = "#DFE2F6" //Backgrounds
   Colors.ballyBlueDark = "#103288" //Actionable graphics
   Colors.ballyBlueOnDrag = "#5562EA" 
+  //Colors to supplement bally colors
+  Colors.hlYellow = "#DB9500" //Additional variation: FFC03A 
+  Colors.hlYellowLight = "#FFE7B5" //"#FFD98A" //"#FFCE66"
+  Colors.hlYellowDark = "#AC7500"
+  Colors.hlYellowOnDrag = "#FFAF07"
+  Colors.ballyBrandBlueOnDrag = "#2AA7B3"
+  Colors.hlOrangeYellow = "#FF9E0A" //Additional variation: CA7B00
+  Colors.hlOrangeYellowLight = "#FFC368"
+  Colors.hlOrangeYellowDark = "#9F6100"
+  Colors.hlOrangeYellowOnDrag = "#FFB33E"
+  Colors.hlGreenBlue = "#07A878" //Additional variation: 00865D
+  Colors.hlGreenBlueLight = "#A7FCE2"//"#75EBC7"//"#4FC19F"
+  Colors.hlGreenBlueDark = "#006949"
+  Colors.hlGreenBlueOnDrag = "#2BB088"
 };
 
 Colors.setCategory = function() {
@@ -9506,9 +9534,9 @@ Colors.setCategory = function() {
       "operators": Colors.ballyBlue,
       "sound": Colors.ballyPurple,
       "control": Colors.ballyGreenYellow,
-      "variables": Colors.ballyPink,
-      "data": Colors.ballyPink,
-      "lists": Colors.ballyPink,
+      "variables": Colors.hlYellow,
+      "data": Colors.hlGreenBlue,
+      "lists": Colors.hlGreenBlue,
       "sensors": Colors.ballyPink,
       "inactive": Colors.ballyGray
     }
@@ -9518,9 +9546,9 @@ Colors.setCategory = function() {
       "operators": Colors.ballyBlueLight,
       "sound": Colors.ballyPurpleLight,
       "control": Colors.ballyGreenYellowLight,
-      "variables": Colors.ballyPinkLight,
-      "data": Colors.ballyPinkLight,
-      "lists": Colors.ballyPinkLight,
+      "variables": Colors.hlYellowLight,
+      "data": Colors.hlGreenBlueLight,
+      "lists": Colors.hlGreenBlueLight,
       "sensors": Colors.ballyPinkLight,
     }
     Colors.blockOutline = {
@@ -9529,22 +9557,21 @@ Colors.setCategory = function() {
       "operators": Colors.ballyBlueDark,
       "sound": Colors.ballyPurpleDark,
       "control": Colors.ballyGreenYellowDark,
-      "variables": Colors.ballyPinkDark,
-      "data": Colors.ballyPinkDark,
-      "lists": Colors.ballyPinkDark,
+      "variables": Colors.hlYellowDark,
+      "data": Colors.hlGreenBlueDark,
+      "lists": Colors.hlGreenBlueDark,
       "sensors": Colors.ballyPinkDark,
       "inactive": Colors.ballyGrayDark
     }
     Colors.dragColors = {
-      //TODO: Make an onDrag color for brand blue
-      "ports": Colors.ballyBrandBlue,
+      "ports": Colors.ballyBrandBlueOnDrag,
       "display": Colors.ballyOrangeOnDrag,
       "operators": Colors.ballyBlueOnDrag,
       "sound": Colors.ballyPurpleOnDrag,
       "control": Colors.ballyGreenYellowOnDrag,
-      "variables": Colors.ballyPinkOnDrag,
-      "data": Colors.ballyPinkOnDrag,
-      "lists": Colors.ballyPinkOnDrag,
+      "variables": Colors.hlYellowOnDrag,
+      "data": Colors.hlGreenBlueOnDrag,
+      "lists": Colors.hlGreenBlueOnDrag,
       "sensors": Colors.ballyPinkOnDrag,
       "inactive": Colors.ballyGray //TODO: Make drag color?
     }
@@ -25255,6 +25282,13 @@ CodeManager.checkBroadcastDelay = function() {
  * @param {Variable} variable
  */
 CodeManager.addVariable = function(variable) {
+  /*if (HatchPlus) {
+    var index = CodeManager.variableList.indexOf(null);
+    if (index != -1) {
+      CodeManager.variableList[index] = variable
+      return
+    }
+  }*/
   CodeManager.variableList.push(variable);
 };
 
@@ -25264,7 +25298,13 @@ CodeManager.addVariable = function(variable) {
  */
 CodeManager.removeVariable = function(variable) {
   var index = CodeManager.variableList.indexOf(variable);
+  /*if (HatchPlus) {
+    CodeManager.variableList[index] = null
+    mbRuntime.saveChunk(new BlockArg())
+  } else {*/
   CodeManager.variableList.splice(index, 1);
+  //}
+  if (HatchPlus) { mbRuntime.variablesChanged() }
 };
 
 /**
@@ -25360,6 +25400,13 @@ CodeManager.getVarIndex = function(name) {
  * @param {List} list
  */
 CodeManager.addList = function(list) {
+  /*if (HatchPlus) {
+    var index = CodeManager.listList.indexOf(null);
+    if (index != -1) {
+      CodeManager.listList[index] = list
+      return
+    }
+  }*/
   CodeManager.listList.push(list);
 };
 
@@ -25369,7 +25416,12 @@ CodeManager.addList = function(list) {
  */
 CodeManager.removeList = function(list) {
   var index = CodeManager.listList.indexOf(list);
+  /*if (HatchPlus) {
+    CodeManager.listList[index] = null
+  } else {*/
   CodeManager.listList.splice(index, 1);
+  //}
+  if (HatchPlus) { mbRuntime.variablesChanged() }
 };
 
 /**
@@ -25465,6 +25517,9 @@ CodeManager.deleteVariable = function(variable) {
 CodeManager.renameList = function(list) {
   TabManager.renameList(list);
   BlockPalette.getCategory("variables").refreshGroup();
+  if (HatchPlus) {
+    BlockPalette.getCategory("data").refreshGroup();
+  }
   SaveManager.markEdited();
 };
 
@@ -25475,6 +25530,7 @@ CodeManager.renameList = function(list) {
 CodeManager.deleteList = function(list) {
   TabManager.deleteList(list);
   BlockPalette.getCategory("variables").refreshGroup();
+  if (HatchPlus) { BlockPalette.getCategory("data").refreshGroup(); }
   SaveManager.markEdited();
 };
 
@@ -40001,8 +40057,7 @@ B_DeviceWithPortsTriLed.prototype.updateAction = function() {
  * @constructor
  */
 function B_DeviceWithPortsBuzzer(x, y, deviceClass) {
-  var category = HatchPlus ? "sound" : deviceClass.getDeviceTypeId()
-  CommandBlock.call(this, x, y, category);
+  CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
   this.minNote = 32
   this.maxNote = 135
@@ -45185,6 +45240,11 @@ function B_SetTempoTo(x, y) {
 }
 B_SetTempoTo.prototype = Object.create(CommandBlock.prototype);
 B_SetTempoTo.prototype.constructor = B_SetTempoTo;
+//MicroBlocks functions
+B_SetTempoTo.prototype.primName = function() { return "[h:st]" }
+B_SetTempoTo.prototype.argList = function() { 
+  return [this.slots[0].getMicroBlocksInstructions()]
+}
 /* Sets the tempo stored in CodeManager */
 B_SetTempoTo.prototype.startAction = function() {
   var slotData = this.slots[0].getData();
@@ -45203,6 +45263,9 @@ function B_Tempo(x, y) {
 }
 B_Tempo.prototype = Object.create(ReporterBlock.prototype);
 B_Tempo.prototype.constructor = B_Tempo;
+//MicroBlocks functions
+B_Tempo.prototype.primName = function() { return "[h:gt]" }
+B_Tempo.prototype.argList = function() { return [] }
 /* Retrieve the tempo */
 B_Tempo.prototype.startAction = function() {
   return new ExecutionStatusResult(new NumData(CodeManager.sound.tempo));
@@ -47567,12 +47630,20 @@ B_HLLedArray.prototype.argList = function() {
 
 
 function B_HLPrint(x, y) {
-  B_MicroBitPrint.call(this, x, y, DeviceHatchling);
+  //B_MicroBitPrint.call(this, x, y, DeviceHatchling);
+
+  CommandBlock.call(this, x, y, "display");
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  // StrS_1 refers to the first string slot.
+  this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
+  this.parseTranslation(Language.getStr("block_Print"));
 }
-B_HLPrint.prototype = Object.create(B_MicroBitPrint.prototype);
+B_HLPrint.prototype = Object.create(CommandBlock.prototype) //B_MicroBitPrint.prototype);
 B_HLPrint.prototype.constructor = B_HLPrint;
-B_HLPrint.prototype.checkActive = function() {
-  return false //Disabled for now
+//MicroBlocks functions
+B_HLPrint.prototype.primName = function() { return "hatchlingDisplayText" } //"[display:mbDisplay]" }
+B_HLPrint.prototype.argList = function() {
+  return [this.slots[1].getMicroBlocksInstructions()]
 }
 
 
@@ -47623,15 +47694,35 @@ B_HLUnplot.prototype.argList = function() {
 
 
 function B_HLBuzzer(x, y) {
-  B_DeviceWithPortsBuzzer.call(this, x, y, DeviceHatchling);
+  //B_DeviceWithPortsBuzzer.call(this, x, y, DeviceHatchling);
+  CommandBlock.call(this, x, y, "sound")
+
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  var noteSlot = new NoteSlot(this, "Note_out", 60, true, true);
+  noteSlot.addLimits(24, 120, Language.getStr("Note")); //accepted midi notes range from 24 to 120
+  this.addPart(noteSlot);
+
+  var typeSlot = new DropSlot(this, "SDS_2", null, null, new SelectionData(Language.getStr("quarter"), 4));
+  typeSlot.addOption(new SelectionData(Language.getStr("whole"), 1));
+  typeSlot.addOption(new SelectionData(Language.getStr("dotted_half"), 3));
+  typeSlot.addOption(new SelectionData(Language.getStr("half"), 2));
+  typeSlot.addOption(new SelectionData(Language.getStr("dotted_quarter"), 6));
+  typeSlot.addOption(new SelectionData(Language.getStr("quarter"), 4));
+  typeSlot.addOption(new SelectionData(Language.getStr("dotted_eighth"), 12));
+  typeSlot.addOption(new SelectionData(Language.getStr("eighth"), 8));
+  typeSlot.addOption(new SelectionData(Language.getStr("sixteenth"), 16));
+  this.addPart(typeSlot);
+  this.parseTranslation(Language.getStr("block_play_note_type"));
 };
-B_HLBuzzer.prototype = Object.create(B_DeviceWithPortsBuzzer.prototype);
+B_HLBuzzer.prototype = Object.create(CommandBlock.prototype) //B_DeviceWithPortsBuzzer.prototype);
 B_HLBuzzer.prototype.constructor = B_HLBuzzer;
 //MicroBlocks functions
 B_HLBuzzer.prototype.primName = function() { return "hatchlingPlayNote" }
 B_HLBuzzer.prototype.argList = function() { 
+  return [this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions()]
 
-  var midiNote = 0
+  /*var midiNote = 0
   if (this.slots[1].hasChild) {
     console.error("SLOTS NOT IMPLEMENTED FOR BUZZER!")
     return []
@@ -47649,7 +47740,56 @@ B_HLBuzzer.prototype.argList = function() {
 
   var frequency = 440 * Math.pow(2, (midiNote - 69)/12)
   var duration = (100 * beats)
-  return [frequency, duration]
+  return [frequency, duration]*/
+}
+
+function B_HLTone(x, y) {
+  CommandBlock.call(this, x, y, "sound")
+
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  var freqSlot = new NumSlot(this, "FreqS_out", 440, true, true)
+  freqSlot.addLimits(20, 20000, "Hz") //Accepted frequencies range from 20 to 20000 Hz
+  this.addPart(freqSlot)
+
+  var durationSlot = new NumSlot(this, "durS_out", 100, true, true)
+  durationSlot.addLimits(10, 10000, "ms") //duration must be at least 10 ms
+  this.addPart(durationSlot)
+
+  this.parseTranslation(Language.getStr("block_play_tone"));
+}
+B_HLTone.prototype = Object.create(CommandBlock.prototype)
+B_HLTone.prototype.constructor = B_HLTone
+//MicroBlocks functions
+B_HLTone.prototype.primName = function() { return "hatchlingPlayTone" }
+B_HLTone.prototype.argList = function() {
+  return [this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions()]
+}
+
+function B_HLRest(x, y) {
+  CommandBlock.call(this, x, y, "sound")
+
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  var typeSlot = new DropSlot(this, "SDS_2", null, null, new SelectionData(Language.getStr("quarter"), 4));
+  typeSlot.addOption(new SelectionData(Language.getStr("whole"), 1));
+  typeSlot.addOption(new SelectionData(Language.getStr("dotted_half"), 3));
+  typeSlot.addOption(new SelectionData(Language.getStr("half"), 2));
+  typeSlot.addOption(new SelectionData(Language.getStr("dotted_quarter"), 6));
+  typeSlot.addOption(new SelectionData(Language.getStr("quarter"), 4));
+  typeSlot.addOption(new SelectionData(Language.getStr("dotted_eighth"), 12));
+  typeSlot.addOption(new SelectionData(Language.getStr("eighth"), 8));
+  typeSlot.addOption(new SelectionData(Language.getStr("sixteenth"), 16));
+  this.addPart(typeSlot);
+
+  this.parseTranslation(Language.getStr("block_rest"));
+}
+B_HLRest.prototype = Object.create(CommandBlock.prototype)
+B_HLRest.prototype.constructor = B_HLRest
+//MicroBlocks functions
+B_HLRest.prototype.primName = function() { return "hatchlingPlayNote" }
+B_HLRest.prototype.argList = function() { 
+  return [0, this.slots[1].getMicroBlocksInstructions()]
 }
 
 
@@ -47737,12 +47877,10 @@ function B_HLSound(x, y){
 B_HLSound.prototype = Object.create(ReporterBlock.prototype)
 B_HLSound.prototype.constructor = B_HLSound
 //MicroBlocks functions
-B_HLSound.prototype.primName = function() { console.error("NOT IMPLEMENTED") }
+B_HLSound.prototype.primName = function() { return "[h:ld]" }
 B_HLSound.prototype.argList = function() { return [] }
 
-B_HLSound.prototype.checkActive = function() {
-  return false //Disabled for now
-}
+
 
 
 /*function B_HLOrientation(x, y) {
@@ -47948,8 +48086,8 @@ function MicroBlocksCompiler () {
 	hatchlingFairyLightWithDelay 115
 	hatchlingNeopixelWithDelay 116
 	hatchlingNeopixelStripWithDelay 117
-	RESERVED 118
-	RESERVED 119
+	hatchlingPlayTone 118
+	hatchlingDisplayText 119
 	RESERVED 120
 	RESERVED 121
 	RESERVED 122
@@ -50633,24 +50771,27 @@ method setVar SmallRuntime varID val {
 		}
 	}
 	if (notNil body) { sendMsg this 'setVarMsg' varID body }
-}
+}*/
 
-method variablesChanged SmallRuntime {
+MicroBlocksRuntime.prototype.variablesChanged = function() {
 	// Called by scripter when variables are added or removed.
 
-	sendStopAll this
-	clearVariableNames this
-	scriptChanged scripter
+	this.sendStopAll()
+	this.clearVariableNames()
+	//scriptChanged scripter
 }
 
-method clearVariableNames SmallRuntime {
-	if (notNil port) { sendMsgSync this 'clearVarsMsg' }
-	oldVarNames = nil
+MicroBlocksRuntime.prototype.clearVariableNames = function() {
+	//if (notNil port) { sendMsgSync this 'clearVarsMsg' }
+	//oldVarNames = nil
+	if (!this.noBleConnection()) {
+		this.sendMsgSync('clearVarsMsg')
+	}
 }
 
 // Serial Delay
 
-method serialDelayMenu SmallRuntime {
+/*method serialDelayMenu SmallRuntime {
 	menu = (menu (join 'Serial delay' (newline) '(smaller is faster, but may fail if computer cannot keep up)') (action 'setSerialDelay' this) true)
 	for i (range 1 5) { addItem menu i }
 	for i (range 6 20 2) { addItem menu i }

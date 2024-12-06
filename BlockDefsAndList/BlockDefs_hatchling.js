@@ -1759,12 +1759,20 @@ B_HLLedArray.prototype.argList = function() {
 
 
 function B_HLPrint(x, y) {
-  B_MicroBitPrint.call(this, x, y, DeviceHatchling);
+  //B_MicroBitPrint.call(this, x, y, DeviceHatchling);
+
+  CommandBlock.call(this, x, y, "display");
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  // StrS_1 refers to the first string slot.
+  this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
+  this.parseTranslation(Language.getStr("block_Print"));
 }
-B_HLPrint.prototype = Object.create(B_MicroBitPrint.prototype);
+B_HLPrint.prototype = Object.create(CommandBlock.prototype) //B_MicroBitPrint.prototype);
 B_HLPrint.prototype.constructor = B_HLPrint;
-B_HLPrint.prototype.checkActive = function() {
-  return false //Disabled for now
+//MicroBlocks functions
+B_HLPrint.prototype.primName = function() { return "hatchlingDisplayText" } //"[display:mbDisplay]" }
+B_HLPrint.prototype.argList = function() {
+  return [this.slots[1].getMicroBlocksInstructions()]
 }
 
 
@@ -1815,15 +1823,35 @@ B_HLUnplot.prototype.argList = function() {
 
 
 function B_HLBuzzer(x, y) {
-  B_DeviceWithPortsBuzzer.call(this, x, y, DeviceHatchling);
+  //B_DeviceWithPortsBuzzer.call(this, x, y, DeviceHatchling);
+  CommandBlock.call(this, x, y, "sound")
+
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  const noteSlot = new NoteSlot(this, "Note_out", 60, true, true);
+  noteSlot.addLimits(24, 120, Language.getStr("Note")); //accepted midi notes range from 24 to 120
+  this.addPart(noteSlot);
+
+  const typeSlot = new DropSlot(this, "SDS_2", null, null, new SelectionData(Language.getStr("quarter"), 4));
+  typeSlot.addOption(new SelectionData(Language.getStr("whole"), 1));
+  typeSlot.addOption(new SelectionData(Language.getStr("dotted_half"), 3));
+  typeSlot.addOption(new SelectionData(Language.getStr("half"), 2));
+  typeSlot.addOption(new SelectionData(Language.getStr("dotted_quarter"), 6));
+  typeSlot.addOption(new SelectionData(Language.getStr("quarter"), 4));
+  typeSlot.addOption(new SelectionData(Language.getStr("dotted_eighth"), 12));
+  typeSlot.addOption(new SelectionData(Language.getStr("eighth"), 8));
+  typeSlot.addOption(new SelectionData(Language.getStr("sixteenth"), 16));
+  this.addPart(typeSlot);
+  this.parseTranslation(Language.getStr("block_play_note_type"));
 };
-B_HLBuzzer.prototype = Object.create(B_DeviceWithPortsBuzzer.prototype);
+B_HLBuzzer.prototype = Object.create(CommandBlock.prototype) //B_DeviceWithPortsBuzzer.prototype);
 B_HLBuzzer.prototype.constructor = B_HLBuzzer;
 //MicroBlocks functions
 B_HLBuzzer.prototype.primName = function() { return "hatchlingPlayNote" }
 B_HLBuzzer.prototype.argList = function() { 
+  return [this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions()]
 
-  let midiNote = 0
+  /*let midiNote = 0
   if (this.slots[1].hasChild) {
     console.error("SLOTS NOT IMPLEMENTED FOR BUZZER!")
     return []
@@ -1841,7 +1869,56 @@ B_HLBuzzer.prototype.argList = function() {
 
   let frequency = 440 * Math.pow(2, (midiNote - 69)/12)
   let duration = (100 * beats)
-  return [frequency, duration]
+  return [frequency, duration]*/
+}
+
+function B_HLTone(x, y) {
+  CommandBlock.call(this, x, y, "sound")
+
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  const freqSlot = new NumSlot(this, "FreqS_out", 440, true, true)
+  freqSlot.addLimits(20, 20000, "Hz") //Accepted frequencies range from 20 to 20000 Hz
+  this.addPart(freqSlot)
+
+  const durationSlot = new NumSlot(this, "durS_out", 100, true, true)
+  durationSlot.addLimits(10, 10000, "ms") //duration must be at least 10 ms
+  this.addPart(durationSlot)
+
+  this.parseTranslation(Language.getStr("block_play_tone"));
+}
+B_HLTone.prototype = Object.create(CommandBlock.prototype)
+B_HLTone.prototype.constructor = B_HLTone
+//MicroBlocks functions
+B_HLTone.prototype.primName = function() { return "hatchlingPlayTone" }
+B_HLTone.prototype.argList = function() {
+  return [this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions()]
+}
+
+function B_HLRest(x, y) {
+  CommandBlock.call(this, x, y, "sound")
+
+  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  const typeSlot = new DropSlot(this, "SDS_2", null, null, new SelectionData(Language.getStr("quarter"), 4));
+  typeSlot.addOption(new SelectionData(Language.getStr("whole"), 1));
+  typeSlot.addOption(new SelectionData(Language.getStr("dotted_half"), 3));
+  typeSlot.addOption(new SelectionData(Language.getStr("half"), 2));
+  typeSlot.addOption(new SelectionData(Language.getStr("dotted_quarter"), 6));
+  typeSlot.addOption(new SelectionData(Language.getStr("quarter"), 4));
+  typeSlot.addOption(new SelectionData(Language.getStr("dotted_eighth"), 12));
+  typeSlot.addOption(new SelectionData(Language.getStr("eighth"), 8));
+  typeSlot.addOption(new SelectionData(Language.getStr("sixteenth"), 16));
+  this.addPart(typeSlot);
+
+  this.parseTranslation(Language.getStr("block_rest"));
+}
+B_HLRest.prototype = Object.create(CommandBlock.prototype)
+B_HLRest.prototype.constructor = B_HLRest
+//MicroBlocks functions
+B_HLRest.prototype.primName = function() { return "hatchlingPlayNote" }
+B_HLRest.prototype.argList = function() { 
+  return [0, this.slots[1].getMicroBlocksInstructions()]
 }
 
 
@@ -1929,12 +2006,10 @@ function B_HLSound(x, y){
 B_HLSound.prototype = Object.create(ReporterBlock.prototype)
 B_HLSound.prototype.constructor = B_HLSound
 //MicroBlocks functions
-B_HLSound.prototype.primName = function() { console.error("NOT IMPLEMENTED") }
+B_HLSound.prototype.primName = function() { return "[h:ld]" }
 B_HLSound.prototype.argList = function() { return [] }
 
-B_HLSound.prototype.checkActive = function() {
-  return false //Disabled for now
-}
+
 
 
 /*function B_HLOrientation(x, y) {

@@ -251,5 +251,16 @@ Language.en = {
 "block_unplot":"unplot x (Slot 1) y (Slot 2)",
 "block_min":"min (Slot 1) (Slot 2)",
 "block_max":"max (Slot 1) (Slot 2)",
-"block_find_item":"find (Slot 1 = thing) in (Slot 2)"
+"block_find_item":"find (Slot 1 = thing) in (Slot 2)",
+"block_play_note_type":"play (Slot 1) for one (Slot 2) note",
+"block_play_tone":"play (Slot 1) Hz for (Slot 2) ms",
+"block_rest":"rest for one (Slot 1) note",
+"whole":"whole",
+"dotted_half":"dotted half",
+"half":"half",
+"dotted_quarter":"dotted quarter",
+"quarter":"quarter",
+"dotted_eighth":"dotted eighth",
+"eighth":"eighth",
+"sixteenth":"sixteenth"
 }

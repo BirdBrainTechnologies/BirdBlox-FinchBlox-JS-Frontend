@@ -322,6 +322,13 @@ CodeManager.checkBroadcastDelay = function() {
  * @param {Variable} variable
  */
 CodeManager.addVariable = function(variable) {
+  /*if (HatchPlus) {
+    const index = CodeManager.variableList.indexOf(null);
+    if (index != -1) {
+      CodeManager.variableList[index] = variable
+      return
+    }
+  }*/
   CodeManager.variableList.push(variable);
 };
 
@@ -331,7 +338,13 @@ CodeManager.addVariable = function(variable) {
  */
 CodeManager.removeVariable = function(variable) {
   const index = CodeManager.variableList.indexOf(variable);
+  /*if (HatchPlus) {
+    CodeManager.variableList[index] = null
+    mbRuntime.saveChunk(new BlockArg())
+  } else {*/
   CodeManager.variableList.splice(index, 1);
+  //}
+  if (HatchPlus) { mbRuntime.variablesChanged() }
 };
 
 /**
@@ -427,6 +440,13 @@ CodeManager.getVarIndex = function(name) {
  * @param {List} list
  */
 CodeManager.addList = function(list) {
+  /*if (HatchPlus) {
+    const index = CodeManager.listList.indexOf(null);
+    if (index != -1) {
+      CodeManager.listList[index] = list
+      return
+    }
+  }*/
   CodeManager.listList.push(list);
 };
 
@@ -436,7 +456,12 @@ CodeManager.addList = function(list) {
  */
 CodeManager.removeList = function(list) {
   const index = CodeManager.listList.indexOf(list);
+  /*if (HatchPlus) {
+    CodeManager.listList[index] = null
+  } else {*/
   CodeManager.listList.splice(index, 1);
+  //}
+  if (HatchPlus) { mbRuntime.variablesChanged() }
 };
 
 /**
@@ -532,6 +557,9 @@ CodeManager.deleteVariable = function(variable) {
 CodeManager.renameList = function(list) {
   TabManager.renameList(list);
   BlockPalette.getCategory("variables").refreshGroup();
+  if (HatchPlus) {
+    BlockPalette.getCategory("data").refreshGroup();
+  }
   SaveManager.markEdited();
 };
 
@@ -542,6 +570,7 @@ CodeManager.renameList = function(list) {
 CodeManager.deleteList = function(list) {
   TabManager.deleteList(list);
   BlockPalette.getCategory("variables").refreshGroup();
+  if (HatchPlus) { BlockPalette.getCategory("data").refreshGroup(); }
   SaveManager.markEdited();
 };
 

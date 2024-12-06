@@ -100,6 +100,20 @@ Colors.setCommon = function() {
   Colors.ballyBlueLight = "#DFE2F6" //Backgrounds
   Colors.ballyBlueDark = "#103288" //Actionable graphics
   Colors.ballyBlueOnDrag = "#5562EA" 
+  //Colors to supplement bally colors
+  Colors.hlYellow = "#DB9500" //Additional variation: FFC03A 
+  Colors.hlYellowLight = "#FFE7B5" //"#FFD98A" //"#FFCE66"
+  Colors.hlYellowDark = "#AC7500"
+  Colors.hlYellowOnDrag = "#FFAF07"
+  Colors.ballyBrandBlueOnDrag = "#2AA7B3"
+  Colors.hlOrangeYellow = "#FF9E0A" //Additional variation: CA7B00
+  Colors.hlOrangeYellowLight = "#FFC368"
+  Colors.hlOrangeYellowDark = "#9F6100"
+  Colors.hlOrangeYellowOnDrag = "#FFB33E"
+  Colors.hlGreenBlue = "#07A878" //Additional variation: 00865D
+  Colors.hlGreenBlueLight = "#A7FCE2"//"#75EBC7"//"#4FC19F"
+  Colors.hlGreenBlueDark = "#006949"
+  Colors.hlGreenBlueOnDrag = "#2BB088"
 };
 
 Colors.setCategory = function() {
@@ -226,9 +240,9 @@ Colors.setCategory = function() {
       "operators": Colors.ballyBlue,
       "sound": Colors.ballyPurple,
       "control": Colors.ballyGreenYellow,
-      "variables": Colors.ballyPink,
-      "data": Colors.ballyPink,
-      "lists": Colors.ballyPink,
+      "variables": Colors.hlYellow,
+      "data": Colors.hlGreenBlue,
+      "lists": Colors.hlGreenBlue,
       "sensors": Colors.ballyPink,
       "inactive": Colors.ballyGray
     }
@@ -238,9 +252,9 @@ Colors.setCategory = function() {
       "operators": Colors.ballyBlueLight,
       "sound": Colors.ballyPurpleLight,
       "control": Colors.ballyGreenYellowLight,
-      "variables": Colors.ballyPinkLight,
-      "data": Colors.ballyPinkLight,
-      "lists": Colors.ballyPinkLight,
+      "variables": Colors.hlYellowLight,
+      "data": Colors.hlGreenBlueLight,
+      "lists": Colors.hlGreenBlueLight,
       "sensors": Colors.ballyPinkLight,
     }
     Colors.blockOutline = {
@@ -249,22 +263,21 @@ Colors.setCategory = function() {
       "operators": Colors.ballyBlueDark,
       "sound": Colors.ballyPurpleDark,
       "control": Colors.ballyGreenYellowDark,
-      "variables": Colors.ballyPinkDark,
-      "data": Colors.ballyPinkDark,
-      "lists": Colors.ballyPinkDark,
+      "variables": Colors.hlYellowDark,
+      "data": Colors.hlGreenBlueDark,
+      "lists": Colors.hlGreenBlueDark,
       "sensors": Colors.ballyPinkDark,
       "inactive": Colors.ballyGrayDark
     }
     Colors.dragColors = {
-      //TODO: Make an onDrag color for brand blue
-      "ports": Colors.ballyBrandBlue,
+      "ports": Colors.ballyBrandBlueOnDrag,
       "display": Colors.ballyOrangeOnDrag,
       "operators": Colors.ballyBlueOnDrag,
       "sound": Colors.ballyPurpleOnDrag,
       "control": Colors.ballyGreenYellowOnDrag,
-      "variables": Colors.ballyPinkOnDrag,
-      "data": Colors.ballyPinkOnDrag,
-      "lists": Colors.ballyPinkOnDrag,
+      "variables": Colors.hlYellowOnDrag,
+      "data": Colors.hlGreenBlueOnDrag,
+      "lists": Colors.hlGreenBlueOnDrag,
       "sensors": Colors.ballyPinkOnDrag,
       "inactive": Colors.ballyGray //TODO: Make drag color?
     }

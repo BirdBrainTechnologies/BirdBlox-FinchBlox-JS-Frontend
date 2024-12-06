@@ -212,8 +212,7 @@ B_DeviceWithPortsTriLed.prototype.updateAction = function() {
  * @constructor
  */
 function B_DeviceWithPortsBuzzer(x, y, deviceClass) {
-  let category = HatchPlus ? "sound" : deviceClass.getDeviceTypeId()
-  CommandBlock.call(this, x, y, category);
+  CommandBlock.call(this, x, y, deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
   this.minNote = 32
   this.maxNote = 135

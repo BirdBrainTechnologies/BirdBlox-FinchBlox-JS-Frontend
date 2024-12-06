@@ -1928,24 +1928,27 @@ method setVar SmallRuntime varID val {
 		}
 	}
 	if (notNil body) { sendMsg this 'setVarMsg' varID body }
-}
+}*/
 
-method variablesChanged SmallRuntime {
+MicroBlocksRuntime.prototype.variablesChanged = function() {
 	// Called by scripter when variables are added or removed.
 
-	sendStopAll this
-	clearVariableNames this
-	scriptChanged scripter
+	this.sendStopAll()
+	this.clearVariableNames()
+	//scriptChanged scripter
 }
 
-method clearVariableNames SmallRuntime {
-	if (notNil port) { sendMsgSync this 'clearVarsMsg' }
-	oldVarNames = nil
+MicroBlocksRuntime.prototype.clearVariableNames = function() {
+	//if (notNil port) { sendMsgSync this 'clearVarsMsg' }
+	//oldVarNames = nil
+	if (!this.noBleConnection()) {
+		this.sendMsgSync('clearVarsMsg')
+	}
 }
 
 // Serial Delay
 
-method serialDelayMenu SmallRuntime {
+/*method serialDelayMenu SmallRuntime {
 	menu = (menu (join 'Serial delay' (newline) '(smaller is faster, but may fail if computer cannot keep up)') (action 'setSerialDelay' this) true)
 	for i (range 1 5) { addItem menu i }
 	for i (range 6 20 2) { addItem menu i }
