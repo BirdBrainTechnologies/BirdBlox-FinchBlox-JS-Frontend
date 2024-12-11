@@ -20,7 +20,9 @@ InputWidget.NumPad.setConstants = function() {
   NP.font = Font.uiFont(34).bold();
   NP.plusMinusH = 22;
   NP.bsIconH = 25;
-  NP.okIconH = NP.bsIconH;
+  NP.okIconH = HatchPlus ? 45 : NP.bsIconH;
+  NP.bsIcon = HatchPlus ? VectorPaths.bsBackspaceFill : VectorPaths.backspace
+  NP.bnBigWidth = 2*NP.bnWidth + NP.bnMargin
 };
 
 /**
@@ -85,6 +87,15 @@ InputWidget.NumPad.prototype.makeBns = function() {
     yPos += NP.bnMargin;
     yPos += NP.bnHeight;
   }
+  if (HatchPlus) {
+    //Only integers are allowed for Hatchling, so no decimal point button is included
+    this.makeNumBn(0, NP.bnMargin * 3 + NP.bnHeight * 3, 0, true);
+    this.makePlusMinusBn(NP.bnMargin + NP.bnBigWidth, NP.bnMargin * 3 + NP.bnHeight * 3);
+    this.bsButton = this.makeBsBn(0, NP.bnMargin * 4 + NP.bnHeight * 4);
+    this.okButton = this.makeOkBn(NP.bnMargin + NP.bnWidth, NP.bnMargin * 4 + NP.bnHeight * 4);
+
+    return
+  }
   this.makeNumBn(NP.bnMargin + NP.bnWidth, NP.bnMargin * 3 + NP.bnHeight * 3, 0);
   this.makePlusMinusBn(0, NP.bnMargin * 3 + NP.bnHeight * 3);
   this.makeDecimalBn(NP.bnMargin * 2 + NP.bnWidth * 2, NP.bnMargin * 3 + NP.bnHeight * 3);
@@ -100,10 +111,10 @@ InputWidget.NumPad.prototype.makeBns = function() {
  * @param {function} callbackFn - The function to call as the button is pressed
  * @return {Button}
  */
-InputWidget.NumPad.prototype.makeTextButton = function(x, y, text, callbackFn) {
+InputWidget.NumPad.prototype.makeTextButton = function(x, y, text, callbackFn, big) {
   const NP = InputWidget.NumPad;
-  let button = new Button(x, y, NP.bnWidth, NP.bnHeight, this.group);
-  button.addText(text, NP.font);
+  let button = new Button(x, y, (big ? NP.bnBigWidth : NP.bnWidth), NP.bnHeight, this.group);
+  button.addText(text, NP.font, (HatchPlus ? Colors.ballyBrandBlueDark: null));
   button.setCallbackFunction(callbackFn, false);
   button.markAsOverlayPart(this.overlay);
   return button;
@@ -116,10 +127,10 @@ InputWidget.NumPad.prototype.makeTextButton = function(x, y, text, callbackFn) {
  * @param {number} num - The number the button will display and append to the DisplayNum
  * @return {Button}
  */
-InputWidget.NumPad.prototype.makeNumBn = function(x, y, num) {
+InputWidget.NumPad.prototype.makeNumBn = function(x, y, num, big) {
   return this.makeTextButton(x, y, num + "", function() {
     this.numPressed(num)
-  }.bind(this));
+  }.bind(this), big);
 };
 
 /**
@@ -154,8 +165,9 @@ InputWidget.NumPad.prototype.makeDecimalBn = function(x, y) {
  */
 InputWidget.NumPad.prototype.makeBsBn = function(x, y) {
   const NP = InputWidget.NumPad;
-  let button = new Button(x, y, NP.longBnW, NP.bnHeight, this.group);
-  button.addIcon(VectorPaths.backspace, NP.bsIconH);
+  let width = HatchPlus ? NP.bnWidth : NP.longBnW
+  let button = new Button(x, y, width, NP.bnHeight, this.group);
+  button.addIcon(NP.bsIcon, NP.bsIconH);
   button.setCallbackFunction(this.bsPressed.bind(this), false);
   button.setCallbackFunction(this.bsReleased.bind(this), true);
   button.markAsOverlayPart(this.overlay);
@@ -170,8 +182,10 @@ InputWidget.NumPad.prototype.makeBsBn = function(x, y) {
  */
 InputWidget.NumPad.prototype.makeOkBn = function(x, y) {
   const NP = InputWidget.NumPad;
-  let button = new Button(x, y, NP.longBnW, NP.bnHeight, this.group);
-  button.addIcon(VectorPaths.checkmark, NP.okIconH);
+  let width = HatchPlus ? NP.bnBigWidth : NP.longBnW
+  let button = new Button(x, y, width, NP.bnHeight, this.group);
+  let icon = HatchPlus ? VectorPaths.bdConnected : VectorPaths.checkmark
+  button.addIcon(icon, NP.okIconH);
   button.setCallbackFunction(this.okPressed.bind(this), true);
   button.markAsOverlayPart(this.overlay);
   return button;
@@ -182,6 +196,7 @@ InputWidget.NumPad.prototype.makeOkBn = function(x, y) {
  * @param {number} num - The number 0-9 to append
  */
 InputWidget.NumPad.prototype.numPressed = function(num) {
+  if (HatchPlus && !this.slotShape.isGray && (this.displayNum.integerPart.length >= 9)) { return } //limit to 9 digits
   this.removeUndo();
   this.deleteIfGray();
   this.displayNum.addDigit(num + "");
@@ -259,7 +274,7 @@ InputWidget.NumPad.prototype.updateBsIcon = function() {
       this.bsButton.addIcon(VectorPaths.undo, NP.bsIconH);
       this.undoVisible = true;
     } else {
-      this.bsButton.addIcon(VectorPaths.backspace, NP.bsIconH);
+      this.bsButton.addIcon(NP.bsIcon, NP.bsIconH);
       this.undoVisible = false;
     }
   }

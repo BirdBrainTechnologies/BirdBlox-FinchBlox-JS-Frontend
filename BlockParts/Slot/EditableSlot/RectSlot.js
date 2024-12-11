@@ -37,5 +37,16 @@ RectSlot.prototype.formatTextSummary = function(textSummary) {
  * @return {InputDialog}
  */
 RectSlot.prototype.createInputSystem = function() {
+  if (HatchPlus) {
+    const x1 = this.getAbsX();
+    const y1 = this.getAbsY();
+    const x2 = this.relToAbsX(this.width);
+    const y2 = this.relToAbsY(this.height);
+    const inputPad = new InputPad(x1, x2, y1, y2);
+
+    inputPad.addWidget(new InputWidget.TextWidget(this.enteredData));
+    return inputPad;
+  }
+
   return new InputDialog(this.parent.textSummary(this), true);
 };

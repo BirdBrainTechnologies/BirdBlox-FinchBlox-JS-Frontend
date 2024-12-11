@@ -262,5 +262,6 @@ Language.en = {
 "quarter":"quarter",
 "dotted_eighth":"dotted eighth",
 "eighth":"eighth",
-"sixteenth":"sixteenth"
+"sixteenth":"sixteenth",
+"block_scroll_text":"scroll text (Slot 1)"
 }

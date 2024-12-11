@@ -34,8 +34,8 @@ InputPad.setConstants = function() {
       IP.width = GuiElements.width * 7/8 - 2*IP.margin
     }
   } else {
-    IP.background = HatchPlus ? Colors.ballyGray : Colors.lightGray;
-    IP.margin = Button.defaultMargin;
+    IP.background = HatchPlus ? Colors.ballyBrandBlue : Colors.lightGray;
+    IP.margin = HatchPlus ? Button.defaultMargin/2 : Button.defaultMargin;
     IP.width = 160;
   }
 };

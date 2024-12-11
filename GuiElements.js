@@ -485,24 +485,29 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, p
   fo.setAttribute("x", x);
   fo.setAttribute("y", y);
 
+  const outerDiv = document.createElement('div');
+  outerDiv.setAttribute("style", "display: table; height: " + h + "px; width: " + w + "px; overflow: hidden;")
+
   const editableText = document.createElement('div');
   editableText.setAttribute("contentEditable", "true");
   editableText.setAttribute("spellcheck", "false");
   editableText.setAttribute("autocomplete", "off");
   editableText.setAttribute("width", w);
-  editableText.setAttribute("style", "pointer-events: auto; -webkit-user-select: auto;");
-  editableText.style.display = "block";
+  editableText.setAttribute("height", h);
+  editableText.setAttribute("style", "pointer-events: auto; -webkit-user-select: auto; display: table-cell; vertical-align: middle;");
+  //editableText.style.display = "block";
   editableText.style.color = textColor;
   editableText.style.fontFamily = font.fontFamily;
   editableText.style.fontSize = font.fontSize + "px";
   editableText.style.outline = "none";
 
-  fo.appendChild(editableText);
+  outerDiv.appendChild(editableText);
+  fo.appendChild(outerDiv);
   group.appendChild(fo);
 
   editableText.charCount = 0;
   editableText.parent = parent;
-  if (parent != null) {
+  if (parent != null && parent.constructor === Comment) {
     fo.setAttribute("style", "text-align: left;");
   }
 
@@ -518,7 +523,8 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, p
       }
     }
     if (HatchPlus && (event.code == 'Enter' || event.keyCode === 13)) { //enter
-      FBPopup.currentPopup.confirm() //will also close the dialog
+      FBPopup.currentPopup?.confirm() //will also close the dialog
+      this.parent?.confirm?.()
     }
     if (event.code == 'Delete' || event.code == 'Backspace' ||
       event.keyCode === 46 || event.keyCode === 8) { //delete or backspace
@@ -529,19 +535,26 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, p
     }
   });
 
+  if (parent != null) {
+    editableText.addEventListener("keyup", function(event) {
+      this.parent.update()
+    })
+  }
+
   //Keep track of the characters typed and limit total to 24 for FinchBlox.
   // https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
   editableText.addEventListener('keypress', function(event) {
     //console.log("pressed a key count=" + this.charCount);
-    if (this.charCount > 24 && FinchBlox) {
+    if ((this.charCount > 24 && FinchBlox) || 
+      (this.charCount > 99 && this.parent?.constructor === InputWidget.TextWidget)) {
       event.preventDefault();
     } else {
       this.charCount++;
     }
 
-    if (this.parent != null) {
+    /*if (this.parent != null) {
       this.parent.update()
-    }
+    }*/
   });
 
   //When focused, move cursor to the end of the content
@@ -567,7 +580,7 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, p
   }
 
   editableText.onblur = function() {
-    if (this.parent != null) {
+    if (this.parent != null && parent.constructor === Comment) {
       this.parent.update()
       if (Comment.currentlyEditing) {
         Comment.currentlyEditing = null

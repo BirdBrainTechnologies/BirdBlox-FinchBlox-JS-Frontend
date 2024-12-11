@@ -13,8 +13,8 @@ InputWidget.Piano.prototype.constructor = InputWidget.Piano;
 InputWidget.Piano.setConstants = function() {
   const P = InputWidget.Piano;
 
-  P.grayOutline = Hatchling ? Colors.ballyGrayLight : Colors.iron 
-  P.purpleOutline = Hatchling ? Colors.ballyPurpleDark : Colors.fbPurpleBorder
+  P.grayOutline = (Hatchling || HatchPlus) ? Colors.ballyGrayLight : Colors.iron 
+  P.purpleOutline = (Hatchling || HatchPlus) ? Colors.ballyPurpleDark : Colors.fbPurpleBorder
 
   P.bnMargin = 2;
   P.firstNote = 48;

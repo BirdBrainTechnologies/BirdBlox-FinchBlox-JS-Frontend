@@ -42,9 +42,9 @@ function Comment() {
 
 Comment.setGlobals = function() {
   Comment.bgColor = Colors.lightYellow
-  Comment.outlineColor = Colors.white //Colors.controlYellow
+  Comment.outlineColor = HatchPlus ? Colors.ballyGrayLight : Colors.white //Colors.controlYellow
   Comment.outlineWidth = 2
-  Comment.textColor = Colors.black
+  Comment.textColor = HatchPlus ? Colors.ballyGrayDark : Colors.black
   Comment.font = Font.uiFont(11)
   Comment.cornerRadius = 3
   Comment.margin = 10
@@ -159,7 +159,7 @@ Comment.prototype.update = function() {
     if (height != this.height - 2 * Comment.margin) {
       this.height = height + 2 * Comment.margin
       GuiElements.update.rect(this.bgRect, 0, 0, this.width, this.height)
-      this.editableText.parentNode.setAttribute('height', height);
+      this.editableText.parentNode.parentNode.setAttribute('height', height);
       if (this.parent != null) {
         this.parent.stack.arrangeComments()
       }

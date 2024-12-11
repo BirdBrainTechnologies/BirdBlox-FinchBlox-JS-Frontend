@@ -75,7 +75,7 @@ PromptDialog.prototype.show = function() {
 			this.group.append(etbg)
 			const etY = textY + margin
 			const etH = textH - 2*margin
-			this.editableText = GuiElements.create.editableText(font, textColor, textX, etY, textW, etH, this.group)
+			this.editableText = GuiElements.create.editableText(font, textColor, textX, textY, textW, textH, this.group)
 			if (this.defaultText != null) {
 				this.editableText.textContent = this.defaultText;
 			}

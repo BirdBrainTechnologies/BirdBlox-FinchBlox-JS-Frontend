@@ -737,7 +737,7 @@ Button.prototype.move = function(x, y) {
 Button.prototype.setColor = function(isPressed) {
   if (isPressed && FinchBlox) {
     if (this.toggles && this.hasIcon) {
-      this.icon.setColor((Hatchling || HatchPlus) ? Colors.ballyPurpleLight : Colors.blockPaletteSound);
+      this.icon.setColor(Hatchling ? Colors.ballyPurpleLight : Colors.blockPaletteSound);
     } else {
       let darkColor = Colors.darkenColor(this.bg, 0.8);
       this.bgRect.setAttributeNS(null, "fill", darkColor);
@@ -768,7 +768,7 @@ Button.prototype.setColor = function(isPressed) {
   } else {
     this.bgRect.setAttributeNS(null, "fill", this.bg);
     if (this.hasText && this.textInverts) {
-      this.textE.setAttributeNS(null, "fill", Button.foreground);
+      this.textE.setAttributeNS(null, "fill", this.textColor);
     }
     if (this.hasIcon && this.iconInverts) {
       let color = Button.foreground;

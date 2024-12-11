@@ -2552,7 +2552,8 @@ Language.en = {
 "quarter":"quarter",
 "dotted_eighth":"dotted eighth",
 "eighth":"eighth",
-"sixteenth":"sixteenth"
+"sixteenth":"sixteenth",
+"block_scroll_text":"scroll text (Slot 1)"
 }
 
 //Spanish Translation
@@ -7190,24 +7191,29 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, p
   fo.setAttribute("x", x);
   fo.setAttribute("y", y);
 
+  var outerDiv = document.createElement('div');
+  outerDiv.setAttribute("style", "display: table; height: " + h + "px; width: " + w + "px; overflow: hidden;")
+
   var editableText = document.createElement('div');
   editableText.setAttribute("contentEditable", "true");
   editableText.setAttribute("spellcheck", "false");
   editableText.setAttribute("autocomplete", "off");
   editableText.setAttribute("width", w);
-  editableText.setAttribute("style", "pointer-events: auto; -webkit-user-select: auto;");
-  editableText.style.display = "block";
+  editableText.setAttribute("height", h);
+  editableText.setAttribute("style", "pointer-events: auto; -webkit-user-select: auto; display: table-cell; vertical-align: middle;");
+  //editableText.style.display = "block";
   editableText.style.color = textColor;
   editableText.style.fontFamily = font.fontFamily;
   editableText.style.fontSize = font.fontSize + "px";
   editableText.style.outline = "none";
 
-  fo.appendChild(editableText);
+  outerDiv.appendChild(editableText);
+  fo.appendChild(outerDiv);
   group.appendChild(fo);
 
   editableText.charCount = 0;
   editableText.parent = parent;
-  if (parent != null) {
+  if (parent != null && parent.constructor === Comment) {
     fo.setAttribute("style", "text-align: left;");
   }
 
@@ -7223,7 +7229,8 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, p
       }
     }
     if (HatchPlus && (event.code == 'Enter' || event.keyCode === 13)) { //enter
-      FBPopup.currentPopup.confirm() //will also close the dialog
+      FBPopup.currentPopup?.confirm() //will also close the dialog
+      this.parent?.confirm?.()
     }
     if (event.code == 'Delete' || event.code == 'Backspace' ||
       event.keyCode === 46 || event.keyCode === 8) { //delete or backspace
@@ -7234,19 +7241,26 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, p
     }
   });
 
+  if (parent != null) {
+    editableText.addEventListener("keyup", function(event) {
+      this.parent.update()
+    })
+  }
+
   //Keep track of the characters typed and limit total to 24 for FinchBlox.
   // https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
   editableText.addEventListener('keypress', function(event) {
     //console.log("pressed a key count=" + this.charCount);
-    if (this.charCount > 24 && FinchBlox) {
+    if ((this.charCount > 24 && FinchBlox) || 
+      (this.charCount > 99 && this.parent?.constructor === InputWidget.TextWidget)) {
       event.preventDefault();
     } else {
       this.charCount++;
     }
 
-    if (this.parent != null) {
+    /*if (this.parent != null) {
       this.parent.update()
-    }
+    }*/
   });
 
   //When focused, move cursor to the end of the content
@@ -7272,7 +7286,7 @@ GuiElements.create.editableText = function(font, textColor, x, y, w, h, group, p
   }
 
   editableText.onblur = function() {
-    if (this.parent != null) {
+    if (this.parent != null && parent.constructor === Comment) {
       this.parent.update()
       if (Comment.currentlyEditing) {
         Comment.currentlyEditing = null
@@ -8874,13 +8888,13 @@ BlockList.populateCat_operators = function(category) {
   category.addBlockByName("B_True");
   category.addBlockByName("B_False");
   category.addSpace();
-  if(!HatchPlus) {
+  //if(!HatchPlus) {
     category.addBlockByName("B_LetterOf");
     category.addBlockByName("B_LengthOf");
     category.addBlockByName("B_join");
     category.addBlockByName("B_Split");
     category.addSpace();
-  }
+  //}
   category.addBlockByName("B_IsAType");
   category.trimBottom();
 };
@@ -9194,21 +9208,22 @@ BlockList.populateCat_data = function(category) {
     //category.addBlockByName("B_InsertItemAtOfList"); //Not supported in MicroBlocks?
     category.addBlockByName("B_ReplaceItemOfListWith");
     //category.addBlockByName("B_CopyListToList"); //Not supported in MicroBlocks?
-  }
+  //}
 
-  // These list functions can take input from the Split block, so we show them even if there are no Lists
-  category.addBlockByName("B_ItemOfList");
-  category.addBlockByName("B_LengthOfList");
-  //category.addBlockByName("B_ListContainsItem");
-  category.addBlockByName("B_FindItemInList")
+    // These list functions can take input from the Split block, so we show them even if there are no Lists
+    category.addBlockByName("B_ItemOfList");
+    category.addBlockByName("B_LengthOfList");
+    //category.addBlockByName("B_ListContainsItem");
+    category.addBlockByName("B_FindItemInList")
+  }
 
   //category.addBlockByName("B_MicroBlocksList");
   //category.addBlockByName("B_AddToMBList");
-  category.addSpace();
+  /*category.addSpace();
   category.addBlockByName("B_LetterOf");
   category.addBlockByName("B_LengthOf");
   category.addBlockByName("B_join");
-  category.addBlockByName("B_Split");
+  category.addBlockByName("B_Split");*/
   category.addSpace();
   category.trimBottom();
 }
@@ -9400,10 +9415,10 @@ Colors.setCommon = function() {
   Colors.hlYellowDark = "#AC7500"
   Colors.hlYellowOnDrag = "#FFAF07"
   Colors.ballyBrandBlueOnDrag = "#2AA7B3"
-  Colors.hlOrangeYellow = "#FF9E0A" //Additional variation: CA7B00
-  Colors.hlOrangeYellowLight = "#FFC368"
-  Colors.hlOrangeYellowDark = "#9F6100"
-  Colors.hlOrangeYellowOnDrag = "#FFB33E"
+  //Colors.hlOrangeYellow = "#FF9E0A" //Additional variation: CA7B00
+  //Colors.hlOrangeYellowLight = "#FFC368"
+  //Colors.hlOrangeYellowDark = "#9F6100"
+  //Colors.hlOrangeYellowOnDrag = "#FFB33E"
   Colors.hlGreenBlue = "#07A878" //Additional variation: 00865D
   Colors.hlGreenBlueLight = "#A7FCE2"//"#75EBC7"//"#4FC19F"
   Colors.hlGreenBlueDark = "#006949"
@@ -10168,6 +10183,10 @@ function VectorPaths(){
     VP.bdZoomOut.width=30
     VP.bdZoomOut.height=8
 
+    VP.bsBackspaceFill={};
+    VP.bsBackspaceFill.path="M15.683 3a2 2 0 0 0-2-2h-7.08a2 2 0 0 0-1.519.698L.241 7.35a1 1 0 0 0 0 1.302l4.843 5.65A2 2 0 0 0 6.603 15h7.08a2 2 0 0 0 2-2zM5.829 5.854a.5.5 0 1 1 .707-.708l2.147 2.147 2.146-2.147a.5.5 0 1 1 .707.708L9.39 8l2.146 2.146a.5.5 0 0 1-.707.708L8.683 8.707l-2.147 2.147a.5.5 0 0 1-.707-.708L7.976 8z"
+    VP.bsBackspaceFill.width=16
+    VP.bsBackspaceFill.height=16
     VP.bsHandIndex={};
     VP.bsHandIndex.path="M6.75 1a.75.75 0 0 1 .75.75V8a.5.5 0 0 0 1 0V5.467l.086-.004c.317-.012.637-.008.816.027.134.027.294.096.448.182.077.042.15.147.15.314V8a.5.5 0 1 0 1 0V6.435l.106-.01c.316-.024.584-.01.708.04.118.046.3.207.486.43.081.096.15.19.2.259V8.5a.5.5 0 0 0 1 0v-1h.342a1 1 0 0 1 .995 1.1l-.271 2.715a2.5 2.5 0 0 1-.317.991l-1.395 2.442a.5.5 0 0 1-.434.252H6.035a.5.5 0 0 1-.416-.223l-1.433-2.15a1.5 1.5 0 0 1-.243-.666l-.345-3.105a.5.5 0 0 1 .399-.546L5 8.11V9a.5.5 0 0 0 1 0V1.75A.75.75 0 0 1 6.75 1M8.5 4.466V1.75a1.75 1.75 0 1 0-3.5 0v5.34l-1.2.24a1.5 1.5 0 0 0-1.196 1.636l.345 3.106a2.5 2.5 0 0 0 .405 1.11l1.433 2.15A1.5 1.5 0 0 0 6.035 16h6.385a1.5 1.5 0 0 0 1.302-.756l1.395-2.441a3.5 3.5 0 0 0 .444-1.389l.271-2.715a2 2 0 0 0-1.99-2.199h-.581a5 5 0 0 0-.195-.248c-.191-.229-.51-.568-.88-.716-.364-.146-.846-.132-1.158-.108l-.132.012a1.26 1.26 0 0 0-.56-.642 2.6 2.6 0 0 0-.738-.288c-.31-.062-.739-.058-1.05-.046zm2.094 2.025"
     VP.bsHandIndex.width=16
@@ -16687,7 +16706,7 @@ Button.prototype.move = function(x, y) {
 Button.prototype.setColor = function(isPressed) {
   if (isPressed && FinchBlox) {
     if (this.toggles && this.hasIcon) {
-      this.icon.setColor((Hatchling || HatchPlus) ? Colors.ballyPurpleLight : Colors.blockPaletteSound);
+      this.icon.setColor(Hatchling ? Colors.ballyPurpleLight : Colors.blockPaletteSound);
     } else {
       var darkColor = Colors.darkenColor(this.bg, 0.8);
       this.bgRect.setAttributeNS(null, "fill", darkColor);
@@ -16718,7 +16737,7 @@ Button.prototype.setColor = function(isPressed) {
   } else {
     this.bgRect.setAttributeNS(null, "fill", this.bg);
     if (this.hasText && this.textInverts) {
-      this.textE.setAttributeNS(null, "fill", Button.foreground);
+      this.textE.setAttributeNS(null, "fill", this.textColor);
     }
     if (this.hasIcon && this.iconInverts) {
       var color = Button.foreground;
@@ -17772,9 +17791,9 @@ function Comment() {
 
 Comment.setGlobals = function() {
   Comment.bgColor = Colors.lightYellow
-  Comment.outlineColor = Colors.white //Colors.controlYellow
+  Comment.outlineColor = HatchPlus ? Colors.ballyGrayLight : Colors.white //Colors.controlYellow
   Comment.outlineWidth = 2
-  Comment.textColor = Colors.black
+  Comment.textColor = HatchPlus ? Colors.ballyGrayDark : Colors.black
   Comment.font = Font.uiFont(11)
   Comment.cornerRadius = 3
   Comment.margin = 10
@@ -17889,7 +17908,7 @@ Comment.prototype.update = function() {
     if (height != this.height - 2 * Comment.margin) {
       this.height = height + 2 * Comment.margin
       GuiElements.update.rect(this.bgRect, 0, 0, this.width, this.height)
-      this.editableText.parentNode.setAttribute('height', height);
+      this.editableText.parentNode.parentNode.setAttribute('height', height);
       if (this.parent != null) {
         this.parent.stack.arrangeComments()
       }
@@ -18272,8 +18291,8 @@ InputPad.setConstants = function() {
       IP.width = GuiElements.width * 7/8 - 2*IP.margin
     }
   } else {
-    IP.background = HatchPlus ? Colors.ballyGray : Colors.lightGray;
-    IP.margin = Button.defaultMargin;
+    IP.background = HatchPlus ? Colors.ballyBrandBlue : Colors.lightGray;
+    IP.margin = HatchPlus ? Button.defaultMargin/2 : Button.defaultMargin;
     IP.width = 160;
   }
 };
@@ -18412,7 +18431,7 @@ InputPad.prototype.finishEdit = function(newData) {
 };
 
 /**
- * A pad of an InputPad which can edit the Dat stored in the Slot.  InputWidget is an abstract class and each Widget
+ * A pad of an InputPad which can edit the Data stored in the Slot.  InputWidget is an abstract class and each Widget
  * is responsible for drawing its own graphics and controlling the data in the Slot being edited.  The Widget is only
  * built when show() is called.
  * @constructor
@@ -18538,7 +18557,9 @@ InputWidget.NumPad.setConstants = function() {
   NP.font = Font.uiFont(34).bold();
   NP.plusMinusH = 22;
   NP.bsIconH = 25;
-  NP.okIconH = NP.bsIconH;
+  NP.okIconH = HatchPlus ? 45 : NP.bsIconH;
+  NP.bsIcon = HatchPlus ? VectorPaths.bsBackspaceFill : VectorPaths.backspace
+  NP.bnBigWidth = 2*NP.bnWidth + NP.bnMargin
 };
 
 /**
@@ -18603,6 +18624,15 @@ InputWidget.NumPad.prototype.makeBns = function() {
     yPos += NP.bnMargin;
     yPos += NP.bnHeight;
   }
+  if (HatchPlus) {
+    //Only integers are allowed for Hatchling, so no decimal point button is included
+    this.makeNumBn(0, NP.bnMargin * 3 + NP.bnHeight * 3, 0, true);
+    this.makePlusMinusBn(NP.bnMargin + NP.bnBigWidth, NP.bnMargin * 3 + NP.bnHeight * 3);
+    this.bsButton = this.makeBsBn(0, NP.bnMargin * 4 + NP.bnHeight * 4);
+    this.okButton = this.makeOkBn(NP.bnMargin + NP.bnWidth, NP.bnMargin * 4 + NP.bnHeight * 4);
+
+    return
+  }
   this.makeNumBn(NP.bnMargin + NP.bnWidth, NP.bnMargin * 3 + NP.bnHeight * 3, 0);
   this.makePlusMinusBn(0, NP.bnMargin * 3 + NP.bnHeight * 3);
   this.makeDecimalBn(NP.bnMargin * 2 + NP.bnWidth * 2, NP.bnMargin * 3 + NP.bnHeight * 3);
@@ -18618,10 +18648,10 @@ InputWidget.NumPad.prototype.makeBns = function() {
  * @param {function} callbackFn - The function to call as the button is pressed
  * @return {Button}
  */
-InputWidget.NumPad.prototype.makeTextButton = function(x, y, text, callbackFn) {
+InputWidget.NumPad.prototype.makeTextButton = function(x, y, text, callbackFn, big) {
   var NP = InputWidget.NumPad;
-  var button = new Button(x, y, NP.bnWidth, NP.bnHeight, this.group);
-  button.addText(text, NP.font);
+  var button = new Button(x, y, (big ? NP.bnBigWidth : NP.bnWidth), NP.bnHeight, this.group);
+  button.addText(text, NP.font, (HatchPlus ? Colors.ballyBrandBlueDark: null));
   button.setCallbackFunction(callbackFn, false);
   button.markAsOverlayPart(this.overlay);
   return button;
@@ -18634,10 +18664,10 @@ InputWidget.NumPad.prototype.makeTextButton = function(x, y, text, callbackFn) {
  * @param {number} num - The number the button will display and append to the DisplayNum
  * @return {Button}
  */
-InputWidget.NumPad.prototype.makeNumBn = function(x, y, num) {
+InputWidget.NumPad.prototype.makeNumBn = function(x, y, num, big) {
   return this.makeTextButton(x, y, num + "", function() {
     this.numPressed(num)
-  }.bind(this));
+  }.bind(this), big);
 };
 
 /**
@@ -18672,8 +18702,9 @@ InputWidget.NumPad.prototype.makeDecimalBn = function(x, y) {
  */
 InputWidget.NumPad.prototype.makeBsBn = function(x, y) {
   var NP = InputWidget.NumPad;
-  var button = new Button(x, y, NP.longBnW, NP.bnHeight, this.group);
-  button.addIcon(VectorPaths.backspace, NP.bsIconH);
+  var width = HatchPlus ? NP.bnWidth : NP.longBnW
+  var button = new Button(x, y, width, NP.bnHeight, this.group);
+  button.addIcon(NP.bsIcon, NP.bsIconH);
   button.setCallbackFunction(this.bsPressed.bind(this), false);
   button.setCallbackFunction(this.bsReleased.bind(this), true);
   button.markAsOverlayPart(this.overlay);
@@ -18688,8 +18719,10 @@ InputWidget.NumPad.prototype.makeBsBn = function(x, y) {
  */
 InputWidget.NumPad.prototype.makeOkBn = function(x, y) {
   var NP = InputWidget.NumPad;
-  var button = new Button(x, y, NP.longBnW, NP.bnHeight, this.group);
-  button.addIcon(VectorPaths.checkmark, NP.okIconH);
+  var width = HatchPlus ? NP.bnBigWidth : NP.longBnW
+  var button = new Button(x, y, width, NP.bnHeight, this.group);
+  var icon = HatchPlus ? VectorPaths.bdConnected : VectorPaths.checkmark
+  button.addIcon(icon, NP.okIconH);
   button.setCallbackFunction(this.okPressed.bind(this), true);
   button.markAsOverlayPart(this.overlay);
   return button;
@@ -18700,6 +18733,7 @@ InputWidget.NumPad.prototype.makeOkBn = function(x, y) {
  * @param {number} num - The number 0-9 to append
  */
 InputWidget.NumPad.prototype.numPressed = function(num) {
+  if (HatchPlus && !this.slotShape.isGray && (this.displayNum.integerPart.length >= 9)) { return } //limit to 9 digits
   this.removeUndo();
   this.deleteIfGray();
   this.displayNum.addDigit(num + "");
@@ -18777,7 +18811,7 @@ InputWidget.NumPad.prototype.updateBsIcon = function() {
       this.bsButton.addIcon(VectorPaths.undo, NP.bsIconH);
       this.undoVisible = true;
     } else {
-      this.bsButton.addIcon(VectorPaths.backspace, NP.bsIconH);
+      this.bsButton.addIcon(NP.bsIcon, NP.bsIconH);
       this.undoVisible = false;
     }
   }
@@ -20078,8 +20112,8 @@ InputWidget.Piano.prototype.constructor = InputWidget.Piano;
 InputWidget.Piano.setConstants = function() {
   var P = InputWidget.Piano;
 
-  P.grayOutline = Hatchling ? Colors.ballyGrayLight : Colors.iron 
-  P.purpleOutline = Hatchling ? Colors.ballyPurpleDark : Colors.fbPurpleBorder
+  P.grayOutline = (Hatchling || HatchPlus) ? Colors.ballyGrayLight : Colors.iron 
+  P.purpleOutline = (Hatchling || HatchPlus) ? Colors.ballyPurpleDark : Colors.fbPurpleBorder
 
   P.bnMargin = 2;
   P.firstNote = 48;
@@ -21272,6 +21306,93 @@ SoundInputPad.prototype.close = function() {
   Sound.stopAllSounds();
 };
 
+
+/**
+ * Used for entering text into Slots.  
+ * @param {string} text - text currently in the slot
+ * @constructor
+ */
+InputWidget.TextWidget = function(text) {
+	this.currentText = text 
+	this.height = 200
+	this.width = InputPad.width;
+	this.bnH = InputWidget.NumPad.bnHeight
+	this.bnM = InputWidget.NumPad.bnMargin
+}
+InputWidget.TextWidget.prototype = Object.create(InputWidget.prototype);
+InputWidget.TextWidget.prototype.constructor = InputWidget.TextWidget;
+
+/**
+ * @inheritDoc
+ * @param {number} x
+ * @param {number} y
+ * @param {Element} parentGroup
+ * @param {BubbleOverlay} overlay
+ * @param {EditableSlotShape} slotShape
+ * @param {function} updateFn
+ * @param {function} finishFn
+ * @param {Data} data
+ */
+InputWidget.TextWidget.prototype.show = function(x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data) {
+  InputWidget.prototype.show.call(this, x, y, parentGroup, overlay, slotShape, updateFn, finishFn, data);
+  this.group = GuiElements.create.group(x, y, parentGroup);
+  this.originalData = data
+
+  var font = Font.uiFont(16)
+  var color = Colors.ballyBrandBlueDark
+  var tW = InputPad.width
+  var tH = this.height - this.bnM - this.bnH
+  var etbg = GuiElements.draw.rect(0, 0, tW, tH, Colors.white, Button.defaultR, Button.defaultR)
+  this.group.append(etbg)
+  var etxy = this.bnM/2
+  var etW = tW - this.bnM 
+  var etH = tH - this.bnM
+  this.editableText = GuiElements.create.editableText(font, color, etxy, etxy, etW, etH, this.group, this)
+  this.editableText.textContent = this.originalData.getValue()
+  TouchReceiver.addListenersEditText(this.editableText, this);
+
+  var bnY = tH + this.bnM
+  var bnW = (this.width - this.bnM)/2
+  var iH = 45
+  var cancelBn = new Button(0, bnY, bnW, this.bnH, this.group);
+  cancelBn.addIcon(VectorPaths.bdClose, iH)
+  cancelBn.setCallbackFunction(this.cancel.bind(this), true);
+  cancelBn.markAsOverlayPart(this.overlay);
+
+  var okBn = new Button(bnW+this.bnM, bnY, bnW, this.bnH, this.group);
+  okBn.addIcon(VectorPaths.bdConnected, iH)
+  GuiElements.update.stroke(okBn.icon.pathE, Colors.ballyBrandBlue, 3)
+  okBn.setCallbackFunction(this.confirm.bind(this), true);
+  okBn.markAsOverlayPart(this.overlay);
+
+  this.editText()
+}
+
+/**
+ * @inheritDoc
+ * @param {number} x
+ * @param {number} y
+ */
+InputWidget.TextWidget.prototype.updateDim = function(x, y) {
+  
+};
+
+InputWidget.TextWidget.prototype.update = function() {
+	this.updateFn(new StringData(this.editableText.textContent))
+}
+
+InputWidget.TextWidget.prototype.editText = function() {
+	this.editableText.focus()
+}
+
+
+InputWidget.TextWidget.prototype.cancel = function() {
+	this.finishFn(this.originalData);
+}
+
+InputWidget.TextWidget.prototype.confirm = function() {
+	this.finishFn(new StringData(this.editableText.textContent));
+}
 /**
  * A BubbleOverlay is a type of Overlay that places its content in a speech bubble shaped background that always
  * is on screen.  The bubble appears above, below, left, or right of a rectangular region specified in the display()
@@ -30354,7 +30475,7 @@ PromptDialog.prototype.show = function() {
 			this.group.append(etbg)
 			var etY = textY + margin
 			var etH = textH - 2*margin
-			this.editableText = GuiElements.create.editableText(font, textColor, textX, etY, textW, etH, this.group)
+			this.editableText = GuiElements.create.editableText(font, textColor, textX, textY, textW, textH, this.group)
 			if (this.defaultText != null) {
 				this.editableText.textContent = this.defaultText;
 			}
@@ -37197,6 +37318,17 @@ RectSlot.prototype.formatTextSummary = function(textSummary) {
  * @return {InputDialog}
  */
 RectSlot.prototype.createInputSystem = function() {
+  if (HatchPlus) {
+    var x1 = this.getAbsX();
+    var y1 = this.getAbsY();
+    var x2 = this.relToAbsX(this.width);
+    var y2 = this.relToAbsY(this.height);
+    var inputPad = new InputPad(x1, x2, y1, y2);
+
+    inputPad.addWidget(new InputWidget.TextWidget(this.enteredData));
+    return inputPad;
+  }
+
   return new InputDialog(this.parent.textSummary(this), true);
 };
 
@@ -47636,7 +47768,7 @@ function B_HLPrint(x, y) {
   this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
   // StrS_1 refers to the first string slot.
   this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
-  this.parseTranslation(Language.getStr("block_Print"));
+  this.parseTranslation(Language.getStr("block_scroll_text"));
 }
 B_HLPrint.prototype = Object.create(CommandBlock.prototype) //B_MicroBitPrint.prototype);
 B_HLPrint.prototype.constructor = B_HLPrint;

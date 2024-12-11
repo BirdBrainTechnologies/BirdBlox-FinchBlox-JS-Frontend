@@ -350,13 +350,13 @@ BlockList.populateCat_operators = function(category) {
   category.addBlockByName("B_True");
   category.addBlockByName("B_False");
   category.addSpace();
-  if(!HatchPlus) {
+  //if(!HatchPlus) {
     category.addBlockByName("B_LetterOf");
     category.addBlockByName("B_LengthOf");
     category.addBlockByName("B_join");
     category.addBlockByName("B_Split");
     category.addSpace();
-  }
+  //}
   category.addBlockByName("B_IsAType");
   category.trimBottom();
 };
@@ -670,21 +670,22 @@ BlockList.populateCat_data = function(category) {
     //category.addBlockByName("B_InsertItemAtOfList"); //Not supported in MicroBlocks?
     category.addBlockByName("B_ReplaceItemOfListWith");
     //category.addBlockByName("B_CopyListToList"); //Not supported in MicroBlocks?
-  }
+  //}
 
-  // These list functions can take input from the Split block, so we show them even if there are no Lists
-  category.addBlockByName("B_ItemOfList");
-  category.addBlockByName("B_LengthOfList");
-  //category.addBlockByName("B_ListContainsItem");
-  category.addBlockByName("B_FindItemInList")
+    // These list functions can take input from the Split block, so we show them even if there are no Lists
+    category.addBlockByName("B_ItemOfList");
+    category.addBlockByName("B_LengthOfList");
+    //category.addBlockByName("B_ListContainsItem");
+    category.addBlockByName("B_FindItemInList")
+  }
 
   //category.addBlockByName("B_MicroBlocksList");
   //category.addBlockByName("B_AddToMBList");
-  category.addSpace();
+  /*category.addSpace();
   category.addBlockByName("B_LetterOf");
   category.addBlockByName("B_LengthOf");
   category.addBlockByName("B_join");
-  category.addBlockByName("B_Split");
+  category.addBlockByName("B_Split");*/
   category.addSpace();
   category.trimBottom();
 }

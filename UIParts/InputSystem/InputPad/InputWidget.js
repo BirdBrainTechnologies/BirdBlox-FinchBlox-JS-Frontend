@@ -1,5 +1,5 @@
 /**
- * A pad of an InputPad which can edit the Dat stored in the Slot.  InputWidget is an abstract class and each Widget
+ * A pad of an InputPad which can edit the Data stored in the Slot.  InputWidget is an abstract class and each Widget
  * is responsible for drawing its own graphics and controlling the data in the Slot being edited.  The Widget is only
  * built when show() is called.
  * @constructor

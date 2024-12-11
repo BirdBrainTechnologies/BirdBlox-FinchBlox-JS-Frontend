@@ -1765,7 +1765,7 @@ function B_HLPrint(x, y) {
   this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
   // StrS_1 refers to the first string slot.
   this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
-  this.parseTranslation(Language.getStr("block_Print"));
+  this.parseTranslation(Language.getStr("block_scroll_text"));
 }
 B_HLPrint.prototype = Object.create(CommandBlock.prototype) //B_MicroBitPrint.prototype);
 B_HLPrint.prototype.constructor = B_HLPrint;
