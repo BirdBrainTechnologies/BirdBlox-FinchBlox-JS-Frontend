@@ -3,9 +3,11 @@
  * @constructor
  */
 InputWidget.Piano = function(index) {
-  this.index = index;
+  this.index = index; //widget index; FinchBlox only
   this.keys = {};
   this.type = "piano";
+  this.keysY = 0
+  this.octaveOffset = 0 //how many octaves away from default?
 };
 InputWidget.Piano.prototype = Object.create(InputWidget.prototype);
 InputWidget.Piano.prototype.constructor = InputWidget.Piano;
@@ -18,7 +20,7 @@ InputWidget.Piano.setConstants = function() {
 
   P.bnMargin = 2;
   P.firstNote = 48;
-  P.numWhiteKeys = 14;
+  P.numWhiteKeys = FinchBlox ? 14 : 15;
   P.inputPadWidth = FinchBlox ? InputPad.width : InputPad.width * 3
   P.whiteKeyW = (P.inputPadWidth - P.bnMargin * (P.numWhiteKeys - 1)) / P.numWhiteKeys;
   P.blackKeyW = P.whiteKeyW * 0.65;
@@ -33,45 +35,23 @@ InputWidget.Piano.setConstants = function() {
   P.font = Font.uiFont(34).bold();
 
   P.blackKeys = [49, 51, 54, 56, 58, 61, 63, 66, 68, 70, 73, 75, 78, 80, 82];
-  P.noteStrings = {
-    48: "C3",
-    49: "C#3",
-    50: "D3",
-    51: "D#3",
-    52: "E3",
-    53: "F3",
-    54: "F#3",
-    55: "G3",
-    56: "G#3",
-    57: "A3",
-    58: "A#3",
-    59: "B3",
-    60: "C4",
-    61: "C#4",
-    62: "D4",
-    63: "D#4",
-    64: "E4",
-    65: "F4",
-    66: "F#4",
-    67: "G4",
-    68: "G#4",
-    69: "A4",
-    70: "A#4",
-    71: "B4",
-    72: "C5",
-    73: "C#5",
-    74: "D5",
-    75: "D#5",
-    76: "E5",
-    77: "F5",
-    78: "F#5",
-    79: "G5",
-    80: "G#5",
-    81: "A5",
-    82: "A#5",
-    83: "B5",
-    84: "C6"
+
+  P.noteStrings = {}
+  for (let i = 0; i < 8; i++) {
+    P.noteStrings[24+i*12] = "C" + (i+1)
+    P.noteStrings[25+i*12] = "C#" + (i+1)
+    P.noteStrings[26+i*12] = "D" + (i+1)
+    P.noteStrings[27+i*12] = "D#" + (i+1)
+    P.noteStrings[28+i*12] = "E" + (i+1)
+    P.noteStrings[29+i*12] = "F" + (i+1)
+    P.noteStrings[30+i*12] = "F#" + (i+1)
+    P.noteStrings[31+i*12] = "G" + (i+1)
+    P.noteStrings[32+i*12] = "G#" + (i+1)
+    P.noteStrings[33+i*12] = "A" + (i+1)
+    P.noteStrings[34+i*12] = "A#" + (i+1)
+    P.noteStrings[35+i*12] = "B" + (i+1)
   }
+  P.noteStrings[120] = "C9"
 };
 
 /**
@@ -94,10 +74,48 @@ InputWidget.Piano.prototype.show = function(x, y, parentGroup, overlay, slotShap
   if (FinchBlox) {
     this.makeBns(data[this.index]);
   } else {
-    this.makeBns(data.getValue());
+    const midiNum = data.getValue()
+
+    //Add the note label above the keyboard
+    const labelText = InputWidget.Piano.noteStrings[midiNum]
+    const L = InputWidget.Label;
+    this.textE = GuiElements.draw.text(x, y, "", L.font, L.color);
+    GuiElements.update.textLimitWidth(this.textE, labelText, InputPad.width);
+    const textW = GuiElements.measure.textWidth(this.textE);
+    this.textY = y + L.font.charHeight + L.margin;
+    const textX = InputWidget.Piano.inputPadWidth / 2 - textW / 2;
+    GuiElements.move.text(this.textE, textX, this.textY);
+    parentGroup.appendChild(this.textE);
+
+    //Add the arrow buttons to change the octave
+    const bnW = L.font.charHeight
+    const bnY = y + L.margin
+    const iconP = VectorPaths.bdPlay
+    const iconC = Colors.ballyBrandBlueLight
+    const lowerBn = new Button(x, bnY, bnW, bnW, this.group, InputPad.background)
+    lowerBn.addColorIcon(iconP, bnW, iconC, 180)
+    lowerBn.markAsOverlayPart(this.overlay)
+    lowerBn.setCallbackFunction(function() { this.changeOctave(false) }.bind(this))
+    const bn2X = InputWidget.Piano.inputPadWidth - bnW
+    const raiseBn = new Button(bn2X, bnY, bnW, bnW, this.group, InputPad.background)
+    raiseBn.addColorIcon(iconP, bnW, iconC)
+    raiseBn.markAsOverlayPart(this.overlay)
+    raiseBn.setCallbackFunction(function() { this.changeOctave(true) }.bind(this))
+
+    //Calculate the position of the keys based on how much space the label takes up
+    this.keysY = this.textY + L.margin + InputPad.margin
+
+    //Calculate where the specified note is located
+    if (midiNum < 48) { this.octaveOffset = 12 * Math.floor((midiNum - 48)/12) }
+    if (midiNum > 72) { this.octaveOffset = 12 * Math.ceil((midiNum - 72)/12) }
+    console.log("*** octaveOffset: " + this.octaveOffset + "  " + midiNum)
+
+    this.makeBns(midiNum - this.octaveOffset);
+
+    
   }
 
-  /* The data in the Slot starts out gray to indicate that it will be deleted on modification. THe number 0 is not
+  /* The data in the Slot starts out gray to indicate that it will be deleted on modification. The number 0 is not
    * grayed since there's nothing to delete. */
   //this.grayOutUnlessZero();
 };
@@ -109,7 +127,8 @@ InputWidget.Piano.prototype.show = function(x, y, parentGroup, overlay, slotShap
  */
 InputWidget.Piano.prototype.updateDim = function(x, y) {
   const P = InputWidget.Piano;
-  this.height = P.whiteKeyH + P.bnMargin * 2;
+  const L = InputWidget.Label;
+  this.height = L.font.charHeight + 2*L.margin + InputPad.margin + P.whiteKeyH + P.bnMargin * 2;
   this.width = P.whiteKeyW * P.numWhiteKeys + (P.numWhiteKeys - 1) * P.bnMargin;
 };
 
@@ -117,12 +136,12 @@ InputWidget.Piano.prototype.updateDim = function(x, y) {
  * Grays out the Slot to indicate that it will be deleted on modification, unless it is 0, in which case there is
  * nothing to modify
  */
-InputWidget.Piano.prototype.grayOutUnlessZero = function() {
+/*InputWidget.Piano.prototype.grayOutUnlessZero = function() {
   const data = this.displayNum.getData();
   if (this.displayNum.isNum || data.getValue() !== 0) {
     this.slotShape.grayOutValue();
   }
-};
+};*/
 
 /**
  * Generates the buttons for the NumPad
@@ -131,13 +150,13 @@ InputWidget.Piano.prototype.makeBns = function(keySelected) {
   const P = InputWidget.Piano;
   let currentNum = P.firstNote;
   let xPos = 0;
-  let yPos = 0;
+  let yPos = this.keysY;
   var blackKeys = [];
   for (let i = 0; i < P.numWhiteKeys; i++) {
     this.makeWhiteKey(xPos, yPos, currentNum);
 
     currentNum += 1;
-    if (this.isBlackKey(currentNum)) {
+    if (this.isBlackKey(currentNum) && i != P.numWhiteKeys-1) {
       let key = {};
       key.xPos = xPos;
       key.yPos = yPos;
@@ -180,17 +199,15 @@ InputWidget.Piano.prototype.makeKey = function(x, y, num, w, h) {
   const P = InputWidget.Piano;
   let button = new Button(x, y, w, h, this.group, Colors.white);
   button.setCallbackFunction(function() {
-    /*const soundDuration = CodeManager.beatsToMs(0.5);
-    const request = "sound/note?note=" + num + "&duration=" + soundDuration;
-    var requestStatus = function() {};
-    HtmlServer.sendRequest(request, requestStatus);*/
-
-    this.keyPressed(num)
+    this.keyPressed(num + this.octaveOffset)
   }.bind(this));
   button.setUnToggleFunction(function() {});
   button.markAsOverlayPart(this.overlay);
   GuiElements.update.opacity(button.bgRect, 0);
   this.keys[num] = button;
+
+  if (HatchPlus) { button.highlightFore = Colors.ballyPurpleLight }
+
   return button;
 }
 
@@ -219,9 +236,10 @@ InputWidget.Piano.prototype.keyPressed = function(num) {
   this.updatePressed(num);
 };
 
-InputWidget.Piano.prototype.updatePressed = function(num) {
+InputWidget.Piano.prototype.updatePressed = function(midiNum) {
   const P = InputWidget.Piano;
-  if (this.pressedKey != null && num != this.pressedKey) {
+  const keyIndex = midiNum - this.octaveOffset
+  if (this.pressedKey != null && keyIndex != this.pressedKey) {
     const oldPressed = this.keys[this.pressedKey];
     oldPressed.unToggle();
 
@@ -232,8 +250,26 @@ InputWidget.Piano.prototype.updatePressed = function(num) {
       GuiElements.update.stroke(oldPressed.icon.pathE, P.grayOutline, 1);
     }
   }
-  this.pressedKey = num;
+  this.pressedKey = keyIndex;
   const newPressed = this.keys[this.pressedKey];
   GuiElements.update.stroke(newPressed.icon.pathE, P.purpleOutline, 1);
 
+  //FinchBlox doesn't have a label over the keyboard
+  if (!FinchBlox) {
+    const labelText = InputWidget.Piano.noteStrings[midiNum]
+    const ipW = InputWidget.Piano.inputPadWidth;
+    GuiElements.update.textLimitWidth(this.textE, labelText, ipW);
+    const textW = GuiElements.measure.textWidth(this.textE);
+    const textX = ipW / 2 - textW / 2;
+    GuiElements.move.text(this.textE, textX, this.textY);
+  }
+
+}
+
+InputWidget.Piano.prototype.changeOctave = function(raise) {
+  this.octaveOffset = raise ? this.octaveOffset + 12 : this.octaveOffset - 12
+  this.octaveOffset = Math.max(-24, Math.min(48, this.octaveOffset))
+
+  this.keys[this.pressedKey].press();
+  this.keys[this.pressedKey].release();
 }

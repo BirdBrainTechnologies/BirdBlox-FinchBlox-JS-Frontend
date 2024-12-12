@@ -56,6 +56,8 @@ function Button(x, y, width, height, parent, color, rx, ry, outlineColor, outlin
   this.scrollable = false; // Whether the button is part of something that scrolls and shouldn't prevent scrolling
   this.svgScrollable = false // Whether the button is part of an svgScrollBox and shouldn't prevent scrolling
   this.closeOverlays = true // Whether the button should close any open overlays when pressed
+
+  this.highlightFore = Button.highlightFore
 }
 
 Button.setGraphics = function() {
@@ -443,8 +445,9 @@ Button.prototype.addImage = function(imageData, height) {
  * @param {object} pathId - Entry from VectorPaths
  * @param {number} height - The height of the icon
  * @param {string} color - Color in hex
+ * @param {number} rotation - amount to rotate the icon in degrees
  */
-Button.prototype.addColorIcon = function(pathId, height, color) {
+Button.prototype.addColorIcon = function(pathId, height, color, rotation) {
   this.removeContent();
   this.hasIcon = true;
   this.iconInverts = false;
@@ -452,7 +455,7 @@ Button.prototype.addColorIcon = function(pathId, height, color) {
   const iconW = VectorIcon.computeWidth(pathId, height);
   const iconX = (this.width - iconW) / 2;
   const iconY = (this.height - height) / 2;
-  this.icon = new VectorIcon(iconX, iconY, pathId, color, height, this.group);
+  this.icon = new VectorIcon(iconX, iconY, pathId, color, height, this.group, null, rotation);
   TouchReceiver.addListenersBN(this.icon.pathE, this);
 };
 /*
@@ -746,10 +749,10 @@ Button.prototype.setColor = function(isPressed) {
   } else if (isPressed) {
     this.bgRect.setAttributeNS(null, "fill", Button.highlightBg);
     if (this.hasText && this.textInverts) {
-      this.textE.setAttributeNS(null, "fill", Button.highlightFore);
+      this.textE.setAttributeNS(null, "fill", this.highlightFore);
     }
     if (this.hasIcon && this.iconInverts) {
-      this.icon.setColor(Button.highlightFore);
+      this.icon.setColor(this.highlightFore);
     }
     if (this.hasImage) {
       GuiElements.update.image(this.imageE, this.imageData.darkName);

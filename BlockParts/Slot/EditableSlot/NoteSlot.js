@@ -25,11 +25,11 @@ NoteSlot.prototype.createInputSystem = function() {
   const x2 = this.relToAbsX(this.width);
   const y2 = this.relToAbsY(this.height);
 
-  const labelText = InputWidget.Piano.noteStrings[this.enteredData.getValue()]
-  this.label = new InputWidget.Label(labelText)
+  //const labelText = InputWidget.Piano.noteStrings[this.enteredData.getValue()]
+  //this.label = new InputWidget.Label(labelText)
 
   const inputPad = new InputPad(x1, x2, y1, y2);
-  inputPad.addWidget(this.label);
+  //inputPad.addWidget(this.label);
   inputPad.addWidget(new InputWidget.Piano(0));
 
   return inputPad;
@@ -43,13 +43,14 @@ NoteSlot.prototype.updateEdit = function(data) {
   const midiNote = this.enteredData.getValue()
 
   //Update the label with the note name
-  const labelText = InputWidget.Piano.noteStrings[midiNote]
+  //This is now handled in PianoWidget
+  /*const labelText = InputWidget.Piano.noteStrings[midiNote]
   const ipW = InputWidget.Piano.inputPadWidth;
   GuiElements.update.textLimitWidth(this.label.textE, labelText, ipW);
   const textW = GuiElements.measure.textWidth(this.label.textE);
   const textX = ipW / 2 - textW / 2;
   const textY = this.label.textY;
-  GuiElements.move.text(this.label.textE, textX, textY);
+  GuiElements.move.text(this.label.textE, textX, textY);*/
 
   //Play the proposed note
   HtmlServer.sendTabletSoundRequest(midiNote, CodeManager.beatsToMs(0.5));

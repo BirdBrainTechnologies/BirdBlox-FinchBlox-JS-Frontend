@@ -16025,6 +16025,8 @@ function Button(x, y, width, height, parent, color, rx, ry, outlineColor, outlin
   this.scrollable = false; // Whether the button is part of something that scrolls and shouldn't prevent scrolling
   this.svgScrollable = false // Whether the button is part of an svgScrollBox and shouldn't prevent scrolling
   this.closeOverlays = true // Whether the button should close any open overlays when pressed
+
+  this.highlightFore = Button.highlightFore
 }
 
 Button.setGraphics = function() {
@@ -16412,8 +16414,9 @@ Button.prototype.addImage = function(imageData, height) {
  * @param {object} pathId - Entry from VectorPaths
  * @param {number} height - The height of the icon
  * @param {string} color - Color in hex
+ * @param {number} rotation - amount to rotate the icon in degrees
  */
-Button.prototype.addColorIcon = function(pathId, height, color) {
+Button.prototype.addColorIcon = function(pathId, height, color, rotation) {
   this.removeContent();
   this.hasIcon = true;
   this.iconInverts = false;
@@ -16421,7 +16424,7 @@ Button.prototype.addColorIcon = function(pathId, height, color) {
   var iconW = VectorIcon.computeWidth(pathId, height);
   var iconX = (this.width - iconW) / 2;
   var iconY = (this.height - height) / 2;
-  this.icon = new VectorIcon(iconX, iconY, pathId, color, height, this.group);
+  this.icon = new VectorIcon(iconX, iconY, pathId, color, height, this.group, null, rotation);
   TouchReceiver.addListenersBN(this.icon.pathE, this);
 };
 /*
@@ -16715,10 +16718,10 @@ Button.prototype.setColor = function(isPressed) {
   } else if (isPressed) {
     this.bgRect.setAttributeNS(null, "fill", Button.highlightBg);
     if (this.hasText && this.textInverts) {
-      this.textE.setAttributeNS(null, "fill", Button.highlightFore);
+      this.textE.setAttributeNS(null, "fill", this.highlightFore);
     }
     if (this.hasIcon && this.iconInverts) {
-      this.icon.setColor(Button.highlightFore);
+      this.icon.setColor(this.highlightFore);
     }
     if (this.hasImage) {
       GuiElements.update.image(this.imageE, this.imageData.darkName);
@@ -20102,9 +20105,11 @@ InputWidget.Slider.prototype.updateLabel = function() {
  * @constructor
  */
 InputWidget.Piano = function(index) {
-  this.index = index;
+  this.index = index; //widget index; FinchBlox only
   this.keys = {};
   this.type = "piano";
+  this.keysY = 0
+  this.octaveOffset = 0 //how many octaves away from default?
 };
 InputWidget.Piano.prototype = Object.create(InputWidget.prototype);
 InputWidget.Piano.prototype.constructor = InputWidget.Piano;
@@ -20117,7 +20122,7 @@ InputWidget.Piano.setConstants = function() {
 
   P.bnMargin = 2;
   P.firstNote = 48;
-  P.numWhiteKeys = 14;
+  P.numWhiteKeys = FinchBlox ? 14 : 15;
   P.inputPadWidth = FinchBlox ? InputPad.width : InputPad.width * 3
   P.whiteKeyW = (P.inputPadWidth - P.bnMargin * (P.numWhiteKeys - 1)) / P.numWhiteKeys;
   P.blackKeyW = P.whiteKeyW * 0.65;
@@ -20132,7 +20137,49 @@ InputWidget.Piano.setConstants = function() {
   P.font = Font.uiFont(34).bold();
 
   P.blackKeys = [49, 51, 54, 56, 58, 61, 63, 66, 68, 70, 73, 75, 78, 80, 82];
-  P.noteStrings = {
+
+  P.noteStrings = {}
+  for (var i = 0; i < 8; i++) {
+    P.noteStrings[24+i*12] = "C" + (i+1)
+    P.noteStrings[25+i*12] = "C#" + (i+1)
+    P.noteStrings[26+i*12] = "D" + (i+1)
+    P.noteStrings[27+i*12] = "D#" + (i+1)
+    P.noteStrings[28+i*12] = "E" + (i+1)
+    P.noteStrings[29+i*12] = "F" + (i+1)
+    P.noteStrings[30+i*12] = "F#" + (i+1)
+    P.noteStrings[31+i*12] = "G" + (i+1)
+    P.noteStrings[32+i*12] = "G#" + (i+1)
+    P.noteStrings[33+i*12] = "A" + (i+1)
+    P.noteStrings[34+i*12] = "A#" + (i+1)
+    P.noteStrings[35+i*12] = "B" + (i+1)
+  }
+  P.noteStrings[120] = "C9"
+
+  /*P.noteStrings = {
+    24: "C1",
+    25: "C#1",
+    26: "D1",
+    27: "D#1",
+    28: "E1",
+    29: "F1",
+    30: "F#1",
+    31: "G1",
+    32: "G#1",
+    33: "A1",
+    34: "A#1",
+    35: "B1",
+    36: "C2",
+    37: "C#2",
+    38: "D2",
+    39: "D#2",
+    40: "E2",
+    41: "F2",
+    42: "F#2",
+    43: "G2",
+    44: "G#2",
+    45: "A2",
+    46: "A#2",
+    47: "B2",
     48: "C3",
     49: "C#3",
     50: "D3",
@@ -20169,8 +20216,44 @@ InputWidget.Piano.setConstants = function() {
     81: "A5",
     82: "A#5",
     83: "B5",
-    84: "C6"
-  }
+    84: "C6",
+    85: "C#6",
+    86: "D6",
+    87: "D#6",
+    88: "E6",
+    89: "F6",
+    90: "F#6",
+    91: "G6",
+    92: "G#6",
+    93: "A6",
+    94: "A#6",
+    95: "B6",
+    96: "C7",
+    97: "C#7",
+    98: "D7",
+    99: "D#7",
+    100: "E7",
+    101: "F7",
+    102: "F#7",
+    103: "G7",
+    104: "G#7",
+    105: "A7",
+    106: "A#7",
+    107: "B7",
+    108: "C8",
+    109: "C#8",
+    110: "D8",
+    111: "D#8",
+    112: "E8",
+    113: "F8",
+    114: "F#8",
+    115: "G8",
+    116: "G#8",
+    117: "A8",
+    118: "A#8",
+    119: "B8",
+    120: "C9"
+  }*/
 };
 
 /**
@@ -20193,10 +20276,48 @@ InputWidget.Piano.prototype.show = function(x, y, parentGroup, overlay, slotShap
   if (FinchBlox) {
     this.makeBns(data[this.index]);
   } else {
-    this.makeBns(data.getValue());
+    var midiNum = data.getValue()
+
+    //Add the note label above the keyboard
+    var labelText = InputWidget.Piano.noteStrings[midiNum]
+    var L = InputWidget.Label;
+    this.textE = GuiElements.draw.text(x, y, "", L.font, L.color);
+    GuiElements.update.textLimitWidth(this.textE, labelText, InputPad.width);
+    var textW = GuiElements.measure.textWidth(this.textE);
+    this.textY = y + L.font.charHeight + L.margin;
+    var textX = InputWidget.Piano.inputPadWidth / 2 - textW / 2;
+    GuiElements.move.text(this.textE, textX, this.textY);
+    parentGroup.appendChild(this.textE);
+
+    //Add the arrow buttons to change the octave
+    var bnW = L.font.charHeight
+    var bnY = y + L.margin
+    var iconP = VectorPaths.bdPlay
+    var iconC = Colors.ballyBrandBlueLight
+    var lowerBn = new Button(x, bnY, bnW, bnW, this.group, InputPad.background)
+    lowerBn.addColorIcon(iconP, bnW, iconC, 180)
+    lowerBn.markAsOverlayPart(this.overlay)
+    lowerBn.setCallbackFunction(function() { this.changeOctave(false) }.bind(this))
+    var bn2X = InputWidget.Piano.inputPadWidth - bnW
+    var raiseBn = new Button(bn2X, bnY, bnW, bnW, this.group, InputPad.background)
+    raiseBn.addColorIcon(iconP, bnW, iconC)
+    raiseBn.markAsOverlayPart(this.overlay)
+    raiseBn.setCallbackFunction(function() { this.changeOctave(true) }.bind(this))
+
+    //Calculate the position of the keys based on how much space the label takes up
+    this.keysY = this.textY + L.margin + InputPad.margin
+
+    //Calculate where the specified note is located
+    if (midiNum < 48) { this.octaveOffset = 12 * Math.floor((midiNum - 48)/12) }
+    if (midiNum > 72) { this.octaveOffset = 12 * Math.ceil((midiNum - 72)/12) }
+    console.log("*** octaveOffset: " + this.octaveOffset + "  " + midiNum)
+
+    this.makeBns(midiNum - this.octaveOffset);
+
+    
   }
 
-  /* The data in the Slot starts out gray to indicate that it will be deleted on modification. THe number 0 is not
+  /* The data in the Slot starts out gray to indicate that it will be deleted on modification. The number 0 is not
    * grayed since there's nothing to delete. */
   //this.grayOutUnlessZero();
 };
@@ -20208,7 +20329,8 @@ InputWidget.Piano.prototype.show = function(x, y, parentGroup, overlay, slotShap
  */
 InputWidget.Piano.prototype.updateDim = function(x, y) {
   var P = InputWidget.Piano;
-  this.height = P.whiteKeyH + P.bnMargin * 2;
+  var L = InputWidget.Label;
+  this.height = L.font.charHeight + 2*L.margin + InputPad.margin + P.whiteKeyH + P.bnMargin * 2;
   this.width = P.whiteKeyW * P.numWhiteKeys + (P.numWhiteKeys - 1) * P.bnMargin;
 };
 
@@ -20216,12 +20338,12 @@ InputWidget.Piano.prototype.updateDim = function(x, y) {
  * Grays out the Slot to indicate that it will be deleted on modification, unless it is 0, in which case there is
  * nothing to modify
  */
-InputWidget.Piano.prototype.grayOutUnlessZero = function() {
+/*InputWidget.Piano.prototype.grayOutUnlessZero = function() {
   var data = this.displayNum.getData();
   if (this.displayNum.isNum || data.getValue() !== 0) {
     this.slotShape.grayOutValue();
   }
-};
+};*/
 
 /**
  * Generates the buttons for the NumPad
@@ -20230,13 +20352,13 @@ InputWidget.Piano.prototype.makeBns = function(keySelected) {
   var P = InputWidget.Piano;
   var currentNum = P.firstNote;
   var xPos = 0;
-  var yPos = 0;
+  var yPos = this.keysY;
   var blackKeys = [];
   for (var i = 0; i < P.numWhiteKeys; i++) {
     this.makeWhiteKey(xPos, yPos, currentNum);
 
     currentNum += 1;
-    if (this.isBlackKey(currentNum)) {
+    if (this.isBlackKey(currentNum) && i != P.numWhiteKeys-1) {
       var key = {};
       key.xPos = xPos;
       key.yPos = yPos;
@@ -20279,17 +20401,15 @@ InputWidget.Piano.prototype.makeKey = function(x, y, num, w, h) {
   var P = InputWidget.Piano;
   var button = new Button(x, y, w, h, this.group, Colors.white);
   button.setCallbackFunction(function() {
-    /*var soundDuration = CodeManager.beatsToMs(0.5);
-    var request = "sound/note?note=" + num + "&duration=" + soundDuration;
-    var requestStatus = function() {};
-    HtmlServer.sendRequest(request, requestStatus);*/
-
-    this.keyPressed(num)
+    this.keyPressed(num + this.octaveOffset)
   }.bind(this));
   button.setUnToggleFunction(function() {});
   button.markAsOverlayPart(this.overlay);
   GuiElements.update.opacity(button.bgRect, 0);
   this.keys[num] = button;
+
+  if (HatchPlus) { button.highlightFore = Colors.ballyPurpleLight }
+
   return button;
 }
 
@@ -20318,9 +20438,10 @@ InputWidget.Piano.prototype.keyPressed = function(num) {
   this.updatePressed(num);
 };
 
-InputWidget.Piano.prototype.updatePressed = function(num) {
+InputWidget.Piano.prototype.updatePressed = function(midiNum) {
   var P = InputWidget.Piano;
-  if (this.pressedKey != null && num != this.pressedKey) {
+  var keyIndex = midiNum - this.octaveOffset
+  if (this.pressedKey != null && keyIndex != this.pressedKey) {
     var oldPressed = this.keys[this.pressedKey];
     oldPressed.unToggle();
 
@@ -20331,10 +20452,28 @@ InputWidget.Piano.prototype.updatePressed = function(num) {
       GuiElements.update.stroke(oldPressed.icon.pathE, P.grayOutline, 1);
     }
   }
-  this.pressedKey = num;
+  this.pressedKey = keyIndex;
   var newPressed = this.keys[this.pressedKey];
   GuiElements.update.stroke(newPressed.icon.pathE, P.purpleOutline, 1);
 
+  //FinchBlox doesn't have a label over the keyboard
+  if (!FinchBlox) {
+    var labelText = InputWidget.Piano.noteStrings[midiNum]
+    var ipW = InputWidget.Piano.inputPadWidth;
+    GuiElements.update.textLimitWidth(this.textE, labelText, ipW);
+    var textW = GuiElements.measure.textWidth(this.textE);
+    var textX = ipW / 2 - textW / 2;
+    GuiElements.move.text(this.textE, textX, this.textY);
+  }
+
+}
+
+InputWidget.Piano.prototype.changeOctave = function(raise) {
+  this.octaveOffset = raise ? this.octaveOffset + 12 : this.octaveOffset - 12
+  this.octaveOffset = Math.max(-24, Math.min(48, this.octaveOffset))
+
+  this.keys[this.pressedKey].press();
+  this.keys[this.pressedKey].release();
 }
 
 /**
@@ -38332,11 +38471,11 @@ NoteSlot.prototype.createInputSystem = function() {
   var x2 = this.relToAbsX(this.width);
   var y2 = this.relToAbsY(this.height);
 
-  var labelText = InputWidget.Piano.noteStrings[this.enteredData.getValue()]
-  this.label = new InputWidget.Label(labelText)
+  //var labelText = InputWidget.Piano.noteStrings[this.enteredData.getValue()]
+  //this.label = new InputWidget.Label(labelText)
 
   var inputPad = new InputPad(x1, x2, y1, y2);
-  inputPad.addWidget(this.label);
+  //inputPad.addWidget(this.label);
   inputPad.addWidget(new InputWidget.Piano(0));
 
   return inputPad;
@@ -38350,13 +38489,14 @@ NoteSlot.prototype.updateEdit = function(data) {
   var midiNote = this.enteredData.getValue()
 
   //Update the label with the note name
-  var labelText = InputWidget.Piano.noteStrings[midiNote]
+  //This is now handled in PianoWidget
+  /*var labelText = InputWidget.Piano.noteStrings[midiNote]
   var ipW = InputWidget.Piano.inputPadWidth;
   GuiElements.update.textLimitWidth(this.label.textE, labelText, ipW);
   var textW = GuiElements.measure.textWidth(this.label.textE);
   var textX = ipW / 2 - textW / 2;
   var textY = this.label.textY;
-  GuiElements.move.text(this.label.textE, textX, textY);
+  GuiElements.move.text(this.label.textE, textX, textY);*/
 
   //Play the proposed note
   HtmlServer.sendTabletSoundRequest(midiNote, CodeManager.beatsToMs(0.5));
