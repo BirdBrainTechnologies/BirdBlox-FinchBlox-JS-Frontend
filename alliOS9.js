@@ -2553,7 +2553,8 @@ Language.en = {
 "dotted_eighth":"dotted eighth",
 "eighth":"eighth",
 "sixteenth":"sixteenth",
-"block_scroll_text":"scroll text (Slot 1)"
+"block_scroll_text":"scroll text (Slot 1)",
+"block_wait_ms":"wait (Slot 1) ms"
 }
 
 //Spanish Translation
@@ -6476,7 +6477,8 @@ DeviceHatchling.prototype.receiveBroadcast = function(msg) {
     for (i in msg){
         str+=String.fromCharCode(msg[i]);
     }
-    console.error("Unsupported broadcast message " + msg + " (" + str + ")")
+    //console.error("Unsupported broadcast message " + msg + " (" + str + ")")
+    console.log("Broadcast message: " + str)
     return
   }
 
@@ -13997,7 +13999,7 @@ BlockPalette.updateZoom = function() {
       GuiElements.move.group(BP.catBnGroup, BP.catX, BP.catY)
       BP.updateOutline()
       //console.log("*** updateZoom " + BP.catX + " " + BP.catY)
-      console.log(BP.catBnGroup)
+      //console.log(BP.catBnGroup)
     } else {
       BP.updatePath();
     }
@@ -20154,106 +20156,6 @@ InputWidget.Piano.setConstants = function() {
     P.noteStrings[35+i*12] = "B" + (i+1)
   }
   P.noteStrings[120] = "C9"
-
-  /*P.noteStrings = {
-    24: "C1",
-    25: "C#1",
-    26: "D1",
-    27: "D#1",
-    28: "E1",
-    29: "F1",
-    30: "F#1",
-    31: "G1",
-    32: "G#1",
-    33: "A1",
-    34: "A#1",
-    35: "B1",
-    36: "C2",
-    37: "C#2",
-    38: "D2",
-    39: "D#2",
-    40: "E2",
-    41: "F2",
-    42: "F#2",
-    43: "G2",
-    44: "G#2",
-    45: "A2",
-    46: "A#2",
-    47: "B2",
-    48: "C3",
-    49: "C#3",
-    50: "D3",
-    51: "D#3",
-    52: "E3",
-    53: "F3",
-    54: "F#3",
-    55: "G3",
-    56: "G#3",
-    57: "A3",
-    58: "A#3",
-    59: "B3",
-    60: "C4",
-    61: "C#4",
-    62: "D4",
-    63: "D#4",
-    64: "E4",
-    65: "F4",
-    66: "F#4",
-    67: "G4",
-    68: "G#4",
-    69: "A4",
-    70: "A#4",
-    71: "B4",
-    72: "C5",
-    73: "C#5",
-    74: "D5",
-    75: "D#5",
-    76: "E5",
-    77: "F5",
-    78: "F#5",
-    79: "G5",
-    80: "G#5",
-    81: "A5",
-    82: "A#5",
-    83: "B5",
-    84: "C6",
-    85: "C#6",
-    86: "D6",
-    87: "D#6",
-    88: "E6",
-    89: "F6",
-    90: "F#6",
-    91: "G6",
-    92: "G#6",
-    93: "A6",
-    94: "A#6",
-    95: "B6",
-    96: "C7",
-    97: "C#7",
-    98: "D7",
-    99: "D#7",
-    100: "E7",
-    101: "F7",
-    102: "F#7",
-    103: "G7",
-    104: "G#7",
-    105: "A7",
-    106: "A#7",
-    107: "B7",
-    108: "C8",
-    109: "C#8",
-    110: "D8",
-    111: "D#8",
-    112: "E8",
-    113: "F8",
-    114: "F#8",
-    115: "G8",
-    116: "G#8",
-    117: "A8",
-    118: "A#8",
-    119: "B8",
-    120: "C9"
-  }*/
 };
 
 /**
@@ -43113,7 +43015,7 @@ function B_FBSound(x, y, level) {
 B_FBSound.prototype = Object.create(CommandBlock.prototype);
 B_FBSound.prototype.constructor = B_FBSound;
 //MicroBlocks functions
-B_FBSound.prototype.primName = function() { return "hatchlingPlayNote" }
+B_FBSound.prototype.primName = function() { return "hatchlingPlayTone" }
 B_FBSound.prototype.argList = function() { 
   var frequency = 440 * Math.pow(2, (this.midiNote - 69)/12)
   var duration = (100 * this.beats)
@@ -43370,8 +43272,13 @@ function B_Wait(x, y) {
     // Category ("control") determines colors
     CommandBlock.call(this, x, y, "control");
     // Build Block out of things found in the BlockParts folder
-    this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
-    this.parseTranslation(Language.getStr("block_wait"));
+    var defaultTime = HatchPlus ? 500 : 1
+    this.addPart(new NumSlot(this, "NumS_dur", defaultTime, true)); // Must be positive.
+    if (HatchPlus) {
+      this.parseTranslation(Language.getStr("block_wait_ms"));
+    } else {
+      this.parseTranslation(Language.getStr("block_wait"));
+    }
   }
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
@@ -43380,7 +43287,8 @@ B_Wait.prototype.constructor = B_Wait;
 B_Wait.prototype.primName = function() { return "waitMillis" }
 B_Wait.prototype.argList = function() {
   if (HatchPlus) {
-    return [new BlockArg("*", [this.slots[0].getMicroBlocksInstructions(), 1000])]
+    //return [new BlockArg("*", [this.slots[0].getMicroBlocksInstructions(), 1000])]
+    return [this.slots[0].getMicroBlocksInstructions()]
   } else {
     return [(this.timeSelection * 100)]
   }
@@ -44579,7 +44487,7 @@ function B_And(x, y) {
 B_And.prototype = Object.create(PredicateBlock.prototype);
 B_And.prototype.constructor = B_And;
 //MicroBlocks functions
-B_And.prototype.primName = function() { return "jmpAnd" }
+B_And.prototype.primName = function() { return "and" }
 B_And.prototype.argList = function() { 
   return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
 }
@@ -44601,9 +44509,8 @@ function B_Or(x, y) {
 B_Or.prototype = Object.create(PredicateBlock.prototype);
 B_Or.prototype.constructor = B_Or;
 //MicroBlocks functions
-B_Or.prototype.primName = function() { return "jmpOr" }
+B_Or.prototype.primName = function() { return "or" }
 B_Or.prototype.argList = function() { 
-  console.error("*** B_Or - this isn't right")
   return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
 }
 /* Result is true if either is true. Always valid. */
@@ -45506,7 +45413,8 @@ B_ChangeTempoBy.prototype.startAction = function() {
 function B_SetTempoTo(x, y) {
   CommandBlock.call(this, x, y, "sound");
   var nS = new NumSlot(this, "NumS_tempo", 60, true); // Positive
-  nS.addLimits(20, 500, null);
+  var max = HatchPlus ? 2000 : 500
+  nS.addLimits(20, max, null);
   this.addPart(nS);
   this.parseTranslation(Language.getStr("block_set_tempo_to"));
 }
@@ -47715,11 +47623,12 @@ B_HLBBFairyLights.prototype.argList = function() {
     return [HL_Utils.portNames[this.port], value, 0] 
   }*/
 
-  var percent = this.slots[1].getMicroBlocksInstructions()
+  /*var percent = this.slots[1].getMicroBlocksInstructions()
   console.error("Remember to scale this!")
   var value = percent
   
-  return [HL_Utils.portNames[this.port], value, 0] 
+  return [HL_Utils.portNames[this.port], value, 0] */
+  return [HL_Utils.portNames[this.port], this.slots[1].getMicroBlocksInstructions(), 0]
 }
 
 function B_HLBBSingleNeopix(x, y, port) {
@@ -48760,11 +48669,11 @@ MicroBlocksCompiler.prototype.instructionsForExpression = function(expr) {
 		//}
 	/*} else if ('colorSwatch' == op) {
 		c = (color (at args 1) (at args 2) (at args 3))
-		return (instructionsForExpression this (pixelRGB c))
+		return (instructionsForExpression this (pixelRGB c))*/
 	} else if ('and' == op) {
-		return (instructionsForAnd this args)
+		return this.instructionsForAnd(args)
 	} else if ('or' == op) {
-		return (instructionsForOr this args)*/
+		return this.instructionsForOr(args)
 	} else if (this.isFunctionCall(op)) {
 		return this.instructionsForFunctionCall(op, args, false)
 	} else {
@@ -48772,45 +48681,47 @@ MicroBlocksCompiler.prototype.instructionsForExpression = function(expr) {
 	}
 }
 
-/*method instructionsForAnd SmallCompiler args {
-	tests = (list)
-	totalInstrCount = 0
-	for expr args {
-		instrList = (instructionsForExpression this expr)
-		add tests instrList
-		totalInstrCount += ((count instrList) + 1)
+MicroBlocksCompiler.prototype.instructionsForAnd = function(args) {
+	var tests = []
+	var totalInstrCount = 0
+	for (var i = 0; i < args.length; i++) {
+		var expr = args[i]
+		var instrList = this.instructionsForExpression(expr)
+		tests.push(instrList)
+		totalInstrCount += (instrList.length + 1)
 	}
 	totalInstrCount += -1 // no jump required after final arg
 
-	result = (list)
-	for i (count tests) {
-		addAll result (at tests i)
-		if (i < (count tests)) {
-			add result (array 'jmpAnd' (totalInstrCount - ((count result) + 1)))
+	var result = []
+	for (var i = 0; i < tests.length; i++) {
+		result = result.concat(tests[i])
+		if (i+1 < tests.length) {
+			result.push(['jmpAnd', (totalInstrCount - (result.length + 1))])
 		}
 	}
 	return result
 }
 
-method instructionsForOr SmallCompiler args {
-	tests = (list)
-	totalInstrCount = 0
-	for expr args {
-		instrList = (instructionsForExpression this expr)
-		add tests instrList
-		totalInstrCount += ((count instrList) + 1)
+MicroBlocksCompiler.prototype.instructionsForOr = function(args) {
+	var tests = []
+	var totalInstrCount = 0
+	for (var i = 0; i < args.length; i++) {
+		var expr = args[i]
+		var instrList = this.instructionsForExpression(expr)
+		tests.push(instrList)
+		totalInstrCount += (instrList.length + 1)
 	}
 	totalInstrCount += -1 // no jump required after final arg
 
-	result = (list)
-	for i (count tests) {
-		addAll result (at tests i)
-		if (i < (count tests)) {
-			add result (array 'jmpOr' (totalInstrCount - ((count result) + 1)))
+	var result = []
+	for (var i = 0; i < tests.length; i++) {
+		result = result.concat(tests[i])
+		if (i+1 < tests.length) {
+			result.push(['jmpOr', (totalInstrCount - (result.length + 1))])
 		}
 	}
 	return result
-}*/
+}
 
 // instruction generation utility methods
 

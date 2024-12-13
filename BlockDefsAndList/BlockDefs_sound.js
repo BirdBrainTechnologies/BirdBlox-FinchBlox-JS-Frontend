@@ -207,7 +207,8 @@ B_ChangeTempoBy.prototype.startAction = function() {
 function B_SetTempoTo(x, y) {
   CommandBlock.call(this, x, y, "sound");
   const nS = new NumSlot(this, "NumS_tempo", 60, true); // Positive
-  nS.addLimits(20, 500, null);
+  const max = HatchPlus ? 2000 : 500
+  nS.addLimits(20, max, null);
   this.addPart(nS);
   this.parseTranslation(Language.getStr("block_set_tempo_to"));
 }

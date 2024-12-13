@@ -527,11 +527,11 @@ MicroBlocksCompiler.prototype.instructionsForExpression = function(expr) {
 		//}
 	/*} else if ('colorSwatch' == op) {
 		c = (color (at args 1) (at args 2) (at args 3))
-		return (instructionsForExpression this (pixelRGB c))
+		return (instructionsForExpression this (pixelRGB c))*/
 	} else if ('and' == op) {
-		return (instructionsForAnd this args)
+		return this.instructionsForAnd(args)
 	} else if ('or' == op) {
-		return (instructionsForOr this args)*/
+		return this.instructionsForOr(args)
 	} else if (this.isFunctionCall(op)) {
 		return this.instructionsForFunctionCall(op, args, false)
 	} else {
@@ -539,45 +539,47 @@ MicroBlocksCompiler.prototype.instructionsForExpression = function(expr) {
 	}
 }
 
-/*method instructionsForAnd SmallCompiler args {
-	tests = (list)
-	totalInstrCount = 0
-	for expr args {
-		instrList = (instructionsForExpression this expr)
-		add tests instrList
-		totalInstrCount += ((count instrList) + 1)
+MicroBlocksCompiler.prototype.instructionsForAnd = function(args) {
+	let tests = []
+	let totalInstrCount = 0
+	for (let i = 0; i < args.length; i++) {
+		let expr = args[i]
+		let instrList = this.instructionsForExpression(expr)
+		tests.push(instrList)
+		totalInstrCount += (instrList.length + 1)
 	}
 	totalInstrCount += -1 // no jump required after final arg
 
-	result = (list)
-	for i (count tests) {
-		addAll result (at tests i)
-		if (i < (count tests)) {
-			add result (array 'jmpAnd' (totalInstrCount - ((count result) + 1)))
+	let result = []
+	for (let i = 0; i < tests.length; i++) {
+		result = result.concat(tests[i])
+		if (i+1 < tests.length) {
+			result.push(['jmpAnd', (totalInstrCount - (result.length + 1))])
 		}
 	}
 	return result
 }
 
-method instructionsForOr SmallCompiler args {
-	tests = (list)
-	totalInstrCount = 0
-	for expr args {
-		instrList = (instructionsForExpression this expr)
-		add tests instrList
-		totalInstrCount += ((count instrList) + 1)
+MicroBlocksCompiler.prototype.instructionsForOr = function(args) {
+	let tests = []
+	let totalInstrCount = 0
+	for (let i = 0; i < args.length; i++) {
+		let expr = args[i]
+		let instrList = this.instructionsForExpression(expr)
+		tests.push(instrList)
+		totalInstrCount += (instrList.length + 1)
 	}
 	totalInstrCount += -1 // no jump required after final arg
 
-	result = (list)
-	for i (count tests) {
-		addAll result (at tests i)
-		if (i < (count tests)) {
-			add result (array 'jmpOr' (totalInstrCount - ((count result) + 1)))
+	let result = []
+	for (let i = 0; i < tests.length; i++) {
+		result = result.concat(tests[i])
+		if (i+1 < tests.length) {
+			result.push(['jmpOr', (totalInstrCount - (result.length + 1))])
 		}
 	}
 	return result
-}*/
+}
 
 // instruction generation utility methods
 

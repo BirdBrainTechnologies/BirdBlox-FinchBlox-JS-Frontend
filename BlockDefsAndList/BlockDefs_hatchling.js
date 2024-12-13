@@ -1572,11 +1572,12 @@ B_HLBBFairyLights.prototype.argList = function() {
     return [HL_Utils.portNames[this.port], value, 0] 
   }*/
 
-  let percent = this.slots[1].getMicroBlocksInstructions()
+  /*let percent = this.slots[1].getMicroBlocksInstructions()
   console.error("Remember to scale this!")
   let value = percent
   
-  return [HL_Utils.portNames[this.port], value, 0] 
+  return [HL_Utils.portNames[this.port], value, 0] */
+  return [HL_Utils.portNames[this.port], this.slots[1].getMicroBlocksInstructions(), 0]
 }
 
 function B_HLBBSingleNeopix(x, y, port) {

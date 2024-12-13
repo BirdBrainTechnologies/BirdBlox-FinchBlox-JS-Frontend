@@ -107,7 +107,8 @@ DeviceHatchling.prototype.receiveBroadcast = function(msg) {
     for (i in msg){
         str+=String.fromCharCode(msg[i]);
     }
-    console.error("Unsupported broadcast message " + msg + " (" + str + ")")
+    //console.error("Unsupported broadcast message " + msg + " (" + str + ")")
+    console.log("Broadcast message: " + str)
     return
   }
 

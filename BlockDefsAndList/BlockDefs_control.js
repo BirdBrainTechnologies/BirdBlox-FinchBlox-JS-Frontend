@@ -96,8 +96,13 @@ function B_Wait(x, y) {
     // Category ("control") determines colors
     CommandBlock.call(this, x, y, "control");
     // Build Block out of things found in the BlockParts folder
-    this.addPart(new NumSlot(this, "NumS_dur", 1, true)); // Must be positive.
-    this.parseTranslation(Language.getStr("block_wait"));
+    let defaultTime = HatchPlus ? 500 : 1
+    this.addPart(new NumSlot(this, "NumS_dur", defaultTime, true)); // Must be positive.
+    if (HatchPlus) {
+      this.parseTranslation(Language.getStr("block_wait_ms"));
+    } else {
+      this.parseTranslation(Language.getStr("block_wait"));
+    }
   }
 }
 B_Wait.prototype = Object.create(CommandBlock.prototype);
@@ -106,7 +111,8 @@ B_Wait.prototype.constructor = B_Wait;
 B_Wait.prototype.primName = function() { return "waitMillis" }
 B_Wait.prototype.argList = function() {
   if (HatchPlus) {
-    return [new BlockArg("*", [this.slots[0].getMicroBlocksInstructions(), 1000])]
+    //return [new BlockArg("*", [this.slots[0].getMicroBlocksInstructions(), 1000])]
+    return [this.slots[0].getMicroBlocksInstructions()]
   } else {
     return [(this.timeSelection * 100)]
   }

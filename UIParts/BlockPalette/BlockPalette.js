@@ -101,7 +101,7 @@ BlockPalette.updateZoom = function() {
       GuiElements.move.group(BP.catBnGroup, BP.catX, BP.catY)
       BP.updateOutline()
       //console.log("*** updateZoom " + BP.catX + " " + BP.catY)
-      console.log(BP.catBnGroup)
+      //console.log(BP.catBnGroup)
     } else {
       BP.updatePath();
     }

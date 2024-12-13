@@ -263,5 +263,6 @@ Language.en = {
 "dotted_eighth":"dotted eighth",
 "eighth":"eighth",
 "sixteenth":"sixteenth",
-"block_scroll_text":"scroll text (Slot 1)"
+"block_scroll_text":"scroll text (Slot 1)",
+"block_wait_ms":"wait (Slot 1) ms"
 }

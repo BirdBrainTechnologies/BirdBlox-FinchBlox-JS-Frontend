@@ -24,7 +24,7 @@ function B_FBSound(x, y, level) {
 B_FBSound.prototype = Object.create(CommandBlock.prototype);
 B_FBSound.prototype.constructor = B_FBSound;
 //MicroBlocks functions
-B_FBSound.prototype.primName = function() { return "hatchlingPlayNote" }
+B_FBSound.prototype.primName = function() { return "hatchlingPlayTone" }
 B_FBSound.prototype.argList = function() { 
   let frequency = 440 * Math.pow(2, (this.midiNote - 69)/12)
   let duration = (100 * this.beats)

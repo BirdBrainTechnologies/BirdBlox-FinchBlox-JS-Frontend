@@ -307,7 +307,7 @@ function B_And(x, y) {
 B_And.prototype = Object.create(PredicateBlock.prototype);
 B_And.prototype.constructor = B_And;
 //MicroBlocks functions
-B_And.prototype.primName = function() { return "jmpAnd" }
+B_And.prototype.primName = function() { return "and" }
 B_And.prototype.argList = function() { 
   return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
 }
@@ -329,9 +329,8 @@ function B_Or(x, y) {
 B_Or.prototype = Object.create(PredicateBlock.prototype);
 B_Or.prototype.constructor = B_Or;
 //MicroBlocks functions
-B_Or.prototype.primName = function() { return "jmpOr" }
+B_Or.prototype.primName = function() { return "or" }
 B_Or.prototype.argList = function() { 
-  console.error("*** B_Or - this isn't right")
   return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
 }
 /* Result is true if either is true. Always valid. */
