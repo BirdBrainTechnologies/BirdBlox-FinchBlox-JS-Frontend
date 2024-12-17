@@ -254,7 +254,9 @@ TouchReceiver.checkStartZoom = function(e) {
  * @param {event} e - wheel event
  */
 TouchReceiver.wheelZoom = function(e) {
-  e.preventDefault()
+  if (FinchBlox) {
+    e.preventDefault()
+  }
 
   const zoomIn = e.deltaY < 0
   let x = e.pageX / GuiElements.zoomFactor

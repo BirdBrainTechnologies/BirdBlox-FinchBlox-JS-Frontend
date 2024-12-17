@@ -2723,9 +2723,8 @@ MicroBlocksRuntime.prototype.showResult = function(chunkID, value, isError, isRe
 		}
 	}
 	if (block != null) {
-		if (block.returnsValue) {
-			console.log("*** showResult " + value + " " + typeof value)
-			console.log(value)
+		if (block.returnsValue || isError) {
+			console.log("*** showResult '" + value + "' <" + typeof value + ">")
 			block.displayValue(value, isError)
 		} else {
 			console.error("showResult only implemented for reporter blocks. Results for chunk " + chunkID + ": '" + value + "' (isError=" + isError + ", isResult=" + isResult + ")")

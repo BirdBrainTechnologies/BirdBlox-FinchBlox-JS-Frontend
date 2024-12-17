@@ -15,11 +15,13 @@ SettingsMenu.prototype.constructor = SettingsMenu;
 SettingsMenu.prototype.loadOptions = function() {
   const icon = VectorPaths.language;
   const me = this;
-  this.addOption("", null, false, function(bn) {
-    bn.addIcon(icon, 25);
-    me.languageMenu = new LanguageMenu(bn, me);
-    me.languageMenu.move();
-  });
+  if (!HatchPlus) {
+    this.addOption("", null, false, function(bn) {
+      bn.addIcon(icon, 25);
+      me.languageMenu = new LanguageMenu(bn, me);
+      me.languageMenu.move();
+    });
+  }
   // Used to have icons, but they didn't work too well and have been disabled
   this.addOption(Language.getStr("Zoom_in"), this.optionZoomIn, false); //, VectorPaths.zoomIn);
   this.addOption(Language.getStr("Zoom_out"), this.optionZoomOut, false); //, VectorPaths.zoomOut);

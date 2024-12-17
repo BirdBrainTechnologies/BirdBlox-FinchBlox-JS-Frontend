@@ -184,10 +184,13 @@ Block.prototype.parseTranslation = function(text) {
       newParts.push(this.parts[0]);
       slotOffset += 1;
       slotsInserted.push(0);
-      if (this.parts[1] != null && this.parts[1].constructor === LabelText) {
+      /*if (this.parts[1] != null && this.parts[1].constructor === LabelText) {
         newParts.push(this.parts[1]) //Hatchling port label
-      }
+      }*/
     }
+  }
+  if (this.parts[0] != null && this.parts[0].constructor === LabelText) {
+    newParts.push(this.parts[0]) //Hatchling port label
   }
   for (var i = 0; i < pieces.length; i++) {
     const piece = pieces[i];

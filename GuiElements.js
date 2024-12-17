@@ -220,6 +220,22 @@ GuiElements.buildUI = function() {
   GuiElements.blockInteraction();
   if (FinchBlox) {
     LevelManager.loadLevelSavePoint();
+  } else if (HatchPlus) {
+    HtmlServer.sendRequestWithCallback("data/currentFile", function(response) {
+      console.log("*** current file: " + response)
+      if (response != null && response != "") {
+        SaveManager.userOpenFile(response);
+      } else {
+        SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
+          SaveManager.newSoft(availableName);
+        });
+      }
+      
+    }, function() {
+      SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
+        SaveManager.newSoft(availableName);
+      });
+    });
   } else {
     OpenDialog.showDialog();
   }
@@ -247,6 +263,7 @@ GuiElements.createLayers = function() {
   layers.TabsBg = create.layer(i);
   layers.paletteBG = create.layer(i);
   layers.paletteScroll = document.getElementById("paletteScrollDiv");
+  if (HatchPlus) { layers.paletteScroll.classList.add("hatchlingScroll") }
   i++;
   layers.trash = create.layer(i);
   layers.catBg = create.layer(i);

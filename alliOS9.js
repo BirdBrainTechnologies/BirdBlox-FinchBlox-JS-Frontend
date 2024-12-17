@@ -6928,6 +6928,22 @@ GuiElements.buildUI = function() {
   GuiElements.blockInteraction();
   if (FinchBlox) {
     LevelManager.loadLevelSavePoint();
+  } else if (HatchPlus) {
+    HtmlServer.sendRequestWithCallback("data/currentFile", function(response) {
+      console.log("*** current file: " + response)
+      if (response != null && response != "") {
+        SaveManager.userOpenFile(response);
+      } else {
+        SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
+          SaveManager.newSoft(availableName);
+        });
+      }
+      
+    }, function() {
+      SaveManager.getAvailableName(SaveManager.newProgName, function(availableName, alreadySanitized, alreadyAvailable) {
+        SaveManager.newSoft(availableName);
+      });
+    });
   } else {
     OpenDialog.showDialog();
   }
@@ -6955,6 +6971,7 @@ GuiElements.createLayers = function() {
   layers.TabsBg = create.layer(i);
   layers.paletteBG = create.layer(i);
   layers.paletteScroll = document.getElementById("paletteScrollDiv");
+  if (HatchPlus) { layers.paletteScroll.classList.add("hatchlingScroll") }
   i++;
   layers.trash = create.layer(i);
   layers.catBg = create.layer(i);
@@ -8890,13 +8907,13 @@ BlockList.populateCat_operators = function(category) {
   category.addBlockByName("B_True");
   category.addBlockByName("B_False");
   category.addSpace();
-  //if(!HatchPlus) {
-    category.addBlockByName("B_LetterOf");
-    category.addBlockByName("B_LengthOf");
+  category.addBlockByName("B_LetterOf");
+  category.addBlockByName("B_LengthOf");
+  if(!HatchPlus) {
     category.addBlockByName("B_join");
     category.addBlockByName("B_Split");
-    category.addSpace();
-  //}
+  }
+  category.addSpace();
   category.addBlockByName("B_IsAType");
   category.trimBottom();
 };
@@ -9168,6 +9185,7 @@ BlockList.populateCat_ports = function(category) {
 BlockList.populateCat_display = function(category) {
   category.addBlockByName("B_HLLedArray");
   category.addBlockByName("B_HLPrint");
+  category.addSpace();
   category.addBlockByName("B_HLPlot");
   category.addBlockByName("B_HLUnplot");
   category.trimBottom();
@@ -12187,7 +12205,9 @@ TouchReceiver.checkStartZoom = function(e) {
  * @param {event} e - wheel event
  */
 TouchReceiver.wheelZoom = function(e) {
-  e.preventDefault()
+  if (FinchBlox) {
+    e.preventDefault()
+  }
 
   var zoomIn = e.deltaY < 0
   var x = e.pageX / GuiElements.zoomFactor
@@ -23458,11 +23478,13 @@ SettingsMenu.prototype.constructor = SettingsMenu;
 SettingsMenu.prototype.loadOptions = function() {
   var icon = VectorPaths.language;
   var me = this;
-  this.addOption("", null, false, function(bn) {
-    bn.addIcon(icon, 25);
-    me.languageMenu = new LanguageMenu(bn, me);
-    me.languageMenu.move();
-  });
+  if (!HatchPlus) {
+    this.addOption("", null, false, function(bn) {
+      bn.addIcon(icon, 25);
+      me.languageMenu = new LanguageMenu(bn, me);
+      me.languageMenu.move();
+    });
+  }
   // Used to have icons, but they didn't work too well and have been disabled
   this.addOption(Language.getStr("Zoom_in"), this.optionZoomIn, false); //, VectorPaths.zoomIn);
   this.addOption(Language.getStr("Zoom_out"), this.optionZoomOut, false); //, VectorPaths.zoomOut);
@@ -34065,10 +34087,13 @@ Block.prototype.parseTranslation = function(text) {
       newParts.push(this.parts[0]);
       slotOffset += 1;
       slotsInserted.push(0);
-      if (this.parts[1] != null && this.parts[1].constructor === LabelText) {
+      /*if (this.parts[1] != null && this.parts[1].constructor === LabelText) {
         newParts.push(this.parts[1]) //Hatchling port label
-      }
+      }*/
     }
+  }
+  if (this.parts[0] != null && this.parts[0].constructor === LabelText) {
+    newParts.push(this.parts[0]) //Hatchling port label
   }
   for (var i = 0; i < pieces.length; i++) {
     var piece = pieces[i];
@@ -40450,17 +40475,14 @@ B_MicroBitPrint.prototype.updateAction = function() {
  * @constructor
  */
 function B_MicroBitButton(x, y, deviceClass) {
-  var category = HatchPlus ? "sensors" : deviceClass.getDeviceTypeId()
-  PredicateBlock.call(this, x, y, category);
+  PredicateBlock.call(this, x, y, deviceClass.getDeviceTypeId());
   this.deviceClass = deviceClass;
   this.addPart(new DeviceDropSlot(this, "DDS_1", this.deviceClass));
 
   var choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
   choice.addOption(new SelectionData("A", "buttonA"));
   choice.addOption(new SelectionData("B", "buttonB"));
-  if (!HatchPlus) {
-    choice.addOption(new SelectionData(Language.getStr("logo"), "V2touch"))
-  }
+  choice.addOption(new SelectionData(Language.getStr("logo"), "V2touch"))
   this.addPart(choice);
   this.parseTranslation(Language.getStr("block_Button"));
 };
@@ -46349,10 +46371,13 @@ B_HLOutputBase.prototype.updateValues = function() {
   HL_Utils.updatePort(this)
   if (this.valueBN != null) {
     if (this.portType == 1) { //rotation servo
-      var percent = this.valueBN.values[0] * 0.9
+      /*var percent = this.valueBN.values[0] * 0.9
       if (percent < 5) { percent = 0 }
       if (this.flip) { percent = -percent - 15 } //rotate counter clockwise
-      this.value = percent
+      this.value = percent*/
+
+      this.value = this.valueBN.values[0] * (this.flip ? -1 : 1)
+
       /*if (percent == 0) {
         this.value = 89 //off signal
       } else if (percent > 100) {
@@ -46458,9 +46483,9 @@ B_HL_PS_L1.prototype.primName = function() { return "hatchlingServoWithDelay" }
 B_HL_PS_L1.prototype.argList = function() { 
   var port = HL_Utils.portNames[this.port]
   var duration = 1000
-  var val = this.value + 2 //0 and 1 are off commands
+  //var val = this.value + 2 //0 and 1 are off commands
 
-  return [port, val, duration] 
+  return [port, this.value, duration] 
 }
 /*B_HL_PS_L1.prototype.primName = function() { return "blockList" }
 B_HL_PS_L1.prototype.argList = function() { 
@@ -46510,9 +46535,9 @@ B_HL_PS_L2.prototype.primName = function() { return "hatchlingServoWithDelay" }
 B_HL_PS_L2.prototype.argList = function() { 
   var port = HL_Utils.portNames[this.port]
   var duration = 0 //duration < 10 causes the servo to stay on
-  var val = this.value + 2 //0 and 1 are off commands
+  //var val = this.value + 2 //0 and 1 are off commands
 
-  return [port, val, duration] 
+  return [port, this.value, duration] 
 }
 /*B_HL_PS_L2.prototype.primName = function() { return "[h:psv]" }
 B_HL_PS_L2.prototype.argList = function() { return [HL_Utils.portNames[this.port], this.value + 2] }
@@ -46538,8 +46563,8 @@ B_HLWave.prototype.argList = function() {
   var prim = "hatchlingServoWithDelay"
   var port = HL_Utils.portNames[this.port]
   var duration = 1000
-  return [new BlockArg(prim, [port, 92, duration]),  
-    new BlockArg(prim, [port, 182, duration])] 
+  return [new BlockArg(prim, [port, 90, duration]),  
+    new BlockArg(prim, [port, 180, duration])] 
 }
 /*B_HLWave.prototype.primName = function() { return "blockList" }
 B_HLWave.prototype.argList = function() { 
@@ -46574,7 +46599,7 @@ B_HLRotationServo.prototype.constructor = B_HLRotationServo;
 function B_HL_RS_L1(x, y, flip, userSelectedPort) {
   B_HLRotationServo.call(this, x, y, flip, userSelectedPort)
 
-  this.value = this.flip ? -60 : 45
+  this.value = this.flip ? -50 : 50 //-60 : 45
 }
 B_HL_RS_L1.prototype = Object.create(B_HLRotationServo.prototype);
 B_HL_RS_L1.prototype.constructor = B_HL_RS_L1;
@@ -46669,6 +46694,9 @@ B_HLSingleNeopix.prototype.primName = function() { return "hatchlingNeopixelWith
 B_HLSingleNeopix.prototype.argList = function() { 
   var port = HL_Utils.portNames[this.port]
   var rgb = Colors.hexToRgb(this.value)
+  for (var i = 0; i < rgb.length; i++) {
+    rgb[i] = Math.round(rgb[i] * 100/255)
+  }
   return [port, rgb[0], rgb[1], rgb[2], this.duration]
 }
 
@@ -47390,7 +47418,7 @@ B_HLWaitUntilPortButton.importXml = HL_Utils.importXml*/
 // B_HLPortF.prototype.constructor = B_HLPortF
 
 
-/*** BirdBlox Blocks  ***/
+/*** BirdBlox Style Blocks  ***/
 
 function B_HLEmptyPort(x, y, port) {
   this.port = port 
@@ -47461,7 +47489,7 @@ function B_HLBirdBloxOutput(x, y, outputType, portType, port, minVal, maxVal) {
 
   CommandBlock.call(this, x, y, "ports")//DeviceHatchling.getDeviceTypeId());
 
-  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  //this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
   this.addPart(new LabelText(this, (Language.getStr("port") + " " + HL_Utils.portNames[this.port]) ))
 }
 B_HLBirdBloxOutput.prototype = Object.create(CommandBlock.prototype);
@@ -47549,7 +47577,7 @@ B_HLBBRotationServo.importXml = HL_Utils.BBimportXml
 //MicroBlocks functions
 B_HLBBRotationServo.prototype.primName = function() { return "hatchlingMotorWithDelay" }
 B_HLBBRotationServo.prototype.argList = function() { 
-  var slot = this.slots[1]
+  /*var slot = this.slots[0]
   if (slot.hasChild) {
     console.error("SLOT CHILDREN NOT IMPLEMENTED FOR ROTATION SERVO!")
     return []
@@ -47564,7 +47592,9 @@ B_HLBBRotationServo.prototype.argList = function() {
 
     console.log("*** rotation servo final value " + value)
     return [port, value, duration]
-  }
+  }*/
+
+  return [HL_Utils.portNames[this.port], this.slots[0].getMicroBlocksInstructions(), 0]
   
 }
 
@@ -47584,14 +47614,15 @@ B_HLBBPositionServo.importXml = HL_Utils.BBimportXml
 //MicroBlocks functions
 B_HLBBPositionServo.prototype.primName = function() { return "hatchlingServoWithDelay" }
 B_HLBBPositionServo.prototype.argList = function() { 
-  var slot = this.slots[1]
+  /*var slot = this.slots[1]
   if (slot.hasChild) {
     console.error("SLOT CHILDREN NOT IMPLEMENTED FOR POSITION SERVO!")
     return []
   } else {
     var value = slot.getDataNotFromChild().getValueInR(this.minVal, this.maxVal, this.positive, true) + 2 //0 and 1 are off commands
     return [HL_Utils.portNames[this.port], value, 0] 
-  }
+  }*/
+  return [HL_Utils.portNames[this.port], this.slots[0].getMicroBlocksInstructions(), 0] 
 }
 
 function B_HLBBFairyLights(x, y, port) {
@@ -47628,7 +47659,7 @@ B_HLBBFairyLights.prototype.argList = function() {
   var value = percent
   
   return [HL_Utils.portNames[this.port], value, 0] */
-  return [HL_Utils.portNames[this.port], this.slots[1].getMicroBlocksInstructions(), 0]
+  return [HL_Utils.portNames[this.port], this.slots[0].getMicroBlocksInstructions(), 0]
 }
 
 function B_HLBBSingleNeopix(x, y, port) {
@@ -47656,7 +47687,7 @@ B_HLBBSingleNeopix.importXml = HL_Utils.BBimportXml
 //MicroBlocks functions
 B_HLBBSingleNeopix.prototype.primName = function() { return "hatchlingNeopixelWithDelay" }
 B_HLBBSingleNeopix.prototype.argList = function() { 
-  var rgb = []
+  /*var rgb = []
   var success = true
 
   for (var i = 1; i <= 3; i++) {
@@ -47674,9 +47705,10 @@ B_HLBBSingleNeopix.prototype.argList = function() {
     return [HL_Utils.portNames[this.port], rgb[0], rgb[1], rgb[2], 0] 
   } else {
     return []
-  }
-  
-  
+  }*/
+
+  return [HL_Utils.portNames[this.port], this.slots[0].getMicroBlocksInstructions(),
+    this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions(), 0]
 }
 
 /*function B_HLBBNeopixStrip(x, y, port) {
@@ -47722,7 +47754,7 @@ function B_HLBirdBloxSensor(x, y, portType, port) {
   if (this.port == null) { console.error("Port must be specified") }
   ReporterBlock.call(this, x, y, "ports") //DeviceHatchling.getDeviceTypeId());
 
-  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  //this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
   this.addPart(new LabelText(this, (Language.getStr("port") + " " + HL_Utils.portNames[this.port]) ))
 }
 B_HLBirdBloxSensor.prototype = Object.create(ReporterBlock.prototype);
@@ -47762,7 +47794,7 @@ function B_HLLedArray(x, y) {
   //B_MicroBitLedArray.call(this, x, y, DeviceHatchling);
 
   CommandBlock.call(this, x, y, "display") //DeviceHatchling.getDeviceTypeId());
-  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  //this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
   var label = new LabelText(this, Language.getStr("block_LED_Display"));
   label.isEndOfLine = true;
   this.addPart(label);
@@ -47802,7 +47834,7 @@ B_HLLedArray.prototype.argList = function() {
   }*/
 
   for (var i = 0; i < 25; i++) {
-    var toggle = this.parts[i+2]
+    var toggle = this.parts[i+1]
     ledStatusString += (toggle.getData().getValue()) ? "1" : "0"
   }
 
@@ -47814,7 +47846,7 @@ function B_HLPrint(x, y) {
   //B_MicroBitPrint.call(this, x, y, DeviceHatchling);
 
   CommandBlock.call(this, x, y, "display");
-  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  //this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
   // StrS_1 refers to the first string slot.
   this.addPart(new StringSlot(this, "StrS_1", "HELLO"));
   this.parseTranslation(Language.getStr("block_scroll_text"));
@@ -47824,13 +47856,13 @@ B_HLPrint.prototype.constructor = B_HLPrint;
 //MicroBlocks functions
 B_HLPrint.prototype.primName = function() { return "hatchlingDisplayText" } //"[display:mbDisplay]" }
 B_HLPrint.prototype.argList = function() {
-  return [this.slots[1].getMicroBlocksInstructions()]
+  return [this.slots[0].getMicroBlocksInstructions()]
 }
 
 
 function B_HLPlot(x, y) {
   CommandBlock.call(this, x, y, "display");
-  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  //this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
 
   var xSlot = new NumSlot(this, "Num_x", 3, true, true);
   xSlot.addLimits(1, 5);
@@ -47847,13 +47879,13 @@ B_HLPlot.prototype.constructor = B_HLPlot
 //MicroBlocks functions
 B_HLPlot.prototype.primName = function() { return "[display:mbPlot]" }
 B_HLPlot.prototype.argList = function() { 
-  return [this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions()] 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()] 
 }
 
 
 function B_HLUnplot(x, y) {
   CommandBlock.call(this, x, y, "display");
-  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  //this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
 
   var xSlot = new NumSlot(this, "Num_x", 3, true, true);
   xSlot.addLimits(1, 5);
@@ -47870,7 +47902,7 @@ B_HLUnplot.prototype.constructor = B_HLUnplot
 //MicroBlocks functions
 B_HLUnplot.prototype.primName = function() { return "[display:mbUnplot]" }
 B_HLUnplot.prototype.argList = function() { 
-  return [this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions()] 
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()] 
 }
 
 
@@ -47878,7 +47910,7 @@ function B_HLBuzzer(x, y) {
   //B_DeviceWithPortsBuzzer.call(this, x, y, DeviceHatchling);
   CommandBlock.call(this, x, y, "sound")
 
-  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  //this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
 
   var noteSlot = new NoteSlot(this, "Note_out", 60, true, true);
   noteSlot.addLimits(24, 120, Language.getStr("Note")); //accepted midi notes range from 24 to 120
@@ -47901,7 +47933,7 @@ B_HLBuzzer.prototype.constructor = B_HLBuzzer;
 //MicroBlocks functions
 B_HLBuzzer.prototype.primName = function() { return "hatchlingPlayNote" }
 B_HLBuzzer.prototype.argList = function() { 
-  return [this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions()]
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
 
   /*var midiNote = 0
   if (this.slots[1].hasChild) {
@@ -47927,7 +47959,7 @@ B_HLBuzzer.prototype.argList = function() {
 function B_HLTone(x, y) {
   CommandBlock.call(this, x, y, "sound")
 
-  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  //this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
 
   var freqSlot = new NumSlot(this, "FreqS_out", 440, true, true)
   freqSlot.addLimits(20, 20000, "Hz") //Accepted frequencies range from 20 to 20000 Hz
@@ -47944,13 +47976,13 @@ B_HLTone.prototype.constructor = B_HLTone
 //MicroBlocks functions
 B_HLTone.prototype.primName = function() { return "hatchlingPlayTone" }
 B_HLTone.prototype.argList = function() {
-  return [this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions()]
+  return [this.slots[0].getMicroBlocksInstructions(), this.slots[1].getMicroBlocksInstructions()]
 }
 
 function B_HLRest(x, y) {
   CommandBlock.call(this, x, y, "sound")
 
-  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  //this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
 
   var typeSlot = new DropSlot(this, "SDS_2", null, null, new SelectionData(Language.getStr("quarter"), 4));
   typeSlot.addOption(new SelectionData(Language.getStr("whole"), 1));
@@ -47970,7 +48002,7 @@ B_HLRest.prototype.constructor = B_HLRest
 //MicroBlocks functions
 B_HLRest.prototype.primName = function() { return "hatchlingPlayNote" }
 B_HLRest.prototype.argList = function() { 
-  return [0, this.slots[1].getMicroBlocksInstructions()]
+  return [0, this.slots[0].getMicroBlocksInstructions()]
 }
 
 
@@ -47978,7 +48010,7 @@ B_HLRest.prototype.argList = function() {
 
 function B_HLBBClaps(x, y) {
   ReporterBlock.call(this, x, y, "sensors")// DeviceHatchling.getDeviceTypeId());
-  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  //this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
 
   this.addPart(new LabelText(this, Language.getStr("block_Claps")));
 }
@@ -47991,7 +48023,7 @@ B_HLBBClaps.prototype.argList = function() { return [] }
 
 function B_HLBBButtonPresses(x, y) {
   ReporterBlock.call(this, x, y, "sensors") //DeviceHatchling.getDeviceTypeId());
-  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  //this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
 
   this.addPart(new LabelText(this, Language.getStr("block_Button_Presses")));
 }
@@ -48003,12 +48035,19 @@ B_HLBBButtonPresses.prototype.argList = function() { return [] }
 
 
 function B_HLButton(x, y) {
-  B_MicroBitButton.call(this, x, y, DeviceHatchling);
+  PredicateBlock.call(this, x, y, "sensors");
+
+  var choice = new DropSlot(this, "SDS_1", null, null, new SelectionData("A", "buttonA"));
+  choice.addOption(new SelectionData("A", "buttonA"));
+  choice.addOption(new SelectionData("B", "buttonB"));
+  this.addPart(choice);
+  this.parseTranslation(Language.getStr("block_Button"));
+
 };
 B_HLButton.prototype = Object.create(B_MicroBitButton.prototype);
 B_HLButton.prototype.constructor = B_HLButton;
 //MicroBlocks functions
-B_HLButton.prototype.primName = function() { return this.slots[1].getDataNotFromChild().getValue() }
+B_HLButton.prototype.primName = function() { return this.slots[0].getMicroBlocksInstructions() }
 B_HLButton.prototype.argList = function() { return [] }
 
 
@@ -48020,7 +48059,7 @@ B_HLButton.prototype.argList = function() { return [] }
  */
 function B_HLAccelerometer(x, y){
   ReporterBlock.call(this, x, y, "sensors") //deviceClass.getDeviceTypeId());
-  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  //this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
 
   var label = new LabelText(this, Language.getStr("Accelerometer"));
   this.addPart(label);
@@ -48035,7 +48074,7 @@ B_HLAccelerometer.prototype = Object.create(ReporterBlock.prototype)
 B_HLAccelerometer.prototype.constructor = B_HLAccelerometer
 //MicroBlocks functions
 B_HLAccelerometer.prototype.primName = function() { 
-  return "[sensors:" + this.slots[1].getDataNotFromChild().getValue() + "]"
+  return "[sensors:" + this.slots[0].getMicroBlocksInstructions() + "]"
 }
 B_HLAccelerometer.prototype.argList = function() { return [] }
 
@@ -48050,7 +48089,7 @@ Block.setDisplaySuffix(B_HLAccelerometer, "m/s" + String.fromCharCode(178));
  */
 function B_HLSound(x, y){
   ReporterBlock.call(this, x, y, "sensors") //deviceClass.getDeviceTypeId());
-  this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  //this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
 
   var label = new LabelText(this, Language.getStr("Sound"));
   this.addPart(label);
@@ -51749,9 +51788,8 @@ MicroBlocksRuntime.prototype.showResult = function(chunkID, value, isError, isRe
 		}
 	}
 	if (block != null) {
-		if (block.returnsValue) {
-			console.log("*** showResult " + value + " " + typeof value)
-			console.log(value)
+		if (block.returnsValue || isError) {
+			console.log("*** showResult '" + value + "' <" + typeof value + ">")
 			block.displayValue(value, isError)
 		} else {
 			console.error("showResult only implemented for reporter blocks. Results for chunk " + chunkID + ": '" + value + "' (isError=" + isError + ", isResult=" + isResult + ")")

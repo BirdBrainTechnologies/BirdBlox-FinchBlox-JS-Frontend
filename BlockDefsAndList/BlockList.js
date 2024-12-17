@@ -350,13 +350,13 @@ BlockList.populateCat_operators = function(category) {
   category.addBlockByName("B_True");
   category.addBlockByName("B_False");
   category.addSpace();
-  //if(!HatchPlus) {
-    category.addBlockByName("B_LetterOf");
-    category.addBlockByName("B_LengthOf");
+  category.addBlockByName("B_LetterOf");
+  category.addBlockByName("B_LengthOf");
+  if(!HatchPlus) {
     category.addBlockByName("B_join");
     category.addBlockByName("B_Split");
-    category.addSpace();
-  //}
+  }
+  category.addSpace();
   category.addBlockByName("B_IsAType");
   category.trimBottom();
 };
@@ -628,6 +628,7 @@ BlockList.populateCat_ports = function(category) {
 BlockList.populateCat_display = function(category) {
   category.addBlockByName("B_HLLedArray");
   category.addBlockByName("B_HLPrint");
+  category.addSpace();
   category.addBlockByName("B_HLPlot");
   category.addBlockByName("B_HLUnplot");
   category.trimBottom();

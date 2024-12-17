@@ -113,14 +113,14 @@ transition:
 
 .hatchlingScroll {
     ::-webkit-scrollbar {
-        width: 5px;
+        width: 8px;
     }
     ::-webkit-scrollbar-track {
         background: #EEEEF4;
     }
     ::-webkit-scrollbar-thumb {
         background: #99A5B1;
-        border-radius: 2.5px;
+        border-radius: 4px;
     }
 }
 
