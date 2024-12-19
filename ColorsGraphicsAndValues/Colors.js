@@ -241,7 +241,7 @@ Colors.setCategory = function() {
       "sound": Colors.ballyPurple,
       "control": Colors.ballyGreenYellow,
       "variables": Colors.hlYellow,
-      "data": Colors.hlGreenBlue,
+      //"data": Colors.hlGreenBlue,
       "lists": Colors.hlGreenBlue,
       "sensors": Colors.ballyPink,
       "inactive": Colors.ballyGray
@@ -253,7 +253,7 @@ Colors.setCategory = function() {
       "sound": Colors.ballyPurpleLight,
       "control": Colors.ballyGreenYellowLight,
       "variables": Colors.hlYellowLight,
-      "data": Colors.hlGreenBlueLight,
+      //"data": Colors.hlGreenBlueLight,
       "lists": Colors.hlGreenBlueLight,
       "sensors": Colors.ballyPinkLight,
     }
@@ -264,7 +264,7 @@ Colors.setCategory = function() {
       "sound": Colors.ballyPurpleDark,
       "control": Colors.ballyGreenYellowDark,
       "variables": Colors.hlYellowDark,
-      "data": Colors.hlGreenBlueDark,
+      //"data": Colors.hlGreenBlueDark,
       "lists": Colors.hlGreenBlueDark,
       "sensors": Colors.ballyPinkDark,
       "inactive": Colors.ballyGrayDark
@@ -276,7 +276,7 @@ Colors.setCategory = function() {
       "sound": Colors.ballyPurpleOnDrag,
       "control": Colors.ballyGreenYellowOnDrag,
       "variables": Colors.hlYellowOnDrag,
-      "data": Colors.hlGreenBlueOnDrag,
+      //"data": Colors.hlGreenBlueOnDrag,
       "lists": Colors.hlGreenBlueOnDrag,
       "sensors": Colors.ballyPinkOnDrag,
       "inactive": Colors.ballyGray //TODO: Make drag color?

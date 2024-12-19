@@ -16,8 +16,8 @@ function BlockContextMenu(block, x, y) {
 
 BlockContextMenu.setGraphics = function() {
   const BCM = BlockContextMenu;
-  BCM.bnMargin = Button.defaultMargin;
-  BCM.bgColor = Colors.lightGray;
+  BCM.bnMargin = HatchPlus ? Button.defaultMargin/2 : Button.defaultMargin;
+  BCM.bgColor = HatchPlus ? Colors.ballyBrandBlue : Colors.lightGray;
   BCM.blockShift = 20;
 };
 
@@ -85,6 +85,15 @@ BlockContextMenu.prototype.addOptions = function() {
       this.duplicate();
     }.bind(this));
 
+    if (HatchPlus) {
+      this.menuBnList.addOption(Language.getStr("Duplicate_All"), function() {
+        this.duplicate(true)
+      }.bind(this))
+      this.menuBnList.addOption(Language.getStr("Extract_Block"), function() {
+        this.extract()
+      }.bind(this))
+    }
+
     this.menuBnList.addOption(Language.getStr("Delete"), function() {
       // Delete the stack and add it to the UndoManager
       UndoManager.deleteStack(this.block.unsnap());
@@ -97,16 +106,53 @@ BlockContextMenu.prototype.addOptions = function() {
 /**
  * Duplicates this menu's Block and all blocks below it.
  */
-BlockContextMenu.prototype.duplicate = function() {
+BlockContextMenu.prototype.duplicate = function(all) {
   const BCM = BlockContextMenu;
   const newX = this.block.getAbsX() + BCM.blockShift;
   const newY = this.block.getAbsY() + BCM.blockShift;
-  const blockCopy = this.block.duplicate(newX, newY);
+  const blockCopy = this.block.duplicate(newX, newY, all);
   const tab = this.block.stack.tab;
   const copyStack = new BlockStack(blockCopy, tab);
   //copyStack.updateDim();
   this.close();
 };
+
+/**
+ * Extracts this menu's Block.
+ */
+BlockContextMenu.prototype.extract = function() {
+  let parent = this.block.parent 
+  let next = this.block.nextBlock
+  const BCM = BlockContextMenu;
+  let newX = this.block.getAbsX() 
+  let newY = this.block.getAbsY() 
+  this.block.unsnap()
+  
+  if (next != null) {
+    next.unsnap()
+    if (parent != null) {
+      parent.snap(next)
+    } else {
+      newY -= BCM.blockShift
+    }
+  }
+  if (parent != null) {
+    newX += parent.width + BCM.blockShift
+    newY -= BCM.blockShift
+  }
+  //this.block.stack.move(newX, newY)
+
+  CodeManager.move.start(this.block, this.block.getAbsX(), this.block.getAbsY())
+  CodeManager.move.update(newX, newY)
+  while (CodeManager.fit.found) {
+    newX += BCM.blockShift
+    newY -= BCM.blockShift;
+    CodeManager.move.update(newX, newY)
+  }
+  CodeManager.move.end()
+
+  this.close()
+}
 
 /**
  * Closes the menu

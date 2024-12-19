@@ -27,7 +27,7 @@ function SmoothMenuBnList(parent, parentGroup, x, y, width, layer) {
   this.height = 0;
   // Store constants TODO: not really necessary
   this.bnHeight = SmoothMenuBnList.bnHeight;
-  this.bnMargin = Button.defaultMargin;
+  this.bnMargin = HatchPlus ? Button.defaultMargin/2 : Button.defaultMargin;
   this.bnsGenerated = false;
   // Prepare list to store options.
   /** @type {Array<object>} - An array of objects with properties like text, func, and addTextFn */

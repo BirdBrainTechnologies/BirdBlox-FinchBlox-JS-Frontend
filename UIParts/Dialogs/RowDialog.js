@@ -44,6 +44,7 @@ RowDialog.setConstants = function() {
     RowDialog.bnHeight = 54;//50;//SmoothMenuBnList.bnHeight;
     RowDialog.titleBarH = RowDialog.bnHeight * 1.5;
     RowDialog.outlineColor = Colors.ballyGray;
+    RowDialog.iconH = 20;
   } else if (FinchBlox) {
     RowDialog.titleBarColor = Colors.finchGreen;
     RowDialog.bgColor = Colors.white;
@@ -52,6 +53,7 @@ RowDialog.setConstants = function() {
     RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
     RowDialog.titleBarH = RowDialog.bnHeight * 2;
     RowDialog.outlineColor = Colors.flagGreen;
+    RowDialog.iconH = 15;
   /*} else if (HatchPlus) {
     RowDialog.titleBarColor = Colors.ballyBrandBlue;
     RowDialog.bgColor = Colors.ballyBrandBlueLight;
@@ -67,6 +69,7 @@ RowDialog.setConstants = function() {
     RowDialog.cornerR = 0;
     RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
     RowDialog.titleBarH = RowDialog.bnHeight + RowDialog.bnMargin;
+    RowDialog.iconH = 15;
   }
   RowDialog.titleBarFontC = HatchPlus ? Colors.ballyBrandBlue : Colors.white;
   RowDialog.centeredBnWidth = 100;
@@ -101,7 +104,7 @@ RowDialog.setConstants = function() {
   RowDialog.hintTextFont = HatchPlus ? Font.secondaryUiFont(16) : Font.uiFont(16);
   RowDialog.centeredfontWeight = "bold";
   RowDialog.smallBnWidth = 45;
-  RowDialog.iconH = 15;
+  
 
   //extra margin so that outlines aren't cut off
   RowDialog.m = (Hatchling || HatchPlus) ? 2 : 0 
@@ -565,7 +568,8 @@ RowDialog.prototype.contentRelToAbsY = function(y) {
 RowDialog.createMainBn = function(bnWidth, x, y, contentGroup, callbackFn) {
   const RD = RowDialog;
   const color = HatchPlus ? Colors.white : null
-  const button = new Button(x, y, bnWidth, RD.bnHeight - 2*RD.m, contentGroup, color, null, null, color);
+  const stroke = HatchPlus ? "none" : null
+  const button = new Button(x, y, bnWidth, RD.bnHeight - 2*RD.m, contentGroup, color, null, null, stroke);
   if (callbackFn != null) {
     button.setCallbackFunction(callbackFn, true);
   }
@@ -600,7 +604,8 @@ RowDialog.createMainBnWithText = function(text, bnWidth, x, y, contentGroup, cal
 RowDialog.createSmallBn = function(x, y, contentGroup, callbackFn) {
   const RD = RowDialog;
   const color = HatchPlus ? Colors.white : null
-  const button = new Button(x, y, RD.smallBnWidth, RD.bnHeight - 2*RD.m, contentGroup, color, null, null, color);
+    const stroke = HatchPlus ? "none" : null
+  const button = new Button(x, y, RD.smallBnWidth, RD.bnHeight - 2*RD.m, contentGroup, color, null, null, stroke);
   if (callbackFn != null) {
     button.setCallbackFunction(callbackFn, true);
   }

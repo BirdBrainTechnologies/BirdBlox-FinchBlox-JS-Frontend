@@ -65,6 +65,15 @@ OpenDialog.prototype.createRow = function(index, y, width, contentGroup) {
   let largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols - 2*RD.m;
   y += RD.m
 
+
+  if (HatchPlus) {
+ 
+    let bgRect = GuiElements.draw.rect(RD.m/2, y - RD.m/2, width - RD.m, RD.bnHeight - RD.m, Colors.white, Button.defaultR, Button.defaultR)
+    GuiElements.update.stroke(bgRect, Colors.ballyBrandBlue, 2)
+    contentGroup.appendChild(bgRect)
+
+  }
+
   const file = this.files[index];
   this.createFileBn(file, largeBnWidth, RD.m, y, contentGroup);
 
@@ -107,7 +116,8 @@ OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup) 
  */
 OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup) {
   const me = this;
-  RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function() {
+  const iconPath = HatchPlus ? VectorPaths.bdTrash : VectorPaths.trash
+  RowDialog.createSmallBnWithIcon(iconPath, x, y, contentGroup, function() {
     SaveManager.userDeleteFile(false, file, function() {
       me.reloadDialog();
     });
@@ -123,7 +133,8 @@ OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup) {
  */
 OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
   const me = this;
-  RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function() {
+  const iconPath = HatchPlus ? VectorPaths.faPencil : VectorPaths.edit
+  RowDialog.createSmallBnWithIcon(iconPath, x, y, contentGroup, function() {
     SaveManager.userRenameFile(false, file, function() {
       me.reloadDialog();
     });
@@ -155,7 +166,8 @@ OpenDialog.prototype.createDuplicateBn = function(file, x, y, contentGroup) {
  */
 OpenDialog.prototype.createExportBn = function(file, x, y, contentGroup) {
   const me = this;
-  RowDialog.createSmallBnWithIcon(VectorPaths.share, x, y, contentGroup, function() {
+  const iconPath = HatchPlus ? VectorPaths.faFileExport : VectorPaths.share
+  RowDialog.createSmallBnWithIcon(iconPath, x, y, contentGroup, function() {
     let x1 = this.contentRelToAbsX(x);
     let x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
     let y1 = this.contentRelToAbsY(y);

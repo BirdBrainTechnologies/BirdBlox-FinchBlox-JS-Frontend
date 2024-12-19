@@ -246,7 +246,7 @@ Language.en = {
 "Ports":"Ports",
 "Display":"Display", //TODO: Use block_LED_Display?
 "Sensors":"Sensors",
-"Data":"Data",
+//"Data":"Data",
 "block_plot":"plot x (Slot 1) y (Slot 2)",
 "block_unplot":"unplot x (Slot 1) y (Slot 2)",
 "block_min":"min (Slot 1) (Slot 2)",
@@ -264,5 +264,8 @@ Language.en = {
 "eighth":"eighth",
 "sixteenth":"sixteenth",
 "block_scroll_text":"scroll text (Slot 1)",
-"block_wait_ms":"wait (Slot 1) ms"
+"block_wait_ms":"wait (Slot 1) ms",
+"Duplicate_All":"Duplicate All",
+"Extract_Block":"Extract Block",
+"Lists":"Lists"
 }

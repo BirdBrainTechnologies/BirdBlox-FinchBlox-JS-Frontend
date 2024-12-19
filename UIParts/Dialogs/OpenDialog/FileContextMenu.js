@@ -30,7 +30,7 @@ FileContextMenu.setGraphics = function() {
     cloud: 3 // For when the user if looking at a cloud file
   };
 
-  FCM.bnMargin = Button.defaultMargin;
+  FCM.bnMargin = HatchPlus ? Button.defaultMargin/2 : Button.defaultMargin;
   FCM.bgColor = HatchPlus ? Colors.ballyBrandBlue : Colors.lightGray;
   FCM.blockShift = 20;
   FCM.width = HatchPlus ? 125 : 115;

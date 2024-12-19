@@ -282,6 +282,7 @@ GuiElements.createLayers = function() {
   layers.dialog = create.layer(i);
   layers.overlay = create.layer(i);
   layers.frontScroll = document.getElementById("frontScrollDiv");
+  if (HatchPlus) { layers.frontScroll.classList.add("hatchlingScroll") }
   i++;
   layers.overlayOverlay = create.layer(i);
   layers.overlayOverlayScroll = document.getElementById("overlayOverlayScrollDiv");

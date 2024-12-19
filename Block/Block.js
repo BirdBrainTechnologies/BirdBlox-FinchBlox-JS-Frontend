@@ -1036,9 +1036,10 @@ Block.prototype.addWidths = function() {
  * Mutually recursive with copyFrom.
  * @param {number} x - The new Block's x coord.
  * @param {number} y - The new Block's y coord.
+ * @param {boolean} all - true if HatchPlus and all subsequent blocks should be copied
  * @return {Block} - This Block's copy.
  */
-Block.prototype.duplicate = function(x, y) {
+Block.prototype.duplicate = function(x, y, all) {
   let myCopy = null;
   // First we use this Block's constructor to create a new block of the same type
   // If this Block is a list or variable Block, we must pass that data to the constructor
@@ -1052,7 +1053,7 @@ Block.prototype.duplicate = function(x, y) {
     myCopy = new this.constructor(x, y);
   }
   // Then we tell the new block to copy its data from this Block
-  myCopy.copyFrom(this);
+  myCopy.copyFrom(this, all);
   return myCopy;
 };
 
@@ -1060,8 +1061,9 @@ Block.prototype.duplicate = function(x, y) {
  * Takes a Block and copies its slot data.  Duplicates all blocks below the Block and in its slots.
  * Mutually recursive with duplicate.
  * @param {Block} block - The block to copy the data from.  Must be of the same type.
+ * @param {boolean} all - true if HatchPlus and all subsequent blocks should be copied
  */
-Block.prototype.copyFrom = function(block) {
+Block.prototype.copyFrom = function(block, all) {
   DebugOptions.assert(block.blockTypeName === this.blockTypeName);
   for (let i = 0; i < this.slots.length; i++) { //Copy block's slots to this Block.
     this.slots[i].copyFrom(block.slots[i]);
@@ -1072,8 +1074,9 @@ Block.prototype.copyFrom = function(block) {
   if (this.blockSlot2 != null) {
     this.blockSlot2.copyFrom(block.blockSlot2);
   }
+  if (HatchPlus && !all) { return }
   if (block.nextBlock != null) { //Copy subsequent Blocks.
-    this.nextBlock = block.nextBlock.duplicate(0, 0);
+    this.nextBlock = block.nextBlock.duplicate(0, 0, all);
     this.nextBlock.parent = this;
   }
 };

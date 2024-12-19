@@ -39,6 +39,12 @@ Language.names = {
  * @param {string} lang - Language code of the language requested.
  */
 Language.setLanguage = function(lang) {
+    if (HatchPlus) {
+      //disable languages in HatchPlus for now 
+      Language.lang = "en";
+      return
+    }
+    
     const code = lang.substring(0, 2);
     if (Language.langs.indexOf(code) != -1) {
       Language.lang = code;

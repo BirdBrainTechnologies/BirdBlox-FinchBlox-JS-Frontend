@@ -1353,6 +1353,12 @@ Language.names = {
  * @param {string} lang - Language code of the language requested.
  */
 Language.setLanguage = function(lang) {
+    if (HatchPlus) {
+      //disable languages in HatchPlus for now 
+      Language.lang = "en";
+      return
+    }
+    
     var code = lang.substring(0, 2);
     if (Language.langs.indexOf(code) != -1) {
       Language.lang = code;
@@ -2536,7 +2542,7 @@ Language.en = {
 "Ports":"Ports",
 "Display":"Display", //TODO: Use block_LED_Display?
 "Sensors":"Sensors",
-"Data":"Data",
+//"Data":"Data",
 "block_plot":"plot x (Slot 1) y (Slot 2)",
 "block_unplot":"unplot x (Slot 1) y (Slot 2)",
 "block_min":"min (Slot 1) (Slot 2)",
@@ -2554,7 +2560,10 @@ Language.en = {
 "eighth":"eighth",
 "sixteenth":"sixteenth",
 "block_scroll_text":"scroll text (Slot 1)",
-"block_wait_ms":"wait (Slot 1) ms"
+"block_wait_ms":"wait (Slot 1) ms",
+"Duplicate_All":"Duplicate All",
+"Extract_Block":"Extract Block",
+"Lists":"Lists"
 }
 
 //Spanish Translation
@@ -6990,6 +6999,7 @@ GuiElements.createLayers = function() {
   layers.dialog = create.layer(i);
   layers.overlay = create.layer(i);
   layers.frontScroll = document.getElementById("frontScrollDiv");
+  if (HatchPlus) { layers.frontScroll.classList.add("hatchlingScroll") }
   i++;
   layers.overlayOverlay = create.layer(i);
   layers.overlayOverlayScroll = document.getElementById("overlayOverlayScrollDiv");
@@ -8618,7 +8628,7 @@ function BlockList() {
     cat.push("Control");
     cat.push("Operators");
     cat.push("Variables");
-    cat.push("Data");
+    cat.push("Lists");
   } else {
     cat.push("Robots");
     cat.push("Operators");
@@ -9213,7 +9223,7 @@ BlockList.populateCat_sensors = function(category) {
  * HatchPlus Data (aka lists) category
  * @param {Category} category
  */
-BlockList.populateCat_data = function(category) {
+BlockList.populateCat_lists = function(category) {
   BlockPalette.createListBn = category.addButton(Language.getStr("Create_List"), CodeManager.newList);
   category.addSpace();
 
@@ -9570,7 +9580,7 @@ Colors.setCategory = function() {
       "sound": Colors.ballyPurple,
       "control": Colors.ballyGreenYellow,
       "variables": Colors.hlYellow,
-      "data": Colors.hlGreenBlue,
+      //"data": Colors.hlGreenBlue,
       "lists": Colors.hlGreenBlue,
       "sensors": Colors.ballyPink,
       "inactive": Colors.ballyGray
@@ -9582,7 +9592,7 @@ Colors.setCategory = function() {
       "sound": Colors.ballyPurpleLight,
       "control": Colors.ballyGreenYellowLight,
       "variables": Colors.hlYellowLight,
-      "data": Colors.hlGreenBlueLight,
+      //"data": Colors.hlGreenBlueLight,
       "lists": Colors.hlGreenBlueLight,
       "sensors": Colors.ballyPinkLight,
     }
@@ -9593,7 +9603,7 @@ Colors.setCategory = function() {
       "sound": Colors.ballyPurpleDark,
       "control": Colors.ballyGreenYellowDark,
       "variables": Colors.hlYellowDark,
-      "data": Colors.hlGreenBlueDark,
+      //"data": Colors.hlGreenBlueDark,
       "lists": Colors.hlGreenBlueDark,
       "sensors": Colors.ballyPinkDark,
       "inactive": Colors.ballyGrayDark
@@ -9605,7 +9615,7 @@ Colors.setCategory = function() {
       "sound": Colors.ballyPurpleOnDrag,
       "control": Colors.ballyGreenYellowOnDrag,
       "variables": Colors.hlYellowOnDrag,
-      "data": Colors.hlGreenBlueOnDrag,
+      //"data": Colors.hlGreenBlueOnDrag,
       "lists": Colors.hlGreenBlueOnDrag,
       "sensors": Colors.ballyPinkOnDrag,
       "inactive": Colors.ballyGray //TODO: Make drag color?
@@ -10318,6 +10328,10 @@ function VectorPaths(){
   VP.mvArrow.width=83;
   VP.mvArrow.height=83;
   VP.mvArrow.transform="matrix(8.76256e-17,-1.43103,1.43103,8.76256e-17,-721.241,439.328)";
+  VP.faPencil={};
+  VP.faPencil.path="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1 0 32c0 8.8 7.2 16 16 16l32 0zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z"
+  VP.faPencil.width=512
+  VP.faPencil.height=512
   VP.faBluetoothB={};
   VP.faBluetoothB.path="M196.5 260l92.6-103.3L143.1 0v206.3l-86.1-86.1-31.4 31.4 108.1 108.4L25.6 368.4l31.4 31.4 86.1-86.1L145.8 512l148.6-148.6-97.9-103.3zm40.9-103l-50 50-.3-100.3 50.3 50.3zM187.4 313l50 50-50.3 50.3 .3-100.3z"
   VP.faBluetoothB.width=320;
@@ -10342,6 +10356,10 @@ function VectorPaths(){
   VP.faFileImport.path="M128 64c0-35.3 28.7-64 64-64L352 0l0 128c0 17.7 14.3 32 32 32l128 0 0 288c0 35.3-28.7 64-64 64l-256 0c-35.3 0-64-28.7-64-64l0-112 174.1 0-39 39c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l80-80c9.4-9.4 9.4-24.6 0-33.9l-80-80c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l39 39L128 288l0-224zm0 224l0 48L24 336c-13.3 0-24-10.7-24-24s10.7-24 24-24l104 0zM512 128l-128 0L384 0 512 128z"
   VP.faFileImport.width=512;
   VP.faFileImport.height=512;
+  VP.faFileExport={};
+  VP.faFileExport.path="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 128-168 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l168 0 0 112c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zM384 336l0-48 110.1 0-39-39c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l80 80c9.4 9.4 9.4 24.6 0 33.9l-80 80c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l39-39L384 336zm0-208l-128 0L256 0 384 128z"
+  VP.faFileExport.width=576
+  VP.faFileExport.height=512
   VP.faEgg={};
   //VP.faEgg.path="M192 496C86 496 0 394 0 288C0 176 64 16 192 16s192 160 192 272c0 106-86 208-192 208zM154.8 134c6.5-6 7-16.1 1-22.6s-16.1-7-22.6-1c-23.9 21.8-41.1 52.7-52.3 84.2C69.7 226.1 64 259.7 64 288c0 8.8 7.2 16 16 16s16-7.2 16-16c0-24.5 5-54.4 15.1-82.8c10.1-28.5 25-54.1 43.7-71.2z"; //original
   VP.faEgg.path="M192 496C86 496 0 394 0 288C0 176 64 16 192 16s192 160 192 272c0 106-86 208-192 208z";
@@ -12004,6 +12022,9 @@ TouchReceiver.addListeners = function() {
   TR.addEventListenerSafe(document.body, TR.handlerUp, TR.handleUp);
   TR.addEventListenerSafe(document.body, TR.handlerDown, TR.handleDocumentDown);
   TR.addEventListenerSafe(document.body, ["wheel"], TR.wheelZoom, true);
+  if (HatchPlus) {
+    TR.addEventListenerSafe(document.body, ["contextmenu"], TR.contextMenu)
+  }
 };
 
 /**
@@ -12031,6 +12052,11 @@ TouchReceiver.handleDocumentDown = function(event) {
     Overlay.closeOverlays(); // Close any visible overlays.
   }
 };
+
+TouchReceiver.contextMenu = function(event) {
+  event.preventDefault()
+  return false
+}
 
 /**
  * Ignores interaction from the user until enableInteraction is called or the timeout expires
@@ -12897,7 +12923,11 @@ TouchReceiver.touchend = function(e) {
         CodeManager.move.end();
         TR.blocksMoving = false;
       } else { // The stack was tapped, so it should run.
-        TR.target.stack.startRun();
+        if (HatchPlus && e.button == 2) {
+          new BlockContextMenu(TR.target, TR.startX, TR.startY)
+        } else {
+          TR.target.stack.startRun();
+        }
       }
     } else if (TR.targetType === "button") {
       TR.target.release(); // Pass message on to button.
@@ -12913,7 +12943,11 @@ TouchReceiver.touchend = function(e) {
     } else if (TR.targetType === "collapsibleItem") {
       TR.target.toggle();
     } else if (TR.targetType == "displayStack") {
-      TR.target.stack.startRun();
+      if (HatchPlus && e.button == 2 && (TR.target.blockTypeName === "B_Variable" || TR.target.blockTypeName === "B_List")) {
+        new BlockContextMenu(TR.target, TR.startX, TR.startY)
+      } else {
+        TR.target.stack.startRun();
+      }
       /*
 		    // tapping a block in the display stack runs the block once
         var execStatus = TR.target.updateRun();
@@ -20788,7 +20822,6 @@ InputWidget.Color.prototype.getHex = function (fullBrightness) {
 }
 
 InputWidget.Color.prototype.dropColor = function() {
-	console.log("dropColor and update...")
     InputWidget.Color.addRecentColor(this.getHex())
     this.updateRecentBns()
 }
@@ -22467,7 +22500,7 @@ function SmoothMenuBnList(parent, parentGroup, x, y, width, layer) {
   this.height = 0;
   // Store constants TODO: not really necessary
   this.bnHeight = SmoothMenuBnList.bnHeight;
-  this.bnMargin = Button.defaultMargin;
+  this.bnMargin = HatchPlus ? Button.defaultMargin/2 : Button.defaultMargin;
   this.bnsGenerated = false;
   // Prepare list to store options.
   /** @type {Array<object>} - An array of objects with properties like text, func, and addTextFn */
@@ -23012,8 +23045,8 @@ Menu.prototype.constructor = Menu;
 
 Menu.setGraphics = function() {
   Menu.defaultWidth = 170;
-  Menu.bnMargin = Button.defaultMargin;
-  Menu.bgColor = HatchPlus ? Colors.ballyGrayLight : Colors.lightGray;
+  Menu.bnMargin = HatchPlus ? Button.defaultMargin/2 : Button.defaultMargin;
+  Menu.bgColor = HatchPlus ? Colors.ballyBrandBlue : Colors.lightGray;
 };
 
 /**
@@ -24374,8 +24407,8 @@ function BlockContextMenu(block, x, y) {
 
 BlockContextMenu.setGraphics = function() {
   var BCM = BlockContextMenu;
-  BCM.bnMargin = Button.defaultMargin;
-  BCM.bgColor = Colors.lightGray;
+  BCM.bnMargin = HatchPlus ? Button.defaultMargin/2 : Button.defaultMargin;
+  BCM.bgColor = HatchPlus ? Colors.ballyBrandBlue : Colors.lightGray;
   BCM.blockShift = 20;
 };
 
@@ -24443,6 +24476,15 @@ BlockContextMenu.prototype.addOptions = function() {
       this.duplicate();
     }.bind(this));
 
+    if (HatchPlus) {
+      this.menuBnList.addOption(Language.getStr("Duplicate_All"), function() {
+        this.duplicate(true)
+      }.bind(this))
+      this.menuBnList.addOption(Language.getStr("Extract_Block"), function() {
+        this.extract()
+      }.bind(this))
+    }
+
     this.menuBnList.addOption(Language.getStr("Delete"), function() {
       // Delete the stack and add it to the UndoManager
       UndoManager.deleteStack(this.block.unsnap());
@@ -24455,16 +24497,53 @@ BlockContextMenu.prototype.addOptions = function() {
 /**
  * Duplicates this menu's Block and all blocks below it.
  */
-BlockContextMenu.prototype.duplicate = function() {
+BlockContextMenu.prototype.duplicate = function(all) {
   var BCM = BlockContextMenu;
   var newX = this.block.getAbsX() + BCM.blockShift;
   var newY = this.block.getAbsY() + BCM.blockShift;
-  var blockCopy = this.block.duplicate(newX, newY);
+  var blockCopy = this.block.duplicate(newX, newY, all);
   var tab = this.block.stack.tab;
   var copyStack = new BlockStack(blockCopy, tab);
   //copyStack.updateDim();
   this.close();
 };
+
+/**
+ * Extracts this menu's Block.
+ */
+BlockContextMenu.prototype.extract = function() {
+  var parent = this.block.parent 
+  var next = this.block.nextBlock
+  var BCM = BlockContextMenu;
+  var newX = this.block.getAbsX() 
+  var newY = this.block.getAbsY() 
+  this.block.unsnap()
+  
+  if (next != null) {
+    next.unsnap()
+    if (parent != null) {
+      parent.snap(next)
+    } else {
+      newY -= BCM.blockShift
+    }
+  }
+  if (parent != null) {
+    newX += parent.width + BCM.blockShift
+    newY -= BCM.blockShift
+  }
+  //this.block.stack.move(newX, newY)
+
+  CodeManager.move.start(this.block, this.block.getAbsX(), this.block.getAbsY())
+  CodeManager.move.update(newX, newY)
+  while (CodeManager.fit.found) {
+    newX += BCM.blockShift
+    newY -= BCM.blockShift;
+    CodeManager.move.update(newX, newY)
+  }
+  CodeManager.move.end()
+
+  this.close()
+}
 
 /**
  * Closes the menu
@@ -27660,6 +27739,7 @@ RowDialog.setConstants = function() {
     RowDialog.bnHeight = 54;//50;//SmoothMenuBnList.bnHeight;
     RowDialog.titleBarH = RowDialog.bnHeight * 1.5;
     RowDialog.outlineColor = Colors.ballyGray;
+    RowDialog.iconH = 20;
   } else if (FinchBlox) {
     RowDialog.titleBarColor = Colors.finchGreen;
     RowDialog.bgColor = Colors.white;
@@ -27668,6 +27748,7 @@ RowDialog.setConstants = function() {
     RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
     RowDialog.titleBarH = RowDialog.bnHeight * 2;
     RowDialog.outlineColor = Colors.flagGreen;
+    RowDialog.iconH = 15;
   /*} else if (HatchPlus) {
     RowDialog.titleBarColor = Colors.ballyBrandBlue;
     RowDialog.bgColor = Colors.ballyBrandBlueLight;
@@ -27683,6 +27764,7 @@ RowDialog.setConstants = function() {
     RowDialog.cornerR = 0;
     RowDialog.bnHeight = SmoothMenuBnList.bnHeight;
     RowDialog.titleBarH = RowDialog.bnHeight + RowDialog.bnMargin;
+    RowDialog.iconH = 15;
   }
   RowDialog.titleBarFontC = HatchPlus ? Colors.ballyBrandBlue : Colors.white;
   RowDialog.centeredBnWidth = 100;
@@ -27717,7 +27799,7 @@ RowDialog.setConstants = function() {
   RowDialog.hintTextFont = HatchPlus ? Font.secondaryUiFont(16) : Font.uiFont(16);
   RowDialog.centeredfontWeight = "bold";
   RowDialog.smallBnWidth = 45;
-  RowDialog.iconH = 15;
+  
 
   //extra margin so that outlines aren't cut off
   RowDialog.m = (Hatchling || HatchPlus) ? 2 : 0 
@@ -28181,7 +28263,8 @@ RowDialog.prototype.contentRelToAbsY = function(y) {
 RowDialog.createMainBn = function(bnWidth, x, y, contentGroup, callbackFn) {
   var RD = RowDialog;
   var color = HatchPlus ? Colors.white : null
-  var button = new Button(x, y, bnWidth, RD.bnHeight - 2*RD.m, contentGroup, color, null, null, color);
+  var stroke = HatchPlus ? "none" : null
+  var button = new Button(x, y, bnWidth, RD.bnHeight - 2*RD.m, contentGroup, color, null, null, stroke);
   if (callbackFn != null) {
     button.setCallbackFunction(callbackFn, true);
   }
@@ -28216,7 +28299,8 @@ RowDialog.createMainBnWithText = function(text, bnWidth, x, y, contentGroup, cal
 RowDialog.createSmallBn = function(x, y, contentGroup, callbackFn) {
   var RD = RowDialog;
   var color = HatchPlus ? Colors.white : null
-  var button = new Button(x, y, RD.smallBnWidth, RD.bnHeight - 2*RD.m, contentGroup, color, null, null, color);
+    var stroke = HatchPlus ? "none" : null
+  var button = new Button(x, y, RD.smallBnWidth, RD.bnHeight - 2*RD.m, contentGroup, color, null, null, stroke);
   if (callbackFn != null) {
     button.setCallbackFunction(callbackFn, true);
   }
@@ -28307,6 +28391,15 @@ OpenDialog.prototype.createRow = function(index, y, width, contentGroup) {
   var largeBnWidth = width - RD.smallBnWidth * cols - RD.bnMargin * cols - 2*RD.m;
   y += RD.m
 
+
+  if (HatchPlus) {
+ 
+    var bgRect = GuiElements.draw.rect(RD.m/2, y - RD.m/2, width - RD.m, RD.bnHeight - RD.m, Colors.white, Button.defaultR, Button.defaultR)
+    GuiElements.update.stroke(bgRect, Colors.ballyBrandBlue, 2)
+    contentGroup.appendChild(bgRect)
+
+  }
+
   var file = this.files[index];
   this.createFileBn(file, largeBnWidth, RD.m, y, contentGroup);
 
@@ -28349,7 +28442,8 @@ OpenDialog.prototype.createFileBn = function(file, bnWidth, x, y, contentGroup) 
  */
 OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup) {
   var me = this;
-  RowDialog.createSmallBnWithIcon(VectorPaths.trash, x, y, contentGroup, function() {
+  var iconPath = HatchPlus ? VectorPaths.bdTrash : VectorPaths.trash
+  RowDialog.createSmallBnWithIcon(iconPath, x, y, contentGroup, function() {
     SaveManager.userDeleteFile(false, file, function() {
       me.reloadDialog();
     });
@@ -28365,7 +28459,8 @@ OpenDialog.prototype.createDeleteBn = function(file, x, y, contentGroup) {
  */
 OpenDialog.prototype.createRenameBn = function(file, x, y, contentGroup) {
   var me = this;
-  RowDialog.createSmallBnWithIcon(VectorPaths.edit, x, y, contentGroup, function() {
+  var iconPath = HatchPlus ? VectorPaths.faPencil : VectorPaths.edit
+  RowDialog.createSmallBnWithIcon(iconPath, x, y, contentGroup, function() {
     SaveManager.userRenameFile(false, file, function() {
       me.reloadDialog();
     });
@@ -28397,7 +28492,8 @@ OpenDialog.prototype.createDuplicateBn = function(file, x, y, contentGroup) {
  */
 OpenDialog.prototype.createExportBn = function(file, x, y, contentGroup) {
   var me = this;
-  RowDialog.createSmallBnWithIcon(VectorPaths.share, x, y, contentGroup, function() {
+  var iconPath = HatchPlus ? VectorPaths.faFileExport : VectorPaths.share
+  RowDialog.createSmallBnWithIcon(iconPath, x, y, contentGroup, function() {
     var x1 = this.contentRelToAbsX(x);
     var x2 = this.contentRelToAbsX(x + RowDialog.smallBnWidth);
     var y1 = this.contentRelToAbsY(y);
@@ -30142,7 +30238,7 @@ FileContextMenu.setGraphics = function() {
     cloud: 3 // For when the user if looking at a cloud file
   };
 
-  FCM.bnMargin = Button.defaultMargin;
+  FCM.bnMargin = HatchPlus ? Button.defaultMargin/2 : Button.defaultMargin;
   FCM.bgColor = HatchPlus ? Colors.ballyBrandBlue : Colors.lightGray;
   FCM.blockShift = 20;
   FCM.width = HatchPlus ? 125 : 115;
@@ -34939,9 +35035,10 @@ Block.prototype.addWidths = function() {
  * Mutually recursive with copyFrom.
  * @param {number} x - The new Block's x coord.
  * @param {number} y - The new Block's y coord.
+ * @param {boolean} all - true if HatchPlus and all subsequent blocks should be copied
  * @return {Block} - This Block's copy.
  */
-Block.prototype.duplicate = function(x, y) {
+Block.prototype.duplicate = function(x, y, all) {
   var myCopy = null;
   // First we use this Block's constructor to create a new block of the same type
   // If this Block is a list or variable Block, we must pass that data to the constructor
@@ -34955,7 +35052,7 @@ Block.prototype.duplicate = function(x, y) {
     myCopy = new this.constructor(x, y);
   }
   // Then we tell the new block to copy its data from this Block
-  myCopy.copyFrom(this);
+  myCopy.copyFrom(this, all);
   return myCopy;
 };
 
@@ -34963,8 +35060,9 @@ Block.prototype.duplicate = function(x, y) {
  * Takes a Block and copies its slot data.  Duplicates all blocks below the Block and in its slots.
  * Mutually recursive with duplicate.
  * @param {Block} block - The block to copy the data from.  Must be of the same type.
+ * @param {boolean} all - true if HatchPlus and all subsequent blocks should be copied
  */
-Block.prototype.copyFrom = function(block) {
+Block.prototype.copyFrom = function(block, all) {
   DebugOptions.assert(block.blockTypeName === this.blockTypeName);
   for (var i = 0; i < this.slots.length; i++) { //Copy block's slots to this Block.
     this.slots[i].copyFrom(block.slots[i]);
@@ -34975,8 +35073,9 @@ Block.prototype.copyFrom = function(block) {
   if (this.blockSlot2 != null) {
     this.blockSlot2.copyFrom(block.blockSlot2);
   }
+  if (HatchPlus && !all) { return }
   if (block.nextBlock != null) { //Copy subsequent Blocks.
-    this.nextBlock = block.nextBlock.duplicate(0, 0);
+    this.nextBlock = block.nextBlock.duplicate(0, 0, all);
     this.nextBlock.parent = this;
   }
 };
@@ -51787,15 +51886,19 @@ MicroBlocksRuntime.prototype.showResult = function(chunkID, value, isError, isRe
 			}
 		}
 	}
-	if (block != null) {
-		if (block.returnsValue || isError) {
-			console.log("*** showResult '" + value + "' <" + typeof value + ">")
-			block.displayValue(value, isError)
+	if (HatchPlus) {
+		if (block != null) {
+			if (block.returnsValue || isError) {
+				console.log("*** showResult '" + value + "' <" + typeof value + ">")
+				block.displayValue(value, isError)
+			} else {
+				console.error("showResult only implemented for reporter blocks. Results for chunk " + chunkID + ": '" + value + "' (isError=" + isError + ", isResult=" + isResult + ")")
+			}
 		} else {
-			console.error("showResult only implemented for reporter blocks. Results for chunk " + chunkID + ": '" + value + "' (isError=" + isError + ", isResult=" + isResult + ")")
+			console.error("showResult could not find block for chunk with id " + chunkID + " (message: '" + value + "' isError: " + isError + " isResult: " + isResult + ")")
 		}
 	} else {
-		console.error("showResult could not find block for chunk with id " + chunkID + " (message: '" + value + "' isError: " + isError + " isResult: " + isResult + ")")
+		console.error("showResult only implemented for HatchBlox. Results for chunk " + chunkID + ": '" + value + "' (isError=" + isError + ", isResult=" + isResult + ")")
 	}
 
 	/*for m (join

@@ -53,6 +53,9 @@ TouchReceiver.addListeners = function() {
   TR.addEventListenerSafe(document.body, TR.handlerUp, TR.handleUp);
   TR.addEventListenerSafe(document.body, TR.handlerDown, TR.handleDocumentDown);
   TR.addEventListenerSafe(document.body, ["wheel"], TR.wheelZoom, true);
+  if (HatchPlus) {
+    TR.addEventListenerSafe(document.body, ["contextmenu"], TR.contextMenu)
+  }
 };
 
 /**
@@ -80,6 +83,11 @@ TouchReceiver.handleDocumentDown = function(event) {
     Overlay.closeOverlays(); // Close any visible overlays.
   }
 };
+
+TouchReceiver.contextMenu = function(event) {
+  event.preventDefault()
+  return false
+}
 
 /**
  * Ignores interaction from the user until enableInteraction is called or the timeout expires
@@ -946,7 +954,11 @@ TouchReceiver.touchend = function(e) {
         CodeManager.move.end();
         TR.blocksMoving = false;
       } else { // The stack was tapped, so it should run.
-        TR.target.stack.startRun();
+        if (HatchPlus && e.button == 2) {
+          new BlockContextMenu(TR.target, TR.startX, TR.startY)
+        } else {
+          TR.target.stack.startRun();
+        }
       }
     } else if (TR.targetType === "button") {
       TR.target.release(); // Pass message on to button.
@@ -962,7 +974,11 @@ TouchReceiver.touchend = function(e) {
     } else if (TR.targetType === "collapsibleItem") {
       TR.target.toggle();
     } else if (TR.targetType == "displayStack") {
-      TR.target.stack.startRun();
+      if (HatchPlus && e.button == 2 && (TR.target.blockTypeName === "B_Variable" || TR.target.blockTypeName === "B_List")) {
+        new BlockContextMenu(TR.target, TR.startX, TR.startY)
+      } else {
+        TR.target.stack.startRun();
+      }
       /*
 		    // tapping a block in the display stack runs the block once
         let execStatus = TR.target.updateRun();

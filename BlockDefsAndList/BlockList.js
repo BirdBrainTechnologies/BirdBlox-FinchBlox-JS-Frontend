@@ -61,7 +61,7 @@ function BlockList() {
     cat.push("Control");
     cat.push("Operators");
     cat.push("Variables");
-    cat.push("Data");
+    cat.push("Lists");
   } else {
     cat.push("Robots");
     cat.push("Operators");
@@ -656,7 +656,7 @@ BlockList.populateCat_sensors = function(category) {
  * HatchPlus Data (aka lists) category
  * @param {Category} category
  */
-BlockList.populateCat_data = function(category) {
+BlockList.populateCat_lists = function(category) {
   BlockPalette.createListBn = category.addButton(Language.getStr("Create_List"), CodeManager.newList);
   category.addSpace();
 

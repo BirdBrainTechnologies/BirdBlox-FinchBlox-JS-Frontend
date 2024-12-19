@@ -2722,15 +2722,19 @@ MicroBlocksRuntime.prototype.showResult = function(chunkID, value, isError, isRe
 			}
 		}
 	}
-	if (block != null) {
-		if (block.returnsValue || isError) {
-			console.log("*** showResult '" + value + "' <" + typeof value + ">")
-			block.displayValue(value, isError)
+	if (HatchPlus) {
+		if (block != null) {
+			if (block.returnsValue || isError) {
+				console.log("*** showResult '" + value + "' <" + typeof value + ">")
+				block.displayValue(value, isError)
+			} else {
+				console.error("showResult only implemented for reporter blocks. Results for chunk " + chunkID + ": '" + value + "' (isError=" + isError + ", isResult=" + isResult + ")")
+			}
 		} else {
-			console.error("showResult only implemented for reporter blocks. Results for chunk " + chunkID + ": '" + value + "' (isError=" + isError + ", isResult=" + isResult + ")")
+			console.error("showResult could not find block for chunk with id " + chunkID + " (message: '" + value + "' isError: " + isError + " isResult: " + isResult + ")")
 		}
 	} else {
-		console.error("showResult could not find block for chunk with id " + chunkID + " (message: '" + value + "' isError: " + isError + " isResult: " + isResult + ")")
+		console.error("showResult only implemented for HatchBlox. Results for chunk " + chunkID + ": '" + value + "' (isError=" + isError + ", isResult=" + isResult + ")")
 	}
 
 	/*for m (join

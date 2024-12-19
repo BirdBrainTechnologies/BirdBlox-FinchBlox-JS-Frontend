@@ -388,7 +388,6 @@ InputWidget.Color.prototype.getHex = function (fullBrightness) {
 }
 
 InputWidget.Color.prototype.dropColor = function() {
-	console.log("dropColor and update...")
     InputWidget.Color.addRecentColor(this.getHex())
     this.updateRecentBns()
 }

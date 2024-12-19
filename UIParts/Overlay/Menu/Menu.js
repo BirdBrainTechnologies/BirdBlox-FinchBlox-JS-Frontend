@@ -46,8 +46,8 @@ Menu.prototype.constructor = Menu;
 
 Menu.setGraphics = function() {
   Menu.defaultWidth = 170;
-  Menu.bnMargin = Button.defaultMargin;
-  Menu.bgColor = HatchPlus ? Colors.ballyGrayLight : Colors.lightGray;
+  Menu.bnMargin = HatchPlus ? Button.defaultMargin/2 : Button.defaultMargin;
+  Menu.bgColor = HatchPlus ? Colors.ballyBrandBlue : Colors.lightGray;
 };
 
 /**
