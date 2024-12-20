@@ -30,6 +30,16 @@ function GuiElements() {
   });
 }
 
+if (HatchPlus) { //TODO: do this always?
+  document.fonts.onloadingdone = function (fontFaceSetEvent) {
+    //Refresh the block palette once the fonts are loaded
+    for (let i = 0; i < BlockList.catCount(); i++) {
+      let cat = BlockList.getCatId(i)
+      BlockPalette.getCategory(cat).refreshGroup()
+    }
+  }
+}
+
 /* Runs GuiElements once all resources are loaded. */
 document.addEventListener('DOMContentLoaded', function() {
   GuiElements.alert("Loading");

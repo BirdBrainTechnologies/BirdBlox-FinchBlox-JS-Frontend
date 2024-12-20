@@ -6747,6 +6747,16 @@ function GuiElements() {
   });
 }
 
+if (HatchPlus) { //TODO: do this always?
+  document.fonts.onloadingdone = function (fontFaceSetEvent) {
+    //Refresh the block palette once the fonts are loaded
+    for (var i = 0; i < BlockList.catCount(); i++) {
+      var cat = BlockList.getCatId(i)
+      BlockPalette.getCategory(cat).refreshGroup()
+    }
+  }
+}
+
 /* Runs GuiElements once all resources are loaded. */
 document.addEventListener('DOMContentLoaded', function() {
   GuiElements.alert("Loading");
@@ -25699,7 +25709,7 @@ CodeManager.newList = function(callbackCreate, callbackCancel) {
       result = result.trim();
       var list = new List(result);
       SaveManager.markEdited();
-      if (HatchPlus) { BlockPalette.getCategory("data").refreshGroup(); }
+      if (HatchPlus) { BlockPalette.getCategory("lists").refreshGroup(); }
       BlockPalette.getCategory("variables").refreshGroup();
       if (callbackCreate != null) callbackCreate(list);
       if (HatchPlus && CodeManager.listList.length >= CodeManager.maxLists) {
@@ -25781,7 +25791,7 @@ CodeManager.renameList = function(list) {
   TabManager.renameList(list);
   BlockPalette.getCategory("variables").refreshGroup();
   if (HatchPlus) {
-    BlockPalette.getCategory("data").refreshGroup();
+    BlockPalette.getCategory("lists").refreshGroup();
   }
   SaveManager.markEdited();
 };
@@ -25793,7 +25803,7 @@ CodeManager.renameList = function(list) {
 CodeManager.deleteList = function(list) {
   TabManager.deleteList(list);
   BlockPalette.getCategory("variables").refreshGroup();
-  if (HatchPlus) { BlockPalette.getCategory("data").refreshGroup(); }
+  if (HatchPlus) { BlockPalette.getCategory("lists").refreshGroup(); }
   SaveManager.markEdited();
 };
 
