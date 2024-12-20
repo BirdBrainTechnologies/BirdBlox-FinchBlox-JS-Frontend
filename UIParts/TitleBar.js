@@ -239,12 +239,12 @@ TitleBar.makeButtons = function() {
     let flagBnColor = Hatchling ? Colors.ballyGreenLight : Colors.flagGreen
     let flagBnOutline = Hatchling ? Colors.ballyGreen : null
     TB.flagBn = new Button(TB.flagBnX, startStopY, TB.longButtonW, startStopH, TBLayer, flagBnColor, r, r, flagBnOutline);
-    TB.flagBn.setCallbackFunction(CodeManager.eventFlagClicked, false);
+    TB.flagBn.setCallbackFunction(CodeManager.eventFlagClicked, Hatchling); //execute after button is released for Hatchling to avoid interference with ports popup
 
     let stopBnColor = Hatchling ? Colors.ballyRedLight : Colors.stopRed
     let stopBnOutline = Hatchling ? Colors.ballyRed : null
     TB.stopBn = new Button(TB.stopBnX, startStopY, TB.longButtonW, startStopH, TBLayer, stopBnColor, r, r, stopBnOutline);
-    TB.stopBn.setCallbackFunction(CodeManager.stop, false);
+    TB.stopBn.setCallbackFunction(CodeManager.stop, Hatchling); //execute after button is released for Hatchling
 
     let undoBnColor = Hatchling ? Colors.ballyGrayLight : Colors.neonCarrot
     let undoBnOutline = Hatchling ? Colors.ballyBrandBlue : null
