@@ -30,6 +30,9 @@ Font.prototype.lookupCharH = function(fontSize) {
  * @return {Font}
  */
 Font.prototype.bold = function() {
+  if (Hatchling || HatchPlus) {
+    return new Font(this.fontFamily, this.fontSize, "normal");
+  }
   return new Font(this.fontFamily, this.fontSize, "bold");
 };
 

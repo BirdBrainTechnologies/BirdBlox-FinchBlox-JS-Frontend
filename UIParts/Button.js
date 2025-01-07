@@ -898,3 +898,7 @@ Button.prototype.rebutton = function() {
     this.textE.setAttributeNS(null, "font-size", this.textFont.fontSize)
   }
 }
+
+Button.prototype.displayError = function(message) {
+  ResultBubble.displayValue(message, this.x, this.y, this.width, this.height, true);
+}

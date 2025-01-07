@@ -267,5 +267,6 @@ Language.en = {
 "block_wait_ms":"wait (Slot 1) ms",
 "Duplicate_All":"Duplicate All",
 "Extract_Block":"Extract Block",
-"Lists":"Lists"
+"Lists":"Lists",
+"Too_many_blocks_error":"Error: Too many blocks in program"
 }

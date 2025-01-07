@@ -2563,7 +2563,8 @@ Language.en = {
 "block_wait_ms":"wait (Slot 1) ms",
 "Duplicate_All":"Duplicate All",
 "Extract_Block":"Extract Block",
-"Lists":"Lists"
+"Lists":"Lists",
+"Too_many_blocks_error":"Error: Too many blocks in program"
 }
 
 //Spanish Translation
@@ -9806,6 +9807,9 @@ Font.prototype.lookupCharH = function(fontSize) {
  * @return {Font}
  */
 Font.prototype.bold = function() {
+  if (Hatchling || HatchPlus) {
+    return new Font(this.fontFamily, this.fontSize, "normal");
+  }
   return new Font(this.fontFamily, this.fontSize, "bold");
 };
 
@@ -16932,6 +16936,10 @@ Button.prototype.rebutton = function() {
     this.textE.setAttributeNS(null, "fill", this.textColor);
     this.textE.setAttributeNS(null, "font-size", this.textFont.fontSize)
   }
+}
+
+Button.prototype.displayError = function(message) {
+  ResultBubble.displayValue(message, this.x, this.y, this.width, this.height, true);
 }
 
 /**
@@ -49191,6 +49199,9 @@ function MicroBlocksRuntime () {
 	this.scripter = new MicroBlocksScripter()
 
 	this.lastPingRecvMSecs = 0
+
+	this.DATA_MAX_BYTES = 2048 //maximum script length
+	this.errorState = false
 }
 MicroBlocksRuntime.init = function() {
 	window.mbRuntime = new MicroBlocksRuntime()
@@ -49200,7 +49211,9 @@ MicroBlocksRuntime.prototype.serialPortOpen = function() {
 	return (this.port != null)
 }
 MicroBlocksRuntime.prototype.bleDevice = function() {
-	return DeviceHatchling.getManager().getDevice(0)
+	var robot = DeviceHatchling.getManager().getDevice(0)
+	if (robot && !robot.connected) { console.error("got disconnected robot " + robot.shortName) }
+	return (robot && robot.connected) ? robot : null
 }
 MicroBlocksRuntime.prototype.noBleConnection = function() {
 	return (this.bleDevice() == null)
@@ -49224,6 +49237,15 @@ var delay = async function(ms) {
 
 //Hatchling app specific
 MicroBlocksRuntime.prototype.startRun = function(startBlock, flagTapped) {
+
+	var bytes = this.chunkBytesFor(startBlock.stack.firstBlock)
+	if (bytes.length >= this.DATA_MAX_BYTES) { //one byte is added for chunk type
+		console.error('Script is too large to execute')
+		startBlock.displayError(Language.getStr("Too_many_blocks_error"))
+		if (flagTapped) { this.errorState = true }
+		return
+	}
+
 	this.showInstructions(startBlock)
     this.showCompiledBytes(startBlock)
     
@@ -50475,6 +50497,11 @@ MicroBlocksRuntime.prototype.sendStopAll = function() {
 }
 
 MicroBlocksRuntime.prototype.sendStartAll = function() {
+	if (this.errorState) { //Do not start the scripts if there is an error
+		this.errorState = false
+		TitleBar.flagBn.displayError(Language.getStr("Too_many_blocks_error"))
+		return
+	}
 	this.scripter.step() // save script changes if needed
 	this.sendMsg('startAllMsg')
 }
@@ -50702,7 +50729,7 @@ MicroBlocksRuntime.prototype.saveChunk = async function(aBlockOrFunction, skipHi
 	var data = new Uint8Array(chunkBytes.length + 1)
 	data.set([chunkType], 0)
 	data.set(chunkBytes, 1)
-	if (data.length > 2048) {
+	if (data.length > this.DATA_MAX_BYTES) { 
 		/*if (isClass aBlockOrFunction 'Function') {
 			inform (global 'page') (join
 				(localized 'Function "') (functionName aBlockOrFunction)
@@ -50710,6 +50737,7 @@ MicroBlocksRuntime.prototype.saveChunk = async function(aBlockOrFunction, skipHi
 		} else {*/
 			//showError (morph aBlockOrFunction) (localized 'Script is too large to send to board.')
 			console.error('Script is too large to send to board.') //TODO: Add alert in UI
+			aBlockOrFunction.displayError(Language.getStr("Too_many_blocks_error"))
 		//}
 		return false
 	}

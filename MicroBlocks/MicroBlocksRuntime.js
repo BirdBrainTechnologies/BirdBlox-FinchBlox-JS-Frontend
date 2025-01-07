@@ -17,6 +17,9 @@ function MicroBlocksRuntime () {
 	this.scripter = new MicroBlocksScripter()
 
 	this.lastPingRecvMSecs = 0
+
+	this.DATA_MAX_BYTES = 2048 //maximum script length
+	this.errorState = false
 }
 MicroBlocksRuntime.init = function() {
 	window.mbRuntime = new MicroBlocksRuntime()
@@ -26,7 +29,9 @@ MicroBlocksRuntime.prototype.serialPortOpen = function() {
 	return (this.port != null)
 }
 MicroBlocksRuntime.prototype.bleDevice = function() {
-	return DeviceHatchling.getManager().getDevice(0)
+	//devices may stay in the manager waiting to be automatically reconnected.
+	let robot = DeviceHatchling.getManager().getDevice(0)
+	return (robot && robot.connected) ? robot : null
 }
 MicroBlocksRuntime.prototype.noBleConnection = function() {
 	return (this.bleDevice() == null)
@@ -50,6 +55,15 @@ const delay = async function(ms) {
 
 //Hatchling app specific
 MicroBlocksRuntime.prototype.startRun = function(startBlock, flagTapped) {
+
+	let bytes = this.chunkBytesFor(startBlock.stack.firstBlock)
+	if (bytes.length >= this.DATA_MAX_BYTES) { //one byte is added for chunk type
+		console.error('Script is too large to execute')
+		startBlock.displayError(Language.getStr("Too_many_blocks_error"))
+		if (flagTapped) { this.errorState = true }
+		return
+	}
+
 	this.showInstructions(startBlock)
     this.showCompiledBytes(startBlock)
     
@@ -1301,6 +1315,11 @@ MicroBlocksRuntime.prototype.sendStopAll = function() {
 }
 
 MicroBlocksRuntime.prototype.sendStartAll = function() {
+	if (this.errorState) { //Do not start the scripts if there is an error
+		this.errorState = false
+		TitleBar.flagBn.displayError(Language.getStr("Too_many_blocks_error"))
+		return
+	}
 	this.scripter.step() // save script changes if needed
 	this.sendMsg('startAllMsg')
 }
@@ -1528,7 +1547,7 @@ MicroBlocksRuntime.prototype.saveChunk = async function(aBlockOrFunction, skipHi
 	let data = new Uint8Array(chunkBytes.length + 1)
 	data.set([chunkType], 0)
 	data.set(chunkBytes, 1)
-	if (data.length > 2048) {
+	if (data.length > this.DATA_MAX_BYTES) { 
 		/*if (isClass aBlockOrFunction 'Function') {
 			inform (global 'page') (join
 				(localized 'Function "') (functionName aBlockOrFunction)
@@ -1536,6 +1555,7 @@ MicroBlocksRuntime.prototype.saveChunk = async function(aBlockOrFunction, skipHi
 		} else {*/
 			//showError (morph aBlockOrFunction) (localized 'Script is too large to send to board.')
 			console.error('Script is too large to send to board.') //TODO: Add alert in UI
+			aBlockOrFunction.displayError(Language.getStr("Too_many_blocks_error"))
 		//}
 		return false
 	}
