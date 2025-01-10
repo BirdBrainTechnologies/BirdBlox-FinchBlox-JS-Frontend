@@ -147,6 +147,9 @@ BlockPalette.createCatBg = function() {
   //BP.catRect = GuiElements.draw.rect(0, BP.catY, BP.width, BP.catH, BP.catBg);
   //BP.catRect = GuiElements.draw.rect(BP.catX, BP.catY, BP.catW, BP.catH, BP.catBg);
   BP.catRect = GuiElements.draw.rect(BP.catX, BP.catY, bgW, BP.catH, BP.catBg);
+  if (HatchPlus) { //crispEdges removes the subtle line between svg elements
+    BP.catRect.setAttributeNS(null, "shape-rendering", "crispEdges")
+  }
   GuiElements.layers.catBg.appendChild(BP.catRect);
   //GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
   if (!Hatchling) {
@@ -168,6 +171,9 @@ BlockPalette.createPalBg = function() {
     BP.palRect.setAttributeNS(null, "shape-rendering", "crispEdges")
     BP.palRect2.setAttributeNS(null, "shape-rendering", "crispEdges")
     GuiElements.layers.paletteBG.appendChild(BP.palRect2)
+  }
+  if (HatchPlus) {
+    BP.palRect.setAttributeNS(null, "shape-rendering", "crispEdges")
   }
   GuiElements.layers.paletteBG.appendChild(BP.palRect);
   if (FinchBlox) {

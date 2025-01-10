@@ -5229,6 +5229,15 @@ Device.stopAll = function() {
  */
 function DeviceWithPorts(name, id, RSSI, device) {
   Device.call(this, name, id, RSSI, device);
+
+  if (Hatchling || HatchPlus) {
+    this.pendingMBRequestStatus = {};
+    this.pendingMBRequestStatus.finished = true;
+    this.pendingMBRequestStatus.error = false;
+    this.pendingMBRequestStatus.result = null;
+
+    this.mbRequestQueue = []
+  }
 }
 DeviceWithPorts.prototype = Object.create(Device.prototype);
 DeviceWithPorts.prototype.constructor = Device;
@@ -5389,11 +5398,40 @@ DeviceWithPorts.prototype.calibrateCompass = function(status) {
  * @param {Uint8Array} data - The data to send
  */
 DeviceWithPorts.prototype.sendMicroBlocksData = function(data) {
+
+  if (!this.pendingMBRequestStatus.finished) {
+    if (data != null) {
+      //console.log("**** adding data to the mb queue... " + data)
+      this.mbRequestQueue.push(data)
+    }
+    
+    setTimeout(function() { this.sendMicroBlocksData() }.bind(this), 50)
+
+    return
+  }
+
+  if (data == null) { 
+    if (this.mbRequestQueue.length == 0) {
+      console.error("sendMicroBlocksData is being called with nothing to send!")
+      return
+    }
+
+    data = this.mbRequestQueue.shift()
+  }
+
+
+  //console.log("**** about to sendMicroBlocksData " + data)
+
+  this.pendingMBRequestStatus = {};
+  this.pendingMBRequestStatus.finished = false;
+  this.pendingMBRequestStatus.error = false;
+  this.pendingMBRequestStatus.result = null;
+
   var request = new HttpRequestBuilder("robot/out/microblocks");
   request.addParam("type", this.getDeviceTypeId());
   request.addParam("id", this.id);
   request.addParam("data", data);
-  HtmlServer.sendRequest(request.toString(), status, true);
+  HtmlServer.sendRequest(request.toString(), this.pendingMBRequestStatus, true);
 }
 
 /**
@@ -5819,6 +5857,13 @@ DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeC
       if (connectedRobotIndex === -1) {
         // Include the device in the list
         disconnectedRobotsList.push(robot);
+      } else if (Hatchling || HatchPlus) {
+        //console.log("*** found robot " + robot.id)
+        var device = this.getDevice(connectedRobotIndex)
+        if (!device.getConnected()) {
+          //console.log("*** robot " + robot.id + " is not connected. adding back to list.")
+          disconnectedRobotsList.push(robot);
+        }
       }
     }
 
@@ -5839,7 +5884,7 @@ DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeC
 };
 
 DeviceManager.prototype.backendDiscovered = function(robotList) {
-  console.log("DeviceManager.prototype.backendDiscovered " + robotList)
+  //console.log("DeviceManager.prototype.backendDiscovered " + robotList)
   this.discoverCache = robotList;
   if (this.deviceDiscoverCallback != null) this.deviceDiscoverCallback(robotList);
 };
@@ -6016,7 +6061,7 @@ DeviceManager.updateSelectableDevices = function() {
  * @param {boolean} isConnected - Whether the robot is in good communication with the backend
  */
 DeviceManager.updateConnectionStatus = function(deviceId, isConnected) {
-  console.log("*** DeviceManager.updateConnectionStatus " + deviceId + " " + isConnected)
+  //console.log("*** DeviceManager.updateConnectionStatus " + deviceId + " " + isConnected)
   DeviceManager.forEach(function(manager) {
     manager.updateConnectionStatus(deviceId, isConnected);
   });
@@ -6122,7 +6167,7 @@ DeviceManager.setStatusListener = function(callbackFn) {
  * @param {string} robotList - A JSON Array as a string representing the discovered devices
  */
 DeviceManager.backendDiscovered = function(robotList) {
-  console.log("*** DeviceManager.backendDiscovered")
+  //console.log("*** DeviceManager.backendDiscovered")
   DeviceManager.forEach(function(manager) {
     manager.backendDiscovered(robotList);
   });
@@ -6950,7 +6995,7 @@ GuiElements.buildUI = function() {
     LevelManager.loadLevelSavePoint();
   } else if (HatchPlus) {
     HtmlServer.sendRequestWithCallback("data/currentFile", function(response) {
-      console.log("*** current file: " + response)
+      //console.log("*** current file: " + response)
       if (response != null && response != "") {
         SaveManager.userOpenFile(response);
       } else {
@@ -12840,7 +12885,7 @@ TouchReceiver.touchmove = function(e) {
         if (Hatchling && TR.target.svgScrollable && 
           HLFileDrawer.currentDrawer != null && 
           HLFileDrawer.currentDrawer.scrollBox != null) {
-          console.log("*** SVG SCROLLABLE")
+          //console.log("*** SVG SCROLLABLE")
           var sb = HLFileDrawer.currentDrawer.scrollBox
           if (sb.isDragging) {
             TR.targetType = "svgScrollBox"
@@ -14113,6 +14158,9 @@ BlockPalette.createCatBg = function() {
   //BP.catRect = GuiElements.draw.rect(0, BP.catY, BP.width, BP.catH, BP.catBg);
   //BP.catRect = GuiElements.draw.rect(BP.catX, BP.catY, BP.catW, BP.catH, BP.catBg);
   BP.catRect = GuiElements.draw.rect(BP.catX, BP.catY, bgW, BP.catH, BP.catBg);
+  if (HatchPlus) { //crispEdges removes the subtle line between svg elements
+    BP.catRect.setAttributeNS(null, "shape-rendering", "crispEdges")
+  }
   GuiElements.layers.catBg.appendChild(BP.catRect);
   //GuiElements.move.group(GuiElements.layers.categories, 0, TitleBar.height);
   if (!Hatchling) {
@@ -14134,6 +14182,9 @@ BlockPalette.createPalBg = function() {
     BP.palRect.setAttributeNS(null, "shape-rendering", "crispEdges")
     BP.palRect2.setAttributeNS(null, "shape-rendering", "crispEdges")
     GuiElements.layers.paletteBG.appendChild(BP.palRect2)
+  }
+  if (HatchPlus) {
+    BP.palRect.setAttributeNS(null, "shape-rendering", "crispEdges")
   }
   GuiElements.layers.paletteBG.appendChild(BP.palRect);
   if (FinchBlox) {
@@ -20284,7 +20335,7 @@ InputWidget.Piano.prototype.show = function(x, y, parentGroup, overlay, slotShap
     //Calculate where the specified note is located
     if (midiNum < 48) { this.octaveOffset = 12 * Math.floor((midiNum - 48)/12) }
     if (midiNum > 72) { this.octaveOffset = 12 * Math.ceil((midiNum - 72)/12) }
-    console.log("*** octaveOffset: " + this.octaveOffset + "  " + midiNum)
+    //console.log("*** octaveOffset: " + this.octaveOffset + "  " + midiNum)
 
     this.makeBns(midiNum - this.octaveOffset);
 
@@ -30010,7 +30061,7 @@ function DiscoverDialog(deviceClass) {
   /** @type {Array<Device>} - The discovered devices to use as the content of the dialog */
   this.discoveredDevices = [];
 
-  //Hatchling
+  //Hatchling and HatchPlus
   this.connectedDevices = []
   this.hasBeenShown = false
 
@@ -30030,8 +30081,11 @@ DiscoverDialog.prototype.show = function() {
   var DD = DiscoverDialog;
   var shouldDiscover = true
   if (Hatchling || HatchPlus) {
+    this.connectedDevices = []
     var device = DeviceHatchling.getManager().getDevice(0)
+    //console.log("**** DiscoverDialog show ", device)
     if (device != null && device.connected) {
+      //console.log("**** device connected")
       //Show the connected device - user can scan if they disconnect
       this.connectedDevices = [device]
       this.hasBeenShown = true
@@ -30043,16 +30097,23 @@ DiscoverDialog.prototype.show = function() {
       } else if (index != -1) {
         //console.log("*** removing connected device from discovery list")
         this.discoveredDevices.splice(index, 1) 
+      } else {
+        this.rowCount += 1
       }
+
     } else if (this.discoveredDevices.length == 0 && this.hasBeenShown) {
-      //No devices. Show new scan button
-      this.connectedDevices = []
-      this.rowCount = 1
-      if (GuiElements.isPWA) { shouldDiscover = false }
+      //console.log("**** no device connected. Nothing discovered. ")
+      if (GuiElements.isPWA) { 
+        //No devices. Show new scan button
+        this.rowCount = 1
+        shouldDiscover = false 
+      }
     } else if (this.discoveredDevices.length == 1) {
+      //console.log("**** no device connected. One discovered. ")
       //This is a weird case where the back end sends the device you are connecting before it is connected.
       if (GuiElements.isPWA) { shouldDiscover = false }
     } else {
+      //console.log("**** no device connected. Discovered: " + this.discoveredDevices.length)
       this.hasBeenShown = true
     }
   }
@@ -30074,7 +30135,7 @@ DiscoverDialog.prototype.discoverDevices = function() {
     return this.visible;
   }.bind(this));
   // When a device is detected, update the dialog
-  console.log("*** discoverDevices of type " + this.deviceClass)
+  //console.log("*** discoverDevices of type " + this.deviceClass.name)
   this.deviceClass.getManager().registerDiscoverCallback(this.updateDeviceList.bind(this));
 };
 
@@ -30096,7 +30157,7 @@ DiscoverDialog.prototype.checkPendingUpdate = function() {
 var updateDeviceListCounter = 0;
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
-  console.log("*** updateDeviceList " + deviceList)
+  //console.log("*** updateDeviceList " + deviceList)
   updateDeviceListCounter += 1;
   if (!this.visible) {
     return;
@@ -30118,7 +30179,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 
   if (Hatchling || HatchPlus) {
     var device = DeviceHatchling.getManager().getDevice(0)
-    if (device != null) {
+    if (device != null && device.connected) {
       this.connectedDevices = [device]
     }
   }
@@ -30141,12 +30202,13 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
  * @param {Element} contentGroup
  */
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
-  //console.log("*** create row " + index)
-  //console.log(this.connectedDevices)
-  //console.log(this.discoveredDevices)
+  /*console.log("*** create row " + index)
+  console.log(this.connectedDevices)
+  console.log(this.discoveredDevices)*/
   var deviceList = this.connectedDevices.concat(this.discoveredDevices)
   var device = deviceList[index]
-  //console.log(deviceList)
+  /*console.log(deviceList)
+  console.log(device)*/
 
 
   var color = Button.bg;
@@ -30207,7 +30269,7 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
  * @param device
  */
 DiscoverDialog.prototype.selectDevice = function(device) {
-  console.log(device)
+  //console.log(device)
   this.deviceClass = DeviceManager.getDeviceClass(device);
   this.deviceClass.getManager().setOneDevice(device);
   if (!(Hatchling || HatchPlus)) {
@@ -32689,7 +32751,7 @@ CallbackManager.robot.updateHasV2Microbit = function(robotId, hasV2String) {
  * @return {boolean}
  */
 CallbackManager.robot.discovered = function(robotList) {
-  console.log("*** CallbackManager.robot.discovered " + robotList)
+  //console.log("*** CallbackManager.robot.discovered " + robotList)
   robotList = HtmlServer.decodeHtml(robotList);
   DeviceManager.backendDiscovered(robotList);
   return true;
@@ -49211,8 +49273,8 @@ MicroBlocksRuntime.prototype.serialPortOpen = function() {
 	return (this.port != null)
 }
 MicroBlocksRuntime.prototype.bleDevice = function() {
+	//devices may stay in the manager waiting to be automatically reconnected.
 	var robot = DeviceHatchling.getManager().getDevice(0)
-	if (robot && !robot.connected) { console.error("got disconnected robot " + robot.shortName) }
 	return (robot && robot.connected) ? robot : null
 }
 MicroBlocksRuntime.prototype.noBleConnection = function() {
@@ -49236,7 +49298,7 @@ var delay = async function(ms) {
 }
 
 //Hatchling app specific
-MicroBlocksRuntime.prototype.startRun = function(startBlock, flagTapped) {
+MicroBlocksRuntime.prototype.startRun = async function(startBlock, flagTapped) {
 
 	var bytes = this.chunkBytesFor(startBlock.stack.firstBlock)
 	if (bytes.length >= this.DATA_MAX_BYTES) { //one byte is added for chunk type
@@ -49283,7 +49345,7 @@ MicroBlocksRuntime.prototype.startRun = function(startBlock, flagTapped) {
       console.log(bytes)
       device.sendMicroBlocksData(bytes)*/
       
-      this.saveChunk(startBlock) //async function
+      await this.saveChunk(startBlock) //async function
       if (!flagTapped) {
         // from MicroBlocksPatches.gp
         // method clicked Block hand 
@@ -51927,7 +51989,7 @@ MicroBlocksRuntime.prototype.showResult = function(chunkID, value, isError, isRe
 	if (HatchPlus) {
 		if (block != null) {
 			if (block.returnsValue || isError) {
-				console.log("*** showResult '" + value + "' <" + typeof value + ">")
+				//console.log("*** showResult '" + value + "' <" + typeof value + ">")
 				block.displayValue(value, isError)
 			} else {
 				console.error("showResult only implemented for reporter blocks. Results for chunk " + chunkID + ": '" + value + "' (isError=" + isError + ", isResult=" + isResult + ")")

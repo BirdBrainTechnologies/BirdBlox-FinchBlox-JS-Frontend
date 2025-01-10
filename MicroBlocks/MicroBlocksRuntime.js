@@ -54,7 +54,7 @@ const delay = async function(ms) {
 }
 
 //Hatchling app specific
-MicroBlocksRuntime.prototype.startRun = function(startBlock, flagTapped) {
+MicroBlocksRuntime.prototype.startRun = async function(startBlock, flagTapped) {
 
 	let bytes = this.chunkBytesFor(startBlock.stack.firstBlock)
 	if (bytes.length >= this.DATA_MAX_BYTES) { //one byte is added for chunk type
@@ -101,7 +101,7 @@ MicroBlocksRuntime.prototype.startRun = function(startBlock, flagTapped) {
       console.log(bytes)
       device.sendMicroBlocksData(bytes)*/
       
-      this.saveChunk(startBlock) //async function
+      await this.saveChunk(startBlock) //async function
       if (!flagTapped) {
         // from MicroBlocksPatches.gp
         // method clicked Block hand 
@@ -2745,7 +2745,7 @@ MicroBlocksRuntime.prototype.showResult = function(chunkID, value, isError, isRe
 	if (HatchPlus) {
 		if (block != null) {
 			if (block.returnsValue || isError) {
-				console.log("*** showResult '" + value + "' <" + typeof value + ">")
+				//console.log("*** showResult '" + value + "' <" + typeof value + ">")
 				block.displayValue(value, isError)
 			} else {
 				console.error("showResult only implemented for reporter blocks. Results for chunk " + chunkID + ": '" + value + "' (isError=" + isError + ", isResult=" + isResult + ")")

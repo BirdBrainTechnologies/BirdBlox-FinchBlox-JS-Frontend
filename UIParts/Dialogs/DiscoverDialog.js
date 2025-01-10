@@ -23,7 +23,7 @@ function DiscoverDialog(deviceClass) {
   /** @type {Array<Device>} - The discovered devices to use as the content of the dialog */
   this.discoveredDevices = [];
 
-  //Hatchling
+  //Hatchling and HatchPlus
   this.connectedDevices = []
   this.hasBeenShown = false
 
@@ -43,8 +43,11 @@ DiscoverDialog.prototype.show = function() {
   const DD = DiscoverDialog;
   let shouldDiscover = true
   if (Hatchling || HatchPlus) {
+    this.connectedDevices = []
     let device = DeviceHatchling.getManager().getDevice(0)
+    //console.log("**** DiscoverDialog show ", device)
     if (device != null && device.connected) {
+      //console.log("**** device connected")
       //Show the connected device - user can scan if they disconnect
       this.connectedDevices = [device]
       this.hasBeenShown = true
@@ -56,16 +59,23 @@ DiscoverDialog.prototype.show = function() {
       } else if (index != -1) {
         //console.log("*** removing connected device from discovery list")
         this.discoveredDevices.splice(index, 1) 
+      } else {
+        this.rowCount += 1
       }
+
     } else if (this.discoveredDevices.length == 0 && this.hasBeenShown) {
-      //No devices. Show new scan button
-      this.connectedDevices = []
-      this.rowCount = 1
-      if (GuiElements.isPWA) { shouldDiscover = false }
+      //console.log("**** no device connected. Nothing discovered. ")
+      if (GuiElements.isPWA) { 
+        //No devices. Show new scan button
+        this.rowCount = 1
+        shouldDiscover = false 
+      }
     } else if (this.discoveredDevices.length == 1) {
+      //console.log("**** no device connected. One discovered. ")
       //This is a weird case where the back end sends the device you are connecting before it is connected.
       if (GuiElements.isPWA) { shouldDiscover = false }
     } else {
+      //console.log("**** no device connected. Discovered: " + this.discoveredDevices.length)
       this.hasBeenShown = true
     }
   }
@@ -87,7 +97,7 @@ DiscoverDialog.prototype.discoverDevices = function() {
     return this.visible;
   }.bind(this));
   // When a device is detected, update the dialog
-  console.log("*** discoverDevices of type " + this.deviceClass)
+  //console.log("*** discoverDevices of type " + this.deviceClass.name)
   this.deviceClass.getManager().registerDiscoverCallback(this.updateDeviceList.bind(this));
 };
 
@@ -109,7 +119,7 @@ DiscoverDialog.prototype.checkPendingUpdate = function() {
 var updateDeviceListCounter = 0;
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
-  console.log("*** updateDeviceList " + deviceList)
+  //console.log("*** updateDeviceList " + deviceList)
   updateDeviceListCounter += 1;
   if (!this.visible) {
     return;
@@ -131,7 +141,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
 
   if (Hatchling || HatchPlus) {
     let device = DeviceHatchling.getManager().getDevice(0)
-    if (device != null) {
+    if (device != null && device.connected) {
       this.connectedDevices = [device]
     }
   }
@@ -154,12 +164,13 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
  * @param {Element} contentGroup
  */
 DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
-  //console.log("*** create row " + index)
-  //console.log(this.connectedDevices)
-  //console.log(this.discoveredDevices)
+  /*console.log("*** create row " + index)
+  console.log(this.connectedDevices)
+  console.log(this.discoveredDevices)*/
   const deviceList = this.connectedDevices.concat(this.discoveredDevices)
   const device = deviceList[index]
-  //console.log(deviceList)
+  /*console.log(deviceList)
+  console.log(device)*/
 
 
   var color = Button.bg;
@@ -220,7 +231,7 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
  * @param device
  */
 DiscoverDialog.prototype.selectDevice = function(device) {
-  console.log(device)
+  //console.log(device)
   this.deviceClass = DeviceManager.getDeviceClass(device);
   this.deviceClass.getManager().setOneDevice(device);
   if (!(Hatchling || HatchPlus)) {

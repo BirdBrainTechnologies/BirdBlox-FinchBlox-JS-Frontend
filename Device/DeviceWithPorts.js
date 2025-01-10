@@ -6,6 +6,15 @@
  */
 function DeviceWithPorts(name, id, RSSI, device) {
   Device.call(this, name, id, RSSI, device);
+
+  if (Hatchling || HatchPlus) {
+    this.pendingMBRequestStatus = {};
+    this.pendingMBRequestStatus.finished = true;
+    this.pendingMBRequestStatus.error = false;
+    this.pendingMBRequestStatus.result = null;
+
+    this.mbRequestQueue = []
+  }
 }
 DeviceWithPorts.prototype = Object.create(Device.prototype);
 DeviceWithPorts.prototype.constructor = Device;
@@ -166,9 +175,38 @@ DeviceWithPorts.prototype.calibrateCompass = function(status) {
  * @param {Uint8Array} data - The data to send
  */
 DeviceWithPorts.prototype.sendMicroBlocksData = function(data) {
+
+  if (!this.pendingMBRequestStatus.finished) {
+    if (data != null) {
+      //console.log("**** adding data to the mb queue... " + data)
+      this.mbRequestQueue.push(data)
+    }
+    
+    setTimeout(function() { this.sendMicroBlocksData() }.bind(this), 50)
+
+    return
+  }
+
+  if (data == null) { 
+    if (this.mbRequestQueue.length == 0) {
+      console.error("sendMicroBlocksData is being called with nothing to send!")
+      return
+    }
+
+    data = this.mbRequestQueue.shift()
+  }
+
+
+  //console.log("**** about to sendMicroBlocksData " + data)
+
+  this.pendingMBRequestStatus = {};
+  this.pendingMBRequestStatus.finished = false;
+  this.pendingMBRequestStatus.error = false;
+  this.pendingMBRequestStatus.result = null;
+
   const request = new HttpRequestBuilder("robot/out/microblocks");
   request.addParam("type", this.getDeviceTypeId());
   request.addParam("id", this.id);
   request.addParam("data", data);
-  HtmlServer.sendRequest(request.toString(), status, true);
+  HtmlServer.sendRequest(request.toString(), this.pendingMBRequestStatus, true);
 }

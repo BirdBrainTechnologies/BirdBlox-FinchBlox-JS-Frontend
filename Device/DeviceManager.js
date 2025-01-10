@@ -421,6 +421,13 @@ DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeC
       if (connectedRobotIndex === -1) {
         // Include the device in the list
         disconnectedRobotsList.push(robot);
+      } else if (Hatchling || HatchPlus) {
+        //console.log("*** found robot " + robot.id)
+        let device = this.getDevice(connectedRobotIndex)
+        if (!device.getConnected()) {
+          //console.log("*** robot " + robot.id + " is not connected. adding back to list.")
+          disconnectedRobotsList.push(robot);
+        }
       }
     }
 
@@ -441,7 +448,7 @@ DeviceManager.prototype.fromJsonArrayString = function(robotListString, includeC
 };
 
 DeviceManager.prototype.backendDiscovered = function(robotList) {
-  console.log("DeviceManager.prototype.backendDiscovered " + robotList)
+  //console.log("DeviceManager.prototype.backendDiscovered " + robotList)
   this.discoverCache = robotList;
   if (this.deviceDiscoverCallback != null) this.deviceDiscoverCallback(robotList);
 };
@@ -618,7 +625,7 @@ DeviceManager.updateSelectableDevices = function() {
  * @param {boolean} isConnected - Whether the robot is in good communication with the backend
  */
 DeviceManager.updateConnectionStatus = function(deviceId, isConnected) {
-  console.log("*** DeviceManager.updateConnectionStatus " + deviceId + " " + isConnected)
+  //console.log("*** DeviceManager.updateConnectionStatus " + deviceId + " " + isConnected)
   DeviceManager.forEach(function(manager) {
     manager.updateConnectionStatus(deviceId, isConnected);
   });
@@ -724,7 +731,7 @@ DeviceManager.setStatusListener = function(callbackFn) {
  * @param {string} robotList - A JSON Array as a string representing the discovered devices
  */
 DeviceManager.backendDiscovered = function(robotList) {
-  console.log("*** DeviceManager.backendDiscovered")
+  //console.log("*** DeviceManager.backendDiscovered")
   DeviceManager.forEach(function(manager) {
     manager.backendDiscovered(robotList);
   });

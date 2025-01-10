@@ -857,7 +857,7 @@ TouchReceiver.touchmove = function(e) {
         if (Hatchling && TR.target.svgScrollable && 
           HLFileDrawer.currentDrawer != null && 
           HLFileDrawer.currentDrawer.scrollBox != null) {
-          console.log("*** SVG SCROLLABLE")
+          //console.log("*** SVG SCROLLABLE")
           const sb = HLFileDrawer.currentDrawer.scrollBox
           if (sb.isDragging) {
             TR.targetType = "svgScrollBox"

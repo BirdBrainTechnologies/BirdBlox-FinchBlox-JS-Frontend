@@ -108,7 +108,7 @@ InputWidget.Piano.prototype.show = function(x, y, parentGroup, overlay, slotShap
     //Calculate where the specified note is located
     if (midiNum < 48) { this.octaveOffset = 12 * Math.floor((midiNum - 48)/12) }
     if (midiNum > 72) { this.octaveOffset = 12 * Math.ceil((midiNum - 72)/12) }
-    console.log("*** octaveOffset: " + this.octaveOffset + "  " + midiNum)
+    //console.log("*** octaveOffset: " + this.octaveOffset + "  " + midiNum)
 
     this.makeBns(midiNum - this.octaveOffset);
 

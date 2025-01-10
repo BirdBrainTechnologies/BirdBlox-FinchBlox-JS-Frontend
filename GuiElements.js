@@ -232,7 +232,7 @@ GuiElements.buildUI = function() {
     LevelManager.loadLevelSavePoint();
   } else if (HatchPlus) {
     HtmlServer.sendRequestWithCallback("data/currentFile", function(response) {
-      console.log("*** current file: " + response)
+      //console.log("*** current file: " + response)
       if (response != null && response != "") {
         SaveManager.userOpenFile(response);
       } else {
