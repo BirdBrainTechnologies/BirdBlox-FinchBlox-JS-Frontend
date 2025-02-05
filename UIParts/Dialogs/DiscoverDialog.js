@@ -26,6 +26,7 @@ function DiscoverDialog(deviceClass) {
   //Hatchling and HatchPlus
   this.connectedDevices = []
   this.hasBeenShown = false
+  this.deviceSelected = false
 
   /* If an update happens at an inconvenient time (like while scrolling), the dialog is not reloaded; rather
    * updatePending is set to true, the timer is started, and the reload occurs at a better time */
@@ -45,8 +46,9 @@ DiscoverDialog.prototype.show = function() {
   if (Hatchling || HatchPlus) {
     this.connectedDevices = []
     let device = DeviceHatchling.getManager().getDevice(0)
-    //console.log("**** DiscoverDialog show ", device)
+    console.log("**** DiscoverDialog show (" + this.deviceSelected + ") ", device)
     if (device != null && device.connected) {
+      this.deviceSelected = false
       //console.log("**** device connected")
       //Show the connected device - user can scan if they disconnect
       this.connectedDevices = [device]
@@ -62,6 +64,10 @@ DiscoverDialog.prototype.show = function() {
       } else {
         this.rowCount += 1
       }
+
+    } else if (this.deviceSelected) {
+      this.rowCount = 1
+      shouldDiscover = false
 
     } else if (this.discoveredDevices.length == 0 && this.hasBeenShown) {
       //console.log("**** no device connected. Nothing discovered. ")
@@ -119,7 +125,7 @@ DiscoverDialog.prototype.checkPendingUpdate = function() {
 var updateDeviceListCounter = 0;
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
-  //console.log("*** updateDeviceList " + deviceList)
+  console.log("*** updateDeviceList " + deviceList)
   updateDeviceListCounter += 1;
   if (!this.visible) {
     return;
@@ -187,6 +193,22 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
 
   const r = (Hatchling || HatchPlus) ? 7 : null
   const m = RowDialog.m
+
+  //Just show a spinner if the app is in the process of connecting a device
+  if ((Hatchling || HatchPlus) && this.deviceSelected) {
+    console.log("*** device selected - showing spinner")
+    let iconPath = VectorPaths.faSyncAlt
+    let iconH = RowDialog.bnHeight - 6*m
+    let iconW = VectorIcon.computeWidth(iconPath, iconH)
+    let x = (width - iconW)/2
+    let spinner = new VectorIcon(x, y+3*m, iconPath, Colors.ballyBrandBlue, iconH, contentGroup)
+
+    GuiElements.animate.spin(spinner.pathE, iconPath.width/2, iconPath.height/2)
+
+    return
+  }
+
+
   // TODO: use RowDialog.createMainBnWithText instead
   const button = new Button(0 + m, y + m, width - 2*m, RowDialog.bnHeight - 2*m, contentGroup, color, r, r);
   
@@ -231,9 +253,13 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
  * @param device
  */
 DiscoverDialog.prototype.selectDevice = function(device) {
-  //console.log(device)
+  console.log("*** selectDevice: " + device.shortName)
+
+  if (Hatchling || HatchPlus) { this.deviceSelected = true }
+
   this.deviceClass = DeviceManager.getDeviceClass(device);
   this.deviceClass.getManager().setOneDevice(device);
+
   if (!(Hatchling || HatchPlus)) {
     this.closeDialog();
   }

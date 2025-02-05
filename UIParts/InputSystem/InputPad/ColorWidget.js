@@ -1,11 +1,13 @@
 /**
- * A widget with a flat circular color picker and Alpha slider.
+ * A widget with a flat circular color picker 
  * 
  */
-InputWidget.Color = function(index, iconColor) {
+InputWidget.Color = function(index, iconColor, multi) {
 	this.type = "colorPicker"
 	this.index = index
     this.iconColor = iconColor
+    this.multi = multi
+    console.log("*** color widget multi=" + multi)
 
 	this.hue = 0 
 	this.saturation = 0 
@@ -18,28 +20,36 @@ InputWidget.Color.prototype.constructor = InputWidget.Color
 //Global color history
 InputWidget.Color.recentColors = [
     "#FF8800", 
-    "#FFFF00",
+    "#8800FF",
+    "#FF0088",
+    "#0088FF", 
+    //"#FFFF00",
     "#88FF00",
     "#00FF88", 
-    "#00FFFF",
-    "#0088FF", 
-    "#8800FF", 
-    "#FF00FF",
-    "#FF0088",
+    //"#00FFFF",
+    
+     
+    //"#FF00FF",
+    
     "#FF8888",
-    "#FFCC88",
+    //"#FFCC88",
     "#FFFF88",
-    "#88FF88",
-    "#88FFFF",
-    "#8888FF",
-    "#FF88FF"
+    //"#88FF88",
+    //"#88FFFF",
+    //"#8888FF",
+    //"#FF88FF"
     ]
 InputWidget.Color.staticColors = [
     //"#000000",
     "#FFFFFF",
     "#FF0000", 
     "#00FF00",
-    "#0000FF"
+    "#0000FF",
+
+    "#FFFF00",
+    "#00FFFF",
+    "#FF00FF",
+    "#000000",
     ]
 InputWidget.Color.addRecentColor = function(color) {
 
@@ -81,11 +91,12 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
     this.setColor(data[this.index])
 
     //Add icon at top
-    const iconPath = VectorPaths.bdLightBulb
+    const iconPath = this.multi ? VectorPaths.bdMultiLightBulb : VectorPaths.bdLightBulb
     const iconH = 80
     const iconW = VectorIcon.computeWidth(iconPath, iconH)
     const iconX = (this.width - iconW)/2
-    const icon = new VectorIcon(iconX, 0, iconPath, this.iconColor, iconH, this.group)
+    const iconY = this.multi ? 0 : ( (this.height - iconH)/2 )
+    const icon = new VectorIcon(iconX, iconY, iconPath, this.iconColor, iconH, this.group)
 
     //Add the color wheel
     this.colorWheelX = margin //this.width/2 - this.height - margin
@@ -163,7 +174,7 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
     //Add the recent colors picker
     this.recentColorButtons = []
     const rX = this.width - this.height + margin //this.width*5/7 // *2/3 //x coord to start this section
-    const rY = margin //this.height/3 //y coord to start this section
+    const rY = (this.height - smIconH)/2 //margin //this.height/3 //y coord to start this section
     const rW = this.height - 2*margin //this.width*2/7 ///3 //width of section
     const rIconPath = VectorPaths.bdRecent
     const rIconW = VectorIcon.computeWidth(rIconPath, smIconH)
@@ -193,8 +204,8 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
     //Add the static color buttons
     this.staticColorButtons = []
     const staticCs = InputWidget.Color.staticColors
-    bnX = this.width/2 - bnH - bnM/2
-    bnY = this.height/2
+    //bnX = this.width/2 - bnH - bnM/2
+    bnY = margin //this.height/2
     for (let i = 0; i < staticCs.length; i++) {
         const color = staticCs[i]
         const bn = new Button(bnX, bnY, bnH, bnH, this.group, color, 6, 6)
@@ -203,8 +214,9 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
         this.staticColorButtons.push(bn)
 
         bnX += bnH + bnM
-        if (i == 1) {
-            bnX = this.width/2 - bnH - bnM/2 //this.width/2 - 1.5*bnH - bnM
+        if (i == 3) { //1) {
+            //bnX = this.width/2 - bnH - bnM/2 //this.width/2 - 1.5*bnH - bnM
+            bnX = rX + 2*bnM
             bnY += bnH + bnM
         }
     }
@@ -220,6 +232,28 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
     this.addStaticColorButton(bnX, bnY, bnH, Colors.green)
     bnX += bnH + bnM
     this.addStaticColorButton(bnX, bnY, bnH, Colors.blue)*/
+
+    //Add color picking for each bulb if this is for a multibulb block
+    if (this.multi) {
+        this.bulbValues = ["#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF"]
+        this.bulbButtons = []
+        let bulbM = bnM/2
+        let bulbH = (this.height - iconH)/4 - bulbM
+        let bulbX = (this.width - bulbH)/2
+        let bulbY = iconH
+        for (let i = 0; i < this.bulbValues.length; i++) {
+            let bulb = new Button(bulbX, bulbY, bulbH, bulbH, this.group, 
+                this.bulbValues[i], bulbH/2, bulbH/2)
+            bulbY += bulbH + bulbM
+            bulb.markAsOverlayPart(this.overlay)
+            bulb.setCallbackFunction(function() {
+                this.selectBulb(i)
+            }.bind(this))
+
+            this.bulbButtons[i] = bulb
+        }
+        this.selectBulb(0)
+    }
 
 
     this.updateRecentBns()
@@ -244,7 +278,8 @@ InputWidget.Color.prototype.updateColorBn = function(bn, color) {
     bn.setCallbackFunction(function() {
         //this.updateSlider()
         this.setColor(color)
-        this.updateFn(this.getHex(), this.index)
+        //this.updateFn(this.getHex(), this.index)
+        this.updateButtonValue()
         this.updatePreview()
         this.selectBns()
         InputWidget.Color.addRecentColor(color)
@@ -264,6 +299,37 @@ InputWidget.Color.prototype.selectBns = function () {
     }
     for (let i = 0; i < this.staticColorButtons.length; i++) {
         setOutline(this.staticColorButtons[i])
+    }
+}
+
+InputWidget.Color.prototype.selectBulb = function (index) {
+
+    this.currentBulb = index
+
+    function setOutline(bn, id) {
+        const outlineW = (id == index) ? 6 : 3
+        GuiElements.update.stroke(bn.bgRect, Colors.ballyGray, outlineW)
+    }
+
+    for (let i = 0; i < this.bulbButtons.length; i++) {
+        setOutline(this.bulbButtons[i], i)
+    }
+    
+}
+
+InputWidget.Color.prototype.updateButtonValue = function () {
+    if (this.multi) {
+        let color = this.getHex()
+        this.bulbValues[this.currentBulb] = color
+        this.bulbButtons[this.currentBulb].updateBgColor(color)
+
+        let val = ""
+        for (let i = 0; i < this.bulbValues.length; i++) {
+            val += this.bulbValues[i] + ";"
+        }
+        this.updateFn(val.slice(0, -1), this.index)
+    } else {
+        this.updateFn(this.getHex(), this.index)
     }
 }
 
@@ -327,12 +393,13 @@ InputWidget.Color.prototype.dragColor = function(x, y) {
     this.saturation = Math.min(100, Math.ceil(scale_length / r * 100));
     this.brightness = 100
 
-    console.log("dragColor hue=" + this.hue + "; saturation=" + this.saturation + "; x=" + relX + "; y=" + relY + "; r=" + r)
+    //console.log("dragColor hue=" + this.hue + "; saturation=" + this.saturation + "; x=" + relX + "; y=" + relY + "; r=" + r)
 
 
-    console.log(this.getHex())
+    //console.log(this.getHex())
     //this.updateSlider()
-    this.updateFn(this.getHex(), this.index)
+    //this.updateFn(this.getHex(), this.index)
+    this.updateButtonValue()
     this.updatePreview()
                 
 }

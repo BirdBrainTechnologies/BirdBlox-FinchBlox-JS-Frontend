@@ -173,7 +173,7 @@ BlockList.populateCat_color_2 = function(category) {
     category.addBlockByName("B_HL_SN_L2")
     category.addBlockByName("B_HLSingleNeopixOff")
     category.addBlockByName("B_HLFairyLightsL2")
-    //category.addBlockByName("B_HLNeopixStrip")
+    category.addBlockByName("B_HLNeopixStrip")
     category.addBlockByName("B_FBLedArrayL2")
     category.addBlockByName("B_HLAlphabet")
   } else {

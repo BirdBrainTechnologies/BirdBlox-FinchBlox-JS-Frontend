@@ -1533,6 +1533,27 @@ GuiElements.animate.updateColor = function(element, color, duration) {
 
   return animate
 }
+/**
+ * Set an element spinning
+ * @param {Element} element - element to spin
+ * @param {number} x - x coord for center of rotation
+ * @param {number} y - y coord for center of rotation
+ */
+GuiElements.animate.spin = function(element, x, y) {
+
+  let animate = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
+  animate.setAttributeNS(null, "attributeName", "transform");
+  animate.setAttributeNS(null, "type", "rotate");
+  animate.setAttributeNS(null, "from", "0 " + x + " " + y)
+  animate.setAttributeNS(null, "to", "360 " + x + " " + y) 
+  animate.setAttributeNS(null, "dur", "5s");
+  animate.setAttributeNS(null, "repeatCount", "indefinite");
+
+  element.appendChild(animate)
+  animate.beginElement()
+
+  return animate
+}
 
 /**
  * Creates a black rectangle to block interaction with the main screen.  Used for

@@ -232,6 +232,12 @@ HL_Utils.replaceBlock = function(block, currentState) {
   case 14:
     blockName = "B_HLBBDistance"
     break;
+  case 17:
+    blockName = "B_HLBBBigButton"
+    break;
+  case 20:
+    blockName = "B_HLBBLight"
+    break;
   default: //If we don't know this state, just leave things the way they are
     return;
   }
@@ -752,17 +758,26 @@ B_HLSingleNeopixOff.prototype.argList = function() {
 
 
 function B_HLNeopixStrip(x, y, userSelectedPort) {
-  this.value = ""
+  this.value = "#FFFFFF;#FFFFFF;#FFFFFF;#FFFFFF" //4 bulbs
   this.valueKey = "colors"
-  this.red = 100;
+  /*this.red = 100;
   this.green = 100;
   this.blue = 100;
   this.blockIcons = []
-  this.colorButtons = []
+  this.colorButtons = []*/
 
-  B_HLOutputBase.call(this, x, y, "color_2", "neopixStrip", 10, userSelectedPort);
+  B_HLOutputBase.call(this, x, y, "color_2", "neopixStrip", 11, userSelectedPort);
 
-  const icon = VectorPaths["faLightbulb"];
+  const icon = VectorPaths.bdMultiLightBulb
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "mNeopix", 45)
+  this.blockIcon.isEndOfLine = true
+  this.addPart(this.blockIcon)
+
+  this.valueBN = new BlockButton(this)
+  this.valueBN.addColorPicker(this.value, true)
+  this.addPart(this.valueBN);
+
+  //const icon = VectorPaths["faLightbulb"];
   /*this.blockIcon1 = new BlockIcon(this, icon, Colors.white, "neopix1", 27);
   this.addPart(this.blockIcon1);
   this.blockIcon2 = new BlockIcon(this, icon, Colors.white, "neopix2", 27);
@@ -786,7 +801,7 @@ function B_HLNeopixStrip(x, y, userSelectedPort) {
   this.colorButtons[3].addSlider("color", { r: this.red, g: this.green, b: this.blue });
   this.addPart(this.colorButtons[3]);*/
 
-  for (let i = 0; i < 4; i++) {
+  /*for (let i = 0; i < 4; i++) {
     this.blockIcons[i] = new BlockIcon(this, icon, Colors.white, "neopix"+i, 27);
     this.addPart(this.blockIcons[i]);
   }
@@ -798,7 +813,7 @@ function B_HLNeopixStrip(x, y, userSelectedPort) {
     this.colorButtons[i].addSlider("color_green", this.green)
     this.colorButtons[i].addSlider("color_blue", this.blue)
     this.addPart(this.colorButtons[i]);
-  }
+  }*/
 
 }
 B_HLNeopixStrip.prototype = Object.create(B_HLOutputBase.prototype);
@@ -934,8 +949,9 @@ B_HLWaitUntil.prototype.argList = function() {
     threshold = 20
     break;
   case "light":
-    prim = "[display:lightLevel]"
-    threshold = 200 //150
+    // For micro:bit built in light sensor, use "[display:lightLevel]" with threshold 200
+    prim = "[h:ls]" //range 0-255, but usually < 50 maybe thresh of 5
+    threshold = 5
     break;
   case "clap":
     prim = "[h:cl]" //number of claps since this function was last called
@@ -943,9 +959,11 @@ B_HLWaitUntil.prototype.argList = function() {
     operator = ">"
     break;
   case "button":
-    prim = "[h:bt]" //number of times either button A or B on the micro:bit was pressed since last called
+    /*prim = "[h:bt]" //number of times either button A or B on the micro:bit was pressed since last called
     threshold = 0
-    operator = ">"
+    operator = ">"*/
+    prim = "[h:ab]" // all buttons: true if any button (micro:bit or accessory) is currently being pressed
+    return [new BlockArg(prim, [])]
     break;
   default:
     console.error("WaitUntil block: Unknown sensor " + this.sensor)
@@ -1040,11 +1058,11 @@ function B_HLWaitUntilClap(x, y) {
 B_HLWaitUntilClap.prototype = Object.create(B_HLWaitUntil.prototype);
 B_HLWaitUntilClap.prototype.constructor = B_HLWaitUntilClap;
 
-function B_HLWaitUntilLight(x, y) {
+/*function B_HLWaitUntilLight(x, y) {
   B_HLWaitUntil.call(this, x, y, false, "light")
 }
 B_HLWaitUntilLight.prototype = Object.create(B_HLWaitUntil.prototype);
-B_HLWaitUntilLight.prototype.constructor = B_HLWaitUntilLight;
+B_HLWaitUntilLight.prototype.constructor = B_HLWaitUntilLight;*/
 
 function B_HLWaitUntilButton(x, y) {
   B_HLWaitUntil.call(this, x, y, false, "button")
@@ -1086,6 +1104,18 @@ function B_HLWaitUntilDistance(x, y, userSelectedPort) {
 B_HLWaitUntilDistance.prototype = Object.create(B_HLWaitUntilPort.prototype);
 B_HLWaitUntilDistance.prototype.constructor = B_HLWaitUntilDistance;
 B_HLWaitUntilDistance.importXml = HL_Utils.importXml
+
+function B_HLWaitUntilLight(x, y, userSelectedPort) {
+  this.portType = 20
+  this.sensorType = "light"
+  this.threshold = 5 //How bright the ambient light has to be to trigger the block
+  this.blockOptions = [0, 100]
+
+  B_HLWaitUntilPort.call(this, x, y, "light", userSelectedPort)
+}
+B_HLWaitUntilLight.prototype = Object.create(B_HLWaitUntilPort.prototype);
+B_HLWaitUntilLight.prototype.constructor = B_HLWaitUntilLight;
+B_HLWaitUntilLight.importXml = HL_Utils.importXml
 
 /*function B_HLWaitUntilDial(x, y, userSelectedPort) {
 
@@ -1638,14 +1668,14 @@ B_HLBBSingleNeopix.prototype.argList = function() {
     this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions(), 0]
 }
 
-/*function B_HLBBNeopixStrip(x, y, port) {
+function B_HLBBNeopixStrip(x, y, port) {
   this.value = ""
   this.valueKey = "colors"
   this.red = 100;
   this.green = 100;
   this.blue = 100;
 
-  B_HLBirdBloxOutput.call(this, x, y, "neopixStrip", 10, port);
+  B_HLBirdBloxOutput.call(this, x, y, "neopixStrip", 11, port);
 
   const ds = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("all"), "all"));
   ds.addOption(new SelectionData("1", "1"));
@@ -1669,7 +1699,10 @@ B_HLBBSingleNeopix.prototype.argList = function() {
 }
 B_HLBBNeopixStrip.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBNeopixStrip.prototype.constructor = B_HLBBNeopixStrip;
-B_HLBBNeopixStrip.importXml = HL_Utils.BBimportXml*/
+B_HLBBNeopixStrip.importXml = HL_Utils.BBimportXml
+//MicroBlocks functions
+B_HLBBNeopixStrip.prototype.primName = function() { return "" }
+B_HLBBNeopixStrip.prototype.argList = function() { return [] }
 
 
 /**
@@ -1713,7 +1746,42 @@ B_HLBBDistance.importXml = HL_Utils.BBimportXml
 B_HLBBDistance.prototype.primName = function() { return "[h:ds]" }
 B_HLBBDistance.prototype.argList = function() { return [HL_Utils.portNames[this.port]] }
 
+function B_HLBBLight(x, y, port) {
+  B_HLBirdBloxSensor.call(this, x, y, 20, port)
 
+  this.addPart(new LabelText(this, Language.getStr("Light")))
+}
+B_HLBBLight.prototype = Object.create(B_HLBirdBloxSensor.prototype);
+B_HLBBLight.prototype.constructor = B_HLBBLight
+B_HLBBLight.importXml = HL_Utils.BBimportXml
+//MicroBlocks functions
+B_HLBBLight.prototype.primName = function() { return "[h:ls]" }
+B_HLBBLight.prototype.argList = function() { return [HL_Utils.portNames[this.port]] }
+
+function B_HLBBBigButton(x, y, port) {
+  this.portType = 17
+  this.port = port
+  if (this.port == null) { console.error("Port must be specified") }
+  PredicateBlock.call(this, x, y, "ports") //DeviceHatchling.getDeviceTypeId());
+
+  //this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  this.addPart(new LabelText(this, (Language.getStr("port") + " " + HL_Utils.portNames[this.port]) ))
+
+  this.addPart(new LabelText(this, Language.getStr("BigButton")))
+}
+B_HLBBBigButton.prototype = Object.create(PredicateBlock.prototype);
+B_HLBBBigButton.prototype.constructor = B_HLBBBigButton
+B_HLBBBigButton.importXml = HL_Utils.BBimportXml
+//MicroBlocks functions
+B_HLBBBigButton.prototype.primName = function() { return "[h:bb]" }
+B_HLBBBigButton.prototype.argList = function() { return [HL_Utils.portNames[this.port]] }
+
+B_HLBBBigButton.prototype.checkActive = function() {
+  return HL_Utils.birdBloxCheckActive(this)
+}
+B_HLBBBigButton.prototype.createXml = function(xmlDoc) {
+  return HL_Utils.BBcreateXml(this, xmlDoc)
+}
 
 //MARK: micro:bit outputs
 
@@ -1971,7 +2039,7 @@ function B_HLButton(x, y) {
   this.parseTranslation(Language.getStr("block_Button"));
 
 };
-B_HLButton.prototype = Object.create(B_MicroBitButton.prototype);
+B_HLButton.prototype = Object.create(PredicateBlock.prototype);
 B_HLButton.prototype.constructor = B_HLButton;
 //MicroBlocks functions
 B_HLButton.prototype.primName = function() { return this.slots[0].getMicroBlocksInstructions() }

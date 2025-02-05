@@ -2564,7 +2564,8 @@ Language.en = {
 "Duplicate_All":"Duplicate All",
 "Extract_Block":"Extract Block",
 "Lists":"Lists",
-"Too_many_blocks_error":"Error: Too many blocks in program"
+"Too_many_blocks_error":"Error: Too many blocks in program",
+"BigButton":"Button"
 }
 
 //Spanish Translation
@@ -6445,10 +6446,12 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
   // * 3  = Position Servo
   // * 8  = Fairy Lights
   // * 9  = Single Neopixel
-  // * 10 = Strip of 4 Neopixels
+  // * 11 = Strip of 4 Neopixels
   // * 14 = Distance Sensor
+  // * 17 = Big Button
+  // * 20 = Light Sensor
   // * 31 = Microbit Not Connected to Hatchling
-  this.supportedStates = [0, 1, 3, 8, 9, 10, 14, 31]
+  this.supportedStates = [0, 1, 3, 8, 9, 11, 14, 17, 20, 31]
   this.portStates = [0, 0, 0, 0, 0, 0]
   this.advertisedName = advertisedName
   this.batteryLevel = null
@@ -8296,6 +8299,27 @@ GuiElements.animate.updateColor = function(element, color, duration) {
 
   return animate
 }
+/**
+ * Set an element spinning
+ * @param {Element} element - element to spin
+ * @param {number} x - x coord for center of rotation
+ * @param {number} y - y coord for center of rotation
+ */
+GuiElements.animate.spin = function(element, x, y) {
+
+  var animate = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
+  animate.setAttributeNS(null, "attributeName", "transform");
+  animate.setAttributeNS(null, "type", "rotate");
+  animate.setAttributeNS(null, "from", "0 " + x + " " + y)
+  animate.setAttributeNS(null, "to", "360 " + x + " " + y) 
+  animate.setAttributeNS(null, "dur", "5s");
+  animate.setAttributeNS(null, "repeatCount", "indefinite");
+
+  element.appendChild(animate)
+  animate.beginElement()
+
+  return animate
+}
 
 /**
  * Creates a black rectangle to block interaction with the main screen.  Used for
@@ -8796,7 +8820,7 @@ BlockList.populateCat_color_2 = function(category) {
     category.addBlockByName("B_HL_SN_L2")
     category.addBlockByName("B_HLSingleNeopixOff")
     category.addBlockByName("B_HLFairyLightsL2")
-    //category.addBlockByName("B_HLNeopixStrip")
+    category.addBlockByName("B_HLNeopixStrip")
     category.addBlockByName("B_FBLedArrayL2")
     category.addBlockByName("B_HLAlphabet")
   } else {
@@ -20502,13 +20526,15 @@ InputWidget.Piano.prototype.changeOctave = function(raise) {
 }
 
 /**
- * A widget with a flat circular color picker and Alpha slider.
+ * A widget with a flat circular color picker 
  * 
  */
-InputWidget.Color = function(index, iconColor) {
+InputWidget.Color = function(index, iconColor, multi) {
 	this.type = "colorPicker"
 	this.index = index
     this.iconColor = iconColor
+    this.multi = multi
+    console.log("*** color widget multi=" + multi)
 
 	this.hue = 0 
 	this.saturation = 0 
@@ -20521,28 +20547,36 @@ InputWidget.Color.prototype.constructor = InputWidget.Color
 //Global color history
 InputWidget.Color.recentColors = [
     "#FF8800", 
-    "#FFFF00",
+    "#8800FF",
+    "#FF0088",
+    "#0088FF", 
+    //"#FFFF00",
     "#88FF00",
     "#00FF88", 
-    "#00FFFF",
-    "#0088FF", 
-    "#8800FF", 
-    "#FF00FF",
-    "#FF0088",
+    //"#00FFFF",
+    
+     
+    //"#FF00FF",
+    
     "#FF8888",
-    "#FFCC88",
+    //"#FFCC88",
     "#FFFF88",
-    "#88FF88",
-    "#88FFFF",
-    "#8888FF",
-    "#FF88FF"
+    //"#88FF88",
+    //"#88FFFF",
+    //"#8888FF",
+    //"#FF88FF"
     ]
 InputWidget.Color.staticColors = [
     //"#000000",
     "#FFFFFF",
     "#FF0000", 
     "#00FF00",
-    "#0000FF"
+    "#0000FF",
+
+    "#FFFF00",
+    "#00FFFF",
+    "#FF00FF",
+    "#000000",
     ]
 InputWidget.Color.addRecentColor = function(color) {
 
@@ -20584,11 +20618,12 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
     this.setColor(data[this.index])
 
     //Add icon at top
-    var iconPath = VectorPaths.bdLightBulb
+    var iconPath = this.multi ? VectorPaths.bdMultiLightBulb : VectorPaths.bdLightBulb
     var iconH = 80
     var iconW = VectorIcon.computeWidth(iconPath, iconH)
     var iconX = (this.width - iconW)/2
-    var icon = new VectorIcon(iconX, 0, iconPath, this.iconColor, iconH, this.group)
+    var iconY = this.multi ? 0 : ( (this.height - iconH)/2 )
+    var icon = new VectorIcon(iconX, iconY, iconPath, this.iconColor, iconH, this.group)
 
     //Add the color wheel
     this.colorWheelX = margin //this.width/2 - this.height - margin
@@ -20666,7 +20701,7 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
     //Add the recent colors picker
     this.recentColorButtons = []
     var rX = this.width - this.height + margin //this.width*5/7 // *2/3 //x coord to start this section
-    var rY = margin //this.height/3 //y coord to start this section
+    var rY = (this.height - smIconH)/2 //margin //this.height/3 //y coord to start this section
     var rW = this.height - 2*margin //this.width*2/7 ///3 //width of section
     var rIconPath = VectorPaths.bdRecent
     var rIconW = VectorIcon.computeWidth(rIconPath, smIconH)
@@ -20696,8 +20731,8 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
     //Add the static color buttons
     this.staticColorButtons = []
     var staticCs = InputWidget.Color.staticColors
-    bnX = this.width/2 - bnH - bnM/2
-    bnY = this.height/2
+    //bnX = this.width/2 - bnH - bnM/2
+    bnY = margin //this.height/2
     for (var i = 0; i < staticCs.length; i++) {
         var color = staticCs[i]
         var bn = new Button(bnX, bnY, bnH, bnH, this.group, color, 6, 6)
@@ -20706,8 +20741,9 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
         this.staticColorButtons.push(bn)
 
         bnX += bnH + bnM
-        if (i == 1) {
-            bnX = this.width/2 - bnH - bnM/2 //this.width/2 - 1.5*bnH - bnM
+        if (i == 3) { //1) {
+            //bnX = this.width/2 - bnH - bnM/2 //this.width/2 - 1.5*bnH - bnM
+            bnX = rX + 2*bnM
             bnY += bnH + bnM
         }
     }
@@ -20723,6 +20759,28 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
     this.addStaticColorButton(bnX, bnY, bnH, Colors.green)
     bnX += bnH + bnM
     this.addStaticColorButton(bnX, bnY, bnH, Colors.blue)*/
+
+    //Add color picking for each bulb if this is for a multibulb block
+    if (this.multi) {
+        this.bulbValues = ["#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF"]
+        this.bulbButtons = []
+        var bulbM = bnM/2
+        var bulbH = (this.height - iconH)/4 - bulbM
+        var bulbX = (this.width - bulbH)/2
+        var bulbY = iconH
+        for (var i = 0; i < this.bulbValues.length; i++) {
+            var bulb = new Button(bulbX, bulbY, bulbH, bulbH, this.group, 
+                this.bulbValues[i], bulbH/2, bulbH/2)
+            bulbY += bulbH + bulbM
+            bulb.markAsOverlayPart(this.overlay)
+            bulb.setCallbackFunction(function() {
+                this.selectBulb(i)
+            }.bind(this))
+
+            this.bulbButtons[i] = bulb
+        }
+        this.selectBulb(0)
+    }
 
 
     this.updateRecentBns()
@@ -20747,7 +20805,8 @@ InputWidget.Color.prototype.updateColorBn = function(bn, color) {
     bn.setCallbackFunction(function() {
         //this.updateSlider()
         this.setColor(color)
-        this.updateFn(this.getHex(), this.index)
+        //this.updateFn(this.getHex(), this.index)
+        this.updateButtonValue()
         this.updatePreview()
         this.selectBns()
         InputWidget.Color.addRecentColor(color)
@@ -20767,6 +20826,37 @@ InputWidget.Color.prototype.selectBns = function () {
     }
     for (var i = 0; i < this.staticColorButtons.length; i++) {
         setOutline(this.staticColorButtons[i])
+    }
+}
+
+InputWidget.Color.prototype.selectBulb = function (index) {
+
+    this.currentBulb = index
+
+    function setOutline(bn, id) {
+        var outlineW = (id == index) ? 6 : 3
+        GuiElements.update.stroke(bn.bgRect, Colors.ballyGray, outlineW)
+    }
+
+    for (var i = 0; i < this.bulbButtons.length; i++) {
+        setOutline(this.bulbButtons[i], i)
+    }
+    
+}
+
+InputWidget.Color.prototype.updateButtonValue = function () {
+    if (this.multi) {
+        var color = this.getHex()
+        this.bulbValues[this.currentBulb] = color
+        this.bulbButtons[this.currentBulb].updateBgColor(color)
+
+        var val = ""
+        for (var i = 0; i < this.bulbValues.length; i++) {
+            val += this.bulbValues[i] + ";"
+        }
+        this.updateFn(val.slice(0, -1), this.index)
+    } else {
+        this.updateFn(this.getHex(), this.index)
     }
 }
 
@@ -20830,12 +20920,13 @@ InputWidget.Color.prototype.dragColor = function(x, y) {
     this.saturation = Math.min(100, Math.ceil(scale_length / r * 100));
     this.brightness = 100
 
-    console.log("dragColor hue=" + this.hue + "; saturation=" + this.saturation + "; x=" + relX + "; y=" + relY + "; r=" + r)
+    //console.log("dragColor hue=" + this.hue + "; saturation=" + this.saturation + "; x=" + relX + "; y=" + relY + "; r=" + r)
 
 
-    console.log(this.getHex())
+    //console.log(this.getHex())
     //this.updateSlider()
-    this.updateFn(this.getHex(), this.index)
+    //this.updateFn(this.getHex(), this.index)
+    this.updateButtonValue()
     this.updatePreview()
                 
 }
@@ -30064,6 +30155,7 @@ function DiscoverDialog(deviceClass) {
   //Hatchling and HatchPlus
   this.connectedDevices = []
   this.hasBeenShown = false
+  this.deviceSelected = false
 
   /* If an update happens at an inconvenient time (like while scrolling), the dialog is not reloaded; rather
    * updatePending is set to true, the timer is started, and the reload occurs at a better time */
@@ -30083,8 +30175,9 @@ DiscoverDialog.prototype.show = function() {
   if (Hatchling || HatchPlus) {
     this.connectedDevices = []
     var device = DeviceHatchling.getManager().getDevice(0)
-    //console.log("**** DiscoverDialog show ", device)
+    console.log("**** DiscoverDialog show (" + this.deviceSelected + ") ", device)
     if (device != null && device.connected) {
+      this.deviceSelected = false
       //console.log("**** device connected")
       //Show the connected device - user can scan if they disconnect
       this.connectedDevices = [device]
@@ -30100,6 +30193,10 @@ DiscoverDialog.prototype.show = function() {
       } else {
         this.rowCount += 1
       }
+
+    } else if (this.deviceSelected) {
+      this.rowCount = 1
+      shouldDiscover = false
 
     } else if (this.discoveredDevices.length == 0 && this.hasBeenShown) {
       //console.log("**** no device connected. Nothing discovered. ")
@@ -30157,7 +30254,7 @@ DiscoverDialog.prototype.checkPendingUpdate = function() {
 var updateDeviceListCounter = 0;
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
-  //console.log("*** updateDeviceList " + deviceList)
+  console.log("*** updateDeviceList " + deviceList)
   updateDeviceListCounter += 1;
   if (!this.visible) {
     return;
@@ -30225,6 +30322,22 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
 
   var r = (Hatchling || HatchPlus) ? 7 : null
   var m = RowDialog.m
+
+  //Just show a spinner if the app is in the process of connecting a device
+  if ((Hatchling || HatchPlus) && this.deviceSelected) {
+    console.log("*** device selected - showing spinner")
+    var iconPath = VectorPaths.faSyncAlt
+    var iconH = RowDialog.bnHeight - 6*m
+    var iconW = VectorIcon.computeWidth(iconPath, iconH)
+    var x = (width - iconW)/2
+    var spinner = new VectorIcon(x, y+3*m, iconPath, Colors.ballyBrandBlue, iconH, contentGroup)
+
+    GuiElements.animate.spin(spinner.pathE, iconPath.width/2, iconPath.height/2)
+
+    return
+  }
+
+
   // TODO: use RowDialog.createMainBnWithText instead
   var button = new Button(0 + m, y + m, width - 2*m, RowDialog.bnHeight - 2*m, contentGroup, color, r, r);
   
@@ -30269,9 +30382,13 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
  * @param device
  */
 DiscoverDialog.prototype.selectDevice = function(device) {
-  //console.log(device)
+  console.log("*** selectDevice: " + device.shortName)
+
+  if (Hatchling || HatchPlus) { this.deviceSelected = true }
+
   this.deviceClass = DeviceManager.getDeviceClass(device);
   this.deviceClass.getManager().setOneDevice(device);
+
   if (!(Hatchling || HatchPlus)) {
     this.closeDialog();
   }
@@ -32751,7 +32868,7 @@ CallbackManager.robot.updateHasV2Microbit = function(robotId, hasV2String) {
  * @return {boolean}
  */
 CallbackManager.robot.discovered = function(robotList) {
-  //console.log("*** CallbackManager.robot.discovered " + robotList)
+  console.log("*** CallbackManager.robot.discovered " + robotList)
   robotList = HtmlServer.decodeHtml(robotList);
   DeviceManager.backendDiscovered(robotList);
   return true;
@@ -39588,7 +39705,7 @@ function BlockButton(parent, width, fontSize) {
     this.lineHeight = this.lineHeight * scale
     this.cornerRadius = this.cornerRadius * scale
 
-    this.height = this.blockButtonMargin + this.lineHeight;
+    this.height = this.buttonMargin + this.lineHeight;
     this.width = width ? width : 20 //30//40;
     this.textColor = Colors.blockOutline[parent.category] //Colors.bbtDarkGray;
     this.font = fontSize ? Font.secondaryUiFont(fontSize) : Font.secondaryUiFont(9);
@@ -39746,18 +39863,29 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
         this.button.updateBgColor(color);
       }
     } else if (this.widgets[i].type == "colorPicker") {
-      //this.button.updateBgColor(this.values[i])
-      if (this.colorCircle == null) { 
-        var cx = this.button.width/2 
-        var cy = this.button.height/2 
-        var r = cy * 2/3
-        this.colorCircle = GuiElements.draw.circle(cx, cy, r, this.values[i], this.button.group)
-        GuiElements.update.stroke(this.colorCircle, Colors.white, 1)
-        TouchReceiver.addListenersBN(this.colorCircle, this.button)
+      if (this.widgets[i].multi) {
+        var colorValues = this.values[i].split(";")
+        if (this.colorCircles == null) {
+          this.colorCircles = []
+          for (var j = 0; j < 4; j++) {
+            console.log("****** width " + this.width + " height " + this.height)
+            var m = 1
+            var cx = 1.5*m + this.height/2 + j*(this.height-m)
+            this.colorCircles[j] = this.createColorCircle(colorValues[j], cx)
+          }
+        } else {
+          for (var j = 0; j < this.colorCircles.length; j++) {
+            GuiElements.update.color(this.colorCircles[j], colorValues[j])
+          }
+        }
+
       } else {
-        GuiElements.update.color(this.colorCircle, this.values[i])
+        if (this.colorCircle == null) { 
+          this.colorCircle = this.createColorCircle(this.values[i], this.button.width/2)
+        } else {
+          GuiElements.update.color(this.colorCircle, this.values[i])
+        }
       }
-      
 
     } else if (this.widgets[i].type == "piano") {
       text[i] = InputWidget.Piano.noteStrings[this.values[i]];
@@ -39871,6 +39999,18 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
 };
 
 /**
+ * Creates a color circle for the colorPicker
+ */
+BlockButton.prototype.createColorCircle = function(color, cx) {
+  var cy = this.button.height/2 
+  var r = cy * 2/3
+  var colorCircle = GuiElements.draw.circle(cx, cy, r, color, this.button.group)
+  GuiElements.update.stroke(colorCircle, Colors.white, 1)
+  TouchReceiver.addListenersBN(colorCircle, this.button)
+  return colorCircle
+}
+
+/**
  * Creates the input pad for this button. Adds the necessary widgets.
  */
 BlockButton.prototype.createInputSystem = function() {
@@ -39950,9 +40090,11 @@ BlockButton.prototype.addPiano = function(startingValue) {
 /**
  * Adds a new value with color picker input to this button
  * @param {string} startingValue - the initial value
+ * @param {boolean} multi - true if this picker is for a strip rather than a single bulb
  */
-BlockButton.prototype.addColorPicker = function(startingValue) {
-  this.addWidget(new InputWidget.Color(this.widgets.length, Colors.categoryColors[this.parent.category]), "", startingValue)
+BlockButton.prototype.addColorPicker = function(startingValue, multi) {
+  if (multi) { this.width = this.height * 4 }
+  this.addWidget(new InputWidget.Color(this.widgets.length, Colors.categoryColors[this.parent.category], multi), "", startingValue)
 }
 
 /**
@@ -46484,6 +46626,12 @@ HL_Utils.replaceBlock = function(block, currentState) {
   case 14:
     blockName = "B_HLBBDistance"
     break;
+  case 17:
+    blockName = "B_HLBBBigButton"
+    break;
+  case 20:
+    blockName = "B_HLBBLight"
+    break;
   default: //If we don't know this state, just leave things the way they are
     return;
   }
@@ -47004,17 +47152,26 @@ B_HLSingleNeopixOff.prototype.argList = function() {
 
 
 function B_HLNeopixStrip(x, y, userSelectedPort) {
-  this.value = ""
+  this.value = "#FFFFFF;#FFFFFF;#FFFFFF;#FFFFFF" //4 bulbs
   this.valueKey = "colors"
-  this.red = 100;
+  /*this.red = 100;
   this.green = 100;
   this.blue = 100;
   this.blockIcons = []
-  this.colorButtons = []
+  this.colorButtons = []*/
 
-  B_HLOutputBase.call(this, x, y, "color_2", "neopixStrip", 10, userSelectedPort);
+  B_HLOutputBase.call(this, x, y, "color_2", "neopixStrip", 11, userSelectedPort);
 
-  var icon = VectorPaths["faLightbulb"];
+  var icon = VectorPaths.bdMultiLightBulb
+  this.blockIcon = new BlockIcon(this, icon, Colors.white, "mNeopix", 45)
+  this.blockIcon.isEndOfLine = true
+  this.addPart(this.blockIcon)
+
+  this.valueBN = new BlockButton(this)
+  this.valueBN.addColorPicker(this.value, true)
+  this.addPart(this.valueBN);
+
+  //var icon = VectorPaths["faLightbulb"];
   /*this.blockIcon1 = new BlockIcon(this, icon, Colors.white, "neopix1", 27);
   this.addPart(this.blockIcon1);
   this.blockIcon2 = new BlockIcon(this, icon, Colors.white, "neopix2", 27);
@@ -47038,7 +47195,7 @@ function B_HLNeopixStrip(x, y, userSelectedPort) {
   this.colorButtons[3].addSlider("color", { r: this.red, g: this.green, b: this.blue });
   this.addPart(this.colorButtons[3]);*/
 
-  for (var i = 0; i < 4; i++) {
+  /*for (var i = 0; i < 4; i++) {
     this.blockIcons[i] = new BlockIcon(this, icon, Colors.white, "neopix"+i, 27);
     this.addPart(this.blockIcons[i]);
   }
@@ -47050,7 +47207,7 @@ function B_HLNeopixStrip(x, y, userSelectedPort) {
     this.colorButtons[i].addSlider("color_green", this.green)
     this.colorButtons[i].addSlider("color_blue", this.blue)
     this.addPart(this.colorButtons[i]);
-  }
+  }*/
 
 }
 B_HLNeopixStrip.prototype = Object.create(B_HLOutputBase.prototype);
@@ -47186,8 +47343,9 @@ B_HLWaitUntil.prototype.argList = function() {
     threshold = 20
     break;
   case "light":
-    prim = "[display:lightLevel]"
-    threshold = 200 //150
+    // For micro:bit built in light sensor, use "[display:lightLevel]" with threshold 200
+    prim = "[h:ls]" //range 0-255, but usually < 50 maybe thresh of 5
+    threshold = 5
     break;
   case "clap":
     prim = "[h:cl]" //number of claps since this function was last called
@@ -47195,9 +47353,11 @@ B_HLWaitUntil.prototype.argList = function() {
     operator = ">"
     break;
   case "button":
-    prim = "[h:bt]" //number of times either button A or B on the micro:bit was pressed since last called
+    /*prim = "[h:bt]" //number of times either button A or B on the micro:bit was pressed since last called
     threshold = 0
-    operator = ">"
+    operator = ">"*/
+    prim = "[h:ab]" // all buttons: true if any button (micro:bit or accessory) is currently being pressed
+    return [new BlockArg(prim, [])]
     break;
   default:
     console.error("WaitUntil block: Unknown sensor " + this.sensor)
@@ -47292,11 +47452,11 @@ function B_HLWaitUntilClap(x, y) {
 B_HLWaitUntilClap.prototype = Object.create(B_HLWaitUntil.prototype);
 B_HLWaitUntilClap.prototype.constructor = B_HLWaitUntilClap;
 
-function B_HLWaitUntilLight(x, y) {
+/*function B_HLWaitUntilLight(x, y) {
   B_HLWaitUntil.call(this, x, y, false, "light")
 }
 B_HLWaitUntilLight.prototype = Object.create(B_HLWaitUntil.prototype);
-B_HLWaitUntilLight.prototype.constructor = B_HLWaitUntilLight;
+B_HLWaitUntilLight.prototype.constructor = B_HLWaitUntilLight;*/
 
 function B_HLWaitUntilButton(x, y) {
   B_HLWaitUntil.call(this, x, y, false, "button")
@@ -47338,6 +47498,18 @@ function B_HLWaitUntilDistance(x, y, userSelectedPort) {
 B_HLWaitUntilDistance.prototype = Object.create(B_HLWaitUntilPort.prototype);
 B_HLWaitUntilDistance.prototype.constructor = B_HLWaitUntilDistance;
 B_HLWaitUntilDistance.importXml = HL_Utils.importXml
+
+function B_HLWaitUntilLight(x, y, userSelectedPort) {
+  this.portType = 20
+  this.sensorType = "light"
+  this.threshold = 5 //How bright the ambient light has to be to trigger the block
+  this.blockOptions = [0, 100]
+
+  B_HLWaitUntilPort.call(this, x, y, "light", userSelectedPort)
+}
+B_HLWaitUntilLight.prototype = Object.create(B_HLWaitUntilPort.prototype);
+B_HLWaitUntilLight.prototype.constructor = B_HLWaitUntilLight;
+B_HLWaitUntilLight.importXml = HL_Utils.importXml
 
 /*function B_HLWaitUntilDial(x, y, userSelectedPort) {
 
@@ -47890,14 +48062,14 @@ B_HLBBSingleNeopix.prototype.argList = function() {
     this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions(), 0]
 }
 
-/*function B_HLBBNeopixStrip(x, y, port) {
+function B_HLBBNeopixStrip(x, y, port) {
   this.value = ""
   this.valueKey = "colors"
   this.red = 100;
   this.green = 100;
   this.blue = 100;
 
-  B_HLBirdBloxOutput.call(this, x, y, "neopixStrip", 10, port);
+  B_HLBirdBloxOutput.call(this, x, y, "neopixStrip", 11, port);
 
   var ds = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("all"), "all"));
   ds.addOption(new SelectionData("1", "1"));
@@ -47921,7 +48093,10 @@ B_HLBBSingleNeopix.prototype.argList = function() {
 }
 B_HLBBNeopixStrip.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBNeopixStrip.prototype.constructor = B_HLBBNeopixStrip;
-B_HLBBNeopixStrip.importXml = HL_Utils.BBimportXml*/
+B_HLBBNeopixStrip.importXml = HL_Utils.BBimportXml
+//MicroBlocks functions
+B_HLBBNeopixStrip.prototype.primName = function() { return "" }
+B_HLBBNeopixStrip.prototype.argList = function() { return [] }
 
 
 /**
@@ -47965,7 +48140,42 @@ B_HLBBDistance.importXml = HL_Utils.BBimportXml
 B_HLBBDistance.prototype.primName = function() { return "[h:ds]" }
 B_HLBBDistance.prototype.argList = function() { return [HL_Utils.portNames[this.port]] }
 
+function B_HLBBLight(x, y, port) {
+  B_HLBirdBloxSensor.call(this, x, y, 20, port)
 
+  this.addPart(new LabelText(this, Language.getStr("Light")))
+}
+B_HLBBLight.prototype = Object.create(B_HLBirdBloxSensor.prototype);
+B_HLBBLight.prototype.constructor = B_HLBBLight
+B_HLBBLight.importXml = HL_Utils.BBimportXml
+//MicroBlocks functions
+B_HLBBLight.prototype.primName = function() { return "[h:ls]" }
+B_HLBBLight.prototype.argList = function() { return [HL_Utils.portNames[this.port]] }
+
+function B_HLBBBigButton(x, y, port) {
+  this.portType = 17
+  this.port = port
+  if (this.port == null) { console.error("Port must be specified") }
+  PredicateBlock.call(this, x, y, "ports") //DeviceHatchling.getDeviceTypeId());
+
+  //this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+  this.addPart(new LabelText(this, (Language.getStr("port") + " " + HL_Utils.portNames[this.port]) ))
+
+  this.addPart(new LabelText(this, Language.getStr("BigButton")))
+}
+B_HLBBBigButton.prototype = Object.create(PredicateBlock.prototype);
+B_HLBBBigButton.prototype.constructor = B_HLBBBigButton
+B_HLBBBigButton.importXml = HL_Utils.BBimportXml
+//MicroBlocks functions
+B_HLBBBigButton.prototype.primName = function() { return "[h:bb]" }
+B_HLBBBigButton.prototype.argList = function() { return [HL_Utils.portNames[this.port]] }
+
+B_HLBBBigButton.prototype.checkActive = function() {
+  return HL_Utils.birdBloxCheckActive(this)
+}
+B_HLBBBigButton.prototype.createXml = function(xmlDoc) {
+  return HL_Utils.BBcreateXml(this, xmlDoc)
+}
 
 //MARK: micro:bit outputs
 
@@ -48223,7 +48433,7 @@ function B_HLButton(x, y) {
   this.parseTranslation(Language.getStr("block_Button"));
 
 };
-B_HLButton.prototype = Object.create(B_MicroBitButton.prototype);
+B_HLButton.prototype = Object.create(PredicateBlock.prototype);
 B_HLButton.prototype.constructor = B_HLButton;
 //MicroBlocks functions
 B_HLButton.prototype.primName = function() { return this.slots[0].getMicroBlocksInstructions() }

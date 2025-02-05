@@ -268,5 +268,6 @@ Language.en = {
 "Duplicate_All":"Duplicate All",
 "Extract_Block":"Extract Block",
 "Lists":"Lists",
-"Too_many_blocks_error":"Error: Too many blocks in program"
+"Too_many_blocks_error":"Error: Too many blocks in program",
+"BigButton":"Button"
 }

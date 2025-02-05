@@ -20,10 +20,12 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
   // * 3  = Position Servo
   // * 8  = Fairy Lights
   // * 9  = Single Neopixel
-  // * 10 = Strip of 4 Neopixels
+  // * 11 = Strip of 4 Neopixels
   // * 14 = Distance Sensor
+  // * 17 = Big Button
+  // * 20 = Light Sensor
   // * 31 = Microbit Not Connected to Hatchling
-  this.supportedStates = [0, 1, 3, 8, 9, 10, 14, 31]
+  this.supportedStates = [0, 1, 3, 8, 9, 11, 14, 17, 20, 31]
   this.portStates = [0, 0, 0, 0, 0, 0]
   this.advertisedName = advertisedName
   this.batteryLevel = null

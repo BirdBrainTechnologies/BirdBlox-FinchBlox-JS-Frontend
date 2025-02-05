@@ -20,7 +20,7 @@ function BlockButton(parent, width, fontSize) {
     this.lineHeight = this.lineHeight * scale
     this.cornerRadius = this.cornerRadius * scale
 
-    this.height = this.blockButtonMargin + this.lineHeight;
+    this.height = this.buttonMargin + this.lineHeight;
     this.width = width ? width : 20 //30//40;
     this.textColor = Colors.blockOutline[parent.category] //Colors.bbtDarkGray;
     this.font = fontSize ? Font.secondaryUiFont(fontSize) : Font.secondaryUiFont(9);
@@ -178,18 +178,29 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
         this.button.updateBgColor(color);
       }
     } else if (this.widgets[i].type == "colorPicker") {
-      //this.button.updateBgColor(this.values[i])
-      if (this.colorCircle == null) { 
-        const cx = this.button.width/2 
-        const cy = this.button.height/2 
-        const r = cy * 2/3
-        this.colorCircle = GuiElements.draw.circle(cx, cy, r, this.values[i], this.button.group)
-        GuiElements.update.stroke(this.colorCircle, Colors.white, 1)
-        TouchReceiver.addListenersBN(this.colorCircle, this.button)
+      if (this.widgets[i].multi) {
+        let colorValues = this.values[i].split(";")
+        if (this.colorCircles == null) {
+          this.colorCircles = []
+          for (let j = 0; j < 4; j++) {
+            console.log("****** width " + this.width + " height " + this.height)
+            let m = 1
+            let cx = 1.5*m + this.height/2 + j*(this.height-m)
+            this.colorCircles[j] = this.createColorCircle(colorValues[j], cx)
+          }
+        } else {
+          for (let j = 0; j < this.colorCircles.length; j++) {
+            GuiElements.update.color(this.colorCircles[j], colorValues[j])
+          }
+        }
+
       } else {
-        GuiElements.update.color(this.colorCircle, this.values[i])
+        if (this.colorCircle == null) { 
+          this.colorCircle = this.createColorCircle(this.values[i], this.button.width/2)
+        } else {
+          GuiElements.update.color(this.colorCircle, this.values[i])
+        }
       }
-      
 
     } else if (this.widgets[i].type == "piano") {
       text[i] = InputWidget.Piano.noteStrings[this.values[i]];
@@ -303,6 +314,18 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
 };
 
 /**
+ * Creates a color circle for the colorPicker
+ */
+BlockButton.prototype.createColorCircle = function(color, cx) {
+  const cy = this.button.height/2 
+  const r = cy * 2/3
+  let colorCircle = GuiElements.draw.circle(cx, cy, r, color, this.button.group)
+  GuiElements.update.stroke(colorCircle, Colors.white, 1)
+  TouchReceiver.addListenersBN(colorCircle, this.button)
+  return colorCircle
+}
+
+/**
  * Creates the input pad for this button. Adds the necessary widgets.
  */
 BlockButton.prototype.createInputSystem = function() {
@@ -382,9 +405,11 @@ BlockButton.prototype.addPiano = function(startingValue) {
 /**
  * Adds a new value with color picker input to this button
  * @param {string} startingValue - the initial value
+ * @param {boolean} multi - true if this picker is for a strip rather than a single bulb
  */
-BlockButton.prototype.addColorPicker = function(startingValue) {
-  this.addWidget(new InputWidget.Color(this.widgets.length, Colors.categoryColors[this.parent.category]), "", startingValue)
+BlockButton.prototype.addColorPicker = function(startingValue, multi) {
+  if (multi) { this.width = this.height * 4 }
+  this.addWidget(new InputWidget.Color(this.widgets.length, Colors.categoryColors[this.parent.category], multi), "", startingValue)
 }
 
 /**
