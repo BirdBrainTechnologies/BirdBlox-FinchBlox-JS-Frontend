@@ -124,7 +124,7 @@ function MicroBlocksCompiler () {
 	hatchlingMotorWithDelay 114
 	hatchlingFairyLightWithDelay 115
 	hatchlingNeopixelWithDelay 116
-	hatchlingNeopixelStripWithDelay 117
+	hatchlingNeopixelStripBuiltIn 117
 	hatchlingPlayTone 118
 	hatchlingDisplayText 119
 	RESERVED 120

@@ -226,7 +226,7 @@ HL_Utils.replaceBlock = function(block, currentState) {
   case 9:
     blockName = "B_HLBBSingleNeopix"
     break;
-  case 10:
+  case 11:
     blockName = "B_HLBBNeopixStrip"
     break;
   case 14:
@@ -758,13 +758,8 @@ B_HLSingleNeopixOff.prototype.argList = function() {
 
 
 function B_HLNeopixStrip(x, y, userSelectedPort) {
-  this.value = "#FFFFFF;#FFFFFF;#FFFFFF;#FFFFFF" //4 bulbs
+  this.value = "#FFFFFF;#00FFFF;#FF8800;#8800FF" //4 bulbs
   this.valueKey = "colors"
-  /*this.red = 100;
-  this.green = 100;
-  this.blue = 100;
-  this.blockIcons = []
-  this.colorButtons = []*/
 
   B_HLOutputBase.call(this, x, y, "color_2", "neopixStrip", 11, userSelectedPort);
 
@@ -777,51 +772,38 @@ function B_HLNeopixStrip(x, y, userSelectedPort) {
   this.valueBN.addColorPicker(this.value, true)
   this.addPart(this.valueBN);
 
-  //const icon = VectorPaths["faLightbulb"];
-  /*this.blockIcon1 = new BlockIcon(this, icon, Colors.white, "neopix1", 27);
-  this.addPart(this.blockIcon1);
-  this.blockIcon2 = new BlockIcon(this, icon, Colors.white, "neopix2", 27);
-  this.addPart(this.blockIcon2);
-  this.blockIcon3 = new BlockIcon(this, icon, Colors.white, "neopix3", 27);
-  this.addPart(this.blockIcon3);
-  this.blockIcon4 = new BlockIcon(this, icon, Colors.white, "neopix4", 27);
-  this.addPart(this.blockIcon4);
-  this.blockIcon4.isEndOfLine = true;
-
-  this.colorButtons[0] = new BlockButton(this, 25);
-  this.colorButtons[0].addSlider("color", { r: this.red, g: this.green, b: this.blue });
-  this.addPart(this.colorButtons[0]);
-  this.colorButtons[1] = new BlockButton(this, 25);
-  this.colorButtons[1].addSlider("color", { r: this.red, g: this.green, b: this.blue });
-  this.addPart(this.colorButtons[1]);
-  this.colorButtons[2] = new BlockButton(this, 25);
-  this.colorButtons[2].addSlider("color", { r: this.red, g: this.green, b: this.blue });
-  this.addPart(this.colorButtons[2]);
-  this.colorButtons[3] = new BlockButton(this, 25);
-  this.colorButtons[3].addSlider("color", { r: this.red, g: this.green, b: this.blue });
-  this.addPart(this.colorButtons[3]);*/
-
-  /*for (let i = 0; i < 4; i++) {
-    this.blockIcons[i] = new BlockIcon(this, icon, Colors.white, "neopix"+i, 27);
-    this.addPart(this.blockIcons[i]);
-  }
-  this.blockIcons[3].isEndOfLine = true
-
-  for (let i = 0; i < 4; i++) {
-    this.colorButtons[i] = new BlockButton(this, 25);
-    this.colorButtons[i].addSlider("color_red", this.red)
-    this.colorButtons[i].addSlider("color_green", this.green)
-    this.colorButtons[i].addSlider("color_blue", this.blue)
-    this.addPart(this.colorButtons[i]);
-  }*/
-
 }
 B_HLNeopixStrip.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLNeopixStrip.prototype.constructor = B_HLNeopixStrip;
 B_HLNeopixStrip.importXml = HL_Utils.importXml
 //MicroBlocks functions
-B_HLNeopixStrip.prototype.primName = function() { return "[h:nps]" } //TODO: update to new format
-B_HLNeopixStrip.prototype.argList = function() { return [HL_Utils.portNames[this.port], 'all', this.red, this.green, this.blue] }
+B_HLNeopixStrip.prototype.primName = function() { 
+  let values = this.value.split(";")
+  if ( (values[0] == values[1]) && (values[1] == values[2]) && (values[2] == values[3]) ) {
+    return "hatchlingNeopixelStripBuiltIn" 
+  } else {
+    return "blockList"
+  }
+} 
+B_HLNeopixStrip.prototype.argList = function() { 
+  let values = this.value.split(";")
+  if ( (values[0] == values[1]) && (values[1] == values[2]) && (values[2] == values[3]) ) {
+    let rgb = Colors.hexToRgb(values[0])
+    return [HL_Utils.portNames[this.port], "all", rgb[0], rgb[1], rgb[2]] 
+  } else {
+    let prim = "hatchlingNeopixelStripBuiltIn"
+    let port = HL_Utils.portNames[this.port]
+    let rgb1 = Colors.hexToRgb(values[0])
+    let rgb2 = Colors.hexToRgb(values[1])
+    let rgb3 = Colors.hexToRgb(values[2])
+    let rgb4 = Colors.hexToRgb(values[3])
+    return [new BlockArg(prim, [port, 1, rgb1[0], rgb1[1], rgb1[2]]), 
+      new BlockArg(prim, [port, 2, rgb2[0], rgb2[1], rgb2[2]]), 
+      new BlockArg(prim, [port, 3, rgb3[0], rgb3[1], rgb3[2]]), 
+      new BlockArg(prim, [port, 4, rgb4[0], rgb4[1], rgb4[2]])]
+  }
+  
+}
 
 function B_HLFairyLights(x, y, userSelectedPort) {
   this.value = 254
@@ -1678,10 +1660,10 @@ function B_HLBBNeopixStrip(x, y, port) {
   B_HLBirdBloxOutput.call(this, x, y, "neopixStrip", 11, port);
 
   const ds = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("all"), "all"));
-  ds.addOption(new SelectionData("1", "1"));
-  ds.addOption(new SelectionData("2", "2"));
-  ds.addOption(new SelectionData("3", "3"));
-  ds.addOption(new SelectionData("4", "4"));
+  ds.addOption(new SelectionData("1", 1));
+  ds.addOption(new SelectionData("2", 2));
+  ds.addOption(new SelectionData("3", 3));
+  ds.addOption(new SelectionData("4", 4));
   ds.addOption(new SelectionData(Language.getStr("all"), "all"));
   this.addPart(ds);
 
@@ -1701,8 +1683,12 @@ B_HLBBNeopixStrip.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBNeopixStrip.prototype.constructor = B_HLBBNeopixStrip;
 B_HLBBNeopixStrip.importXml = HL_Utils.BBimportXml
 //MicroBlocks functions
-B_HLBBNeopixStrip.prototype.primName = function() { return "" }
-B_HLBBNeopixStrip.prototype.argList = function() { return [] }
+B_HLBBNeopixStrip.prototype.primName = function() { return "hatchlingNeopixelStripBuiltIn" }
+B_HLBBNeopixStrip.prototype.argList = function() { 
+  return [HL_Utils.portNames[this.port], this.slots[0].getMicroBlocksInstructions(), 
+    this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions(),
+    this.slots[3].getMicroBlocksInstructions()] 
+}
 
 
 /**

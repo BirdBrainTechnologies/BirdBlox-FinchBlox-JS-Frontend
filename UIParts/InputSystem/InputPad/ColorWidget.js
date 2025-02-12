@@ -7,7 +7,6 @@ InputWidget.Color = function(index, iconColor, multi) {
 	this.index = index
     this.iconColor = iconColor
     this.multi = multi
-    console.log("*** color widget multi=" + multi)
 
 	this.hue = 0 
 	this.saturation = 0 
@@ -51,6 +50,11 @@ InputWidget.Color.staticColors = [
     "#FF00FF",
     "#000000",
     ]
+
+/**
+ * Add a value to the recent colors list, or move it up in the list if it's already there.
+ * Leave the static colors where they are.
+ */
 InputWidget.Color.addRecentColor = function(color) {
 
     //Do not add colors from the static color list
@@ -92,10 +96,10 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
 
     //Add icon at top
     const iconPath = this.multi ? VectorPaths.bdMultiLightBulb : VectorPaths.bdLightBulb
-    const iconH = 80
+    const iconH = this.multi ? 100 : 80
     const iconW = VectorIcon.computeWidth(iconPath, iconH)
     const iconX = (this.width - iconW)/2
-    const iconY = this.multi ? 0 : ( (this.height - iconH)/2 )
+    const iconY = this.multi ? (this.height/2 - iconH) : ( (this.height - iconH)/2 )
     const icon = new VectorIcon(iconX, iconY, iconPath, this.iconColor, iconH, this.group)
 
     //Add the color wheel
@@ -235,22 +239,34 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
 
     //Add color picking for each bulb if this is for a multibulb block
     if (this.multi) {
-        this.bulbValues = ["#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF"]
+        this.bulbValues = data[this.index].split(";")
         this.bulbButtons = []
         let bulbM = bnM/2
         let bulbH = (this.height - iconH)/4 - bulbM
-        let bulbX = (this.width - bulbH)/2
-        let bulbY = iconH
+        let bulbSetX = (this.width)/2 - bulbH - bulbM/2
+        let bulbX = bulbSetX
+        let bulbY = this.height/2 //iconH
         for (let i = 0; i < this.bulbValues.length; i++) {
             let bulb = new Button(bulbX, bulbY, bulbH, bulbH, this.group, 
                 this.bulbValues[i], bulbH/2, bulbH/2)
-            bulbY += bulbH + bulbM
             bulb.markAsOverlayPart(this.overlay)
             bulb.setCallbackFunction(function() {
+                let color = this.bulbValues[i]
+                this.setColor(color)
+                this.updatePreview()
                 this.selectBulb(i)
+
+                InputWidget.Color.addRecentColor(color)
+                this.selectBns()
             }.bind(this))
 
             this.bulbButtons[i] = bulb
+
+            bulbX += bulbH + bulbM
+            if (i == 1) {
+                bulbY += bulbH + bulbM
+                bulbX = bulbSetX
+            }
         }
         this.selectBulb(0)
     }
@@ -286,6 +302,9 @@ InputWidget.Color.prototype.updateColorBn = function(bn, color) {
     }.bind(this), true)
 }
 
+/**
+ * Update the outlines of the color buttons to show which is selected. 
+ */
 InputWidget.Color.prototype.selectBns = function () {
     const currentColor = this.getHex()
 
@@ -302,6 +321,10 @@ InputWidget.Color.prototype.selectBns = function () {
     }
 }
 
+/**
+ *  Update the outlines of the bulb buttons to show which is selected. 
+ *  Record index of selection. Multi bulb only.
+ */
 InputWidget.Color.prototype.selectBulb = function (index) {
 
     this.currentBulb = index
@@ -317,6 +340,10 @@ InputWidget.Color.prototype.selectBulb = function (index) {
     
 }
 
+/**
+ * Run the update function with the current value selection. 
+ * In the multi bulb case, also update the bulb button color.
+ */
 InputWidget.Color.prototype.updateButtonValue = function () {
     if (this.multi) {
         let color = this.getHex()

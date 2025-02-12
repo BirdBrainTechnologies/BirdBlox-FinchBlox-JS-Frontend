@@ -8780,6 +8780,7 @@ BlockList.populateCat_color_1 = function(category) {
     category.addBlockByName("B_HL_SN_L1_Green")
     category.addBlockByName("B_HL_SN_L1_Blue")
     category.addBlockByName("B_HL_SN_L1_White")
+    category.addBlockByName("B_HLSingleNeopixOff")
     category.addBlockByName("B_HLFairyLightsL1")
   } else {
     category.addBlockByName("B_FBBeakRed");
@@ -20534,7 +20535,6 @@ InputWidget.Color = function(index, iconColor, multi) {
 	this.index = index
     this.iconColor = iconColor
     this.multi = multi
-    console.log("*** color widget multi=" + multi)
 
 	this.hue = 0 
 	this.saturation = 0 
@@ -20578,6 +20578,11 @@ InputWidget.Color.staticColors = [
     "#FF00FF",
     "#000000",
     ]
+
+/**
+ * Add a value to the recent colors list, or move it up in the list if it's already there.
+ * Leave the static colors where they are.
+ */
 InputWidget.Color.addRecentColor = function(color) {
 
     //Do not add colors from the static color list
@@ -20619,10 +20624,10 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
 
     //Add icon at top
     var iconPath = this.multi ? VectorPaths.bdMultiLightBulb : VectorPaths.bdLightBulb
-    var iconH = 80
+    var iconH = this.multi ? 100 : 80
     var iconW = VectorIcon.computeWidth(iconPath, iconH)
     var iconX = (this.width - iconW)/2
-    var iconY = this.multi ? 0 : ( (this.height - iconH)/2 )
+    var iconY = this.multi ? (this.height/2 - iconH) : ( (this.height - iconH)/2 )
     var icon = new VectorIcon(iconX, iconY, iconPath, this.iconColor, iconH, this.group)
 
     //Add the color wheel
@@ -20762,22 +20767,34 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
 
     //Add color picking for each bulb if this is for a multibulb block
     if (this.multi) {
-        this.bulbValues = ["#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF"]
+        this.bulbValues = data[this.index].split(";")
         this.bulbButtons = []
         var bulbM = bnM/2
         var bulbH = (this.height - iconH)/4 - bulbM
-        var bulbX = (this.width - bulbH)/2
-        var bulbY = iconH
+        var bulbSetX = (this.width)/2 - bulbH - bulbM/2
+        var bulbX = bulbSetX
+        var bulbY = this.height/2 //iconH
         for (var i = 0; i < this.bulbValues.length; i++) {
             var bulb = new Button(bulbX, bulbY, bulbH, bulbH, this.group, 
                 this.bulbValues[i], bulbH/2, bulbH/2)
-            bulbY += bulbH + bulbM
             bulb.markAsOverlayPart(this.overlay)
             bulb.setCallbackFunction(function() {
+                var color = this.bulbValues[i]
+                this.setColor(color)
+                this.updatePreview()
                 this.selectBulb(i)
+
+                InputWidget.Color.addRecentColor(color)
+                this.selectBns()
             }.bind(this))
 
             this.bulbButtons[i] = bulb
+
+            bulbX += bulbH + bulbM
+            if (i == 1) {
+                bulbY += bulbH + bulbM
+                bulbX = bulbSetX
+            }
         }
         this.selectBulb(0)
     }
@@ -20813,6 +20830,9 @@ InputWidget.Color.prototype.updateColorBn = function(bn, color) {
     }.bind(this), true)
 }
 
+/**
+ * Update the outlines of the color buttons to show which is selected. 
+ */
 InputWidget.Color.prototype.selectBns = function () {
     var currentColor = this.getHex()
 
@@ -20829,6 +20849,10 @@ InputWidget.Color.prototype.selectBns = function () {
     }
 }
 
+/**
+ *  Update the outlines of the bulb buttons to show which is selected. 
+ *  Record index of selection. Multi bulb only.
+ */
 InputWidget.Color.prototype.selectBulb = function (index) {
 
     this.currentBulb = index
@@ -20844,6 +20868,10 @@ InputWidget.Color.prototype.selectBulb = function (index) {
     
 }
 
+/**
+ * Run the update function with the current value selection. 
+ * In the multi bulb case, also update the bulb button color.
+ */
 InputWidget.Color.prototype.updateButtonValue = function () {
     if (this.multi) {
         var color = this.getHex()
@@ -30387,6 +30415,7 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
   }
 
   if (!device) {
+    //TODO: Remove the button? Ideally this shouldn't happen.
     console.error("No device at index " + index)
     return
   }
@@ -46654,7 +46683,7 @@ HL_Utils.replaceBlock = function(block, currentState) {
   case 9:
     blockName = "B_HLBBSingleNeopix"
     break;
-  case 10:
+  case 11:
     blockName = "B_HLBBNeopixStrip"
     break;
   case 14:
@@ -47186,13 +47215,8 @@ B_HLSingleNeopixOff.prototype.argList = function() {
 
 
 function B_HLNeopixStrip(x, y, userSelectedPort) {
-  this.value = "#FFFFFF;#FFFFFF;#FFFFFF;#FFFFFF" //4 bulbs
+  this.value = "#FFFFFF;#00FFFF;#FF8800;#8800FF" //4 bulbs
   this.valueKey = "colors"
-  /*this.red = 100;
-  this.green = 100;
-  this.blue = 100;
-  this.blockIcons = []
-  this.colorButtons = []*/
 
   B_HLOutputBase.call(this, x, y, "color_2", "neopixStrip", 11, userSelectedPort);
 
@@ -47205,51 +47229,38 @@ function B_HLNeopixStrip(x, y, userSelectedPort) {
   this.valueBN.addColorPicker(this.value, true)
   this.addPart(this.valueBN);
 
-  //var icon = VectorPaths["faLightbulb"];
-  /*this.blockIcon1 = new BlockIcon(this, icon, Colors.white, "neopix1", 27);
-  this.addPart(this.blockIcon1);
-  this.blockIcon2 = new BlockIcon(this, icon, Colors.white, "neopix2", 27);
-  this.addPart(this.blockIcon2);
-  this.blockIcon3 = new BlockIcon(this, icon, Colors.white, "neopix3", 27);
-  this.addPart(this.blockIcon3);
-  this.blockIcon4 = new BlockIcon(this, icon, Colors.white, "neopix4", 27);
-  this.addPart(this.blockIcon4);
-  this.blockIcon4.isEndOfLine = true;
-
-  this.colorButtons[0] = new BlockButton(this, 25);
-  this.colorButtons[0].addSlider("color", { r: this.red, g: this.green, b: this.blue });
-  this.addPart(this.colorButtons[0]);
-  this.colorButtons[1] = new BlockButton(this, 25);
-  this.colorButtons[1].addSlider("color", { r: this.red, g: this.green, b: this.blue });
-  this.addPart(this.colorButtons[1]);
-  this.colorButtons[2] = new BlockButton(this, 25);
-  this.colorButtons[2].addSlider("color", { r: this.red, g: this.green, b: this.blue });
-  this.addPart(this.colorButtons[2]);
-  this.colorButtons[3] = new BlockButton(this, 25);
-  this.colorButtons[3].addSlider("color", { r: this.red, g: this.green, b: this.blue });
-  this.addPart(this.colorButtons[3]);*/
-
-  /*for (var i = 0; i < 4; i++) {
-    this.blockIcons[i] = new BlockIcon(this, icon, Colors.white, "neopix"+i, 27);
-    this.addPart(this.blockIcons[i]);
-  }
-  this.blockIcons[3].isEndOfLine = true
-
-  for (var i = 0; i < 4; i++) {
-    this.colorButtons[i] = new BlockButton(this, 25);
-    this.colorButtons[i].addSlider("color_red", this.red)
-    this.colorButtons[i].addSlider("color_green", this.green)
-    this.colorButtons[i].addSlider("color_blue", this.blue)
-    this.addPart(this.colorButtons[i]);
-  }*/
-
 }
 B_HLNeopixStrip.prototype = Object.create(B_HLOutputBase.prototype);
 B_HLNeopixStrip.prototype.constructor = B_HLNeopixStrip;
 B_HLNeopixStrip.importXml = HL_Utils.importXml
 //MicroBlocks functions
-B_HLNeopixStrip.prototype.primName = function() { return "[h:nps]" } //TODO: update to new format
-B_HLNeopixStrip.prototype.argList = function() { return [HL_Utils.portNames[this.port], 'all', this.red, this.green, this.blue] }
+B_HLNeopixStrip.prototype.primName = function() { 
+  var values = this.value.split(";")
+  if ( (values[0] == values[1]) && (values[1] == values[2]) && (values[2] == values[3]) ) {
+    return "hatchlingNeopixelStripBuiltIn" 
+  } else {
+    return "blockList"
+  }
+} 
+B_HLNeopixStrip.prototype.argList = function() { 
+  var values = this.value.split(";")
+  if ( (values[0] == values[1]) && (values[1] == values[2]) && (values[2] == values[3]) ) {
+    var rgb = Colors.hexToRgb(values[0])
+    return [HL_Utils.portNames[this.port], "all", rgb[0], rgb[1], rgb[2]] 
+  } else {
+    var prim = "hatchlingNeopixelStripBuiltIn"
+    var port = HL_Utils.portNames[this.port]
+    var rgb1 = Colors.hexToRgb(values[0])
+    var rgb2 = Colors.hexToRgb(values[1])
+    var rgb3 = Colors.hexToRgb(values[2])
+    var rgb4 = Colors.hexToRgb(values[3])
+    return [new BlockArg(prim, [port, 1, rgb1[0], rgb1[1], rgb1[2]]), 
+      new BlockArg(prim, [port, 2, rgb2[0], rgb2[1], rgb2[2]]), 
+      new BlockArg(prim, [port, 3, rgb3[0], rgb3[1], rgb3[2]]), 
+      new BlockArg(prim, [port, 4, rgb4[0], rgb4[1], rgb4[2]])]
+  }
+  
+}
 
 function B_HLFairyLights(x, y, userSelectedPort) {
   this.value = 254
@@ -48106,10 +48117,10 @@ function B_HLBBNeopixStrip(x, y, port) {
   B_HLBirdBloxOutput.call(this, x, y, "neopixStrip", 11, port);
 
   var ds = new DropSlot(this, "SDS_1", null, null, new SelectionData(Language.getStr("all"), "all"));
-  ds.addOption(new SelectionData("1", "1"));
-  ds.addOption(new SelectionData("2", "2"));
-  ds.addOption(new SelectionData("3", "3"));
-  ds.addOption(new SelectionData("4", "4"));
+  ds.addOption(new SelectionData("1", 1));
+  ds.addOption(new SelectionData("2", 2));
+  ds.addOption(new SelectionData("3", 3));
+  ds.addOption(new SelectionData("4", 4));
   ds.addOption(new SelectionData(Language.getStr("all"), "all"));
   this.addPart(ds);
 
@@ -48129,8 +48140,12 @@ B_HLBBNeopixStrip.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBNeopixStrip.prototype.constructor = B_HLBBNeopixStrip;
 B_HLBBNeopixStrip.importXml = HL_Utils.BBimportXml
 //MicroBlocks functions
-B_HLBBNeopixStrip.prototype.primName = function() { return "" }
-B_HLBBNeopixStrip.prototype.argList = function() { return [] }
+B_HLBBNeopixStrip.prototype.primName = function() { return "hatchlingNeopixelStripBuiltIn" }
+B_HLBBNeopixStrip.prototype.argList = function() { 
+  return [HL_Utils.portNames[this.port], this.slots[0].getMicroBlocksInstructions(), 
+    this.slots[1].getMicroBlocksInstructions(), this.slots[2].getMicroBlocksInstructions(),
+    this.slots[3].getMicroBlocksInstructions()] 
+}
 
 
 /**
@@ -48728,7 +48743,7 @@ function MicroBlocksCompiler () {
 	hatchlingMotorWithDelay 114
 	hatchlingFairyLightWithDelay 115
 	hatchlingNeopixelWithDelay 116
-	hatchlingNeopixelStripWithDelay 117
+	hatchlingNeopixelStripBuiltIn 117
 	hatchlingPlayTone 118
 	hatchlingDisplayText 119
 	RESERVED 120
