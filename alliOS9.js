@@ -8780,7 +8780,6 @@ BlockList.populateCat_color_1 = function(category) {
     category.addBlockByName("B_HL_SN_L1_Green")
     category.addBlockByName("B_HL_SN_L1_Blue")
     category.addBlockByName("B_HL_SN_L1_White")
-    category.addBlockByName("B_HLSingleNeopixOff")
     category.addBlockByName("B_HLFairyLightsL1")
   } else {
     category.addBlockByName("B_FBBeakRed");
