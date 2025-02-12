@@ -1022,7 +1022,7 @@ method updateConnection SmallRuntime {
 MicroBlocksRuntime.prototype.justConnected = async function() {
 	// Called when a board has just connected (browser or stand-alone).
 
-	console.log('Connected to' + this.bleDevice().shortName) //portName
+	console.log('Connected to ' + this.bleDevice().shortName) //portName
 	this.connectionStartTime = null
 	this.vmVersion = null
 	await this.sendMsgSync('getVersionMsg')

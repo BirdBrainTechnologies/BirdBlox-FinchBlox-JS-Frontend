@@ -687,7 +687,7 @@ DeviceManager.updateStatus = function() {
   if (DM.statusListener != null) DM.statusListener(totalStatus);
   if ((Hatchling || HatchPlus) && RowDialog.currentDialog != null) {
     //Update the discover dialog when connection status changes
-    RowDialog.currentDialog.reloadRows((totalStatus == 3) ? 1 : 0)
+    RowDialog.currentDialog.reloadRows(0) //Just show the connected robot if there is one. //(totalStatus == 3) ? 1 : 0)
   }
   return totalStatus;
 };

@@ -46,23 +46,50 @@ DiscoverDialog.prototype.show = function() {
   if (Hatchling || HatchPlus) {
     this.connectedDevices = []
     let device = DeviceHatchling.getManager().getDevice(0)
-    console.log("**** DiscoverDialog show (" + this.deviceSelected + ") ", device)
+
+    console.log("**** DiscoverDialog show (" + this.deviceSelected + "; " + this.rowCount + ") " + device?.shortName)
+    console.log("**** discovered devices: " + this.discoveredDevices.length)
+    for (let i = 0; i < this.discoveredDevices.length; i++) {
+      let name = this.discoveredDevices[i] ? this.discoveredDevices[i].shortName : "???"
+      console.log("**** " + i + ": " + name)
+    }
+    
     if (device != null && device.connected) {
-      this.deviceSelected = false
+
+      if (this.deviceSelected) {
+        //Just connected the selected device. Close the dialog in a bit.
+        this.deviceSelected = false
+
+        setTimeout(function () {
+          this.closeDialog();
+        }.bind(this), 2000)
+      }
       //console.log("**** device connected")
       //Show the connected device - user can scan if they disconnect
       this.connectedDevices = [device]
       this.hasBeenShown = true
-      const index = this.discoveredDevices.indexOf(device)
+      //const index = this.discoveredDevices.indexOf(device)
+      
       if (GuiElements.isPWA) { 
         this.discoveredDevices = []
         this.rowCount = 1
         shouldDiscover = false 
-      } else if (index != -1) {
-        //console.log("*** removing connected device from discovery list")
+      /*} else if (index != -1) {
+        console.log("*** removing connected device from discovery list at index " + index)
         this.discoveredDevices.splice(index, 1) 
       } else {
         this.rowCount += 1
+      }*/
+      } else {
+        this.rowCount += 1
+        let index = -1
+        for (let i = 0; i < this.discoveredDevices.length; i++) {
+          if (this.discoveredDevices[i].id == device.id) {
+            console.log("*** removing connected device from discovery list at index " + i)
+            this.discoveredDevices.splice(i, 1) 
+            this.rowCount -= 1
+          }
+        }
       }
 
     } else if (this.deviceSelected) {
@@ -85,6 +112,7 @@ DiscoverDialog.prototype.show = function() {
       this.hasBeenShown = true
     }
   }
+  console.log("**** about to call RowDialog show with " + this.rowCount + " rows")
   RowDialog.prototype.show.call(this);
   if (shouldDiscover) {
     this.discoverDevices();
@@ -145,17 +173,18 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
     return parseFloat(b.RSSI) - parseFloat(a.RSSI);
   });
 
-  if (Hatchling || HatchPlus) {
+  /*if (Hatchling || HatchPlus) {
     let device = DeviceHatchling.getManager().getDevice(0)
     if (device != null && device.connected) {
       this.connectedDevices = [device]
     }
-  }
+  }*/
 
   //if ((updateDeviceListCounter % 40) == 0){
   //console.log("*** updateDeviceList about to reload " + (this.discoveredDevicesRSSISorted.length + this.connectedDevices.length) + " rows")
   //console.log(this.discoveredDevices)
-  this.reloadRows(this.discoveredDevicesRSSISorted.length + this.connectedDevices.length);
+  console.log("*** updateDeviceList about to reload " + this.discoveredDevicesRSSISorted.length + " rows")
+  this.reloadRows(this.discoveredDevicesRSSISorted.length)// + this.connectedDevices.length);
   //};
 
   //	this.reloadRows(this.discoveredDevices.length);
@@ -225,6 +254,12 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
     button.setCallbackFunction(function() {
       this.discoverDevices()
     }.bind(this), true)
+    return
+  }
+
+  if (!device) {
+    //TODO: Remove the button? Ideally this shouldn't happen.
+    console.error("No device at index " + index)
     return
   }
 
