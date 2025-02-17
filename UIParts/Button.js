@@ -393,7 +393,8 @@ Button.prototype.addDeviceInfo = function(device) {
     const dIconPath = device.connected ? VectorPaths.bdConnected : VectorPaths.bdClose
     const dIconColor = device.connected ? Colors.ballyBrandBlue : Colors.ballyGray
     const dIcon = new VectorIcon(dIconX, dIconY, dIconPath, dIconColor, dIconH, this.group)
-    this.textE = GuiElements.draw.text(2*margin + dIconH, textY, device.shortName, font, color2);
+    const nameText = device.shortName + "  (" + device.name + ")"
+    this.textE = GuiElements.draw.text(2*margin + dIconH, textY, nameText, font, color2);
     this.group.appendChild(this.textE);
 
     if (device.connected) { 
@@ -404,12 +405,11 @@ Button.prototype.addDeviceInfo = function(device) {
     this.textE = GuiElements.draw.text(textX, textY, device.shortName, font, color);
     this.group.appendChild(this.textE);
 
-    
-  }
-
-  const text2X = 3 * this.height;
-  this.textE2 = GuiElements.draw.text(text2X, textY, device.name, font2, color2);
-  this.group.appendChild(this.textE2);
+    const text2X = 3 * this.height;
+    this.textE2 = GuiElements.draw.text(text2X, textY, device.name, font2, color2);
+    this.group.appendChild(this.textE2);
+    TouchReceiver.addListenersBN(this.textE2, this);
+  }  
 
   this.icon = new VectorIcon(iconX, iconY, pathId, color, iconH, this.group);
   if (Hatchling || HatchPlus) {
@@ -418,7 +418,6 @@ Button.prototype.addDeviceInfo = function(device) {
 
   this.hasText = true;
   TouchReceiver.addListenersBN(this.textE, this);
-  TouchReceiver.addListenersBN(this.textE2, this);
   TouchReceiver.addListenersBN(this.icon.pathE, this);
 }
 

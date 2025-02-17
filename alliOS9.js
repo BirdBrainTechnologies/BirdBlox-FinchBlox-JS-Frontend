@@ -6437,7 +6437,9 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
 
   //TODO: Use final naming convention
   this.shortName = advertisedName
-  this.name = ""
+  this.name = DeviceHatchling.firstNames[this.shortName[0]] + " " +
+    DeviceHatchling.middleNames[this.shortName[1]] + " " +
+    DeviceHatchling.lastNames[this.shortName[2]]
 
   this.hlState = []
   // Code for what is connected to each of the 6 ports (A-F). Current options:
@@ -6586,6 +6588,91 @@ DeviceHatchling.prototype.getPortsByType = function(type) {
     }
   }
   return ports
+}
+
+DeviceHatchling.firstNames = {
+  'A': 'Awesome',
+  'B': 'Bouncy',
+  'C': 'Cunning',
+  'D': 'Doubtful',
+  'E': 'Enormous',
+  'F': 'Fearless',
+  'G': 'Gentle',
+  'H': 'Hungry',
+  'I': 'Icy',
+  'J': 'Joyful',
+  'K': 'Kind',
+  'L': 'Lazy',
+  'M': 'Mutant',
+  'N': 'Nocturnal',
+  'O': 'Optimistic',
+  'P': 'Persistent',
+  'Q': 'Quirky',
+  'R': 'Remarkable',
+  'S': 'Shy',
+  'T': 'Tiny',
+  'U': 'Unbelievable',
+  'V': 'Vivid',
+  'W': 'Witty',
+  'X': 'Xenial', //someone who shows warmth, hospitality, and friendship towards other people.
+  'Y': 'Young',
+  'Z': 'Zealous'
+}
+DeviceHatchling.middleNames = {
+  'A': 'Arctic',
+  'B': 'Blue',
+  'C': 'Crystal',
+  'D': 'Desert',
+  'E': 'Emerald',
+  'F': 'Fire',
+  'G': 'Green',
+  'H': 'Honey',
+  'I': 'Indigo',
+  'J': 'Jungle',
+  'K': 'Kelp',
+  'L': 'Lightning',
+  'M': 'Mountain',
+  'N': 'Navy',
+  'O': 'Ocean',
+  'P': 'Purple',
+  'Q': 'Quartz',
+  'R': 'Rainforest',
+  'S': 'Space',
+  'T': 'Teal',
+  'U': 'Umber',
+  'V': 'Violet',
+  'W': 'Watermelon',
+  'X': 'Xanadu',
+  'Y': 'Yellow',
+  'Z': 'Zephyr'
+}
+DeviceHatchling.lastNames = {
+  'A': 'Axolotl',
+  'B': 'Bee',
+  'C': 'Cat',
+  'D': 'Dragon',
+  'E': 'Elephant',
+  'F': 'Fox',
+  'G': 'Griffin',
+  'H': 'Hawk',
+  'I': 'Inchworm',
+  'J': 'Jellyfish',
+  'K': 'Kraken',
+  'L': 'Lion',
+  'M': 'Monkey',
+  'N': 'Narwhal',
+  'O': 'Octopus',
+  'P': 'Platypus',
+  'Q': 'Quail',
+  'R': 'Rooster',
+  'S': 'Snail',
+  'T': 'Tiger',
+  'U': 'Unicorn',
+  'V': 'Velociraptor',
+  'W': 'Whale',
+  'X': 'Xerus', //African ground squirrel
+  'Y': 'Yak',
+  'Z': 'Zebra'
 }
 
 /**
@@ -6802,6 +6889,11 @@ if (HatchPlus) { //TODO: do this always?
     for (var i = 0; i < BlockList.catCount(); i++) {
       var cat = BlockList.getCatId(i)
       BlockPalette.getCategory(cat).refreshGroup()
+    }
+
+    //Reload the current file so that the blocks are displayed properly
+    if (SaveManager.fileName) {
+      SaveManager.userOpenFile(SaveManager.fileName)
     }
   }
 }
@@ -16507,7 +16599,8 @@ Button.prototype.addDeviceInfo = function(device) {
     var dIconPath = device.connected ? VectorPaths.bdConnected : VectorPaths.bdClose
     var dIconColor = device.connected ? Colors.ballyBrandBlue : Colors.ballyGray
     var dIcon = new VectorIcon(dIconX, dIconY, dIconPath, dIconColor, dIconH, this.group)
-    this.textE = GuiElements.draw.text(2*margin + dIconH, textY, device.shortName, font, color2);
+    var nameText = device.shortName + "  (" + device.name + ")"
+    this.textE = GuiElements.draw.text(2*margin + dIconH, textY, nameText, font, color2);
     this.group.appendChild(this.textE);
 
     if (device.connected) { 
@@ -16518,12 +16611,11 @@ Button.prototype.addDeviceInfo = function(device) {
     this.textE = GuiElements.draw.text(textX, textY, device.shortName, font, color);
     this.group.appendChild(this.textE);
 
-    
-  }
-
-  var text2X = 3 * this.height;
-  this.textE2 = GuiElements.draw.text(text2X, textY, device.name, font2, color2);
-  this.group.appendChild(this.textE2);
+    var text2X = 3 * this.height;
+    this.textE2 = GuiElements.draw.text(text2X, textY, device.name, font2, color2);
+    this.group.appendChild(this.textE2);
+    TouchReceiver.addListenersBN(this.textE2, this);
+  }  
 
   this.icon = new VectorIcon(iconX, iconY, pathId, color, iconH, this.group);
   if (Hatchling || HatchPlus) {
@@ -16532,7 +16624,6 @@ Button.prototype.addDeviceInfo = function(device) {
 
   this.hasText = true;
   TouchReceiver.addListenersBN(this.textE, this);
-  TouchReceiver.addListenersBN(this.textE2, this);
   TouchReceiver.addListenersBN(this.icon.pathE, this);
 }
 
@@ -30243,11 +30334,11 @@ DiscoverDialog.prototype.show = function() {
     this.connectedDevices = []
     var device = DeviceHatchling.getManager().getDevice(0)
 
-    console.log("**** DiscoverDialog show (" + this.deviceSelected + "; " + this.rowCount + ") " + device?.shortName)
-    console.log("**** discovered devices: " + this.discoveredDevices.length)
+    //console.log("**** DiscoverDialog show (" + this.deviceSelected + "; " + this.rowCount + ") " + device?.shortName)
+    //console.log("**** discovered devices: " + this.discoveredDevices.length)
     for (var i = 0; i < this.discoveredDevices.length; i++) {
       var name = this.discoveredDevices[i] ? this.discoveredDevices[i].shortName : "???"
-      console.log("**** " + i + ": " + name)
+      //console.log("**** " + i + ": " + name)
     }
     
     if (device != null && device.connected) {
@@ -30281,7 +30372,7 @@ DiscoverDialog.prototype.show = function() {
         var index = -1
         for (var i = 0; i < this.discoveredDevices.length; i++) {
           if (this.discoveredDevices[i].id == device.id) {
-            console.log("*** removing connected device from discovery list at index " + i)
+            //console.log("*** removing connected device from discovery list at index " + i)
             this.discoveredDevices.splice(i, 1) 
             this.rowCount -= 1
           }
@@ -30308,7 +30399,7 @@ DiscoverDialog.prototype.show = function() {
       this.hasBeenShown = true
     }
   }
-  console.log("**** about to call RowDialog show with " + this.rowCount + " rows")
+  //console.log("**** about to call RowDialog show with " + this.rowCount + " rows")
   RowDialog.prototype.show.call(this);
   if (shouldDiscover) {
     this.discoverDevices();
@@ -30421,7 +30512,7 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
 
   //Just show a spinner if the app is in the process of connecting a device
   if ((Hatchling || HatchPlus) && this.deviceSelected) {
-    console.log("*** device selected - showing spinner")
+    //console.log("*** device selected - showing spinner")
     var iconPath = VectorPaths.faSyncAlt
     var iconH = RowDialog.bnHeight - 6*m
     var iconW = VectorIcon.computeWidth(iconPath, iconH)
@@ -30484,7 +30575,7 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
  * @param device
  */
 DiscoverDialog.prototype.selectDevice = function(device) {
-  console.log("*** selectDevice: " + device.shortName)
+  //console.log("*** selectDevice: " + device.shortName)
 
   if (Hatchling || HatchPlus) { this.deviceSelected = true }
 

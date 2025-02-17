@@ -37,6 +37,11 @@ if (HatchPlus) { //TODO: do this always?
       let cat = BlockList.getCatId(i)
       BlockPalette.getCategory(cat).refreshGroup()
     }
+
+    //Reload the current file so that the blocks are displayed properly
+    if (SaveManager.fileName) {
+      SaveManager.userOpenFile(SaveManager.fileName)
+    }
   }
 }
 

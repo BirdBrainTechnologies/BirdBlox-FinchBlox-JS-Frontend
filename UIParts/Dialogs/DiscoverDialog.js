@@ -47,11 +47,11 @@ DiscoverDialog.prototype.show = function() {
     this.connectedDevices = []
     let device = DeviceHatchling.getManager().getDevice(0)
 
-    console.log("**** DiscoverDialog show (" + this.deviceSelected + "; " + this.rowCount + ") " + device?.shortName)
-    console.log("**** discovered devices: " + this.discoveredDevices.length)
+    //console.log("**** DiscoverDialog show (" + this.deviceSelected + "; " + this.rowCount + ") " + device?.shortName)
+    //console.log("**** discovered devices: " + this.discoveredDevices.length)
     for (let i = 0; i < this.discoveredDevices.length; i++) {
       let name = this.discoveredDevices[i] ? this.discoveredDevices[i].shortName : "???"
-      console.log("**** " + i + ": " + name)
+      //console.log("**** " + i + ": " + name)
     }
     
     if (device != null && device.connected) {
@@ -85,7 +85,7 @@ DiscoverDialog.prototype.show = function() {
         let index = -1
         for (let i = 0; i < this.discoveredDevices.length; i++) {
           if (this.discoveredDevices[i].id == device.id) {
-            console.log("*** removing connected device from discovery list at index " + i)
+            //console.log("*** removing connected device from discovery list at index " + i)
             this.discoveredDevices.splice(i, 1) 
             this.rowCount -= 1
           }
@@ -112,7 +112,7 @@ DiscoverDialog.prototype.show = function() {
       this.hasBeenShown = true
     }
   }
-  console.log("**** about to call RowDialog show with " + this.rowCount + " rows")
+  //console.log("**** about to call RowDialog show with " + this.rowCount + " rows")
   RowDialog.prototype.show.call(this);
   if (shouldDiscover) {
     this.discoverDevices();
@@ -225,7 +225,7 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
 
   //Just show a spinner if the app is in the process of connecting a device
   if ((Hatchling || HatchPlus) && this.deviceSelected) {
-    console.log("*** device selected - showing spinner")
+    //console.log("*** device selected - showing spinner")
     let iconPath = VectorPaths.faSyncAlt
     let iconH = RowDialog.bnHeight - 6*m
     let iconW = VectorIcon.computeWidth(iconPath, iconH)
@@ -288,7 +288,7 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
  * @param device
  */
 DiscoverDialog.prototype.selectDevice = function(device) {
-  console.log("*** selectDevice: " + device.shortName)
+  //console.log("*** selectDevice: " + device.shortName)
 
   if (Hatchling || HatchPlus) { this.deviceSelected = true }
 

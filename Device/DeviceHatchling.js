@@ -11,7 +11,9 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
 
   //TODO: Use final naming convention
   this.shortName = advertisedName
-  this.name = ""
+  this.name = DeviceHatchling.firstNames[this.shortName[0]] + " " +
+    DeviceHatchling.middleNames[this.shortName[1]] + " " +
+    DeviceHatchling.lastNames[this.shortName[2]]
 
   this.hlState = []
   // Code for what is connected to each of the 6 ports (A-F). Current options:
@@ -160,6 +162,91 @@ DeviceHatchling.prototype.getPortsByType = function(type) {
     }
   }
   return ports
+}
+
+DeviceHatchling.firstNames = {
+  'A': 'Awesome',
+  'B': 'Bouncy',
+  'C': 'Cunning',
+  'D': 'Doubtful',
+  'E': 'Enormous',
+  'F': 'Fearless',
+  'G': 'Gentle',
+  'H': 'Hungry',
+  'I': 'Icy',
+  'J': 'Joyful',
+  'K': 'Kind',
+  'L': 'Lazy',
+  'M': 'Mutant',
+  'N': 'Nocturnal',
+  'O': 'Optimistic',
+  'P': 'Persistent',
+  'Q': 'Quirky',
+  'R': 'Remarkable',
+  'S': 'Shy',
+  'T': 'Tiny',
+  'U': 'Unbelievable',
+  'V': 'Vivid',
+  'W': 'Witty',
+  'X': 'Xenial', //someone who shows warmth, hospitality, and friendship towards other people.
+  'Y': 'Young',
+  'Z': 'Zealous'
+}
+DeviceHatchling.middleNames = {
+  'A': 'Arctic',
+  'B': 'Blue',
+  'C': 'Crystal',
+  'D': 'Desert',
+  'E': 'Emerald',
+  'F': 'Fire',
+  'G': 'Green',
+  'H': 'Honey',
+  'I': 'Indigo',
+  'J': 'Jungle',
+  'K': 'Kelp',
+  'L': 'Lightning',
+  'M': 'Mountain',
+  'N': 'Navy',
+  'O': 'Ocean',
+  'P': 'Purple',
+  'Q': 'Quartz',
+  'R': 'Rainforest',
+  'S': 'Space',
+  'T': 'Teal',
+  'U': 'Umber',
+  'V': 'Violet',
+  'W': 'Watermelon',
+  'X': 'Xanadu',
+  'Y': 'Yellow',
+  'Z': 'Zephyr'
+}
+DeviceHatchling.lastNames = {
+  'A': 'Axolotl',
+  'B': 'Bee',
+  'C': 'Cat',
+  'D': 'Dragon',
+  'E': 'Elephant',
+  'F': 'Fox',
+  'G': 'Griffin',
+  'H': 'Hawk',
+  'I': 'Inchworm',
+  'J': 'Jellyfish',
+  'K': 'Kraken',
+  'L': 'Lion',
+  'M': 'Monkey',
+  'N': 'Narwhal',
+  'O': 'Octopus',
+  'P': 'Platypus',
+  'Q': 'Quail',
+  'R': 'Rooster',
+  'S': 'Snail',
+  'T': 'Tiger',
+  'U': 'Unicorn',
+  'V': 'Velociraptor',
+  'W': 'Whale',
+  'X': 'Xerus', //African ground squirrel
+  'Y': 'Yak',
+  'Z': 'Zebra'
 }
 
 /**
