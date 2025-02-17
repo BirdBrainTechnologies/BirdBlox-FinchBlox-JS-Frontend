@@ -192,7 +192,7 @@ BlockSlot.prototype.highlight = function() {
  */
 BlockSlot.prototype.copyFrom = function(blockSlot) {
   if (blockSlot.hasChild) {
-    this.snap(blockSlot.child.duplicate(0, 0));
+    this.snap(blockSlot.child.duplicate(0, 0, true));
   }
 };
 

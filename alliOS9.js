@@ -18712,6 +18712,8 @@ InputWidget.NumPad.setConstants = function() {
   NP.okIconH = HatchPlus ? 45 : NP.bsIconH;
   NP.bsIcon = HatchPlus ? VectorPaths.bsBackspaceFill : VectorPaths.backspace
   NP.bnBigWidth = 2*NP.bnWidth + NP.bnMargin
+
+  NP.currentNumberPad = null
 };
 
 /**
@@ -18733,7 +18735,13 @@ InputWidget.NumPad.prototype.show = function(x, y, parentGroup, overlay, slotSha
   /* The data in the Slot starts out gray to indicate that it will be deleted on modification. THe number 0 is not
    * grayed since there's nothing to delete. */
   this.grayOutUnlessZero();
+
+  InputWidget.NumPad.currentNumberPad = this
 };
+
+InputWidget.NumPad.prototype.close = function() {
+  InputWidget.NumPad.currentNumberPad = null
+}
 
 /**
  * @inheritDoc
@@ -19019,6 +19027,38 @@ InputWidget.NumPad.prototype.okPressed = function() {
 InputWidget.NumPad.prototype.sendUpdate = function() {
   this.updateFn(this.displayNum.getData(), this.displayNum.getString());
 };
+
+/**
+ * Keyboard input
+ * @param {KeyboardEvent} event - keyboard keydown event
+ */
+InputWidget.NumPad.prototype.onKeyDown = function(event) {
+  switch (event.key) {
+  case '0':
+  case '1':
+  case '2':
+  case '3':
+  case '4':
+  case '5':
+  case '6':
+  case '7':
+  case '8':
+  case '9':
+    this.numPressed(event.key)
+    break;
+  case '+':
+  case '-':
+    if (!this.positive) { this.plusMinusPressed() }
+    break;
+  case 'Backspace':
+  case 'Delete':
+    this.bsPressed()
+    break;
+  case 'Enter':
+    this.okPressed()
+    break;
+  }
+}
 
 /**
  * Handles displaying numbers entered using the NumPadWidget.  Properties of the number are divided into a number of
@@ -20623,10 +20663,10 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
 
     //Add icon at top
     var iconPath = this.multi ? VectorPaths.bdMultiLightBulb : VectorPaths.bdLightBulb
-    var iconH = this.multi ? 100 : 80
+    var iconH = this.multi ? 120 : 80
     var iconW = VectorIcon.computeWidth(iconPath, iconH)
     var iconX = (this.width - iconW)/2
-    var iconY = this.multi ? (this.height/2 - iconH) : ( (this.height - iconH)/2 )
+    var iconY = this.multi ? (this.height/2 - iconH*3/4) : ( (this.height - iconH)/2 )
     var icon = new VectorIcon(iconX, iconY, iconPath, this.iconColor, iconH, this.group)
 
     //Add the color wheel
@@ -20769,10 +20809,10 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
         this.bulbValues = data[this.index].split(";")
         this.bulbButtons = []
         var bulbM = bnM/2
-        var bulbH = (this.height - iconH)/4 - bulbM
-        var bulbSetX = (this.width)/2 - bulbH - bulbM/2
+        var bulbH = bnH*11/10 //(this.height - iconH)/4 - bulbM
+        var bulbSetX = (this.width)/2 - 2*bulbH - bulbM*3/2
         var bulbX = bulbSetX
-        var bulbY = this.height/2 //iconH
+        var bulbY = rY + smIconH + bnM //this.height/2 //iconH
         for (var i = 0; i < this.bulbValues.length; i++) {
             var bulb = new Button(bulbX, bulbY, bulbH, bulbH, this.group, 
                 this.bulbValues[i], bulbH/2, bulbH/2)
@@ -20790,10 +20830,10 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
             this.bulbButtons[i] = bulb
 
             bulbX += bulbH + bulbM
-            if (i == 1) {
+            /*if (i == 1) {
                 bulbY += bulbH + bulbM
                 bulbX = bulbSetX
-            }
+            }*/
         }
         this.selectBulb(0)
     }
@@ -33055,6 +33095,16 @@ CallbackManager.setFilePreference = function(fileName) {
 };
 
 /**
+ * Handle keydown event - used in for hatchblox webapp
+ * @param {KeyboardEvent} event
+ */
+CallbackManager.onKeyDownEvent = function(event) {
+  if (InputWidget.NumPad.currentNumberPad) {
+    InputWidget.NumPad.currentNumberPad.onKeyDown(event)
+  }
+}
+
+/**
  * Static class that helps parse and write XML files
  */
 function XmlWriter() {
@@ -39169,7 +39219,7 @@ BlockSlot.prototype.highlight = function() {
  */
 BlockSlot.prototype.copyFrom = function(blockSlot) {
   if (blockSlot.hasChild) {
-    this.snap(blockSlot.child.duplicate(0, 0));
+    this.snap(blockSlot.child.duplicate(0, 0, true));
   }
 };
 
@@ -54490,7 +54540,7 @@ PrettyPrinter.prototype.printValue = function(block) {
       this.printCmd(block)
       this.gen.closeParen()
     //}
-  } else if (block instanceof CommandBlock || block instanceof LoopBlock) {
+  } else if (block instanceof CommandBlock || block instanceof LoopBlock || block instanceof DoubleLoopBlock) {
     this.printCmdList(block)
   } else if (typeof block == 'string') {
     //console.log("*** got a string: " + block)

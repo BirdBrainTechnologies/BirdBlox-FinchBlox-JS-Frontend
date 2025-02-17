@@ -23,6 +23,8 @@ InputWidget.NumPad.setConstants = function() {
   NP.okIconH = HatchPlus ? 45 : NP.bsIconH;
   NP.bsIcon = HatchPlus ? VectorPaths.bsBackspaceFill : VectorPaths.backspace
   NP.bnBigWidth = 2*NP.bnWidth + NP.bnMargin
+
+  NP.currentNumberPad = null
 };
 
 /**
@@ -44,7 +46,13 @@ InputWidget.NumPad.prototype.show = function(x, y, parentGroup, overlay, slotSha
   /* The data in the Slot starts out gray to indicate that it will be deleted on modification. THe number 0 is not
    * grayed since there's nothing to delete. */
   this.grayOutUnlessZero();
+
+  InputWidget.NumPad.currentNumberPad = this
 };
+
+InputWidget.NumPad.prototype.close = function() {
+  InputWidget.NumPad.currentNumberPad = null
+}
 
 /**
  * @inheritDoc
@@ -330,3 +338,35 @@ InputWidget.NumPad.prototype.okPressed = function() {
 InputWidget.NumPad.prototype.sendUpdate = function() {
   this.updateFn(this.displayNum.getData(), this.displayNum.getString());
 };
+
+/**
+ * Keyboard input
+ * @param {KeyboardEvent} event - keyboard keydown event
+ */
+InputWidget.NumPad.prototype.onKeyDown = function(event) {
+  switch (event.key) {
+  case '0':
+  case '1':
+  case '2':
+  case '3':
+  case '4':
+  case '5':
+  case '6':
+  case '7':
+  case '8':
+  case '9':
+    this.numPressed(event.key)
+    break;
+  case '+':
+  case '-':
+    if (!this.positive) { this.plusMinusPressed() }
+    break;
+  case 'Backspace':
+  case 'Delete':
+    this.bsPressed()
+    break;
+  case 'Enter':
+    this.okPressed()
+    break;
+  }
+}

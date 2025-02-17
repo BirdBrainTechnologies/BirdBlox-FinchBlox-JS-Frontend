@@ -182,9 +182,10 @@ PrettyPrinter.prototype.printValue = function(block) {
       this.printCmd(block)
       this.gen.closeParen()
     //}
-  } else if (block instanceof CommandBlock || block instanceof LoopBlock) {
+  } else if (block instanceof CommandBlock || block instanceof LoopBlock || block instanceof DoubleLoopBlock) {
     this.printCmdList(block)
   } else if (typeof block == 'string') {
+    //console.log("*** got a string: " + block)
     this.gen.const(block)//(printString block)
   } else if (typeof block == 'number') { //'Float'
     this.gen.const(block.toString())//(toString block 20) TODO: add precision?

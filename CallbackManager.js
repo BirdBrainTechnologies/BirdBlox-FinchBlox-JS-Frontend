@@ -251,6 +251,7 @@ CallbackManager.robot.updateHasV2Microbit = function(robotId, hasV2String) {
  * @return {boolean}
  */
 CallbackManager.robot.discovered = function(robotList) {
+  console.log("*** CallbackManager.robot.discovered " + robotList)
   robotList = HtmlServer.decodeHtml(robotList);
   DeviceManager.backendDiscovered(robotList);
   return true;
@@ -373,3 +374,13 @@ CallbackManager.setFilePreference = function(fileName) {
   GuiElements.alert("Setting default file to " + fileName);
   OpenDialog.lastOpenFile = fileName;
 };
+
+/**
+ * Handle keydown event - used in for hatchblox webapp
+ * @param {KeyboardEvent} event
+ */
+CallbackManager.onKeyDownEvent = function(event) {
+  if (InputWidget.NumPad.currentNumberPad) {
+    InputWidget.NumPad.currentNumberPad.onKeyDown(event)
+  }
+}

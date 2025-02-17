@@ -96,10 +96,10 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
 
     //Add icon at top
     const iconPath = this.multi ? VectorPaths.bdMultiLightBulb : VectorPaths.bdLightBulb
-    const iconH = this.multi ? 100 : 80
+    const iconH = this.multi ? 120 : 80
     const iconW = VectorIcon.computeWidth(iconPath, iconH)
     const iconX = (this.width - iconW)/2
-    const iconY = this.multi ? (this.height/2 - iconH) : ( (this.height - iconH)/2 )
+    const iconY = this.multi ? (this.height/2 - iconH*3/4) : ( (this.height - iconH)/2 )
     const icon = new VectorIcon(iconX, iconY, iconPath, this.iconColor, iconH, this.group)
 
     //Add the color wheel
@@ -242,10 +242,10 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
         this.bulbValues = data[this.index].split(";")
         this.bulbButtons = []
         let bulbM = bnM/2
-        let bulbH = (this.height - iconH)/4 - bulbM
-        let bulbSetX = (this.width)/2 - bulbH - bulbM/2
+        let bulbH = bnH*11/10 //(this.height - iconH)/4 - bulbM
+        let bulbSetX = (this.width)/2 - 2*bulbH - bulbM*3/2
         let bulbX = bulbSetX
-        let bulbY = this.height/2 //iconH
+        let bulbY = rY + smIconH + bnM //this.height/2 //iconH
         for (let i = 0; i < this.bulbValues.length; i++) {
             let bulb = new Button(bulbX, bulbY, bulbH, bulbH, this.group, 
                 this.bulbValues[i], bulbH/2, bulbH/2)
@@ -263,10 +263,10 @@ InputWidget.Color.prototype.show = function(x, y, parentGroup, overlay, slotShap
             this.bulbButtons[i] = bulb
 
             bulbX += bulbH + bulbM
-            if (i == 1) {
+            /*if (i == 1) {
                 bulbY += bulbH + bulbM
                 bulbX = bulbSetX
-            }
+            }*/
         }
         this.selectBulb(0)
     }
