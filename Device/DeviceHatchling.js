@@ -242,7 +242,7 @@ DeviceHatchling.lastNames = {
   'S': 'Snail',
   'T': 'Tiger',
   'U': 'Unicorn',
-  'V': 'Velociraptor',
+  'V': 'Velociraptor', //Vole?
   'W': 'Whale',
   'X': 'Xerus', //African ground squirrel
   'Y': 'Yak',
