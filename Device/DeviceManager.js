@@ -518,6 +518,12 @@ DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected)
       mbRuntime.justConnected()
     }
   }
+  
+  if (HatchPlus && !isConnected) { 
+    //Update the blocks to show that nothing is connected
+    CodeManager.updateAvailableSensors(); 
+  }
+  
 };
 
 /**

@@ -191,18 +191,18 @@ HL_Utils.showPortsPopup = function(block) {
 HL_Utils.birdBloxCheckActive = function(block) {
   //console.log("birdBloxCheckActive for " + block.constructor.name)
   let device = DeviceHatchling.getManager().getDevice(0);
-  if (device != null) {
-    const currentState = device.portStates[block.port]
-
-    if (block.stack != null && block.stack.isDisplayStack && block.portType != currentState) {
-      HL_Utils.replaceBlock(block, currentState)
-      return (currentState != 0)
-    } else {
-      return (block.portType == currentState && currentState != 0)
-    }
-
+  let currentState = 0
+  if (device != null && device.connected) {
+    currentState = device.portStates[block.port]
   }
-  return false
+
+  if (block.stack != null && block.stack.isDisplayStack && block.portType != currentState) {
+    HL_Utils.replaceBlock(block, currentState)
+    return (currentState != 0)
+  } else {
+    return (block.portType == currentState && currentState != 0)
+  }
+
 }
 //To replace the block in the palette when something new is plugged in to a port 
 HL_Utils.replaceBlock = function(block, currentState) {
