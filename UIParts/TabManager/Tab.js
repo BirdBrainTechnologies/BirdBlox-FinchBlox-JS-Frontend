@@ -758,7 +758,7 @@ Tab.prototype.outlineCode = function(inRed) {
   }
 
   this.mainG.insertBefore(this.outlineGroup, this.mainG.children[0])
-  console.log(this.outlineGroup)
+  //console.log(this.outlineGroup)
 }
 
 /**

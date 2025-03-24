@@ -183,7 +183,6 @@ BlockButton.prototype.updateValue = function(newValue, index) { //, displayStrin
         if (this.colorCircles == null) {
           this.colorCircles = []
           for (let j = 0; j < 4; j++) {
-            console.log("****** width " + this.width + " height " + this.height)
             let m = 1
             let cx = 1.5*m + this.height/2 + j*(this.height-m)
             this.colorCircles[j] = this.createColorCircle(colorValues[j], cx)

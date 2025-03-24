@@ -10,10 +10,12 @@ function HLFileDrawer() {
 	this.iconColor = Colors.ballyBrandBlue
 	this.iconColor2 = Colors.ballyBrandBlueLight
 	this.textColor = Colors.ballyBrandBlueDark
-	this.visible = false
 	this.slideDuration = 0.33
+
+	//Variables
+	this.visible = false
 	this.isExtended = false
-	
+	this.renamePending = false
 	
 
 	Overlay.call(this, Overlay.types.menu)
@@ -312,13 +314,14 @@ HLFileDrawer.prototype.displaySaveOrDeleteMenu = function(embed) {
 
 HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile, embed) {
 	const VP = VectorPaths
+	this.shouldCreateFile = shouldCreateFile
 
 	this.resetTab(2, null, embed)
 
 	const group = embed ? this.insetGroup : this.menuContainer
 	
 	let y = 0
-	if (shouldCreateFile) {
+	if (this.shouldCreateFile) {
 		//Add the star at the top if this is in the create file tab
 		const iconP = VP.bdSaveProgramStar
 		const iconH = this.bnH * 4/5
@@ -362,12 +365,13 @@ HLFileDrawer.prototype.displaySaveProgramMenu = function(shouldCreateFile, embed
 		    return;
 		}
 
+		if (GuiElements.isIos) { this.renamePending = true }
 		//console.log("Name file " + fileName);
 		LM.saveAs(fileName, (SaveManager.fileName != LM.savePointFileNames[LM.currentLevel]));
 
-		if (shouldCreateFile) {
+		/*if (shouldCreateFile) {
 			LevelManager.loadLevelSavePoint();
-		}
+		}*/ //moved to displaySuccess
 
 		this.displaySuccess(embed)
 	
@@ -629,11 +633,27 @@ HLFileDrawer.prototype.displaySuccess = function(embed, extend) {
 	const circle = GuiElements.draw.circle(cx, cy, r, Colors.white, group)
 	const icon = new VectorIcon(iconX, m, VectorPaths.bdCheck, Colors.ballyGreen, h, group)
 
-	if (this.fileToOpen != null) {
-		LevelManager.openFile(this.fileToOpen)
+	let succeed = function() {
+		if (this.fileToOpen != null && this.shouldCreateFile) {
+			console.error("Cannot create a new file and open an existing file at the same time!")
+		} else if (this.fileToOpen != null) {
+			LevelManager.openFile(this.fileToOpen)
+		} else if (this.shouldCreateFile) {
+			LevelManager.loadLevelSavePoint()
+			this.shouldCreateFile = false
+		}
+		setTimeout(this.close.bind(this), 1000)
 	}
 
-	setTimeout(this.close.bind(this), 1000)
+	//Maybe we should wait for the file to actually be renamed, but what if the rename fails? 
+	//Better to still load a file and dismiss this menu.
+	if (this.renamePending) {
+		setTimeout(succeed.bind(this), 500)
+		this.renamePending = false
+	} else {
+		succeed.call(this)
+	}
+
 }
 
 HLFileDrawer.prototype.editText = function() {
