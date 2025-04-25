@@ -303,25 +303,8 @@ B_HLOutputBase.prototype.constructor = B_HLOutputBase;
 B_HLOutputBase.prototype.updateValues = function() {
   HL_Utils.updatePort(this)
   if (this.valueBN != null) {
-    if (this.portType == 1) { //rotation servo
-      /*let percent = this.valueBN.values[0] * 0.9
-      if (percent < 5) { percent = 0 }
-      if (this.flip) { percent = -percent - 15 } //rotate counter clockwise
-      this.value = percent*/
-
-      this.value = this.valueBN.values[0] * (this.flip ? -1 : 1)
-
-      /*if (percent == 0) {
-        this.value = 89 //off signal
-      } else if (percent > 100) {
-        this.value = 174
-      } else if (percent < -100) {
-        this.value = 2
-      } else if (percent > 0) {
-        this.value = Math.round( (percent * 75/100) + 98 ) 
-      } else if (percent < 0) {
-        this.value = Math.round( 78 + (percent * 75/100) )
-      }*/
+    if (this.portType == 1) { //rotation servo (motor)
+      this.value = this.valueBN.values[0] * (this.flip ? 1 : -1)
     } else if (this.portType == 8) { //fairy lights
       let percent = this.valueBN.values[0]
       if (percent > 100) {
@@ -331,9 +314,6 @@ B_HLOutputBase.prototype.updateValues = function() {
       } else {
         this.value = Math.round(percent * 254/100)
       }
-    /*} else if (this.portType == 3) { //position servo
-      this.value = Math.round(this.valueBN.values[0] / 1.5) + 2
-      //this.value = this.valueBN.values[0] + 5*/
     } else {
       this.value = this.valueBN.values[0]
     }
@@ -344,10 +324,6 @@ B_HLOutputBase.prototype.updateValues = function() {
       this.green = this.colorButton.values[1];
       this.blue = this.colorButton.values[2];
     }
-
-    /*this.red = this.colorButton.values[0].r;
-    this.green = this.colorButton.values[0].g;
-    this.blue = this.colorButton.values[0].b;*/
     
     this.value = Math.round(this.red*2.55) + ":" +
       Math.round(this.green*2.55) + ":" + Math.round(this.blue*2.55)
@@ -356,25 +332,12 @@ B_HLOutputBase.prototype.updateValues = function() {
   if (this.portType == 10 && this.colorButtons.length == 4) { //neopixel strip
     this.value = ""
     for (let i = 0; i < this.colorButtons.length; i++) {
-      /*this.value = this.value + Math.round(this.colorButtons[i].values[0].r*2.55) + ","
-      this.value = this.value + Math.round(this.colorButtons[i].values[0].g*2.55) + ","
-      this.value = this.value + Math.round(this.colorButtons[i].values[0].b*2.55) + ","*/
       this.value = this.value + Math.round(this.colorButtons[i].values[0]*2.55) + ","
       this.value = this.value + Math.round(this.colorButtons[i].values[1]*2.55) + ","
       this.value = this.value + Math.round(this.colorButtons[i].values[2]*2.55) + ","
     }
   }
 }
-/*B_HLOutputBase.prototype.updateAction = function() {
-  if (this.runMem.requestStatus.finished) {
-    if (this.runMem.requestStatus.error) {
-      return new ExecutionStatusError();
-    }
-    return new ExecutionStatusDone();
-  } else {
-    return new ExecutionStatusRunning();
-  }
-};*/
 B_HLOutputBase.prototype.checkActive = function() {
   return HL_Utils.checkActive(this)
 }
@@ -532,7 +495,7 @@ B_HLRotationServo.prototype.constructor = B_HLRotationServo;
 function B_HL_RS_L1(x, y, flip, userSelectedPort) {
   B_HLRotationServo.call(this, x, y, flip, userSelectedPort)
 
-  this.value = this.flip ? -50 : 50 //-60 : 45
+  this.value = this.flip ? 50 : -50 //-60 : 45
 }
 B_HL_RS_L1.prototype = Object.create(B_HLRotationServo.prototype);
 B_HL_RS_L1.prototype.constructor = B_HL_RS_L1;
@@ -1508,7 +1471,7 @@ function B_HLBBRotationServo(x, y, port) {
   const numSlot = new NumSlot(this, "NumS_out", 0, false, true)
   numSlot.addLimits(this.minVal, this.maxVal, Language.getStr("Speed"))
   this.addPart(numSlot)
-  this.parseTranslation(Language.getStr("block_Rotation_Servo"))
+  this.parseTranslation(Language.getStr("block_HL_Motor"))
 }
 B_HLBBRotationServo.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBRotationServo.prototype.constructor = B_HLBBRotationServo;
@@ -1545,7 +1508,7 @@ function B_HLBBPositionServo(x, y, port) {
   const numSlot = new NumSlot(this, "NumS_out", 90, true, true)
   numSlot.addLimits(this.minVal, this.maxVal, Language.getStr("Angle"))
   this.addPart(numSlot)
-  this.parseTranslation(Language.getStr("block_Position_Servo"))
+  this.parseTranslation(Language.getStr("block_HL_Servo"))
 }
 B_HLBBPositionServo.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBPositionServo.prototype.constructor = B_HLBBPositionServo;

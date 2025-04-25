@@ -114,6 +114,7 @@ BlockContextMenu.prototype.duplicate = function(all) {
   const tab = this.block.stack.tab;
   const copyStack = new BlockStack(blockCopy, tab);
   //copyStack.updateDim();
+  SaveManager.markEdited()
   this.close();
 };
 

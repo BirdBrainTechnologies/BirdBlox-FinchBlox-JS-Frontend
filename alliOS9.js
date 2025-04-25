@@ -2533,8 +2533,8 @@ Language.en = {
 "Add_Comment_Here":"add comment here...",
 "is_empty":"is empty",
 "block_Fairy_Lights":"Fairy Lights (Slot 1) (Slot 2) %",
-"block_Neopixel_Strip":"Neopixel (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
-"block_Single_Neopixel":"Neopixel R (Slot 1) % G (Slot 2) % B (Slot 3) %",
+"block_Neopixel_Strip":"Bendy Lights (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
+"block_Single_Neopixel":"Big LED R (Slot 1) % G (Slot 2) % B (Slot 3) %",
 "Hatchling":"Hatchling",
 "block_Button_Presses":"Button Presses",
 "block_Claps":"Claps",
@@ -2565,7 +2565,9 @@ Language.en = {
 "Extract_Block":"Extract Block",
 "Lists":"Lists",
 "Too_many_blocks_error":"Error: Too many blocks in program",
-"BigButton":"Button"
+"BigButton":"Big Button",
+"block_HL_Servo":"Servo (Slot 1) (Slot 2) °",
+"block_HL_Motor":"Motor (Slot 1) (Slot 2) %"
 }
 
 //Spanish Translation
@@ -8957,7 +8959,7 @@ BlockList.populateCat_control_2 = function(category) {
   category.addBlockByName("B_Wait");
   category.addBlockByName("B_Forever");
   category.addBlockByName("B_Repeat");
-  category.addBlockByName("B_Stop");
+  //category.addBlockByName("B_Stop");
   category.trimBottom();
   category.centerBlocks();
 }
@@ -24851,6 +24853,7 @@ BlockContextMenu.prototype.duplicate = function(all) {
   var tab = this.block.stack.tab;
   var copyStack = new BlockStack(blockCopy, tab);
   //copyStack.updateDim();
+  SaveManager.markEdited()
   this.close();
 };
 
@@ -30587,8 +30590,7 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
   var me = this;
   if (device.connected) {
     button.setCallbackFunction(function() {
-      //me.closeDialog()
-      device.disconnect()
+      me.deviceClass.getManager().removeDevice(device.name);
     }, true)
   } else {
     button.setCallbackFunction(function() {
@@ -30607,7 +30609,6 @@ DiscoverDialog.prototype.selectDevice = function(device) {
 
   if (Hatchling || HatchPlus) { this.deviceSelected = true }
 
-  this.deviceClass = DeviceManager.getDeviceClass(device);
   this.deviceClass.getManager().setOneDevice(device);
 
   if (!(Hatchling || HatchPlus)) {
@@ -46929,25 +46930,8 @@ B_HLOutputBase.prototype.constructor = B_HLOutputBase;
 B_HLOutputBase.prototype.updateValues = function() {
   HL_Utils.updatePort(this)
   if (this.valueBN != null) {
-    if (this.portType == 1) { //rotation servo
-      /*var percent = this.valueBN.values[0] * 0.9
-      if (percent < 5) { percent = 0 }
-      if (this.flip) { percent = -percent - 15 } //rotate counter clockwise
-      this.value = percent*/
-
-      this.value = this.valueBN.values[0] * (this.flip ? -1 : 1)
-
-      /*if (percent == 0) {
-        this.value = 89 //off signal
-      } else if (percent > 100) {
-        this.value = 174
-      } else if (percent < -100) {
-        this.value = 2
-      } else if (percent > 0) {
-        this.value = Math.round( (percent * 75/100) + 98 ) 
-      } else if (percent < 0) {
-        this.value = Math.round( 78 + (percent * 75/100) )
-      }*/
+    if (this.portType == 1) { //rotation servo (motor)
+      this.value = this.valueBN.values[0] * (this.flip ? 1 : -1)
     } else if (this.portType == 8) { //fairy lights
       var percent = this.valueBN.values[0]
       if (percent > 100) {
@@ -46957,9 +46941,6 @@ B_HLOutputBase.prototype.updateValues = function() {
       } else {
         this.value = Math.round(percent * 254/100)
       }
-    /*} else if (this.portType == 3) { //position servo
-      this.value = Math.round(this.valueBN.values[0] / 1.5) + 2
-      //this.value = this.valueBN.values[0] + 5*/
     } else {
       this.value = this.valueBN.values[0]
     }
@@ -46970,10 +46951,6 @@ B_HLOutputBase.prototype.updateValues = function() {
       this.green = this.colorButton.values[1];
       this.blue = this.colorButton.values[2];
     }
-
-    /*this.red = this.colorButton.values[0].r;
-    this.green = this.colorButton.values[0].g;
-    this.blue = this.colorButton.values[0].b;*/
     
     this.value = Math.round(this.red*2.55) + ":" +
       Math.round(this.green*2.55) + ":" + Math.round(this.blue*2.55)
@@ -46982,25 +46959,12 @@ B_HLOutputBase.prototype.updateValues = function() {
   if (this.portType == 10 && this.colorButtons.length == 4) { //neopixel strip
     this.value = ""
     for (var i = 0; i < this.colorButtons.length; i++) {
-      /*this.value = this.value + Math.round(this.colorButtons[i].values[0].r*2.55) + ","
-      this.value = this.value + Math.round(this.colorButtons[i].values[0].g*2.55) + ","
-      this.value = this.value + Math.round(this.colorButtons[i].values[0].b*2.55) + ","*/
       this.value = this.value + Math.round(this.colorButtons[i].values[0]*2.55) + ","
       this.value = this.value + Math.round(this.colorButtons[i].values[1]*2.55) + ","
       this.value = this.value + Math.round(this.colorButtons[i].values[2]*2.55) + ","
     }
   }
 }
-/*B_HLOutputBase.prototype.updateAction = function() {
-  if (this.runMem.requestStatus.finished) {
-    if (this.runMem.requestStatus.error) {
-      return new ExecutionStatusError();
-    }
-    return new ExecutionStatusDone();
-  } else {
-    return new ExecutionStatusRunning();
-  }
-};*/
 B_HLOutputBase.prototype.checkActive = function() {
   return HL_Utils.checkActive(this)
 }
@@ -47158,7 +47122,7 @@ B_HLRotationServo.prototype.constructor = B_HLRotationServo;
 function B_HL_RS_L1(x, y, flip, userSelectedPort) {
   B_HLRotationServo.call(this, x, y, flip, userSelectedPort)
 
-  this.value = this.flip ? -50 : 50 //-60 : 45
+  this.value = this.flip ? 50 : -50 //-60 : 45
 }
 B_HL_RS_L1.prototype = Object.create(B_HLRotationServo.prototype);
 B_HL_RS_L1.prototype.constructor = B_HL_RS_L1;
@@ -48134,7 +48098,7 @@ function B_HLBBRotationServo(x, y, port) {
   var numSlot = new NumSlot(this, "NumS_out", 0, false, true)
   numSlot.addLimits(this.minVal, this.maxVal, Language.getStr("Speed"))
   this.addPart(numSlot)
-  this.parseTranslation(Language.getStr("block_Rotation_Servo"))
+  this.parseTranslation(Language.getStr("block_HL_Motor"))
 }
 B_HLBBRotationServo.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBRotationServo.prototype.constructor = B_HLBBRotationServo;
@@ -48171,7 +48135,7 @@ function B_HLBBPositionServo(x, y, port) {
   var numSlot = new NumSlot(this, "NumS_out", 90, true, true)
   numSlot.addLimits(this.minVal, this.maxVal, Language.getStr("Angle"))
   this.addPart(numSlot)
-  this.parseTranslation(Language.getStr("block_Position_Servo"))
+  this.parseTranslation(Language.getStr("block_HL_Servo"))
 }
 B_HLBBPositionServo.prototype = Object.create(B_HLBirdBloxOutput.prototype);
 B_HLBBPositionServo.prototype.constructor = B_HLBBPositionServo;

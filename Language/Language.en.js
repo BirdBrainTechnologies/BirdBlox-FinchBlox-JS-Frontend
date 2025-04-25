@@ -237,8 +237,8 @@ Language.en = {
 "Add_Comment_Here":"add comment here...",
 "is_empty":"is empty",
 "block_Fairy_Lights":"Fairy Lights (Slot 1) (Slot 2) %",
-"block_Neopixel_Strip":"Neopixel (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
-"block_Single_Neopixel":"Neopixel R (Slot 1) % G (Slot 2) % B (Slot 3) %",
+"block_Neopixel_Strip":"Bendy Lights (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
+"block_Single_Neopixel":"Big LED R (Slot 1) % G (Slot 2) % B (Slot 3) %",
 "Hatchling":"Hatchling",
 "block_Button_Presses":"Button Presses",
 "block_Claps":"Claps",
@@ -269,5 +269,7 @@ Language.en = {
 "Extract_Block":"Extract Block",
 "Lists":"Lists",
 "Too_many_blocks_error":"Error: Too many blocks in program",
-"BigButton":"Button"
+"BigButton":"Big Button",
+"block_HL_Servo":"Servo (Slot 1) (Slot 2) °",
+"block_HL_Motor":"Motor (Slot 1) (Slot 2) %"
 }

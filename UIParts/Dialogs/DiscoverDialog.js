@@ -272,8 +272,7 @@ DiscoverDialog.prototype.createRow = function(index, y, width, contentGroup) {
   const me = this;
   if (device.connected) {
     button.setCallbackFunction(function() {
-      //me.closeDialog()
-      device.disconnect()
+      me.deviceClass.getManager().removeDevice(device.name);
     }, true)
   } else {
     button.setCallbackFunction(function() {
@@ -292,7 +291,6 @@ DiscoverDialog.prototype.selectDevice = function(device) {
 
   if (Hatchling || HatchPlus) { this.deviceSelected = true }
 
-  this.deviceClass = DeviceManager.getDeviceClass(device);
   this.deviceClass.getManager().setOneDevice(device);
 
   if (!(Hatchling || HatchPlus)) {

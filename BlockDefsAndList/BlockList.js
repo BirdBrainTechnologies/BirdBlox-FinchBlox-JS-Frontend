@@ -210,7 +210,7 @@ BlockList.populateCat_control_2 = function(category) {
   category.addBlockByName("B_Wait");
   category.addBlockByName("B_Forever");
   category.addBlockByName("B_Repeat");
-  category.addBlockByName("B_Stop");
+  //category.addBlockByName("B_Stop");
   category.trimBottom();
   category.centerBlocks();
 }
