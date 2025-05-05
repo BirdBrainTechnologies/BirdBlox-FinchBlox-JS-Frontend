@@ -149,10 +149,6 @@ PromptDialog.prototype.close = function() {
 		DialogManager.dialogVisible = false
 		this.group.remove()
 		FBPopup.currentPopup = null
-		if (GuiElements.isPWA) {
-			//Pass focus back to the parent window so that keydown events can be captured for the number pad. TODO: have all key events come from the parent?
-			HtmlServer.sendRequest("focus/parent")
-		}
 
 		if (RowDialog.currentDialog != null) { RowDialog.currentDialog.makeVisible() }
 	}

@@ -49,6 +49,13 @@ if (HatchPlus) { //TODO: do this always?
 document.addEventListener('DOMContentLoaded', function() {
   GuiElements.alert("Loading");
   (DebugOptions.safeFunc(GuiElements))();
+
+  //Capture keydown event for numpad
+  if (HatchPlus) {
+    document.onkeydown = function(e) {
+      CallbackManager.onKeyDownEvent(e)
+    }
+  }
 }, false);
 
 /** Redraws UI if screen dimensions change
