@@ -329,14 +329,14 @@ B_HLOutputBase.prototype.updateValues = function() {
       Math.round(this.green*2.55) + ":" + Math.round(this.blue*2.55)
     this.updateColor();
   }
-  if (this.portType == 10 && this.colorButtons.length == 4) { //neopixel strip
+  /*if (this.portType == 10 && this.colorButtons.length == 4) { //neopixel strip
     this.value = ""
     for (let i = 0; i < this.colorButtons.length; i++) {
       this.value = this.value + Math.round(this.colorButtons[i].values[0]*2.55) + ","
       this.value = this.value + Math.round(this.colorButtons[i].values[1]*2.55) + ","
       this.value = this.value + Math.round(this.colorButtons[i].values[2]*2.55) + ","
     }
-  }
+  }*/
 }
 B_HLOutputBase.prototype.checkActive = function() {
   return HL_Utils.checkActive(this)
@@ -864,8 +864,10 @@ function B_HLWaitUntil(x, y, usePort, sensor, userSelectedPort) {
     this.addPart(this.sensorBN);*/
   }
   let sensorPaths = [VectorPaths.bdRuler, VectorPaths.bdClap, VectorPaths.bdNoLight, VectorPaths.bdButton]
+  let defaultThresholds = [20, 0, 5, 0]
   let sensorTypes = ["distance", "clap", "light", "button"]
   let path = sensorPaths[sensorTypes.indexOf(this.sensor)]
+  this.threshold = defaultThresholds[sensorTypes.indexOf(this.sensor)]
 
   const blockIcon = new BlockIcon(this, path, Colors.white, "sensor", 45)
   blockIcon.isEndOfLine = true;
@@ -891,12 +893,12 @@ B_HLWaitUntil.prototype.argList = function() {
   switch (this.sensor) {
   case "distance":
     prim = "[h:ds]"
-    threshold = 20
+    threshold = this.threshold //20
     break;
   case "light":
     // For micro:bit built in light sensor, use "[display:lightLevel]" with threshold 200
     prim = "[h:ls]" //range 0-255, but usually < 50 maybe thresh of 5
-    threshold = 5
+    threshold = this.threshold //5
     break;
   case "clap":
     prim = "[h:cl]" //number of claps since this function was last called

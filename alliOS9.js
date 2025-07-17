@@ -6457,7 +6457,7 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
   // * 1  = Rotation Servo
   // * 3  = Position Servo
   // * 8  = Fairy Lights
-  // * 9  = Single Neopixel
+  // * 9  = Single Neopixel (or 10?!)
   // * 11 = Strip of 4 Neopixels
   // * 14 = Distance Sensor
   // * 17 = Big Button
@@ -6562,6 +6562,13 @@ DeviceHatchling.prototype.receiveBroadcast = function(msg) {
   
 
   for (var i = 0; i < this.portStates.length; i++) {
+
+    //Temporarily, neopixels may come up as 10
+    if (this.hlState[i] == 10) {
+      console.log("Setting type 10 to 9")
+      this.hlState[i] = 9
+    }
+
     if (this.portStates[i] != this.hlState[i]) {
       if (this.supportedStates.includes(this.hlState[i])) {
         var oldState = this.portStates[i]
@@ -46959,14 +46966,14 @@ B_HLOutputBase.prototype.updateValues = function() {
       Math.round(this.green*2.55) + ":" + Math.round(this.blue*2.55)
     this.updateColor();
   }
-  if (this.portType == 10 && this.colorButtons.length == 4) { //neopixel strip
+  /*if (this.portType == 10 && this.colorButtons.length == 4) { //neopixel strip
     this.value = ""
     for (var i = 0; i < this.colorButtons.length; i++) {
       this.value = this.value + Math.round(this.colorButtons[i].values[0]*2.55) + ","
       this.value = this.value + Math.round(this.colorButtons[i].values[1]*2.55) + ","
       this.value = this.value + Math.round(this.colorButtons[i].values[2]*2.55) + ","
     }
-  }
+  }*/
 }
 B_HLOutputBase.prototype.checkActive = function() {
   return HL_Utils.checkActive(this)
@@ -47494,8 +47501,10 @@ function B_HLWaitUntil(x, y, usePort, sensor, userSelectedPort) {
     this.addPart(this.sensorBN);*/
   }
   var sensorPaths = [VectorPaths.bdRuler, VectorPaths.bdClap, VectorPaths.bdNoLight, VectorPaths.bdButton]
+  var defaultThresholds = [20, 0, 5, 0]
   var sensorTypes = ["distance", "clap", "light", "button"]
   var path = sensorPaths[sensorTypes.indexOf(this.sensor)]
+  this.threshold = defaultThresholds[sensorTypes.indexOf(this.sensor)]
 
   var blockIcon = new BlockIcon(this, path, Colors.white, "sensor", 45)
   blockIcon.isEndOfLine = true;
@@ -47521,12 +47530,12 @@ B_HLWaitUntil.prototype.argList = function() {
   switch (this.sensor) {
   case "distance":
     prim = "[h:ds]"
-    threshold = 20
+    threshold = this.threshold //20
     break;
   case "light":
     // For micro:bit built in light sensor, use "[display:lightLevel]" with threshold 200
     prim = "[h:ls]" //range 0-255, but usually < 50 maybe thresh of 5
-    threshold = 5
+    threshold = this.threshold //5
     break;
   case "clap":
     prim = "[h:cl]" //number of claps since this function was last called

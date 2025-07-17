@@ -21,7 +21,7 @@ function DeviceHatchling(name, id, RSSI, device, advertisedName) {
   // * 1  = Rotation Servo
   // * 3  = Position Servo
   // * 8  = Fairy Lights
-  // * 9  = Single Neopixel
+  // * 9  = Single Neopixel (or 10?!)
   // * 11 = Strip of 4 Neopixels
   // * 14 = Distance Sensor
   // * 17 = Big Button
@@ -126,6 +126,13 @@ DeviceHatchling.prototype.receiveBroadcast = function(msg) {
   
 
   for (let i = 0; i < this.portStates.length; i++) {
+
+    //Temporarily, neopixels may come up as 10
+    if (this.hlState[i] == 10) {
+      console.log("Setting type 10 to 9")
+      this.hlState[i] = 9
+    }
+
     if (this.portStates[i] != this.hlState[i]) {
       if (this.supportedStates.includes(this.hlState[i])) {
         let oldState = this.portStates[i]
