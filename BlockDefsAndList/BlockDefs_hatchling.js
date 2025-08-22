@@ -447,6 +447,7 @@ function B_HLWave(x, y, userSelectedPort) {
 
   const icon = VectorPaths["bdPositionWW"];
   this.blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 40);
+  this.blockIcon.addText("0° - 90°", -4, 40);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 }
@@ -459,8 +460,8 @@ B_HLWave.prototype.argList = function() {
   let prim = "hatchlingServoWithDelay"
   let port = HL_Utils.portNames[this.port]
   let duration = 1000
-  return [new BlockArg(prim, [port, 90, duration]),  
-    new BlockArg(prim, [port, 180, duration])] 
+  return [new BlockArg(prim, [port, 0, duration]),  
+    new BlockArg(prim, [port, 90, duration])] 
 }
 /*B_HLWave.prototype.primName = function() { return "blockList" }
 B_HLWave.prototype.argList = function() { 
@@ -1965,6 +1966,19 @@ B_HLBBClaps.prototype.constructor = B_HLBBClaps
 //MicroBlocks functions
 B_HLBBClaps.prototype.primName = function() { return "[h:cl]" }
 B_HLBBClaps.prototype.argList = function() { return [] }
+
+
+function B_HLBBClap(x, y) {
+  PredicateBlock.call(this, x, y, "sensors")// DeviceHatchling.getDeviceTypeId());
+  //this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  this.addPart(new LabelText(this, Language.getStr("block_Clap")));
+}
+B_HLBBClap.prototype = Object.create(PredicateBlock.prototype)
+B_HLBBClap.prototype.constructor = B_HLBBClap
+//MicroBlocks functions
+B_HLBBClap.prototype.primName = function() { return ">" }
+B_HLBBClap.prototype.argList = function() { return [new BlockArg("[h:cl]", []), 0] }
 
 
 function B_HLBBButtonPresses(x, y) {

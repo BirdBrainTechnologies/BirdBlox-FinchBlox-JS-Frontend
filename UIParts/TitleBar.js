@@ -255,7 +255,8 @@ TitleBar.makeButtons = function() {
     if (Hatchling) {
       TB.flagBn.addColorIcon(VectorPaths.bdStart, TB.bnIconH * 1.3, Colors.ballyGreen);
       TB.stopBn.addColorIcon(VectorPaths.bdStop, TB.bnIconH * 1.3, Colors.ballyRed);
-      TB.undoButton.addColorIcon(VectorPaths.bdUndo, TB.bnIconH * 0.5, Colors.ballyBrandBlue);
+      //TB.undoButton.addColorIcon(VectorPaths.bdUndo, TB.bnIconH * 0.5, Colors.ballyBrandBlue);
+      TB.undoButton.addColorIcon(VectorPaths.undoDelete, TB.bnIconH, Colors.ballyBrandBlue);
 
       TB.fileBn = new Button(TB.fileBnX, y, TB.buttonW, h, TBLayer, undoBnColor, r, r, undoBnOutline);
       TB.fileBn.addColorIcon(VectorPaths.bdFile, TB.bnIconH * 0.78, Colors.ballyBrandBlue);

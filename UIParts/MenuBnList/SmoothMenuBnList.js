@@ -332,7 +332,8 @@ SmoothMenuBnList.prototype.previewWidth = function() {
  * @return {number}
  */
 SmoothMenuBnList.previewHeight = function(count, maxHeight) {
-  let height = (SmoothMenuBnList.bnHeight + Button.defaultMargin) * count - Button.defaultMargin;
+  let m = HatchPlus ? Button.defaultMargin/2 : Button.defaultMargin
+  let height = (SmoothMenuBnList.bnHeight + m) * count - m;
   height = Math.max(height, 0);
   if (maxHeight != null) {
     height = Math.min(height, maxHeight);

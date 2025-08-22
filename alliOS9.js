@@ -2534,10 +2534,11 @@ Language.en = {
 "is_empty":"is empty",
 "block_Fairy_Lights":"Fairy Lights (Slot 1) (Slot 2) %",
 "block_Neopixel_Strip":"Bendy Lights (Slot 1) R (Slot 2) % G (Slot 3) % B (Slot 4) %",
-"block_Single_Neopixel":"Big LED R (Slot 1) % G (Slot 2) % B (Slot 3) %",
+"block_Single_Neopixel":"Big Light R (Slot 1) % G (Slot 2) % B (Slot 3) %",
 "Hatchling":"Hatchling",
 "block_Button_Presses":"Button Presses",
 "block_Claps":"Claps",
+"block_Clap":"Clap",
 "Import":"Import",
 "Ports":"Ports",
 "Display":"Display", //TODO: Use block_LED_Display?
@@ -9402,9 +9403,10 @@ BlockList.populateCat_display = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_sensors = function(category) {
-  category.addBlockByName("B_HLBBClaps");
-  category.addBlockByName("B_HLBBButtonPresses");
-  category.addSpace();
+  //category.addBlockByName("B_HLBBClaps");
+  category.addBlockByName("B_HLBBClap");
+  //category.addBlockByName("B_HLBBButtonPresses");
+  //category.addSpace();
   //category.addBlockByName("B_HLMagnetometer");
   category.addBlockByName("B_HLButton");
   category.addBlockByName("B_HLAccelerometer");
@@ -13810,7 +13812,8 @@ TitleBar.makeButtons = function() {
     if (Hatchling) {
       TB.flagBn.addColorIcon(VectorPaths.bdStart, TB.bnIconH * 1.3, Colors.ballyGreen);
       TB.stopBn.addColorIcon(VectorPaths.bdStop, TB.bnIconH * 1.3, Colors.ballyRed);
-      TB.undoButton.addColorIcon(VectorPaths.bdUndo, TB.bnIconH * 0.5, Colors.ballyBrandBlue);
+      //TB.undoButton.addColorIcon(VectorPaths.bdUndo, TB.bnIconH * 0.5, Colors.ballyBrandBlue);
+      TB.undoButton.addColorIcon(VectorPaths.undoDelete, TB.bnIconH, Colors.ballyBrandBlue);
 
       TB.fileBn = new Button(TB.fileBnX, y, TB.buttonW, h, TBLayer, undoBnColor, r, r, undoBnOutline);
       TB.fileBn.addColorIcon(VectorPaths.bdFile, TB.bnIconH * 0.78, Colors.ballyBrandBlue);
@@ -23147,7 +23150,8 @@ SmoothMenuBnList.prototype.previewWidth = function() {
  * @return {number}
  */
 SmoothMenuBnList.previewHeight = function(count, maxHeight) {
-  var height = (SmoothMenuBnList.bnHeight + Button.defaultMargin) * count - Button.defaultMargin;
+  var m = HatchPlus ? Button.defaultMargin/2 : Button.defaultMargin
+  var height = (SmoothMenuBnList.bnHeight + m) * count - m;
   height = Math.max(height, 0);
   if (maxHeight != null) {
     height = Math.min(height, maxHeight);
@@ -31838,6 +31842,9 @@ BlockStack.prototype.remove = function() {
   this.group.remove();
   this.tab.removeStack(this);
   this.tab.updateArrows();
+  if (Hatchling || HatchPlus) { 
+    mbRuntime.removeObsoleteChunks()
+  }
 };
 
 /**
@@ -47084,6 +47091,7 @@ function B_HLWave(x, y, userSelectedPort) {
 
   var icon = VectorPaths["bdPositionWW"];
   this.blockIcon = new BlockIcon(this, icon, Colors.white, "pServo", 40);
+  this.blockIcon.addText("0° - 90°", -4, 40);
   this.blockIcon.isEndOfLine = true;
   this.addPart(this.blockIcon);
 }
@@ -47096,8 +47104,8 @@ B_HLWave.prototype.argList = function() {
   var prim = "hatchlingServoWithDelay"
   var port = HL_Utils.portNames[this.port]
   var duration = 1000
-  return [new BlockArg(prim, [port, 90, duration]),  
-    new BlockArg(prim, [port, 180, duration])] 
+  return [new BlockArg(prim, [port, 0, duration]),  
+    new BlockArg(prim, [port, 90, duration])] 
 }
 /*B_HLWave.prototype.primName = function() { return "blockList" }
 B_HLWave.prototype.argList = function() { 
@@ -48602,6 +48610,19 @@ B_HLBBClaps.prototype.constructor = B_HLBBClaps
 //MicroBlocks functions
 B_HLBBClaps.prototype.primName = function() { return "[h:cl]" }
 B_HLBBClaps.prototype.argList = function() { return [] }
+
+
+function B_HLBBClap(x, y) {
+  PredicateBlock.call(this, x, y, "sensors")// DeviceHatchling.getDeviceTypeId());
+  //this.addPart(new DeviceDropSlot(this, "DDS_1", DeviceHatchling));
+
+  this.addPart(new LabelText(this, Language.getStr("block_Clap")));
+}
+B_HLBBClap.prototype = Object.create(PredicateBlock.prototype)
+B_HLBBClap.prototype.constructor = B_HLBBClap
+//MicroBlocks functions
+B_HLBBClap.prototype.primName = function() { return ">" }
+B_HLBBClap.prototype.argList = function() { return [new BlockArg("[h:cl]", []), 0] }
 
 
 function B_HLBBButtonPresses(x, y) {

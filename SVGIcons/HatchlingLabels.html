@@ -111,16 +111,32 @@
 			Labels.distanceSensor.icon = "bdRuler"
 			Labels.distanceSensor.iconH = 200
 			Labels.distanceSensor.text = "DISTANCE"
+
+			Labels.button = {}
+			Labels.button.icon = "bdButton"
+			Labels.button.iconH = 200
+			Labels.button.text = "BIG BUTTON"
+			Labels.lightSensor = {}
+			Labels.lightSensor.icon = "bdNoLight"
+			Labels.lightSensor.iconH = 200
+			Labels.lightSensor.text = "LIGHT SENSOR"
+			Labels.neopixStrip = {}
+			Labels.neopixStrip.icon = "bdMultiLightBulb"
+			Labels.neopixStrip.iconH = 200
+			Labels.neopixStrip.text = "BENDY LIGHTS"
+
+
 	
 			//Edit this list to include the labels you want to print
 			const labelList = [
-					"positionServo","positionServo","positionServo","positionServo",
+					"button", "lightSensor", "neopixStrip",
 					"positionServo","positionServo","positionServo","positionServo",
 					"rotationServo","rotationServo","rotationServo","rotationServo",
-					"rotationServo","rotationServo","rotationServo","rotationServo",
-					//"singleNeopix",
-					"fairyLights","fairyLights","fairyLights","fairyLights","fairyLights",
+					"singleNeopix","singleNeopix","singleNeopix","singleNeopix",
+					"fairyLights","fairyLights","fairyLights","fairyLights",
+					"fairyLights","fairyLights","fairyLights",
 					"distanceSensor","distanceSensor","distanceSensor","distanceSensor",
+					"distanceSensor","distanceSensor",
 				]
 
 			const svg = document.getElementById("svg");
@@ -184,7 +200,7 @@
 			}
 
 			//Edit to change the number of port letter label sets to print
-			let portLabels = 12
+			let portLabels = 3
 			let portLabelW = 400
 			let portLabelH = 100
 

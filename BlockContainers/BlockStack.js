@@ -550,6 +550,9 @@ BlockStack.prototype.remove = function() {
   this.group.remove();
   this.tab.removeStack(this);
   this.tab.updateArrows();
+  if (Hatchling || HatchPlus) { 
+    mbRuntime.removeObsoleteChunks()
+  }
 };
 
 /**

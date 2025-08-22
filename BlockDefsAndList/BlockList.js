@@ -639,9 +639,10 @@ BlockList.populateCat_display = function(category) {
  * @param {Category} category
  */
 BlockList.populateCat_sensors = function(category) {
-  category.addBlockByName("B_HLBBClaps");
-  category.addBlockByName("B_HLBBButtonPresses");
-  category.addSpace();
+  //category.addBlockByName("B_HLBBClaps");
+  category.addBlockByName("B_HLBBClap");
+  //category.addBlockByName("B_HLBBButtonPresses");
+  //category.addSpace();
   //category.addBlockByName("B_HLMagnetometer");
   category.addBlockByName("B_HLButton");
   category.addBlockByName("B_HLAccelerometer");
