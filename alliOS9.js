@@ -13580,6 +13580,9 @@ TitleBar.setGraphicsPart1 = function() {
   if (GuiElements.smallMode) {
     TB.height = 35;
     TB.buttonMargin = Button.defaultMargin / 2;
+    if (HatchPlus) {
+      TB.solidHeight = 2
+    }
   } else {
     if (FinchBlox) {
       TB.height = 90; //100;
@@ -32364,6 +32367,26 @@ HtmlServer.getIosHandler = function() {
   if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.serverSubstitute &&
     window.webkit.messageHandlers.serverSubstitute.postMessage) {
     GuiElements.alert("Using native");
+
+    //set up console.log and console.error forwarding
+    var oldLog = console.log;
+    console.log = function(message) {
+      var request = new HttpRequestBuilder("ui/consoleLog");
+      request.addParam("message", message);
+      HtmlServer.sendRequestWithCallback(request.toString());
+
+      oldLog.apply(console, arguments);
+    }
+    var oldError = console.error;
+    console.error = function(message) {
+      var request = new HttpRequestBuilder("ui/consoleError");
+      request.addParam("message", message);
+      HtmlServer.sendRequestWithCallback(request.toString());
+
+      oldError.apply(console, arguments);
+    }
+
+
     return window.webkit.messageHandlers.serverSubstitute.postMessage;
   } else {
     GuiElements.alert("Using http");

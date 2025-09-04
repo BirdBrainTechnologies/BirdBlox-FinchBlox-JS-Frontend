@@ -16,6 +16,26 @@ HtmlServer.getIosHandler = function() {
   if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.serverSubstitute &&
     window.webkit.messageHandlers.serverSubstitute.postMessage) {
     GuiElements.alert("Using native");
+
+    //set up console.log and console.error forwarding
+    var oldLog = console.log;
+    console.log = function(message) {
+      const request = new HttpRequestBuilder("ui/consoleLog");
+      request.addParam("message", message);
+      HtmlServer.sendRequestWithCallback(request.toString());
+
+      oldLog.apply(console, arguments);
+    }
+    var oldError = console.error;
+    console.error = function(message) {
+      const request = new HttpRequestBuilder("ui/consoleError");
+      request.addParam("message", message);
+      HtmlServer.sendRequestWithCallback(request.toString());
+
+      oldError.apply(console, arguments);
+    }
+
+
     return window.webkit.messageHandlers.serverSubstitute.postMessage;
   } else {
     GuiElements.alert("Using http");

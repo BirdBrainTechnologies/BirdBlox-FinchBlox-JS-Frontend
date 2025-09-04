@@ -23,6 +23,9 @@ TitleBar.setGraphicsPart1 = function() {
   if (GuiElements.smallMode) {
     TB.height = 35;
     TB.buttonMargin = Button.defaultMargin / 2;
+    if (HatchPlus) {
+      TB.solidHeight = 2
+    }
   } else {
     if (FinchBlox) {
       TB.height = 90; //100;
