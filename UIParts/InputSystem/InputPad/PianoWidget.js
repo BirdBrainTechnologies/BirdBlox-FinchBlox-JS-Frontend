@@ -32,7 +32,7 @@ InputWidget.Piano.setConstants = function() {
   P.bkIcon = VectorPaths.mvPianoBlackKey;
   const bKeyRatio = P.bkIcon.height / P.bkIcon.width;
   P.blackKeyH = P.blackKeyW * bKeyRatio;
-  P.font = Font.uiFont(34).bold();
+  P.font = FinchBlox ? Font.secondaryUiFont(16) : Font.uiFont(34).bold();
 
   P.blackKeys = [49, 51, 54, 56, 58, 61, 63, 66, 68, 70, 73, 75, 78, 80, 82];
 
@@ -52,6 +52,14 @@ InputWidget.Piano.setConstants = function() {
     P.noteStrings[35+i*12] = "B" + (i+1)
   }
   P.noteStrings[120] = "C9"
+
+  P.keyLabels = {}
+  P.keyLabels[60] = "C"
+  P.keyLabels[62] = "D"
+  P.keyLabels[65] = "F"
+  P.keyLabels[67] = "G"
+  P.keyLabels[69] = "A"
+
 };
 
 /**
@@ -184,6 +192,24 @@ InputWidget.Piano.prototype.makeWhiteKey = function(x, y, num) {
   button.addColorIcon(VectorPaths.mvPianoWhiteKey, P.whiteKeyH, Colors.white);
   button.iconInverts = true;
   GuiElements.update.stroke(button.icon.pathE, P.grayOutline, 1);
+
+  if (FinchBlox) {
+    //Add text to a few of the keys
+    let label = P.keyLabels[num + this.octaveOffset]
+    if (label != null) {
+      button.textColor = P.grayOutline
+      button.textE = GuiElements.draw.text(0, 0, label, P.font, button.textColor);
+      button.group.appendChild(button.textE);
+
+      const textW = GuiElements.measure.textWidth(button.textE);
+      const textX = (button.width - textW) / 2;
+      const textY = (button.height + P.font.charHeight) * 3 / 4;
+      GuiElements.move.text(button.textE, textX, textY);
+      button.hasText = true;
+      TouchReceiver.addListenersBN(button.textE, button);
+    }
+  }
+  
 }
 
 InputWidget.Piano.prototype.makeBlackKey = function(x, y, num) {
@@ -249,10 +275,17 @@ InputWidget.Piano.prototype.updatePressed = function(midiNum) {
     } else {
       GuiElements.update.stroke(oldPressed.icon.pathE, P.grayOutline, 1);
     }
+
+    if (oldPressed.hasText) {
+      oldPressed.textE.setAttributeNS(null, "fill", P.grayOutline)
+    }
   }
   this.pressedKey = keyIndex;
   const newPressed = this.keys[this.pressedKey];
   GuiElements.update.stroke(newPressed.icon.pathE, P.purpleOutline, 1);
+  if (newPressed.hasText) {
+    newPressed.textE.setAttributeNS(null, "fill", P.purpleOutline)
+  }
 
   //FinchBlox doesn't have a label over the keyboard
   if (!FinchBlox) {

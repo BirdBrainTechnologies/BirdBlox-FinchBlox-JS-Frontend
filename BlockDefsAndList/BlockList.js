@@ -173,7 +173,7 @@ BlockList.populateCat_color_2 = function(category) {
     category.addBlockByName("B_HL_SN_L2")
     category.addBlockByName("B_HLSingleNeopixOff")
     category.addBlockByName("B_HLFairyLightsL2")
-    category.addBlockByName("B_HLNeopixStrip")
+    //category.addBlockByName("B_HLNeopixStrip")
     category.addBlockByName("B_FBLedArrayL2")
     category.addBlockByName("B_HLAlphabet")
   } else {
@@ -197,7 +197,7 @@ BlockList.populateCat_sensor_2 = function(category) {
   //Hatchling only
   category.addBlockByName("B_HLWaitUntilDistance");
   //category.addBlockByName("B_HLWaitUntilDial");
-  category.addBlockByName("B_HLWaitUntilLight");
+  //category.addBlockByName("B_HLWaitUntilLight");
   category.addBlockByName("B_HLWaitUntilButton");
   category.addBlockByName("B_HLWaitUntilClap");
   //category.addBlockByName("B_HLWaitUntilShake");

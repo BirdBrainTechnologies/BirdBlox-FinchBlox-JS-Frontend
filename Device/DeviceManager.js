@@ -224,6 +224,7 @@ DeviceManager.prototype.appendDevice = function(newDevice) {
  * @param {Device} newDevice
  */
 DeviceManager.prototype.setOneDevice = function(newDevice) {
+  //console.log("*** setOneDevice ", newDevice)
   for (let i = 0; i < this.connectedDevices.length; i++) {
     if (this.connectedDevices[i].id != newDevice.id) {
       this.connectedDevices[i].disconnect();
@@ -497,6 +498,7 @@ DeviceManager.prototype.createVirtualDeviceList = function() {
  * @param {boolean} isConnected - Whether the robot is currently in good communication with the backend
  */
 DeviceManager.prototype.updateConnectionStatus = function(deviceId, isConnected) {
+  //console.log("*** updateConnectionStatus " + deviceId + " " + isConnected)
   const index = this.lookupRobotIndexById(deviceId);
   let robot = null;
   if (index >= 0) {
