@@ -29,7 +29,7 @@ def get_paths_from_lines(lines):
     return result
 
 def get_lines_from_html(html_path):
-    html_file = open(html_path, "r")
+    html_file = open(html_path, "r", encoding="utf-8")
     text = html_file.read()
     lines = re.split("\n", text)
     return lines
@@ -40,19 +40,19 @@ def concat_js():
     all_path = path_prefix + "all_MAX.js"
     if os.path.exists(all_path):
         os.remove(all_path)
-    target = open(all_path, 'w')
+    target = open(all_path, 'w', encoding="utf-8")
     use_strict = "\"use strict\";"
     target.write(use_strict)
     target.write("\n")
     for path in paths:
-        target.write(clean_file(open(path, "r").read()))
+        target.write(clean_file(open(path, "r", encoding="utf-8").read()))
         target.write("\n")
     alliOS9_path = path_prefix + "alliOS9.js"
     if os.path.exists(alliOS9_path):
         os.remove(alliOS9_path)
-    targetiOS9 = open(alliOS9_path, 'w')
+    targetiOS9 = open(alliOS9_path, 'w', encoding="utf-8")
     for path in paths:
-        targetiOS9.write(clean_file_iOS9(open(path, "r").read()))
+        targetiOS9.write(clean_file_iOS9(open(path, "r", encoding="utf-8").read()))
         targetiOS9.write("\n")
         
 def clean_file(file):
@@ -73,5 +73,5 @@ concat_js()
 
 # Minify using closure-compiler. Change the jar file name to the version you have downloaded.
 # See https://developers.google.com/closure/compiler/docs/gettingstarted_app
-cmd_str = "java -jar closure-compiler-v20230411.jar  --js all_MAX.js --js_output_file all.js"
+cmd_str = "java -jar closure-compiler-v20260415.jar  --js all_MAX.js --js_output_file all.js"
 subprocess.run(cmd_str, shell=True)
