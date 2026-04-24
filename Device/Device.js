@@ -140,6 +140,7 @@ Device.prototype.getDeviceTypeId = function() {
  * list of robots it is trying to connect to.
  */
 Device.prototype.disconnect = function() {
+//  console.log("*** disconnecting ", this.id)
   const request = new HttpRequestBuilder("robot/disconnect");
   request.addParam("type", this.getDeviceTypeId());
   request.addParam("id", this.id);

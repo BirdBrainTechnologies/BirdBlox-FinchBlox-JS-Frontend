@@ -153,7 +153,7 @@ DiscoverDialog.prototype.checkPendingUpdate = function() {
 var updateDeviceListCounter = 0;
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
-  console.log("*** updateDeviceList " + deviceList)
+//  console.log("*** updateDeviceList " + deviceList)
   updateDeviceListCounter += 1;
   if (!this.visible) {
     return;
@@ -183,7 +183,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
   //if ((updateDeviceListCounter % 40) == 0){
   //console.log("*** updateDeviceList about to reload " + (this.discoveredDevicesRSSISorted.length + this.connectedDevices.length) + " rows")
   //console.log(this.discoveredDevices)
-  console.log("*** updateDeviceList about to reload " + this.discoveredDevicesRSSISorted.length + " rows")
+//  console.log("*** updateDeviceList about to reload " + this.discoveredDevicesRSSISorted.length + " rows")
   this.reloadRows(this.discoveredDevicesRSSISorted.length)// + this.connectedDevices.length);
   //};
 

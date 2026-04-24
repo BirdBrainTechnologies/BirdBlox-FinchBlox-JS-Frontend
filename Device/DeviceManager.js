@@ -224,15 +224,19 @@ DeviceManager.prototype.appendDevice = function(newDevice) {
  * @param {Device} newDevice
  */
 DeviceManager.prototype.setOneDevice = function(newDevice) {
-  //console.log("*** setOneDevice ", newDevice)
-  for (let i = 0; i < this.connectedDevices.length; i++) {
-    if (this.connectedDevices[i].id != newDevice.id) {
-      this.connectedDevices[i].disconnect();
-    }
-  }
+//  console.log("*** setOneDevice ", newDevice.id)
+
+  let oldDevices = this.connectedDevices
   newDevice.connect();
   this.connectedDevices = [newDevice];
   this.devicesChanged(null, false);
+
+  for (let i = 0; i < oldDevices.length; i++) {
+    if (oldDevices[i].id != newDevice.id) {
+      oldDevices[i].disconnect();
+    }
+  }
+  
 };
 
 /**

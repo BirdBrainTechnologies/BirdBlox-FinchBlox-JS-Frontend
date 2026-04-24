@@ -251,7 +251,7 @@ CallbackManager.robot.updateHasV2Microbit = function(robotId, hasV2String) {
  * @return {boolean}
  */
 CallbackManager.robot.discovered = function(robotList) {
-  console.log("*** CallbackManager.robot.discovered " + robotList)
+//  console.log("*** CallbackManager.robot.discovered " + robotList)
   robotList = HtmlServer.decodeHtml(robotList);
   DeviceManager.backendDiscovered(robotList);
   return true;

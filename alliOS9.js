@@ -5009,6 +5009,7 @@ Device.prototype.getDeviceTypeId = function() {
  * list of robots it is trying to connect to.
  */
 Device.prototype.disconnect = function() {
+//  console.log("*** disconnecting ", this.id)
   var request = new HttpRequestBuilder("robot/disconnect");
   request.addParam("type", this.getDeviceTypeId());
   request.addParam("id", this.id);
@@ -5664,15 +5665,19 @@ DeviceManager.prototype.appendDevice = function(newDevice) {
  * @param {Device} newDevice
  */
 DeviceManager.prototype.setOneDevice = function(newDevice) {
-  //console.log("*** setOneDevice ", newDevice)
-  for (var i = 0; i < this.connectedDevices.length; i++) {
-    if (this.connectedDevices[i].id != newDevice.id) {
-      this.connectedDevices[i].disconnect();
-    }
-  }
+//  console.log("*** setOneDevice ", newDevice.id)
+
+  var oldDevices = this.connectedDevices
   newDevice.connect();
   this.connectedDevices = [newDevice];
   this.devicesChanged(null, false);
+
+  for (var i = 0; i < oldDevices.length; i++) {
+    if (oldDevices[i].id != newDevice.id) {
+      oldDevices[i].disconnect();
+    }
+  }
+  
 };
 
 /**
@@ -30527,7 +30532,7 @@ DiscoverDialog.prototype.checkPendingUpdate = function() {
 var updateDeviceListCounter = 0;
 
 DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
-  console.log("*** updateDeviceList " + deviceList)
+//  console.log("*** updateDeviceList " + deviceList)
   updateDeviceListCounter += 1;
   if (!this.visible) {
     return;
@@ -30557,7 +30562,7 @@ DiscoverDialog.prototype.updateDeviceList = function(deviceList) {
   //if ((updateDeviceListCounter % 40) == 0){
   //console.log("*** updateDeviceList about to reload " + (this.discoveredDevicesRSSISorted.length + this.connectedDevices.length) + " rows")
   //console.log(this.discoveredDevices)
-  console.log("*** updateDeviceList about to reload " + this.discoveredDevicesRSSISorted.length + " rows")
+//  console.log("*** updateDeviceList about to reload " + this.discoveredDevicesRSSISorted.length + " rows")
   this.reloadRows(this.discoveredDevicesRSSISorted.length)// + this.connectedDevices.length);
   //};
 
@@ -33167,7 +33172,7 @@ CallbackManager.robot.updateHasV2Microbit = function(robotId, hasV2String) {
  * @return {boolean}
  */
 CallbackManager.robot.discovered = function(robotList) {
-  console.log("*** CallbackManager.robot.discovered " + robotList)
+//  console.log("*** CallbackManager.robot.discovered " + robotList)
   robotList = HtmlServer.decodeHtml(robotList);
   DeviceManager.backendDiscovered(robotList);
   return true;
