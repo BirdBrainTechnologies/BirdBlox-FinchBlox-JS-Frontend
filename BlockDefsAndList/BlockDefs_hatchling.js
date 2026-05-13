@@ -2040,6 +2040,38 @@ B_HLAccelerometer.prototype.argList = function() { return [] }
 
 Block.setDisplaySuffix(B_HLAccelerometer, "m/s" + String.fromCharCode(178));
 
+/**
+ * A Block to ask about the hatchling's orientation 
+ * @param {number} x
+ * @param {number} y
+ * @constructor
+ */
+function B_HLOrientation(x, y){
+  PredicateBlock.call(this, x, y, "sensors") 
+
+  /*spec 'r' '[sensors:lvl]' 'Level'
+  spec 'r' '[sensors:udwn]' 'Upside Down'
+  spec 'r' '[sensors:btnup]' 'Power Button Up'
+  spec 'r' '[sensors:btndwn]' 'Power Button Down'
+  spec 'r' '[sensors:dspup]' 'Power Button Right' (formerly Display Up)
+  spec 'r' '[sensors:dspdwn]' 'Power Button Left' (formerly Display Down)*/
+
+  const pickAxis = new DropSlot(this, "SDS_2", null, null, new SelectionData("Level", "lvl"));
+  pickAxis.addOption(new SelectionData(Language.getStr("Level"), "lvl"));
+  pickAxis.addOption(new SelectionData(Language.getStr("Upside_Down"), "udwn"));
+  pickAxis.addOption(new SelectionData(Language.getStr("Power_Button_Up"), "btnup"));
+  pickAxis.addOption(new SelectionData(Language.getStr("Power_Button_Down"), "btndwn"));
+  pickAxis.addOption(new SelectionData(Language.getStr("Display_Up"), "dspup"));
+  pickAxis.addOption(new SelectionData(Language.getStr("Display_Down"), "dspdwn"));
+  this.addPart(pickAxis);
+}
+B_HLOrientation.prototype = Object.create(PredicateBlock.prototype)
+B_HLOrientation.prototype.constructor = B_HLOrientation
+//MicroBlocks functions
+B_HLOrientation.prototype.primName = function() { 
+  return "[sensors:" + this.slots[0].getMicroBlocksInstructions() + "]"
+}
+B_HLOrientation.prototype.argList = function() { return [] }
 
 /** 
  * Get the micro:bit sound 

@@ -645,6 +645,7 @@ BlockList.populateCat_sensors = function(category) {
   //category.addSpace();
   //category.addBlockByName("B_HLMagnetometer");
   category.addBlockByName("B_HLButton");
+  category.addBlockByName("B_HLOrientation");
   category.addBlockByName("B_HLAccelerometer");
   category.addBlockByName("B_HLSound");
   //category.addBlockByName("B_HLOrientation");

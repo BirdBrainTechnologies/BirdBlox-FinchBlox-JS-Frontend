@@ -272,5 +272,10 @@ Language.en = {
 "Too_many_blocks_error":"Error: Too many blocks in program",
 "BigButton":"Big Button",
 "block_HL_Servo":"Servo (Slot 1) (Slot 2) °",
-"block_HL_Motor":"Motor (Slot 1) (Slot 2) %"
+"block_HL_Motor":"Motor (Slot 1) (Slot 2) %",
+"Level":"Level",
+"Power_Button_Up":"Power Button Up",
+"Power_Button_Down":"Power Button Down",
+"Display_Up":"Display Up",
+"Display_Down":"Display Down"
 }
